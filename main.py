@@ -77,4 +77,14 @@ print(v)
 # pen=None to hide pen
 ploted = pg.plot(u, v, title="Top View of DNA", symbol='o', symbolSize=80, pxMode=True)
 ploted.showGrid(x=True, y=True)
-pg.QtGui.QApplication.exec()
+# pg.QtGui.QApplication.exec()
+
+import sys
+from PyQt6.QtWidgets import QApplication
+
+app = QApplication(sys.argv)
+
+window = ploted
+window.show()
+
+app.exec()
