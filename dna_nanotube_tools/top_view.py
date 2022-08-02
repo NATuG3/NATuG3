@@ -1,6 +1,5 @@
 import math
 from typing import Tuple
-import pyqtgraph as pg
 
 class top_view():
     """
@@ -133,15 +132,17 @@ class top_view():
                 )
             )
 
-    def ui(self) -> pg.plot:
+    def ui(self):
         """
         Return PyQt widget of topview.
 
         Returns:
             pg.plot: PyQt widget of topview.
         """
+        import pyqtgraph as pg
         ui = pg.plot(
                 self.us(), self.vs(), title="Top View of DNA", symbol='o', symbolSize=80, pxMode=True
                 )
+        ui.setAspectLocked(lock=True, ratio=1)
         ui.showGrid(x=True, y=True)
         return ui
