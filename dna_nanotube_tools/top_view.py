@@ -64,7 +64,7 @@ class top_view():
         Returns:
             list: list of all thetas.
         """
-        current = 1
+        current = 0
         while len(self.theta_list) < self.inputLength:
             self.theta_list.append(
                 (self.m_c[current-1] * self.theta_c) - (self.m_s[current-1] * self.theta_s)
@@ -79,10 +79,12 @@ class top_view():
         Returns:
             list: list of all psis.
         """
-        while len(self.psi_list) < self.inputLength-1:
+        current = 0
+        while len(self.psi_list) < self.inputLength:
             self.psi_list.append(
-                self.psi_list[-1] + 180 - self.theta_list[len(self.psi_list)+1]
+                self.psi_list[-1] + 180 - self.theta_list[current]
             )
+            current += 1
         return self.psi_list
 
     def us(self) -> list:
@@ -93,7 +95,7 @@ class top_view():
             list: list of all u cords.
         """
         current = 0
-        while len(self.u_list) < self.inputLength-1:
+        while len(self.u_list) < self.inputLength:
             self.u_list.append(
                 self.u_list[-1] + self.d * math.cos(
                     math.radians(self.psi_list[current])
@@ -110,7 +112,7 @@ class top_view():
             list: list of all v cords.
         """
         current = 0
-        while len(self.v_list) < self.inputLength-1:
+        while len(self.v_list) < self.inputLength:
             self.v_list.append(
                 self.v_list[-1] + self.d * math.sin(
                     math.radians(self.psi_list[current])
