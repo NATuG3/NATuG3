@@ -1,5 +1,7 @@
 import math
+import sys
 import pyqtgraph as pg
+from PyQt6.QtWidgets import QApplication
 
 theta_c = 360/21
 theta_s = 126
@@ -77,14 +79,9 @@ print(v)
 # pen=None to hide pen
 ploted = pg.plot(u, v, title="Top View of DNA", symbol='o', symbolSize=80, pxMode=True)
 ploted.showGrid(x=True, y=True)
-# pg.QtGui.QApplication.exec()
-
-import sys
-from PyQt6.QtWidgets import QApplication
 
 app = QApplication(sys.argv)
 
-window = ploted
-window.show()
+ploted.show()
 
 app.exec()
