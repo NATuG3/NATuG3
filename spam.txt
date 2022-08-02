@@ -1,0 +1,3 @@
+# m_c = [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+# m_s = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+# app = QApplication(sys.argv); ui = topView(m_c, m_s).ui(); ui.show(); app.exec() to view UI
