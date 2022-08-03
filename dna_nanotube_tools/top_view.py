@@ -22,7 +22,7 @@ class top_view():
             theta_s (float, optional): Switch angle. Defaults to 0.
 
         Raises:
-            ValueError: Length of m_c does not that of m_s.
+            ValueError: Length of m_c does not match that of m_s.
         """
         if len(m_c) != len(m_s):
             raise ValueError("len(m_c) != len(m_s)")
@@ -121,7 +121,7 @@ class top_view():
             current += 1
         return self.v_list
 
-    def cords(self) -> Tuple[float, float]:
+    def cords(self) -> Tuple[Tuple[float, float]]:
         """
         Obtain list of all cords.
 
