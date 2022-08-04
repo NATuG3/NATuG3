@@ -4,7 +4,6 @@ from typing import Tuple
 class top_view():
     """
     Generate (u, v) cords for topview of helices generation.
-
     Attributes:
         m_c: list of characteristic angle multiples.
         m_s: list of switch angle multiples.
@@ -13,14 +12,12 @@ class top_view():
     def __init__(self, m_c: list, m_s: list, d: float, theta_c = 360/21, theta_s = 0) -> None:
         """
         Initilize topview generation class.
-
         Args:
             m_c (list): list of multiples of characteristic angle.
             m_s (list): list of multiples of switch angle.
             d (float): distance between helicies
             theta_c (float, optional): Characteristic angle. Defaults to 360/21.
             theta_s (float, optional): Switch angle. Defaults to 0.
-
         Raises:
             ValueError: Length of m_c does not match that of m_s.
         """
@@ -48,10 +45,8 @@ class top_view():
     def theta_by_index(self, index: int) -> float:
         """
         Obtain a theta (interior angle) given a specific index.
-
         Args:
             index (int): index of theta to return.
-
         Returns:
             float: theta's value.
         """
@@ -60,7 +55,6 @@ class top_view():
     def thetas(self) -> list:
         """
         Generate list of interior angles ("thetas") or return existing list.
-
         Returns:
             list: list of all thetas.
         """
@@ -75,7 +69,6 @@ class top_view():
     def psis(self) -> list:
         """
         Generate list of angle changes ("psis") or return existing list.
-
         Returns:
             list: list of all psis.
         """
@@ -90,12 +83,11 @@ class top_view():
     def us(self) -> list:
         """
         Generate a list of horizontal cords ("u cords").
-
         Returns:
             list: list of all u cords.
         """
         current = 0
-        while len(self.u_list) < self.inputLength:
+        while len(self.u_list) <= self.inputLength:
             self.u_list.append(
                 self.u_list[-1] + self.d * math.cos(
                     math.radians(self.psi_list[current])
@@ -107,12 +99,11 @@ class top_view():
     def vs(self) -> list:
         """
         Generate a list of vertical cords ("v cords").
-
         Returns:
             list: list of all v cords.
         """
         current = 0
-        while len(self.v_list) < self.inputLength:
+        while len(self.v_list) <= self.inputLength:
             self.v_list.append(
                 self.v_list[-1] + self.d * math.sin(
                     math.radians(self.psi_list[current])
@@ -124,7 +115,6 @@ class top_view():
     def cords(self) -> Tuple[Tuple[float, float]]:
         """
         Obtain list of all cords.
-
         Returns:
             Tuple[float, float]: tuple of tuples of all (u, v) cords.
         """
@@ -137,7 +127,6 @@ class top_view():
     def ui(self):
         """
         Return PyQt widget of topview.
-
         Returns:
             pg.plot: PyQt widget of topview.
         """
