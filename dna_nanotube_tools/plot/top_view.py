@@ -10,8 +10,8 @@ class top_view:
         interior_angles (int): Interior angle, measured as a multiple of the characteristic angle.
         switch_angles (int): List of switch angle multiples.
         d (float): Distance between helicies.
-        theta_c (float, optional): Characteristic angle.
-        theta_s (float, optional): Switch angle.
+        theta_c (float): Characteristic angle.
+        theta_s (float): Switch angle.
     """
 
     def __init__(
