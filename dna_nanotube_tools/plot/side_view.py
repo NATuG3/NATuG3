@@ -51,11 +51,13 @@ class side_view:
         self.exterior_angles = [360 - angle for angle in self.interior_angles]
 
         # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.base_angle_cache = [ # related function: base_angles()
+        self.base_angle_cache = [  # related function: base_angles()
             [[0], [0 - self.strand_switch_angle]] * self.input_length
         ]
-        self.x_cache = [[[], []] * self.input_length] # related function: xs()
-        self.z_cache = [[[0], [0 - self.strand_switch_distance]] * self.input_length] # related function: zs()
+        self.x_cache = [[[], []] * self.input_length]  # related function: xs()
+        self.z_cache = [
+            [[0], [0 - self.strand_switch_distance]] * self.input_length
+        ]  # related function: zs()
 
     def base_angles(self, count: int):
         """

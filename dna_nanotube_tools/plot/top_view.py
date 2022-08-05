@@ -11,8 +11,7 @@ class top_view:
         strand_switch_angles (list): List of strand switch angles per domain transition.
         domain_distance (float): Distance between any given two domain centers.
         characteristic_angle (float, optional): Characteristic angle.
-        strand_switch_angle (float, optional): strand switch angle.
-
+        strand_switch_angle (float, optional): Strand switch angle.
     """
 
     def __init__(
@@ -51,12 +50,12 @@ class top_view:
         ]
 
         # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.angle_delta_cache = [0] # related function: angle_deltas()
-        self.interior_angle_cache = [ # related function: interior_angles()
+        self.angle_delta_cache = [0]  # related function: angle_deltas()
+        self.interior_angle_cache = [  # related function: interior_angles()
             angle * self.characteristic_angle for angle in interior_angle_multiples
         ]
-        self.u_cache = [0] # related function: us()
-        self.v_cache = [0] # related function vs()
+        self.u_cache = [0]  # related function: us()
+        self.v_cache = [0]  # related function vs()
 
     def interior_angle_by_index(self, index: int) -> float:
         """
