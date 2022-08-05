@@ -3,74 +3,79 @@ from typing import List
 
 class side_view:
     """
-    Generate (x, z) cords for side view of helices generation.
+    Generate data needed for a side view graph of helicies.
+
+    Attributes:
+        interior_angles (List[float]): Angle between bases from a side view.
+        base_height (float): Height between two bases (in Angstroms).
+        base_angle (int): The angle that one base makes about the helix axis.
+        strand_switch_distance (float): Strand strand_switch distance (in Angstroms).
+        strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
+        characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
     """
 
     def __init__(
         self,
-        interior_angles: List[int],
-        switch_angles: List[int],
-        z_distance: float,
-        switch_distance: float,
-        switch_theta: float,
-        base_angle: int,
-        theta_c=360 / 21,
-        theta_s=0,
+        interior_angle_multiples: List[int],
+        base_height: float,
+        base_angle: float,
+        strand_switch_distance: float,
+        strand_switch_angle: float,
+        characteristic_angle=360 / 21,
     ) -> None:
         """
         Initilize side_view generation class.
 
         Args:
-            interior_angles (list): Theta interior, measured in multiples of characteristic angle.
-            switch_angles (list): List of multiples of switch angle.
-            z_distance (float): distance between bases (in Angstroms).
-            switch_distance (float): Strand switch distance (in Angstroms).
-            switch_theta (float): Strand switch angle (theta) (in degrees).
-            base_angle (int): Angle between bases, measured in multiples of characteristic angle.
-            theta_c (float, optional): Characteristic angle. Defaults to 360/21.
-            theta_s (float, optional): Switch angle. Defaults to 0.
+            interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
+            base_height (float): Height between two bases (in Angstroms).
+            base_angle (int): The angle that one base makes about the helix axis.
+            strand_switch_distance (float): Strand switch distance (in Angstroms).
+            strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
+            characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
+
         Raises:
-            ValueError: Length of interior_angles does not match that of switch_angles.
+            ValueError: Length of interior_angles does not match that of strand_switch_angles.
         """
-        if len(interior_angles) != len(switch_angles):
-            raise ValueError("len(interior_angles) != len(switch_angles)")
+        self.characteristic_angle = characteristic_angle
+        self.strand_switch_angle = strand_switch_angle
+        self.base_angle = base_angle
 
-        self.theta_c = theta_c
-        self.theta_s = theta_s
-        self.z_distance = z_distance
-        self.switch_distance = switch_distance
-        self.switch_theta = switch_theta
-        self.base_angle = base_angle * theta_c
+        self.base_height = base_height
+        self.strand_switch_distance = strand_switch_distance
 
-        self.input_length = len(interior_angles)
-
-        self.interior_angles = [angle * self.theta_c for angle in interior_angles]
+        self.input_length = len(interior_angle_multiples)
+        self.interior_angles = [
+            angle * self.characteristic_angle for angle in interior_angle_multiples
+        ]
         self.exterior_angles = [360 - angle for angle in self.interior_angles]
-        self.switch_angles = switch_angles
 
-        self.theta_list = [[[0], [0 - self.switch_theta]] * self.input_length]
-        self.x_list = [[[], []] * self.input_length]
-        self.z_list = [[[0], [0 - self.switch_distance]] * self.input_length]
+        # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
+        self.base_angle_cache = [ # related function: base_angles()
+            [[0], [0 - self.strand_switch_angle]] * self.input_length
+        ]
+        self.x_cache = [[[], []] * self.input_length] # related function: xs()
+        self.z_cache = [[[0], [0 - self.strand_switch_distance]] * self.input_length] # related function: zs()
 
-    def thetas(self, count: int):
+    def base_angles(self, count: int):
         """
-        Generate thetas.
+        Generate angles between bases.
 
         Args:
-            count (int): Number of thetas to generate.
+            count (int): Number of interbase angles to generate.
 
         Returns:
-            list: List of thetas in format [[[up strand], [down strand]], ...] for each domain.
+            list: List of interbase angles in format [[[up strand], [down strand]], ...] for each domain.
         """
         current = 0
-        while len(self.theta_list[0][0]) < count:
-            for domain in self.theta_list:
+        while len(self.base_angle_cache[0][0]) < count:
+            for domain in self.base_angle_cache:
                 # up strand
                 domain[0].append(domain[0][current] + self.base_angle)
                 # down strand
                 domain[1].append(domain[0][current + 1] - 2.3)
             current += 1
-        return self.theta_list
+        return self.base_angle_cache
 
     def xs(self, count: int):
         """
@@ -83,26 +88,30 @@ class side_view:
             list: List of x cords in format [[[up strand], [down strand]], ...] for each domain.
         """
         current = 0
-        while len(self.x_list[0][0]) < count:
-            current += 1
-            for domain_index, domain in enumerate(self.x_list):
+        while len(self.x_cache[0][0]) < count:
+            for domain_index, domain in enumerate(self.x_cache):
                 for strand_direction in range(2):
                     if (
-                        self.thetas(count + 1)[domain_index][strand_direction][current]
+                        self.base_angles(count + 1)[domain_index][strand_direction][
+                            current
+                        ]
                         < self.exterior_angles[domain_index]
                     ):
                         new_x = (
-                            self.thetas(count)[domain_index][strand_direction][current]
+                            self.base_angles(count)[domain_index][strand_direction][
+                                current
+                            ]
                         ) / self.exterior_angles[domain_index]
                     else:
                         new_x = (
                             360
-                            - self.thetas(count + 1)[domain_index][strand_direction][
-                                current
-                            ]
+                            - self.base_angles(count + 1)[domain_index][
+                                strand_direction
+                            ][current]
                         ) / self.interior_angles[domain_index]
                     domain[strand_direction].append(new_x)
-        return self.x_list
+            current += 1
+        return self.x_cache
 
     def zs(self, count: int):
         """
@@ -114,10 +123,10 @@ class side_view:
         Returns:
             list: List of z cords in format [[[up strand], [down strand]], ...] for each domain.
         """
-        while len(self.z_list[0][0]) < count:
-            for domain in self.z_list:
+        while len(self.z_cache[0][0]) < count:
+            for domain in self.z_cache:
                 # up strand
-                domain[0].append(domain[0][-1] + self.z_distance)
+                domain[0].append(domain[0][-1] + self.base_height)
                 # down strand
-                domain[1].append(domain[0][-1] - self.switch_distance)
-        return self.z_list
+                domain[1].append(domain[0][-1] - self.strand_switch_distance)
+        return self.z_cache

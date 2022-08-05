@@ -1,5 +1,5 @@
 import math
-from typing import Tuple
+from typing import Tuple, List
 
 
 class top_view:
@@ -7,92 +7,98 @@ class top_view:
     Generate (u, v) cords for top view of helices generation.
 
     Attributes:
-        interior_angles (int): Interior angle, measured as a multiple of the characteristic angle.
-        switch_angles (int): List of switch angle multiples.
-        d (float): Distance between helicies.
-        theta_c (float, optional): Characteristic angle.
-        theta_s (float, optional): Switch angle.
+        interior_angles (list): List of interior angles per domain transition.
+        strand_switch_angles (list): List of strand switch angles per domain transition.
+        domain_distance (float): Distance between any given two domain centers.
+        characteristic_angle (float, optional): Characteristic angle.
+        strand_switch_angle (float, optional): strand switch angle.
+
     """
 
     def __init__(
         self,
-        interior_angles: list,
-        switch_angles: list,
-        d: float,
-        theta_c=360 / 21,
-        theta_s=0,
+        interior_angle_multiples: List[int],
+        strand_switch_angle_multiples: List[int],
+        domain_distance: float,
+        characteristic_angle=360 / 21,
+        strand_switch_angle=0,
     ) -> None:
         """
         Initilize top_view generation class.
 
         Args:
-            interior_angles (list): List of multiples of characteristic angle.
-            switch_angles (list): List of multiples of switch angle.
-            d (float): Distance between helicies.
-            theta_c (float, optional): Characteristic angle. Defaults to 360/21.
-            theta_s (float, optional): Switch angle. Defaults to 0.
+            interior_angle_multiples (List[int]): List of interior angles per domain transition. List of multiples of characteristic angle.
+            strand_switch_angle_multiples (List[int]): List of strand switch angles per domain transition. List of multiples of strand switch angle.
+            domain_distance (float): Distance between any given two domain centers.
+            characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
+            strand_switch_angle (float, optional): strand switch angle. Defaults to 0.
         Raises:
-            ValueError: Length of interior_angles does not match that of switch_angles.
+            ValueError: Length of strand_switch_angle_multiples does not match that of strand switch angles.
         """
-        if len(interior_angles) != len(switch_angles):
-            raise ValueError("len(interior_angles) != len(switch_angles)")
+        if len(interior_angle_multiples) != len(strand_switch_angle_multiples):
+            raise ValueError(
+                "Length of strand_switch_angle_multiples does not match that of strand_switch_angle_multiples"
+            )
 
-        self.theta_c = theta_c
-        self.theta_s = theta_s
-        self.d = d
+        self.characteristic_angle = characteristic_angle
+        self.strand_switch_angle = strand_switch_angle
+        self.domain_distance = domain_distance
 
-        self.input_length = len(interior_angles)
+        self.input_length = len(interior_angle_multiples)
 
-        self.interior_angles = [angle * self.theta_c for angle in interior_angles]
-        self.switch_angles = switch_angles
+        self.strand_switch_angles = [
+            angle * self.strand_switch_angle for angle in strand_switch_angle_multiples
+        ]
 
-        self.psi_list = [0]
-        self.theta_list = []
+        # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
+        self.angle_delta_cache = [0] # related function: angle_deltas()
+        self.interior_angle_cache = [ # related function: interior_angles()
+            angle * self.characteristic_angle for angle in interior_angle_multiples
+        ]
+        self.u_cache = [0] # related function: us()
+        self.v_cache = [0] # related function vs()
 
-        self.u_list = [0]
-        self.v_list = [0]
-
-        self.thetas()
-        self.psis()
-
-    def theta_by_index(self, index: int) -> float:
+    def interior_angle_by_index(self, index: int) -> float:
         """
-        Obtain a theta (interior angle) given a specific index.
+        Obtain a interior_angle (interior angle) given a specific index.
+
         Args:
-            index (int): index of theta to return.
+            index (int): Index of interior_angle to return.
         Returns:
-            float: theta's value.
+            float: Requested interior angle's value.
         """
-        return self.interior_angles[index - 1] - (
-            self.switch_angles[index - 1] * self.theta_s
-        )
+        return self.interior_angles[index - 1] - (self.strand_switch_angles[index - 1])
 
-    def thetas(self) -> list:
+    def interior_angles(self) -> List[float]:
         """
-        Generate list of interior angles ("thetas") or return existing list.
+        Generate list of interior angles ("interior_angles") or return existing list.
+
         Returns:
-            list: list of all thetas.
+            list: list of all interior_angles.
         """
         current = 0
-        while len(self.theta_list) < self.input_length:
-            self.theta_list.append(
+        while len(self.interior_angle_cache) < self.input_length:
+            self.interior_angle_cache.append(
                 (self.interior_angles[current - 1])
-                - (self.switch_angles[current - 1] * self.theta_s)
+                - (self.strand_switch_angles[current - 1])
             )
             current += 1
-        return self.theta_list
+        return self.interior_angle_cache
 
-    def psis(self) -> list:
+    def angle_deltas(self) -> list:
         """
-        Generate list of angle changes ("psis") or return existing list.
+        Generate list of angle changes ("angle_deltas") or return existing list.
+
         Returns:
-            list: list of all psis.
+            list: list of all angle_deltas.
         """
         current = 0
-        while len(self.psi_list) < self.input_length:
-            self.psi_list.append(self.psi_list[-1] + 180 - self.theta_list[current])
+        while len(self.angle_delta_cache) < self.input_length:
+            self.angle_delta_cache.append(
+                self.angle_delta_cache[-1] + 180 - self.interior_angle_cache[current]
+            )
             current += 1
-        return self.psi_list
+        return self.angle_delta_cache
 
     def us(self) -> list:
         """
@@ -101,13 +107,14 @@ class top_view:
             list: list of all u cords.
         """
         current = 0
-        while len(self.u_list) <= self.input_length:
-            self.u_list.append(
-                self.u_list[-1]
-                + self.d * math.cos(math.radians(self.psi_list[current]))
+        while len(self.u_cache) <= self.input_length:
+            self.u_cache.append(
+                self.u_cache[-1]
+                + self.domain_distance
+                * math.cos(math.radians(self.angle_deltas()[current]))
             )
             current += 1
-        return self.u_list
+        return self.u_cache
 
     def vs(self) -> list:
         """
@@ -116,19 +123,21 @@ class top_view:
             list: list of all v cords.
         """
         current = 0
-        while len(self.v_list) <= self.input_length:
-            self.v_list.append(
-                self.v_list[-1]
-                + self.d * math.sin(math.radians(self.psi_list[current]))
+        while len(self.v_cache) <= self.input_length:
+            self.v_cache.append(
+                self.v_cache[-1]
+                + self.domain_distance
+                * math.sin(math.radians(self.angle_deltas()[current]))
             )
             current += 1
-        return self.v_list
+        return self.v_cache
 
-    def cords(self) -> Tuple[Tuple[float, float]]:
+    def cords(self) -> Tuple[Tuple[float, float], ...]:
         """
         Obtain list of all cords.
+
         Returns:
-            Tuple[float, float]: tuple of tuples of all (u, v) cords.
+            Tuple[Tuple[float, float], ...]: tuple of tuples of all (u, v) cords.
         """
         return tuple(zip(self.us(), self.vs()))
 

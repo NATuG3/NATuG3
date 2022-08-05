@@ -4,8 +4,8 @@ import sys
 
 interior_angle_multiples = [4]
 switch_angle_multiples = [0]
-# interior_angle_multiples = [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
-# switch_angle_multiples = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+interior_angle_multiples = [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
+switch_angle_multiples = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
 def test_top_view():
@@ -26,19 +26,14 @@ def test_top_view():
 
 
 def test_side_view():
+    base_angle = 2 * (360 / 21)
     side_view = dna_nanotube_tools.plot.side_view(
-        interior_angle_multiples, switch_angle_multiples, 3.38, 12.6, 2.3, 2
+        interior_angle_multiples, 3.38, base_angle, 12.6, 2.3
     )
-    # print(side_view.thetas(3))
-    xs = side_view.xs(1000)[0]
-    zs = side_view.zs(1000)[0]
-    print(xs)
+    xs = side_view.xs(10)[0]
+    zs = side_view.zs(10)[0]
     xs = xs[0]
     zs = zs[0]
-    # xs = xs[0]+xs[1]
-    # zs = zs[0]+zs[1]
-
-    # exit()
 
     # display the widget as a window
     app = QApplication(sys.argv)
@@ -58,4 +53,4 @@ def test_side_view():
     app.exec()
 
 
-test_side_view()
+test_top_view()
