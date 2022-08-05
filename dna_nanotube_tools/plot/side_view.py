@@ -44,7 +44,7 @@ class side_view:
 
         self.input_length = len(interior_angles)
 
-        self.interior_angles = [angle*self.theta_c for angle in interior_angles]
+        self.interior_angles = [angle * self.theta_c for angle in interior_angles]
         self.exterior_angles = [360 - angle for angle in self.interior_angles]
         self.switch_angles = switch_angles
 
@@ -64,15 +64,11 @@ class side_view:
         """
         current = 0
         while len(self.theta_list[0][0]) < count:
-            for domain_index, domain in enumerate(self.theta_list):
+            for domain in self.theta_list:
                 # up strand
-                domain[0].append(
-                    domain[0][current] + self.base_angle
-                )
+                domain[0].append(domain[0][current] + self.base_angle)
                 # down strand
-                domain[1].append(
-                    domain[0][current+1] - 2.3
-                )
+                domain[1].append(domain[0][current + 1] - 2.3)
             current += 1
         return self.theta_list
 
@@ -91,16 +87,21 @@ class side_view:
             current += 1
             for domain_index, domain in enumerate(self.x_list):
                 for strand_direction in range(2):
-                    if self.thetas(count+1)[domain_index][strand_direction][current] < self.exterior_angles[domain_index]:
-                        domain[strand_direction].append(
-                            (self.thetas(count)[domain_index][strand_direction][current])
-                            / self.exterior_angles[domain_index]
-                        )
+                    if (
+                        self.thetas(count + 1)[domain_index][strand_direction][current]
+                        < self.exterior_angles[domain_index]
+                    ):
+                        new_x = (
+                            self.thetas(count)[domain_index][strand_direction][current]
+                        ) / self.exterior_angles[domain_index]
                     else:
-                        domain[strand_direction].append(
-                            (360 - self.thetas(count+1)[domain_index][strand_direction][current])
-                            / self.interior_angles[domain_index]
-                        )
+                        new_x = (
+                            360
+                            - self.thetas(count + 1)[domain_index][strand_direction][
+                                current
+                            ]
+                        ) / self.interior_angles[domain_index]
+                    domain[strand_direction].append(new_x)
         return self.x_list
 
     def zs(self, count: int):

@@ -43,7 +43,7 @@ class top_view:
 
         self.input_length = len(interior_angles)
 
-        self.interior_angles = [angle*self.theta_c for angle in interior_angles]
+        self.interior_angles = [angle * self.theta_c for angle in interior_angles]
         self.switch_angles = switch_angles
 
         self.psi_list = [0]
