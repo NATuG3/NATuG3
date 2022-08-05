@@ -26,7 +26,30 @@ def test_side_view():
     side_view = dna_nanotube_tools.plot.side_view(
         interior_angle_multiples, switch_angle_multiples, 3.38, 12.6, 2.3, 2
     )
-    print(side_view.thetas(3))
-    # print(side_view.xs(3))
+    # print(side_view.thetas(3))
+    xs = side_view.xs(500)[0]
+    zs = side_view.zs(500)[0]
+    print(xs)
+    
+    xs = xs[0]+xs[1]
+    zs = zs[0]+zs[1]
+
+    # exit()
+
+    # display the widget as a window
+    app = QApplication(sys.argv)
+    import pyqtgraph as pg
+    ui = pg.plot(
+            xs,
+            zs,
+            title="Side View of DNA",
+            symbol="o",
+            symbolSize=4,
+            pxMode=True,
+        )
+    ui.setAspectLocked(lock=True, ratio=1)
+    ui.showGrid(x=True, y=True)
+    ui.show()
+    app.exec()
 
 test_side_view()

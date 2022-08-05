@@ -90,30 +90,18 @@ class side_view:
         while len(self.x_list[0][0]) < count:
             current += 1
             for domain_index, domain in enumerate(self.x_list):
-                # up strand
-                if self.thetas(count)[domain_index][0][current] < self.exterior_angles[domain_index]:
-                    domain[0].append(
-                        (self.thetas(count)[domain_index][0][current])
-                        / self.exterior_angles[domain_index]
-                    )
-                else:
-                    domain[0].append(
-                        (360 - self.thetas(count)[domain_index][0][current])
-                        / self.interior_angles[domain_index]
-                    )
-                # down strand
-                print(self.thetas(count)[domain_index])
-                print(self.thetas(count)[domain_index][1][current])
-                if self.thetas[domain_index][1] < self.exterior_angles[domain_index]:
-                    domain[1].append(
-                        (self.thetas(count)[domain_index][1][current])
-                        / self.exterior_angles[domain_index]
-                    )
-                else:
-                    domain[1].append(
-                        (360 - self.thetas(count)[domain_index][1][current])
-                        / self.interior_angles[domain_index]
-                    )
+                for strand_direction in range(2):
+                    if self.thetas(count+1)[domain_index][strand_direction][current] < self.exterior_angles[domain_index]:
+                        domain[strand_direction].append(
+                            (self.thetas(count)[domain_index][strand_direction][current])
+                            / self.exterior_angles[domain_index]
+                        )
+                    else:
+                        domain[strand_direction].append(
+                            (360 - self.thetas(count+1)[domain_index][strand_direction][current])
+                            / self.interior_angles[domain_index]
+                        )
+        return self.x_list
 
     def zs(self, count: int):
         """
@@ -131,3 +119,4 @@ class side_view:
                 domain[0].append(domain[0][-1] + self.z_distance)
                 # down strand
                 domain[1].append(domain[0][-1] - self.switch_distance)
+        return self.z_list
