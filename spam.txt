@@ -3,3 +3,66 @@
 # app = QApplication(sys.argv); ui = topView(m_c, m_s).ui(); ui.show(); app.exec() to view UI
 m_c = [6, 7, 7, 7, 7, 7, 7, 0, 0, 0]
 m_s = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+
+    # xs = side_view.xs(30)[0]
+    # zs = side_view.zs(30)[0]
+    # xs = xs[0]
+    # zs = zs[0]
+
+    # # display the widget as a window
+    # app = QApplication(sys.argv)
+    # import pyqtgraph as pg
+
+    # ui = pg.plot(
+    #     xs,
+    #     zs,
+    #     title="Side View of DNA",
+    #     symbol="o",
+    #     symbolSize=4,
+    #     pxMode=True,
+    # )
+    # ui.setAspectLocked(lock=True, ratio=1)
+    # ui.showGrid(x=True, y=True)
+    # ui.show()
+    # app.exec()
+
+### test side
+
+import dna_nanotube_tools
+from PyQt6.QtWidgets import QApplication
+import pyqtgraph as pg
+import sys
+
+interior_angle_multiples = [4, 10]
+switch_angle_multiples = [0]
+
+interbase_angle = 2 * (360 / 21)
+side_view = dna_nanotube_tools.plot.side_view(
+    interior_angle_multiples, 3.38, interbase_angle, 12.6, 2.3
+)
+
+xs_NEMid = side_view.xs(25, NEMid=True)[0]
+zs_NEMid = side_view.zs(25, NEMid=True)[0]
+
+win = pg.GraphicsLayoutWidget()
+win.setWindowTitle('Side View of DNA')
+main_plot = win.addPlot()
+
+for strand_direction, color in enumerate(["b", "g"]):
+    main_plot.plot(
+        xs_NEMid[strand_direction],
+        zs_NEMid[strand_direction],
+        title="Up Strand",
+        symbol="x",
+        symbolSize=12,
+        pxMode=True,
+        symbolPen=color
+    )
+
+app = QApplication(sys.argv)
+
+# win.setAspectLocked(lock=True, ratio=1)
+# win.showGrid(x=True, y=True)
+win.show()
+
+app.exec()

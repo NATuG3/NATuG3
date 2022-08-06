@@ -1,35 +1,6 @@
-from typing import List, Iterable
-from types import FunctionType
-
-def exec_on_innermost(iterable: Iterable, func: FunctionType):
-    """
-    Run func on all innermost contents of iterable.
-
-    Args:
-        iterable (Iterable): Main iterable to run func onto innermost values of.
-        func (FunctionType): Func to run on innermost values.
-
-    Returns:
-        Iterable: iterable with identical schema but all innermost values are updated to func(value)
-    """
-    for index in range(len(iterable)):
-        if not isinstance(iterable[index], Iterable):
-            iterable[index] = func(iterable[index])
-        else:
-            exec_on_innermost(iterable[index], func)
-    
-    return iterable
-
-def update_domains_array_values(domains_array):
-    """
-    Run func on all values of a domains-array List[]
-
-    Args:
-        domains_array (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
+from typing import List
+from copy import deepcopy
+import dna_nanotube_tools
 
 class side_view:
     """
@@ -38,7 +9,7 @@ class side_view:
     Attributes:
         interior_angles (List[float]): Angle between bases from a side view.
         base_height (float): Height between two bases (in Angstroms).
-        base_angle (int): The angle that one base makes about the helix axis.
+        interpoint_angle (int): The angle that one base makes about the helix axis.
         strand_switch_distance (float): Strand strand_switch distance (in Angstroms).
         strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
         characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
@@ -48,7 +19,7 @@ class side_view:
         self,
         interior_angle_multiples: List[int],
         base_height: float,
-        base_angle: float,
+        interpoint_angle: float,
         strand_switch_distance: float,
         strand_switch_angle: float,
         characteristic_angle=360 / 21,
@@ -59,7 +30,7 @@ class side_view:
         Args:
             interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
             base_height (float): Height between two bases (in Angstroms).
-            base_angle (int): The angle that one base makes about the helix axis.
+            interpoint_angle (int): The angle that one base makes about the helix axis.
             strand_switch_distance (float): Strand switch distance (in Angstroms).
             strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
             characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
@@ -69,7 +40,7 @@ class side_view:
         """
         self.characteristic_angle = characteristic_angle
         self.strand_switch_angle = strand_switch_angle
-        self.base_angle = base_angle
+        self.interpoint_angle = interpoint_angle
 
         self.base_height = base_height
         self.strand_switch_distance = strand_switch_distance
@@ -81,7 +52,7 @@ class side_view:
         self.exterior_angles = [360 - angle for angle in self.interior_angles]
 
         # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.base_angle_cache = [  # related function: base_angles()
+        self.interpoint_angle_cache = [  # related function: interpoint_angles()
             [[0], [0 - self.strand_switch_angle]] * self.input_length
         ]
         self.x_cache = [[[], []] * self.input_length]  # related function: xs()
@@ -89,12 +60,12 @@ class side_view:
             [[0], [0 - self.strand_switch_distance]] * self.input_length
         ]  # related function: zs()
 
-    def base_angles(self, count: int, NEMid=False):
+    def interpoint_angles(self, count: int, NEMid=False):
         """
-        Generate angles between bases.
+        Generate angles between bases/NEMids ("points").
 
         Args:
-            count (int): Number of interbase angles to generate.
+            count (int): Number of interbase/NEMid (point) angles to generate.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
@@ -102,22 +73,28 @@ class side_view:
         """
         current = 0
 
-        while len(self.base_angle_cache[0][0]) < count:
-            for domain in self.base_angle_cache:
+        while len(self.interpoint_angle_cache[0][0]) < count:
+            for domain in self.interpoint_angle_cache:
                 # up strand
-                domain[0].append(domain[0][current] + self.base_angle)
+                domain[0].append(domain[0][current] + self.interpoint_angle)
                 # down strand
                 domain[1].append(domain[0][current + 1] - 2.3)
             current += 1
 
-        return self.base_angle_cache
+        if NEMid:
+            return dna_nanotube_tools.helpers.exec_on_innermost(
+                deepcopy(self.interpoint_angle_cache), lambda cord: cord - (self.base_height/2)
+                )
+        else:
+            return self.interpoint_angle_cache
 
-    def xs(self, count: int):
+    def xs(self, count: int, NEMid=False):
         """
         Generate x cords.
 
         Args:
             count (int): Number of x cords to generate.
+            NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
             list: List of x cords in format [[[up strand], [down strand]], ...] for each domain.
@@ -128,23 +105,24 @@ class side_view:
             for domain_index, domain in enumerate(self.x_cache):
                 for strand_direction in range(2):
                     if (
-                        self.base_angles(count + 1)[domain_index][strand_direction][
+                        self.interpoint_angles(count + 1)[domain_index][strand_direction][
                             current
                         ]
                         < self.exterior_angles[domain_index]
                     ):
                         new_x = (
-                            self.base_angles(count)[domain_index][strand_direction][
+                            self.interpoint_angles(count)[domain_index][strand_direction][
                                 current
                             ]
                         ) / self.exterior_angles[domain_index]
                     else:
                         new_x = (
                             360
-                            - self.base_angles(count + 1)[domain_index][
+                            - self.interpoint_angles(count + 1)[domain_index][
                                 strand_direction
                             ][current]
                         ) / self.interior_angles[domain_index]
+
                     domain[strand_direction].append(new_x)
             current += 1
 
@@ -170,6 +148,8 @@ class side_view:
                 domain[1].append(domain[0][-1] - self.strand_switch_distance)
 
         if NEMid:
-            return exec_on_innermost(self.z_cache, lambda cord: cord + (self.base_height/2))
-
-        return self.z_cache
+            return dna_nanotube_tools.helpers.exec_on_innermost(
+                deepcopy(self.z_cache), lambda cord: cord - (self.base_height/2)
+                )
+        else:
+            return self.z_cache
