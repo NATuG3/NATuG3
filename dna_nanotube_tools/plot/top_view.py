@@ -92,11 +92,13 @@ class top_view:
             list: list of all angle_deltas.
         """
         current = 0
+        
         while len(self.angle_delta_cache) < self.input_length:
             self.angle_delta_cache.append(
                 self.angle_delta_cache[-1] + 180 - self.interior_angle_cache[current]
             )
             current += 1
+
         return self.angle_delta_cache
 
     def us(self) -> list:
@@ -106,6 +108,7 @@ class top_view:
             list: list of all u cords.
         """
         current = 0
+
         while len(self.u_cache) <= self.input_length:
             self.u_cache.append(
                 self.u_cache[-1]
@@ -113,6 +116,7 @@ class top_view:
                 * math.cos(math.radians(self.angle_deltas()[current]))
             )
             current += 1
+            
         return self.u_cache
 
     def vs(self) -> list:
@@ -122,6 +126,7 @@ class top_view:
             list: list of all v cords.
         """
         current = 0
+
         while len(self.v_cache) <= self.input_length:
             self.v_cache.append(
                 self.v_cache[-1]
@@ -129,6 +134,7 @@ class top_view:
                 * math.sin(math.radians(self.angle_deltas()[current]))
             )
             current += 1
+
         return self.v_cache
 
     def cords(self) -> Tuple[Tuple[float, float], ...]:
@@ -158,4 +164,5 @@ class top_view:
         )
         ui.setAspectLocked(lock=True, ratio=1)
         ui.showGrid(x=True, y=True)
+
         return ui

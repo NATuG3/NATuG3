@@ -1,5 +1,35 @@
-from typing import List
+from typing import List, Iterable
+from types import FunctionType
 
+def exec_on_innermost(iterable: Iterable, func: FunctionType):
+    """
+    Run func on all innermost contents of iterable.
+
+    Args:
+        iterable (Iterable): Main iterable to run func onto innermost values of.
+        func (FunctionType): Func to run on innermost values.
+
+    Returns:
+        Iterable: iterable with identical schema but all innermost values are updated to func(value)
+    """
+    for index in range(len(iterable)):
+        if not isinstance(iterable[index], Iterable):
+            iterable[index] = func(iterable[index])
+        else:
+            exec_on_innermost(iterable[index], func)
+    
+    return iterable
+
+def update_domains_array_values(domains_array):
+    """
+    Run func on all values of a domains-array List[]
+
+    Args:
+        domains_array (_type_): _description_
+
+    Returns:
+        _type_: _description_
+    """
 
 class side_view:
     """
@@ -59,17 +89,19 @@ class side_view:
             [[0], [0 - self.strand_switch_distance]] * self.input_length
         ]  # related function: zs()
 
-    def base_angles(self, count: int):
+    def base_angles(self, count: int, NEMid=False):
         """
         Generate angles between bases.
 
         Args:
             count (int): Number of interbase angles to generate.
+            NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
             list: List of interbase angles in format [[[up strand], [down strand]], ...] for each domain.
         """
         current = 0
+
         while len(self.base_angle_cache[0][0]) < count:
             for domain in self.base_angle_cache:
                 # up strand
@@ -77,6 +109,7 @@ class side_view:
                 # down strand
                 domain[1].append(domain[0][current + 1] - 2.3)
             current += 1
+
         return self.base_angle_cache
 
     def xs(self, count: int):
@@ -90,6 +123,7 @@ class side_view:
             list: List of x cords in format [[[up strand], [down strand]], ...] for each domain.
         """
         current = 0
+
         while len(self.x_cache[0][0]) < count:
             for domain_index, domain in enumerate(self.x_cache):
                 for strand_direction in range(2):
@@ -113,14 +147,17 @@ class side_view:
                         ) / self.interior_angles[domain_index]
                     domain[strand_direction].append(new_x)
             current += 1
-        return self.x_cache
 
-    def zs(self, count: int):
+        return self.x_cache
+        
+
+    def zs(self, count: int, NEMid=False):
         """
         Generate z cords.
 
         Args:
             count (int): Number of z cords to generate.
+            NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
             list: List of z cords in format [[[up strand], [down strand]], ...] for each domain.
@@ -131,4 +168,8 @@ class side_view:
                 domain[0].append(domain[0][-1] + self.base_height)
                 # down strand
                 domain[1].append(domain[0][-1] - self.strand_switch_distance)
+
+        if NEMid:
+            return exec_on_innermost(self.z_cache, lambda cord: cord + (self.base_height/2))
+
         return self.z_cache
