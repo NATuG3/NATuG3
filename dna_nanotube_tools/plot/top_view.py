@@ -1,5 +1,6 @@
 import math
 from typing import Tuple, List
+import pyqtgraph as pg
 
 
 class top_view:
@@ -31,6 +32,7 @@ class top_view:
             domain_distance (float): Distance between any given two domain centers.
             characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
             strand_switch_angle (float, optional): strand switch angle. Defaults to 0.
+
         Raises:
             ValueError: Length of strand_switch_angle_multiples does not match that of strand switch angles.
         """
@@ -45,9 +47,12 @@ class top_view:
 
         self.input_length = len(interior_angle_multiples)
 
-        self.strand_switch_angles = [
-            angle * self.strand_switch_angle for angle in strand_switch_angle_multiples
-        ]
+        self.strand_switch_angles = tuple(
+            [
+                tuple([angle * self.strand_switch_angle])
+                for angle in strand_switch_angle_multiples
+            ]
+        )
 
         # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
         self.angle_delta_cache = [0]  # related function: angle_deltas()
@@ -92,7 +97,7 @@ class top_view:
             list: list of all angle_deltas.
         """
         current = 0
-        
+
         while len(self.angle_delta_cache) < self.input_length:
             self.angle_delta_cache.append(
                 self.angle_delta_cache[-1] + 180 - self.interior_angle_cache[current]
@@ -101,9 +106,10 @@ class top_view:
 
         return self.angle_delta_cache
 
-    def us(self) -> list:
+    def us(self) -> List[float]:
         """
         Generate a list of horizontal cords ("u cords").
+
         Returns:
             list: list of all u cords.
         """
@@ -116,12 +122,13 @@ class top_view:
                 * math.cos(math.radians(self.angle_deltas()[current]))
             )
             current += 1
-            
+
         return self.u_cache
 
-    def vs(self) -> list:
+    def vs(self) -> List[float]:
         """
         Generate a list of vertical cords ("v cords").
+
         Returns:
             list: list of all v cords.
         """
@@ -137,23 +144,22 @@ class top_view:
 
         return self.v_cache
 
-    def cords(self) -> Tuple[Tuple[float, float], ...]:
+    def cords(self) -> List[Tuple[float, float]]:
         """
         Obtain list of all cords.
 
         Returns:
-            Tuple[Tuple[float, float], ...]: tuple of tuples of all (u, v) cords.
+            list: [(u_0, v_0), (u_1, v_1), ...]
         """
         return tuple(zip(self.us(), self.vs()))
 
-    def ui(self):
+    def ui(self) -> pg.widgets.PlotWidget.PlotWidget:
         """
         Return PyQt widget of topview.
+
         Returns:
             pg.plot: PyQt widget of topview.
         """
-        import pyqtgraph as pg
-
         ui = pg.plot(
             self.us(),
             self.vs(),

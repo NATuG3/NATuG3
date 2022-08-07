@@ -2,13 +2,15 @@ import dna_nanotube_tools
 from PyQt6.QtWidgets import QApplication
 import sys
 
-interior_angle_multiples = [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9]
-switch_angle_multiples = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+interior_angle_multiples = [9] * 14
+switch_angle_multiples = [0] * 14
+
 
 def visualize_widget(widget):
     app = QApplication(sys.argv)
     widget.show()
     app.exec()
+
 
 # initilize top_view object
 top_view = dna_nanotube_tools.plot.top_view(

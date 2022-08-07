@@ -1,6 +1,7 @@
-from typing import List
+from typing import List, Tuple
 from copy import deepcopy
 import dna_nanotube_tools
+
 
 class side_view:
     """
@@ -41,26 +42,29 @@ class side_view:
         self.characteristic_angle = characteristic_angle
         self.strand_switch_angle = strand_switch_angle
         self.interpoint_angle = interpoint_angle
-
         self.base_height = base_height
         self.strand_switch_distance = strand_switch_distance
 
         self.input_length = len(interior_angle_multiples)
-        self.interior_angles = [
+        self.interior_angles = tuple(
             angle * self.characteristic_angle for angle in interior_angle_multiples
-        ]
-        self.exterior_angles = [360 - angle for angle in self.interior_angles]
+        )
+        self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
         # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.interpoint_angle_cache = [  # related function: interpoint_angles()
-            [[0], [0 - self.strand_switch_angle]] * self.input_length
-        ]
-        self.x_cache = [[[], []] * self.input_length]  # related function: xs()
-        self.z_cache = [
-            [[0], [0 - self.strand_switch_distance]] * self.input_length
-        ]  # related function: zs()
+        self.interpoint_angle_cache = tuple(  # related function: interpoint_angles()
+            [tuple([[0], [0 - self.strand_switch_angle]]) * self.input_length]
+        )
+        self.x_cache = tuple(
+            [tuple([[], []]) * self.input_length]
+        )  # related function: xs()
+        self.z_cache = tuple(
+            [tuple([[0], [0 - self.strand_switch_distance]]) * self.input_length]
+        )  # related function: zs()
 
-    def interpoint_angles(self, count: int, NEMid=False):
+    def interpoint_angles(
+        self, count: int, NEMid=False
+    ) -> Tuple[Tuple[List[float], List[float]], ...]:
         """
         Generate angles between bases/NEMids ("points").
 
@@ -69,7 +73,7 @@ class side_view:
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
-            list: List of interbase angles in format [[[up strand], [down strand]], ...] for each domain.
+            tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
         current = 0
 
@@ -83,12 +87,15 @@ class side_view:
 
         if NEMid:
             return dna_nanotube_tools.helpers.exec_on_innermost(
-                deepcopy(self.interpoint_angle_cache), lambda cord: cord - (self.base_height/2)
-                )
+                deepcopy(self.interpoint_angle_cache),
+                lambda cord: cord - (self.base_height / 2),
+            )
         else:
             return self.interpoint_angle_cache
 
-    def xs(self, count: int, NEMid=False):
+    def xs(
+        self, count: int, NEMid=False
+    ) -> Tuple[Tuple[List[float], List[float]], ...]:
         """
         Generate x cords.
 
@@ -97,23 +104,23 @@ class side_view:
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
-            list: List of x cords in format [[[up strand], [down strand]], ...] for each domain.
+            tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
         current = 0
 
-        while len(self.x_cache[0][0]) < count:
+        while len(self.x_cache[0][0]) < count - 1:
             for domain_index, domain in enumerate(self.x_cache):
                 for strand_direction in range(2):
                     if (
-                        self.interpoint_angles(count + 1)[domain_index][strand_direction][
-                            current
-                        ]
+                        self.interpoint_angles(count + 1)[domain_index][
+                            strand_direction
+                        ][current]
                         < self.exterior_angles[domain_index]
                     ):
                         new_x = (
-                            self.interpoint_angles(count)[domain_index][strand_direction][
-                                current
-                            ]
+                            self.interpoint_angles(count)[domain_index][
+                                strand_direction
+                            ][current]
                         ) / self.exterior_angles[domain_index]
                     else:
                         new_x = (
@@ -127,9 +134,10 @@ class side_view:
             current += 1
 
         return self.x_cache
-        
 
-    def zs(self, count: int, NEMid=False):
+    def zs(
+        self, count: int, NEMid=False
+    ) -> Tuple[Tuple[List[float], List[float]], ...]:
         """
         Generate z cords.
 
@@ -138,7 +146,7 @@ class side_view:
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
 
         Returns:
-            list: List of z cords in format [[[up strand], [down strand]], ...] for each domain.
+            tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
         while len(self.z_cache[0][0]) < count:
             for domain in self.z_cache:
@@ -149,7 +157,7 @@ class side_view:
 
         if NEMid:
             return dna_nanotube_tools.helpers.exec_on_innermost(
-                deepcopy(self.z_cache), lambda cord: cord - (self.base_height/2)
-                )
+                deepcopy(self.z_cache), lambda cord: cord - (self.base_height / 2)
+            )
         else:
             return self.z_cache

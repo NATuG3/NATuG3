@@ -4,27 +4,27 @@
 m_c = [6, 7, 7, 7, 7, 7, 7, 0, 0, 0]
 m_s = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
-    # xs = side_view.xs(30)[0]
-    # zs = side_view.zs(30)[0]
-    # xs = xs[0]
-    # zs = zs[0]
+# xs = side_view.xs(30)[0]
+# zs = side_view.zs(30)[0]
+# xs = xs[0]
+# zs = zs[0]
 
-    # # display the widget as a window
-    # app = QApplication(sys.argv)
-    # import pyqtgraph as pg
+# # display the widget as a window
+# app = QApplication(sys.argv)
+# import pyqtgraph as pg
 
-    # ui = pg.plot(
-    #     xs,
-    #     zs,
-    #     title="Side View of DNA",
-    #     symbol="o",
-    #     symbolSize=4,
-    #     pxMode=True,
-    # )
-    # ui.setAspectLocked(lock=True, ratio=1)
-    # ui.showGrid(x=True, y=True)
-    # ui.show()
-    # app.exec()
+# ui = pg.plot(
+#     xs,
+#     zs,
+#     title="Side View of DNA",
+#     symbol="o",
+#     symbolSize=4,
+#     pxMode=True,
+# )
+# ui.setAspectLocked(lock=True, ratio=1)
+# ui.showGrid(x=True, y=True)
+# ui.show()
+# app.exec()
 
 ### test side
 
@@ -45,7 +45,7 @@ xs_NEMid = side_view.xs(25, NEMid=True)[0]
 zs_NEMid = side_view.zs(25, NEMid=True)[0]
 
 win = pg.GraphicsLayoutWidget()
-win.setWindowTitle('Side View of DNA')
+win.setWindowTitle("Side View of DNA")
 main_plot = win.addPlot()
 
 for strand_direction, color in enumerate(["b", "g"]):
@@ -56,7 +56,7 @@ for strand_direction, color in enumerate(["b", "g"]):
         symbol="x",
         symbolSize=12,
         pxMode=True,
-        symbolPen=color
+        symbolPen=color,
     )
 
 app = QApplication(sys.argv)
