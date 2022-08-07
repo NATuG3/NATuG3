@@ -60,7 +60,7 @@ class top_view:
             angle * self.characteristic_angle for angle in interior_angle_multiples
         ]
         self.u_cache = [0]  # related function: us()
-        self.v_cache = [0]  # related function vs()
+        self.v_cache = [0]  # related function: vs()
 
     def interior_angle_by_index(self, index: int) -> float:
         """

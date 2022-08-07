@@ -1,0 +1,2 @@
+pyqtgraph
+PyQt6
