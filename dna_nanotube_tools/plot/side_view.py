@@ -82,7 +82,7 @@ class side_view:
                 # up strand
                 domain[0].append(domain[0][current] + self.interpoint_angle)
                 # down strand
-                domain[1].append(domain[0][current + 1] - 2.3)
+                domain[1].append(domain[0][current + 1] - self.strand_switch_angle)
             current += 1
 
         if NEMid:
@@ -108,26 +108,26 @@ class side_view:
         """
         current = 0
 
-        while len(self.x_cache[0][0]) < count - 1:
+        while len(self.x_cache[0][0]) < count:
             for domain_index, domain in enumerate(self.x_cache):
-                for strand_direction in range(2):
-                    if (
-                        self.interpoint_angles(count + 1)[domain_index][
+                for strand_direction in range(2): # [0, 1] 0 is up strand; 1 is down strand
+                    if ( # if the next interpoint angle is less than 
+                        (self.interpoint_angles(count + 1)[domain_index][
                             strand_direction
-                        ][current]
+                        ][current] % 360)
                         < self.exterior_angles[domain_index]
                     ):
                         new_x = (
-                            self.interpoint_angles(count)[domain_index][
+                            (self.interpoint_angles(count)[domain_index][
                                 strand_direction
-                            ][current]
+                            ][current]) % 360
                         ) / self.exterior_angles[domain_index]
                     else:
                         new_x = (
-                            360
+                            (360
                             - self.interpoint_angles(count + 1)[domain_index][
                                 strand_direction
-                            ][current]
+                            ][current] % 360)
                         ) / self.interior_angles[domain_index]
 
                     domain[strand_direction].append(new_x)

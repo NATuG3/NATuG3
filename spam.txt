@@ -64,5 +64,4 @@ app = QApplication(sys.argv)
 # win.setAspectLocked(lock=True, ratio=1)
 # win.showGrid(x=True, y=True)
 win.show()
-
 app.exec()
