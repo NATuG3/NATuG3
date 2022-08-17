@@ -1,174 +1,83 @@
 import math
-from typing import Tuple, List
 import pyqtgraph as pg
+import dna_nanotube_tools
 
 
 class top_view:
     """
-    Generate (u, v) cords for top view of helices generation.
+    Generate top view features.
 
     Attributes:
-        interior_angles (list): List of interior angles per domain transition.
-        strand_switch_angles (list): List of strand switch angles per domain transition.
-        domain_distance (float): Distance between any given two domain centers.
-        characteristic_angle (float, optional): Characteristic angle.
-        strand_switch_angle (float, optional): Strand switch angle.
+        self.domains (List[dna_nanotube_tools.domain]): List of all domains inputted.
+        angle_deltas (List[float]) = List of all angle changes between domains.
+        coords (dna_nanotube_tools.cords) = Dna_nanotube_tools cords type object. Schema can be found in dna_nanotube_tools/types.coords.
+        ui_widget (pyqtgraph.plot): Pyqtgraph widget to display the topview
     """
 
     def __init__(
         self,
-        interior_angle_multiples: List[int],
-        strand_switch_angle_multiples: List[int],
+        domains: list,
         domain_distance: float,
         characteristic_angle=360 / 21,
-        strand_switch_angle=0,
-    ) -> None:
+        strand_switch_angle=2.3,
+    ):
         """
-        Initilize top_view generation class.
+        Generate (u, v) cords for top view of helices generation.
 
         Args:
-            interior_angle_multiples (List[int]): List of interior angles per domain transition. List of multiples of characteristic angle.
-            strand_switch_angle_multiples (List[int]): List of strand switch angles per domain transition. List of multiples of strand switch angle.
+            domains (List[dna_nanotube_tools]): List of domains.
             domain_distance (float): Distance between any given two domain centers.
-            characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
-            strand_switch_angle (float, optional): strand switch angle. Defaults to 0.
-
-        Raises:
-            ValueError: Length of strand_switch_angle_multiples does not match that of strand switch angles.
+            characteristic_angle (float, optional): Characteristic angle.
+            strand_switch_angle (float, optional): Strand switch angle.
         """
-        if len(interior_angle_multiples) != len(strand_switch_angle_multiples):
-            raise ValueError(
-                "Length of strand_switch_angle_multiples does not match that of strand_switch_angle_multiples"
+
+        domain_count = len(domains)  # number of domains
+        angle_deltas = [0]  # create list to store angle changes in
+        us = [0]  # create list to store u cords in
+        vs = [0]  # create list to store v cords in
+
+        for counter in range(domain_count):
+            # locate strand switch angle for (counter - 1)'s domain. (the previous domain)
+            strand_switch_angle = (
+                domains[counter - 1].switch_angle_multiple * strand_switch_angle
             )
-
-        self.characteristic_angle = characteristic_angle
-        self.strand_switch_angle = strand_switch_angle
-        self.domain_distance = domain_distance
-
-        self.input_length = len(interior_angle_multiples)
-
-        self.strand_switch_angles = tuple(
-            [
-                tuple([angle * self.strand_switch_angle])
-                for angle in strand_switch_angle_multiples
-            ]
-        )
-
-        # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.angle_delta_cache = [0]  # related function: angle_deltas()
-        self.interior_angle_cache = [  # related function: interior_angles()
-            angle * self.characteristic_angle for angle in interior_angle_multiples
-        ]
-        self.u_cache = [0]  # related function: us()
-        self.v_cache = [0]  # related function: vs()
-
-    def interior_angle_by_index(self, index: int) -> float:
-        """
-        Obtain a interior_angle (interior angle) given a specific index.
-
-        Args:
-            index (int): Index of interior_angle to return.
-        Returns:
-            float: Requested interior angle's value.
-        """
-        return self.interior_angles[index - 1] - (self.strand_switch_angles[index - 1])
-
-    def interior_angles(self) -> List[float]:
-        """
-        Generate list of interior angles ("interior_angles") or return existing list.
-
-        Returns:
-            list: list of all interior_angles.
-        """
-        current = 0
-        while len(self.interior_angle_cache) < self.input_length:
-            self.interior_angle_cache.append(
-                (self.interior_angles[current - 1])
-                - (self.strand_switch_angles[current - 1])
+            # locate interior angle for (counter - 1)'s domain. (the previous domain)
+            interjunction_angle = (
+                domains[counter - 1].interjunction_multiple * characteristic_angle
             )
-            current += 1
-        return self.interior_angle_cache
+            # calculate the actual interior angle (with strand switching angle factored in)
+            interior_angle = interjunction_angle - strand_switch_angle
 
-    def angle_deltas(self) -> list:
-        """
-        Generate list of angle changes ("angle_deltas") or return existing list.
+            # append the angle change to "angle_deltas"
+            angle_deltas.append(angle_deltas[-1] + 180 - interior_angle)
+            # (current angle delta) AKA most previously appended angle delta
+            angle_delta = angle_deltas[-1]
 
-        Returns:
-            list: list of all angle_deltas.
-        """
-        current = 0
+            # append the u cord of the domain to "us"
+            us.append(us[-1] + domain_distance * math.cos(math.radians(angle_delta)))
 
-        while len(self.angle_delta_cache) < self.input_length:
-            self.angle_delta_cache.append(
-                self.angle_delta_cache[-1] + 180 - self.interior_angle_cache[current]
-            )
-            current += 1
+            # append the v cord of the domain to "vs"
+            vs.append(vs[-1] + domain_distance * math.sin(math.radians(angle_delta)))
 
-        return self.angle_delta_cache
-
-    def us(self) -> List[float]:
-        """
-        Generate a list of horizontal cords ("u cords").
-
-        Returns:
-            list: list of all u cords.
-        """
-        current = 0
-
-        while len(self.u_cache) <= self.input_length:
-            self.u_cache.append(
-                self.u_cache[-1]
-                + self.domain_distance
-                * math.cos(math.radians(self.angle_deltas()[current]))
-            )
-            current += 1
-
-        return self.u_cache
-
-    def vs(self) -> List[float]:
-        """
-        Generate a list of vertical cords ("v cords").
-
-        Returns:
-            list: list of all v cords.
-        """
-        current = 0
-
-        while len(self.v_cache) <= self.input_length:
-            self.v_cache.append(
-                self.v_cache[-1]
-                + self.domain_distance
-                * math.sin(math.radians(self.angle_deltas()[current]))
-            )
-            current += 1
-
-        return self.v_cache
-
-    def cords(self) -> List[Tuple[float, float]]:
-        """
-        Obtain list of all cords.
-
-        Returns:
-            list: [(u_0, v_0), (u_1, v_1), ...]
-        """
-        return tuple(zip(self.us(), self.vs()))
-
-    def ui(self) -> pg.widgets.PlotWidget.PlotWidget:
-        """
-        Return PyQt widget of topview.
-
-        Returns:
-            pg.plot: PyQt widget of topview.
-        """
-        ui = pg.plot(
-            self.us(),
-            self.vs(),
+        # create PyQtGraph widget
+        ui_widget = pg.plot(
+            us,
+            vs,
             title="Top View of DNA",
             symbol="o",
             symbolSize=80,
             pxMode=True,
         )
-        ui.setAspectLocked(lock=True, ratio=1)
-        ui.showGrid(x=True, y=True)
+        ui_widget.setAspectLocked(lock=True, ratio=1)
+        ui_widget.showGrid(x=True, y=True)
 
-        return ui
+        # convert calculated coords into actual coords object
+        coords = dna_nanotube_tools.coords()
+        coords.xs = us
+        coords.ys = vs
+
+        # store main outputs in class
+        self.domains = domains
+        self.angle_deltas = angle_deltas
+        self.coords = coords
+        self.ui_widget = ui_widget

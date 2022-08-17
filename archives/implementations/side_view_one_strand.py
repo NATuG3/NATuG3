@@ -25,10 +25,12 @@ ui = pg.plot(
 ui.setAspectLocked(lock=True, ratio=50)
 ui.showGrid(x=True, y=True)
 
+
 def visualize_widget(widget):
     app = QApplication(sys.argv)
     widget.show()
     app.exec()
+
 
 widget = pg.GraphicsLayoutWidget()
 widget.setWindowTitle("Side View of DNA")

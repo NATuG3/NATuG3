@@ -10,7 +10,7 @@ class side_view:
     Attributes:
         interior_angles (List[float]): Angle between bases from a side view.
         base_height (float): Height between two bases (in Angstroms).
-        interpoint_angle (int): The angle that one base makes about the helix axis.
+        point_angle (int): The angle about the central axis going counter-clockwise from the line of tangency.
         strand_switch_distance (float): Strand strand_switch distance (in Angstroms).
         strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
         characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
@@ -20,7 +20,7 @@ class side_view:
         self,
         interior_angle_multiples: List[int],
         base_height: float,
-        interpoint_angle: float,
+        point_angle: float,
         strand_switch_distance: float,
         strand_switch_angle: float,
         characteristic_angle=360 / 21,
@@ -31,7 +31,7 @@ class side_view:
         Args:
             interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
             base_height (float): Height between two bases (in Angstroms).
-            interpoint_angle (int): The angle that one base makes about the helix axis.
+            point_angle (float): The angle that one base makes about the helix axis.
             strand_switch_distance (float): Strand switch distance (in Angstroms).
             strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
             characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
@@ -41,7 +41,7 @@ class side_view:
         """
         self.characteristic_angle = characteristic_angle
         self.strand_switch_angle = strand_switch_angle
-        self.interpoint_angle = interpoint_angle
+        self.point_angle = point_angle
         self.base_height = base_height
         self.strand_switch_distance = strand_switch_distance
 
@@ -52,7 +52,7 @@ class side_view:
         self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
         # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.interpoint_angle_cache = tuple(  # related function: interpoint_angles()
+        self.point_angle_cache = tuple(  # related function: point_angles()
             [tuple([[0], [0 - self.strand_switch_angle]]) * self.input_length]
         )
         self.x_cache = tuple(
@@ -62,7 +62,7 @@ class side_view:
             [tuple([[0], [0 - self.strand_switch_distance]]) * self.input_length]
         )  # related function: zs()
 
-    def interpoint_angles(
+    def point_angles(
         self, count: int, NEMid=False
     ) -> Tuple[Tuple[List[float], List[float]], ...]:
         """
@@ -77,21 +77,21 @@ class side_view:
         """
         current = 0
 
-        while len(self.interpoint_angle_cache[0][0]) < count:
-            for domain in self.interpoint_angle_cache:
+        while len(self.point_angle_cache[0][0]) < count:
+            for domain in self.point_angle_cache:
                 # up strand
-                domain[0].append(domain[0][current] + self.interpoint_angle)
+                domain[0].append(domain[0][current] + self.point_angle)
                 # down strand
                 domain[1].append(domain[0][current + 1] - self.strand_switch_angle)
             current += 1
 
         if NEMid:
             return dna_nanotube_tools.helpers.exec_on_innermost(
-                deepcopy(self.interpoint_angle_cache),
+                deepcopy(self.point_angle_cache),
                 lambda cord: cord - (self.base_height / 2),
             )
         else:
-            return self.interpoint_angle_cache
+            return self.point_angle_cache
 
     def xs(
         self, count: int, NEMid=False
@@ -110,24 +110,32 @@ class side_view:
 
         while len(self.x_cache[0][0]) < count:
             for domain_index, domain in enumerate(self.x_cache):
-                for strand_direction in range(2): # [0, 1] 0 is up strand; 1 is down strand
-                    if ( # if the next interpoint angle is less than 
-                        (self.interpoint_angles(count + 1)[domain_index][
-                            strand_direction
-                        ][current] % 360)
-                        < self.exterior_angles[domain_index]
-                    ):
+                for strand_direction in range(
+                    2
+                ):  # [0, 1] 0 is up strand; 1 is down strand
+                    if (  # if the next point angle is less than
+                        self.point_angles(count + 1)[domain_index][strand_direction][
+                            current
+                        ]
+                        % 360
+                    ) < self.exterior_angles[domain_index]:
                         new_x = (
-                            (self.interpoint_angles(count)[domain_index][
-                                strand_direction
-                            ][current]) % 360
+                            (
+                                self.point_angles(count)[domain_index][
+                                    strand_direction
+                                ][current]
+                            )
+                            % 360
                         ) / self.exterior_angles[domain_index]
                     else:
                         new_x = (
-                            (360
-                            - self.interpoint_angles(count + 1)[domain_index][
-                                strand_direction
-                            ][current] % 360)
+                            (
+                                360
+                                - self.point_angles(count + 1)[domain_index][
+                                    strand_direction
+                                ][current]
+                                % 360
+                            )
                         ) / self.interior_angles[domain_index]
 
                     domain[strand_direction].append(new_x)
