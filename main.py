@@ -1,20 +1,14 @@
 import dna_nanotube_tools
 from PyQt6.QtWidgets import QApplication
+import pyqtgraph as pg
 import sys
 
+interior_angle_multiples = [4, 2]
+switch_angle_multiples = [0]
 
-def visualize_widget(widget):
-    app = QApplication(sys.argv)
-    widget.show()
-    app.exec()
+interbase_angle = 2 * (360 / 21)
+side_view = dna_nanotube_tools.plot.side_view(
+    interior_angle_multiples, 3.38, interbase_angle, 12.6, 2.3
+)
 
-
-# domain-object-instances of all the domains
-domains = [dna_nanotube_tools.domain(9, 0) for i in range(14)]
-# distance between domains
-domain_distance = 2.3
-
-# initilize top_view object
-output = dna_nanotube_tools.plot.top_view(domains, domain_distance)
-# display the widget as a window
-visualize_widget(output.ui_widget)
+print(side_view.z_coords(21, NEMid=True))

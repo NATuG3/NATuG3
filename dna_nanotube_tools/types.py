@@ -55,7 +55,7 @@ class strand:
         self.side_view_coords = coords()
 
 
-class domain():
+class domain:
     """
     Domain storage object.
     """
