@@ -1,7 +1,6 @@
 from typing import List, Tuple
 from copy import deepcopy
 import dna_nanotube_tools
-import numpy as np
 
 
 class side_view:
@@ -113,7 +112,7 @@ class side_view:
                         ]
                         % 360
                     ) < self.exterior_angles[domain_index]:
-                        new_x = (
+                        new_x = domain_index+(
                             (
                                 self.point_angles(count)[domain_index][
                                     strand_direction
@@ -122,7 +121,7 @@ class side_view:
                             % 360
                         ) / self.exterior_angles[domain_index]
                     else:
-                        new_x = (
+                        new_x = domain_index+(
                             (
                                 360
                                 - self.point_angles(count + 1)[domain_index][
@@ -151,15 +150,16 @@ class side_view:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
         # since all initial z_coord values are pre-set we reduce the count (which is used for itterating) by 1
-        count -= 1 
+        count -= 1
 
         # create container all the z coords for each domain
         # each z cord is in the form [(<up_strand>, <down_strand>), ...]
-        # tuple index is which domain it represents, and up_strand & down_strand are np.arrays of actual z coords
-        z_coords = []
+        # tuple index is which domain it represents, and up_strand & down_strand are arrays of actual z coords
+        z_coords = tuple([([], []) for i in range(self.domain_count)])
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
-        z_coords.append([np.array(0.0), np.array(0.0 - self.strand_switch_distance)])
+        z_coords[0][0].append(0)
+        z_coords[0][1].append(z_coords[0][0][0] - self.strand_switch_distance)
 
         # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first one first
         # the first domain has its initial z cords (up and down strands) set to (arbitrary) static values, whereas other domains do not
@@ -169,20 +169,12 @@ class side_view:
             # generate the next z_coord for the up strand...
             # append the previous z_coord + the base_height
             # "z_coords[0][0]" means "z_coords -> domain#0 -> up_strand -> (previous z_coord on the up strand of domain#0)"
-            z_coords[0][0] = np.append(
-                z_coords[0][0], z_coords[0][0] + self.base_height
-            )
-
-            # note:
-            # weird quark with numpy is that when len(numpy_array) == 0 then numpy_array returns just the single value within it
-            # and no numpy_array[-1] is needed 
+            z_coords[0][0].append(z_coords[0][0][-1] + self.base_height)
 
             # generate the next z_coord for the down strand...
             # append the previous z_coord's up strand value, minus the strand switch distance
             # "z_coords[0][0]" means "z_coords -> domain#0 -> down_strand -> (previous z_coord on the down strand of domain#0)"
-            z_coords[0][1] = np.append(
-                z_coords[0][1], z_coords[0][1] - self.strand_switch_distance
-            )
+            z_coords[0][1].append(z_coords[0][1][-1] - self.strand_switch_distance)
 
         # now find and append the initial z_coord for each domain
         for domain_index in range(self.domain_count - 1):
@@ -203,39 +195,38 @@ class side_view:
             maximum_x_coord_index = maximum_x_coord_index[domain_index - 1][
                 0
             ]  # we can sample the up strand of the current domain (domain_index)
-            # WORK IN PROGRESS!!!! X CORDS WILL BE NUMPY ARRAYS EVENTUALLY, THEN THIS CAN BE UNCOMMENTED
-                # # np.argmax finds the index(s) of the maximum element(s)
-                # maximum_x_coord_index = np.argmax(maximum_x_coord_index)
-            
-            maximum_x_coord_index = maximum_x_coord_index.index(max(maximum_x_coord_index))
+
+            # obtain the index of the maximum x coord
+            maximum_x_coord_index = maximum_x_coord_index.index(
+                max(maximum_x_coord_index)
+            )
 
             # z_coords[domain_index-1] represents the previous domain's z_coords in the form [<up_strand>, <down_strand>]
             # we are going to line up the next up strand so that its leftmost (first) point touches that of the previous domain's
-            initial_z_coord = z_coords[domain_index - 1][1][maximum_x_coord_index]
+            initial_z_coord: float = z_coords[domain_index - 1][1][maximum_x_coord_index]
 
             # append this new initial z cord to the actual list of z_coords
-            z_coords.append([np.array(initial_z_coord), np.array(initial_z_coord - self.strand_switch_distance)])
+            z_coords[domain_index][0].append(initial_z_coord)
+            z_coords[domain_index][1].append(initial_z_coord - self.strand_switch_distance)
+
             # step 2: actually calculate the z coords of this new domain
 
-            for i in range(count):
+            for i in range(count): # (domain 0 is already calculated)
                 # append the previous z_coord + the base_height
                 # "z_coords[i][0][-1]" means "z_coords -> domain#i -> up_strand -> (previous z_coord on the up strand of domain#i)"
-                z_coords[i][0] = np.append(
-                    z_coords[i][0], z_coords[i][0][-1] + self.base_height
-                )
+                z_coords[domain_index][0].append(z_coords[domain_index][0][-1] + self.base_height)
 
                 # append the previous z_coord's up strand value, minus the strand switch distance
                 # "z_coords[i][0][-1]" means "z_coords -> domain#i -> down_strand -> (previous z_coord on the down strand of domain#i)"
-                z_coords[i][1] = np.append(
-                    z_coords[i][1], z_coords[i][1][-1] - self.strand_switch_distance
-                )
-        
+                z_coords[domain_index][1].append(z_coords[domain_index][1][-1] - self.strand_switch_distance)
+
         if NEMid:
             # z_coords for NEMids are the same but shifted down half a base height
             # (note that NEMids in reality are just the points in-between nemids)
-            NEMid_modifier = (self.base_height / 2)
-            for i in range(self.domain_count):
-                z_coords[i][0] -= NEMid_modifier
-                z_coords[i][1] -= NEMid_modifier
+            NEMid_modifier = self.base_height / 2
+            for domain_index in range(self.domain_count):
+                for strand_direction in range(2): # up, down (range(2) creates a list of [0, 1]; indexes for strand directions)
+                    for item in z_coords[domain_index][strand_direction]:
+                        item -= NEMid_modifier
 
         return z_coords
