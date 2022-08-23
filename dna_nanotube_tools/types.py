@@ -1,5 +1,6 @@
 from typing import Literal
 
+
 class domain:
     """
     Domain storage object.

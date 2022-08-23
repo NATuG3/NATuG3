@@ -8,27 +8,30 @@ def visualize_widget(widget):
     widget.show()
     app.exec()
 
-interior_angle_multiples = [4, 2]
+interior_angle_multiples = [4, 6]
 switch_angle_multiples = [0]
 
-interbase_angle = 2 * (360 / 21)
+base_angle = 2 * (360 / 21)
 side_view = dna_nanotube_tools.plot.side_view(
-    interior_angle_multiples, 3.38, interbase_angle, 12.6, 2.3
+    interior_angle_multiples, 3.38, base_angle, 12.6, 2.3
 )
+xs_NEMid = side_view.x_coords(100)
+zs_NEMid = side_view.z_coords(100)
 
-x_coords = side_view.x_coords(200, NEMid=True)
-z_coords = side_view.z_coords(200, NEMid=True)
+win = pg.GraphicsLayoutWidget()
+win.setWindowTitle("Side View of DNA")
+main_plot = win.addPlot()
 
-ui = pg.plot(
-    x_coords[0][0],
-    z_coords[0][0] + z_coords[1][0],
-    title="Side View of DNA",
-    symbol="o",
-    symbolSize=5,
-    pxMode=True,
-)
-ui.setAspectLocked(lock=True, ratio=50)
-ui.showGrid(x=True, y=True)
-ui.setWindowTitle("Side View of DNA")
+for domain in range(side_view.domain_count):
+    for strand_direction, color in enumerate(["b", "g"]):
+        main_plot.plot(
+            xs_NEMid[domain][strand_direction],
+            zs_NEMid[domain][strand_direction],
+            title="Up Strand",
+            symbol="x",
+            symbolSize=12,
+            pxMode=True,
+            symbolPen=color,
+        )
 
-visualize_widget(ui)
+visualize_widget(win)
