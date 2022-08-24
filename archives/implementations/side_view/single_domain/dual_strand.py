@@ -3,10 +3,12 @@ from PyQt6.QtWidgets import QApplication
 import pyqtgraph as pg
 import sys
 
+
 def visualize_widget(widget):
     app = QApplication(sys.argv)
     widget.show()
     app.exec()
+
 
 interior_angle_multiples = [4]
 switch_angle_multiples = [0]
