@@ -133,30 +133,32 @@ class side_view:
         # generate count# of x coords on a domain-by-domain basis
         # domain_index is the index of the current domain
         for domain_index in range(self.domain_count):
-            for strand_direction in range(2):  # [0: up_strand, 1: down_strand]
-                for i in range(count):
-                    # find the current point_angle and modulo it by 360
-                    # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
-                    # they do not reset at 360, however, so we modulo the current point angle here
-                    point_angle = point_angles[domain_index][strand_direction][i] % 360
+            for i in range(count):
+                # find the current point_angle and modulo it by 360
+                # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
+                # they do not reset at 360, however, so we modulo the current point angle here
+                point_angle = point_angles[domain_index][0][i] % 360
 
-                    # current exterior and interior angles ("tridomain" angles)
-                    # note that "exterior_angle == 360 - interior_angle"
-                    interior_angle = self.interior_angles[domain_index]
-                    exterior_angle = self.exterior_angles[domain_index]
+                # current exterior and interior angles ("tridomain" angles)
+                # note that "exterior_angle == 360 - interior_angle"
+                interior_angle = self.interior_angles[domain_index]
+                exterior_angle = self.exterior_angles[domain_index]
 
-                    if point_angle < exterior_angle:
-                        x_coord = point_angle / exterior_angle
-                    else:
-                        x_coord = (360 - point_angle) / interior_angle
+                if point_angle < exterior_angle:
+                    x_coord = point_angle / exterior_angle
+                else:
+                    x_coord = (360 - point_angle) / interior_angle
 
-                    # domain 0 lies between [0, 1] on the x axis
-                    # domain 1 lies between [1, 2] on the x axis
-                    # ext...
-                    x_coord += domain_index
+                # domain 0 lies between [0, 1] on the x axis
+                # domain 1 lies between [1, 2] on the x axis
+                # ext...
+                x_coord += domain_index
 
-                    # store the new x_coord in the container object and continue
-                    x_coords[domain_index][strand_direction].append(x_coord)
+                # store the new x_coord in the container object and continue
+                x_coords[domain_index][0].append(x_coord)
+
+            for coord in x_coords[domain_index][0]:
+                x_coords[domain_index][1].append(coord) 
 
         exec_on_innermost(x_coords, lambda coord: round(coord, round_to))
         return x_coords
@@ -196,8 +198,7 @@ class side_view:
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
         z_coords[0][0].append(0)
-        z_coords[0][1].append(0 - self.strand_switch_distance)
-        # "z_coords[0][0][0] - self.strand_switch_distance" would also work for the above line, but would be less efficient
+        z_coords[0][1].append(z_coords[0][0][0] - self.strand_switch_distance)
 
         # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first one first
         # the first domain has its initial z cords (up and down strands) set to (arbitrary) static values, whereas other domains do not

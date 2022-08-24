@@ -11,19 +11,20 @@ def visualize_widget(widget):
     app.exec()
 
 
-interior_angle_multiples = [9] * 1
-switch_angle_multiples = [0] * 1
+interior_angle_multiples = [4, 10, 6, 2, 7]
+switch_angle_multiples = [0]
 
 base_angle = 2 * (360 / 21)
 side_view = dna_nanotube_tools.plot.side_view(
     interior_angle_multiples, 3.38, base_angle, 12.6, 2.3
 )
-x_coords = side_view.x_coords(22)
-z_coords = side_view.z_coords(22)
+x_coords = side_view.x_coords(125)
+z_coords = side_view.z_coords(125)
 
 # pprint(z_coords)
-pprint(x_coords)
-exit()
+# pprint(x_coords)
+# exit()
+
 win = pg.GraphicsLayoutWidget()
 win.setWindowTitle("Side View of DNA")
 main_plot = win.addPlot()
