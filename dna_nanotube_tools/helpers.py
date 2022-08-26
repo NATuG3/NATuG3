@@ -12,13 +12,24 @@ def exec_on_innermost(iterable: Iterable, func: FunctionType) -> None:
         func (FunctionType): Func to run on innermost values.
     """
     for index in range(len(iterable)):
-        # the equivalent of "if not isinstance(iterable[index], Iterable)"
-        # except the try except statements are faster sincew it does not need to check every time
         try:
             iterable[index] = func(iterable[index])
         except TypeError:
             exec_on_innermost(iterable[index], func)
 
+def exec_on_innermost_forcedTypeCheck(iterable: Iterable, func: FunctionType) -> None:
+    """
+    Run func on all innermost contents of iterable. Less optmized but won't exec on iterables.
+
+    Args:
+        iterable (Iterable): Main iterable to run func onto innermost values of.
+        func (FunctionType): Func to run on innermost values.
+    """
+    for index in range(len(iterable)):
+        if not isinstance(iterable[index], Iterable):
+            iterable[index] = func(iterable[index])
+        else:
+            exec_on_innermost(iterable[index], func)
 
 def visualize_widget(widget):
     """

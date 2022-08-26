@@ -1,9 +1,8 @@
 import math
-from typing import Iterable, List
+from typing import List
 import pyqtgraph as pg
-
-from dna_nanotube_tools import plot
-
+from dna_nanotube_tools.helpers import exec_on_innermost
+from PyQt5.QtWidgets import QWidget
 
 class top_view:
     """
@@ -96,7 +95,9 @@ class top_view:
         # our symbols are VERY large circles and pyqtgraph calculates padding from the actual points, so the circles get cut off
         plotted_view_box = main_plot.getViewBox()
         plotted_view_box.setDefaultPadding(padding=0.18)
+        
         # prevent user from interacting with the graph
         plotted_view_box.setMouseEnabled(x=False, y=False)
+        plotted_view_box.setAspectLocked(lock=True, ratio=1)
 
         return plotted_window
