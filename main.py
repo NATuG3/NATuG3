@@ -3,14 +3,15 @@ from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 import sys
 
 # define domains to generate sideview for
-domains = [dna_nanotube_tools.domain(9, 0) for i in range(14)]
+interjunction_multiples = (7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0)
+domains = [dna_nanotube_tools.domain(interjunction_multiple, 0) for interjunction_multiple in interjunction_multiples]
 
 # initilize side view class
 side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
 top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 
 # create ui widget
-side_view_ui_widget = side_view.ui(125)
+side_view_ui_widget = side_view.ui(300)
 top_view_ui_widget = top_view.ui()
 
 # display the widgets side-by-side

@@ -1,6 +1,8 @@
 import math
-from typing import List
+from typing import Iterable, List
 import pyqtgraph as pg
+
+from dna_nanotube_tools import plot
 
 
 class top_view:
@@ -30,6 +32,9 @@ class top_view:
             strand_switch_angle (float, optional): Strand switch angle.
         """
         domain_count = len(domains)  # number of domains inputted
+        self.domain_distance = domain_distance # store domain distance setting
+        self.domains = domains # store the inputted domains
+
         self.angle_deltas: List[float] = [0.0]  # list to store angle deltas in
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
@@ -83,8 +88,15 @@ class top_view:
             self.v_coords,
             title="Top View of DNA",
             symbol="o",
-            symbolSize=80,
+            symbolSize=73.5,
             pxMode=True,
         )
+
+        # increase the view box padding, since...
+        # our symbols are VERY large circles and pyqtgraph calculates padding from the actual points, so the circles get cut off
+        plotted_view_box = main_plot.getViewBox()
+        plotted_view_box.setDefaultPadding(padding=0.18)
+        # prevent user from interacting with the graph
+        plotted_view_box.setMouseEnabled(x=False, y=False)
 
         return plotted_window
