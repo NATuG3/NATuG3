@@ -1,2 +1,1 @@
-modify generation for side view to cache the x coords
-for side_view.py: since all x and z coords and point angles repeat every 21 bases/NEMids, we can use that to save compute (and make it a generator?)
+convert everything in side_view.py to be generators

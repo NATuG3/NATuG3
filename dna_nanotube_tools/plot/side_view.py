@@ -1,11 +1,11 @@
-from typing import Iterable, List, Tuple
+from typing import List, Tuple
 from dna_nanotube_tools.helpers import exec_on_innermost
+from dna_nanotube_tools.types import DomainsContainer
 
 
 class side_view:
     """
     Generate data needed for a side view graph of helicies.
-
     Attributes:
         interior_angles (List[float]): Angle between bases from a side view.
         base_height (float): Height between two bases (in Angstroms).
@@ -26,7 +26,6 @@ class side_view:
     ) -> None:
         """
         Initilize side_view generation class.
-
         Args:
             interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
             base_height (float): Height between two bases (in Angstroms).
@@ -34,7 +33,6 @@ class side_view:
             strand_switch_distance (float): Strand switch distance (in Angstroms).
             strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
             characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
-
         Raises:
             ValueError: Length of interior_angles does not match that of strand_switch_angles.
         """
@@ -62,15 +60,13 @@ class side_view:
 
     def point_angles(
         self, count: int, round_to=4, NEMid=False
-    ) -> Tuple[Tuple[List[float], List[float]], ...]:
+    ) -> DomainsContainer:
         """
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
-
         Args:
             count (int): Number of interbase/NEMid (point) angles to generate.
             round_to (int): Decimal place to round output to.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
-
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
@@ -113,20 +109,18 @@ class side_view:
 
     def x_coords(
         self, count: int, round_to=4, NEMid=False
-    ) -> Tuple[Tuple[List[float], List[float]], ...]:
+    ) -> DomainsContainer:
         """
         Generate x cords.
-
         Args:
             count (int): Number of x cords to generate.
             round_to (int): Decimal place to round output to.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
-
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
-        x_coords = self.container()  # where to store the output/what to return
-        point_angles = self.point_angles(
+        x_coords: DomainsContainer = self.container()  # where to store the output/what to return
+        point_angles: DomainsContainer = self.point_angles(
             count
         )  # point angles are needed to convert to x coords
 
@@ -137,12 +131,12 @@ class side_view:
                 # find the current point_angle and modulo it by 360
                 # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
                 # they do not reset at 360, however, so we modulo the current point angle here
-                point_angle = point_angles[domain_index][0][i] % 360
+                point_angle: float = point_angles[domain_index][0][i] % 360
 
                 # current exterior and interior angles ("tridomain" angles)
                 # note that "exterior_angle == 360 - interior_angle"
-                interior_angle = self.interior_angles[domain_index]
-                exterior_angle = self.exterior_angles[domain_index]
+                interior_angle: float = self.interior_angles[domain_index]
+                exterior_angle: float = self.exterior_angles[domain_index]
 
                 if point_angle < exterior_angle:
                     x_coord = point_angle / exterior_angle
@@ -165,18 +159,15 @@ class side_view:
 
     def z_coords(
         self, count: int, round_to=4, NEMid=False
-    ) -> Tuple[Tuple[List[float], List[float]], ...]:
+    ) -> DomainsContainer:
         """
         Generate z cords.
-
         Args:
             count (int): Number of z cords to generate. Must be > 21 if generating for multiple domains.
             round_to (int): Decimal place to round output to.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
-
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
-
         Raises:
             Exception: Not enough domains. Count must be > 21 when multiple domains are passed.
         """
@@ -194,7 +185,7 @@ class side_view:
         # create container for all the z coords for each domain
         # each z cord is in the form [(<up_strand>, <down_strand>), ...]
         # tuple index is which domain it represents, and <up_strand> & <down_strand> are arrays of actual z coords
-        z_coords = self.container()
+        z_coords: DomainsContainer = self.container()
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
         z_coords[0][0].append(0)
@@ -217,24 +208,24 @@ class side_view:
 
         # now find and append the initial z_coord for each domain
         for domain_index in range(1, self.domain_count):
-            previous_domain_index = domain_index - 1  # the previous domain's index
+            previous_domain_index: int = domain_index - 1  # the previous domain's index
 
             # step 1: find the initial z cord for the current domain_index
 
             # lets find the maxmimum x cord for the previous domain
             # that will be the point where, when placed adjacently to the right in the proper place
             # there will be an overlap of NEMids/bases
-            maximum_x_coord_index = self.x_coords(
+            maximum_x_coord_index: DomainsContainer = self.x_coords(
                 21, NEMid=NEMid
             )  # 21 will get all the possible values of a given x cord
             # current structure is [[<up_strand>, <down_strand>], ...]
             # since we are aligning the new domain next to the previous, we index by <previous_domain_index>
-            maximum_x_coord_index = maximum_x_coord_index[previous_domain_index][
+            maximum_x_coord_index: List[float] = maximum_x_coord_index[previous_domain_index][
                 0
             ]  # we can sample the up strand
 
             # obtain the index of the maximum x coord
-            maximum_x_coord_index = maximum_x_coord_index.index(
+            maximum_x_coord_index: int = maximum_x_coord_index.index(
                 max(maximum_x_coord_index)
             )
 
