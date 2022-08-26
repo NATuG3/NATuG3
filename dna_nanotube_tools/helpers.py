@@ -18,3 +18,19 @@ def exec_on_innermost(iterable: Iterable, func: FunctionType) -> None:
             iterable[index] = func(iterable[index])
         except TypeError:
             exec_on_innermost(iterable[index], func)
+
+
+def visualize_widget(widget):
+    """
+    Quickly display a PyQt widget as a full window. For testing purposes only.
+
+    Args:
+        widget (_type_): _description_
+    """
+    # only import these libraries if ui is being used
+    from PyQt6.QtWidgets import QApplication
+    import sys
+
+    app = QApplication(sys.argv)
+    widget.show()
+    app.exec()

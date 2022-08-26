@@ -1,5 +1,7 @@
 import math
 from typing import List
+import pyqtgraph as pg
+
 
 class top_view:
     """
@@ -50,10 +52,39 @@ class top_view:
 
             # the current angle delta (we will use it to generate the next one)
             angle_delta: float = self.angle_deltas[-1]
-            angle_delta: float = math.radians(angle_delta) # convert to radians (AKA angle_delta*(180/pi))
+            angle_delta: float = math.radians(
+                angle_delta
+            )  # convert to radians (AKA angle_delta*(180/pi))
 
             # append the u cord of the domain to "self.u_coords"
-            self.u_coords.append(self.u_coords[-1] + domain_distance * math.cos(angle_delta))
+            self.u_coords.append(
+                self.u_coords[-1] + domain_distance * math.cos(angle_delta)
+            )
 
             # append the v cord of the domain to "self.v_coords"
-            self.v_coords.append(self.v_coords[-1] + domain_distance * math.sin(angle_delta))
+            self.v_coords.append(
+                self.v_coords[-1] + domain_distance * math.sin(angle_delta)
+            )
+
+    def ui(self) -> pg.GraphicsLayoutWidget:
+        """
+        Generate PyQt widget for top view.
+        """
+        plotted_window: pg.GraphicsLayoutWidget = (
+            pg.GraphicsLayoutWidget()
+        )  # create main plotting window
+        plotted_window.setWindowTitle("Top View of DNA")  # set the window's title
+        plotted_window.setBackground("w")  # make the background white
+
+        main_plot = plotted_window.addPlot()
+
+        main_plot.plot(
+            self.u_coords,
+            self.v_coords,
+            title="Top View of DNA",
+            symbol="o",
+            symbolSize=80,
+            pxMode=True,
+        )
+
+        return plotted_window

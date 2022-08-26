@@ -2,6 +2,7 @@ from typing import Tuple, List
 
 DomainsContainer = Tuple[Tuple[List[float], List[float]], ...]
 
+
 class domain:
     """
     Domain storage object.

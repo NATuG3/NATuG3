@@ -1,11 +1,13 @@
 from typing import List
 from dna_nanotube_tools.helpers import exec_on_innermost
 from dna_nanotube_tools.types import DomainsContainer
+import pyqtgraph as pg
 
 
 class side_view:
     """
     Generate data needed for a side view graph of helicies.
+
     Attributes:
         interior_angles (List[float]): Angle between bases from a side view.
         base_height (float): Height between two bases (in Angstroms).
@@ -17,35 +19,38 @@ class side_view:
 
     def __init__(
         self,
-        interior_angle_multiples: List[int],
+        domains: list,
         base_height: float,
-        interpoint_angle: float,
         strand_switch_distance: float,
         strand_switch_angle: float,
+        interpoint_angle_multiple=2,
         characteristic_angle=360 / 21,
     ) -> None:
         """
         Initilize side_view generation class.
+
         Args:
             interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
             base_height (float): Height between two bases (in Angstroms).
-            interpoint_angle (float): The angle that one base makes about the helix axis.
             strand_switch_distance (float): Strand switch distance (in Angstroms).
-            strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
+            strand_switch_angle (float): Angle about the helix axis between two NEMids on different helices of a double helix.
+            interpoint_angle_multiple (int, optional): Angle that one base makes about the helix axis, measured in multiples of characteristic angle.
             characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
+
         Raises:
             ValueError: Length of interior_angles does not match that of strand_switch_angles.
         """
-        self.domain_count = len(interior_angle_multiples)
+        self.domain_count = len(domains)
 
         self.characteristic_angle = characteristic_angle
         self.strand_switch_angle = strand_switch_angle
-        self.interpoint_angle = interpoint_angle
+        self.interpoint_angle = interpoint_angle_multiple * self.characteristic_angle
         self.base_height = base_height
         self.strand_switch_distance = strand_switch_distance
 
         self.interior_angles = tuple(
-            angle * self.characteristic_angle for angle in interior_angle_multiples
+            domain.interjunction_multiple * self.characteristic_angle
+            for domain in domains
         )
         self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
@@ -58,9 +63,7 @@ class side_view:
             [tuple([[0], [0 - self.strand_switch_angle]])]
         )
 
-    def point_angles(
-        self, count: int, round_to=4, NEMid=False
-    ) -> DomainsContainer:
+    def point_angles(self, count: int, round_to=4, NEMid=False) -> DomainsContainer:
         """
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
         Args:
@@ -107,9 +110,7 @@ class side_view:
 
         return point_angles
 
-    def x_coords(
-        self, count: int, round_to=4, NEMid=False
-    ) -> DomainsContainer:
+    def x_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainer:
         """
         Generate x cords.
         Args:
@@ -119,7 +120,9 @@ class side_view:
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
-        x_coords: DomainsContainer = self.container()  # where to store the output/what to return
+        x_coords: DomainsContainer = (
+            self.container()
+        )  # where to store the output/what to return
         point_angles: DomainsContainer = self.point_angles(
             count
         )  # point angles are needed to convert to x coords
@@ -128,38 +131,38 @@ class side_view:
         # domain_index is the index of the current domain
         for domain_index in range(self.domain_count):
             for i in range(count):
-                # find the current point_angle and modulo it by 360
-                # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
-                # they do not reset at 360, however, so we modulo the current point angle here
-                point_angle: float = point_angles[domain_index][0][i] % 360
+                for strand_direction in range(
+                    2
+                ):  # repeat same steps for up and down strand
+                    # find the current point_angle and modulo it by 360
+                    # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
+                    # they do not reset at 360, however, so we modulo the current point angle here
+                    point_angle: float = (
+                        point_angles[domain_index][strand_direction][i] % 360
+                    )
 
-                # current exterior and interior angles ("tridomain" angles)
-                # note that "exterior_angle == 360 - interior_angle"
-                interior_angle: float = self.interior_angles[domain_index]
-                exterior_angle: float = self.exterior_angles[domain_index]
+                    # current exterior and interior angles ("tridomain" angles)
+                    # note that "exterior_angle == 360 - interior_angle"
+                    interior_angle: float = self.interior_angles[domain_index]
+                    exterior_angle: float = self.exterior_angles[domain_index]
 
-                if point_angle < exterior_angle:
-                    x_coord = point_angle / exterior_angle
-                else:
-                    x_coord = (360 - point_angle) / interior_angle
+                    if point_angle < exterior_angle:
+                        x_coord = point_angle / exterior_angle
+                    else:
+                        x_coord = (360 - point_angle) / interior_angle
 
-                # domain 0 lies between [0, 1] on the x axis
-                # domain 1 lies between [1, 2] on the x axis
-                # ext...
-                x_coord += domain_index
+                    # domain 0 lies between [0, 1] on the x axis
+                    # domain 1 lies between [1, 2] on the x axis
+                    # ext...
+                    x_coord += domain_index
 
-                # store the new x_coord in the container object and continue
-                x_coords[domain_index][0].append(x_coord)
-
-            for coord in x_coords[domain_index][0]:
-                x_coords[domain_index][1].append(coord) 
+                    # store the new x_coord in the container object and continue
+                    x_coords[domain_index][strand_direction].append(x_coord)
 
         exec_on_innermost(x_coords, lambda coord: round(coord, round_to))
         return x_coords
 
-    def z_coords(
-        self, count: int, round_to=4, NEMid=False
-    ) -> DomainsContainer:
+    def z_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainer:
         """
         Generate z cords.
         Args:
@@ -220,7 +223,9 @@ class side_view:
             )  # 21 will get all the possible values of a given x cord
             # current structure is [[<up_strand>, <down_strand>], ...]
             # since we are aligning the new domain next to the previous, we index by <previous_domain_index>
-            maximum_x_coord_index: List[float] = maximum_x_coord_index[previous_domain_index][
+            maximum_x_coord_index: List[float] = maximum_x_coord_index[
+                previous_domain_index
+            ][
                 0
             ]  # we can sample the up strand
 
@@ -259,3 +264,53 @@ class side_view:
             exec_on_innermost(z_coords, lambda cord: (cord - (self.base_height / 2)))
         exec_on_innermost(z_coords, lambda coord: round(coord, round_to))
         return z_coords
+
+    def ui(self, count: int) -> pg.GraphicsLayoutWidget:
+        """
+        Generate PyQt widget for side view.
+
+        Args:
+            count (int): Number of points to generate per domain.
+        """
+        plotted_window: pg.GraphicsLayoutWidget = (
+            pg.GraphicsLayoutWidget()
+        )  # create main plotting window
+        plotted_window.setWindowTitle("Side View of DNA")  # set the window's title
+        plotted_window.setBackground("w")  # make the background white
+
+        main_plot: pg.plot = plotted_window.addPlot()
+
+        for domain_index in range(self.domain_count):
+            if domain_index % 2:  # if the domain index is an even integer
+                colors: tuple = ("r", "g")  # use red and green colors
+            else:  # but if it is an odd integer
+                colors: tuple = ("b", "y")  # use blue and yellow colors
+            # this way it will be easy to discern between different domains
+            # (every other domain will be a different color scheme)
+
+            for strand_direction in range(2):
+                if strand_direction == 0:  # 0 means up strand
+                    symbol: str = "t1"  # up arrow for up strand
+                    color: str = colors[
+                        0
+                    ]  # set the color to be the second option of current color scheme (which is "colors")
+                elif strand_direction == 1:  # 1 means down strand
+                    symbol: str = "t"  # down arrow for down strand
+                    color: str = colors[
+                        1
+                    ]  # set the color to be the first option of current color scheme (which is "colors")
+
+                # domain#i-up or domain#i-down
+                title = f"domain#{domain_index}-{str(strand_direction).replace('0','up').replace('1','down')}"
+
+                main_plot.plot(  # actually plot the current strand of the current domain
+                    self.x_coords(count)[domain_index][strand_direction],
+                    self.z_coords(count)[domain_index][strand_direction],
+                    title=title,  # name of what was just plotted
+                    symbol=symbol,  # type of symbol (in this case up/down arrow)
+                    symbolSize=6,  # size of arrows in px
+                    pxMode=True,  # means that symbol size is in px
+                    symbolPen=color,  # set color of pen to current color
+                )
+
+        return plotted_window

@@ -1,35 +1,29 @@
 import dna_nanotube_tools
-import pyqtgraph as pg
-from PyQt6.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 import sys
 
-"""
-Generate and display an overhead (top view) of double helicies.
-"""
-
-def visualize_widget(widget):
-    app = QApplication(sys.argv)
-    widget.show()
-    app.exec()
-
-# define domains to generate topview for
+# define domains to generate sideview for
 domains = [dna_nanotube_tools.domain(9, 0) for i in range(14)]
 
-# generate top view data
+# initilize side view class
+side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
 top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 
-# obtain coords
-u_coords = top_view.u_coords
-v_coords = top_view.v_coords
+# create ui widget
+side_view_ui_widget = side_view.ui(125)
+top_view_ui_widget = top_view.ui()
 
-widget = pg.plot(
-    u_coords,
-    v_coords,
-    title="Top View of DNA",
-    symbol="o",
-    symbolSize=80,
-    pxMode=True,
-)
-widget.setAspectLocked(lock=True, ratio=1)
-widget.showGrid(x=True, y=True)
-visualize_widget(widget)
+# display the widgets side-by-side
+app = QApplication(sys.argv)
+
+window = QWidget() # set up window as a widget
+window.setWindowTitle("DNA Visualizer")
+
+layout = QHBoxLayout() # initilize side-by-side layout
+layout.addWidget(side_view_ui_widget) # add the side view to the left
+layout.addWidget(top_view_ui_widget) # add the top view to the right
+
+window.setLayout(layout) # apply the side-by-side layout to the window
+window.show() # show the duel-widget window
+
+sys.exit(app.exec_()) # run app's main event loop

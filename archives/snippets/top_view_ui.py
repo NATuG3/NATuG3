@@ -1,4 +1,3 @@
-
 # create PyQtGraph widget
 ui_widget = pg.plot(
     us,
