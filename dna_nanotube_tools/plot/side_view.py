@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 from dna_nanotube_tools.helpers import exec_on_innermost
 from dna_nanotube_tools.types import DomainsContainer
 
