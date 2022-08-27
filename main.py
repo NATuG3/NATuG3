@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 import sys
 
 # define domains to generate sideview for
-interjunction_multiples = (7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0)
+interjunction_multiples = [9] * 14
 domains = [dna_nanotube_tools.domain(interjunction_multiple, 0) for interjunction_multiple in interjunction_multiples]
 
 # initilize side view class
