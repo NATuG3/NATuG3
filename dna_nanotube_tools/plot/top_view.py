@@ -1,9 +1,6 @@
 import math
 from typing import List
 import pyqtgraph as pg
-from dna_nanotube_tools.helpers import exec_on_innermost
-from PyQt6.QtWidgets import QWidget
-from functools import cache
 
 
 class top_view:

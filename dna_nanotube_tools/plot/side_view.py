@@ -2,7 +2,6 @@ from typing import List, Tuple, NamedTuple
 from collections import namedtuple
 from dna_nanotube_tools.helpers import exec_on_innermost
 import pyqtgraph as pg
-from functools import cache
 
 # datatype to store strand data in
 # (this is a function that returns a template whenever called)
@@ -76,6 +75,7 @@ class side_view:
     def point_angles(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
+
         Args:
             count (int): Number of interbase/NEMid (point) angles to generate.
             round_to (int): Decimal place to round output to.
@@ -120,10 +120,10 @@ class side_view:
 
         return point_angles
 
-    @cache
     def x_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate x cords.
+
         Args:
             count (int): Number of x cords to generate.
             round_to (int): Decimal place to round output to.
@@ -173,10 +173,10 @@ class side_view:
         exec_on_innermost(x_coords, lambda coord: round(coord, round_to))
         return x_coords
 
-    @cache
     def z_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate z cords.
+
         Args:
             count (int): Number of z cords to generate. Must be > 21 if generating for multiple domains.
             round_to (int): Decimal place to round output to.
@@ -294,6 +294,10 @@ class side_view:
         # we can calculate the range at the end of generation; we don't need to continiously recalculate the range
         main_plot.disableAutoRange()
 
+        # generate the coords
+        x_coords = self.x_coords(count)
+        z_coords = self.z_coords(count)
+
         for domain_index in range(self.domain_count):
             if domain_index % 2:  # if the domain index is an even integer
                 colors: tuple = ("r", "g")  # use red and green colors
@@ -318,8 +322,8 @@ class side_view:
                 title = f"domain#{domain_index}-{str(strand_direction).replace('0','up').replace('1','down')}"
 
                 main_plot.plot(  # actually plot the current strand of the current domain
-                    self.x_coords(count)[domain_index][strand_direction],
-                    self.z_coords(count)[domain_index][strand_direction],
+                    x_coords[domain_index][strand_direction],
+                    z_coords[domain_index][strand_direction],
                     title=title,  # name of what was just plotted
                     symbol=symbol,  # type of symbol (in this case up/down arrow)
                     symbolSize=6,  # size of arrows in px
