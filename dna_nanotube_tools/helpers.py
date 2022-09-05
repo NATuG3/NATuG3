@@ -17,6 +17,7 @@ def exec_on_innermost(iterable: Iterable, func: FunctionType) -> None:
         except TypeError:
             exec_on_innermost(iterable[index], func)
 
+
 def exec_on_innermost_forcedTypeCheck(iterable: Iterable, func: FunctionType) -> None:
     """
     Run func on all innermost contents of iterable. Less optmized but won't exec on iterables.
@@ -30,6 +31,7 @@ def exec_on_innermost_forcedTypeCheck(iterable: Iterable, func: FunctionType) ->
             iterable[index] = func(iterable[index])
         else:
             exec_on_innermost(iterable[index], func)
+
 
 def visualize_widget(widget):
     """
