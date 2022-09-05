@@ -1,10 +1,19 @@
-from typing import List
+from typing import List, Tuple, NamedTuple
+from collections import namedtuple
 from dna_nanotube_tools.helpers import exec_on_innermost
-from dna_nanotube_tools.types import DomainsContainer
 import pyqtgraph as pg
 
+# datatype to store strand data in
+StrandsContainer = lambda: namedtuple("StrandData", "up_strand down_strand")(list(), list())
+# the actual type (for type annotations)
+StrandsContainerType = NamedTuple("StrandData", [("up_strand", list), ("down_strand", list)])
 
-class side_view:
+# datatype to store multiple domains' strand data in
+DomainsContainer = lambda domain_count: tuple(StrandsContainer() for i in range(domain_count))
+# the actual type (for type annotations)
+DomainsContainerType = Tuple[StrandsContainerType]
+
+class side_view():
     """
     Generate data needed for a side view graph of helicies.
 
@@ -54,16 +63,7 @@ class side_view:
         )
         self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
-        # container object to store data for up&down strand for all domains
-        # this is a function so that it does not simply reference/modify self.container
-        self.container = lambda: tuple([([], []) for i in range(self.domain_count)])
-
-        # Note that "_cache" is appended to variables used by functions. Do not use these attributes directly; instead call related function.
-        self.point_angle_cache = tuple(  # related function: point_angles()
-            [tuple([[0], [0 - self.strand_switch_angle]])]
-        )
-
-    def point_angles(self, count: int, round_to=4, NEMid=False) -> DomainsContainer:
+    def point_angles(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
         Args:
@@ -73,7 +73,7 @@ class side_view:
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
-        point_angles = self.container()
+        point_angles = DomainsContainer(self.domain_count)
 
         # set initial point angle values
         for domain_index in range(self.domain_count):
@@ -110,7 +110,7 @@ class side_view:
 
         return point_angles
 
-    def x_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainer:
+    def x_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate x cords.
         Args:
@@ -120,10 +120,10 @@ class side_view:
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
-        x_coords: DomainsContainer = (
-            self.container()
+        x_coords: DomainsContainerType = (
+            DomainsContainer(self.domain_count)
         )  # where to store the output/what to return
-        point_angles: DomainsContainer = self.point_angles(
+        point_angles: DomainsContainerType = self.point_angles(
             count
         )  # point angles are needed to convert to x coords
 
@@ -162,7 +162,7 @@ class side_view:
         exec_on_innermost(x_coords, lambda coord: round(coord, round_to))
         return x_coords
 
-    def z_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainer:
+    def z_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate z cords.
         Args:
@@ -188,7 +188,7 @@ class side_view:
         # create container for all the z coords for each domain
         # each z cord is in the form [(<up_strand>, <down_strand>), ...]
         # tuple index is which domain it represents, and <up_strand> & <down_strand> are arrays of actual z coords
-        z_coords: DomainsContainer = self.container()
+        z_coords: DomainsContainerType = DomainsContainer(self.domain_count)
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
         z_coords[0][0].append(0)
@@ -218,7 +218,7 @@ class side_view:
             # lets find the maxmimum x cord for the previous domain
             # that will be the point where, when placed adjacently to the right in the proper place
             # there will be an overlap of NEMids/bases
-            maximum_x_coord_index: DomainsContainer = self.x_coords(
+            maximum_x_coord_index: DomainsContainerType = self.x_coords(
                 21, NEMid=NEMid
             )  # 21 will get all the possible values of a given x cord
             # current structure is [[<up_strand>, <down_strand>], ...]

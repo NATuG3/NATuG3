@@ -2,7 +2,7 @@ import math
 from typing import List
 import pyqtgraph as pg
 from dna_nanotube_tools.helpers import exec_on_innermost
-from PyQt5.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget
 
 
 class top_view:
@@ -83,13 +83,13 @@ class top_view:
 
         main_plot = plotted_window.addPlot()
 
-        main_plot.plot(
+        plotted = main_plot.plot(
             self.u_coords,
             self.v_coords,
             title="Top View of DNA",
             symbol="o",
-            symbolSize=73.5,
-            pxMode=True,
+            symbolSize=self.domain_distance,
+            pxMode=False,
         )
 
         # increase the view box padding, since...
