@@ -12,13 +12,16 @@ domains = [
 # initilize side view class
 side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
 top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
+print("Initilized preview classes")
 
 # create ui widget
-side_view_ui_widget = side_view.ui(150)
+side_view_ui_widget = side_view.ui(100)
 top_view_ui_widget = top_view.ui()
+print("Created UI widgets/preview data")
 
 # display the widgets side-by-side
 app = QApplication(sys.argv)
+print("Created app")
 
 window = QWidget()  # set up window as a widget
 window.setWindowTitle("DNA Visualizer")

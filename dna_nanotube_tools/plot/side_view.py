@@ -2,18 +2,28 @@ from typing import List, Tuple, NamedTuple
 from collections import namedtuple
 from dna_nanotube_tools.helpers import exec_on_innermost
 import pyqtgraph as pg
+from functools import cache
 
 # datatype to store strand data in
-StrandsContainer = lambda: namedtuple("StrandData", "up_strand down_strand")(list(), list())
+# (this is a function that returns a template whenever called)
+StrandsContainer = lambda: namedtuple("StrandData", "up_strand down_strand")(
+    list(), list()
+)
 # the actual type (for type annotations)
-StrandsContainerType = NamedTuple("StrandData", [("up_strand", list), ("down_strand", list)])
+StrandsContainerType: NamedTuple = NamedTuple(
+    "StrandData", [("up_strand", list), ("down_strand", list)]
+)
 
 # datatype to store multiple domains' strand data in
-DomainsContainer = lambda domain_count: tuple(StrandsContainer() for i in range(domain_count))
+# (this is a function that returns a DomainsContainer object whenever called)
+DomainsContainer = lambda domain_count: tuple(
+    StrandsContainer() for i in range(domain_count)
+)
 # the actual type (for type annotations)
-DomainsContainerType = Tuple[StrandsContainerType]
+DomainsContainerType: Tuple[StrandsContainerType, ...] = Tuple[StrandsContainerType]
 
-class side_view():
+
+class side_view:
     """
     Generate data needed for a side view graph of helicies.
 
@@ -110,6 +120,7 @@ class side_view():
 
         return point_angles
 
+    @cache
     def x_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate x cords.
@@ -120,8 +131,8 @@ class side_view():
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
-        x_coords: DomainsContainerType = (
-            DomainsContainer(self.domain_count)
+        x_coords: DomainsContainerType = DomainsContainer(
+            self.domain_count
         )  # where to store the output/what to return
         point_angles: DomainsContainerType = self.point_angles(
             count
@@ -162,6 +173,7 @@ class side_view():
         exec_on_innermost(x_coords, lambda coord: round(coord, round_to))
         return x_coords
 
+    @cache
     def z_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
         """
         Generate z cords.
@@ -277,8 +289,10 @@ class side_view():
         )  # create main plotting window
         plotted_window.setWindowTitle("Side View of DNA")  # set the window's title
         plotted_window.setBackground("w")  # make the background white
-
         main_plot: pg.plot = plotted_window.addPlot()
+
+        # we can calculate the range at the end of generation; we don't need to continiously recalculate the range
+        main_plot.disableAutoRange()
 
         for domain_index in range(self.domain_count):
             if domain_index % 2:  # if the domain index is an even integer
@@ -312,5 +326,7 @@ class side_view():
                     pxMode=True,  # means that symbol size is in px
                     symbolPen=color,  # set color of pen to current color
                 )
+
+        main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
 
         return plotted_window
