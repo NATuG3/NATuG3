@@ -72,13 +72,12 @@ class side_view:
         )
         self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
-    def point_angles(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
+    def point_angles(self, count: int, NEMid=False) -> DomainsContainerType:
         """
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
 
         Args:
             count (int): Number of interbase/NEMid (point) angles to generate.
-            round_to (int): Decimal place to round output to.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
@@ -114,19 +113,15 @@ class side_view:
             exec_on_innermost(
                 point_angles, lambda point_angle: (point_angle - self.base_height / 2)
             )
-        exec_on_innermost(
-            point_angles, lambda point_angle: round(point_angle, round_to)
-        )
 
         return point_angles
 
-    def x_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
+    def x_coords(self, count: int, NEMid=False) -> DomainsContainerType:
         """
         Generate x cords.
 
         Args:
             count (int): Number of x cords to generate.
-            round_to (int): Decimal place to round output to.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
@@ -170,16 +165,14 @@ class side_view:
                     # store the new x_coord in the container object and continue
                     x_coords[domain_index][strand_direction].append(x_coord)
 
-        exec_on_innermost(x_coords, lambda coord: round(coord, round_to))
         return x_coords
 
-    def z_coords(self, count: int, round_to=4, NEMid=False) -> DomainsContainerType:
+    def z_coords(self, count: int, NEMid=False) -> DomainsContainerType:
         """
         Generate z cords.
 
         Args:
             count (int): Number of z cords to generate. Must be > 21 if generating for multiple domains.
-            round_to (int): Decimal place to round output to.
             NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
@@ -274,7 +267,6 @@ class side_view:
 
         if NEMid:
             exec_on_innermost(z_coords, lambda cord: (cord - (self.base_height / 2)))
-        exec_on_innermost(z_coords, lambda coord: round(coord, round_to))
         return z_coords
 
     def ui(self, count: int) -> pg.GraphicsLayoutWidget:
