@@ -21,9 +21,5 @@ domains = [
 
 # initilize side view class
 side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
-side_view.data = side_view.compute(21)[0]
-pprint(side_view.data)
-
-top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
-top_view.data = top_view.compute()
-pprint(top_view.data)
+data = side_view.compute(21)[0]
+pprint(data)

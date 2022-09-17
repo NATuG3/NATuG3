@@ -5,8 +5,20 @@ import sys
 # define domains to generate sideview for
 interjunction_multiples = (7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0)
 domains = [
-    dna_nanotube_tools.domain(interjunction_multiple, 0)
-    for interjunction_multiple in interjunction_multiples
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
+    dna_nanotube_tools.domain(9, 0),
 ]
 
 # initilize side view class

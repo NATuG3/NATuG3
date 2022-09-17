@@ -1,3 +1,5 @@
+from collections import namedtuple
+from dataclasses import dataclass
 import math
 from typing import List
 import pyqtgraph as pg
@@ -29,22 +31,33 @@ class top_view:
             characteristic_angle (float, optional): Characteristic angle.
             strand_switch_angle (float, optional): Strand switch angle.
         """
-        domain_count = len(domains)  # number of domains inputted
-        self.domain_distance = domain_distance  # store domain distance setting
-        self.domains = domains  # store the inputted domains
+        self.domains = domains
+        self.domain_count = len(domains)
+        self.domain_distance = domain_distance
+        self.computed = False  # has compute() been called?
+
+        self._characteristic_angle = characteristic_angle
+        self._strand_switch_angle = strand_switch_angle
+
+    def compute(self):
+        """
+        Compute helices' top-view graph data
+        """
 
         self.angle_deltas: List[float] = [0.0]  # list to store angle deltas in
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
 
-        for counter in range(domain_count):
+        for counter in range(self.domain_count):
             # locate strand switch angle for the previous domain.
             strand_switch_angle: float = (
-                domains[counter - 1].switch_angle_multiple * strand_switch_angle
+                self.domains[counter - 1].switch_angle_multiple
+                * self._strand_switch_angle
             )
             # locate interior angle for the previous domain.
             interjunction_angle: float = (
-                domains[counter - 1].interjunction_multiple * characteristic_angle
+                self.domains[counter - 1].interjunction_multiple
+                * self._characteristic_angle
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
@@ -61,13 +74,16 @@ class top_view:
 
             # append the u cord of the domain to "self.u_coords"
             self.u_coords.append(
-                self.u_coords[-1] + domain_distance * math.cos(angle_delta)
+                self.u_coords[-1] + self.domain_distance * math.cos(angle_delta)
             )
 
             # append the v cord of the domain to "self.v_coords"
             self.v_coords.append(
-                self.v_coords[-1] + domain_distance * math.sin(angle_delta)
+                self.v_coords[-1] + self.domain_distance * math.sin(angle_delta)
             )
+
+        self.computed = True
+        return self
 
     def ui(self) -> pg.GraphicsLayoutWidget:
         """
@@ -81,7 +97,7 @@ class top_view:
 
         main_plot = plotted_window.addPlot()
 
-        plotted = main_plot.plot(
+        main_plot.plot(
             self.u_coords,
             self.v_coords,
             title="Top View of DNA",
@@ -100,3 +116,16 @@ class top_view:
         plotted_view_box.setAspectLocked(lock=True, ratio=1)
 
         return plotted_window
+
+    def __repr__(self) -> str:
+        round_to = 3
+        if not self.computed:
+            return "top_view(uncomputed top_view object)"
+        else:
+            prettified_coords = list(
+                zip(
+                    [round(coord, round_to) for coord in self.u_coords],
+                    [round(coord, round_to) for coord in self.v_coords],
+                )
+            )
+            return f"top_view(coords={prettified_coords}, angle_deltas={[round(delta, round_to) for delta in self.angle_deltas]}"

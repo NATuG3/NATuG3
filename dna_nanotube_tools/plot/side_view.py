@@ -1,25 +1,37 @@
-from typing import List, Tuple, NamedTuple
-from collections import namedtuple
-from dna_nanotube_tools.helpers import exec_on_innermost
+from code import interact
+from dataclasses import dataclass
+from functools import lru_cache
+from turtle import down
+from types import FunctionType
+from typing import List, Tuple, Type
+from collections import deque
 import pyqtgraph as pg
-
-# datatype to store strand data in
-# (this is a function that returns a template whenever called)
-StrandsContainer = lambda: namedtuple("StrandData", "up_strand down_strand")(
-    list(), list()
-)
-# the actual type (for type annotations)
-StrandsContainerType: NamedTuple = NamedTuple(
-    "StrandData", [("up_strand", list), ("down_strand", list)]
-)
 
 # datatype to store multiple domains' strand data in
 # (this is a function that returns a DomainsContainer object whenever called)
-DomainsContainer = lambda domain_count: tuple(
-    StrandsContainer() for i in range(domain_count)
+DomainsContainerType: Type = List[Tuple[deque, deque]]
+DomainsContainer: FunctionType = lambda domain_count: tuple(
+    (deque(), deque()) for i in range(domain_count)
 )
-# the actual type (for type annotations)
-DomainsContainerType: Tuple[StrandsContainerType, ...] = Tuple[StrandsContainerType]
+
+
+@dataclass
+class NEMid:
+    """
+    Dataclass for NEMid storage.
+    """
+
+    x_coord: float
+    z_coord: float
+    angle: float
+    is_junction: bool = False
+
+    def __repr__(self) -> str:
+        round_to = 3
+        return f"NEMid(location=({round(self.x_coord, round_to)}, {round(self.z_coord, round_to)}), angle={round(self.angle, round_to)}°, isJunction={self.is_junction})"
+
+    def coords(self) -> tuple:
+        return (self.x_coord, self.z_coord)
 
 
 class side_view:
@@ -72,13 +84,41 @@ class side_view:
         )
         self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
-    def point_angles(self, count: int, NEMid=False) -> DomainsContainerType:
+    def compute(self, count: int) -> DomainsContainerType:
+        """
+        Compute data for count# of points.
+
+        Args:
+            count (int): Number of points to compute data for.
+
+        Returns:
+            DomainsContainerType: A domains container of all points.
+        """
+
+        points = DomainsContainer(self.domain_count)
+        for domain_index in range(self.domain_count):
+            for strand_direction in range(2):
+                for i in range(count):
+                    # generate/retreive cached
+                    angle = self._point_angles(count)[domain_index][strand_direction][i]
+                    x_coord = self._x_coords(count)[domain_index][strand_direction][i]
+                    z_coord = self._z_coords(count)[domain_index][strand_direction][i]
+
+                    point = NEMid(
+                        x_coord,
+                        z_coord,
+                        angle,
+                    )
+                    points[domain_index][strand_direction].append(point)
+        return points
+
+    @lru_cache(maxsize=1)
+    def _point_angles(self, count: int) -> DomainsContainerType:
         """
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
 
         Args:
             count (int): Number of interbase/NEMid (point) angles to generate.
-            NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
@@ -86,7 +126,7 @@ class side_view:
 
         # set initial point angle values
         for domain_index in range(self.domain_count):
-            point_angles[domain_index][0].append(0)
+            point_angles[domain_index][0].append(0.0)
             point_angles[domain_index][1].append(0 - self.strand_switch_angle)
 
         # generate count# of point angles on a domain-by-domain basis
@@ -109,27 +149,22 @@ class side_view:
                     previous_up_strand_point_angle - self.strand_switch_angle
                 )
 
-        if NEMid:
-            exec_on_innermost(
-                point_angles, lambda point_angle: (point_angle - self.base_height / 2)
-            )
-
         return point_angles
 
-    def x_coords(self, count: int, NEMid=False) -> DomainsContainerType:
+    @lru_cache(maxsize=1)
+    def _x_coords(self, count: int) -> DomainsContainerType:
         """
         Generate x cords.
 
         Args:
             count (int): Number of x cords to generate.
-            NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """
         x_coords: DomainsContainerType = DomainsContainer(
             self.domain_count
         )  # where to store the output/what to return
-        point_angles: DomainsContainerType = self.point_angles(
+        point_angles: DomainsContainerType = self._point_angles(
             count
         )  # point angles are needed to convert to x coords
 
@@ -167,20 +202,20 @@ class side_view:
 
         return x_coords
 
-    def z_coords(self, count: int, NEMid=False) -> DomainsContainerType:
+    @lru_cache(maxsize=1)
+    def _z_coords(self, count: int) -> DomainsContainerType:
         """
         Generate z cords.
 
         Args:
             count (int): Number of z cords to generate. Must be > 21 if generating for multiple domains.
-            NEMid (bool, optional): Generate for NEMids instead of bases. Defaults to False (generate for bases).
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         Raises:
             Exception: Not enough domains. Count must be > 21 when multiple domains are passed.
         """
         # if there are multiple domains ensure "count" is over 21, because we would not be able to get a full
-        # sample of the x coords for finding the best places to place NEMids/bases
+        # sample of the x coords for finding the best places to place bases
         if self.domain_count > 0:
             if count < 21:
                 raise Exception(
@@ -196,7 +231,7 @@ class side_view:
         z_coords: DomainsContainerType = DomainsContainer(self.domain_count)
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
-        z_coords[0][0].append(0)
+        z_coords[0][0].append(0.0)
         z_coords[0][1].append(z_coords[0][0][0] - self.strand_switch_distance)
 
         # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first one first
@@ -222,9 +257,9 @@ class side_view:
 
             # lets find the maxmimum x cord for the previous domain
             # that will be the point where, when placed adjacently to the right in the proper place
-            # there will be an overlap of NEMids/bases
-            maximum_x_coord_index: DomainsContainerType = self.x_coords(
-                21, NEMid=NEMid
+            # there will be an overlap of bases
+            maximum_x_coord_index: DomainsContainerType = self._x_coords(
+                21
             )  # 21 will get all the possible values of a given x cord
             # current structure is [[<up_strand>, <down_strand>], ...]
             # since we are aligning the new domain next to the previous, we index by <previous_domain_index>
@@ -265,8 +300,6 @@ class side_view:
                     z_coords[domain_index][0][i] - self.strand_switch_distance
                 )
 
-        if NEMid:
-            exec_on_innermost(z_coords, lambda cord: (cord - (self.base_height / 2)))
         return z_coords
 
     def ui(self, count: int) -> pg.GraphicsLayoutWidget:
@@ -287,8 +320,8 @@ class side_view:
         main_plot.disableAutoRange()
 
         # generate the coords
-        x_coords = self.x_coords(count)
-        z_coords = self.z_coords(count)
+        x_coords = self._x_coords(count)
+        z_coords = self._z_coords(count)
 
         for domain_index in range(self.domain_count):
             if domain_index % 2:  # if the domain index is an even integer
