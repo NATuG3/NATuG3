@@ -28,7 +28,7 @@ class NEMid:
 
     def __repr__(self) -> str:
         round_to = 3
-        return f"NEMid(location=({round(self.x_coord, round_to)}, {round(self.z_coord, round_to)}), angle={round(self.angle, round_to)}°, isJunction={self.is_junction})"
+        return f"NEMid(location=({round(self.x_coord, round_to)}, {round(self.z_coord, round_to)}), angle={round(self.angle, round_to)}°, is_junction={self.is_junction})"
 
     def coords(self) -> tuple:
         return (self.x_coord, self.z_coord)
@@ -259,8 +259,8 @@ class side_view:
             # that will be the point where, when placed adjacently to the right in the proper place
             # there will be an overlap of bases
             maximum_x_coord_index: DomainsContainerType = self._x_coords(
-                21
-            )  # 21 will get all the possible values of a given x cord
+                count
+            )  # 21 will get all the possible values of a given x cord, but we will generate the same amount of x_coords 
             # current structure is [[<up_strand>, <down_strand>], ...]
             # since we are aligning the new domain next to the previous, we index by <previous_domain_index>
             maximum_x_coord_index: List[float] = maximum_x_coord_index[
