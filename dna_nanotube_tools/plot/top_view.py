@@ -89,6 +89,8 @@ class top_view:
         """
         Generate PyQt widget for top view.
         """
+        self.compute()
+
         plotted_window: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
         )  # create main plotting window
