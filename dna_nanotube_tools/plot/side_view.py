@@ -1,24 +1,24 @@
-from code import interact
+from copy import deepcopy
 from dataclasses import dataclass
 from functools import lru_cache
-from turtle import down
 from types import FunctionType
-from typing import List, Tuple, Type
+from typing import Deque, List, Tuple, Type, Literal
 from collections import deque
 import pyqtgraph as pg
 
-# datatype to store multiple domains' strand data in
 # (this is a function that returns a DomainsContainer object whenever called)
-DomainsContainerType: Type = List[Tuple[deque, deque]]
 DomainsContainer: FunctionType = lambda domain_count: tuple(
     (deque(), deque()) for i in range(domain_count)
 )
 
+# domains container is a tuple of tuples with two deques (up and down strand) for each domain
+# (below is the actual datatype)
+DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 
 @dataclass
 class NEMid:
     """
-    Dataclass for NEMid storage.
+    Dataclass for a NEMid.
     """
 
     x_coord: float
@@ -27,12 +27,18 @@ class NEMid:
     is_junction: bool = False
 
     def __repr__(self) -> str:
+        """Repr for datatype."""
         round_to = 3
-        return f"NEMid(location=({round(self.x_coord, round_to)}, {round(self.z_coord, round_to)}), angle={round(self.angle, round_to)}°, is_junction={self.is_junction})"
+        output = []
+        output.append(f"position=({round(self.x_coord, round_to)}, {round(self.z_coord, round_to)})")
+        output.append(f"angle={round(self.angle, round_to)}°")
+        output.append(f"is_junction={self.is_junction}")
+        output = ", ".join(output)
+
+        return f"NEMid({output})"
 
     def coords(self) -> tuple:
         return (self.x_coord, self.z_coord)
-
 
 class side_view:
     """
@@ -43,7 +49,7 @@ class side_view:
         base_height (float): Height between two bases (in Angstroms).
         interpoint_angle (int): The angle about the central axis going counter-clockwise from the line of tangency.
         strand_switch_distance (float): Strand strand_switch distance (in Angstroms).
-        strand_switch_angle (float): The angle about the helix axis between two NEMids on different helices of a double helix.
+        strand_switch_angle (float): The angle about the helix axis between two nucleosides on different helices of a double helix.
         characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
     """
 
@@ -63,13 +69,14 @@ class side_view:
             interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
             base_height (float): Height between two bases (in Angstroms).
             strand_switch_distance (float): Strand switch distance (in Angstroms).
-            strand_switch_angle (float): Angle about the helix axis between two NEMids on different helices of a double helix.
+            strand_switch_angle (float): Angle about the helix axis between two nucleosides on different helices of a double helix.
             interpoint_angle_multiple (int, optional): Angle that one base makes about the helix axis, measured in multiples of characteristic angle.
             characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
 
         Raises:
             ValueError: Length of interior_angles does not match that of strand_switch_angles.
         """
+
         self.domain_count = len(domains)
 
         self.characteristic_angle = characteristic_angle
@@ -118,7 +125,7 @@ class side_view:
         Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
 
         Args:
-            count (int): Number of interbase/NEMid (point) angles to generate.
+            count (int): Number of nucleoside angles to generate.
         Returns:
             tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
         """

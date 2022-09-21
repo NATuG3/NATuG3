@@ -121,13 +121,16 @@ class top_view:
 
     def __repr__(self) -> str:
         round_to = 3
-        if not self.computed:
-            return "top_view(uncomputed top_view object)"
-        else:
-            prettified_coords = list(
-                zip(
-                    [round(coord, round_to) for coord in self.u_coords],
-                    [round(coord, round_to) for coord in self.v_coords],
+        match self.computed:
+            case False:
+                return "top_view(uncomputed top_view object)"
+            case True:
+                prettified_coords = list(
+                    zip(
+                        [round(coord, round_to) for coord in self.u_coords],
+                        [round(coord, round_to) for coord in self.v_coords],
+                    )
                 )
-            )
-            return f"top_view(coords={prettified_coords}, angle_deltas={[round(delta, round_to) for delta in self.angle_deltas]}"
+                return f"top_view(coords={prettified_coords}, angle_deltas={[round(delta, round_to) for delta in self.angle_deltas]}"
+            case _:
+                return "top_view(uninitilized)"
