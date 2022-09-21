@@ -1,56 +1,21 @@
-from copy import deepcopy
-from dataclasses import dataclass
+from dna_nanotube_tools.datatypes import base
 from functools import lru_cache
 from types import FunctionType
-from typing import Deque, List, Tuple, Type, Literal
+from typing import Deque, List, Tuple, Type
 from collections import deque
 import pyqtgraph as pg
 
-# (this is a function that returns a DomainsContainer object whenever called)
+# container to store data for domains in
 DomainsContainer: FunctionType = lambda domain_count: tuple(
     (deque(), deque()) for i in range(domain_count)
 )
-
-# domains container is a tuple of tuples with two deques (up and down strand) for each domain
-# (below is the actual datatype)
+# type annotation for the aforementioned container
 DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 
-@dataclass
-class NEMid:
-    """
-    Dataclass for a NEMid.
-    """
-
-    x_coord: float
-    z_coord: float
-    angle: float
-    is_junction: bool = False
-
-    def __repr__(self) -> str:
-        """Repr for datatype."""
-        round_to = 3
-        output = []
-        output.append(f"position=({round(self.x_coord, round_to)}, {round(self.z_coord, round_to)})")
-        output.append(f"angle={round(self.angle, round_to)}°")
-        output.append(f"is_junction={self.is_junction}")
-        output = ", ".join(output)
-
-        return f"NEMid({output})"
-
-    def coords(self) -> tuple:
-        return (self.x_coord, self.z_coord)
 
 class side_view:
     """
     Generate data needed for a side view graph of helicies.
-
-    Attributes:
-        interior_angles (List[float]): Angle between bases from a side view.
-        base_height (float): Height between two bases (in Angstroms).
-        interpoint_angle (int): The angle about the central axis going counter-clockwise from the line of tangency.
-        strand_switch_distance (float): Strand strand_switch distance (in Angstroms).
-        strand_switch_angle (float): The angle about the helix axis between two nucleosides on different helices of a double helix.
-        characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
     """
 
     def __init__(
@@ -111,10 +76,11 @@ class side_view:
                     x_coord = self._x_coords(count)[domain_index][strand_direction][i]
                     z_coord = self._z_coords(count)[domain_index][strand_direction][i]
 
-                    point = NEMid(
+                    point = base(
                         x_coord,
                         z_coord,
                         angle,
+                        None
                     )
                     points[domain_index][strand_direction].append(point)
         return points
