@@ -1,4 +1,4 @@
-import dna_nanotube_tools
+import dna_nanotube_tools.plot
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 import sys
 
@@ -26,7 +26,7 @@ side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
 top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 
 # create ui widget
-side_view_ui_widget = side_view.ui(300)
+side_view_ui_widget = side_view.ui(150)
 top_view_ui_widget = top_view.ui()
 
 # display the widgets side-by-side

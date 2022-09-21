@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Literal, Tuple
 
+
 @dataclass
 class domain:
     """
@@ -13,6 +14,7 @@ class domain:
 
     interjunction_multiple: int
     switch_angle_multiple: int
+
 
 @dataclass
 class NEMid:
@@ -35,12 +37,8 @@ class NEMid:
 
     def to_base(self, base_height: float, base: Literal["a", "t", "g", "c", "u"]):
         """Convert the NEMid to a base"""
-        return base(
-            self.x_coord,
-            self.z_coord-(base_height/2),
-            self.angle,
-            base
-        )
+        return base(self.x_coord, self.z_coord - (base_height / 2), self.angle, base)
+
 
 @dataclass
 class base:
@@ -70,14 +68,14 @@ class base:
             "a": "u",
             "c": "g",
             "g": "c",
-        } 
+        }
         return complements[self.nucleotide]
 
-    def to_NEMid(self, base_height:float, is_junction=False):
+    def to_NEMid(self, base_height: float, is_junction=False):
         """Convert the base to a NEMid"""
         return NEMid(
             self.x_coord,
-            self.z_coord - (base_height/2),
+            self.z_coord - (base_height / 2),
             self.angle,
-            is_junction=is_junction
+            is_junction=is_junction,
         )

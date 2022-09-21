@@ -76,12 +76,7 @@ class side_view:
                     x_coord = self._x_coords(count)[domain_index][strand_direction][i]
                     z_coord = self._z_coords(count)[domain_index][strand_direction][i]
 
-                    point = base(
-                        x_coord,
-                        z_coord,
-                        angle,
-                        None
-                    )
+                    point = base(x_coord, z_coord, angle, None)
                     points[domain_index][strand_direction].append(point)
         return points
 
@@ -233,7 +228,7 @@ class side_view:
             # there will be an overlap of bases
             maximum_x_coord_index: DomainsContainerType = self._x_coords(
                 count
-            )  # 21 will get all the possible values of a given x cord, but we will generate the same amount of x_coords 
+            )  # 21 will get all the possible values of a given x cord, but we will generate the same amount of x_coords
             # current structure is [[<up_strand>, <down_strand>], ...]
             # since we are aligning the new domain next to the previous, we index by <previous_domain_index>
             maximum_x_coord_index: List[float] = maximum_x_coord_index[
