@@ -26,6 +26,9 @@ class NEMid:
     # NEMid Specific Attributes
     is_junction: bool = False
 
+    def __repr__(self) -> str:
+        return f"NEMid(pos={self.position()}), angle={self.angle}°, is_junction={str(self.is_junction).lower()}"
+
     def position(self, round_to=3) -> Tuple[float, float]:
         """Return coords of the NEMid as a tuple of form (x, z)"""
         return (round(self.x_coord, round_to), round(self.z_coord, round_to))
@@ -49,7 +52,10 @@ class base:
     angle: float
 
     # Base Specific Attributes
-    nucleotide: Literal["a", "t", "g", "c", "u"]
+    nucleotide: Literal["a", "t", "g", "c", "u", None]
+
+    def __repr__(self) -> str:
+        return f"base(pos={self.position()}), angle={self.angle}°, nucleotide={str(self.nucleotide).replace('None','unset')}"
 
     def position(self, round_to=3) -> Tuple[float, float]:
         """Return coords of the base as a tuple of form (x, z)"""
@@ -57,7 +63,14 @@ class base:
 
     def complement(self) -> str:
         "Return the complement of this base"
-        global complements
+        complements = {
+            "a": "t",
+            "t": "a",
+            "u": "a",
+            "a": "u",
+            "c": "g",
+            "g": "c",
+        } 
         return complements[self.nucleotide]
 
     def to_NEMid(self, base_height:float, is_junction=False):
