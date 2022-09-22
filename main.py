@@ -1,45 +1,69 @@
-import dna_nanotube_tools.plot
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 import sys
+from PyQt6.QtWidgets import (
+    QApplication,
+    QWidget,
+    QMainWindow,
+    QHBoxLayout,
+    QVBoxLayout,
+    QLabel,
+)
+import dna_nanotube_tools.plot
 
-# define domains to generate sideview for
-interjunction_multiples = (7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0)
-domains = [
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-]
+class mainWindow(QMainWindow):
+    def __init__(self):
+        # this is an inherented class of QMainWindow
+        # so we must initialize the parent qt widget
+        super().__init__()
+        # this activates the parent's __init__()
 
-# initilize side view class
-side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
-top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
+        # configure the main window's general settings
+        # initilize a main widget/layout
+        self.central_widget = (
+            QWidget()
+        )  # this is the main widget, which is just a layout
+        self.central_layout = (
+            QVBoxLayout()
+        )  # this is the main layout, which the central widget is a frame for
 
-# create ui widget
-side_view_ui_widget = side_view.ui(150)
-top_view_ui_widget = top_view.ui()
+        # utilize inhereted methods to set up the main window
+        self.setWindowTitle("DNA Constructor")
+        self.setCentralWidget(self.central_widget)
+        self.centralWidget().setLayout(
+            self.central_layout
+        )  # this is an inhereted method
 
-# display the widgets side-by-side
-app = QApplication(sys.argv)
+        # add dna previews on top
+        self.central_layout.addWidget(self._generate_dna_previews())
+        # configuration panel on bottom
+        self.central_layout.addWidget(QLabel("Placeholder for configuration panel"))
 
-window = QWidget()  # set up window as a widget
-window.setWindowTitle("DNA Visualizer")
 
-layout = QHBoxLayout()  # initilize side-by-side layout
-layout.addWidget(side_view_ui_widget)  # add the side view to the left
-layout.addWidget(top_view_ui_widget)  # add the top view to the right
+    def _generate_dna_previews(self) -> QWidget:
+        """Generate a QWidget of the two dna previews side by side."""
+        # define domains to generate sideview for
+        domains = [dna_nanotube_tools.domain(9, 0)] * 14
 
-window.setLayout(layout)  # apply the side-by-side layout to the window
-window.show()  # show the duel-widget window
+        # initilize side view class
+        side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
+        top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 
-sys.exit(app.exec_())  # run app's main event loop
+        # the dna previews will be a side by side array of widgets
+        dna_previews = QHBoxLayout()
+        dna_previews.addWidget(side_view.ui(150))
+        dna_previews.addWidget(top_view.ui())
+
+        # convert the above dna_previews layout into an actual widget
+        widgetized_output = QWidget()
+        widgetized_output.setLayout(dna_previews)
+        widgetized_output.show()
+
+        # return the output as a widget
+        return widgetized_output
+
+
+# this ensures that the program is being run directly (since this is indeeed the main file)
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = mainWindow()
+    window.show()
+    sys.exit(app.exec())

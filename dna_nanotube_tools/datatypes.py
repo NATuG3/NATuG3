@@ -35,6 +35,7 @@ class NEMid:
         """Return coords of the NEMid as a tuple of form (x, z)"""
         return (round(self.x_coord, round_to), round(self.z_coord, round_to))
 
+
 @dataclass
 class nucleoside:
     """Dataclass for a nucleoside."""
