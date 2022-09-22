@@ -8,11 +8,11 @@ class domain:
     Domain storage object.
 
     Attributes:
-        interjunction_multiple (int): The angle between two junctions on a double helix. Integer multiple of characteristic angle.
+        interior_angle_multiple (int): The angle between domain #i/#i+1's line of tangency and domain #i+1/i+2's line of tangency
         switch_angle_multiple (int): Strand switch angle per domain transition. Integer multiple of strand switch angle.
     """
 
-    interjunction_multiple: int
+    interior_angle_multiple: int
     switch_angle_multiple: int
 
 
@@ -29,20 +29,15 @@ class NEMid:
     is_junction: bool = False
 
     def __repr__(self) -> str:
-        return f"NEMid(pos={self.position()}), angle={self.angle}°, is_junction={str(self.is_junction).lower()}"
+        return f"NEMid(pos={self.position()}), angle={round(self.angle, 3)}°, is_junction={str(self.is_junction).lower()}"
 
     def position(self, round_to=3) -> Tuple[float, float]:
         """Return coords of the NEMid as a tuple of form (x, z)"""
         return (round(self.x_coord, round_to), round(self.z_coord, round_to))
 
-    def to_base(self, base_height: float, base: Literal["a", "t", "g", "c", "u"]):
-        """Convert the NEMid to a base"""
-        return base(self.x_coord, self.z_coord - (base_height / 2), self.angle, base)
-
-
 @dataclass
-class base:
-    """Dataclass for a base."""
+class nucleoside:
+    """Dataclass for a nucleoside."""
 
     # Generic Attributes
     x_coord: float
@@ -50,32 +45,23 @@ class base:
     angle: float
 
     # Base Specific Attributes
-    nucleotide: Literal["a", "t", "g", "c", "u", None]
+    base: Literal["A", "T", "G", "C", "U", None]
 
     def __repr__(self) -> str:
-        return f"base(pos={self.position()}), angle={self.angle}°, nucleotide={str(self.nucleotide).replace('None','unset')}"
+        return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None','unset')}"
 
     def position(self, round_to=3) -> Tuple[float, float]:
         """Return coords of the base as a tuple of form (x, z)"""
         return (round(self.x_coord, round_to), round(self.z_coord, round_to))
 
-    def complement(self) -> str:
+    def complementary_base(self) -> str:
         "Return the complement of this base"
         complements = {
-            "a": "t",
-            "t": "a",
-            "u": "a",
-            "a": "u",
-            "c": "g",
-            "g": "c",
+            "A": "T",
+            "T": "A",
+            "U": "A",
+            "A": "U",
+            "C": "G",
+            "G": "C",
         }
-        return complements[self.nucleotide]
-
-    def to_NEMid(self, base_height: float, is_junction=False):
-        """Convert the base to a NEMid"""
-        return NEMid(
-            self.x_coord,
-            self.z_coord - (base_height / 2),
-            self.angle,
-            is_junction=is_junction,
-        )
+        return complements[self.nucleoside]

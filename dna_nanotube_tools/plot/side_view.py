@@ -1,9 +1,10 @@
-from dna_nanotube_tools.datatypes import base
 from functools import lru_cache
 from types import FunctionType
 from typing import Deque, List, Tuple, Type
 from collections import deque
 import pyqtgraph as pg
+from dna_nanotube_tools.datatypes import domain, nucleoside, NEMid
+from dna_nanotube_tools.helpers import exec_on_innermost
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda domain_count: tuple(
@@ -43,18 +44,13 @@ class side_view:
         """
 
         self.domain_count = len(domains)
+        self.domains = domains
 
         self.characteristic_angle = characteristic_angle
         self.strand_switch_angle = strand_switch_angle
         self.interpoint_angle = interpoint_angle_multiple * self.characteristic_angle
         self.base_height = base_height
         self.strand_switch_distance = strand_switch_distance
-
-        self.interior_angles = tuple(
-            domain.interjunction_multiple * self.characteristic_angle
-            for domain in domains
-        )
-        self.exterior_angles = tuple(360 - angle for angle in self.interior_angles)
 
     def compute(self, count: int) -> DomainsContainerType:
         """
@@ -76,84 +72,77 @@ class side_view:
                     x_coord = self._x_coords(count)[domain_index][strand_direction][i]
                     z_coord = self._z_coords(count)[domain_index][strand_direction][i]
 
-                    point = base(x_coord, z_coord, angle, None)
+                    point = NEMid(x_coord, z_coord, angle, None)
                     points[domain_index][strand_direction].append(point)
         return points
 
     @lru_cache(maxsize=1)
     def _point_angles(self, count: int) -> DomainsContainerType:
-        """
-        Generate angles made about the central axis going counter-clockwise from the line of tangency for all points.
-
-        Args:
-            count (int): Number of nucleoside angles to generate.
-        Returns:
-            tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
-        """
-        point_angles = DomainsContainer(self.domain_count)
-
-        # set initial point angle values
-        for domain_index in range(self.domain_count):
-            point_angles[domain_index][0].append(0.0)
-            point_angles[domain_index][1].append(0 - self.strand_switch_angle)
+        """Generate angles made about the central axis going counter-clockwise from the line of tangency."""
+        point_angles = DomainsContainer(self.domain_count) # container to store generated angles in
 
         # generate count# of point angles on a domain-by-domain basis
         # domain_index is the index of the current domain
         for domain_index in range(self.domain_count):
+            # one strand direction will be initially set to zero
+            # whereas the other will be set to zero - strand_switch_angle
+
+            # initially_zero_strand_direction alternates between 0 and 1 (up and down) for each domain
+            # so that down strands can line up with up strands at x = 1
+            initially_zero_strand_direction = domain_index % 2
+            # if initially_zero_strand_direction is 1 make this 0 if it is 0 make this 1
+            not_initially_zero_strand_direction = int(not bool(initially_zero_strand_direction))
+
+            # set initial point angle values
+            point_angles[domain_index][initially_zero_strand_direction].append(0.0)
+            point_angles[domain_index][not_initially_zero_strand_direction].append(0.0 - self.strand_switch_angle)
+
             for i in range(count):
-                # only previous up strand point angle is needed to calculate the next point angle for up and down strands
-                # [i] represents the previous one, since we are generating for the next one
-                previous_up_strand_point_angle = point_angles[domain_index][0][i]
 
                 # generate the next UP STRAND point angle
-                # "point_angles[domain_index][0]" = point angles -> current domain -> list of point angles for up strand
-                point_angles[domain_index][0].append(
-                    previous_up_strand_point_angle + self.interpoint_angle
+                # "point_angles[domain_index][0]" = 
+                # point angles -> current domain -> list of point angles for up strand -> previous one
+                point_angles[domain_index][initially_zero_strand_direction].append(
+                    point_angles[domain_index][initially_zero_strand_direction][i] + self.interpoint_angle
                 )
 
                 # generate the next DOWN STRAND point angle
-                # "point_angles[domain_index][1]" = point angles -> current domain -> list of point angles for down strand
-                point_angles[domain_index][1].append(
-                    previous_up_strand_point_angle - self.strand_switch_angle
+                # "point_angles[domain_index][0][i+1]" =
+                # point angles -> current domain -> list of point angles for up strand -> one we just computed
+                point_angles[domain_index][not_initially_zero_strand_direction].append(
+                    point_angles[domain_index][initially_zero_strand_direction][i+1] - self.strand_switch_angle
                 )
 
         return point_angles
 
     @lru_cache(maxsize=1)
     def _x_coords(self, count: int) -> DomainsContainerType:
-        """
-        Generate x cords.
-
-        Args:
-            count (int): Number of x cords to generate.
-        Returns:
-            tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
-        """
+        """Generate x cords."""
         x_coords: DomainsContainerType = DomainsContainer(
             self.domain_count
-        )  # where to store the output/what to return
+        )  # container to store generated x coords in
         point_angles: DomainsContainerType = self._point_angles(
             count
-        )  # point angles are needed to convert to x coords
+        )  # point angles are needed to generate x coords
 
         # generate count# of x coords on a domain-by-domain basis
         # domain_index is the index of the current domain
         for domain_index in range(self.domain_count):
+            # current exterior and interior angles
+            # note that "exterior_angle == 360 - interior_angle"
+            interior_angle: float = self.domains[domain_index].interior_angle_multiple * self.characteristic_angle
+            exterior_angle: float = 360 - interior_angle
+
             for i in range(count):
                 for strand_direction in range(
                     2
                 ):  # repeat same steps for up and down strand
                     # find the current point_angle and modulo it by 360
                     # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
-                    # they do not reset at 360, however, so we modulo the current point angle here
+                    # they reset at 360, so we modulo the current point angle here
                     point_angle: float = (
                         point_angles[domain_index][strand_direction][i] % 360
                     )
-
-                    # current exterior and interior angles ("tridomain" angles)
-                    # note that "exterior_angle == 360 - interior_angle"
-                    interior_angle: float = self.interior_angles[domain_index]
-                    exterior_angle: float = self.exterior_angles[domain_index]
 
                     if point_angle < exterior_angle:
                         x_coord = point_angle / exterior_angle
@@ -171,17 +160,8 @@ class side_view:
         return x_coords
 
     @lru_cache(maxsize=1)
-    def _z_coords(self, count: int) -> DomainsContainerType:
-        """
-        Generate z cords.
-
-        Args:
-            count (int): Number of z cords to generate. Must be > 21 if generating for multiple domains.
-        Returns:
-            tuple: ([domain_0_up_strand], [domain_0_down_strand]), ([domain_1_up_strand], [domain_1_down_strand]), ...).
-        Raises:
-            Exception: Not enough domains. Count must be > 21 when multiple domains are passed.
-        """
+    def _z_coords(self, count: int, NEMid=True) -> DomainsContainerType:
+        """Generate z cords."""
         # if there are multiple domains ensure "count" is over 21, because we would not be able to get a full
         # sample of the x coords for finding the best places to place bases
         if self.domain_count > 0:
@@ -200,22 +180,20 @@ class side_view:
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
         z_coords[0][0].append(0.0)
-        z_coords[0][1].append(z_coords[0][0][0] - self.strand_switch_distance)
+        z_coords[0][1].append(0.0 - self.strand_switch_distance)
 
         # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first one first
         # the first domain has its initial z cords (up and down strands) set to (arbitrary) static values, whereas other domains do not
         # for all domains except domain#0 the initial z cord will rely on a specific z cord of the previous
         # and so, we calculate the z coords of domain#0...
         for i in range(count):
-            # generate the next z_coord for the up strand...
-            # append the previous z_coord + the base_height
-            # "z_coords[0][0]" means "z_coords -> domain#0 -> up_strand -> (previous z_coord on the up strand of domain#0)"
+            # generate the next z_coord for the down strand...
+            # "z_coords[0][0][i] " means "z_coords -> domain#0 -> up_strand -> previous z_coord"
             z_coords[0][0].append(z_coords[0][0][i] + self.base_height)
 
-            # generate the next z_coord for the down strand...
-            # append the previous z_coord's up strand value, minus the strand switch distance
-            # "z_coords[0][0]" means "z_coords -> domain#0 -> down_strand -> (previous z_coord on the down strand of domain#0)"
-            z_coords[0][1].append(z_coords[0][0][i] - self.strand_switch_distance)
+            # generate the next z_coord for the up strand...
+            # "z_coords[0][1][i+1]" means "z_coords -> domain#0 -> up_strand -> z_coord we just computed
+            z_coords[0][1].append(z_coords[0][0][i+1] - self.strand_switch_distance)
 
         # now find and append the initial z_coord for each domain
         for domain_index in range(1, self.domain_count):
@@ -226,46 +204,38 @@ class side_view:
             # lets find the maxmimum x cord for the previous domain
             # that will be the point where, when placed adjacently to the right in the proper place
             # there will be an overlap of bases
-            maximum_x_coord_index: DomainsContainerType = self._x_coords(
+            initial_z_coord: DomainsContainerType = self._x_coords(
                 count
-            )  # 21 will get all the possible values of a given x cord, but we will generate the same amount of x_coords
-            # current structure is [[<up_strand>, <down_strand>], ...]
-            # since we are aligning the new domain next to the previous, we index by <previous_domain_index>
-            maximum_x_coord_index: List[float] = maximum_x_coord_index[
-                previous_domain_index
-            ][
-                0
-            ]  # we can sample the up strand
-
-            # obtain the index of the maximum x coord
-            maximum_x_coord_index: int = maximum_x_coord_index.index(
-                max(maximum_x_coord_index)
-            )
+            )[previous_domain_index][0]
+            # initial_z_coord = previous domains's up strand's rightmost x coord
+            
+            initial_z_coord: int = initial_z_coord.index(max(initial_z_coord))
+            # obtain the index of the rightmost x coord on the strand
 
             # we are going to line up the next up strand so that its leftmost (first) point touches the previous domain's rightmost
             initial_z_coord: float = z_coords[previous_domain_index][0][
-                maximum_x_coord_index
+                initial_z_coord
             ]
 
             # append this new initial z cord to the actual list of z_coords
             z_coords[domain_index][1].append(initial_z_coord)
             z_coords[domain_index][0].append(
-                initial_z_coord + self.strand_switch_distance
+                initial_z_coord - self.strand_switch_distance
             )
 
             # step 2: actually calculate the z coords of this new domain
 
             for i in range(count):  # (domain 0 is already calculated)
                 # append the previous z_coord + the base_height
-                # "z_coords[i][0][i]" == "z_coords -> domain#i -> up_strand -> (previous z_coord on up strand of domain#domain_index)"
-                z_coords[domain_index][0].append(
-                    z_coords[domain_index][0][i] + self.base_height
+                # "z_coords[i][0][i]" == "z_coords -> domain#i -> up_strand -> previous one"
+                z_coords[domain_index][1].append(
+                    z_coords[domain_index][1][i] + self.base_height
                 )
 
                 # append the previous z_coord's up strand value, minus the strand switch distance
-                # "z_coords[i][0][i]" == "z_coords -> domain#i -> down_strand -> (previous z_coord on down strand of domain#domain_index)"
-                z_coords[domain_index][1].append(
-                    z_coords[domain_index][0][i] - self.strand_switch_distance
+                # "z_coords[i][0][i]" == "z_coords -> domain#i -> down_strand -> z_coord we just calculated"
+                z_coords[domain_index][0].append(
+                    z_coords[domain_index][1][i+1] - self.strand_switch_distance
                 )
 
         return z_coords

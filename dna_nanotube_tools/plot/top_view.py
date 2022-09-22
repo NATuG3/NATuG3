@@ -27,7 +27,7 @@ class top_view:
 
         Args:
             domains (List[dna_nanotube_tools]): List of domains.
-            domain_distance (float): Distance between any given two domain centers.
+            domain_distance (float): Distance between any given two domain centers (nanometers).
             characteristic_angle (float, optional): Characteristic angle.
             strand_switch_angle (float, optional): Strand switch angle.
         """
@@ -48,20 +48,20 @@ class top_view:
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
 
-        for counter in range(self.domain_count):
+        for domain_index in range(self.domain_count):
             # locate strand switch angle for the previous domain.
             strand_switch_angle: float = (
-                self.domains[counter - 1].switch_angle_multiple
+                self.domains[domain_index - 1].switch_angle_multiple
                 * self._strand_switch_angle
             )
             # locate interior angle for the previous domain.
-            interjunction_angle: float = (
-                self.domains[counter - 1].interjunction_multiple
+            interior_angle_multiple: float = (
+                self.domains[domain_index - 1].interior_angle_multiple
                 * self._characteristic_angle
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
-            interior_angle: float = interjunction_angle - strand_switch_angle
+            interior_angle: float = interior_angle_multiple - strand_switch_angle
 
             # append the angle change to "self.angle_deltas"
             self.angle_deltas.append(self.angle_deltas[-1] + 180 - interior_angle)
