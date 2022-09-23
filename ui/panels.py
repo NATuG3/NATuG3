@@ -23,6 +23,5 @@ class dna_views(QWidget):
         dna_previews.addWidget(top_view.ui())
 
         # convert the above dna_previews layout into an actual widget
-        widgetized_output = QWidget()
         self.setLayout(dna_previews)
         self.show()
