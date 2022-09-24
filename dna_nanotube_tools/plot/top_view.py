@@ -1,7 +1,6 @@
 import math
 from typing import List
 import pyqtgraph as pg
-from PyQt6.QtWidgets import QHBoxLayout, QGroupBox
 
 class top_view:
     """
@@ -112,18 +111,9 @@ class top_view:
         plotted_view_box.setDefaultPadding(padding=0.18)
 
         # prevent user from interacting with the graph
-        plotted_view_box.setMouseEnabled(x=False, y=False)
         plotted_view_box.setAspectLocked(lock=True, ratio=1)
 
-        class widget(QGroupBox):
-            def __init__(self):
-                super().__init__()
-                self.setLayout(QHBoxLayout())
-                self.layout().addWidget(plotted_window)
-                self.setTitle("Top View of Helicies")
-                self.setStatusTip("A plot of the top view of all domains")
-
-        return widget()
+        return plotted_window
 
     def __repr__(self) -> str:
         round_to = 3
