@@ -33,17 +33,19 @@ class main_window(QMainWindow):
         self.statusBar().setStyleSheet("background-color: rgb(220, 220, 220)")
 
     def _menu_bar(self):
-        menu_bar = QMenuBar()
+        self.menu_bar = QMenuBar()
 
-        def hide_or_unhide(widget):
+        def hide_or_unhide(widget, action):
             if widget.isHidden():
                 widget.show()
+                action.setChecked(True)
             else:
                 widget.hide()
+                action.setChecked(False)
 
         class file(QMenu):
             def __init__(subself):
-                super().__init__("&File", menu_bar)
+                super().__init__("&File", self.menu_bar)
 
                 subself.actions = SimpleNamespace()
                 subself.actions.open = subself.addAction("Open")
@@ -51,41 +53,41 @@ class main_window(QMainWindow):
 
         class view(QMenu):
             def __init__(subself):
-                super().__init__("&View", menu_bar)
+                super().__init__("&View", self.menu_bar)
 
                 subself.actions = SimpleNamespace()
                 
                 subself.actions.side_view = subself.addAction("Helicies Side View")
                 subself.actions.side_view.setChecked(True)
                 subself.actions.side_view.setCheckable(True)
-                subself.actions.side_view.toggled.connect(lambda: hide_or_unhide(self.centralWidget().widget(0)))
+                subself.actions.side_view.triggered.connect(lambda: hide_or_unhide(self.centralWidget().widget(0), subself.actions.side_view))
 
                 subself.actions.top_view = subself.addAction("Helicies Top View")
                 subself.actions.top_view.setChecked(True)
                 subself.actions.top_view.setCheckable(True)
-                subself.actions.top_view.toggled.connect(lambda: hide_or_unhide(self.centralWidget().widget(1)))
+                subself.actions.top_view.triggered.connect(lambda: hide_or_unhide(self.centralWidget().widget(1), subself.actions.top_view))
 
                 subself.actions.top_view = subself.addAction("Settings")
                 subself.actions.top_view.setChecked(True)
                 subself.actions.top_view.setCheckable(True)
-                subself.actions.top_view.toggled.connect(lambda: hide_or_unhide(self.config_panel))
+                subself.actions.top_view.triggered.connect(lambda: hide_or_unhide(self.config_panel, subself.actions.top_view))
 
         class help(QMenu):
             def __init__(subself):
-                super().__init__("&Help", menu_bar)
+                super().__init__("&Help", self.menu_bar)
 
                 subself.actions = SimpleNamespace()
                 subself.actions.manual = subself.addAction("Manual")
-                
+
                 subself.actions.github = subself.addAction("Github")
                 subself.actions.github.triggered.connect(lambda: webbrowser.open_new_tab("https://github.com/404Wolf/dna_nanotube_tools"))
 
                 subself.actions.about = subself.addAction("About")
 
-        menu_bar.addMenu(file())
-        menu_bar.addMenu(view())
-        menu_bar.addMenu(help())
+        self.menu_bar.addMenu(file())
+        self.menu_bar.addMenu(view())
+        self.menu_bar.addMenu(help())
 
-        self.setMenuBar(menu_bar)
+        self.setMenuBar(self.menu_bar)
         
         self.statusBar().setStyleSheet("background-color: rgb(220, 220, 220)")
