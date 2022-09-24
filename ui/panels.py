@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QLabel, QVBoxLayout
 from PyQt6 import uic
 import dna_nanotube_tools.plot
-import config
+import database
 
 class title_panel(QWidget):
     def __init__(self):
@@ -43,37 +43,37 @@ class configuration(QWidget):
         # load the widget from the ui file
         uic.loadUi("ui/config.ui", self)
 
-        loaded_config = config.load()
+        loaded_config = database.load()
 
         # set saved values of each setting and hook it to config updating
         self.strandSwitchDistance_input.valueChanged.connect(
-            lambda: config.update(
+            lambda: database.update(
                 "strand_switch_distance", self.strandSwitchDistance_input
             )
         )
         self.strandSwitchDistance_input.setValue(loaded_config["strand_switch_distance"])
         
         self.strandSwitchAngle_input.valueChanged.connect(
-            lambda: config.update("strand_switch_angle", self.strandSwitchAngle_input.value())
+            lambda: database.update("strand_switch_angle", self.strandSwitchAngle_input.value())
         )
         self.strandSwitchAngle_input.setValue(loaded_config["strand_switch_angle"])
 
         self.domainDistance_input.valueChanged.connect(
-            lambda: config.update("domain_distance", self.domainDistance_input.value())
+            lambda: database.update("domain_distance", self.domainDistance_input.value())
         )
         self.domainDistance_input.setValue(loaded_config["domain_distance"])
 
         self.NEMidHeight_input.valueChanged.connect(
-            lambda: config.update("NEMid_height", self.NEMidHeight_input.value())
+            lambda: database.update("NEMid_height", self.NEMidHeight_input.value())
         )
         self.NEMidHeight_input.setValue(loaded_config["NEMid_height"])
 
         self.generateCount_input.valueChanged.connect(
-            lambda: config.update("generate_count", self.generateCount_input.value())
+            lambda: database.update("generate_count", self.generateCount_input.value())
         )
         self.generateCount_input.setValue(loaded_config["generate_count"])
 
         self.characteristicAngle_input.valueChanged.connect(
-            lambda: config.update("characteristic_angle", self.characteristicAngle_input.value())
+            lambda: database.update("characteristic_angle", self.characteristicAngle_input.value())
         )
         self.characteristicAngle_input.setValue(loaded_config["characteristic_angle"])

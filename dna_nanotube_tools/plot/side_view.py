@@ -31,7 +31,7 @@ class side_view:
         Initilize side_view generation class.
 
         Args:
-            interior_angle_multiples (list): Interbase angle interior, measured in multiples of characteristic angle.
+            domains (list): List of domains.
             base_height (float): Height between two bases (in Angstroms).
             strand_switch_distance (float): Strand switch distance (in Angstroms).
             strand_switch_angle (float): Angle about the helix axis between two nucleosides on different helices of a double helix.
@@ -125,11 +125,11 @@ class side_view:
         for domain_index in range(self.domain_count):
             # current exterior and interior angles
             # note that "exterior_angle == 360 - interior_angle"
-            interior_angle: float = (
-                self.domains[domain_index].interior_angle_multiple
+            theta_interior: float = (
+                self.domains[domain_index].theta_interior_multiple
                 * self.characteristic_angle
             )
-            exterior_angle: float = 360 - interior_angle
+            exterior_angle: float = 360 - theta_interior
 
             for i in range(count):
                 for strand_direction in range(
@@ -145,7 +145,7 @@ class side_view:
                     if point_angle < exterior_angle:
                         x_coord = point_angle / exterior_angle
                     else:
-                        x_coord = (360 - point_angle) / interior_angle
+                        x_coord = (360 - point_angle) / theta_interior
 
                     # domain 0 lies between [0, 1] on the x axis
                     # domain 1 lies between [1, 2] on the x axis

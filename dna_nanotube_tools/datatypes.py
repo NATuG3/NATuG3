@@ -8,12 +8,12 @@ class domain:
     Domain storage object.
 
     Attributes:
-        interior_angle_multiple (int): The angle between domain #i/#i+1's line of tangency and domain #i+1/i+2's line of tangency
+        theta_interior (int): The angle between domain #i/#i+1's line of tangency and domain #i+1/i+2's line of tangency
         switch_angle_multiple (int): Strand switch angle per domain transition. Integer multiple of strand switch angle.
     """
 
-    interior_angle_multiple: int
-    switch_angle_multiple: int
+    theta_interior_multiple: int
+    theta_switch_multiple: int
 
 
 @dataclass

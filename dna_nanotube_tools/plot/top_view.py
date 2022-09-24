@@ -51,12 +51,12 @@ class top_view:
         for domain_index in range(self.domain_count):
             # locate strand switch angle for the previous domain.
             strand_switch_angle: float = (
-                self.domains[domain_index - 1].switch_angle_multiple
+                self.domains[domain_index - 1].theta_switch_multiple
                 * self._strand_switch_angle
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                self.domains[domain_index - 1].interior_angle_multiple
+                self.domains[domain_index - 1].theta_interior_multiple
                 * self._characteristic_angle
             )
 

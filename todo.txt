@@ -1,1 +1,0 @@
-convert everything in side_view.py to be generators
