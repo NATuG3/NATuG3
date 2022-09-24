@@ -4,6 +4,7 @@ from typing import Deque, Tuple, Type
 from collections import deque
 import pyqtgraph as pg
 from dna_nanotube_tools.datatypes import domain, nucleoside, NEMid
+from PyQt6.QtWidgets import QGroupBox, QHBoxLayout
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda domain_count: tuple(
@@ -292,4 +293,13 @@ class side_view:
 
         main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
 
-        return plotted_window
+        class widget(QGroupBox):
+            def __init__(self):
+                super().__init__()
+                self.setLayout(QHBoxLayout())
+                self.layout().addWidget(plotted_window)
+                self.setTitle("Side View of Helicies")
+                self.setStatusTip("A plot of the side view of all domains")
+                
+
+        return widget()
