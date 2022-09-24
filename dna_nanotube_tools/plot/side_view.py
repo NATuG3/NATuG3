@@ -259,9 +259,9 @@ class side_view:
 
         for domain_index in range(self.domain_count):
             if domain_index % 2:  # if the domain index is an even integer
-                colors: tuple = ("r", "g")  # use red and green colors
+                colors: tuple = ((255, 0, 0), (0, 255, 0))  # use red and green colors
             else:  # but if it is an odd integer
-                colors: tuple = ("b", "y")  # use blue and yellow colors
+                colors: tuple = ((0, 0, 255), (255, 255, 0))  # use blue and yellow colors
             # this way it will be easy to discern between different domains
             # (every other domain will be a different color scheme)
 
@@ -287,9 +287,15 @@ class side_view:
                     symbol=symbol,  # type of symbol (in this case up/down arrow)
                     symbolSize=6,  # size of arrows in px
                     pxMode=True,  # means that symbol size is in px
-                    symbolPen=color,  # set color of pen to current color
+                    symbolPen=pg.mkPen(
+                        color=color
+                    ),  # set color of points to current color
+                    pen=pg.mkPen(
+                        color=(120, 120, 120), width=1.8
+                    ) # set color of pen to current color (but darker)
                 )
 
+        main_plot.setAspectLocked(lock=True, ratio=116)
         main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
 
         return plotted_window
