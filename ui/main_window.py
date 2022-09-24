@@ -1,23 +1,6 @@
-from PyQt6.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QLabel, QStatusBar
+from PyQt6.QtWidgets import QWidget, QMainWindow, QVBoxLayout, QStatusBar, QDockWidget
+from PyQt6.QtCore import Qt
 import ui
-
-
-class central_widget(QWidget):
-    def __init__(self) -> None:
-        # this is an inherented class of QWidget
-        # so we must initialize the parent qt widget
-        super().__init__()
-
-        # this is the main window's central widget, which is a vertical array layout
-        self.setLayout(QVBoxLayout())
-
-        # add title/software description top panel
-        self.layout().addWidget(ui.panels.title_panel())
-        # add dna previews on top
-        self.layout().addWidget(ui.panels.dna_views())
-        # configuration panel on bottom
-        self.layout().addWidget(ui.panels.configuration())
-
 
 class main_window(QMainWindow):
     def __init__(self):
@@ -25,12 +8,17 @@ class main_window(QMainWindow):
         # so we must initialize the parent qt widget
         super().__init__()
 
-        # configure the main window's general settings
-        self.central_widget = central_widget()
-
         # utilize inhereted methods to set up the main window
         self.setWindowTitle("DNA Constructor")
-        self.setCentralWidget(self.central_widget)
+        self.setCentralWidget(ui.panels.central_panel())
+
+        # attach config panel as docked panel
+        config_panel = QDockWidget()
+        config_panel.setWindowTitle("Configuration")
+        config_panel.setWidget(ui.panels.configuration())
+        config_panel.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        # 0x1 left, 0x2 right; 0x4 top; 0x8 bottom; 0 all
+        self.addDockWidget(Qt.DockWidgetArea(0x2), config_panel)
 
         # initilize status bar
         self._status_bar()

@@ -17,13 +17,12 @@ template_preset = {
     "THETA_C": 0.0,
     "Z_S": 0.0,
     "THETA_S": 0.0,
-    "domains": [
-        [9, 0] for i in range(14)
-    ],
+    "domains": [[9, 0] for i in range(14)],
 }
 
+
 class config:
-    def __init__(self, filename: str="presets.nano") -> None:
+    def __init__(self, filename: str = "presets.nano") -> None:
         """
         The configuration's database.
 
@@ -68,7 +67,9 @@ class config:
 
         domains = []
         for theta_interior, theta_switch in preset.domains:
-            domains.append(dna_nanotube_tools.datatypes.domain(theta_interior, theta_switch))
+            domains.append(
+                dna_nanotube_tools.datatypes.domain(theta_interior, theta_switch)
+            )
         preset.domains = domains
         return preset
 
