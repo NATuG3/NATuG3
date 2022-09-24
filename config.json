@@ -1,8 +1,8 @@
 {
     "strand_switch_distance": 0,
-    "strand_switch_angle": 0,
+    "strand_switch_angle": 3.0,
     "domain_distance": 0,
     "NEMid_height": 0,
     "generate_count": 0,
-    "characteristic_angle": 0
+    "characteristic_angle": 1.0
 }
