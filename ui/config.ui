@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>404</width>
+    <height>257</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="2">
+    <widget class="QLabel" name="generateCount_label">
+     <property name="statusTip">
+      <string>Number of NEMids/nucleosides to generate</string>
+     </property>
+     <property name="text">
+      <string>Generate Count</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QSpinBox" name="generateCount_input"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="domainDistance_input">
+     <property name="decimals">
+      <number>4</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLabel" name="NEMidHeight_label">
+     <property name="statusTip">
+      <string>Vertical height between two NEMids on different helices of the same double helix</string>
+     </property>
+     <property name="text">
+      <string>NEMid Height</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="strandSwitchDistance_label">
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="statusTip">
+      <string>Distance between a NEMid on the up strand and a NEMid on the down strand of a given domain</string>
+     </property>
+     <property name="whatsThis">
+      <string extracomment="Distance between a NEMid on the up strand and a NEMid on the down strand of a given domain"/>
+     </property>
+     <property name="text">
+      <string>Strand Switch Distance</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="domainDistance_label">
+     <property name="statusTip">
+      <string>Distance between two domains</string>
+     </property>
+     <property name="whatsThis">
+      <string extracomment="test"/>
+     </property>
+     <property name="text">
+      <string>Domain Distance</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QDoubleSpinBox" name="strandSwitchDistance_input">
+     <property name="decimals">
+      <number>4</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QDoubleSpinBox" name="strandSwitchAngle_input">
+     <property name="decimals">
+      <number>4</number>
+     </property>
+     <property name="maximum">
+      <double>360.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="strandSwitchAngle_label">
+     <property name="statusTip">
+      <string>The angle about the helix axis between two NEMids on different helices of a double helix</string>
+     </property>
+     <property name="whatsThis">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Strand Switch Angle</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="characteristicAngle_label">
+     <property name="whatsThis">
+      <string>Smallest possible angle about the helix axis possible between two NEMids on the same helix</string>
+     </property>
+     <property name="text">
+      <string>Characteristic Angle</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QDoubleSpinBox" name="characteristicAngle_input">
+     <property name="decimals">
+      <number>4</number>
+     </property>
+     <property name="maximum">
+      <double>360.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="3">
+    <widget class="QDoubleSpinBox" name="NEMidHeight_input">
+     <property name="decimals">
+      <number>4</number>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

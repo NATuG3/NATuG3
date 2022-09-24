@@ -1,11 +1,7 @@
-import sys
-import ui
-import json
 from PyQt6.QtWidgets import QApplication
-import config
-
-config = config.load_config()
-print(config.characteristic_angle)
+import sys
+import json
+import ui
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
