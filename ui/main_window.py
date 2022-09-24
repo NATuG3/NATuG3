@@ -12,14 +12,6 @@ class main_window(QMainWindow):
         self.setWindowTitle("DNA Constructor")
         self.setCentralWidget(ui.panels.central_panel())
 
-        # attach config panel as docked panel
-        config_panel = QDockWidget()
-        config_panel.setWindowTitle("Configuration")
-        config_panel.setWidget(ui.panels.configuration())
-        config_panel.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
-        # 0x1 left, 0x2 right; 0x4 top; 0x8 bottom; 0 all
-        self.addDockWidget(Qt.DockWidgetArea(0x2), config_panel)
-
         # initilize status bar
         self._status_bar()
 
