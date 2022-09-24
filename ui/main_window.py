@@ -1,5 +1,13 @@
 from types import SimpleNamespace
-from PyQt6.QtWidgets import QMainWindow, QStatusBar, QDockWidget, QMenuBar, QMenu, QGroupBox, QHBoxLayout, QPushButton
+from PyQt6.QtWidgets import (
+    QMainWindow,
+    QStatusBar,
+    QDockWidget,
+    QMenuBar,
+    QMenu,
+    QGroupBox,
+    QHBoxLayout,
+)
 from PyQt6.QtCore import Qt
 import ui
 import webbrowser
@@ -10,6 +18,7 @@ domains = [dna_nanotube_tools.domain(9, 0)] * 14
 side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
 top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 # END OF PLACEHOLDER CODE
+
 
 class main_window(QMainWindow):
     def __init__(self):
@@ -46,21 +55,28 @@ class main_window(QMainWindow):
         self.docked_widgets = SimpleNamespace()
 
         # attach helicies top view to left dock
-        def float_resizer(widget, default_width):
+        def float_resizer(widget, default_width, maximum_width=9999):
             """Adjust a dockable widget's size based on whether it is floating or not."""
             if widget.isFloating():
                 widget.setMinimumWidth(320)
-                widget.setMaximumWidth(600)
+                widget.setMaximumWidth(maximum_width)
             else:
                 widget.setMaximumWidth(default_width)
 
         self.docked_widgets.top_view = QDockWidget()
-        self.docked_widgets.top_view.setWindowTitle("Helicies Top View")
-        self.docked_widgets.top_view.setStatusTip("A plot of the top view of all domains")
+        self.docked_widgets.top_view.setWindowTitle("Top View of Helicies")
+        self.docked_widgets.top_view.setStatusTip(
+            "A plot of the top view of all domains"
+        )
         self.docked_widgets.top_view.setWidget(top_view.ui())
-        self.docked_widgets.top_view.setMaximumWidth(260)
-        self.docked_widgets.top_view.topLevelChanged.connect(lambda: float_resizer(self.docked_widgets.top_view, 210))
-        self.docked_widgets.top_view.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        self.docked_widgets.top_view.setMaximumWidth(270)
+        self.docked_widgets.top_view.topLevelChanged.connect(
+            lambda: float_resizer(self.docked_widgets.top_view, 210)
+        )
+        self.docked_widgets.top_view.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+        )
         self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)
 
         # attach config panel to right dock
@@ -68,9 +84,14 @@ class main_window(QMainWindow):
         self.docked_widgets.config.setWindowTitle("Config")
         self.docked_widgets.config.setStatusTip("Settings panel")
         self.docked_widgets.config.setWidget(ui.panels.config())
-        self.docked_widgets.config.setFixedWidth(175)
-        self.docked_widgets.config.topLevelChanged.connect(lambda: float_resizer(self.docked_widgets.config, 175))
-        self.docked_widgets.config.setFeatures(QDockWidget.DockWidgetFeature.DockWidgetFloatable | QDockWidget.DockWidgetFeature.DockWidgetMovable)
+        self.docked_widgets.config.setMaximumWidth(300)
+        self.docked_widgets.config.topLevelChanged.connect(
+            lambda: float_resizer(self.docked_widgets.config, 200, maximum_width=400)
+        )
+        self.docked_widgets.config.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+        )
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
     def _status_bar(self):
@@ -102,14 +123,20 @@ class main_window(QMainWindow):
                 subself.actions.config.setStatusTip("Display the config tab menu")
                 subself.actions.config.setChecked(True)
                 subself.actions.config.setCheckable(True)
-                subself.actions.config.toggled.connect(lambda: hide_or_unhide(self.docked_widgets.config))
+                subself.actions.config.toggled.connect(
+                    lambda: hide_or_unhide(self.docked_widgets.config)
+                )
 
                 # view -> "top view" -> hide/unhide
                 subself.actions.top_view = subself.addAction("Helicies Top View")
-                subself.actions.config.setStatusTip("Display the helicies top view graph")
+                subself.actions.config.setStatusTip(
+                    "Display the helicies top view graph"
+                )
                 subself.actions.top_view.setChecked(True)
                 subself.actions.top_view.setCheckable(True)
-                subself.actions.top_view.toggled.connect(lambda: hide_or_unhide(self.docked_widgets.top_view))
+                subself.actions.top_view.toggled.connect(
+                    lambda: hide_or_unhide(self.docked_widgets.top_view)
+                )
 
         class help(QMenu):
             def __init__(subself):

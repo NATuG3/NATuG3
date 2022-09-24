@@ -5,8 +5,6 @@ from PyQt6 import uic
 
 class title_panel(QWidget):
     def __init__(self):
-        # this is an inherented class of QWidget
-        # so we must initialize the parent qt widget
         super().__init__()
 
         self.setLayout(QVBoxLayout())
@@ -16,23 +14,35 @@ class title_panel(QWidget):
         self.layout().addWidget(title)
 
 
-class config(QTabWidget):
+class config(QWidget):
     """A tab box for config and domain configuration"""
+
     def __init__(self) -> None:
-        # this is an inherented class of QWidget
-        # so we must initialize the parent qt widget
         super().__init__()
 
-        # container to store all tabs in
-        self.tabs = SimpleNamespace()
-
-        class settings(QWidget):
-            def __init__(self):
+        class tab_area(QTabWidget):
+            def __init__(subself):
                 super().__init__()
-                uic.loadUi("ui/settings.ui", self)
 
-        self.tabs.settings = settings()
-        self.tabs.domains = QLabel("Placeholder for domain tab")
+                # container to store all tabs in
+                subself.tabs = SimpleNamespace()
 
-        self.addTab(self.tabs.settings, "Settings")
-        self.addTab(self.tabs.domains, "Domains")
+                class settings(QWidget):
+                    def __init__(subsubself):
+                        super().__init__()
+                        uic.loadUi("ui/settings.ui", subsubself)
+
+                subself.tabs.settings = settings()
+                subself.tabs.domains = QLabel("Placeholder for domain tab")
+
+                subself.addTab(subself.tabs.settings, "Settings")
+                subself.addTab(subself.tabs.domains, "Domains")
+
+        class preset_manager(QWidget):
+            def __init__(subself):
+                super().__init__()
+                uic.loadUi("ui/preset_manager.ui", subself)
+
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(preset_manager())
+        self.layout().addWidget(tab_area())
