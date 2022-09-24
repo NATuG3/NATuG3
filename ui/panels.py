@@ -22,7 +22,7 @@ class configuration(QGroupBox):
         # load the widget from the ui file
         uic.loadUi("ui/config.ui", self)
         self.setTitle("Settings")
-        self.setMaximumWidth(170)
+        self.setMaximumWidth(177)
 
 class central_panel(QSplitter):
     def __init__(self):
@@ -38,6 +38,5 @@ class central_panel(QSplitter):
 
         self.addWidget(side_view.ui(150))
         self.addWidget(top_view.ui())
-        self.addWidget(configuration())
-
+        # self.addWidget(configuration())
         self.setHandleWidth(8)

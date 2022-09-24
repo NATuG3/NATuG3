@@ -45,15 +45,22 @@
       <number>4</number>
      </property>
      <item>
-      <widget class="QSpinBox" name="spinBox"/>
+      <widget class="QSpinBox" name="spinBox">
+       <property name="statusTip">
+        <string/>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QLabel" name="label_3">
+       <property name="statusTip">
+        <string>There are T many turns for B many bases</string>
+       </property>
        <property name="whatsThis">
         <string>There are T turns every B bases for a given nucleic acid, where T and B are relatively prime integers.</string>
        </property>
        <property name="text">
-        <string>turns /</string>
+        <string>[T]urns /</string>
        </property>
       </widget>
      </item>
@@ -62,11 +69,14 @@
      </item>
      <item>
       <widget class="QLabel" name="label_5">
+       <property name="statusTip">
+        <string>There are T many turns for B many bases</string>
+       </property>
        <property name="whatsThis">
         <string>There are T turns every B bases for a given nucleic acid, where T and B are relatively prime integers.</string>
        </property>
        <property name="text">
-        <string>bases</string>
+        <string>[B]ases</string>
        </property>
       </widget>
      </item>
@@ -142,6 +152,9 @@
    </item>
    <item row="2" column="1">
     <widget class="QLabel" name="label_4">
+     <property name="statusTip">
+      <string>The radius of a given domain</string>
+     </property>
      <property name="text">
       <string>Radius</string>
      </property>
@@ -202,7 +215,10 @@
    <item row="6" column="1">
     <widget class="QLabel" name="label_12">
      <property name="toolTip">
-      <string extracomment="The height a helix climbs as it rotates through the characteristic angle"/>
+      <string/>
+     </property>
+     <property name="statusTip">
+      <string>The height a helix climbs as it rotates through the characteristic angle</string>
      </property>
      <property name="text">
       <string>Z&lt;sub&gt;c&lt;/sub&gt;</string>
@@ -244,13 +260,6 @@
     <widget class="QDoubleSpinBox" name="doubleSpinBox">
      <property name="decimals">
       <number>3</number>
-     </property>
-    </widget>
-   </item>
-   <item row="14" column="1">
-    <widget class="QCheckBox" name="checkBox">
-     <property name="text">
-      <string>Closed Tube</string>
      </property>
     </widget>
    </item>
@@ -327,6 +336,16 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="14" column="1" colspan="3">
+    <widget class="QCheckBox" name="checkBox">
+     <property name="statusTip">
+      <string>Indicates whether the tube is closed (and thus actually a tube) or not</string>
+     </property>
+     <property name="text">
+      <string>Closed Tube</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
