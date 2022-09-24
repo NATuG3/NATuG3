@@ -261,7 +261,10 @@ class side_view:
             if domain_index % 2:  # if the domain index is an even integer
                 colors: tuple = ((255, 0, 0), (0, 255, 0))  # use red and green colors
             else:  # but if it is an odd integer
-                colors: tuple = ((0, 0, 255), (255, 255, 0))  # use blue and yellow colors
+                colors: tuple = (
+                    (0, 0, 255),
+                    (255, 255, 0),
+                )  # use blue and yellow colors
             # this way it will be easy to discern between different domains
             # (every other domain will be a different color scheme)
 
@@ -292,7 +295,7 @@ class side_view:
                     ),  # set color of points to current color
                     pen=pg.mkPen(
                         color=(120, 120, 120), width=1.8
-                    ) # set color of pen to current color (but darker)
+                    ),  # set color of pen to current color (but darker)
                 )
 
         main_plot.setAspectLocked(lock=True, ratio=116)

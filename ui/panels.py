@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QTabWidget
+from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QTabWidget, QPushButton, QSpacerItem, QSizePolicy
 from PyQt6 import uic
 
 
@@ -21,6 +21,8 @@ class config(QWidget):
         super().__init__()
 
         class tab_area(QTabWidget):
+            """Settings/Domain tab area"""
+
             def __init__(subself):
                 super().__init__()
 
@@ -39,10 +41,18 @@ class config(QWidget):
                 subself.addTab(subself.tabs.domains, "Domains")
 
         class preset_manager(QWidget):
+            """Manager for config presets"""
+
             def __init__(subself):
                 super().__init__()
                 uic.loadUi("ui/preset_manager.ui", subself)
 
+        class update_graphs(QPushButton):
+            def __init__(self):
+                super().__init__("Update Graphs")
+
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(preset_manager())
         self.layout().addWidget(tab_area())
+        self.layout().addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.layout().addWidget(update_graphs())
