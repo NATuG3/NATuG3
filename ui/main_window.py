@@ -58,7 +58,6 @@ class main_window(QMainWindow):
         def float_resizer(widget, default_width, maximum_width=9999):
             """Adjust a dockable widget's size based on whether it is floating or not."""
             if widget.isFloating():
-                widget.setMinimumWidth(320)
                 widget.setMaximumWidth(maximum_width)
             else:
                 widget.setMaximumWidth(default_width)
@@ -71,7 +70,7 @@ class main_window(QMainWindow):
         self.docked_widgets.top_view.setWidget(top_view.ui())
         self.docked_widgets.top_view.setMaximumWidth(270)
         self.docked_widgets.top_view.topLevelChanged.connect(
-            lambda: float_resizer(self.docked_widgets.top_view, 210)
+            lambda: float_resizer(self.docked_widgets.top_view, 270)
         )
         self.docked_widgets.top_view.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
@@ -84,9 +83,9 @@ class main_window(QMainWindow):
         self.docked_widgets.config.setWindowTitle("Config")
         self.docked_widgets.config.setStatusTip("Settings panel")
         self.docked_widgets.config.setWidget(ui.panels.config())
-        self.docked_widgets.config.setMaximumWidth(300)
+        self.docked_widgets.config.setMaximumWidth(250)
         self.docked_widgets.config.topLevelChanged.connect(
-            lambda: float_resizer(self.docked_widgets.config, 200, maximum_width=400)
+            lambda: float_resizer(self.docked_widgets.config, 250, maximum_width=400)
         )
         self.docked_widgets.config.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
