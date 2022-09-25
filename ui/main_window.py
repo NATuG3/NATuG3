@@ -2,7 +2,6 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import (
     QMainWindow,
     QStatusBar,
-    QDockWidget,
     QMenuBar,
     QMenu,
     QGroupBox,
@@ -47,12 +46,14 @@ class main_window(QMainWindow):
 
     def _docked_widgets(self):
         """Add all docked widgets."""
-        
+
         # storage container for docked widget classes
         self.docked_widgets = SimpleNamespace()
 
         self.docked_widgets.top_view = ui.panels.top_view()
-        self.addDockWidget(self.docked_widgets.top_view.area, self.docked_widgets.top_view)
+        self.addDockWidget(
+            self.docked_widgets.top_view.area, self.docked_widgets.top_view
+        )
 
         self.docked_widgets.config = ui.panels.config()
         self.addDockWidget(self.docked_widgets.config.area, self.docked_widgets.config)
@@ -60,7 +61,9 @@ class main_window(QMainWindow):
     def _status_bar(self):
         """Create and add status bar."""
         self.setStatusBar(QStatusBar())
-        self.statusBar().setStyleSheet("background-color: rgb(210, 210, 210); margin-top: 10px")
+        self.statusBar().setStyleSheet(
+            "background-color: rgb(210, 210, 210); margin-top: 10px"
+        )
 
     def _menu_bar(self):
         """Create a menu bar for the main window"""

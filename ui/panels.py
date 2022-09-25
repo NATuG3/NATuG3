@@ -1,5 +1,14 @@
 from types import SimpleNamespace
-from PyQt6.QtWidgets import QWidget, QLabel, QVBoxLayout, QTabWidget, QPushButton, QSpacerItem, QSizePolicy, QDockWidget
+from PyQt6.QtWidgets import (
+    QWidget,
+    QLabel,
+    QVBoxLayout,
+    QTabWidget,
+    QPushButton,
+    QSpacerItem,
+    QSizePolicy,
+    QDockWidget,
+)
 from PyQt6 import uic
 import dna_nanotube_tools
 import ui.slots
@@ -11,6 +20,7 @@ domains = [dna_nanotube_tools.domain(9, 0)] * 14
 _top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 # END OF PLACEHOLDER CODE
 
+
 class title_panel(QWidget):
     def __init__(self):
         super().__init__()
@@ -21,31 +31,30 @@ class title_panel(QWidget):
         title = QLabel("""<h1>DNA Nanotube Constructor</h1>""")
         self.layout().addWidget(title)
 
+
 class top_view(QDockWidget):
     """Top view dock"""
+
     def __init__(self):
         super().__init__("Top View of Helicies")
 
         self.setWindowTitle("Top View of Helicies")
-        self.setStatusTip(
-            "A plot of the top view of all domains"
-        )
+        self.setStatusTip("A plot of the top view of all domains")
         self.setWidget(_top_view.ui())
         self.widget().setStyleSheet("margin: 5px")
         self.setMaximumWidth(270)
-        self.topLevelChanged.connect(
-            lambda: ui.slots.float_resizer(self, 270)
-        )
+        self.topLevelChanged.connect(lambda: ui.slots.float_resizer(self, 270))
         self.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
         self.area = Qt.DockWidgetArea(0x1)
 
+
 class config(QDockWidget):
     """
     A tab box for config and domain configuration.
-    
+
     This is a docked widget which initiates on the right side of the main window.
     The layout() subclass arranges all the other subclasses in this order (top to bottom):
     """
@@ -55,6 +64,7 @@ class config(QDockWidget):
 
         class tab_area(QTabWidget):
             """Settings/Domain tab area"""
+
             def __init__(self):
                 super().__init__()
 
@@ -63,6 +73,7 @@ class config(QDockWidget):
 
                 class settings(QWidget):
                     """Settings area"""
+
                     def __init__(subself):
                         super().__init__()
                         uic.loadUi("ui/settings.ui", subself)
@@ -75,6 +86,7 @@ class config(QDockWidget):
 
         class preset_manager(QWidget):
             """Manager for config presets"""
+
             def __init__(subself):
                 super().__init__()
                 uic.loadUi("ui/preset_manager.ui", subself)
@@ -87,9 +99,11 @@ class config(QDockWidget):
         self.laid_out.setLayout(QVBoxLayout())
         self.laid_out.layout().addWidget(preset_manager())
         self.laid_out.layout().addWidget(tab_area())
-        self.laid_out.layout().addItem(QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding))
+        self.laid_out.layout().addItem(
+            QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
+        )
         self.laid_out.layout().addWidget(update_graphs())
-        
+
         self.setWindowTitle("Config")
         self.setStatusTip("Settings panel")
         self.setWidget(self.laid_out)
