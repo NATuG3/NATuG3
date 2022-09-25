@@ -8,7 +8,6 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
 )
-from PyQt6.QtCore import Qt
 import ui
 import webbrowser
 import dna_nanotube_tools.plot
@@ -48,55 +47,20 @@ class main_window(QMainWindow):
 
     def _docked_widgets(self):
         """Add all docked widgets."""
-        # docked widget positions:
-        #  0x1 left, 0x2 right; 0x4 top; 0x8 bottom; 0 all
-
-        # storage container for docked widgets
+        
+        # storage container for docked widget classes
         self.docked_widgets = SimpleNamespace()
 
-        # attach helicies top view to left dock
-        def float_resizer(widget, default_width, maximum_width=9999):
-            """Adjust a dockable widget's size based on whether it is floating or not."""
-            if widget.isFloating():
-                widget.setMaximumWidth(maximum_width)
-            else:
-                widget.setMaximumWidth(default_width)
+        self.docked_widgets.top_view = ui.panels.top_view()
+        self.addDockWidget(self.docked_widgets.top_view.area, self.docked_widgets.top_view)
 
-        self.docked_widgets.top_view = QDockWidget()
-        self.docked_widgets.top_view.setWindowTitle("Top View of Helicies")
-        self.docked_widgets.top_view.setStatusTip(
-            "A plot of the top view of all domains"
-        )
-        self.docked_widgets.top_view.setWidget(top_view.ui())
-        self.docked_widgets.top_view.setMaximumWidth(270)
-        self.docked_widgets.top_view.topLevelChanged.connect(
-            lambda: float_resizer(self.docked_widgets.top_view, 270)
-        )
-        self.docked_widgets.top_view.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable
-        )
-        self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)
-
-        # attach config panel to right dock
-        self.docked_widgets.config = QDockWidget()
-        self.docked_widgets.config.setWindowTitle("Config")
-        self.docked_widgets.config.setStatusTip("Settings panel")
-        self.docked_widgets.config.setWidget(ui.panels.config())
-        self.docked_widgets.config.setMaximumWidth(250)
-        self.docked_widgets.config.topLevelChanged.connect(
-            lambda: float_resizer(self.docked_widgets.config, 250, maximum_width=400)
-        )
-        self.docked_widgets.config.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable
-        )
-        self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
+        self.docked_widgets.config = ui.panels.config()
+        self.addDockWidget(self.docked_widgets.config.area, self.docked_widgets.config)
 
     def _status_bar(self):
         """Create and add status bar."""
         self.setStatusBar(QStatusBar())
-        self.statusBar().setStyleSheet("background-color: rgb(210, 210, 210)")
+        self.statusBar().setStyleSheet("background-color: rgb(210, 210, 210); margin-top: 10px")
 
     def _menu_bar(self):
         """Create a menu bar for the main window"""
