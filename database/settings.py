@@ -67,7 +67,7 @@ def presets():
                 Z_s=12.6,
                 theta_b=34.29,
                 theta_c=360 / 21,
-                theta_s=2.3
+                theta_s=2.3,
             ),
         }
 

@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 import sys
 import database.settings
+
 print(database.settings.presets)
 
 if sys.platform.startswith("win"):
