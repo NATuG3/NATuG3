@@ -26,7 +26,7 @@
    <property name="bottomMargin">
     <number>2</number>
    </property>
-   <item row="16" column="1">
+   <item row="17" column="1">
     <widget class="QLabel" name="label_18">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -39,7 +39,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QLabel" name="label">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -52,7 +52,7 @@
      </property>
     </widget>
    </item>
-   <item row="8" column="1" colspan="3">
+   <item row="9" column="1" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QSpinBox" name="spinBox_3">
@@ -82,14 +82,21 @@
      </item>
     </layout>
    </item>
-   <item row="10" column="3">
+   <item row="11" column="3">
     <widget class="QLabel" name="label_10">
      <property name="text">
       <string>nm</string>
      </property>
     </widget>
    </item>
-   <item row="2" column="1">
+   <item row="3" column="2">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+     <property name="decimals">
+      <number>3</number>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
     <widget class="QLabel" name="label_4">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -105,14 +112,28 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+   <item row="12" column="2">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
      <property name="decimals">
       <number>3</number>
      </property>
     </widget>
    </item>
-   <item row="14" column="2">
+   <item row="4" column="3">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>nm</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="1" colspan="3">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="15" column="2">
     <widget class="QDoubleSpinBox" name="doubleSpinBox_4">
      <property name="statusTip">
       <string/>
@@ -122,42 +143,14 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="3">
-    <widget class="QLabel" name="label_6">
-     <property name="text">
-      <string>nm</string>
-     </property>
-    </widget>
-   </item>
-   <item row="14" column="3">
+   <item row="15" column="3">
     <widget class="QLabel" name="label_11">
      <property name="text">
       <string>°</string>
      </property>
     </widget>
    </item>
-   <item row="11" column="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_5">
-     <property name="decimals">
-      <number>3</number>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1" colspan="3">
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="3">
-    <widget class="QLabel" name="label_7">
-     <property name="text">
-      <string>nm</string>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="1">
+   <item row="11" column="1">
     <widget class="QLabel" name="label_8">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -170,7 +163,7 @@
      </property>
     </widget>
    </item>
-   <item row="15" column="1">
+   <item row="16" column="1">
     <widget class="QLabel" name="label_14">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -183,21 +176,42 @@
      </property>
     </widget>
    </item>
-   <item row="15" column="3">
+   <item row="16" column="3">
     <widget class="QLabel" name="label_15">
      <property name="text">
       <string>°</string>
      </property>
     </widget>
    </item>
-   <item row="12" column="3">
+   <item row="3" column="3">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>nm</string>
+     </property>
+    </widget>
+   </item>
+   <item row="13" column="3">
     <widget class="QLabel" name="label_17">
      <property name="text">
       <string>nm</string>
      </property>
     </widget>
    </item>
-   <item row="11" column="1">
+   <item row="11" column="2">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+     <property name="decimals">
+      <number>3</number>
+     </property>
+    </widget>
+   </item>
+   <item row="16" column="2">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
+     <property name="decimals">
+      <number>3</number>
+     </property>
+    </widget>
+   </item>
+   <item row="12" column="1">
     <widget class="QLabel" name="label_12">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -213,21 +227,7 @@
      </property>
     </widget>
    </item>
-   <item row="15" column="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_6">
-     <property name="decimals">
-      <number>3</number>
-     </property>
-    </widget>
-   </item>
-   <item row="10" column="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
-     <property name="decimals">
-      <number>3</number>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1" colspan="3">
+   <item row="5" column="1" colspan="3">
     <widget class="QCheckBox" name="checkBox">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -240,31 +240,21 @@
      </property>
     </widget>
    </item>
-   <item row="12" column="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
-     <property name="statusTip">
-      <string/>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
+   <item row="4" column="2">
     <widget class="QDoubleSpinBox" name="doubleSpinBox">
      <property name="decimals">
       <number>3</number>
      </property>
     </widget>
    </item>
-   <item row="11" column="3">
+   <item row="12" column="3">
     <widget class="QLabel" name="label_13">
      <property name="text">
       <string>nm</string>
      </property>
     </widget>
    </item>
-   <item row="12" column="1">
+   <item row="13" column="1">
     <widget class="QLabel" name="label_16">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -280,28 +270,17 @@
      </property>
     </widget>
    </item>
-   <item row="16" column="3">
-    <widget class="QLabel" name="label_19">
-     <property name="text">
-      <string>°</string>
+   <item row="13" column="2">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox_7">
+     <property name="statusTip">
+      <string/>
      </property>
-    </widget>
-   </item>
-   <item row="9" column="1" colspan="3">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="16" column="2">
-    <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
      <property name="decimals">
       <number>3</number>
      </property>
     </widget>
    </item>
-   <item row="14" column="1">
+   <item row="15" column="1">
     <widget class="QLabel" name="label_9">
      <property name="cursor">
       <cursorShape>ArrowCursor</cursorShape>
@@ -314,7 +293,28 @@
      </property>
     </widget>
    </item>
-   <item row="7" column="1" colspan="3">
+   <item row="10" column="1" colspan="3">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="17" column="2">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox_8">
+     <property name="decimals">
+      <number>3</number>
+     </property>
+    </widget>
+   </item>
+   <item row="17" column="3">
+    <widget class="QLabel" name="label_19">
+     <property name="text">
+      <string>°</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="1" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QSpinBox" name="spinBox">
@@ -357,6 +357,64 @@
        </property>
        <property name="text">
         <string>[T]urns</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="1" colspan="3">
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="3">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <item row="2" column="1">
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="statusTip">
+        <string>Delete the preset with the above name</string>
+       </property>
+       <property name="text">
+        <string>Delete Preset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QPushButton" name="pushButton">
+       <property name="statusTip">
+        <string>Save the current settings as a preset with the above name</string>
+       </property>
+       <property name="text">
+        <string>Save Preset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QComboBox" name="comboBox">
+       <property name="statusTip">
+        <string>The current preset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_21">
+       <property name="text">
+        <string>Active Preset</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLineEdit" name="lineEdit">
+       <property name="statusTip">
+        <string>Name of preset to save current state as/name of existing preset to delete</string>
+       </property>
+       <property name="inputMask">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Preset Name</string>
        </property>
       </widget>
      </item>

@@ -82,20 +82,12 @@ class config(QDockWidget):
                 self.addTab(self.tabs.settings, "Settings")
                 self.addTab(self.tabs.domains, "Domains")
 
-        class preset_manager(QWidget):
-            """Manager for config presets"""
-
-            def __init__(subself):
-                super().__init__()
-                uic.loadUi("ui/preset_manager.ui", subself)
-
         class update_graphs(QPushButton):
             def __init__(subself):
                 super().__init__("Update Graphs")
 
         self.laid_out = QWidget()
         self.laid_out.setLayout(QVBoxLayout())
-        self.laid_out.layout().addWidget(preset_manager())
         self.laid_out.layout().addWidget(tab_area())
         self.laid_out.layout().addItem(
             QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
