@@ -14,23 +14,18 @@ import dna_nanotube_tools
 import ui.slots
 from PyQt6.QtCore import Qt
 
-# docked widget positions: 0x1 left, 0x2 right; 0x4 top; 0x8 bottom; 0 all
 # START OF PLACEHOLDER CODE
 domains = [dna_nanotube_tools.domain(9, 0)] * 14
 _top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 # END OF PLACEHOLDER CODE
 
-
-class title_panel(QWidget):
-    def __init__(self):
-        super().__init__()
-
-        self.setLayout(QVBoxLayout())
-
-        # add title widget
-        title = QLabel("""<h1>DNA Nanotube Constructor</h1>""")
-        self.layout().addWidget(title)
-
+dock_areas = SimpleNamespace(
+    left=0x1,
+    right=0x2,
+    top=0x4,
+    bottom=0x8,
+    all=0
+)
 
 class top_view(QDockWidget):
     """Top view dock"""
@@ -42,13 +37,16 @@ class top_view(QDockWidget):
         self.setStatusTip("A plot of the top view of all domains")
         self.setWidget(_top_view.ui())
         self.widget().setStyleSheet("margin: 5px")
-        self.setMaximumWidth(270)
-        self.topLevelChanged.connect(lambda: ui.slots.float_resizer(self, 270))
+
+        self.setMaximumWidth(250)
+        self.topLevelChanged.connect(lambda: ui.slots.float_resizer(self, 250))
         self.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
-        self.area = Qt.DockWidgetArea(0x1)
+
+        # area for widget to be docked (this is accessed in main_window.py)
+        self.area = Qt.DockWidgetArea(dock_areas.left)
 
 
 class config(QDockWidget):
@@ -107,7 +105,7 @@ class config(QDockWidget):
         self.setWindowTitle("Config")
         self.setStatusTip("Settings panel")
         self.setWidget(self.laid_out)
-        self.setMaximumWidth(250)
+        self.setMaximumWidth(450)
         # ensure that when the config panel is undocked it can resize to be larger
         self.topLevelChanged.connect(
             lambda: ui.slots.float_resizer(self, 250, maximum_width=400)
@@ -116,4 +114,6 @@ class config(QDockWidget):
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
-        self.area = Qt.DockWidgetArea(0x2)
+
+        # area for widget to be docked (this is accessed in main_window.py)
+        self.area = Qt.DockWidgetArea(dock_areas.right)

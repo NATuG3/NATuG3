@@ -3,18 +3,16 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QStatusBar,
     QMenuBar,
-    QMenu,
     QGroupBox,
-    QHBoxLayout,
+    QVBoxLayout,
 )
-import ui
-import webbrowser
+import ui.menus
 import dna_nanotube_tools.plot
 
 # START OF PLACEHOLDER CODE
 domains = [dna_nanotube_tools.domain(9, 0)] * 14
 side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
-top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
+side_view = side_view.ui(150)
 # END OF PLACEHOLDER CODE
 
 
@@ -27,13 +25,17 @@ class main_window(QMainWindow):
         # utilize inhereted methods to set up the main window
         self.setWindowTitle("DNA Constructor")
 
-        # the side view plot is the main widget
-        central_widget = QGroupBox()
-        central_widget.setLayout(QHBoxLayout())
-        central_widget.layout().addWidget(side_view.ui(150))
-        central_widget.setTitle("Side View of Helicies")
-        central_widget.setStatusTip("A plot of the side view of all domains")
-        self.setCentralWidget(central_widget)
+        # prittify the central widget in a group box
+        class central_widget(QGroupBox):
+            """Central widget of window"""
+            def __init__(subself):
+                super().__init__("Side View of Helicies")
+                subself.setLayout(QVBoxLayout())
+                subself.layout().addWidget(side_view)
+                subself.setStatusTip("A plot of the side view of all domains")
+                subself.setMinimumWidth(350)
+
+        self.setCentralWidget(central_widget())
 
         # initilize status bar
         self._status_bar()
@@ -42,21 +44,23 @@ class main_window(QMainWindow):
         self._menu_bar()
 
         # add docked widgets
-        self._docked_widgets()
+        self._docked_items()
 
-    def _docked_widgets(self):
+    def _docked_items(self):
         """Add all docked widgets."""
 
         # storage container for docked widget classes
-        self.docked_widgets = SimpleNamespace()
+        self.docked_items = SimpleNamespace()
 
-        self.docked_widgets.top_view = ui.panels.top_view()
+        # dock the top view panel
+        self.docked_items.top_view = ui.dockables.top_view()
         self.addDockWidget(
-            self.docked_widgets.top_view.area, self.docked_widgets.top_view
+            self.docked_items.top_view.area, self.docked_items.top_view
         )
 
-        self.docked_widgets.config = ui.panels.config()
-        self.addDockWidget(self.docked_widgets.config.area, self.docked_widgets.config)
+        # dock the side view panel
+        self.docked_items.config = ui.dockables.config()
+        self.addDockWidget(self.docked_items.config.area, self.docked_items.config)
 
     def _status_bar(self):
         """Create and add status bar."""
@@ -67,65 +71,18 @@ class main_window(QMainWindow):
 
     def _menu_bar(self):
         """Create a menu bar for the main window"""
-        self.menu_bar = QMenuBar()
 
-        def hide_or_unhide(widget):
-            """
-            Reverse the hiddenness of a widget
-            """
-            if widget.isHidden():
-                widget.show()
-            else:
-                widget.hide()
+        # container to store menu bar items in
+        self.menu_bar_items = SimpleNamespace()
 
-        class view(QMenu):
-            def __init__(subself):
-                super().__init__("&View", self.menu_bar)
+        # initilize the menu bar
+        self.setMenuBar(QMenuBar())
 
-                subself.actions = SimpleNamespace()
+        # add all menus to the menu bar (and to the menu bar namespace container)
+        self.menu_bar_items.view = ui.menus.view(self)
+        self.menuBar().addMenu(self.menu_bar_items.view)
 
-                # view -> "settings" -> hide/unhide
-                subself.actions.config = subself.addAction("Config")
-                subself.actions.config.setStatusTip("Display the config tab menu")
-                subself.actions.config.setChecked(True)
-                subself.actions.config.setCheckable(True)
-                subself.actions.config.toggled.connect(
-                    lambda: hide_or_unhide(self.docked_widgets.config)
-                )
+        self.menu_bar_items.help = ui.menus.help()
+        self.menuBar().addMenu(self.menu_bar_items.help)
 
-                # view -> "top view" -> hide/unhide
-                subself.actions.top_view = subself.addAction("Helicies Top View")
-                subself.actions.config.setStatusTip(
-                    "Display the helicies top view graph"
-                )
-                subself.actions.top_view.setChecked(True)
-                subself.actions.top_view.setCheckable(True)
-                subself.actions.top_view.toggled.connect(
-                    lambda: hide_or_unhide(self.docked_widgets.top_view)
-                )
-
-        class help(QMenu):
-            def __init__(subself):
-                super().__init__("&Help", self.menu_bar)
-
-                # help -> manual -> open manual pdf
-                subself.actions = SimpleNamespace()
-                subself.actions.manual = subself.addAction("Manual")
-
-                # help -> github -> open github project link
-                subself.actions.github = subself.addAction("Github")
-                subself.actions.github.triggered.connect(
-                    lambda: webbrowser.open_new_tab(
-                        "https://github.com/404Wolf/dna_nanotube_tools"
-                    )
-                )
-
-                # help -> about -> open about statement
-                subself.actions.about = subself.addAction("About")
-
-        # add all the menus to the filemenu
-        self.menu_bar.addMenu(view())
-        self.menu_bar.addMenu(help())
-
-        # place the menu bar object into the actual menu bar
-        self.setMenuBar(self.menu_bar)
+        
