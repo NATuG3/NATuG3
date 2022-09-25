@@ -17,13 +17,17 @@ class settings(QWidget):
                 self.preset_list.addItem(preset)
 
         # set the current preset of whichever was "last_used"
-        self.inject_settings_data(database.settings.presets[database.settings.presets["last_used"]])
+        last_used_preset = database.settings.presets["last_used"]
+        self.inject_settings_data(database.settings.presets[last_used_preset])
+        self.preset_list.setCurrentText(last_used_preset)
 
-        self.preset_list.currentIndexChanged.connect(
-            lambda: self.inject_settings_data(
-                database.settings.presets[self.preset_list.currentText()]
-            )
-        )
+        def inject_preset_if_existing():
+            """If the preset selector box was changed to an existing preset then update inputs to it"""
+            if self.preset_input.currentText() != "":
+                self.inject_settings_data(
+                    database.settings.presets[self.preset_list.currentText()]
+                )
+        self.preset_list.currentIndexChanged.connect(inject_preset_if_existing)
         self.save_preset_button.clicked.connect(self.save_button)
         self.delete_preset_button.clicked.connect(self.delete_button)
 
@@ -31,11 +35,6 @@ class settings(QWidget):
         def on_exit():
             database.settings.presets["last_used"] = self.preset_list.currentText()
         atexit.register(on_exit)
-
-    def get_preset_list_items(self):
-        return [
-            self.preset_list.itemText(_) for _ in range(self.preset_list.count())
-        ]
 
     def save_button(self):
         selected_preset_name = self.preset_input.text()
@@ -47,26 +46,29 @@ class settings(QWidget):
             if selected_preset_name not in database.settings.presets:
                 # only add a new entry to the combo box if the preset name doesn't exist already
                 self.preset_list.addItem(selected_preset_name)
-            # find index of current preset name and set the preset box to it (it is the new active preset)
-            self.preset_list.setCurrentIndex(self.get_preset_list_items().index(selected_preset_name))
-            # empty out the preset input box
-            self.preset_input.setText("")
-            
+            # set the preset box to the most recently added preset (it is the new active preset)
+            self.preset_list.setCurrentIndex(self.preset_list.count())            
         else:
             # give warning if preset box was empty
             error = QErrorMessage(self.parent())
             error.showMessage("Preset name is empty!")
 
+        # empty out the preset input box
+        self.preset_input.setText("")
+
     def delete_button(self):
         selected_preset_name = self.preset_input.text()
+        preset_list_items = [
+            self.preset_list.itemText(_) for _ in range(self.preset_list.count())
+        ]
 
-        if selected_preset_name not in self.get_preset_list_items():
+        if selected_preset_name not in preset_list_items:
             # give warning if the preset they are trying to delete doesn't exist
             error = QErrorMessage(self.parent())
             error.showMessage("You can't delete a preset that doesn't exist!")
 
         del database.settings.presets[selected_preset_name]
-        self.preset_list.removeItem(self.get_preset_list_items().index(selected_preset_name))
+        self.preset_list.removeItem(preset_list_items.index(selected_preset_name))
 
         # empty out the preset input box
         self.preset_input.setText("")
