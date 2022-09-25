@@ -5,6 +5,7 @@ def float_resizer(widget, limited_width, maximum_width=9999):
     else:
         widget.setMaximumWidth(limited_width)
 
+
 def hide_or_unhide(widget):
     """
     Reverse the hiddenness of a widget

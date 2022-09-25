@@ -11,7 +11,9 @@ import dna_nanotube_tools.plot
 
 # START OF PLACEHOLDER CODE
 domains = [dna_nanotube_tools.domain(9, 0)] * 14
-side_view = dna_nanotube_tools.plot.side_view(domains, 3.38, 12.6, 2.3)
+side_view = dna_nanotube_tools.plot.side_view(
+    domains, 3.38, 12.6, 2.3, (360 / 21) * 2, 360 / 21
+)
 side_view = side_view.ui(150)
 # END OF PLACEHOLDER CODE
 
@@ -28,6 +30,7 @@ class main_window(QMainWindow):
         # prittify the central widget in a group box
         class central_widget(QGroupBox):
             """Central widget of window"""
+
             def __init__(subself):
                 super().__init__("Side View of Helicies")
                 subself.setLayout(QVBoxLayout())
@@ -54,9 +57,7 @@ class main_window(QMainWindow):
 
         # dock the top view panel
         self.docked_items.top_view = ui.dockables.top_view()
-        self.addDockWidget(
-            self.docked_items.top_view.area, self.docked_items.top_view
-        )
+        self.addDockWidget(self.docked_items.top_view.area, self.docked_items.top_view)
 
         # dock the side view panel
         self.docked_items.config = ui.dockables.config()
@@ -84,5 +85,3 @@ class main_window(QMainWindow):
 
         self.menu_bar_items.help = ui.menus.help()
         self.menuBar().addMenu(self.menu_bar_items.help)
-
-        

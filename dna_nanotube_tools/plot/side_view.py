@@ -7,7 +7,7 @@ from dna_nanotube_tools.datatypes import domain, nucleoside, NEMid
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda domain_count: tuple(
-    (deque(), deque()) for i in range(domain_count)
+    (deque(), deque()) for _ in range(domain_count)
 )
 # type annotation for the aforementioned container
 DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
@@ -21,131 +21,131 @@ class side_view:
     def __init__(
         self,
         domains: list,
-        base_height: float,
-        strand_switch_distance: float,
-        strand_switch_angle: float,
-        interpoint_angle_multiple=2,
-        characteristic_angle=360 / 21,
+        Z_b: float,
+        Z_s: float,
+        theta_s: float,
+        theta_b: float,
+        theta_c: float,
     ) -> None:
         """
         Initilize side_view generation class.
 
         Args:
             domains (list): List of domains.
-            base_height (float): Height between two bases (in Angstroms).
-            strand_switch_distance (float): Strand switch distance (in Angstroms).
-            strand_switch_angle (float): Angle about the helix axis between two nucleosides on different helices of a double helix.
-            interpoint_angle_multiple (int, optional): Angle that one base makes about the helix axis, measured in multiples of characteristic angle.
-            characteristic_angle (float, optional): Characteristic angle. Defaults to 360/21.
+            Z_b (float): Base height (in nm)
+            Z_s (float): Strand switch distance (in nm).
+            theta_s (float): Switch angle (in degrees).
+            theta_b (float): Base angle (in degrees).
+            theta_c (float): Characteristic angle (in degrees).
 
         Raises:
-            ValueError: Length of interior_angles does not match that of strand_switch_angles.
+            ValueError: Length of interior_angles does not match that of theta_ss.
         """
 
         self.domain_count = len(domains)
         self.domains = domains
 
-        self.characteristic_angle = characteristic_angle
-        self.strand_switch_angle = strand_switch_angle
-        self.interpoint_angle = interpoint_angle_multiple * self.characteristic_angle
-        self.base_height = base_height
-        self.strand_switch_distance = strand_switch_distance
+        self.Z_b = Z_b
+        self.Z_s = Z_s
+
+        self.theta_s = theta_s
+        self.theta_b = theta_b
+        self.theta_c = theta_c
 
     def compute(self, count: int) -> DomainsContainerType:
         """
-        Compute data for count# of points.
+        Compute data for count# of NEMids.
 
         Args:
-            count (int): Number of points to compute data for.
+            count (int): Number of NEMids to compute data for.
 
         Returns:
-            DomainsContainerType: A domains container of all points.
+            DomainsContainerType: A domains container of all NEMids.
         """
 
-        points = DomainsContainer(self.domain_count)
+        NEMids = DomainsContainer(self.domain_count)
         for domain_index in range(self.domain_count):
             for strand_direction in range(2):
                 for i in range(count):
                     # generate/retreive cached
-                    angle = self._point_angles(count)[domain_index][strand_direction][i]
+                    angle = self._NEMid_angles(count)[domain_index][strand_direction][i]
                     x_coord = self._x_coords(count)[domain_index][strand_direction][i]
                     z_coord = self._z_coords(count)[domain_index][strand_direction][i]
 
-                    point = NEMid(x_coord, z_coord, angle, None)
-                    points[domain_index][strand_direction].append(point)
-        return points
+                    NEMid = NEMid(x_coord, z_coord, angle, None)
+                    NEMids[domain_index][strand_direction].append(NEMid)
+        return NEMids
 
     @lru_cache(maxsize=1)
-    def _point_angles(self, count: int) -> DomainsContainerType:
-        """Generate angles made about the central axis going counter-clockwise from the line of tangency."""
-        point_angles = DomainsContainer(
+    def _NEMid_angles(self, count: int) -> DomainsContainerType:
+        """Generate angles made about the central axis going counter-clockwise from the line of tangency for count# of NEMids."""
+        NEMid_angles = DomainsContainer(
             self.domain_count
         )  # container to store generated angles in
 
-        # generate count# of point angles on a domain-by-domain basis
+        # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
         for domain_index in range(self.domain_count):
             # one strand direction will be initially set to zero
-            # whereas the other will be set to zero - strand_switch_angle
+            # whereas the other will be set to zero - theta_s
 
-            # set initial point angle values
-            point_angles[domain_index][1].append(0.0)
-            point_angles[domain_index][0].append(0.0 - self.strand_switch_angle)
+            # set initial NEMid angle values
+            NEMid_angles[domain_index][1].append(0.0)
+            NEMid_angles[domain_index][0].append(0.0 - self.theta_s)
 
             for i in range(count):
 
-                # generate the next UP STRAND point angle
-                # "point_angles[domain_index][0]" =
-                # point angles -> current domain -> list of point angles for up strand -> previous one
-                point_angles[domain_index][1].append(
-                    point_angles[domain_index][1][i] + self.interpoint_angle
+                # generate the next UP STRAND NEMid angle
+                # "NEMid_angles[domain_index][0]" =
+                # NEMid angles -> current domain -> list of NEMid angles for up strand -> previous one
+                NEMid_angles[domain_index][1].append(
+                    NEMid_angles[domain_index][1][i] + self.theta_b
                 )
 
-                # generate the next DOWN STRAND point angle
-                # "point_angles[domain_index][0][i+1]" =
-                # point angles -> current domain -> list of point angles for up strand -> one we just computed
-                point_angles[domain_index][0].append(
-                    point_angles[domain_index][1][i + 1] - self.strand_switch_angle
+                # generate the next DOWN STRAND NEMid angle
+                # "NEMid_angles[domain_index][0][i+1]" =
+                # NEMid angles -> current domain -> list of NEMid angles for up strand -> one we just computed
+                NEMid_angles[domain_index][0].append(
+                    NEMid_angles[domain_index][1][i + 1] - self.theta_s
                 )
 
-        return point_angles
+        return NEMid_angles
 
     @lru_cache(maxsize=1)
     def _x_coords(self, count: int) -> DomainsContainerType:
-        """Generate x cords."""
+        """Generate count# of x cords."""
         x_coords: DomainsContainerType = DomainsContainer(
             self.domain_count
         )  # container to store generated x coords in
-        point_angles: DomainsContainerType = self._point_angles(
+        NEMid_angles: DomainsContainerType = self._NEMid_angles(
             count
-        )  # point angles are needed to generate x coords
+        )  # NEMid angles are needed to generate x coords
 
         # generate count# of x coords on a domain-by-domain basis
         # domain_index is the index of the current domain
         for domain_index in range(self.domain_count):
             # current exterior and interior angles
-            # note that "exterior_angle == 360 - interior_angle"
+            # note that "theta_exterior == 360 - interior_angle"
             theta_interior: float = (
-                self.domains[domain_index].theta_interior_multiple
-                * self.characteristic_angle
+                self.domains[domain_index].theta_interior_multiple * self.theta_c
             )
-            exterior_angle: float = 360 - theta_interior
+            theta_exterior: float = 360 - theta_interior
 
             for i in range(count):
                 for strand_direction in range(
                     2
                 ):  # repeat same steps for up and down strand
-                    # find the current point_angle and modulo it by 360
-                    # point angles are "the angle about the central axis going counter-clockwise from the line of tangency."
-                    # they reset at 360, so we modulo the current point angle here
-                    point_angle: float = (
-                        point_angles[domain_index][strand_direction][i] % 360
+                    # find the current NEMid_angle and modulo it by 360
+                    # NEMid angles are "the angle about the central axis going counter-clockwise from the line of tangency."
+                    # they reset at 360, so we modulo the current NEMid angle here
+                    NEMid_angle: float = (
+                        NEMid_angles[domain_index][strand_direction][i] % 360
                     )
 
-                    if point_angle < exterior_angle:
-                        x_coord = point_angle / exterior_angle
+                    if NEMid_angle < theta_exterior:
+                        x_coord = NEMid_angle / theta_exterior
                     else:
-                        x_coord = (360 - point_angle) / theta_interior
+                        x_coord = (360 - NEMid_angle) / theta_interior
 
                     # domain 0 lies between [0, 1] on the x axis
                     # domain 1 lies between [1, 2] on the x axis
@@ -158,8 +158,8 @@ class side_view:
         return x_coords
 
     @lru_cache(maxsize=1)
-    def _z_coords(self, count: int, NEMid=True) -> DomainsContainerType:
-        """Generate z cords."""
+    def _z_coords(self, count: int) -> DomainsContainerType:
+        """Generate count# of z cords."""
         # if there are multiple domains ensure "count" is over 21, because we would not be able to get a full
         # sample of the x coords for finding the best places to place bases
         if self.domain_count > 0:
@@ -178,7 +178,7 @@ class side_view:
 
         # arbitrarily define the z_coord of the up strand of domain#0 to be 0
         z_coords[0][0].append(0.0)
-        z_coords[0][1].append(0.0 - self.strand_switch_distance)
+        z_coords[0][1].append(0.0 - self.Z_s)
 
         # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first one first
         # the first domain has its initial z cords (up and down strands) set to (arbitrary) static values, whereas other domains do not
@@ -187,11 +187,11 @@ class side_view:
         for i in range(count):
             # generate the next z_coord for the down strand...
             # "z_coords[0][0][i] " means "z_coords -> domain#0 -> up_strand -> previous z_coord"
-            z_coords[0][0].append(z_coords[0][0][i] + self.base_height)
+            z_coords[0][0].append(z_coords[0][0][i] + self.Z_b)
 
             # generate the next z_coord for the up strand...
             # "z_coords[0][1][i+1]" means "z_coords -> domain#0 -> up_strand -> z_coord we just computed
-            z_coords[0][1].append(z_coords[0][0][i + 1] - self.strand_switch_distance)
+            z_coords[0][1].append(z_coords[0][0][i + 1] - self.Z_s)
 
         # now find and append the initial z_coord for each domain
         for domain_index in range(1, self.domain_count):
@@ -200,7 +200,7 @@ class side_view:
             # step 1: find the initial z cord for the current domain_index
 
             # lets find the maxmimum x cord for the previous domain
-            # that will be the point where, when placed adjacently to the right in the proper place
+            # that will be the NEMid where, when placed adjacently to the right in the proper place
             # there will be an overlap of bases
             initial_z_coord: DomainsContainerType = self._x_coords(count)[
                 previous_domain_index
@@ -210,28 +210,26 @@ class side_view:
             initial_z_coord: int = initial_z_coord.index(max(initial_z_coord))
             # obtain the index of the rightmost x coord on the strand
 
-            # we are going to line up the next up strand so that its leftmost (first) point touches the previous domain's rightmost
+            # we are going to line up the next up strand so that its leftmost (first) NEMid touches the previous domain's rightmost
             initial_z_coord: float = z_coords[previous_domain_index][0][initial_z_coord]
 
             # append this new initial z cord to the actual list of z_coords
             z_coords[domain_index][1].append(initial_z_coord)
-            z_coords[domain_index][0].append(
-                initial_z_coord - self.strand_switch_distance
-            )
+            z_coords[domain_index][0].append(initial_z_coord - self.Z_s)
 
             # step 2: actually calculate the z coords of this new domain
 
             for i in range(count):  # (domain 0 is already calculated)
-                # append the previous z_coord + the base_height
+                # append the previous z_coord + the Z_b
                 # "z_coords[i][0][i]" == "z_coords -> domain#i -> up_strand -> previous one"
                 z_coords[domain_index][1].append(
-                    z_coords[domain_index][1][i] + self.base_height
+                    z_coords[domain_index][1][i] + self.Z_b
                 )
 
                 # append the previous z_coord's up strand value, minus the strand switch distance
                 # "z_coords[i][0][i]" == "z_coords -> domain#i -> down_strand -> z_coord we just calculated"
                 z_coords[domain_index][0].append(
-                    z_coords[domain_index][1][i + 1] - self.strand_switch_distance
+                    z_coords[domain_index][1][i + 1] - self.Z_s
                 )
 
         return z_coords
@@ -241,7 +239,7 @@ class side_view:
         Generate PyQt widget for side view.
 
         Args:
-            count (int): Number of points to generate per domain.
+            count (int): Number of NEMids to generate per domain.
         """
         plotted_window: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
@@ -292,7 +290,7 @@ class side_view:
                     pxMode=True,  # means that symbol size is in px
                     symbolPen=pg.mkPen(
                         color=color
-                    ),  # set color of points to current color
+                    ),  # set color of NEMids to current color
                     pen=pg.mkPen(
                         color=(120, 120, 120), width=1.8
                     ),  # set color of pen to current color (but darker)
