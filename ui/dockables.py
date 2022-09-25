@@ -1,25 +1,24 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import (
     QWidget,
-    QLabel,
     QVBoxLayout,
-    QTabWidget,
     QPushButton,
     QSpacerItem,
     QSizePolicy,
     QDockWidget,
+    QTabWidget,
+    QLabel,
 )
-from PyQt6 import uic
 import dna_nanotube_tools
-import ui.slots, ui.panels
+import ui.helpers, ui.panels
 from PyQt6.QtCore import Qt
+import database.settings
+
+dock_areas = SimpleNamespace(left=0x1, right=0x2, top=0x4, bottom=0x8, all=0)
 
 # START OF PLACEHOLDER CODE
 domains = [dna_nanotube_tools.domain(9, 0)] * 14
-_top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
 # END OF PLACEHOLDER CODE
-
-dock_areas = SimpleNamespace(left=0x1, right=0x2, top=0x4, bottom=0x8, all=0)
 
 
 class top_view(QDockWidget):
@@ -28,13 +27,16 @@ class top_view(QDockWidget):
     def __init__(self):
         super().__init__("Top View of Helicies")
 
+        # preliminary window settings
         self.setWindowTitle("Top View of Helicies")
         self.setStatusTip("A plot of the top view of all domains")
-        self.setWidget(_top_view.ui())
-        self.widget().setStyleSheet("margin: 5px")
 
+        # initilize plot
+        self.refresh()
+
+        # if window is popped out sizing can be larger
         self.setMaximumWidth(250)
-        self.topLevelChanged.connect(lambda: ui.slots.float_resizer(self, 250))
+        self.topLevelChanged.connect(lambda: ui.helpers.float_resizer(self, 250))
         self.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
@@ -42,6 +44,13 @@ class top_view(QDockWidget):
 
         # area for widget to be docked (this is accessed in main_window.py)
         self.area = Qt.DockWidgetArea(dock_areas.left)
+
+    def refresh(self):
+        settings = database.settings.current_preset.data
+        widget = dna_nanotube_tools.plot.top_view(domains, settings.diameter)
+        widget = widget.ui()
+        self.setWidget(widget)
+        self.widget().setStyleSheet("margin: 5px")
 
 
 class config(QDockWidget):
@@ -59,12 +68,20 @@ class config(QDockWidget):
             QWidget()
         )  # main widget is empty widget with vertical array layout
         self.widget().setLayout(QVBoxLayout())  # add layout to empty widget
-        layout = self.widget().layout()  # create reference to make coding easier
 
-        # main tab area
+        # create reference to make coding easier
+        layout = self.widget().layout()
+
+        # container to store references to tabs in
+        self.tabs = SimpleNamespace()
         self.tab_area = QTabWidget()
-        self.tab_area.addTab(ui.panels.settings(), "Settings")
-        self.tab_area.addTab(ui.panels.domains(), "Domains")
+        # settings tab
+        self.tabs.settings = ui.panels.settings()
+        self.tab_area.addTab(self.tabs.settings, "Settings")
+        # domains tab
+        self.tabs.domains = ui.panels.domains()
+        self.tab_area.addTab(self.tabs.domains, "Domains")
+        # add tab area to central dock widget
         layout.addWidget(self.tab_area)
 
         # expanding spacer item
@@ -72,8 +89,8 @@ class config(QDockWidget):
             QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
         )
 
-        # update graphs button
-        self.update_graphs_button = QPushButton("Update Graphs")
+        # add update graph button
+        self.update_graphs_button = QPushButton("Overwrite Preset/Update Graphs")
         layout.addWidget(self.update_graphs_button)
 
         # prettification
@@ -83,7 +100,7 @@ class config(QDockWidget):
 
         # ensure that when the config panel is undocked it can resize to be larger
         self.topLevelChanged.connect(
-            lambda: ui.slots.float_resizer(self, 250, maximum_width=400)
+            lambda: ui.helpers.float_resizer(self, 250, maximum_width=400)
         )
 
         # prevent closing the panel

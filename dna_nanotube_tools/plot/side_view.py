@@ -296,7 +296,7 @@ class side_view:
                     ),  # set color of pen to current color (but darker)
                 )
 
-        main_plot.setAspectLocked(lock=True, ratio=116)
+        main_plot.setAspectLocked(lock=True, ratio=25)
         main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
 
         return plotted_window

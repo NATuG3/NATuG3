@@ -5,17 +5,45 @@ from PyQt6.QtWidgets import (
     QMenuBar,
     QGroupBox,
     QVBoxLayout,
+    QLabel,
 )
 import ui.menus
 import dna_nanotube_tools.plot
+import database.settings
 
 # START OF PLACEHOLDER CODE
 domains = [dna_nanotube_tools.domain(9, 0)] * 14
-side_view = dna_nanotube_tools.plot.side_view(
-    domains, 3.38, 12.6, 2.3, (360 / 21) * 2, 360 / 21
-)
-side_view = side_view.ui(150)
 # END OF PLACEHOLDER CODE
+
+
+class central_widget(QGroupBox):
+    """Central widget of window"""
+
+    def __init__(self):
+        super().__init__("Side View of Helicies")
+
+        # set main widget and layout
+        self.setLayout(QVBoxLayout())
+
+        # we store the previous widget so that it is easy to replace
+        self.previous_widget = None
+
+        # add plotted side view as main widget and apply styling
+        self.setStatusTip("A plot of the side view of all domains")
+        self.setMinimumWidth(350)
+
+        # Refresh the side view central widget
+        settings = database.settings.current_preset.data
+        widget = dna_nanotube_tools.plot.side_view(
+            domains,
+            settings.Z_b,
+            settings.Z_s,
+            settings.theta_s,
+            settings.theta_b,
+            settings.theta_c,
+        )
+        widget = widget.ui(settings.count)
+        self.layout().addWidget(widget)
 
 
 class main_window(QMainWindow):
@@ -27,17 +55,7 @@ class main_window(QMainWindow):
         # utilize inhereted methods to set up the main window
         self.setWindowTitle("DNA Constructor")
 
-        # prittify the central widget in a group box
-        class central_widget(QGroupBox):
-            """Central widget of window"""
-
-            def __init__(subself):
-                super().__init__("Side View of Helicies")
-                subself.setLayout(QVBoxLayout())
-                subself.layout().addWidget(side_view)
-                subself.setStatusTip("A plot of the side view of all domains")
-                subself.setMinimumWidth(350)
-
+        # apply central widget
         self.setCentralWidget(central_widget())
 
         # initilize status bar
@@ -48,6 +66,36 @@ class main_window(QMainWindow):
 
         # add docked widgets
         self._docked_items()
+
+        # initilize buttons
+        self._buttons()
+
+    def _buttons(self):
+        """Link critical buttons"""
+        # first overwrite the current preset
+        def overwrite_current_preset():
+            # obtain currently entered settings
+            current_settings = (
+                self.docked_items.config.tabs.settings.fetch_settings_data()
+            )
+            # overwrite the current preset
+            database.settings.presets[
+                database.settings.current_preset.name
+            ] = current_settings
+            database.settings.current_preset = SimpleNamespace(
+                name=database.settings.current_preset.name, data=current_settings
+            )
+        self.docked_items.config.update_graphs_button.clicked.connect(
+            overwrite_current_preset
+        )
+
+        # update graph button to graph refresh funcs
+        self.docked_items.config.update_graphs_button.clicked.connect(
+            lambda: self.docked_items.top_view.refresh()
+        )
+        self.docked_items.config.update_graphs_button.clicked.connect(
+            lambda: self.setCentralWidget(central_widget())
+        )
 
     def _docked_items(self):
         """Add all docked widgets."""

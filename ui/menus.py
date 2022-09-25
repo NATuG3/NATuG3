@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 import webbrowser
-import ui.slots
+import ui.helpers
 
 
 class view(QMenu):
@@ -20,7 +20,7 @@ class view(QMenu):
         self.actions.config.setCheckable(True)  # top view can be hidden
         # when clicked reverse hidden state of the config panel
         self.actions.config.toggled.connect(
-            lambda: ui.slots.hide_or_unhide(main_window.docked_items.config)
+            lambda: ui.helpers.hide_or_unhide(main_window.docked_items.config)
         )
 
         # view -> "top view" -> hide/unhide
@@ -30,7 +30,7 @@ class view(QMenu):
         self.actions.top_view.setCheckable(True)  # top view can be hidden
         # when clicked reverse hidden state of the top view graph
         self.actions.top_view.toggled.connect(
-            lambda: ui.slots.hide_or_unhide(main_window.docked_items.top_view)
+            lambda: ui.helpers.hide_or_unhide(main_window.docked_items.top_view)
         )
 
 

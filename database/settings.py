@@ -1,13 +1,16 @@
 import atexit
+from collections import namedtuple
 from copyreg import pickle
 from dataclasses import dataclass
 from os import listdir
 import pickle
+from types import SimpleNamespace
 
 
 def save(presets, filename) -> None:
     """Save the preset()s dictonary into filename"""
     with open(filename, "wb") as database:
+        presets["last_used"] = current_preset.name
         pickle.dump(presets, database)
 
 
@@ -45,35 +48,32 @@ class preset:
         self.Z_b = (self.T * self.H) / self.B
 
 
-def presets():
-    """Initiation function to load and return presets"""
+filename = "settings.nano"
 
-    global presets
-    filename = "settings.nano"
+if filename in listdir():
+    with open(filename, mode="rb") as file:
+        presets = pickle.load(file)
+else:
+    presets = {
+        "last_used": "MFD B-DNA",
+        "MFD B-DNA": preset(
+            count=200,
+            diameter=2.2,
+            H=3.549,
+            T=2,
+            B=21,
+            Z_c=0.17,
+            Z_s=12.6,
+            theta_b=34.29,
+            theta_c=360 / 21,
+            theta_s=2.3,
+        ),
+    }
 
-    if filename in listdir():
-        with open(filename, mode="rb") as file:
-            presets = pickle.load(file)
-    else:
-        presets = {
-            "last_used": "MFD B-DNA",
-            "MFD B-DNA": preset(
-                count=150,
-                diameter=2.2,
-                H=3.549,
-                T=2,
-                B=21,
-                Z_c=0.17,
-                Z_s=12.6,
-                theta_b=34.29,
-                theta_c=360 / 21,
-                theta_s=2.3,
-            ),
-        }
+current_preset = SimpleNamespace(
+    name=presets["last_used"], data=presets[presets["last_used"]]
+)
 
-    atexit.register(lambda: save(presets, "settings.nano"))
+del presets["last_used"]
 
-    return presets  # return reference to presets
-
-
-presets()
+atexit.register(lambda: save(presets, "settings.nano"))

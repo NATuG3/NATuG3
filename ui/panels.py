@@ -1,4 +1,5 @@
 import atexit
+from types import SimpleNamespace
 import database.settings
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QLabel, QErrorMessage
 from PyQt6 import uic
@@ -17,28 +18,42 @@ class settings(QWidget):
                 self.preset_list.addItem(preset)
 
         # set the current preset of whichever was "last_used"
-        last_used_preset = database.settings.presets["last_used"]
-        self.inject_settings_data(database.settings.presets[last_used_preset])
-        self.preset_list.setCurrentText(last_used_preset)
+        # database.settings.current_preset.name is the name of the current preset (or last used one)
+        self.inject_settings_data(database.settings.current_preset.data)
+        self.preset_list.setCurrentText(database.settings.current_preset.name)
 
-        def inject_preset_if_existing():
+        def current_preset_changed():
             """If the preset selector box was changed to an existing preset then update inputs to it"""
+            current_preset_name = self.preset_list.currentText()
             try:
                 self.inject_settings_data(
-                    database.settings.presets[self.preset_list.currentText()]
+                    database.settings.presets[current_preset_name]
+                )
+                # store the new preset change in database.settings.current_preset
+                # current_preset_format is a namedtuple[name, data]
+                database.settings.current_preset = SimpleNamespace(
+                    name=current_preset_name,
+                    data=database.settings.presets[current_preset_name],
                 )
             except KeyError:
                 pass
-        self.preset_list.currentIndexChanged.connect(inject_preset_if_existing)
-        self.save_preset_button.clicked.connect(self.save_button)
-        self.delete_preset_button.clicked.connect(self.delete_button)
+
+        # hook functions to buttons
+        self.preset_list.currentIndexChanged.connect(current_preset_changed)
+        self.save_preset_button.clicked.connect(self.save_preset_button_func)
+        self.delete_preset_button.clicked.connect(self.delete_preset_button_func)
+        self.restore_preset_button.clicked.connect(
+            lambda: self.inject_settings_data(database.settings.current_preset.data)
+        )
 
         # store the current state as "last_used" on exit
         def on_exit():
             database.settings.presets["last_used"] = self.preset_list.currentText()
+
         atexit.register(on_exit)
 
-    def save_button(self):
+    def save_preset_button_func(self):
+        """Called when "save preset" button is clicked."""
         selected_preset_name = self.preset_input.text()
 
         # only add a new entry to the combo box if the preset name doesn't exist already
@@ -51,7 +66,8 @@ class settings(QWidget):
 
         self.preset_list.setCurrentText(selected_preset_name)
 
-    def delete_button(self):
+    def delete_preset_button_func(self):
+        """Called when "delete preset" button is clicked."""
         selected_preset_name = self.preset_input.text()
         preset_list_items = [
             self.preset_list.itemText(_) for _ in range(self.preset_list.count())
@@ -67,7 +83,7 @@ class settings(QWidget):
         preset_list_items = [
             self.preset_list.itemText(_) for _ in range(self.preset_list.count())
         ]
-        # delete preset from combo box by index 
+        # delete preset from combo box by index
         del database.settings.presets[selected_preset_name]
         self.preset_list.removeItem(preset_list_items.index(selected_preset_name))
 
@@ -87,7 +103,7 @@ class settings(QWidget):
         )
 
     def inject_settings_data(self, preset):
-        """Inject a preset object's data into the input boxes"""
+        """Inject <preset>'s data into the input boxes"""
         self.count_input.setValue(preset.count)
         self.diameter_input.setValue(preset.diameter)
         self.H_input.setValue(preset.H)
