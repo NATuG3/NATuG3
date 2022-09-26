@@ -1,9 +1,23 @@
 from types import SimpleNamespace
-from PyQt6.QtWidgets import QMainWindow, QStatusBar, QDockWidget, QMenuBar, QMenu
-import ui.plots
-import ui.config
-import webbrowser
+from PyQt6.QtWidgets import (
+    QMainWindow,
+    QStatusBar,
+    QDockWidget,
+    QMenuBar,
+    QMenu,
+    QGroupBox,
+    QHBoxLayout,
+)
 from PyQt6.QtCore import Qt
+import ui
+import webbrowser
+import dna_nanotube_tools.graph
+
+# START OF PLACEHOLDER CODE
+domains = [dna_nanotube_tools.domain(9, 0)] * 14
+side_view = dna_nanotube_tools.graph.side_view(domains, 3.38, 12.6, 2.3)
+top_view = dna_nanotube_tools.graph.top_view(domains, 2.2)
+# END OF PLACEHOLDER CODE
 
 
 class main_window(QMainWindow):
@@ -48,13 +62,13 @@ class main_window(QMainWindow):
         self.config = QDockWidget()
         self.config.setWindowTitle("Config")
         self.config.setStatusTip("Settings panel")
-        self.config.setWidget(ui.config.config())
+        self.config.setWidget(ui.panels.config())
         self.config.setMaximumWidth(250)
         self.config.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
-        self.addDockWidget(Qt.DockWidgetArea(0x2), self.config)
+        self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
     def _status_bar(self):
         """Create and add status bar."""
