@@ -1,9 +1,10 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import QMainWindow, QStatusBar, QDockWidget, QMenuBar, QMenu
-import ui.plots
-import ui.config
+import ui.plots, ui.config, ui.slots
 import webbrowser
 from PyQt6.QtCore import Qt
+from contextlib import suppress
+import database
 
 
 class main_window(QMainWindow):
@@ -15,45 +16,75 @@ class main_window(QMainWindow):
         # utilize inhereted methods to set up the main window
         self.setWindowTitle("DNA Constructor")
 
-        # the side view plot is the main widget
-        self.setCentralWidget(ui.plots.side_view())
-
         # initilize status bar
         self._status_bar()
 
         # initilize menu bar
         self._menu_bar()
 
-        # add docked widgets
-        self._docked_widgets()
+        # add all widgets
+        self.refresh_config()
+        self.refresh_top_view()
+        self.refresh_side_view()
 
-    def _docked_widgets(self):
-        """Add all docked widgets."""
-        # docked widget positions:
-        #  0x1 left, 0x2 right; 0x4 top; 0x8 bottom; 0 all
+        # store instance in the database
+        database.main_window = self
 
-        # attach top view to left dock
+    def refresh_top_view(self):
+        """Attach top view to main window/replace current top view widget"""
+        # remove the current top view widget if it exists
+        with suppress(AttributeError):
+            self.removeDockWidget(self.top_view)
+        # create dockable widget for top view
         self.top_view = QDockWidget()
         self.top_view.setWindowTitle("Top View of Helicies")
         self.top_view.setStatusTip("A plot of the top view of all domains")
         self.top_view.setWidget(ui.plots.top_view())
-        self.top_view.setMaximumWidth(270)
+        # limit max width of top view widget while docked to 340px
+        self.top_view.setMaximumWidth(340)
+        # when this widget floats remove width scaling limitation
+        self.top_view.topLevelChanged.connect(
+            lambda: ui.slots.unrestrict_scale_upon_float(
+                self.top_view, initial_width=340
+            )
+        )
         self.top_view.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
+        # dock the new dockable top view widget
         self.addDockWidget(Qt.DockWidgetArea(0x1), self.top_view)
 
-        # attach config panel to right dock
+    def refresh_side_view(self):
+        """Attach side view to main window/replace current side view widget"""
+        self.side_view = ui.plots.side_view()
+        # ensure this widget is always large enough to be useful (300px)
+        self.side_view.setMinimumWidth(300)
+        self.setCentralWidget(self.side_view)
+
+    def refresh_config(self):
+        """Attach config to main window/replace current config widget"""
+        # remove the current config dockable widget if it exists
+        with suppress(AttributeError):
+            self.removeDockWidget(self.config)
+        # create a dockable config widget
         self.config = QDockWidget()
         self.config.setWindowTitle("Config")
         self.config.setStatusTip("Settings panel")
         self.config.setWidget(ui.config.config())
-        self.config.setMaximumWidth(250)
+        # limit max width of config widget while docked to 200px
+        self.config.setMaximumWidth(200)
+        # when this widget floats allow it to scale up to 400px wide
+        self.config.topLevelChanged.connect(
+            lambda: ui.slots.unrestrict_scale_upon_float(
+                self.config, initial_width=200, unbounded_width=460
+            )
+        )
         self.config.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
             | QDockWidget.DockWidgetFeature.DockWidgetMovable
         )
+        # dock the new docakble config widget
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.config)
 
     def _status_bar(self):

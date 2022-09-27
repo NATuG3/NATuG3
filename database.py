@@ -17,7 +17,6 @@ def settings():
         T=2,
         B=21,
         Z_c=0.17,
-        Z_b=.338,
         Z_s=1.26,
         theta_b=34.29,
         theta_c=360 / 21,
