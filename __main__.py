@@ -33,8 +33,7 @@ if __name__ == "__main__":
     # QApplication must be created before we can import ui
     import ui
 
-    # store main_window instance in database
-    window = ui.window()
+    window = ui.windows.main()
     # show window
     window.show()
 

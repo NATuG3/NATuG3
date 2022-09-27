@@ -1,14 +1,13 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
-from PyQt6.QtGui import QIcon
 import ui.helpers
 import webbrowser
 from PyQt6.QtGui import QKeySequence
 
 # the parent for all menus
-import database.references
+import database.ui
 
-parent_menu = database.references.window.menu_bar
+parent_menu = database.ui.windows.main.menu_bar
 
 
 class file(QMenu):
@@ -60,7 +59,7 @@ class view(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(ui.helpers.fetch_icon("eye-off-outline"))
         config.triggered.connect(
-            lambda: hide_or_unhide(database.references.window.docked_widgets.config, config)
+            lambda: hide_or_unhide(database.ui.window.docked_widgets.config, config)
         )
 
         # view -> "top view" -> hide/unhide
@@ -69,7 +68,7 @@ class view(QMenu):
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(ui.helpers.fetch_icon("eye-off-outline"))
         top_view.triggered.connect(
-            lambda: hide_or_unhide(database.references.window.docked_widgets.top_view, top_view)
+            lambda: hide_or_unhide(database.ui.window.docked_widgets.top_view, top_view)
         )
 
         # view -> update graphs

@@ -1,1 +1,1 @@
-from ui.window import window
+from ui.windows.main import main

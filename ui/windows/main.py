@@ -11,7 +11,8 @@ from PyQt6.QtWidgets import (
 import ui.widgets, ui.widgets.config
 from PyQt6.QtCore import Qt
 from contextlib import suppress
-import database.references
+import database.ui
+
 
 def unrestrict_scale_upon_float(
     widget: QWidget,
@@ -37,7 +38,7 @@ def unrestrict_scale_upon_float(
         widget.setMaximumWidth(initial_width)
         widget.setMaximumHeight(initial_height)
 
-class window(QMainWindow):
+class main(QMainWindow):
     """
     The application's main window.
 
@@ -54,8 +55,8 @@ class window(QMainWindow):
         # so we must initialize the parent qt widget
         super().__init__()
 
-        # store instance in the database
-        database.references.window = self
+        # store instance of this window in the database
+        database.ui.windows.main = self
 
         # utilize inhereted methods to set up the main window
         self.setWindowTitle("DNA Constructor")
