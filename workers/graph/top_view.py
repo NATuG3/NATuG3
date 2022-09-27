@@ -2,6 +2,7 @@ import math
 from typing import List
 import pyqtgraph as pg
 
+
 class top_view:
     """
     Generate top view features.
@@ -48,13 +49,11 @@ class top_view:
         for domain_index in range(self.domain_count):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                self.domains[domain_index - 1].theta_switch_multiple
-                * self._theta_s
+                self.domains[domain_index - 1].theta_switch_multiple * self._theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                self.domains[domain_index - 1].theta_interior_multiple
-                * self._theta_c
+                self.domains[domain_index - 1].theta_interior_multiple * self._theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
@@ -82,39 +81,6 @@ class top_view:
         self.computed = True
         return self
 
-    def ui(self) -> pg.GraphicsLayoutWidget:
-        """
-        Generate PyQt widget for top view.
-        """
-        self.compute()
-
-        plotted_window: pg.GraphicsLayoutWidget = (
-            pg.GraphicsLayoutWidget()
-        )  # create main plotting window
-        plotted_window.setWindowTitle("Top View of DNA")  # set the window's title
-        plotted_window.setBackground("w")  # make the background white
-
-        main_plot = plotted_window.addPlot()
-
-        main_plot.plot(
-            self.u_coords,
-            self.v_coords,
-            title="Top View of DNA",
-            symbol="o",
-            symbolSize=self.diameter,
-            pxMode=False,
-        )
-
-        # increase the view box padding, since...
-        # our symbols are VERY large circles and pyqtgraph calculates padding from the actual points, so the circles get cut off
-        plotted_view_box = main_plot.getViewBox()
-        plotted_view_box.setDefaultPadding(padding=0.18)
-
-        # prevent user from interacting with the graph
-        plotted_view_box.setAspectLocked(lock=True, ratio=1)
-
-        return plotted_window
-
     def __repr__(self) -> str:
         round_to = 3
         match self.computed:
@@ -127,6 +93,6 @@ class top_view:
                         [round(coord, round_to) for coord in self.v_coords],
                     )
                 )
-                return f"top_view(coords={prettified_coords}, theta_deltas={[round(delta, round_to) for delta in self.angle_deltas]}"
+                return f"top_view(coords={prettified_coords}, theta_deltas={[round(delta, round_to) for delta in self.theta_deltas]}"
             case _:
                 return "top_view(uninitilized)"

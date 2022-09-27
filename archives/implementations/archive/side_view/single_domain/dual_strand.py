@@ -1,4 +1,4 @@
-import dna_nanotube_tools
+import workers
 from PyQt6.QtWidgets import QApplication
 import pyqtgraph as pg
 import sys
@@ -14,7 +14,7 @@ interior_angle_multiples = [4]
 switch_angle_multiples = [0]
 
 base_angle = 2 * (360 / 21)
-side_view = dna_nanotube_tools.plot.side_view(
+side_view = workers.plot.side_view(
     interior_angle_multiples, 3.38, base_angle, 12.6, 2.3
 )
 xs_NEMid = side_view.x_coords(25)

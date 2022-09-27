@@ -1,7 +1,7 @@
-import dna_nanotube_tools.graph
+import workers.graph
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import database
+import database.settings, database.domains
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,15 +11,16 @@ class top_view(QWidget):
     def __init__(self):
         super().__init__()
 
+        # set layout of widget
         self.setLayout(QVBoxLayout())
 
         # obtain current settings
-        settings = database.settings()
+        settings = database.settings.current
 
         # obtain current domains
-        domains = database.domains()
+        domains = database.domains.current
 
-        top_view = dna_nanotube_tools.graph.top_view(
+        top_view = workers.graph.top_view(
             domains, settings.diameter, settings.theta_c, settings.theta_s
         )
         top_view.compute()

@@ -2,7 +2,7 @@ from functools import lru_cache
 from types import FunctionType
 from typing import Deque, Tuple, Type
 from collections import deque
-from dna_nanotube_tools.datatypes import domain, nucleoside, NEMid
+from workers.datatypes import domain, nucleoside, NEMid
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda domain_count: tuple(

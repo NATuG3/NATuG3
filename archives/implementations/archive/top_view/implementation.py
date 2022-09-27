@@ -1,4 +1,4 @@
-import dna_nanotube_tools
+import workers
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QApplication
 import sys
@@ -15,10 +15,10 @@ def visualize_widget(widget):
 
 
 # define domains to generate topview for
-domains = [dna_nanotube_tools.domain(9, 0) for i in range(14)]
+domains = [workers.domain(9, 0) for i in range(14)]
 
 # generate top view data
-top_view = dna_nanotube_tools.plot.top_view(domains, 2.2)
+top_view = workers.plot.top_view(domains, 2.2)
 
 # obtain coords
 u_coords = top_view.u_coords

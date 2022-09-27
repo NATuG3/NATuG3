@@ -1,29 +1,27 @@
-from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import dna_nanotube_tools.graph
-import database
+import workers.graph
+import database.settings, database.domains
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class side_view(QGroupBox):
+class side_view(QWidget):
     def __init__(self):
         super().__init__()
 
+        # set layout of widget
         self.setLayout(QVBoxLayout())
 
-        # set window data
-        self.setTitle("Side View of Helicies")
-        self.setStatusTip("A plot of the side view of all domains")
-
         # obtain current settings
-        settings = database.settings()
+        settings = database.settings.current
+
         # obtain current domains
-        domains = database.domains()
+        domains = database.domains.current
 
         # create instance of dna_nanotube_tools side view generation
-        side_view = dna_nanotube_tools.graph.side_view(
+        side_view = workers.graph.side_view(
             domains,
             settings.Z_b,
             settings.Z_s,

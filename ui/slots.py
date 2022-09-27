@@ -24,3 +24,11 @@ def unrestrict_scale_upon_float(
     else:
         widget.setMaximumWidth(initial_width)
         widget.setMaximumHeight(initial_height)
+
+
+def hide_or_unhide(widget):
+    """Reverse the hiddenness of a widget"""
+    if widget.isHidden():
+        widget.show()
+    else:
+        widget.hide()

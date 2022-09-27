@@ -101,7 +101,13 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QComboBox" name="comboBox"/>
+           <widget class="QComboBox" name="comboBox">
+            <item>
+             <property name="text">
+              <string>Choose Profile</string>
+             </property>
+            </item>
+           </widget>
           </item>
           <item row="1" column="0" colspan="2">
            <widget class="Line" name="line_4">
@@ -149,7 +155,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Save</string>
+               <string>Save/Overwrite</string>
               </property>
              </widget>
             </item>

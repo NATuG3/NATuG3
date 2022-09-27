@@ -1,29 +1,29 @@
-import dna_nanotube_tools.graph
+import workers.graph
 from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout
 import sys
 
 # define domains to generate sideview for
 interjunction_multiples = (7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0)
 domains = [
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
-    dna_nanotube_tools.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
+    workers.domain(9, 0),
 ]
 
 # initilize side view class
-side_view = dna_nanotube_tools.graph.side_view(domains, 3.38, 12.6, 2.3)
-top_view = dna_nanotube_tools.graph.top_view(domains, 2.2)
+side_view = workers.graph.side_view(domains, 3.38, 12.6, 2.3)
+top_view = workers.graph.top_view(domains, 2.2)
 
 # create ui widget
 side_view_ui_widget = side_view.ui(150)
