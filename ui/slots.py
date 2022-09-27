@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QWidget
 
+
 def unrestrict_scale_upon_float(
     widget: QWidget,
     initial_width: int = 9999,

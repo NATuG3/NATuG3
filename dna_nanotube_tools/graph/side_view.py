@@ -228,3 +228,11 @@ class side_view:
                 )
 
         return z_coords
+
+    def __repr__(self) -> str:
+        output = "side_view("
+        for attr, value in vars(self).items():
+            output += f"{attr}={value}, "
+        output -= 1
+        output += ")"
+        return output

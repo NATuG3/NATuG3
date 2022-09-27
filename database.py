@@ -1,5 +1,5 @@
 import dna_nanotube_tools
-import ui.config
+import ui.widgets.config
 from PyQt6.QtWidgets import QMainWindow
 
 """
@@ -14,7 +14,7 @@ def domains():
 
 
 def settings():
-    return ui.config.profile(
+    return ui.widgets.profile(
         count=200,
         diameter=2.2,
         H=3.549,

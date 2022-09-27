@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import QMainWindow, QStatusBar, QDockWidget, QMenuBar, QMenu
-import ui.plots, ui.config, ui.slots
+import ui.widgets, ui.widgets.config, ui.slots
 import webbrowser
 from PyQt6.QtCore import Qt
 from contextlib import suppress
@@ -39,7 +39,7 @@ class main_window(QMainWindow):
         self.top_view = QDockWidget()
         self.top_view.setWindowTitle("Top View of Helicies")
         self.top_view.setStatusTip("A plot of the top view of all domains")
-        self.top_view.setWidget(ui.plots.top_view())
+        self.top_view.setWidget(ui.widgets.top_view())
         # limit max width of top view widget while docked to 340px
         self.top_view.setMaximumWidth(340)
         # when this widget floats remove width scaling limitation
@@ -57,7 +57,7 @@ class main_window(QMainWindow):
 
     def refresh_side_view(self):
         """Attach side view to main window/replace current side view widget"""
-        self.side_view = ui.plots.side_view()
+        self.side_view = ui.widgets.side_view()
         # ensure this widget is always large enough to be useful (300px)
         self.side_view.setMinimumWidth(300)
         self.setCentralWidget(self.side_view)
@@ -71,7 +71,7 @@ class main_window(QMainWindow):
         self.config = QDockWidget()
         self.config.setWindowTitle("Config")
         self.config.setStatusTip("Settings panel")
-        self.config.setWidget(ui.config.config())
+        self.config.setWidget(ui.widgets.config())
         # limit max width of config widget while docked to 200px
         self.config.setMaximumWidth(200)
         # when this widget floats allow it to scale up to 400px wide
