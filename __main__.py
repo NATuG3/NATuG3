@@ -6,8 +6,6 @@ import logging
 
 # log to file
 logging.basicConfig(
-    format="%(asctime)s %(levelname)s %(message)s",
-    filename="logs.nano",
     level=logging.DEBUG,
 )
 
