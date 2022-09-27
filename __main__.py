@@ -1,6 +1,22 @@
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 import sys
+from time import time
+import logging
+
+# log to file
+logging.basicConfig(
+    format="%(asctime)s %(levelname)s %(message)s",
+    filename="logs.nano",
+    level=logging.DEBUG,
+)
+
+# log to console
+logging.getLogger().addHandler(logging.StreamHandler())
+# log boot statement
+logging.debug(f"Booting @ {time()}")
+# mute pyqt logs
+logging.getLogger("PyQt6").setLevel(logging.INFO)
 
 if sys.platform.startswith("win"):
     # to get icon to work properly on windows this code must be run

@@ -231,8 +231,12 @@ class side_view:
 
     def __repr__(self) -> str:
         output = "side_view("
+        blacklist = "domains"
         for attr, value in vars(self).items():
-            output += f"{attr}={value}, "
-        output -= 1
+            if attr not in blacklist:
+                if isinstance(value, float):
+                    value = round(value, 4)
+                output += f"{attr}={value}, "
+        output = output[:-2]
         output += ")"
         return output

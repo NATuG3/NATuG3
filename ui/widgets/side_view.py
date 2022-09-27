@@ -2,6 +2,9 @@ from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 import pyqtgraph as pg
 import dna_nanotube_tools.graph
 import database
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class side_view(QGroupBox):
@@ -28,6 +31,7 @@ class side_view(QGroupBox):
             settings.theta_b,
             settings.theta_c,
         )
+        logger.debug(side_view)
 
         plotted_window: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
@@ -84,7 +88,7 @@ class side_view(QGroupBox):
                     ),  # set color of pen to current color (but darker)
                 )
 
-        main_plot.setAspectLocked(lock=False, ratio=50)
+        main_plot.setAspectLocked(lock=False, ratio=(1 / 25))
         main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
 
         # add the plot widget to the layout

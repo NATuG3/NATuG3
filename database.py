@@ -1,10 +1,11 @@
 import dna_nanotube_tools
-import ui.widgets.config
 from PyQt6.QtWidgets import QMainWindow
+import ui.datatypes
 
 """
 This file allows cross module data syncing
 """
+
 
 main_window: QMainWindow
 
@@ -14,7 +15,7 @@ def domains():
 
 
 def settings():
-    return ui.widgets.profile(
+    return ui.datatypes.profile(
         count=200,
         diameter=2.2,
         H=3.549,

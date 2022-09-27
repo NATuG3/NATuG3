@@ -2,6 +2,9 @@ import dna_nanotube_tools.graph
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
 import database
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class top_view(QWidget):
@@ -20,6 +23,7 @@ class top_view(QWidget):
             domains, settings.diameter, settings.theta_c, settings.theta_s
         )
         top_view.compute()
+        logger.debug(top_view)
 
         plotted_window: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
