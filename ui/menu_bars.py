@@ -1,5 +1,5 @@
 from types import SimpleNamespace
-from PyQt6.QtWidgets import QMenu, QMenuBar
+from PyQt6.QtWidgets import QMenu
 import ui.slots
 import webbrowser
 from PyQt6.QtGui import QKeySequence
