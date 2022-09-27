@@ -1,2 +1,4 @@
 pyqtgraph
 PyQt6
+PyQt5
+webbrowser

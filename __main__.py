@@ -3,7 +3,9 @@ from PyQt6.QtGui import QIcon
 import sys
 from time import time
 import logging
-import database.ui
+
+# initilize the database
+import database
 
 # initilize logging
 logging.basicConfig(
@@ -26,10 +28,11 @@ if __name__ == "__main__":
     # initilize PyQt6 application
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    app.setWindowIcon(QIcon("resources/icon.ico"))
+    app.setWindowIcon(QIcon("ui/icon.ico"))
 
     # QApplication must be created before we can import ui
     import ui
+
     # store main_window instance in database
     window = ui.window()
     # show window

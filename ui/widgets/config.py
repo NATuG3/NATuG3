@@ -8,7 +8,7 @@ class config(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
-        uic.loadUi("ui/config.ui", self)
+        uic.loadUi("ui/designer/config.ui", self)
 
     class dockable(QDockWidget):
         def __init__(self, subself):
