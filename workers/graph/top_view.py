@@ -1,6 +1,5 @@
 import math
 from typing import List
-import pyqtgraph as pg
 
 
 class top_view:

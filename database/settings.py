@@ -43,6 +43,7 @@ class profile:
         if self.Z_b is None:
             self.Z_b = (self.T * self.H) / self.B
 
+
 def refresh():
     """
     Refresh the settings variable with the current user-inputted settings.
@@ -58,10 +59,11 @@ def dump():
     with open(filename, "wb") as settings_file:
         pickle.dump((current, profiles), settings_file)
 
+
 def load():
     """Load persisting attributes of this module from a file"""
-    global profiles # settings.profiles is global
-    global current # settings.current is global
+    global profiles  # settings.profiles is global
+    global current  # settings.current is global
 
     try:
         # attempt to open the settings file, or create a new settings file with

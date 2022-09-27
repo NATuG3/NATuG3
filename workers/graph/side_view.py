@@ -2,7 +2,8 @@ from functools import lru_cache
 from types import FunctionType
 from typing import Deque, Tuple, Type
 from collections import deque
-from workers.datatypes import domain, nucleoside, NEMid
+from workers.datatypes import NEMid
+
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda domain_count: tuple(
@@ -67,8 +68,10 @@ class side_view:
                     x_coord = self._x_coords(count)[domain_index][strand_direction][i]
                     z_coord = self._z_coords(count)[domain_index][strand_direction][i]
 
+                    # combine all data into NEMid objects
                     _NEMid = NEMid(x_coord, z_coord, angle, None)
                     NEMids[domain_index][strand_direction].append(_NEMid)
+
         return NEMids
 
     @lru_cache(maxsize=1)
@@ -85,23 +88,23 @@ class side_view:
             # whereas the other will be set to zero - theta_s
 
             # set initial NEMid angle values
-            NEMid_angles[domain_index][1].append(0.0)
-            NEMid_angles[domain_index][0].append(0.0 - self.theta_s)
+            NEMid_angles[domain_index][0].append(0.0)
+            NEMid_angles[domain_index][1].append(0.0 - self.theta_s)
 
             for i in range(count):
 
                 # generate the next UP STRAND NEMid angle
                 # "NEMid_angles[domain_index][0]" =
                 # NEMid angles -> current domain -> list of NEMid angles for up strand -> previous one
-                NEMid_angles[domain_index][1].append(
-                    NEMid_angles[domain_index][1][i] + self.theta_b
+                NEMid_angles[domain_index][0].append(
+                    NEMid_angles[domain_index][0][i] + self.theta_b
                 )
 
                 # generate the next DOWN STRAND NEMid angle
                 # "NEMid_angles[domain_index][0][i+1]" =
                 # NEMid angles -> current domain -> list of NEMid angles for up strand -> one we just computed
-                NEMid_angles[domain_index][0].append(
-                    NEMid_angles[domain_index][1][i + 1] - self.theta_s
+                NEMid_angles[domain_index][1].append(
+                    NEMid_angles[domain_index][0][i + 1] - self.theta_s
                 )
 
         return NEMid_angles
@@ -109,9 +112,7 @@ class side_view:
     @lru_cache(maxsize=1)
     def _x_coords(self, count: int) -> DomainsContainerType:
         """Generate count# of x cords."""
-        x_coords: DomainsContainerType = DomainsContainer(
-            self.domain_count
-        )  # container to store generated x coords in
+        x_coords: DomainsContainerType = DomainsContainer(self.domain_count)
         NEMid_angles: DomainsContainerType = self._NEMid_angles(
             count
         )  # NEMid angles are needed to generate x coords

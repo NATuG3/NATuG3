@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QMenuBar,
     QVBoxLayout,
     QGroupBox,
-    QWidget
+    QWidget,
 )
 import ui.widgets, ui.widgets.config
 from PyQt6.QtCore import Qt
@@ -37,6 +37,7 @@ def unrestrict_scale_upon_float(
     else:
         widget.setMaximumWidth(initial_width)
         widget.setMaximumHeight(initial_height)
+
 
 class main(QMainWindow):
     """
@@ -123,9 +124,7 @@ class main(QMainWindow):
 
         # when this widget floats remove width scaling limitation
         docked_top_view.topLevelChanged.connect(
-            lambda: unrestrict_scale_upon_float(
-                self.top_view, initial_width=340
-            )
+            lambda: unrestrict_scale_upon_float(self.top_view, initial_width=340)
         )
         docked_top_view.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable

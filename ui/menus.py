@@ -51,8 +51,7 @@ class view(QMenu):
             else:
                 potentially_hidden_item.hide()
                 menu_item.setIcon(ui.helpers.fetch_icon("eye-outline"))
-                
-                
+
         # view -> "Config" -> hide/unhide
         config = self.actions.config = self.addAction("Config")
         config.setStatusTip("Display the config tab menu")

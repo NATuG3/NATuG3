@@ -8,6 +8,7 @@ def fetch_icon(name: str) -> QIcon:
     """Fetch an icon by name, and cache it."""
     return QIcon(f"ui/icons/{name}.svg")
 
+
 def unrestrict_scale_upon_float(
     widget: QWidget,
     initial_width: int = 9999,
@@ -31,5 +32,3 @@ def unrestrict_scale_upon_float(
     else:
         widget.setMaximumWidth(initial_width)
         widget.setMaximumHeight(initial_height)
-
-
