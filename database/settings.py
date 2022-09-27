@@ -1,11 +1,11 @@
-from collections import namedtuple
 import pickle
-from types import SimpleNamespace
 from dataclasses import dataclass
 from typing import Union
+import logging
 
 
 filename = "settings.nano"
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -40,8 +40,10 @@ class profile:
     theta_s: float = 0.0
 
     def __post_init__(self):
+        # if self.Z_b isn't set then compute it
         if self.Z_b is None:
             self.Z_b = (self.T * self.H) / self.B
+            self.Z_b = round(self.Z_b, 5)
 
 
 def refresh():
@@ -66,11 +68,13 @@ def load():
     global current  # settings.current is global
 
     try:
+        logger.debug("Settings file found. Loading setting profiles...")
         # attempt to open the settings file, or create a new settings file with
         # DNA-B settings (as a default/example)
         with open(filename, "rb") as settings_file:
             current, profiles = pickle.load(settings_file)
     except FileNotFoundError:
+        logger.debug("Settings file not found. Restoring defaults...")
         current = profile(
             count=200,
             diameter=2.2,
@@ -84,3 +88,6 @@ def load():
             theta_s=2.3,
         )
         profiles = {"B-DNA": current}
+
+    logger.debug("Loaded profiles.")
+    logger.debug(profiles)

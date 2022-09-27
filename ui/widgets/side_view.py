@@ -86,8 +86,8 @@ class side_view(QWidget):
                     ),  # set color of pen to current color (but darker)
                 )
 
-        # main_plot.setAspectLocked(lock=False, ratio=(1 / 25))
         main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
+        main_plot.setXRange(0, side_view.domain_count)
 
         # add the plot widget to the layout
         self.layout().addWidget(plotted_window)

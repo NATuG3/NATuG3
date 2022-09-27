@@ -4,9 +4,6 @@ import sys
 from time import time
 import logging
 
-# initilize the database
-import database
-
 # initilize logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -15,6 +12,9 @@ logging.basicConfig(
 logging.debug(f"Booting @ {time()}")
 # mute pyqt logs
 logging.getLogger("PyQt6").setLevel(logging.INFO)
+
+# initilize the database
+import database
 
 if sys.platform.startswith("win"):
     # to get icon to work properly on windows this code must be run

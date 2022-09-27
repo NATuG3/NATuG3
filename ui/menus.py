@@ -58,7 +58,9 @@ class view(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(ui.helpers.fetch_icon("eye-off-outline"))
         config.triggered.connect(
-            lambda: hide_or_unhide(database.ui.window.docked_widgets.config, config)
+            lambda: hide_or_unhide(
+                database.ui.windows.main.docked_widgets.config, config
+            )
         )
 
         # view -> "top view" -> hide/unhide
@@ -67,7 +69,9 @@ class view(QMenu):
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(ui.helpers.fetch_icon("eye-off-outline"))
         top_view.triggered.connect(
-            lambda: hide_or_unhide(database.ui.window.docked_widgets.top_view, top_view)
+            lambda: hide_or_unhide(
+                database.ui.windows.main.docked_widgets.top_view, top_view
+            )
         )
 
         # view -> update graphs
