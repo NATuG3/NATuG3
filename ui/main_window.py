@@ -23,12 +23,34 @@ class main_window(QMainWindow):
         self._menu_bar()
 
         # add all widgets
-        self.refresh_config()
+        self._config()
         self.refresh_top_view()
         self.refresh_side_view()
 
         # store instance in the database
         database.main_window = self
+
+    def _config(self):
+        # create a dockable config widget
+        self.config = QDockWidget()
+        self.config.setWindowTitle("Config")
+        self.config.setStatusTip("Settings panel")
+        self.config.setWidget(ui.widgets.config())
+        # set width of config widget while docked to 200px
+        self.config.setMinimumWidth(215)
+        self.config.setMaximumWidth(215)
+        # when this widget floats allow it to scale up to 400px wide
+        self.config.topLevelChanged.connect(
+            lambda: ui.slots.unrestrict_scale_upon_float(
+                self.config, initial_width=215, unbounded_width=460
+            )
+        )
+        self.config.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+        )
+        # dock the new docakble config widget
+        self.addDockWidget(Qt.DockWidgetArea(0x2), self.config)
 
     def refresh_top_view(self):
         """Attach top view to main window/replace current top view widget"""
@@ -61,31 +83,6 @@ class main_window(QMainWindow):
         # ensure this widget is always large enough to be useful (300px)
         self.side_view.setMinimumWidth(300)
         self.setCentralWidget(self.side_view)
-
-    def refresh_config(self):
-        """Attach config to main window/replace current config widget"""
-        # remove the current config dockable widget if it exists
-        with suppress(AttributeError):
-            self.removeDockWidget(self.config)
-        # create a dockable config widget
-        self.config = QDockWidget()
-        self.config.setWindowTitle("Config")
-        self.config.setStatusTip("Settings panel")
-        self.config.setWidget(ui.widgets.config())
-        # limit max width of config widget while docked to 200px
-        self.config.setMaximumWidth(200)
-        # when this widget floats allow it to scale up to 400px wide
-        self.config.topLevelChanged.connect(
-            lambda: ui.slots.unrestrict_scale_upon_float(
-                self.config, initial_width=200, unbounded_width=460
-            )
-        )
-        self.config.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable
-        )
-        # dock the new docakble config widget
-        self.addDockWidget(Qt.DockWidgetArea(0x2), self.config)
 
     def _status_bar(self):
         """Create and add status bar."""
