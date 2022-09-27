@@ -2,6 +2,10 @@ import dna_nanotube_tools
 import ui.config
 from PyQt6.QtWidgets import QMainWindow
 
+"""
+This file allows cross module data syncing
+"""
+
 main_window: QMainWindow
 
 
