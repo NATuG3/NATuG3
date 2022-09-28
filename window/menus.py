@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
-from extras import fetch_icon
+from resources import fetch_icon
 import webbrowser
 from PyQt6.QtGui import QKeySequence
 import references
@@ -57,7 +57,7 @@ class view(QMenu):
         config.setIcon(fetch_icon("eye-off-outline"))
         config.triggered.connect(
             lambda: hide_or_unhide(
-                database.ui.windows.main.docked_widgets.config, config
+                references.window.docked_widgets.config, config
             )
         )
 
@@ -68,7 +68,7 @@ class view(QMenu):
         top_view.setIcon(fetch_icon("eye-off-outline"))
         top_view.triggered.connect(
             lambda: hide_or_unhide(
-                database.ui.windows.main.docked_widgets.top_view, top_view
+                references.window.docked_widgets.top_view, top_view
             )
         )
 

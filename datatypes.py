@@ -49,7 +49,7 @@ class domain:
         switch_angle_multiple (int): Strand switch angle per domain transition. Integer multiple of strand switch angle.
     """
 
-    # multiple of the characteristic angle (theta_c) for the interior angle 
+    # multiple of the characteristic angle (theta_c) for the interior angle
     # between this domains[this domain's index] and this domains[this domain's index + 1]
     theta_interior_multiple: int
 
