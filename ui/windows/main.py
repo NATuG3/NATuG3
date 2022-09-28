@@ -92,7 +92,7 @@ class main(QMainWindow):
         # when this widget floats allow it to scale up to 400px wide
         docked_config.topLevelChanged.connect(
             lambda: unrestrict_scale_upon_float(
-                self.config, initial_width=215, unbounded_width=460
+                docked_config, initial_width=215, unbounded_width=460
             )
         )
         docked_config.setFeatures(
@@ -124,7 +124,7 @@ class main(QMainWindow):
 
         # when this widget floats remove width scaling limitation
         docked_top_view.topLevelChanged.connect(
-            lambda: unrestrict_scale_upon_float(self.top_view, initial_width=340)
+            lambda: unrestrict_scale_upon_float(docked_top_view, initial_width=340)
         )
         docked_top_view.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
