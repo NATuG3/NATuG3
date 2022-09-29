@@ -5,12 +5,12 @@ import webbrowser
 from PyQt6.QtGui import QKeySequence
 import references
 
-parent_menu = references.window.menu_bar
+parent = references.windows.constructor.menu_bar
 
 
 class file(QMenu):
     def __init__(self):
-        super().__init__("&File", parent_menu)
+        super().__init__("&File", parent)
 
         # container for actions
         self.actions = SimpleNamespace()
@@ -36,7 +36,7 @@ class file(QMenu):
 
 class view(QMenu):
     def __init__(self):
-        super().__init__("&View", parent_menu)
+        super().__init__("&View", parent)
 
         # container for actions
         self.actions = SimpleNamespace()
@@ -83,7 +83,7 @@ class view(QMenu):
 
 class help(QMenu):
     def __init__(self):
-        super().__init__("&Help", parent_menu)
+        super().__init__("&Help", parent)
 
         # container for actions
         self.actions = SimpleNamespace()

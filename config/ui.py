@@ -2,7 +2,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 
 
-class widget(QWidget):
+class panel(QWidget):
     """Config panel"""
 
     def __init__(self) -> None:

@@ -15,6 +15,7 @@ import config.ui
 import top_view.ui, side_view.ui
 
 
+
 def unrestrict_scale_upon_float(
     widget: QWidget,
     initial_width: int = 9999,
@@ -58,7 +59,7 @@ class window(QMainWindow):
         super().__init__()
 
         # store a reference to self in references for cross module use
-        references.window = self
+        references.windows.constructor = self
 
         # utilize inhereted methods to set up the main window
         self.setWindowTitle("DNA Constructor")
@@ -167,7 +168,7 @@ class window(QMainWindow):
         self.menu_bar = QMenuBar()
 
         # import all menu bars
-        import window.menus as menus
+        import windows.constructor.menus as menus
 
         # add all the menus to the filemenu
         self.menu_bar.addMenu(menus.file())

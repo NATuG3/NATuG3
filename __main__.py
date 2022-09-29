@@ -29,13 +29,13 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon("resources/icon.ico"))
 
     # QApplication must be created before we can import ui
-    import window
+    from windows.constructor.ui import window as main_window
 
     # obtain and generate window item
-    window = window.window()
+    windows = main_window()
 
     # show window
-    window.show()
+    windows.show()
 
     # begin app event loop
     sys.exit(app.exec())
