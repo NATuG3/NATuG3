@@ -14,7 +14,6 @@ import config.panel
 import top_view.ui, side_view.ui
 
 
-
 def unrestrict_scale_upon_float(
     widget: QWidget,
     initial_width: int = 9999,
@@ -74,8 +73,7 @@ class window(QMainWindow):
 
         # add all widgets
         self._config()
-        self.refresh_top_view()
-        self.refresh_side_view()
+        self.load_graphs()
 
     def _config(self):
         try: # not first run
@@ -91,8 +89,8 @@ class window(QMainWindow):
             self.docked_widgets.config.setWidget(self.config)
 
             # set width of config widget while docked to 200px
-            self.docked_widgets.config.setMinimumWidth(215)
-            self.docked_widgets.config.setMaximumWidth(215)
+            self.docked_widgets.config.setMinimumWidth(230)
+            self.docked_widgets.config.setMaximumWidth(230)
             # when this widget floats allow it to scale up to 400px wide
             self.docked_widgets.config.topLevelChanged.connect(
                 lambda: unrestrict_scale_upon_float(
@@ -106,7 +104,12 @@ class window(QMainWindow):
             # dock the new docakble config widget
             self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
-    def refresh_top_view(self):
+    def load_graphs(self):
+        
+        self._top_view()
+        self._side_view()
+
+    def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
         try: # not first run
             self.top_view.load()
@@ -141,7 +144,7 @@ class window(QMainWindow):
             # dock the new dockable top view widget
             self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)
 
-    def refresh_side_view(self):
+    def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
         # convert from QWidget to QGroupBox for pretty label and frame
         docked_side_view = self.docked_widgets.side_view = QGroupBox()

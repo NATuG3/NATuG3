@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from PyQt6.QtWidgets import QMainWindow, QDialog, QMenuBar
+from PyQt6.QtWidgets import QMainWindow, QDialog
 
 
 @dataclass

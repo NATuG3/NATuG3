@@ -43,8 +43,5 @@ class panel(QWidget):
 
         # set up the update graphs button
         self.update_graphs.clicked.connect(
-            references.windows.constructor.refresh_top_view
-        )
-        self.update_graphs.clicked.connect(
-            references.windows.constructor.refresh_side_view
+            references.windows.constructor.load_graphs
         )

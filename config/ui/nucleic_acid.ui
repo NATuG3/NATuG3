@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>297</width>
-    <height>535</height>
+    <width>320</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,7 +69,7 @@
        <number>5</number>
       </property>
       <item row="0" column="1">
-       <widget class="QPushButton" name="profile_load_button">
+       <widget class="QPushButton" name="load_profile_button">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -88,13 +88,7 @@
        </widget>
       </item>
       <item row="0" column="0">
-       <widget class="QComboBox" name="profile_chooser">
-        <item>
-         <property name="text">
-          <string>Choose Profile</string>
-         </property>
-        </item>
-       </widget>
+       <widget class="QComboBox" name="profile_chooser"/>
       </item>
       <item row="1" column="0" colspan="2">
        <widget class="Line" name="line_4">
@@ -105,28 +99,6 @@
       </item>
       <item row="2" column="0" colspan="2">
        <layout class="QGridLayout" name="profile_tools_layout">
-        <item row="0" column="0" colspan="2">
-         <widget class="QLineEdit" name="profile_editor_input">
-          <property name="statusTip">
-           <string>Name of profile to save current settings to/name of profile to delete</string>
-          </property>
-          <property name="inputMask">
-           <string/>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="placeholderText">
-           <string>Profile Name Here</string>
-          </property>
-          <property name="cursorMoveStyle">
-           <enum>Qt::LogicalMoveStyle</enum>
-          </property>
-          <property name="clearButtonEnabled">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0">
          <widget class="QPushButton" name="save_profile_button">
           <property name="sizePolicy">
@@ -165,6 +137,28 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QLineEdit" name="profile_editor">
+          <property name="statusTip">
+           <string>Name of profile to save current settings to/name of profile to delete</string>
+          </property>
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="placeholderText">
+           <string>Profile Name Here</string>
+          </property>
+          <property name="cursorMoveStyle">
+           <enum>Qt::LogicalMoveStyle</enum>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -192,45 +186,8 @@
        <number>5</number>
       </property>
       <property name="verticalSpacing">
-       <number>2</number>
+       <number>6</number>
       </property>
-      <item row="6" column="0">
-       <widget class="QLabel" name="Z_c_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="toolTip">
-         <string/>
-        </property>
-        <property name="statusTip">
-         <string>The height a helix climbs as it rotates through the characteristic angle</string>
-        </property>
-        <property name="text">
-         <string>Z&lt;sub&gt;c&lt;/sub&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="2">
-       <widget class="QLabel" name="Z_s_units">
-        <property name="text">
-         <string>nm</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="1">
-       <widget class="QDoubleSpinBox" name="Z_b">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="2">
-       <widget class="QLabel" name="theta_b_units_2">
-        <property name="text">
-         <string>nm</string>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="0" colspan="3">
        <widget class="Line" name="nucleic_acid_settings_splitter">
         <property name="orientation">
@@ -238,260 +195,336 @@
         </property>
        </widget>
       </item>
-      <item row="9" column="2">
-       <widget class="QLabel" name="theta_c_units">
-        <property name="text">
-         <string>°</string>
+      <item row="5" column="0" colspan="3">
+       <layout class="QFormLayout" name="formLayout_2">
+        <property name="horizontalSpacing">
+         <number>16</number>
         </property>
-       </widget>
-      </item>
-      <item row="9" column="0">
-       <widget class="QLabel" name="theta_c_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>The smallest angle about the helix axis possible between two NEMids on the same helix</string>
-        </property>
-        <property name="text">
-         <string>Θ&lt;sub&gt;c&lt;/sub&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="0">
-       <widget class="QLabel" name="theta_b_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>The angle that one base makes about the helix axis</string>
-        </property>
-        <property name="text">
-         <string>Θ&lt;sub&gt;b&lt;/sub&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="0">
-       <widget class="QLabel" name="theta_s_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>The angle about the helix axis between two NEMids on different helices of a double helix</string>
-        </property>
-        <property name="text">
-         <string>Θ&lt;sub&gt;s&lt;/sub&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="2">
-       <widget class="QLabel" name="theta_b_units">
-        <property name="text">
-         <string>°</string>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0">
-       <widget class="QLabel" name="Z_s_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="toolTip">
-         <string extracomment="The vertical height between two NEMids on different helices of the same double helix"/>
-        </property>
-        <property name="statusTip">
-         <string>The vertical height between two NEMids on different helices of the same double helix</string>
-        </property>
-        <property name="text">
-         <string>Z&lt;sub&gt;s&lt;/sub&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
-       <widget class="QDoubleSpinBox" name="Z_c">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="1">
-       <widget class="QDoubleSpinBox" name="Z_s">
-        <property name="statusTip">
-         <string/>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="1">
-       <widget class="QDoubleSpinBox" name="theta_s">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="9" column="1">
-       <widget class="QDoubleSpinBox" name="theta_c">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QDoubleSpinBox" name="theta_b">
-        <property name="statusTip">
-         <string/>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="D_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>The radius of a given domain</string>
-        </property>
-        <property name="whatsThis">
-         <string/>
-        </property>
-        <property name="text">
-         <string>[D]iameter</string>
-        </property>
-       </widget>
-      </item>
-      <item row="10" column="2">
-       <widget class="QLabel" name="theta_s_units">
-        <property name="text">
-         <string>°</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="2">
-       <widget class="QLabel" name="Z_c_units">
-        <property name="text">
-         <string>nm</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="3">
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <item>
-         <widget class="QSpinBox" name="B">
-          <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
+        <item row="0" column="0">
+         <widget class="QLabel" name="Z_b_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QLabel" name="B_label">
           <property name="statusTip">
-           <string>There are B bases per T turns of the helix</string>
+           <string>The height between two bases on the helix axis. = (T*H)/B</string>
           </property>
           <property name="text">
-           <string>[B]ases </string>
+           <string>Z&lt;sub&gt;b&lt;/sub&gt;</string>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QLabel" name="bases_per_turns_slash">
-          <property name="text">
-           <string>/</string>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="Z_b">
+          <property name="autoFillBackground">
+           <bool>false</bool>
           </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
+          <property name="wrapping">
+           <bool>false</bool>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QSpinBox" name="T">
+          <property name="frame">
+           <bool>true</bool>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
           <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
+           <enum>QAbstractSpinBox::UpDownArrows</enum>
+          </property>
+          <property name="specialValueText">
+           <string/>
+          </property>
+          <property name="accelerated">
+           <bool>false</bool>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QLabel" name="T_label">
+        <item row="1" column="0">
+         <widget class="QLabel" name="Z_c_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string/>
+          </property>
           <property name="statusTip">
-           <string>There are B bases per T turns of the helix</string>
+           <string>The height a helix climbs as it rotates through the characteristic angle</string>
           </property>
           <property name="text">
-           <string>[T]urns</string>
+           <string>Z&lt;sub&gt;c&lt;/sub&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="Z_c">
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="Z_s_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string extracomment="The vertical height between two NEMids on different helices of the same double helix"/>
+          </property>
+          <property name="statusTip">
+           <string>The vertical height between two NEMids on different helices of the same double helix</string>
+          </property>
+          <property name="text">
+           <string>Z&lt;sub&gt;s&lt;/sub&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="Z_s">
+          <property name="statusTip">
+           <string/>
+          </property>
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="theta_b_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The angle that one base makes about the helix axis</string>
+          </property>
+          <property name="text">
+           <string>Θ&lt;sub&gt;b&lt;/sub&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QDoubleSpinBox" name="theta_b">
+          <property name="statusTip">
+           <string/>
+          </property>
+          <property name="readOnly">
+           <bool>false</bool>
+          </property>
+          <property name="suffix">
+           <string notr="true">°</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0">
+         <widget class="QLabel" name="theta_c_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The smallest angle about the helix axis possible between two NEMids on the same helix</string>
+          </property>
+          <property name="text">
+           <string>Θ&lt;sub&gt;c&lt;/sub&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1">
+         <widget class="QDoubleSpinBox" name="theta_c">
+          <property name="suffix">
+           <string notr="true">°</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>360.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="theta_s_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The angle about the helix axis between two NEMids on different helices of a double helix</string>
+          </property>
+          <property name="text">
+           <string>Θ&lt;sub&gt;s&lt;/sub&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <widget class="QDoubleSpinBox" name="theta_s">
+          <property name="prefix">
+           <string/>
+          </property>
+          <property name="suffix">
+           <string notr="true">°</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>360.000000000000000</double>
           </property>
          </widget>
         </item>
        </layout>
       </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="D">
-        <property name="decimals">
-         <number>3</number>
+      <item row="0" column="0" colspan="3">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <property name="horizontalSpacing">
+         <number>16</number>
         </property>
-       </widget>
-      </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="D_units">
-        <property name="text">
-         <string>nm</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="H_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>The height of one turn of the helix of a nucleic acid</string>
-        </property>
-        <property name="text">
-         <string>[H]eight</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="height_units">
-        <property name="text">
-         <string>nm</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="3">
-       <widget class="QCheckBox" name="closed_tube">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>Indicates whether the tube is closed (and thus actually a tube) or not</string>
-        </property>
-        <property name="text">
-         <string>Closed Tube</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="H">
-        <property name="decimals">
-         <number>3</number>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <widget class="QLabel" name="Z_b_label">
-        <property name="cursor">
-         <cursorShape>ArrowCursor</cursorShape>
-        </property>
-        <property name="statusTip">
-         <string>The angle that one base makes about the helix axis.</string>
-        </property>
-        <property name="text">
-         <string>Z&lt;sub&gt;b&lt;/sub&gt;</string>
-        </property>
-       </widget>
+        <item row="0" column="0">
+         <widget class="QLabel" name="D_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The radius of a given domain</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="text">
+           <string>[D]iameter</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="D">
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="H_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The height of one turn of the helix of a nucleic acid</string>
+          </property>
+          <property name="text">
+           <string>[H]eight</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QSpinBox" name="B">
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::NoButtons</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="B_label">
+            <property name="statusTip">
+             <string>There are B bases per T turns of the helix</string>
+            </property>
+            <property name="text">
+             <string>[B]ases </string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="bases_per_turns_slash">
+            <property name="text">
+             <string>/</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="T">
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::NoButtons</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="T_label">
+            <property name="statusTip">
+             <string>There are B bases per T turns of the helix</string>
+            </property>
+            <property name="text">
+             <string>[T]urns</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="H">
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <widget class="QCheckBox" name="closed_tube">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>Indicates whether the tube is closed (and thus actually a tube) or not</string>
+          </property>
+          <property name="text">
+           <string>Closed Tube</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>
