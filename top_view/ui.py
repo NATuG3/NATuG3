@@ -60,4 +60,3 @@ class plot(QWidget):
 
         # add the plot widget to the layout
         self.layout().addWidget(self.graph)
-

@@ -47,7 +47,6 @@
       <attribute name="title">
        <string>Nucleic Acid</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2"/>
      </widget>
      <widget class="QWidget" name="domains_tab">
       <attribute name="title">

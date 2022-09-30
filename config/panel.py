@@ -1,3 +1,4 @@
+import logging
 from types import SimpleNamespace
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
@@ -7,6 +8,7 @@ import references
 
 # general settings
 count: int = None  # number of initial NEMids to generate
+logger = logging.getLogger(__name__)
 
 
 class panel(QWidget):
@@ -29,6 +31,7 @@ class panel(QWidget):
         # container to store tabs in
         self.tabs = SimpleNamespace()
 
+        logger.debug("Building config panel...")
         # set the nucleic acid tab
         # store actual widget in the tabs container
         self.tabs.nucleic_acid = config.nucleic_acid.widget()
@@ -42,6 +45,4 @@ class panel(QWidget):
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
         # set up the update graphs button
-        self.update_graphs.clicked.connect(
-            references.windows.constructor.load_graphs
-        )
+        self.update_graphs.clicked.connect(references.windows.constructor.load_graphs)

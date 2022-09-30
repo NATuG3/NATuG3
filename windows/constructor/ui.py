@@ -76,9 +76,9 @@ class window(QMainWindow):
         self.load_graphs()
 
     def _config(self):
-        try: # not first run
+        try:  # not first run
             side_view.load()
-        except AttributeError: # first run
+        except AttributeError:  # first run
             # create a dockable config widget
             self.docked_widgets.config = QDockWidget()
             self.docked_widgets.config.setWindowTitle("Config")
@@ -105,15 +105,15 @@ class window(QMainWindow):
             self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
     def load_graphs(self):
-        
+
         self._top_view()
         self._side_view()
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
-        try: # not first run
+        try:  # not first run
             self.top_view.load()
-        except AttributeError: # first run
+        except AttributeError:  # first run
             # create dockable widget for top view
             self.docked_widgets.top_view = QDockWidget()
             self.docked_widgets.top_view.setWindowTitle("Top View of Helicies")

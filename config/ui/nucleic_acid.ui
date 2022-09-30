@@ -68,57 +68,9 @@
       <property name="spacing">
        <number>5</number>
       </property>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="profile_chooser"/>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QPushButton" name="load_profile_button">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Load</string>
-        </property>
-       </widget>
-      </item>
       <item row="2" column="0" colspan="2">
        <layout class="QGridLayout" name="profile_tools_layout">
-        <item row="1" column="0">
-         <widget class="QPushButton" name="save_profile_button">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Save/Overwrite</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
+        <item row="0" column="3">
          <widget class="QPushButton" name="delete_profile_button">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -137,32 +89,43 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QLineEdit" name="profile_editor">
-          <property name="statusTip">
-           <string>Name of profile to save current settings to/name of profile to delete</string>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="save_profile_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="inputMethodHints">
-           <set>Qt::ImhLatinOnly</set>
-          </property>
-          <property name="inputMask">
-           <string/>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
           </property>
           <property name="text">
-           <string/>
+           <string>Save</string>
           </property>
-          <property name="placeholderText">
-           <string>Profile Name Here</string>
-          </property>
-          <property name="cursorMoveStyle">
-           <enum>Qt::LogicalMoveStyle</enum>
-          </property>
-          <property name="clearButtonEnabled">
-           <bool>true</bool>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="load_profile_button">
+          <property name="text">
+           <string>Load</string>
           </property>
          </widget>
         </item>
        </layout>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QComboBox" name="profile_chooser"/>
       </item>
      </layout>
     </widget>
