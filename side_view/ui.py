@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import config.properties
+import config.nucleic_acid, config.domains
 import logging
-import side_view.workers
-from temp import domains
+import side_view.computer
+from contextlib import suppress
 
 
 logger = logging.getLogger(__name__)
@@ -16,14 +16,22 @@ class plot(QWidget):
         # set layout of widget
         self.setLayout(QVBoxLayout())
 
+        # initilize the widget
+        self.load()
+
+    def load(self):
+        # attempt to remove existing widget if it is already generated
+        with suppress(AttributeError):
+            self.layout().removeWidget(self.graph)
+
         # obtain current settings
-        settings = config.properties.current
+        settings = config.nucleic_acid.current
 
         # obtain current domains
-        # domains = domains
+        domains = config.domains.current
 
         # create instance of dna_nanotube_tools side view generation
-        self.worker = side_view.workers.plot(
+        self.worker = side_view.computer.plot(
             domains,
             settings.Z_b,
             settings.Z_s,
@@ -44,8 +52,8 @@ class plot(QWidget):
         main_plot.disableAutoRange()
 
         # generate the coords
-        x_coords = self.worker._x_coords(settings.count)
-        z_coords = self.worker._z_coords(settings.count)
+        x_coords = self.worker._x_coords(config.panel.count)
+        z_coords = self.worker._z_coords(config.panel.count)
 
         for domain_index in range(self.worker.domain_count):
             if domain_index % 2:  # if the domain index is an even integer

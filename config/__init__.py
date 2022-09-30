@@ -1,6 +1,7 @@
 import atexit
-import config.workers
+import config.nucleic_acid
+from config.panel import panel
 
 # ensure settings saves on exit and loads on entry
-config.workers.load()
-atexit.register(config.workers.dump)
+config.nucleic_acid.load()
+atexit.register(config.nucleic_acid.dump)

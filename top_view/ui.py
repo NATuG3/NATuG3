@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import top_view.workers
+import top_view.computer
 import logging
-import config.properties
-from temp import domains
+import config.nucleic_acid, config.domains
+from contextlib import suppress
 
 
 logger = logging.getLogger(__name__)
@@ -16,27 +16,37 @@ class plot(QWidget):
         # set layout of widget
         self.setLayout(QVBoxLayout())
 
-        # obtain current settings
-        settings = config.properties.current
+        # initilize the widget
+        self.load()
 
-        self.worker = top_view.workers.plot(
-            domains, settings.diameter, settings.theta_c, settings.theta_s
+    def load(self):
+        with suppress(AttributeError):
+            self.layout().removeWidget(self.graph)
+
+        # obtain current settings
+        settings = config.nucleic_acid.current
+
+        # obtain current domains
+        domains = config.domains.current
+
+        self.worker = top_view.computer.plot(
+            domains, settings.D, settings.theta_c, settings.theta_s
         )
         self.worker.compute()
         logger.debug(self.worker)
 
-        plotted_window: pg.GraphicsLayoutWidget = (
+        self.graph: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
         )  # create main plotting window
-        plotted_window.setBackground("w")  # make the background white
+        self.graph.setBackground("w")  # make the background white
 
-        main_plot = plotted_window.addPlot()
+        main_plot = self.graph.addPlot()
 
         main_plot.plot(
             self.worker.u_coords,
             self.worker.v_coords,
             symbol="o",
-            symbolSize=self.worker.diameter,
+            symbolSize=self.worker.D,
             pxMode=False,
         )
 
@@ -49,4 +59,5 @@ class plot(QWidget):
         plotted_view_box.setAspectLocked(lock=True, ratio=1)
 
         # add the plot widget to the layout
-        self.layout().addWidget(plotted_window)
+        self.layout().addWidget(self.graph)
+

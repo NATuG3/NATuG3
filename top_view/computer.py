@@ -15,7 +15,7 @@ class plot:
     def __init__(
         self,
         domains: list,
-        diameter: float,
+        D: float,
         theta_c=360 / 21,
         theta_s=2.3,
     ) -> None:
@@ -24,13 +24,13 @@ class plot:
 
         Args:
             domains (List[dna_nanotube_tools]): List of domains.
-            diameter (float): Distance between any given two domain centers (nanometers).
+            D (float): Distance between any given two domain centers (nanometers).
             theta_c (float, optional): Characteristic angle.
             theta_s (float, optional): Strand switch angle.
         """
         self.domains = domains
         self.domain_count = len(domains)
-        self.diameter = diameter
+        self.D = D
         self.computed = False  # has compute() been called?
 
         self._theta_c = theta_c
@@ -69,12 +69,12 @@ class plot:
 
             # append the u cord of the domain to "self.u_coords"
             self.u_coords.append(
-                self.u_coords[-1] + self.diameter * math.cos(angle_delta)
+                self.u_coords[-1] + self.D * math.cos(angle_delta)
             )
 
             # append the v cord of the domain to "self.v_coords"
             self.v_coords.append(
-                self.v_coords[-1] + self.diameter * math.sin(angle_delta)
+                self.v_coords[-1] + self.D * math.sin(angle_delta)
             )
 
         self.computed = True
