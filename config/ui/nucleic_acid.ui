@@ -68,6 +68,16 @@
       <property name="spacing">
        <number>5</number>
       </property>
+      <item row="0" column="0">
+       <widget class="QComboBox" name="profile_chooser"/>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item row="0" column="1">
        <widget class="QPushButton" name="load_profile_button">
         <property name="sizePolicy">
@@ -84,16 +94,6 @@
         </property>
         <property name="text">
          <string>Load</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <widget class="QComboBox" name="profile_chooser"/>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="line_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
@@ -141,6 +141,9 @@
          <widget class="QLineEdit" name="profile_editor">
           <property name="statusTip">
            <string>Name of profile to save current settings to/name of profile to delete</string>
+          </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhLatinOnly</set>
           </property>
           <property name="inputMask">
            <string/>

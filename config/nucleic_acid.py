@@ -1,7 +1,8 @@
 import pickle
 import logging
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QCompleter
+from PyQt6.QtCore import QStringListModel, Qt
 from dataclasses import dataclass
 from contextlib import suppress
 
@@ -91,6 +92,7 @@ class widget(QWidget):
 
         # restore the current settinsg
         self.dump_settings(current)
+        profiles["Restored Settings"] = current
         self.profile_chooser.addItem("Restored Settings")
 
         # blacklist of profile names
@@ -105,7 +107,7 @@ class widget(QWidget):
     def _profile_manager(self) -> None:
         """Set up the profile manager"""
         # function to obtain list of all items in profile_chooser
-        self.profile_chooser.item_list = lambda: [self.profile_chooser.itemText(i) for i in range(self.profile_chooser.count())]
+        profile_list = self.profile_chooser.item_list = lambda: [self.profile_chooser.itemText(i) for i in range(self.profile_chooser.count())]
         # add each profile to the combo box
         for profile_name in profiles:
             self.profile_chooser.addItem(profile_name)
@@ -117,14 +119,16 @@ class widget(QWidget):
             if profile_name not in self.profile_name_blacklist:
                 # save the profile with the current settings
                 profiles[profile_name] = self.fetch_settings()
-                if profile_name not in self.profile_chooser.item_list():
+                if profile_name not in profile_list():
                     # add the new profile to the profile chooser
                     self.profile_chooser.addItem(profile_name)
                     # index of profile in the profile chooser dropdown
-                    profile_index = self.profile_chooser.item_list().index(profile_name)
+                    profile_index = profile_list().index(profile_name)
                     # set the current chosen profile to the new one
                     self.profile_chooser.setCurrentIndex(profile_index)
             self.profile_editor.setText("")
+            # add profile to autocomplete
+            update_profile_editor_autocomplete()
         # connect save profile button to save profile function
         self.save_profile_button.clicked.connect(save_profile)
 
@@ -136,12 +140,14 @@ class widget(QWidget):
                 with suppress(KeyError):
                     del profiles[profile_name]
                     # index of profile in the profile chooser dropdown
-                    profile_index = self.profile_chooser.item_list().index(profile_name)
+                    profile_index = profile_list().index(profile_name)
                     # remove profile by index from profile chooser
                     self.profile_chooser.removeItem(profile_index)
                     # clear text in profile chooser
                     self.profile_chooser.setCurrentText("")
             self.profile_editor.setText("")
+            # remove profile from autocomplete
+            update_profile_editor_autocomplete()
         # connect delete profile button to delete profile function
         self.delete_profile_button.clicked.connect(delete_profile)
 
@@ -151,6 +157,20 @@ class widget(QWidget):
             self.dump_settings(profiles[current_profile])
         # connect profile chooser combo box to update profile function
         self.load_profile_button.clicked.connect(load_profile)
+
+        # enable auto fill suggestions for profile editor text edit box
+        def update_profile_editor_autocomplete(): 
+            """Set up/update profile editor entry box autocomplete."""
+            autocomplete = QCompleter(
+                profile_list(),
+                self,
+                caseSensitivity=Qt.CaseSensitivity(0) # 0 = case insensitive
+            )
+            model = QStringListModel(autocomplete)
+            autocomplete.setModel(model)
+            self.profile_editor.setCompleter(autocomplete)
+        update_profile_editor_autocomplete()
+
 
     def _inputs(self) -> None:
         """Link input boxes to their respective functions."""
