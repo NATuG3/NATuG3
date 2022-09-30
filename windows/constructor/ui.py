@@ -9,7 +9,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from PyQt6.QtCore import Qt
-from contextlib import suppress
 import references
 import config.panel
 import top_view.ui, side_view.ui
