@@ -1,3 +1,4 @@
+from contextlib import suppress
 from types import SimpleNamespace
 from PyQt6.QtWidgets import (
     QMainWindow,
@@ -10,7 +11,7 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 import references
-import config.panel
+import config.panel, config.nucleic_acid
 import top_view.ui, side_view.ui
 
 
@@ -72,48 +73,44 @@ class window(QMainWindow):
         self.docked_widgets = SimpleNamespace()
 
         # add all widgets
-        self._config()
         self.load_graphs()
+        self._config()
 
     def _config(self):
-        try:  # not first run
-            side_view.load()
-        except AttributeError:  # first run
-            # create a dockable config widget
-            self.docked_widgets.config = QDockWidget()
-            self.docked_widgets.config.setWindowTitle("Config")
-            self.docked_widgets.config.setStatusTip("Settings panel")
+        # create a dockable config widget
+        self.docked_widgets.config = QDockWidget()
+        self.docked_widgets.config.setWindowTitle("Config")
+        self.docked_widgets.config.setStatusTip("Settings panel")
 
-            # store the actual link to the widget in self.config
-            self.config = config.panel()
-            self.docked_widgets.config.setWidget(self.config)
+        # store the actual link to the widget in self.config
+        self.config = config.panel()
+        self.docked_widgets.config.setWidget(self.config)
 
-            # set width of config widget while docked to 200px
-            self.docked_widgets.config.setMinimumWidth(230)
-            self.docked_widgets.config.setMaximumWidth(230)
-            # when this widget floats allow it to scale up to 400px wide
-            self.docked_widgets.config.topLevelChanged.connect(
-                lambda: unrestrict_scale_upon_float(
-                    self.docked_widgets.config, initial_width=215, unbounded_width=460
-                )
+        # set width of config widget while docked to 200px
+        self.docked_widgets.config.setMinimumWidth(200)
+        self.docked_widgets.config.setMaximumWidth(200)
+        # when this widget floats allow it to scale up to 400px wide
+        self.docked_widgets.config.topLevelChanged.connect(
+            lambda: unrestrict_scale_upon_float(
+                self.docked_widgets.config, initial_width=225, unbounded_width=460
             )
-            self.docked_widgets.config.setFeatures(
-                QDockWidget.DockWidgetFeature.DockWidgetFloatable
-                | QDockWidget.DockWidgetFeature.DockWidgetMovable
-            )
-            # dock the new docakble config widget
-            self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
+        )
+        self.docked_widgets.config.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+        )
+        # dock the new docakble config widget
+        self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
     def load_graphs(self):
-
         self._top_view()
         self._side_view()
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
-        try:  # not first run
+        try:
             self.top_view.load()
-        except AttributeError:  # first run
+        except AttributeError:
             # create dockable widget for top view
             self.docked_widgets.top_view = QDockWidget()
             self.docked_widgets.top_view.setWindowTitle("Top View of Helicies")
@@ -146,19 +143,22 @@ class window(QMainWindow):
 
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
-        # convert from QWidget to QGroupBox for pretty label and frame
-        docked_side_view = self.docked_widgets.side_view = QGroupBox()
-        docked_side_view.setLayout(QVBoxLayout())
-        docked_side_view.setTitle("Side View of Helicies")
-        docked_side_view.setStatusTip("A plot of the side view of all domains")
+        try:
+            self.side_view.load()
+        except AttributeError:
+            # create group box to place side view widget in
+            prittified_side_view = QGroupBox()
+            prittified_side_view.setLayout(QVBoxLayout())
+            prittified_side_view.setTitle("Side View of Helicies")
+            prittified_side_view.setStatusTip("A plot of the side view of all domains")
 
-        # store widget in class for easier future direct widget access
-        self.side_view = side_view.ui.plot()
-        docked_side_view.layout().addWidget(self.side_view)
+            # store widget in class for easier future direct widget access
+            self.side_view = side_view.ui.plot()
+            prittified_side_view.layout().addWidget(self.side_view)
 
-        # ensure this widget is always large enough to be useful (300px)
-        docked_side_view.setMinimumWidth(300)
-        self.setCentralWidget(docked_side_view)
+            # ensure this widget is always large enough to be useful (300px)
+            prittified_side_view.setMinimumWidth(300)
+            self.setCentralWidget(prittified_side_view)
 
     def _status_bar(self):
         """Create and add status bar."""

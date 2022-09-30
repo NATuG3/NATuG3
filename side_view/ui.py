@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import config.nucleic_acid, config.domains
+import config.nucleic_acid, config.domains, config.properties
 import logging
 import side_view.computer
 from contextlib import suppress
@@ -25,35 +25,35 @@ class plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # obtain current settings
-        settings = config.nucleic_acid.current
+        self.settings = config.nucleic_acid.current
 
         # obtain current domains
-        domains = config.domains.current
+        self.domains = config.domains.current
 
         # create instance of dna_nanotube_tools side view generation
         self.worker = side_view.computer.plot(
-            domains,
-            settings.Z_b,
-            settings.Z_s,
-            settings.theta_s,
-            settings.theta_b,
-            settings.theta_c,
+            self.domains,
+            self.settings.Z_b,
+            self.settings.Z_s,
+            self.settings.theta_s,
+            self.settings.theta_b,
+            self.settings.theta_c,
         )
         logger.debug(self.worker)
 
-        plotted_window: pg.GraphicsLayoutWidget = (
+        self.graph: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
         )  # create main plotting window
-        plotted_window.setWindowTitle("Side View of DNA")  # set the window's title
-        plotted_window.setBackground("w")  # make the background white
-        main_plot: pg.plot = plotted_window.addPlot()
+        self.graph.setWindowTitle("Side View of DNA")  # set the window's title
+        self.graph.setBackground("w")  # make the background white
+        main_plot: pg.plot = self.graph.addPlot()
 
         # we can calculate the range at the end of generation; we don't need to continiously recalculate the range
         main_plot.disableAutoRange()
 
         # generate the coords
-        x_coords = self.worker._x_coords(config.panel.count)
-        z_coords = self.worker._z_coords(config.panel.count)
+        x_coords = self.worker._x_coords(config.properties.count)
+        z_coords = self.worker._z_coords(config.properties.count)
 
         for domain_index in range(self.worker.domain_count):
             if domain_index % 2:  # if the domain index is an even integer
@@ -100,4 +100,4 @@ class plot(QWidget):
         main_plot.setXRange(0, self.worker.domain_count)
 
         # add the plot widget to the layout
-        self.layout().addWidget(plotted_window)
+        self.layout().addWidget(self.graph)

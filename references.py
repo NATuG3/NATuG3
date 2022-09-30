@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from PyQt6.QtWidgets import QMainWindow, QDialog
+from PyQt6.QtWidgets import QMainWindow, QDialog, QWidget
+from config.nucleic_acid import profile
 
 
 @dataclass
@@ -12,3 +13,23 @@ class windows:
 
 
 windows = windows()
+
+
+@dataclass
+class buttons:
+    """Dataclass to store references to needed buttons in."""
+
+    update_graphs: QWidget = None
+
+
+buttons = buttons()
+
+
+@dataclass
+class miscellaneous:
+    """Dataclass to store all other needed references"""
+
+    current_graphs_profile: profile = None
+
+
+miscellaneous = miscellaneous()

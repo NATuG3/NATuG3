@@ -4,10 +4,9 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import config.nucleic_acid, config.domains
 import references
+from resources import fetch_icon
 
 
-# general settings
-count: int = None  # number of initial NEMids to generate
 logger = logging.getLogger(__name__)
 
 
@@ -18,13 +17,18 @@ class panel(QWidget):
         super().__init__()
         uic.loadUi("config/ui/panel.ui", self)
 
+        # store instance of self in references
+        references.buttons.update_graphs = self.update_graphs
+
+        self.update_graphs.setIcon(fetch_icon("reload-outline"))
+
         # set config.panel.count (for cross module use)
         def config_count_updater():
             """Update config.panel.count to the current initial NEMid count box's value"""
-            config.panel.count = self.initial_NEMids.value()
+            config.properties.count = self.initial_NEMids.value()
 
         # store default value in initial_NEMids box
-        config_count_updater()
+        self.initial_NEMids.setValue(config.properties.count)
         # when initial NEMid count box is changed store the change
         self.update_graphs.clicked.connect(config_count_updater)
 

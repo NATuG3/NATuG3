@@ -2,7 +2,7 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 from resources import fetch_icon
 import webbrowser
-from PyQt6.QtGui import QKeySequence
+from PyQt6.QtGui import QKeySequence, QShortcut
 import references
 
 parent = references.windows.constructor.menu_bar
@@ -18,13 +18,13 @@ class file(QMenu):
         # file -> open
         open = self.actions.open = self.addAction("Open")
         open.setIcon(fetch_icon("open-outline"))
-        open.setShortcut(QKeySequence("ctrl+o"))
+        open.setShortcut("ctrl+o")
         open.setStatusTip("Open saved stage from file")
 
         # file -> save
         save = self.actions.save = self.addAction("Save")
         save.setIcon(fetch_icon("save-outline"))
-        save.setShortcut(QKeySequence("ctrl+s"))
+        save.setShortcut("ctrl+s")
         save.setStatusTip("Save current stage top file")
 
         # file -> save as
@@ -68,14 +68,6 @@ class view(QMenu):
             lambda: hide_or_unhide(references.window.docked_widgets.top_view, top_view)
         )
 
-        # view -> update graphs
-        update_graphs = self.actions.update_graphs = self.addAction("Update Graphs")
-        update_graphs.setIcon(fetch_icon("refresh-outline"))
-        update_graphs.setStatusTip(
-            'Update the graphs (equivalent to pressing the "update graphs" button)'
-        )
-        update_graphs.setShortcut(QKeySequence("ctrl+u"))
-
 
 class help(QMenu):
     def __init__(self):
@@ -87,7 +79,7 @@ class help(QMenu):
         # help -> manual -> open manual pdf
         manual = self.actions.manual = self.addAction("Manual")
         manual.setIcon(fetch_icon("book-outline"))
-        manual.setShortcuts((QKeySequence("control+h"), QKeySequence("command+h")))
+        manual.setShortcut("ctrl+h")
 
         # help -> github -> open github project link
         github = self.actions.github = self.addAction("Github")

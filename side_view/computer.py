@@ -29,6 +29,7 @@ class plot:
     ) -> None:
         """
         Initilize side_view generation class.
+
         Args:
             domains (list): List of domains.
             Z_b (float): Base height (in nm)

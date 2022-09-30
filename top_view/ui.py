@@ -24,13 +24,13 @@ class plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # obtain current settings
-        settings = config.nucleic_acid.current
+        self.settings = config.nucleic_acid.current
 
         # obtain current domains
-        domains = config.domains.current
+        self.domains = config.domains.current
 
         self.worker = top_view.computer.plot(
-            domains, settings.D, settings.theta_c, settings.theta_s
+            self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s
         )
         self.worker.compute()
         logger.debug(self.worker)

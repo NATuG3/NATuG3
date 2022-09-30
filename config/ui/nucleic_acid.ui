@@ -84,13 +84,25 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Delete Profile</string>
+          </property>
+          <property name="statusTip">
+           <string>Delete the selected profile</string>
+          </property>
+          <property name="whatsThis">
+           <string>Delete Profile</string>
+          </property>
           <property name="text">
-           <string>Delete</string>
+           <string/>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="save_profile_button">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -103,15 +115,39 @@
             <height>16777215</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Save Profile</string>
+          </property>
+          <property name="statusTip">
+           <string>Save current settings as new profile with above name (overwrites if existing)</string>
+          </property>
+          <property name="whatsThis">
+           <string>Save Profile</string>
+          </property>
           <property name="text">
-           <string>Save</string>
+           <string/>
           </property>
          </widget>
         </item>
         <item row="0" column="0">
          <widget class="QPushButton" name="load_profile_button">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="toolTip">
+           <string>Load Profile</string>
+          </property>
+          <property name="statusTip">
+           <string>Load the above named profile</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
           <property name="text">
-           <string>Load</string>
+           <string/>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -125,7 +161,14 @@
        </widget>
       </item>
       <item row="0" column="0" colspan="2">
-       <widget class="QComboBox" name="profile_chooser"/>
+       <widget class="QComboBox" name="profile_chooser">
+        <property name="toolTip">
+         <string/>
+        </property>
+        <property name="editable">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -171,8 +214,14 @@
           <property name="cursor">
            <cursorShape>ArrowCursor</cursorShape>
           </property>
+          <property name="toolTip">
+           <string>Base height</string>
+          </property>
           <property name="statusTip">
            <string>The height between two bases on the helix axis. = (T*H)/B</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
           </property>
           <property name="text">
            <string>Z&lt;sub&gt;b&lt;/sub&gt;</string>
@@ -194,7 +243,7 @@
            <bool>true</bool>
           </property>
           <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::UpDownArrows</enum>
+           <enum>QAbstractSpinBox::NoButtons</enum>
           </property>
           <property name="specialValueText">
            <string/>
@@ -218,7 +267,10 @@
            <double>0.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <double>999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
           </property>
          </widget>
         </item>
@@ -228,10 +280,13 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string/>
+           <string>Characteristic Height</string>
           </property>
           <property name="statusTip">
            <string>The height a helix climbs as it rotates through the characteristic angle</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
           </property>
           <property name="text">
            <string>Z&lt;sub&gt;c&lt;/sub&gt;</string>
@@ -240,6 +295,9 @@
         </item>
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="Z_c">
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="suffix">
            <string notr="true"> nm</string>
           </property>
@@ -247,7 +305,10 @@
            <number>4</number>
           </property>
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <double>999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
           </property>
          </widget>
         </item>
@@ -257,10 +318,13 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string extracomment="The vertical height between two NEMids on different helices of the same double helix"/>
+           <string extracomment="The vertical height between two NEMids on different helices of the same double helix">Strand Switch Height</string>
           </property>
           <property name="statusTip">
            <string>The vertical height between two NEMids on different helices of the same double helix</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
           </property>
           <property name="text">
            <string>Z&lt;sub&gt;s&lt;/sub&gt;</string>
@@ -272,6 +336,9 @@
           <property name="statusTip">
            <string/>
           </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
           <property name="suffix">
            <string notr="true"> nm</string>
           </property>
@@ -279,7 +346,10 @@
            <number>4</number>
           </property>
           <property name="maximum">
-           <double>1000.000000000000000</double>
+           <double>999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
           </property>
          </widget>
         </item>
@@ -288,8 +358,14 @@
           <property name="cursor">
            <cursorShape>ArrowCursor</cursorShape>
           </property>
+          <property name="toolTip">
+           <string>Base Angle</string>
+          </property>
           <property name="statusTip">
            <string>The angle that one base makes about the helix axis</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
           </property>
           <property name="text">
            <string>Θ&lt;sub&gt;b&lt;/sub&gt;</string>
@@ -304,6 +380,18 @@
           <property name="readOnly">
            <bool>false</bool>
           </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="specialValueText">
+           <string/>
+          </property>
+          <property name="accelerated">
+           <bool>false</bool>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string notr="true">°</string>
           </property>
@@ -312,6 +400,9 @@
           </property>
           <property name="maximum">
            <double>360.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
           </property>
          </widget>
         </item>
@@ -320,8 +411,14 @@
           <property name="cursor">
            <cursorShape>ArrowCursor</cursorShape>
           </property>
+          <property name="toolTip">
+           <string>Characteristic Angle</string>
+          </property>
           <property name="statusTip">
            <string>The smallest angle about the helix axis possible between two NEMids on the same helix</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
           </property>
           <property name="text">
            <string>Θ&lt;sub&gt;c&lt;/sub&gt;</string>
@@ -330,6 +427,18 @@
         </item>
         <item row="4" column="1">
          <widget class="QDoubleSpinBox" name="theta_c">
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="specialValueText">
+           <string/>
+          </property>
+          <property name="accelerated">
+           <bool>false</bool>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>false</bool>
+          </property>
           <property name="suffix">
            <string notr="true">°</string>
           </property>
@@ -339,6 +448,9 @@
           <property name="maximum">
            <double>360.000000000000000</double>
           </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
          </widget>
         </item>
         <item row="5" column="0">
@@ -346,8 +458,14 @@
           <property name="cursor">
            <cursorShape>ArrowCursor</cursorShape>
           </property>
+          <property name="toolTip">
+           <string>Switch Angle</string>
+          </property>
           <property name="statusTip">
            <string>The angle about the helix axis between two NEMids on different helices of a double helix</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
           </property>
           <property name="text">
            <string>Θ&lt;sub&gt;s&lt;/sub&gt;</string>
@@ -356,6 +474,18 @@
         </item>
         <item row="5" column="1">
          <widget class="QDoubleSpinBox" name="theta_s">
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="specialValueText">
+           <string/>
+          </property>
+          <property name="accelerated">
+           <bool>false</bool>
+          </property>
+          <property name="showGroupSeparator" stdset="0">
+           <bool>false</bool>
+          </property>
           <property name="prefix">
            <string/>
           </property>
@@ -368,6 +498,9 @@
           <property name="maximum">
            <double>360.000000000000000</double>
           </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
          </widget>
         </item>
        </layout>
@@ -377,56 +510,45 @@
         <property name="horizontalSpacing">
          <number>16</number>
         </property>
-        <item row="0" column="0">
-         <widget class="QLabel" name="D_label">
-          <property name="cursor">
-           <cursorShape>ArrowCursor</cursorShape>
-          </property>
-          <property name="statusTip">
-           <string>The radius of a given domain</string>
-          </property>
-          <property name="whatsThis">
-           <string/>
-          </property>
-          <property name="text">
-           <string>[D]iameter</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="D">
-          <property name="suffix">
-           <string notr="true"> nm</string>
-          </property>
-          <property name="decimals">
-           <number>4</number>
-          </property>
-          <property name="maximum">
-           <double>1000.000000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="H_label">
-          <property name="cursor">
-           <cursorShape>ArrowCursor</cursorShape>
-          </property>
-          <property name="statusTip">
-           <string>The height of one turn of the helix of a nucleic acid</string>
-          </property>
-          <property name="text">
-           <string>[H]eight</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="topMargin">
+           <number>5</number>
+          </property>
+          <property name="bottomMargin">
+           <number>4</number>
+          </property>
           <item>
            <widget class="QSpinBox" name="B">
+            <property name="toolTip">
+             <string>Bases</string>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
+            <property name="whatsThis">
+             <string/>
+            </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QLabel" name="B_label">
@@ -450,10 +572,32 @@
           </item>
           <item>
            <widget class="QSpinBox" name="T">
+            <property name="toolTip">
+             <string>Turns</string>
+            </property>
+            <property name="whatsThis">
+             <string/>
+            </property>
             <property name="buttonSymbols">
              <enum>QAbstractSpinBox::NoButtons</enum>
             </property>
            </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
           </item>
           <item>
            <widget class="QLabel" name="T_label">
@@ -467,16 +611,6 @@
           </item>
          </layout>
         </item>
-        <item row="1" column="1">
-         <widget class="QDoubleSpinBox" name="H">
-          <property name="suffix">
-           <string notr="true"> nm</string>
-          </property>
-          <property name="decimals">
-           <number>3</number>
-          </property>
-         </widget>
-        </item>
         <item row="3" column="0" colspan="2">
          <widget class="QCheckBox" name="closed_tube">
           <property name="cursor">
@@ -487,6 +621,82 @@
           </property>
           <property name="text">
            <string>Closed Tube</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="H_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The height of one turn of the helix of a nucleic acid</string>
+          </property>
+          <property name="text">
+           <string>[H]eight</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="D_label">
+          <property name="cursor">
+           <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="statusTip">
+           <string>The diameter of a given domain</string>
+          </property>
+          <property name="whatsThis">
+           <string/>
+          </property>
+          <property name="text">
+           <string>[D]iameter</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="H">
+          <property name="toolTip">
+           <string>Helical Twist height</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QDoubleSpinBox" name="D">
+          <property name="toolTip">
+           <string>Domain Diameter</string>
+          </property>
+          <property name="whatsThis">
+           <string>Diameter</string>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="suffix">
+           <string notr="true"> nm</string>
+          </property>
+          <property name="decimals">
+           <number>4</number>
+          </property>
+          <property name="maximum">
+           <double>999999.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.500000000000000</double>
           </property>
          </widget>
         </item>
