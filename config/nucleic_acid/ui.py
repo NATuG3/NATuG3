@@ -150,5 +150,7 @@ class panel(QWidget):
                 self.{input_widget}_label.setStatusTip(
                     self.setting_descriptions.{input_widget}[1]
                 )
-                """.replace("                ", "")
+                """.replace(
+                    "                ", ""
+                )
             )

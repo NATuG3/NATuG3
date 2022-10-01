@@ -43,7 +43,9 @@ def setup(panel):
 
     # force profile manager to always be title case
     panel.profile_chooser.currentTextChanged.connect(
-        lambda: panel.profile_chooser.setCurrentText(panel.profile_chooser.currentText().title())
+        lambda: panel.profile_chooser.setCurrentText(
+            panel.profile_chooser.currentText().title()
+        )
     )
 
     # hook profile chooser dropdown to input_box_changed function
@@ -58,7 +60,7 @@ def setup(panel):
 def save_profile(panel):
     """Worker for the save profile button"""
     # obtain name of profile to save
-    profile_name = panel.profile_chooser.currentText()    
+    profile_name = panel.profile_chooser.currentText()
     # save the profile with the current settings
     storage.profiles[profile_name] = panel.fetch_settings()
     if profile_name not in panel.profile_list():
@@ -188,4 +190,6 @@ def input_box_changed(panel, input):
     # No matter what we cannot save a profile with a blank name
     if chosen_profile_name == "":
         panel.save_profile_button.setEnabled(False)
-        panel.save_profile_button.setStatusTip("Cannot save a profile with a blank name.")
+        panel.save_profile_button.setStatusTip(
+            "Cannot save a profile with a blank name."
+        )

@@ -89,7 +89,7 @@ def load() -> None:
     # if the settings file wasn't found then create a new one
     except FileNotFoundError:
         logger.debug("Settings file not found. Restoring defaults...")
-        
+
         # default profile is for B-DNA
         current = profile(
             D=2.2,
