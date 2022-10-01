@@ -109,8 +109,6 @@ class widget(QWidget):
         # set up the profile manager
         self._profile_manager()
 
-        # hook all input boxes to respective functions
-        self._inputs_setup()
 
     def _profile_manager(self) -> None:
         """Set up the profile manager"""
@@ -144,6 +142,8 @@ class widget(QWidget):
         def save_profile():
             # obtain name of profile to save
             profile_name = self.profile_chooser.currentText()
+            if profile_name == last_state_name:
+                return
             # save the profile with the current settings
             profiles[profile_name] = self.fetch_settings()
             if profile_name not in self.profile_list():
@@ -168,7 +168,7 @@ class widget(QWidget):
         def load_profile():
             """Current-profile-changed worker."""
             global previously_loaded_name
-            self.load_profile_button.setChecked(True)
+            self.load_profile_button.setEnabled(False)
             current_profile = self.profile_chooser.currentText()
             previously_loaded_name = current_profile
             if current_profile == last_state_name:
@@ -181,10 +181,7 @@ class widget(QWidget):
         # load the restored settings profile
         load_profile()
 
-    def _inputs_setup(self) -> None:
-        """Link input boxes to their respective functions."""
-
-        # create list of all input boxes for easier future access
+    # create list of all input boxes for easier future access
         self.input_widgets = (
             self.D,
             self.H,
@@ -207,32 +204,33 @@ class widget(QWidget):
             # if B or T or H were changed Z_b also will have changed
             self.Z_b.setValue(current.Z_b)
 
-            with suppress(KeyError):
-                # if the selected profile is still the previoiusly loaded one
-                # and the profile chooser combo box hasn't changed
-                if (self.profile_chooser.currentText() == previously_loaded_name) and (
-                    (current == profiles[previously_loaded_name])
-                    or (self.profile_chooser.currentText() == last_state_name)
-                ):
-                    # toggle the current profile
-                    self.profile_chooser.setCurrentIndex(
-                        self.profile_index(previously_loaded_name)
-                    )
-                    self.load_profile_button.setChecked(True)
-                # if the selected profile has changed
-                else:
-                    self.load_profile_button.setChecked(False)
+            # profile chooser's current text
+            chooser_text = self.profile_chooser.currentText()
 
-                # if the current graph's settings are the same as the current settings
-                # lock the update graphs button
-                if (
-                    current
-                    == references.windows.constructor.top_view.settings
-                    == references.windows.constructor.side_view.settings
-                ):
-                    references.buttons.update_graphs.setChecked(True)
-                else:
-                    references.buttons.update_graphs.setChecked(False)
+            # if the selected profile is still the previoiusly loaded one
+            # and the profile chooser combo box hasn't changed
+            if (current == profiles[previously_loaded_name]
+                or ((chooser_text == last_state_name))
+            ):
+                # toggle the current profile
+                self.profile_chooser.setCurrentIndex(
+                    self.profile_index(previously_loaded_name)
+                )
+                self.load_profile_button.setEnabled(False)
+            # if the selected profile has changed
+            else:
+                self.load_profile_button.setEnabled(True)
+
+            # if the current graph's settings are the same as the current settings
+            # lock the update graphs button
+            if (
+                current
+                == references.windows.constructor.top_view.settings
+                == references.windows.constructor.side_view.settings
+            ):
+                references.buttons.update_graphs.setEnabled(False)
+            else:
+                references.buttons.update_graphs.setEnabled(True)
 
         for input in self.input_widgets:
             # for all input boxes hook them to the input changed function
@@ -240,7 +238,7 @@ class widget(QWidget):
 
         # unhighlight the profile chooser if the current profile input is changed
         self.profile_chooser.currentTextChanged.connect(
-            lambda: self.load_profile_button.setChecked(False)
+            lambda: self.load_profile_button.setEnabled(True)
         )
 
         input_changed(None)
