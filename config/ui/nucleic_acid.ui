@@ -431,6 +431,9 @@
           </item>
           <item>
            <widget class="QLabel" name="T_label">
+            <property name="toolTip">
+             <string>Turns</string>
+            </property>
             <property name="statusTip">
              <string>There are B bases per T turns of the helix</string>
             </property>
@@ -457,6 +460,12 @@
           </item>
           <item>
            <widget class="QLabel" name="bases_per_turns_slash">
+            <property name="toolTip">
+             <string>(per)</string>
+            </property>
+            <property name="statusTip">
+             <string/>
+            </property>
             <property name="text">
              <string>/</string>
             </property>
@@ -515,6 +524,9 @@
           </item>
           <item>
            <widget class="QLabel" name="B_label">
+            <property name="toolTip">
+             <string>Bases</string>
+            </property>
             <property name="statusTip">
              <string>There are B bases per T turns of the helix</string>
             </property>
@@ -543,6 +555,9 @@
           <property name="cursor">
            <cursorShape>ArrowCursor</cursorShape>
           </property>
+          <property name="toolTip">
+           <string>Helical Twist Height</string>
+          </property>
           <property name="statusTip">
            <string>The height of one turn of the helix of a nucleic acid</string>
           </property>
@@ -557,7 +572,7 @@
            <string>Domain Diameter</string>
           </property>
           <property name="whatsThis">
-           <string>Diameter</string>
+           <string/>
           </property>
           <property name="buttonSymbols">
            <enum>QAbstractSpinBox::NoButtons</enum>
@@ -580,6 +595,9 @@
          <widget class="QLabel" name="D_label">
           <property name="cursor">
            <cursorShape>ArrowCursor</cursorShape>
+          </property>
+          <property name="toolTip">
+           <string>Diameter of Domain</string>
           </property>
           <property name="statusTip">
            <string>The diameter of a given domain</string>
