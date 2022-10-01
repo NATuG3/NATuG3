@@ -88,10 +88,13 @@
            <string>Delete Profile</string>
           </property>
           <property name="statusTip">
-           <string>Delete the selected profile</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string>Delete Profile</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210, 210)}</string>
           </property>
           <property name="text">
            <string/>
@@ -122,10 +125,13 @@
            <string>Save Profile</string>
           </property>
           <property name="statusTip">
-           <string>Save current settings as new profile with above name (overwrites if existing)</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string>Save Profile</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210, 210)}</string>
           </property>
           <property name="text">
            <string/>
@@ -144,10 +150,13 @@
            <string>Load Profile</string>
           </property>
           <property name="statusTip">
-           <string>Load the above named profile</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210, 210)}</string>
           </property>
           <property name="text">
            <string/>

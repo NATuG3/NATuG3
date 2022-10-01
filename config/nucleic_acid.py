@@ -11,6 +11,7 @@ import references
 filename = "config/saves/nucleic_acid.nano"
 current = None  # current profile
 profiles = None  # all profiles
+previous_profile_name = None # name of previously loaded profile
 logger = logging.getLogger(__name__)
 
 
@@ -54,6 +55,7 @@ class profile:
 
 def load() -> None:
     global current
+    global previous_profile_name
     global profiles
 
     # attempt to load the nucleic acid settings file
@@ -63,13 +65,32 @@ def load() -> None:
         # DNA-B settings (as a default/example)
         with open(filename, "rb") as settings_file:
             profiles = pickle.load(settings_file)
+
         # if profile dict was empty then reset to default
         # (by triggering the exception which causes a default reload)
         if profiles == {}:
             raise FileNotFoundError
-        # let the current settings be the first item in profiles
-        current = profiles[next(iter(profiles))]
-    # if the file does not exist then create a new one with default settings
+
+        # attempt to load the previously used profile
+        try:
+            # make the current profile the last used one
+            # (if the last used one does not exist a KeyError will be raised)
+            current = profiles[previous_profile_name]
+
+            # save the currently loaded profile name as the previously loaded profile name
+            # (because it will be the first loaded profile)
+            previous_profile_name = profiles["restore"]
+
+            # delete the profile named "restore" (since it isn't actually a profile)
+            del profiles["restore"]
+
+        # if it was deleted then just load the first profile found in the dict
+        except KeyError:
+            # obtain name of the first profile in the dict and set the current profile to it
+            previous_profile_name = next(iter(profiles))
+            current = profiles[previous_profile_name]
+
+    # if the settings file wasn't found then create a new one
     except FileNotFoundError:
         logger.debug("Settings file not found. Restoring defaults...")
         # default profile is for B-DNA
@@ -87,6 +108,7 @@ def load() -> None:
         # this will be the only profile in the master list
         # (since the master list of profiles is being created now)
         profiles = {"B-DNA": current}
+        
 
     # log that profiles were loaded
     logger.debug("Loaded profiles.")
@@ -95,6 +117,7 @@ def load() -> None:
 
 def dump() -> None:
     """Dump persisting attributes of this module to a file"""
+    profiles["restore"] = previous_profile_name
     # dump settings to file in format current-profile, all-profiles
     with open(filename, "wb") as settings_file:
         pickle.dump(profiles, settings_file)
@@ -109,17 +132,8 @@ class widget(QWidget):
 
         # prettify buttons
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
-        self.load_profile_button.setStyleSheet(
-            "QPushButton::disabled{background-color: rgb(210, 210, 210)}"
-        )
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
-        self.save_profile_button.setStyleSheet(
-            "QPushButton::disabled{background-color: rgb(210, 210, 210)}"
-        )
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
-        self.delete_profile_button.setStyleSheet(
-            "QPushButton::disabled{background-color: rgb(210, 210, 210)}"
-        )
 
         # create list of all input boxes for easier future access
         # (notably for when we link all the inputs to functions, we can itterate this tuple)
@@ -143,6 +157,8 @@ class widget(QWidget):
 
     def _profile_manager(self) -> None:
         """Set up the profile manager."""
+        global previous_profile_name
+
         # function to obtain list of all items in profile_chooser
         self.profile_list = lambda: [
             self.profile_chooser.itemText(i)
@@ -155,9 +171,6 @@ class widget(QWidget):
         # add each profile from the save file to the combo box
         for profile_name in profiles:
             self.profile_chooser.addItem(profile_name)
-
-        # save the currently loaded profile name as the previously loaded profile name
-        self.previous_profile_name = self.profile_chooser.currentText()
 
         # Worker for the save button
         def save_profile():
@@ -173,7 +186,7 @@ class widget(QWidget):
                 # add the new profile to the profile chooser
                 self.profile_chooser.addItem(profile_name)
             # the currently saved profile will become the last profile state
-            self.self.previous_profile_name = profile_name
+            self.previous_profile_name = profile_name
 
         # when the save profile button is clicked call save_profile()
         self.save_profile_button.clicked.connect(save_profile)
@@ -227,16 +240,17 @@ class widget(QWidget):
 
         def button_locker():
             """Lock profile manager button(s) based on chosen profile's updatedness and newness."""
+            chosen_profile_name = self.profile_chooser.currentText()
             # the chosen profile's name is NOT the name of an already existant profile
             chosen_profile_name_is_new = (
-                self.profile_chooser.currentText() not in profiles
+                chosen_profile_name not in profiles
             )
             logger.debug(f"chosen-profile-is-new-is: {chosen_profile_name_is_new}")
 
             # the actual current settings match the current profile's settings
             try:
                 chosen_profile_is_updated = not (
-                    current == profiles[self.previous_profile_name]
+                    current == profiles[previous_profile_name]
                 )
                 logger.debug(
                     f"chosen-profile-is-updated is: {chosen_profile_is_updated}"
@@ -249,32 +263,70 @@ class widget(QWidget):
                 if chosen_profile_is_updated:  # and is new
                     # can't load a profile that doesn't exist
                     self.load_profile_button.setEnabled(False)
+                    self.load_profile_button.setStatusTip(
+                        "Cannot load a profile that does not exist."
+                    )
                     # can save a profile that doesn't already exist
                     self.save_profile_button.setEnabled(True)
+                    self.save_profile_button.setStatusTip(
+                        f"Save current settings as new profile with name \"{chosen_profile_name}.\""
+                    )
                     # can't delete a profile that doesn't exist
                     self.delete_profile_button.setEnabled(False)
+                    self.delete_profile_button.setStatusTip(
+                        "Cannot delete a profile that does not exist."
+                    )
                 else:  # chosen profile is updated and is new
                     # can't load a profile that doesn't exist
                     self.load_profile_button.setEnabled(False)
+                    self.load_profile_button.setStatusTip(
+                        "Cannot load a profile that does not exist."
+                    )
                     # new profile will be a copy of an existing one; that's fine
                     self.save_profile_button.setEnabled(True)
+                    self.save_profile_button.setStatusTip(
+                        f"Clone profile \"{previous_profile_name}\" to new profile named \"{chosen_profile_name}.\""
+                    )
                     # can't delete a profile that doesn't exist
                     self.delete_profile_button.setEnabled(False)
+                    self.delete_profile_button.setStatusTip(
+                        "Cannot delete a profile that does not exist."
+                    )
             else:
                 if chosen_profile_is_updated:  # and not new
                     # can load back the saved state of an existing but changed profile
                     self.load_profile_button.setEnabled(True)
+                    self.load_profile_button.setStatusTip(
+                        f"Overwrite current settings with the settings of the profile named \"{chosen_profile_name}.\""
+                    )
                     # can overwrite existing profile with the new settings
                     self.save_profile_button.setEnabled(True)
+                    self.save_profile_button.setStatusTip(
+                        f"Overwrite the profile named \"{chosen_profile_name}.\" with the current settings"
+                    )
                     # can delete a profile no matter if it is updated or not
                     self.delete_profile_button.setEnabled(True)
+                    self.delete_profile_button.setStatusTip(
+                        f"Delete the profile named \"{chosen_profile_name}.\" This action cannot be undone."
+                    )
                 else:  # chosen profile is not updated and not new
                     # doesn't make sense to overwrite current settings with identical ones
                     self.load_profile_button.setEnabled(False)
+                    self.load_profile_button.setStatusTip(
+                        f"Current settings match the saved settings of profile named \"{chosen_profile_name}.\"" +
+                        " (cannot overwrite the save with identical settings)"
+                    )
                     # doesn't make sense to overwrite a profile with the exact same settings
                     self.save_profile_button.setEnabled(False)
+                    self.save_profile_button.setStatusTip(
+                        f"Current settings match the saved settings of profile named \"{chosen_profile_name}.\"" + 
+                        " (cannot load saved settings onto identical current settings)"
+                    )
                     # can delete a profile no matter if it is updated or not
                     self.delete_profile_button.setEnabled(True)
+                    self.delete_profile_button.setStatusTip(
+                        f"Delete the profile named \"{chosen_profile_name}\". This action cannot be undone."
+                    )
 
         # hook all inputs to the following functions...
         for input in self.input_widgets:
