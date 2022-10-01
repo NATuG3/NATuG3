@@ -58,15 +58,17 @@ def load() -> None:
     global current
     global profiles
 
+    # attempt to load the nucleic acid settings file
     try:
         logger.debug("Settings file found. Loading setting profiles...")
         # attempt to open the settings file, or create a new settings file with
         # DNA-B settings (as a default/example)
         with open(filename, "rb") as settings_file:
             current, profiles = pickle.load(settings_file)
-
+    # if the file does not exist then create a new one with default settings
     except FileNotFoundError:
         logger.debug("Settings file not found. Restoring defaults...")
+        # default profile is for B-DNA
         current = profile(
             D=2.2,
             H=3.549,
@@ -78,14 +80,19 @@ def load() -> None:
             theta_c=17.1428,
             theta_s=2.3,
         )
+        # this will be the only profile in the master list
+        # (since the master list of profiles is being created now)
         profiles = {"B-DNA": current}
 
+    # log that profiles were loaded
     logger.debug("Loaded profiles.")
     logger.debug(profiles)
 
 
 def dump() -> None:
     """Dump persisting attributes of this module to a file"""
+    with suppress(KeyError):
+        del profiles[last_state_name]
     # dump settings to file in format current-profile, all-profiles
     with open(filename, "wb") as settings_file:
         pickle.dump((current, profiles), settings_file)
@@ -105,6 +112,7 @@ class widget(QWidget):
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
 
         # create list of all input boxes for easier future access
+        # (notably for when we link all the inputs to functions, we can itterate this tuple)
         self.input_widgets = (
             self.D,
             self.H,
@@ -131,23 +139,26 @@ class widget(QWidget):
             self.profile_chooser.itemText(i)
             for i in range(self.profile_chooser.count())
         ]
-        # function to obtain index of a given profile
+
+        # easy access function to obtain index of a given profile
         self.profile_index = lambda name: self.profile_list().index(name)
 
-        # add each profile to the combo box
+        # add each profile from the save file to the combo box
         for profile_name in profiles:
             self.profile_chooser.addItem(profile_name)
 
         # scan to see if the last used settings belonged to a profile
-        profile_found = False
+        profile_found = False # did we find a profile with the last used settings?
         for name, profile in profiles.items():
             # if they did then set it to that profile
             if current == profile:
                 self.profile_chooser.setCurrentIndex(self.profile_index(name))
                 profile_found = True
-                break
-        if not profile_found:
+                break # we found the profile we were looking for. break!
+        if not profile_found: # if no profiles with the last used settings were found...
             # add current profile as the restored profile
+            # profiles["Restored Settings" (or something similar)] = current 
+            profiles[last_state_name] = current
             self.profile_chooser.addItem(last_state_name)
             self.profile_chooser.setCurrentIndex(self.profile_index(last_state_name))
         previously_loaded_name = self.profile_chooser.currentText()
@@ -164,6 +175,7 @@ class widget(QWidget):
                 # add the new profile to the profile chooser
                 self.profile_chooser.addItem(profile_name)
 
+        # when the save profile button is clicked call save_profile()
         self.save_profile_button.clicked.connect(save_profile)
 
         # Worker for the delete button
@@ -177,19 +189,23 @@ class widget(QWidget):
                 # remove profile by index from profile chooser
                 self.profile_chooser.removeItem(profile_index)
 
+        # when the delete profile button is clicked call delete_profile()
         self.delete_profile_button.clicked.connect(delete_profile)
 
         def load_profile():
-            """Current-profile-changed worker."""
+            # load profile button worker
+            # previously_loaded_name is a global variable
+            # which indicates the name of the previously located profile
             global previously_loaded_name
-            self.load_profile_button.setEnabled(False)
-            current_profile = self.profile_chooser.currentText()
-            previously_loaded_name = current_profile
-            if current_profile == last_state_name:
-                self.dump_settings(current)
-            else:
-                self.dump_settings(profiles[current_profile])
 
+            # since we just loaded a profile the button gets disabled
+            # (since there's no point in loading it again until settings have changed)
+            self.load_profile_button.setEnabled(False)
+
+            # dump settings of profile chooser's text
+            self.dump_settings(profiles[self.profile_chooser.currentText()])
+
+        # when load profile button is clicked load profiles
         self.load_profile_button.clicked.connect(load_profile)
         self.load_profile_button.clicked.connect(lambda: self.load_profile_button.setEnabled(False))
 
@@ -197,6 +213,7 @@ class widget(QWidget):
         load_profile()
 
         def input_changed(input):
+            # we are modifying the global input variable
             global current
 
             # fetch settings of input boxes
@@ -223,10 +240,10 @@ class widget(QWidget):
             lambda: self.load_profile_button.setEnabled(True)
         )
 
-        input_changed(None)
 
     def dump_settings(self, profile: profile) -> None:
         """Saves current settings to profile with name in text edit input box."""
+        # set the value of all widgets to their respective profile attribute
         self.D.setValue(profile.D)
         self.H.setValue(profile.H)
         self.T.setValue(profile.T)
@@ -240,6 +257,7 @@ class widget(QWidget):
 
     def fetch_settings(self) -> profile:
         """Fetch a profile object with all current nucleic acid settings from inputs."""
+        # fetch the value of each needed attribute to build a profile from their respective widgets
         return profile(
             D=self.D.value(),
             H=self.H.value(),
