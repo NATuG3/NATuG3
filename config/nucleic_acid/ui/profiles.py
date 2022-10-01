@@ -163,6 +163,7 @@ def input_box_changed(self, input):
             self.save_profile_button.setStatusTip(
                 f'Save current settings to a new profile with name "{chosen_profile_name}."'
             )
+            self.save_profile_button.setToolTip("Save Profile")
             # can't delete a profile that doesn't exist
             self.delete_profile_button.setEnabled(False)
             self.delete_profile_button.setStatusTip(
@@ -179,6 +180,7 @@ def input_box_changed(self, input):
             self.save_profile_button.setStatusTip(
                 f'Clone profile "{storage.previous_profile_name}"\'s settings to new profile named "{chosen_profile_name}."'
             )
+            self.save_profile_button.setToolTip("Clone Profile")
             # can't delete a profile that doesn't exist
             self.delete_profile_button.setEnabled(False)
             self.delete_profile_button.setStatusTip(
@@ -196,6 +198,7 @@ def input_box_changed(self, input):
             self.save_profile_button.setStatusTip(
                 f'Overwrite the profile named "{chosen_profile_name}"\'s saved settings with the current settings'
             )
+            self.save_profile_button.setToolTip("Overwrite Profile")
             # can delete a profile no matter if it is updated or not
             self.delete_profile_button.setEnabled(True)
             self.delete_profile_button.setStatusTip(
@@ -209,13 +212,16 @@ def input_box_changed(self, input):
                 # doesn't make sense to overwrite a profile with the exact same settings
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
-                    f'The current settings match "{chosen_profile_name}"\'s settings.'
+                    f'The current settings match "{chosen_profile_name}"\'s settings. ' +
+                    '(cannot overwrite current settings with identical settings)'
                 )
                 # can overwrite existing profile with the new settings
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setStatusTip(
-                    f'The current settings match "{chosen_profile_name}"\'s settings (cannot overwrite current settings with identical ones).'
+                    f'The current settings match "{chosen_profile_name}"\'s settings ' +
+                    f'(cannot overwrite "{chosen_profile_name}"\'s settings with identical settings).'
                 )
+                self.save_profile_button.setToolTip("Save Profile")
             # the chosen profile hasn't changed and the settings are the same as the profile's
             # so we should disable the load profile button
             else:
@@ -231,6 +237,7 @@ def input_box_changed(self, input):
                 self.save_profile_button.setStatusTip(
                     f'Overwrite the profile named "{chosen_profile_name}"\'s saved settings with the current settings'
                 )
+                self.save_profile_button.setToolTip("Overwrite Profile")
 
             # can delete a profile no matter if it is updated or not
             self.delete_profile_button.setEnabled(True)
