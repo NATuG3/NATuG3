@@ -1,6 +1,5 @@
 import atexit
 import config.nucleic_acid
-from config.panel import panel
 
 
 # ensure settings saves on exit and loads on entry

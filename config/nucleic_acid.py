@@ -10,10 +10,8 @@ import references
 
 filename = "config/saves/nucleic_acid.nano"
 current = None  # current profile
-previously_loaded_name = None
 profiles = None  # all profiles
 logger = logging.getLogger(__name__)
-last_state_name = "Restored Settings"
 
 
 @dataclass
@@ -64,7 +62,13 @@ def load() -> None:
         # attempt to open the settings file, or create a new settings file with
         # DNA-B settings (as a default/example)
         with open(filename, "rb") as settings_file:
-            current, profiles = pickle.load(settings_file)
+            profiles = pickle.load(settings_file)
+        # if profile dict was empty then reset to default
+        # (by triggering the exception which causes a default reload)
+        if profiles == {}:
+            raise FileNotFoundError
+        # let the current settings be the first item in profiles
+        current = profiles[next(iter(profiles))]
     # if the file does not exist then create a new one with default settings
     except FileNotFoundError:
         logger.debug("Settings file not found. Restoring defaults...")
@@ -91,11 +95,9 @@ def load() -> None:
 
 def dump() -> None:
     """Dump persisting attributes of this module to a file"""
-    with suppress(KeyError):
-        del profiles[last_state_name]
     # dump settings to file in format current-profile, all-profiles
     with open(filename, "wb") as settings_file:
-        pickle.dump((current, profiles), settings_file)
+        pickle.dump(profiles, settings_file)
 
 
 class widget(QWidget):
@@ -107,9 +109,17 @@ class widget(QWidget):
 
         # prettify buttons
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
-        self.load_profile_button.setStyleSheet("QPushButton::disabled{background-color: rgb(210, 210, 210)}")
+        self.load_profile_button.setStyleSheet(
+            "QPushButton::disabled{background-color: rgb(210, 210, 210)}"
+        )
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
+        self.save_profile_button.setStyleSheet(
+            "QPushButton::disabled{background-color: rgb(210, 210, 210)}"
+        )
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
+        self.delete_profile_button.setStyleSheet(
+            "QPushButton::disabled{background-color: rgb(210, 210, 210)}"
+        )
 
         # create list of all input boxes for easier future access
         # (notably for when we link all the inputs to functions, we can itterate this tuple)
@@ -131,9 +141,8 @@ class widget(QWidget):
         # set up the profile manager
         self._profile_manager()
 
-
     def _profile_manager(self) -> None:
-        """Set up the profile manager"""
+        """Set up the profile manager."""
         # function to obtain list of all items in profile_chooser
         self.profile_list = lambda: [
             self.profile_chooser.itemText(i)
@@ -147,27 +156,16 @@ class widget(QWidget):
         for profile_name in profiles:
             self.profile_chooser.addItem(profile_name)
 
-        # scan to see if the last used settings belonged to a profile
-        profile_found = False # did we find a profile with the last used settings?
-        for name, profile in profiles.items():
-            # if they did then set it to that profile
-            if current == profile:
-                self.profile_chooser.setCurrentIndex(self.profile_index(name))
-                profile_found = True
-                break # we found the profile we were looking for. break!
-        if not profile_found: # if no profiles with the last used settings were found...
-            # add current profile as the restored profile
-            # profiles["Restored Settings" (or something similar)] = current 
-            profiles[last_state_name] = current
-            self.profile_chooser.addItem(last_state_name)
-            self.profile_chooser.setCurrentIndex(self.profile_index(last_state_name))
-        previously_loaded_name = self.profile_chooser.currentText()
+        # save the currently loaded profile name as the previously loaded profile name
+        self.previous_profile_name = self.profile_chooser.currentText()
 
         # Worker for the save button
         def save_profile():
             # obtain name of profile to save
             profile_name = self.profile_chooser.currentText()
-            if profile_name == last_state_name:
+            # don't allow blank profile names
+            if profile_name == "":
+                logger.debug("Cannot create profile with blank name")
                 return
             # save the profile with the current settings
             profiles[profile_name] = self.fetch_settings()
@@ -207,12 +205,15 @@ class widget(QWidget):
 
         # when load profile button is clicked load profiles
         self.load_profile_button.clicked.connect(load_profile)
-        self.load_profile_button.clicked.connect(lambda: self.load_profile_button.setEnabled(False))
+        self.load_profile_button.clicked.connect(
+            lambda: self.load_profile_button.setEnabled(False)
+        )
 
         # load the restored settings profile
         load_profile()
 
-        def input_changed(input):
+        # Called when any of the input boxes values are changed
+        def settings_updater(input):
             # we are modifying the global input variable
             global current
 
@@ -222,23 +223,60 @@ class widget(QWidget):
             # if B or T or H were changed Z_b also will have changed
             self.Z_b.setValue(current.Z_b)
 
-            # if the selected profile in the profile chooser dropdown
-            # matches the current settings (input boxes' values) then
-            # disable the "load profile" button 
-            if current == profiles[previously_loaded_name]:
-                # toggle the current profile in the profile chooser dropdown
-                self.load_profile_button.setEnabled(False)
+
+        def button_locker():
+            """Lock profile manager button(s) based on chosen profile's updatedness and newness."""
+            # the actual current settings match the current profile's settings
+            try:
+                chosen_profile_is_updated = not (current == profiles[self.previous_profile_name])
+                logger.debug(f"chosen-profile-is-updated is: {chosen_profile_is_updated}")
+            except KeyError: # the previously loaded profile was deleted
+                chosen_profile_is_updated = True 
+
+            # the chosen profile's name is NOT the name of an already existant profile
+            chosen_profile_name_is_new = (self.profile_chooser.currentText() not in profiles)
+            logger.debug(f"chosen-profile-is-new-is: {chosen_profile_name_is_new}")
+
+            # lock/unlock profile manager buttons according to state
+            if chosen_profile_name_is_new:
+                if chosen_profile_is_updated: # and is new
+                    # can't load a profile that doesn't exist
+                    self.load_profile_button.setEnabled(False)
+                    # can save a profile that doesn't already exist
+                    self.save_profile_button.setEnabled(True)
+                    # can't delete a profile that doesn't exist
+                    self.delete_profile_button.setEnabled(False)
+                else: # chosen profile is updated and is new
+                    # can't load a profile that doesn't exist
+                    self.load_profile_button.setEnabled(False)
+                    # new profile will be a copy of an existing one; that's fine
+                    self.save_profile_button.setEnabled(True)
+                    # can't delete a profile that doesn't exist
+                    self.delete_profile_button.setEnabled(False)
             else:
-                self.load_profile_button.setEnabled(True)
+                if chosen_profile_is_updated: # and not new
+                    # can load back the saved state of an existing but changed profile
+                    self.load_profile_button.setEnabled(True)
+                    # can overwrite existing profile with the new settings
+                    self.save_profile_button.setEnabled(True)
+                    # can delete a profile no matter if it is updated or not
+                    self.delete_profile_button.setEnabled(True)
+                else: # chosen profile is not updated and not new
+                    # doesn't make sense to overwrite current settings with identical ones
+                    self.load_profile_button.setEnabled(False)
+                    # doesn't make sense to overwrite a profile with the exact same settings
+                    self.save_profile_button.setEnabled(False)
+                    # can delete a profile no matter if it is updated or not
+                    self.delete_profile_button.setEnabled(True)
 
+
+        # hook all inputs to the following functions...
         for input in self.input_widgets:
-            # for all input boxes hook them to the input changed function
-            input.valueChanged.connect(lambda: input_changed(input))
+            input.valueChanged.connect(lambda: settings_updater(input))
+            input.valueChanged.connect(button_locker)
 
-        # unhighlight the profile chooser if the current profile input is changed
-        self.profile_chooser.currentTextChanged.connect(
-            lambda: self.load_profile_button.setEnabled(True)
-        )
+        self.profile_chooser.currentTextChanged.connect(button_locker)
+        button_locker()
 
 
     def dump_settings(self, profile: profile) -> None:

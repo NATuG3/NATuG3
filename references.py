@@ -14,6 +14,7 @@ class windows:
 
 windows = windows()
 
+
 @dataclass
 class miscellaneous:
     """Dataclass to store all other needed references"""

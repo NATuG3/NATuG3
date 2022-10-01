@@ -4,6 +4,7 @@ import sys
 from time import time
 import logging
 
+
 # initilize logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -29,10 +30,10 @@ if __name__ == "__main__":
     app.setWindowIcon(QIcon("resources/icon.ico"))
 
     # QApplication must be created before we can import ui
-    import windows.constructor.ui
+    import windows.constructor.main
 
     # obtain and generate window item
-    windows = windows.constructor.ui.window()
+    windows = windows.constructor.main.window()
 
     # show window
     windows.show()

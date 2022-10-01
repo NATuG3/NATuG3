@@ -1,4 +1,3 @@
-from contextlib import suppress
 from types import SimpleNamespace
 from PyQt6.QtWidgets import (
     QMainWindow,
@@ -11,8 +10,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt
 import references
-import config.panel, config.nucleic_acid
-import top_view.ui, side_view.ui
+import config.main, config.nucleic_acid
+import plotting.top_view.runner, plotting.side_view.runner
 
 
 def unrestrict_scale_upon_float(
@@ -83,7 +82,7 @@ class window(QMainWindow):
         self.docked_widgets.config.setStatusTip("Settings panel")
 
         # store the actual link to the widget in self.config
-        self.config = config.panel()
+        self.config = config.main.panel()
         self.docked_widgets.config.setWidget(self.config)
 
         # set width of config widget while docked to 200px
@@ -119,7 +118,7 @@ class window(QMainWindow):
             )
 
             # store widget in class for easier direct access
-            self.top_view = top_view.ui.plot()
+            self.top_view = plotting.top_view.runner.plot()
 
             # attach actaul top view widget to docked top view widget
             self.docked_widgets.top_view.setWidget(self.top_view)
@@ -153,7 +152,7 @@ class window(QMainWindow):
             prittified_side_view.setStatusTip("A plot of the side view of all domains")
 
             # store widget in class for easier future direct widget access
-            self.side_view = side_view.ui.plot()
+            self.side_view = plotting.side_view.runner.plot()
             prittified_side_view.layout().addWidget(self.side_view)
 
             # ensure this widget is always large enough to be useful (300px)

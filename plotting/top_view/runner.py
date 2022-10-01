@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import top_view.computer
+import plotting.top_view.worker
 import logging
-import config.nucleic_acid, config.domains
 from contextlib import suppress
+import config.nucleic_acid, config.domains
 
 
 logger = logging.getLogger(__name__)
@@ -20,16 +20,21 @@ class plot(QWidget):
         self.load()
 
     def load(self):
+        """
+        Fetch settings data and actually plot the top view graph.
+        Automatically replaces existing plot if this has already been called.
+        """
+
+        # attempt to remove existing widget if it is already generated
+        # (so that we don't end up with two widgets)
         with suppress(AttributeError):
             self.layout().removeWidget(self.graph)
 
-        # obtain current settings
+        # fetch nucleic acid settings and the current domains
         self.settings = config.nucleic_acid.current
-
-        # obtain current domains
         self.domains = config.domains.current
 
-        self.worker = top_view.computer.plot(
+        self.worker = plotting.top_view.worker.plot(
             self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s
         )
         self.worker.compute()

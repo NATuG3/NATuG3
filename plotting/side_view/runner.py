@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import config.nucleic_acid, config.domains, config.properties
+import config.nucleic_acid, config.domains, config.main
 import logging
-import side_view.computer
+import plotting.side_view.worker
 from contextlib import suppress
 
 
@@ -20,18 +20,23 @@ class plot(QWidget):
         self.load()
 
     def load(self):
+        """
+        Fetch settings data and actually plot the top view graph.
+        Automatically replaces existing plot if this has already been called.
+        """
+
         # attempt to remove existing widget if it is already generated
+        # (so that we don't end up with two widgets)
         with suppress(AttributeError):
             self.layout().removeWidget(self.graph)
 
-        # obtain current settings
+        # fetch nucleic acid settings and the current domains
         self.settings = config.nucleic_acid.current
-
-        # obtain current domains
         self.domains = config.domains.current
+        self.count = config.main.count
 
         # create instance of dna_nanotube_tools side view generation
-        self.worker = side_view.computer.plot(
+        self.worker = plotting.side_view.worker.plot(
             self.domains,
             self.settings.Z_b,
             self.settings.Z_s,
@@ -52,8 +57,8 @@ class plot(QWidget):
         main_plot.disableAutoRange()
 
         # generate the coords
-        x_coords = self.worker._x_coords(config.properties.count)
-        z_coords = self.worker._z_coords(config.properties.count)
+        x_coords = self.worker._x_coords(self.count)
+        z_coords = self.worker._z_coords(self.count)
 
         for domain_index in range(self.worker.domain_count):
             if domain_index % 2:  # if the domain index is an even integer

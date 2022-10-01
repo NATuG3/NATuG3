@@ -2,11 +2,12 @@ import logging
 from types import SimpleNamespace
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
-import config.nucleic_acid, config.domains, config.properties
+import config.nucleic_acid, config.domains, config.main
 import references
 from resources import fetch_icon
 
 
+count = 50
 logger = logging.getLogger(__name__)
 
 
@@ -22,10 +23,11 @@ class panel(QWidget):
         # set config.panel.count (for cross module use)
         def config_count_updater():
             """Update config.panel.count to the current initial NEMid count box's value"""
-            config.properties.count = self.initial_NEMids.value()
+            global count
+            count = self.initial_NEMids.value()
 
         # store default value in initial_NEMids box
-        self.initial_NEMids.setValue(config.properties.count)
+        self.initial_NEMids.setValue(config.main.count)
         # when initial NEMid count box is changed store the change
         self.initial_NEMids.valueChanged.connect(config_count_updater)
 
@@ -47,5 +49,3 @@ class panel(QWidget):
 
         # set up the update graphs button
         self.update_graphs.clicked.connect(references.windows.constructor.load_graphs)
-    
-
