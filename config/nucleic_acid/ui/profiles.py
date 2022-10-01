@@ -21,8 +21,12 @@ def setup(self):
         self.profile_chooser.addItem(profile_name)
 
     # set the profile chooser to the last used profile
-    logger.debug(f"Previously loaded profile name was \"{storage.previous_profile_name}\"")
-    self.profile_chooser.setCurrentIndex(self.profile_index(storage.previous_profile_name))
+    logger.debug(
+        f'Previously loaded profile name was "{storage.previous_profile_name}"'
+    )
+    self.profile_chooser.setCurrentIndex(
+        self.profile_index(storage.previous_profile_name)
+    )
 
     # when the save profile button is clicked call save_profile()
     self.save_profile_button.clicked.connect(lambda: save_profile(self))
@@ -63,7 +67,9 @@ def save_profile(self):
     # save the profile with the current settings
     new_settings = self.fetch_settings()
     storage.profiles[profile_name] = new_settings
-    logging.debug(f"Saving new settings ({new_settings}) as profile named \"{profile_name}\"")
+    logging.debug(
+        f'Saving new settings ({new_settings}) as profile named "{profile_name}"'
+    )
 
     # if the profile is not already in the profile chooser...
     if profile_name not in self.profile_list():
@@ -124,7 +130,9 @@ def input_box_changed(self, input):
         chosen_profile_is_updated = True
 
     logger.debug(f"Current profile: {storage.current}")
-    logger.debug(f"Previous profile [{storage.previous_profile_name}]: {storage.profiles[storage.previous_profile_name]}")
+    logger.debug(
+        f"Previous profile [{storage.previous_profile_name}]: {storage.profiles[storage.previous_profile_name]}"
+    )
 
     # lock/unlock profile manager buttons according to state
     if chosen_profile_name_is_new:
@@ -179,7 +187,9 @@ def input_box_changed(self, input):
             )
         else:  # chosen profile is not updated and not new
             if storage.previous_profile_name == chosen_profile_name:
-                logger.debug("The previously loaded profile name matches the currently chosen profile name.")
+                logger.debug(
+                    "The previously loaded profile name matches the currently chosen profile name."
+                )
                 # doesn't make sense to overwrite a profile with the exact same settings
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
@@ -193,7 +203,9 @@ def input_box_changed(self, input):
             # the chosen profile hasn't changed and the settings are the same as the profile's
             # so we should disable the load profile button
             else:
-                logger.debug("The previously loaded profile name does NOT match the currently chosen profile name.")
+                logger.debug(
+                    "The previously loaded profile name does NOT match the currently chosen profile name."
+                )
                 self.load_profile_button.setEnabled(True)
                 self.load_profile_button.setStatusTip(
                     f'Overwrite current settings with the settings of the profile named "{chosen_profile_name}."'

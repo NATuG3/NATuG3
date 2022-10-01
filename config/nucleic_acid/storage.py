@@ -84,10 +84,14 @@ def load() -> None:
 
         # if it was deleted then just load the first profile found in the dict
         except KeyError:
-            logger.debug(f"Previous profile (\"previous_profile_name\") could not be located.")
+            logger.debug(
+                f'Previous profile ("previous_profile_name") could not be located.'
+            )
             # obtain name of the first profile in the dict and set the current profile to it
             previous_profile_name = next(iter(profiles))
-            logger.debug(f"Set \"{previous_profile_name}\" as the currently selected/loaded profile.")
+            logger.debug(
+                f'Set "{previous_profile_name}" as the currently selected/loaded profile.'
+            )
             current = profiles[previous_profile_name]
 
     # if the settings file wasn't found then create a new one
