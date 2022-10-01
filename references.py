@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from PyQt6.QtWidgets import QMainWindow, QDialog, QWidget
-from config.nucleic_acid import profile
+from PyQt6.QtWidgets import QMainWindow, QDialog
+from config.nucleic_acid.storage import profile
 
 
 @dataclass

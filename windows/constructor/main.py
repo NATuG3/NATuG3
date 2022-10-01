@@ -9,9 +9,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 from PyQt6.QtCore import Qt
-import references
 import config.main, config.nucleic_acid
 import plotting.top_view.runner, plotting.side_view.runner
+import references
 
 
 def unrestrict_scale_upon_float(
@@ -95,8 +95,8 @@ class window(QMainWindow):
             )
         )
         self.docked_widgets.config.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+            # this dock widget is just a container
+            QDockWidget.DockWidgetFeature.NoDockWidgetFeatures
         )
         # dock the new docakble config widget
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)

@@ -31,7 +31,7 @@ class plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # fetch nucleic acid settings and the current domains
-        self.settings = config.nucleic_acid.current
+        self.settings = config.nucleic_acid.storage.current
         self.domains = config.domains.current
         self.count = config.main.count
 

@@ -325,10 +325,10 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string>Characteristic Angle</string>
+           <string/>
           </property>
           <property name="statusTip">
-           <string>The smallest angle about the helix axis possible between two NEMids on the same helix</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
@@ -353,10 +353,10 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string>Switch Angle</string>
+           <string/>
           </property>
           <property name="statusTip">
-           <string>The angle about the helix axis between two NEMids on different helices of a double helix</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
@@ -381,10 +381,10 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string>Base Angle</string>
+           <string/>
           </property>
           <property name="statusTip">
-           <string>The angle that one base makes about the helix axis</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
@@ -441,10 +441,10 @@
           <item>
            <widget class="QLabel" name="T_label">
             <property name="toolTip">
-             <string>Turns</string>
+             <string/>
             </property>
             <property name="statusTip">
-             <string>There are B bases per T turns of the helix</string>
+             <string/>
             </property>
             <property name="text">
              <string>[T]urns</string>
@@ -568,7 +568,7 @@
            <string>Helical Twist Height</string>
           </property>
           <property name="statusTip">
-           <string>The height of one turn of the helix of a nucleic acid</string>
+           <string/>
           </property>
           <property name="text">
            <string>[H]eight</string>
@@ -578,7 +578,7 @@
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="D">
           <property name="toolTip">
-           <string>Domain Diameter</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
@@ -606,10 +606,10 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string>Diameter of Domain</string>
+           <string/>
           </property>
           <property name="statusTip">
-           <string>The diameter of a given domain</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
@@ -622,7 +622,7 @@
         <item row="1" column="1">
          <widget class="QDoubleSpinBox" name="H">
           <property name="toolTip">
-           <string>Helical Twist height</string>
+           <string/>
           </property>
           <property name="buttonSymbols">
            <enum>QAbstractSpinBox::NoButtons</enum>
@@ -718,7 +718,7 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string extracomment="The vertical height between two NEMids on different helices of the same double helix">Strand Switch Height</string>
+           <string/>
           </property>
           <property name="statusTip">
            <string>The vertical height between two NEMids on different helices of the same double helix</string>
@@ -746,10 +746,10 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string>Base height</string>
+           <string/>
           </property>
           <property name="statusTip">
-           <string>The height between two bases on the helix axis. = (T*H)/B</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>
@@ -761,8 +761,17 @@
         </item>
         <item row="0" column="1">
          <widget class="QDoubleSpinBox" name="Z_b">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="statusTip">
+           <string/>
+          </property>
           <property name="autoFillBackground">
            <bool>false</bool>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QDoubleSpinBox::disabled{background-color: rgb(240, 240, 240); color: black}</string>
           </property>
           <property name="wrapping">
            <bool>false</bool>
@@ -771,7 +780,7 @@
            <bool>true</bool>
           </property>
           <property name="readOnly">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="buttonSymbols">
            <enum>QAbstractSpinBox::NoButtons</enum>
@@ -820,10 +829,10 @@
            <cursorShape>ArrowCursor</cursorShape>
           </property>
           <property name="toolTip">
-           <string>Characteristic Height</string>
+           <string/>
           </property>
           <property name="statusTip">
-           <string>The height a helix climbs as it rotates through the characteristic angle</string>
+           <string/>
           </property>
           <property name="whatsThis">
            <string/>

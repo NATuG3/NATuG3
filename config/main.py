@@ -37,7 +37,7 @@ class panel(QWidget):
         logger.debug("Building config panel...")
         # set the nucleic acid tab
         # store actual widget in the tabs container
-        self.tabs.nucleic_acid = config.nucleic_acid.widget()
+        self.tabs.nucleic_acid = config.nucleic_acid.ui.panel()
         self.nucleic_acid_tab.setLayout(QVBoxLayout())
         self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
 
