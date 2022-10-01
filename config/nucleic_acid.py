@@ -223,30 +223,35 @@ class widget(QWidget):
             # if B or T or H were changed Z_b also will have changed
             self.Z_b.setValue(current.Z_b)
 
-
         def button_locker():
             """Lock profile manager button(s) based on chosen profile's updatedness and newness."""
             # the actual current settings match the current profile's settings
             try:
-                chosen_profile_is_updated = not (current == profiles[self.previous_profile_name])
-                logger.debug(f"chosen-profile-is-updated is: {chosen_profile_is_updated}")
-            except KeyError: # the previously loaded profile was deleted
-                chosen_profile_is_updated = True 
+                chosen_profile_is_updated = not (
+                    current == profiles[self.previous_profile_name]
+                )
+                logger.debug(
+                    f"chosen-profile-is-updated is: {chosen_profile_is_updated}"
+                )
+            except KeyError:  # the previously loaded profile was deleted
+                chosen_profile_is_updated = True
 
             # the chosen profile's name is NOT the name of an already existant profile
-            chosen_profile_name_is_new = (self.profile_chooser.currentText() not in profiles)
+            chosen_profile_name_is_new = (
+                self.profile_chooser.currentText() not in profiles
+            )
             logger.debug(f"chosen-profile-is-new-is: {chosen_profile_name_is_new}")
 
             # lock/unlock profile manager buttons according to state
             if chosen_profile_name_is_new:
-                if chosen_profile_is_updated: # and is new
+                if chosen_profile_is_updated:  # and is new
                     # can't load a profile that doesn't exist
                     self.load_profile_button.setEnabled(False)
                     # can save a profile that doesn't already exist
                     self.save_profile_button.setEnabled(True)
                     # can't delete a profile that doesn't exist
                     self.delete_profile_button.setEnabled(False)
-                else: # chosen profile is updated and is new
+                else:  # chosen profile is updated and is new
                     # can't load a profile that doesn't exist
                     self.load_profile_button.setEnabled(False)
                     # new profile will be a copy of an existing one; that's fine
@@ -254,21 +259,20 @@ class widget(QWidget):
                     # can't delete a profile that doesn't exist
                     self.delete_profile_button.setEnabled(False)
             else:
-                if chosen_profile_is_updated: # and not new
+                if chosen_profile_is_updated:  # and not new
                     # can load back the saved state of an existing but changed profile
                     self.load_profile_button.setEnabled(True)
                     # can overwrite existing profile with the new settings
                     self.save_profile_button.setEnabled(True)
                     # can delete a profile no matter if it is updated or not
                     self.delete_profile_button.setEnabled(True)
-                else: # chosen profile is not updated and not new
+                else:  # chosen profile is not updated and not new
                     # doesn't make sense to overwrite current settings with identical ones
                     self.load_profile_button.setEnabled(False)
                     # doesn't make sense to overwrite a profile with the exact same settings
                     self.save_profile_button.setEnabled(False)
                     # can delete a profile no matter if it is updated or not
                     self.delete_profile_button.setEnabled(True)
-
 
         # hook all inputs to the following functions...
         for input in self.input_widgets:
@@ -277,7 +281,6 @@ class widget(QWidget):
 
         self.profile_chooser.currentTextChanged.connect(button_locker)
         button_locker()
-
 
     def dump_settings(self, profile: profile) -> None:
         """Saves current settings to profile with name in text edit input box."""
