@@ -17,9 +17,6 @@ class panel(QWidget):
         super().__init__()
         uic.loadUi("config/ui/panel.ui", self)
 
-        # store instance of self in references
-        references.buttons.update_graphs = self.update_graphs
-
         self.update_graphs.setIcon(fetch_icon("reload-outline"))
 
         # set config.panel.count (for cross module use)

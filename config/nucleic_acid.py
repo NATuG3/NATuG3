@@ -100,8 +100,22 @@ class widget(QWidget):
 
         # prettify buttons
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
+        self.load_profile_button.setStyleSheet("QPushButton::disabled{background-color: rgb(210, 210, 210)}")
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
+
+        # create list of all input boxes for easier future access
+        self.input_widgets = (
+            self.D,
+            self.H,
+            self.T,
+            self.B,
+            self.Z_c,
+            self.Z_s,
+            self.theta_b,
+            self.theta_c,
+            self.theta_s,
+        )
 
         # restore the current settinsg
         self.dump_settings(current)
@@ -177,25 +191,12 @@ class widget(QWidget):
                 self.dump_settings(profiles[current_profile])
 
         self.load_profile_button.clicked.connect(load_profile)
+        self.load_profile_button.clicked.connect(lambda: self.load_profile_button.setEnabled(False))
 
         # load the restored settings profile
         load_profile()
 
-    # create list of all input boxes for easier future access
-        self.input_widgets = (
-            self.D,
-            self.H,
-            self.T,
-            self.B,
-            self.Z_c,
-            self.Z_s,
-            self.theta_b,
-            self.theta_c,
-            self.theta_s,
-        )
-
         def input_changed(input):
-            """Store new settings on input box changed event"""
             global current
 
             # fetch settings of input boxes
@@ -204,20 +205,12 @@ class widget(QWidget):
             # if B or T or H were changed Z_b also will have changed
             self.Z_b.setValue(current.Z_b)
 
-            # profile chooser's current text
-            chooser_text = self.profile_chooser.currentText()
-
-            # if the selected profile is still the previoiusly loaded one
-            # and the profile chooser combo box hasn't changed
-            if (current == profiles[previously_loaded_name]
-                or ((chooser_text == last_state_name))
-            ):
-                # toggle the current profile
-                self.profile_chooser.setCurrentIndex(
-                    self.profile_index(previously_loaded_name)
-                )
+            # if the selected profile in the profile chooser dropdown
+            # matches the current settings (input boxes' values) then
+            # disable the "load profile" button 
+            if current == profiles[previously_loaded_name]:
+                # toggle the current profile in the profile chooser dropdown
                 self.load_profile_button.setEnabled(False)
-            # if the selected profile has changed
             else:
                 self.load_profile_button.setEnabled(True)
 
