@@ -1,8 +1,0 @@
-pyqtgraph
-PyQt6
-PyQt5
-<<<<<<< HEAD
-webbrowser
-=======
-webbrowser
->>>>>>> 85f52d0697c1dfa0c18bc42d41a343e927a16bd3
