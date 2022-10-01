@@ -1,3 +1,4 @@
+from weakref import KeyedRef
 from config.nucleic_acid import storage
 import logging
 from contextlib import suppress
@@ -54,6 +55,8 @@ def setup(self):
 
     # save button needs to be locked right after it's clicked
     self.save_profile_button.clicked.connect(lambda: input_box_changed(self, None))
+    # load button needs to be locked right after it's clicked
+    self.load_profile_button.clicked.connect(lambda: input_box_changed(self, None))
 
     # set up button locking/other needed functions initially
     input_box_changed(self, None)
@@ -67,8 +70,8 @@ def save_profile(self):
     # save the profile with the current settings
     new_settings = self.fetch_settings()
     storage.profiles[profile_name] = new_settings
-    logging.debug(
-        f'Saving new settings ({new_settings}) as profile named "{profile_name}"'
+    logging.info(
+        f'Saved new settings ({new_settings}) as profile named "{profile_name}"'
     )
 
     # if the profile is not already in the profile chooser...
@@ -84,12 +87,22 @@ def delete_profile(self):
     """Worker for the delete profile button"""
     # obtain name of profile to delete
     profile_name = self.profile_chooser.currentText()
+
     with suppress(KeyError):
+        # delete stored profile
         del storage.profiles[profile_name]
+
         # index of profile in the profile chooser dropdown
         profile_index = self.profile_index(profile_name)
+
         # remove profile by index from profile chooser
         self.profile_chooser.removeItem(profile_index)
+
+        # the profile with the name of the previous contents of the box has been deleted
+        # so now empty the profile chooser's box
+        self.profile_chooser.setCurrentText("")
+
+        logger.info(f'Deleted profile named "{profile_name}"')
 
 
 def load_profile(self):
@@ -103,6 +116,8 @@ def load_profile(self):
     # dump settings of profile chooser's text
     self.dump_settings(storage.profiles[profile_name])
 
+    logger.info(f'Loaded profile named "{profile_name}"')
+
 
 def input_box_changed(self, input):
     """Worker for when any input box is changed"""
@@ -115,7 +130,8 @@ def input_box_changed(self, input):
 
     # the currently chosen/inputted profile name
     chosen_profile_name = self.profile_chooser.currentText()
-
+    logger.debug(f"Currently chosen profile name: {chosen_profile_name}")
+    logger.debug(f"Previously loaded profile name: {storage.previous_profile_name}")
     # the chosen profile's name is NOT the name of an already existant profile
     chosen_profile_name_is_new = chosen_profile_name not in storage.profiles
     logger.debug(f"chosen-profile-is-new-is: {chosen_profile_name_is_new}")
@@ -126,13 +142,13 @@ def input_box_changed(self, input):
             storage.current == storage.profiles[storage.previous_profile_name]
         )
         logger.debug(f"chosen-profile-is-updated is: {chosen_profile_is_updated}")
+        logger.debug(f"Current profile: {storage.current}")
+        logger.debug(
+            f"Previous profile: {storage.profiles[storage.previous_profile_name]}"
+        )
     except KeyError:  # the previously loaded profile was deleted
         chosen_profile_is_updated = True
-
-    logger.debug(f"Current profile: {storage.current}")
-    logger.debug(
-        f"Previous profile [{storage.previous_profile_name}]: {storage.profiles[storage.previous_profile_name]}"
-    )
+        logger.debug("Previous profile no longer exists.")
 
     # lock/unlock profile manager buttons according to state
     if chosen_profile_name_is_new:
@@ -145,7 +161,7 @@ def input_box_changed(self, input):
             # can save a profile that doesn't already exist
             self.save_profile_button.setEnabled(True)
             self.save_profile_button.setStatusTip(
-                f'Save current settings as new profile with name "{chosen_profile_name}."'
+                f'Save current settings to a new profile with name "{chosen_profile_name}."'
             )
             # can't delete a profile that doesn't exist
             self.delete_profile_button.setEnabled(False)
@@ -161,7 +177,7 @@ def input_box_changed(self, input):
             # new profile will be a copy of an existing one; that's fine
             self.save_profile_button.setEnabled(True)
             self.save_profile_button.setStatusTip(
-                f'Clone profile "{storage.previous_profile_name}" to new profile named "{chosen_profile_name}."'
+                f'Clone profile "{storage.previous_profile_name}"\'s settings to new profile named "{chosen_profile_name}."'
             )
             # can't delete a profile that doesn't exist
             self.delete_profile_button.setEnabled(False)
@@ -178,7 +194,7 @@ def input_box_changed(self, input):
             # can overwrite existing profile with the new settings
             self.save_profile_button.setEnabled(True)
             self.save_profile_button.setStatusTip(
-                f'Overwrite the profile named "{chosen_profile_name}." with the current settings'
+                f'Overwrite the profile named "{chosen_profile_name}"\'s saved settings with the current settings'
             )
             # can delete a profile no matter if it is updated or not
             self.delete_profile_button.setEnabled(True)
@@ -193,12 +209,12 @@ def input_box_changed(self, input):
                 # doesn't make sense to overwrite a profile with the exact same settings
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
-                    f'Current settings of "{chosen_profile_name}" have not changed.'
+                    f'The current settings match "{chosen_profile_name}"\'s settings.'
                 )
                 # can overwrite existing profile with the new settings
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setStatusTip(
-                    f'Cannot update settings of "{chosen_profile_name}" to current settings since current settings match its saved settings.'
+                    f'The current settings match "{chosen_profile_name}"\'s settings (cannot overwrite current settings with identical ones).'
                 )
             # the chosen profile hasn't changed and the settings are the same as the profile's
             # so we should disable the load profile button
@@ -213,13 +229,13 @@ def input_box_changed(self, input):
                 # can overwrite existing profile with the new settings
                 self.save_profile_button.setEnabled(True)
                 self.save_profile_button.setStatusTip(
-                    f'Overwrite the profile named "{chosen_profile_name}." with the current settings'
+                    f'Overwrite the profile named "{chosen_profile_name}"\'s saved settings with the current settings'
                 )
 
             # can delete a profile no matter if it is updated or not
             self.delete_profile_button.setEnabled(True)
             self.delete_profile_button.setStatusTip(
-                f'Delete the profile named "{chosen_profile_name}". This action cannot be undone.'
+                f'Delete the profile named "{chosen_profile_name}." This action cannot be undone.'
             )
 
     # No matter what we cannot save a profile with a blank name

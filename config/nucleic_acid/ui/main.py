@@ -136,8 +136,6 @@ class panel(QWidget):
             input_widget = input_widget.objectName()
             exec(
                 f"""
-                logger.debug(f"Setting description/tool tips for {input_widget}")
-
                 self.{input_widget}.setToolTip(
                     self.setting_descriptions.{input_widget}[0]
                 )
@@ -154,3 +152,4 @@ class panel(QWidget):
                     "                ", ""
                 )
             )
+        logger.info("Set statusTips/toolTips for all input widgets.")
