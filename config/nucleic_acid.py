@@ -221,17 +221,6 @@ class widget(QWidget):
             else:
                 self.load_profile_button.setEnabled(True)
 
-            # if the current graph's settings are the same as the current settings
-            # lock the update graphs button
-            if (
-                current
-                == references.windows.constructor.top_view.settings
-                == references.windows.constructor.side_view.settings
-            ):
-                references.buttons.update_graphs.setEnabled(False)
-            else:
-                references.buttons.update_graphs.setEnabled(True)
-
         for input in self.input_widgets:
             # for all input boxes hook them to the input changed function
             input.valueChanged.connect(lambda: input_changed(input))

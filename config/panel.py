@@ -26,7 +26,6 @@ class panel(QWidget):
         def config_count_updater():
             """Update config.panel.count to the current initial NEMid count box's value"""
             config.properties.count = self.initial_NEMids.value()
-            references.buttons.update_graphs.setEnabled(True)
 
         # store default value in initial_NEMids box
         self.initial_NEMids.setValue(config.properties.count)
