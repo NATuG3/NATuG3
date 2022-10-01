@@ -172,6 +172,8 @@ class widget(QWidget):
             if profile_name not in self.profile_list():
                 # add the new profile to the profile chooser
                 self.profile_chooser.addItem(profile_name)
+            # the currently saved profile will become the last profile state
+            self.self.previous_profile_name = profile_name
 
         # when the save profile button is clicked call save_profile()
         self.save_profile_button.clicked.connect(save_profile)
@@ -225,6 +227,12 @@ class widget(QWidget):
 
         def button_locker():
             """Lock profile manager button(s) based on chosen profile's updatedness and newness."""
+            # the chosen profile's name is NOT the name of an already existant profile
+            chosen_profile_name_is_new = (
+                self.profile_chooser.currentText() not in profiles
+            )
+            logger.debug(f"chosen-profile-is-new-is: {chosen_profile_name_is_new}")
+
             # the actual current settings match the current profile's settings
             try:
                 chosen_profile_is_updated = not (
@@ -235,12 +243,6 @@ class widget(QWidget):
                 )
             except KeyError:  # the previously loaded profile was deleted
                 chosen_profile_is_updated = True
-
-            # the chosen profile's name is NOT the name of an already existant profile
-            chosen_profile_name_is_new = (
-                self.profile_chooser.currentText() not in profiles
-            )
-            logger.debug(f"chosen-profile-is-new-is: {chosen_profile_name_is_new}")
 
             # lock/unlock profile manager buttons according to state
             if chosen_profile_name_is_new:

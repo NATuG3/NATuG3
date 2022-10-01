@@ -91,7 +91,7 @@ class window(QMainWindow):
         # when this widget floats allow it to scale up to 400px wide
         self.docked_widgets.config.topLevelChanged.connect(
             lambda: unrestrict_scale_upon_float(
-                self.docked_widgets.config, initial_width=225, unbounded_width=460
+                self.docked_widgets.config, initial_width=225, unbounded_width=320
             )
         )
         self.docked_widgets.config.setFeatures(
