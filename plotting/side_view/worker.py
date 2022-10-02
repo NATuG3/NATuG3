@@ -2,7 +2,7 @@ from functools import lru_cache
 from types import FunctionType
 from typing import Deque, Tuple, Type
 from collections import deque
-from plotting.structures import NEMid
+from plotting.datatypes import NEMid
 
 
 # container to store data for domains in

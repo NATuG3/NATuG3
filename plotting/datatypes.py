@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from types import NoneType
 from typing import Tuple, Tuple, Union, Literal
-from plotting.constants import bases, directions, strand_switches
+from plotting.constants import bases
 
 
 @dataclass
@@ -21,11 +21,7 @@ class domain:
     # (-1) up to down; (0) both up/down; (1) down to up
     #
     # this does not need to be defined if theta_switch_multiple is defined
-    theta_switch_multiple: Literal[
-        strand_switches.UP_TO_DOWN,
-        strand_switches.NO_DIRECTION_CHANGE,
-        strand_switches.DOWN_TO_UP,
-    ] = None
+    theta_switch_multiple: Literal[-1, 0, 1] = None
 
     # [left_helix_joint, right_helix_joint]
     # where left_helix_joint and right_helix_joint
@@ -35,7 +31,7 @@ class domain:
     #
     # this does not need to be defined if theta_switch_multiple is -1 or 1
     helix_joints: Tuple[
-        Literal[directions.UP, directions.DOWN], Literal[directions.UP, directions.DOWN]
+        Literal[0, 1], Literal[0, 1]
     ] = None
 
 
@@ -52,6 +48,7 @@ class NEMid:
     is_junction: bool = False
 
     def __repr__(self) -> str:
+        """Determine what to print when instance is printed directly."""
         return f"NEMid(pos={self.position()}), angle={round(self.angle, 3)}°, is_junction={str(self.is_junction).lower()}"
 
     def position(self, round_to=3) -> Tuple[float, float]:

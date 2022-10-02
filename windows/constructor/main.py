@@ -96,10 +96,27 @@ class window(QMainWindow):
         self.config = config.main.panel()
         self.docked_widgets.config.setWidget(self.config)
 
+        # when this widget floats remove width scaling limitation
+        self.docked_widgets.config.topLevelChanged.connect(
+            lambda: unrestrict_scale_upon_float(
+                self.docked_widgets.config, initial_width=340
+            )
+        )
+
         self.docked_widgets.config.setFeatures(
             # this dock widget is just a container
-            QDockWidget.DockWidgetFeature.NoDockWidgetFeatures
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable,
         )
+
+        self.docked_widgets.config.setAllowedAreas(
+            # only left and right areas allowed
+            Qt.DockWidgetArea(0x1)
+            | Qt.DockWidgetArea(0x2)
+        )
+        
+        # limit maximum size of config
+        self.docked_widgets.config.setMaximumWidth(400)
         # dock the new docakble config widget
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
@@ -138,10 +155,17 @@ class window(QMainWindow):
                     self.docked_widgets.top_view, initial_width=340
                 )
             )
+
             self.docked_widgets.top_view.setFeatures(
                 QDockWidget.DockWidgetFeature.DockWidgetFloatable
                 | QDockWidget.DockWidgetFeature.DockWidgetMovable
             )
+
+            self.docked_widgets.top_view.setAllowedAreas(
+            # only left and right areas allowed
+            Qt.DockWidgetArea(0x1)
+            | Qt.DockWidgetArea(0x2)
+        )
 
             # dock the new dockable top view widget
             self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)

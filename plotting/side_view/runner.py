@@ -32,7 +32,7 @@ class plot(QWidget):
 
         # fetch nucleic acid settings and the current domains
         self.settings = config.nucleic_acid.storage.current
-        self.domains = config.domains.current
+        self.domains = config.domains.storage.current
         self.count = config.main.count
 
         # create instance of dna_nanotube_tools side view generation

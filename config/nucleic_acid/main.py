@@ -197,7 +197,7 @@ class panel(QWidget):
                     f'No saved profile is named "{chosen_profile_name}." Cannot load a profile that does not exist.'
                 )
 
-                self.delete_profile_button.setEnabled(True)
+                self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
                     f'No saved profile is named "{chosen_profile_name}." Cannot delete a profile that does not exist.'
                 )
@@ -256,9 +256,19 @@ class panel(QWidget):
         # set up button locking/other needed functions initially
         input_box_changed(self, None)
 
-        # clear the input of the profile chooser
-        # (since it is not certain that the last used settings were actually a profile's settings)
-        self.profile_chooser.setCurrentText("")
+        # set placeholder text of profile chooser
+        # (this text gets cleared on the first click of the profile chooser)
+        self.profile_chooser.setCurrentText("Name to save/load/delete")
+        self.save_profile_button.setEnabled(False)
+        self.firstClickOnSave = True
+        self.profile_chooser.typical_focus_in = self.profile_chooser.focusInEvent
+        def _(focusEvent):
+            self.profile_chooser.typical_focus_in(focusEvent)
+            if self.firstClickOnSave:
+                self.profile_chooser.setCurrentText("")
+            self.firstClickOnSave = False
+        self.profile_chooser.focusInEvent = _
+
 
     def _setting_descriptions(self):
         self.setting_descriptions = SimpleNamespace()

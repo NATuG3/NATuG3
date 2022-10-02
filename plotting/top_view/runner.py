@@ -32,7 +32,7 @@ class plot(QWidget):
 
         # fetch nucleic acid settings and the current domains
         self.settings = config.nucleic_acid.storage.current
-        self.domains = config.domains.current
+        self.domains = config.domains.storage.current
 
         self.worker = plotting.top_view.worker.plot(
             self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s

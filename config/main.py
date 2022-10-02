@@ -16,7 +16,7 @@ class panel(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
-        uic.loadUi("config/designer/panel.ui", self)
+        uic.loadUi("config/panel.ui", self)
 
         self.update_graphs.setIcon(fetch_icon("reload-outline"))
 
@@ -43,7 +43,7 @@ class panel(QWidget):
 
         # set the domains tab
         # store actual widget in the tabs container
-        self.tabs.domains = config.domains.widget()
+        self.tabs.domains = config.domains.panel()
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
