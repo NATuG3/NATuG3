@@ -110,7 +110,7 @@ def dump() -> None:
     # dump all profiles
     with open(profiles_filename, "wb") as settings_file:
         pickle.dump(profiles, settings_file)
-        
+
     # dump current settings
     with open(restored_filename, "wb") as settings_file:
         pickle.dump(current, settings_file)

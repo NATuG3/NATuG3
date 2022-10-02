@@ -38,11 +38,15 @@ def unrestrict_scale_upon_float(
     if widget.isFloating():
         widget.setMaximumWidth(unbounded_width)
         widget.setMaximumHeight(unbounded_height)
-        logger.debug(f"Widget \"{widget.objectName()}\" is floating. Maximum size has been changed to (width={unbounded_width}, height={unbounded_height}).")
+        logger.debug(
+            f'Widget "{widget.objectName()}" is floating. Maximum size has been changed to (width={unbounded_width}, height={unbounded_height}).'
+        )
     else:
         widget.setMaximumWidth(initial_width)
         widget.setMaximumHeight(initial_height)
-        logger.debug(f"Widget \"{widget.objectName()}\" is no longer floating. Maximum size has been changed to (width={initial_width}, height={initial_height}).")
+        logger.debug(
+            f'Widget "{widget.objectName()}" is no longer floating. Maximum size has been changed to (width={initial_width}, height={initial_height}).'
+        )
 
 
 class window(QMainWindow):
@@ -80,7 +84,6 @@ class window(QMainWindow):
         # add all widgets
         self.load_graphs()
         self._config()
-
 
     def _config(self):
         # create a dockable config widget

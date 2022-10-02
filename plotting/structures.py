@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Literal, Tuple, Tuple
+from types import NoneType
+from typing import Tuple, Tuple, Union, Literal
+from plotting.constants import bases, directions, strand_switches
 
 
 @dataclass
@@ -19,7 +21,11 @@ class domain:
     # (-1) up to down; (0) both up/down; (1) down to up
     #
     # this does not need to be defined if theta_switch_multiple is defined
-    theta_switch_multiple: Literal[-1, 0, 1] = None
+    theta_switch_multiple: Literal[
+        strand_switches.UP_TO_DOWN,
+        strand_switches.NO_DIRECTION_CHANGE,
+        strand_switches.DOWN_TO_UP,
+    ] = None
 
     # [left_helix_joint, right_helix_joint]
     # where left_helix_joint and right_helix_joint
@@ -28,7 +34,9 @@ class domain:
     # [0, 1] means that the left helix joint is upwards/right helix joint is downwards
     #
     # this does not need to be defined if theta_switch_multiple is -1 or 1
-    helix_joints: Tuple[Literal[0, 1], Literal[0, 1]] = None
+    helix_joints: Tuple[
+        Literal[directions.UP, directions.DOWN], Literal[directions.UP, directions.DOWN]
+    ] = None
 
 
 @dataclass
@@ -61,7 +69,7 @@ class nucleoside:
     angle: float
 
     # Base Specific Attributes
-    base: Literal["A", "T", "G", "C", "U", None]
+    base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType]
 
     def __repr__(self) -> str:
         return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None','unset')}"

@@ -83,7 +83,9 @@ class panel(QWidget):
             for i in range(self.profile_chooser.count())
         ]
 
-        self.profile_chooser.index = lambda name: self.profile_chooser.list().index(name)
+        self.profile_chooser.index = lambda name: self.profile_chooser.list().index(
+            name
+        )
 
         def save_profile(self):
             """Worker for the save profile button"""
@@ -96,9 +98,7 @@ class panel(QWidget):
 
             # log that the profile was saved (and print the name/repr of the saved profile)
             logger.debug(f"Current settings: {storage.profiles[profile_name]}")
-            logger.info(
-                f'Saved current settings as profile named "{profile_name}"'
-            )
+            logger.info(f'Saved current settings as profile named "{profile_name}"')
 
             # if the profile name is not already in the profile chooser...
             if profile_name not in self.profile_chooser.list():
