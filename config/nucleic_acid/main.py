@@ -96,6 +96,9 @@ class panel(QWidget):
             # fetch current settings and store them under the chosen name
             storage.profiles[profile_name] = self.fetch_settings()
 
+            # clear profile chooser to make placeholder text visable
+            self.profile_chooser.setCurrentText("")
+
             # log that the profile was saved (and print the name/repr of the saved profile)
             logger.debug(f"Current settings: {storage.profiles[profile_name]}")
             logger.info(f'Saved current settings as profile named "{profile_name}"')
@@ -121,6 +124,9 @@ class panel(QWidget):
             # so now empty the profile chooser's box
             self.profile_chooser.setCurrentText("")
 
+            # clear profile chooser to make placeholder text visable
+            self.profile_chooser.setCurrentText("")
+
             # log that the profile was deleted
             logger.info(f'Deleted profile named "{profile_name}"')
 
@@ -132,9 +138,13 @@ class panel(QWidget):
             # dump settings of profile chooser's text
             self.dump_settings(storage.profiles[profile_name])
 
+            # clear profile chooser to make placeholder text visable
+            self.profile_chooser.setCurrentText("")
+
             # log that the profile was loaded
             logger.debug(f"Settings that were loaded: {storage.profiles[profile_name]}")
             logger.info(f'Loaded profile named "{profile_name}"')
+            
 
         def input_box_changed(self, input):
             """Worker for when any input box is changed"""
