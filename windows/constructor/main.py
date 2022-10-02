@@ -103,12 +103,6 @@ class window(QMainWindow):
             )
         )
 
-        self.docked_widgets.config.setFeatures(
-            # this dock widget is just a container
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable,
-        )
-
         self.docked_widgets.config.setAllowedAreas(
             # only left and right areas allowed
             Qt.DockWidgetArea(0x1)
@@ -154,11 +148,6 @@ class window(QMainWindow):
                 lambda: unrestrict_scale_upon_float(
                     self.docked_widgets.top_view, initial_width=340
                 )
-            )
-
-            self.docked_widgets.top_view.setFeatures(
-                QDockWidget.DockWidgetFeature.DockWidgetFloatable
-                | QDockWidget.DockWidgetFeature.DockWidgetMovable
             )
 
             self.docked_widgets.top_view.setAllowedAreas(
