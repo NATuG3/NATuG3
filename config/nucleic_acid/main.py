@@ -250,6 +250,7 @@ class panel(QWidget):
             for profile_name in storage.profiles:
                 self.profile_chooser.addItem(profile_name)
 
+
         # hook all buttons to their workers
         hook_widgets()
 
@@ -257,18 +258,9 @@ class panel(QWidget):
         input_box_changed(self, None)
 
         # set placeholder text of profile chooser
-        # (this text gets cleared on the first click of the profile chooser)
-        self.profile_chooser.setCurrentText("Name to save/load/delete")
-        self.save_profile_button.setEnabled(False)
-        self.firstClickOnSave = True
-        self.profile_chooser.typical_focus_in = self.profile_chooser.focusInEvent
-        def _(focusEvent):
-            self.profile_chooser.typical_focus_in(focusEvent)
-            if self.firstClickOnSave:
-                self.profile_chooser.setCurrentText("")
-            self.firstClickOnSave = False
-        self.profile_chooser.focusInEvent = _
-
+        self.profile_chooser.lineEdit().setPlaceholderText("Name to save/load/delete")
+        self.profile_chooser.setCurrentText("")
+        
 
     def _setting_descriptions(self):
         self.setting_descriptions = SimpleNamespace()
