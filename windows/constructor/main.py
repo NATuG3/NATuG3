@@ -12,6 +12,10 @@ from PyQt6.QtCore import Qt
 import config.main, config.nucleic_acid
 import plotting.top_view.runner, plotting.side_view.runner
 import references
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 def unrestrict_scale_upon_float(
@@ -34,9 +38,11 @@ def unrestrict_scale_upon_float(
     if widget.isFloating():
         widget.setMaximumWidth(unbounded_width)
         widget.setMaximumHeight(unbounded_height)
+        logger.debug(f"Widget \"{widget.objectName()}\" is floating. Maximum size has been changed to (width={unbounded_width}, height={unbounded_height}).")
     else:
         widget.setMaximumWidth(initial_width)
         widget.setMaximumHeight(initial_height)
+        logger.debug(f"Widget \"{widget.objectName()}\" is no longer floating. Maximum size has been changed to (width={initial_width}, height={initial_height}).")
 
 
 class window(QMainWindow):
@@ -75,25 +81,18 @@ class window(QMainWindow):
         self.load_graphs()
         self._config()
 
+
     def _config(self):
         # create a dockable config widget
         self.docked_widgets.config = QDockWidget()
+        self.docked_widgets.config.setObjectName("Config Panel")
         self.docked_widgets.config.setWindowTitle("Config")
-        self.docked_widgets.config.setStatusTip("Settings panel")
+        self.docked_widgets.config.setStatusTip("Config panel")
 
         # store the actual link to the widget in self.config
         self.config = config.main.panel()
         self.docked_widgets.config.setWidget(self.config)
 
-        # set width of config widget while docked to 200px
-        self.docked_widgets.config.setMinimumWidth(200)
-        self.docked_widgets.config.setMaximumWidth(200)
-        # when this widget floats allow it to scale up to 400px wide
-        self.docked_widgets.config.topLevelChanged.connect(
-            lambda: unrestrict_scale_upon_float(
-                self.docked_widgets.config, initial_width=225, unbounded_width=320
-            )
-        )
         self.docked_widgets.config.setFeatures(
             # this dock widget is just a container
             QDockWidget.DockWidgetFeature.NoDockWidgetFeatures
@@ -102,16 +101,20 @@ class window(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
     def load_graphs(self):
+        """Load all nanotube graphs simultaniously."""
         self._top_view()
         self._side_view()
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
         try:
+            assert isinstance(self.top_view, QWidget)
             self.top_view.load()
-        except AttributeError:
+            logger.info("Reloaded top view graph.")
+        except AttributeError or AssertionError:
             # create dockable widget for top view
             self.docked_widgets.top_view = QDockWidget()
+            self.docked_widgets.top_view.setObjectName("Top View")
             self.docked_widgets.top_view.setWindowTitle("Top View of Helicies")
             self.docked_widgets.top_view.setStatusTip(
                 "A plot of the top view of all domains"
@@ -140,13 +143,18 @@ class window(QMainWindow):
             # dock the new dockable top view widget
             self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)
 
+            logger.info("Loaded top view graph for the first time.")
+
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
         try:
+            assert isinstance(self.side_view, QWidget)
             self.side_view.load()
-        except AttributeError:
+            logger.info("Reloaded side view graph.")
+        except AttributeError or AssertionError:
             # create group box to place side view widget in
             prittified_side_view = QGroupBox()
+            prittified_side_view.setObjectName("Side View")
             prittified_side_view.setLayout(QVBoxLayout())
             prittified_side_view.setTitle("Side View of Helicies")
             prittified_side_view.setStatusTip("A plot of the side view of all domains")
@@ -159,11 +167,14 @@ class window(QMainWindow):
             prittified_side_view.setMinimumWidth(300)
             self.setCentralWidget(prittified_side_view)
 
+            logger.info("Loaded side view graph for the first time.")
+
     def _status_bar(self):
         """Create and add status bar."""
         status_bar = self.status_bar = QStatusBar()
         self.setStatusBar(status_bar)
         self.statusBar().setStyleSheet("background-color: rgb(210, 210, 210)")
+        logger.info("Created status bar.")
 
     def _menu_bar(self):
         """Create a menu bar for the main window"""
@@ -180,3 +191,4 @@ class window(QMainWindow):
 
         # place the menu bar object into the actual menu bar
         self.setMenuBar(self.menu_bar)
+        logger.info("Created menu bar.")

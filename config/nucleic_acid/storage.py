@@ -1,15 +1,14 @@
-from contextlib import suppress
 from dataclasses import dataclass
 import logging
 import pickle
+import atexit
 
 
 profiles_filename = "config/nucleic_acid/profiles.nano"
 restored_filename = "config/nucleic_acid/restored.nano"
 
-current = None  # current profile
-profiles = None  # all profiles
-previous_profile_name = None  # name of previously loaded profile
+current: object = None  # current profile
+profiles: dict = None  # all profiles
 
 
 # set up logger
@@ -51,52 +50,36 @@ class profile:
 
     def __eq__(self, other: object) -> bool:
         """Returns true if identical profile is returned"""
-        return vars(self) == vars(other)
+        if isinstance(other, profile):
+            return vars(self) == vars(other)
+        else:
+            return False
 
 
 def load() -> None:
     global current
-    global previous_profile_name
     global profiles
+
+    # ensure settings save on program exit
+    atexit.register(dump)
 
     # attempt to load the nucleic acid settings file
     try:
-        logger.debug("Settings file found. Loading setting profiles...")
-        # attempt to open the settings file, or create a new settings file with
-        # DNA-B settings (as a default/example)
+        logger.debug("Saved profiles file found.")
+
+        # load all profiles
         with open(profiles_filename, "rb") as settings_file:
             profiles = pickle.load(settings_file)
+            assert isinstance(profiles, dict)
 
-        # if profile dict was empty then reset to default
-        # (by triggering the exception which causes a default reload)
-        if profiles == {}:
-            raise FileNotFoundError
-
-        # attempt to load the previously used profile
-        try:
-            # the previous profile name is the text contents of restored_file
-            with open(restored_filename) as restored_file:
-                previous_profile_name = restored_file.read()
-
-            # make the current profile the last used one
-            # (if the last used one does not exist a KeyError will be raised)
-            current = profiles[previous_profile_name]
-
-        # if it was deleted then just load the first profile found in the dict
-        except KeyError:
-            logger.debug(
-                f'Previous profile ("previous_profile_name") could not be located.'
-            )
-            # obtain name of the first profile in the dict and set the current profile to it
-            previous_profile_name = next(iter(profiles))
-            logger.debug(
-                f'Set "{previous_profile_name}" as the currently selected/loaded profile.'
-            )
-            current = profiles[previous_profile_name]
+        # load restored settings
+        with open(restored_filename, "rb") as restored_file:
+            current = pickle.load(restored_file)
+            assert isinstance(current, profile)
 
     # if the settings file wasn't found then create a new one
     except FileNotFoundError:
-        logger.debug("Settings file not found. Restoring defaults...")
+        logger.debug("Saved profiles file not found. Restoring defaults.")
 
         # default profile is for B-DNA
         current = profile(
@@ -111,12 +94,8 @@ def load() -> None:
             theta_s=2.3,
         )
 
-        # this will be the only profile in the master list
-        # (since the master list of profiles is being created now)
+        # all profiles is just the current one (by default)
         profiles = {"B-DNA": current}
-
-        # set the previous_profile_name to B-DNA (the default)
-        previous_profile_name = "B-DNA"
 
     # log that profiles were loaded
     logger.debug("Loaded profiles.")
@@ -125,9 +104,13 @@ def load() -> None:
 
 def dump() -> None:
     """Dump persisting attributes of this module to a file"""
-    with open(restored_filename, "w") as restored_file:
-        restored_file.write(previous_profile_name)
+    assert isinstance(profiles, dict)
+    assert isinstance(current, profile)
 
-    # dump settings to file in format current-profile, all-profiles
+    # dump all profiles
     with open(profiles_filename, "wb") as settings_file:
         pickle.dump(profiles, settings_file)
+        
+    # dump current settings
+    with open(restored_filename, "wb") as settings_file:
+        pickle.dump(current, settings_file)

@@ -1,2 +1,1 @@
-import config.nucleic_acid.storage
-from config.nucleic_acid.ui.main import panel
+from config.nucleic_acid.main import panel

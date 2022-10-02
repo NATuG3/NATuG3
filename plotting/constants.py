@@ -1,0 +1,2 @@
+UP_STRAND = 0
+DOWN_STRAND = 1

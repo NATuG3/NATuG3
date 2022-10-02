@@ -4,11 +4,17 @@ import sys
 from time import time
 import logging
 
+DEBUG = False
 
 # initilize logging
-logging.basicConfig(
-    level=logging.DEBUG,
-)
+if DEBUG:
+    logging.basicConfig(
+        level=logging.DEBUG,
+    )
+else:
+    logging.basicConfig(
+        level=logging.INFO,
+    )
 # log boot statement
 logging.debug(f"Booting @ {time()}")
 # mute pyqt logs
@@ -33,10 +39,11 @@ if __name__ == "__main__":
     import windows.constructor.main
 
     # obtain and generate window item
-    windows = windows.constructor.main.window()
+    window = windows.constructor.main.window()
+    assert isinstance(window, windows.constructor.main.window)
 
     # show window
-    windows.show()
+    window.show()
 
     # begin app event loop
     sys.exit(app.exec())

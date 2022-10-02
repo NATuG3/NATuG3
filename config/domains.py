@@ -1,4 +1,4 @@
-import structures
+import plotting.structures as structures
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 
