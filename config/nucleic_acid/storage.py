@@ -42,7 +42,6 @@ class profile:
     theta_b: float = 0.0
     theta_c: float = 0.0
     theta_s: float = 0.0
-    notes: str = ""
 
     def __post_init__(self) -> None:
         # compute Z_b based on T, H, and B
@@ -116,6 +115,5 @@ defaults = {
         theta_b=34.29,
         theta_c=17.1428,
         theta_s=2.3,
-        notes="Modified Fiber Data B type DNA",
     )
 }

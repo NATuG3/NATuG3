@@ -45,7 +45,6 @@ class panel(QWidget):
         self.theta_b.setValue(profile.theta_b)
         self.theta_c.setValue(profile.theta_c)
         self.theta_s.setValue(profile.theta_s)
-        self.notes.setPlainText(profile.notes)
 
     def fetch_settings(self) -> storage.profile:
         """Fetch a profile object with all current nucleic acid settings from inputs."""
@@ -60,7 +59,6 @@ class panel(QWidget):
             theta_b=self.theta_b.value(),
             theta_c=self.theta_c.value(),
             theta_s=self.theta_s.value(),
-            notes=self.notes.toPlainText(),
         )
 
     def _profile_manager(self):
@@ -258,12 +256,6 @@ class panel(QWidget):
                 self.theta_s,
             ):
                 input.valueChanged.connect(lambda: input_box_changed(self, input))
-            self.notes.textChanged.connect(lambda: input_box_changed(self, input))
-
-            # (notes' current text change box is currentTextChanged (NOT valueChanged))
-            self.profile_chooser.currentTextChanged.connect(
-                lambda: input_box_changed(self, None)
-            )
 
             # add each profile from the save file to the combo box
             for profile_name in storage.profiles:
@@ -319,8 +311,5 @@ class panel(QWidget):
         self.theta_s.setStatusTip(
             "The angle about the helix axis between two NEMids on different helices of a double helix."
         )
-
-        self.notes.setToolTip("Notes Area")
-        self.notes.setStatusTip("Any notes about these settings.")
 
         logger.info("Set statusTips/toolTips for all input widgets.")
