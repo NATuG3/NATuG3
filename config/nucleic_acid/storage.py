@@ -42,6 +42,7 @@ class profile:
     theta_b: float = 0.0
     theta_c: float = 0.0
     theta_s: float = 0.0
+    notes: str = ""
 
     def __post_init__(self) -> None:
         # compute Z_b based on T, H, and B
@@ -65,8 +66,6 @@ def load() -> None:
 
     # attempt to load the nucleic acid settings file
     try:
-        logger.debug("Saved profiles file found.")
-
         # load all profiles
         with open(profiles_filename, "rb") as settings_file:
             profiles = pickle.load(settings_file)
@@ -77,25 +76,14 @@ def load() -> None:
             current = pickle.load(restored_file)
             assert isinstance(current, profile)
 
+        logger.debug("Saved profiles file loaded.")
+
     # if the settings file wasn't found then create a new one
     except FileNotFoundError:
         logger.debug("Saved profiles file not found. Restoring defaults.")
 
-        # default profile is for B-DNA
-        current = profile(
-            D=2.2,
-            H=3.549,
-            T=2,
-            B=21,
-            Z_c=0.17,
-            Z_s=1.26,
-            theta_b=34.29,
-            theta_c=17.1428,
-            theta_s=2.3,
-        )
-
-        # all profiles is just the current one (by default)
-        profiles = {"B-DNA": current}
+        profiles = defaults
+        current = next(iter(defaults.values()))
 
     # log that profiles were loaded
     logger.debug("Loaded profiles.")
@@ -114,3 +102,20 @@ def dump() -> None:
     # dump current settings
     with open(restored_filename, "wb") as settings_file:
         pickle.dump(current, settings_file)
+
+
+# defaults
+defaults = {
+    "B-DNA (MFD)": profile(
+        D=2.2,
+        H=3.549,
+        T=2,
+        B=21,
+        Z_c=0.17,
+        Z_s=1.26,
+        theta_b=34.29,
+        theta_c=17.1428,
+        theta_s=2.3,
+        notes="Modified Fiber Data B type DNA",
+    )
+}

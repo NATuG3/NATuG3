@@ -108,7 +108,7 @@ class window(QMainWindow):
             Qt.DockWidgetArea(0x1)
             | Qt.DockWidgetArea(0x2)
         )
-        
+
         # limit maximum size of config
         self.docked_widgets.config.setMaximumWidth(400)
         # dock the new docakble config widget
@@ -151,10 +151,10 @@ class window(QMainWindow):
             )
 
             self.docked_widgets.top_view.setAllowedAreas(
-            # only left and right areas allowed
-            Qt.DockWidgetArea(0x1)
-            | Qt.DockWidgetArea(0x2)
-        )
+                # only left and right areas allowed
+                Qt.DockWidgetArea(0x1)
+                | Qt.DockWidgetArea(0x2)
+            )
 
             # dock the new dockable top view widget
             self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)

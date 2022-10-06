@@ -6,30 +6,30 @@ import logging
 
 DEBUG = False
 
-# initilize logging
-if DEBUG:
-    logging.basicConfig(
-        level=logging.DEBUG,
-    )
-else:
-    logging.basicConfig(
-        level=logging.INFO,
-    )
-# log boot statement
-logging.debug(f"Booting @ {time()}")
-# mute pyqt logs
-logging.getLogger("PyQt6").setLevel(logging.INFO)
 
+def main():
+    # initilize logging
+    if DEBUG:
+        logging.basicConfig(
+            level=logging.DEBUG,
+        )
+    else:
+        logging.basicConfig(
+            level=logging.INFO,
+        )
+    # log boot statement
+    logging.debug(f"Booting @ {time()}")
+    # mute pyqt logs
+    logging.getLogger("PyQt6").setLevel(logging.INFO)
 
-if sys.platform.startswith("win"):
-    # to get icon to work properly on windows this code must be run
-    # consult the below stackoverflow link for information on why
-    # https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105
-    import ctypes
+    if sys.platform.startswith("win"):
+        # to get icon to work properly on windows this code must be run
+        # consult the below stackoverflow link for information on why
+        # https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105
+        import ctypes
 
-    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
 
-if __name__ == "__main__":
     # initilize PyQt6 application
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
@@ -47,3 +47,7 @@ if __name__ == "__main__":
 
     # begin app event loop
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

@@ -27,7 +27,7 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="profile_manager">
+    <widget class="QGroupBox" name="profile_manager_area">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
        <horstretch>0</horstretch>
@@ -70,40 +70,6 @@
       </property>
       <item row="2" column="0" colspan="2">
        <layout class="QGridLayout" name="profile_tools_layout">
-        <item row="0" column="3">
-         <widget class="QPushButton" name="delete_profile_button">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Delete Profile</string>
-          </property>
-          <property name="statusTip">
-           <string/>
-          </property>
-          <property name="whatsThis">
-           <string>Delete Profile</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210, 210)}</string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="save_profile_button">
           <property name="enabled">
@@ -166,6 +132,40 @@
           </property>
          </widget>
         </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="delete_profile_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Delete Profile</string>
+          </property>
+          <property name="statusTip">
+           <string/>
+          </property>
+          <property name="whatsThis">
+           <string>Delete Profile</string>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210, 210)}</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="checkable">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item row="1" column="0" colspan="2">
@@ -185,11 +185,27 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QPlainTextEdit" name="notes">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>50</height>
+         </size>
+        </property>
+        <property name="plainText">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string>Notes Area</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="nucleic_acid_settings">
+    <widget class="QGroupBox" name="nucleic_acid_settings_area">
      <property name="title">
       <string>Nucleic Acid Settings</string>
      </property>
@@ -643,15 +659,15 @@
         </item>
        </layout>
       </item>
-      <item row="6" column="0" colspan="2">
-       <widget class="Line" name="line">
+      <item row="1" column="0" colspan="2">
+       <widget class="Line" name="nucleic_acid_settings_splitter">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="nucleic_acid_settings_splitter">
+      <item row="6" column="0" colspan="2">
+       <widget class="Line" name="line">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>

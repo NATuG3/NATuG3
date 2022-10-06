@@ -1,8 +1,7 @@
-from types import SimpleNamespace
 from config.nucleic_acid import storage
 import logging
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox
 from resources import fetch_icon
 
 
@@ -23,21 +22,6 @@ class panel(QWidget):
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
-
-        # create list of all input boxes for easier future access
-        # (notably for when we link all the inputs to functions, we can itterate this tuple)
-        self.input_widgets = (
-            self.D,
-            self.H,
-            self.T,
-            self.B,
-            self.Z_b,
-            self.Z_c,
-            self.Z_s,
-            self.theta_b,
-            self.theta_c,
-            self.theta_s,
-        )
 
         # restore the current settinsg
         self.dump_settings(storage.current)
@@ -61,6 +45,7 @@ class panel(QWidget):
         self.theta_b.setValue(profile.theta_b)
         self.theta_c.setValue(profile.theta_c)
         self.theta_s.setValue(profile.theta_s)
+        self.notes.setPlainText(profile.notes)
 
     def fetch_settings(self) -> storage.profile:
         """Fetch a profile object with all current nucleic acid settings from inputs."""
@@ -75,6 +60,7 @@ class panel(QWidget):
             theta_b=self.theta_b.value(),
             theta_c=self.theta_c.value(),
             theta_s=self.theta_s.value(),
+            notes=self.notes.toPlainText(),
         )
 
     def _profile_manager(self):
@@ -89,6 +75,18 @@ class panel(QWidget):
 
         def save_profile(self):
             """Worker for the save profile button"""
+            if self.save_profile_button.toolTip() == "Overwrite Profile":
+                choice = QMessageBox.question(
+                    self,
+                    "Overwrite confirmation",
+                    f"Are you sure you want to overwrite {self.profile_chooser.currentText()} with new settings?",
+                    QMessageBox.standardButtons.Yes | QMessageBox.standardButtons.No,
+                )
+                if choice == QMessageBox.Yes:
+                    print("Test")
+                else:
+                    pass
+
             # obtain name of profile to save
             profile_name = self.profile_chooser.currentText()
             assert len(profile_name) > 0
@@ -144,7 +142,6 @@ class panel(QWidget):
             # log that the profile was loaded
             logger.debug(f"Settings that were loaded: {storage.profiles[profile_name]}")
             logger.info(f'Loaded profile named "{profile_name}"')
-            
 
         def input_box_changed(self, input):
             """Worker for when any input box is changed"""
@@ -248,10 +245,22 @@ class panel(QWidget):
             )
 
             # hook all inputs to the following input_box_changed function
-            for input in self.input_widgets:
+            for input in (
+                self.D,
+                self.H,
+                self.T,
+                self.B,
+                self.Z_b,
+                self.Z_c,
+                self.Z_s,
+                self.theta_b,
+                self.theta_c,
+                self.theta_s,
+            ):
                 input.valueChanged.connect(lambda: input_box_changed(self, input))
+            self.notes.textChanged.connect(lambda: input_box_changed(self, input))
 
-            # hook profile chooser dropdown to input_box_changed function
+            # (notes' current text change box is currentTextChanged (NOT valueChanged))
             self.profile_chooser.currentTextChanged.connect(
                 lambda: input_box_changed(self, None)
             )
@@ -259,7 +268,6 @@ class panel(QWidget):
             # add each profile from the save file to the combo box
             for profile_name in storage.profiles:
                 self.profile_chooser.addItem(profile_name)
-
 
         # hook all buttons to their workers
         hook_widgets()
@@ -270,81 +278,49 @@ class panel(QWidget):
         # set placeholder text of profile chooser
         self.profile_chooser.lineEdit().setPlaceholderText("Name to save/load/delete")
         self.profile_chooser.setCurrentText("")
-        
 
     def _setting_descriptions(self):
-        self.setting_descriptions = SimpleNamespace()
+        self.D.setToolTip = "Diameter of Domain"
+        self.D.setStatusTip("The diameter of a given domain.")
 
-        self.setting_descriptions.D = (
-            "Diameter of Domain",
-            "The diameter of a given domain.",
+        self.H.setToolTip("Twist Height")
+        self.H.setStatusTip("The height of one turn of the helix of a nucleic acid.")
+
+        self.T.setToolTip("Turns")
+        self.T.setStatusTip("There are B bases per T turns of the helix.")
+
+        self.B.setToolTip = "Bases"
+        self.B.setStatusTip("There are B bases per T turns of the helix.")
+
+        self.Z_b.setToolTip = "Base height"
+        self.Z_b.setStatusTip = (
+            'The height between two bases on the helix axis. Equal to "(T*H)/B".'
         )
 
-        self.setting_descriptions.H = (
-            "Twist Height",
-            "The height of one turn of the helix of a nucleic acid.",
+        self.Z_c.setToolTip = "Characteristic Height"
+        self.Z_c.setStatusTip = (
+            "The height a helix climbs as it rotates through the characteristic angle."
         )
 
-        self.setting_descriptions.T = (
-            "Turns",
-            "There are B bases per T turns of the helix.",
+        self.Z_s.setToolTip("Strand Switch Height")
+        self.Z_s.setStatusTip(
+            "The vertical height between two NEMids on different helices of the same double helix."
         )
 
-        self.setting_descriptions.B = (
-            "Bases",
-            "There are B bases per T turns of the helix.",
+        self.theta_b.setToolTip("Base Angle")
+        self.theta_b.setStatusTip("The angle that one base makes about the helix axis.")
+
+        self.theta_c.setToolTip("Characteristic Angle")
+        self.theta_c.setStatusTip(
+            "The smallest angle about the helix axis possible between two NEMids on the same helix."
         )
 
-        self.setting_descriptions.Z_b = (
-            "Base height",
-            'The height between two bases on the helix axis. Equal to "(T*H)/B".',
+        self.theta_s.setToolTip = "Switch Angle"
+        self.theta_s.setStatusTip(
+            "The angle about the helix axis between two NEMids on different helices of a double helix."
         )
 
-        self.setting_descriptions.Z_c = (
-            "Characteristic Height",
-            "The height a helix climbs as it rotates through the characteristic angle.",
-        )
+        self.notes.setToolTip("Notes Area")
+        self.notes.setStatusTip("Any notes about these settings.")
 
-        self.setting_descriptions.Z_s = (
-            "Strand Switch Height",
-            "The vertical height between two NEMids on different helices of the same double helix.",
-        )
-
-        self.setting_descriptions.theta_b = (
-            "Base Angle",
-            "The angle that one base makes about the helix axis.",
-        )
-
-        self.setting_descriptions.theta_c = (
-            "Characteristic Angle",
-            "The smallest angle about the helix axis possible between two NEMids on the same helix.",
-        )
-
-        self.setting_descriptions.theta_s = (
-            "Switch Angle",
-            "The angle about the helix axis between two NEMids on different helices of a double helix.",
-        )
-
-        # set status tip/tool tip of all lables and input boxes
-        # with the above setting descriptions
-        for input_widget in self.input_widgets:
-            input_widget = input_widget.objectName()
-            exec(
-                f"""
-                self.{input_widget}.setToolTip(
-                    self.setting_descriptions.{input_widget}[0]
-                )
-                self.{input_widget}.setStatusTip(
-                    self.setting_descriptions.{input_widget}[1]
-                )
-                self.{input_widget}_label.setToolTip(
-                    self.setting_descriptions.{input_widget}[0]
-                )
-                self.{input_widget}_label.setStatusTip(
-                    self.setting_descriptions.{input_widget}[1]
-                )
-                """.replace(
-                    "                ", ""
-                )
-            )
         logger.info("Set statusTips/toolTips for all input widgets.")
