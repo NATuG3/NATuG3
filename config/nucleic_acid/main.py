@@ -1,9 +1,12 @@
+from contextlib import suppress
+
+from attr import Attribute
 from config.nucleic_acid import storage
 import logging
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 from resources import fetch_icon
-import helpers 
+import helpers
 
 
 logger = logging.getLogger(__name__)
@@ -78,9 +81,9 @@ class panel(QWidget):
                 if not helpers.yes_no_prompt(
                     self,
                     "Overwrite confirmation",
-                    f"Are you sure you want to overwrite the profile named \""+
-                    self.profile_chooser.currentText()+
-                    "\" with the currently chosen nucleic acid settings?",
+                    f'Are you sure you want to overwrite the profile named "'
+                    + self.profile_chooser.currentText()
+                    + '" with the currently chosen nucleic acid settings?',
                 ):
                     return
 
@@ -106,13 +109,13 @@ class panel(QWidget):
         def delete_profile(self):
             """Worker for the delete profile button"""
             if not helpers.yes_no_prompt(
-                    self,
-                    "Delete profile confirmation",
-                    f"Are you sure you want to delete the profile named \""+
-                    self.profile_chooser.currentText()+
-                    "\"?\nNote that this action cannot be undone!",
-                ):
-                    return
+                self,
+                "Delete profile confirmation",
+                f'Are you sure you want to delete the profile named "'
+                + self.profile_chooser.currentText()
+                + '"?\nNote that this action cannot be undone!',
+            ):
+                return
 
             # obtain name of profile to delete
             profile_name = self.profile_chooser.currentText()
@@ -137,14 +140,14 @@ class panel(QWidget):
         def load_profile(self):
             """Worker for the load profile button"""
             if not helpers.yes_no_prompt(
-                    self,
-                    "Load profile confirmation",
-                    f"Are you sure you want to overwrite all currently chosen settings"+
-                    " with those of the profile named \""+
-                    self.profile_chooser.currentText()+
-                    "\"?",
-                ):
-                    return
+                self,
+                "Load profile confirmation",
+                f"Are you sure you want to overwrite all currently chosen settings"
+                + ' with those of the profile named "'
+                + self.profile_chooser.currentText()
+                + '"?',
+            ):
+                return
 
             # obtain the name of profile to load
             profile_name = self.profile_chooser.currentText()
@@ -159,12 +162,8 @@ class panel(QWidget):
             logger.debug(f"Settings that were loaded: {storage.profiles[profile_name]}")
             logger.info(f'Loaded profile named "{profile_name}"')
 
-        def input_box_changed(self, input):
+        def input_box_changed():
             """Worker for when any input box is changed"""
-
-            # log the initiation of the function
-            logger.debug(f"The input box \"{input}\" was changed.")
-
             # fetch settings of input boxes
             storage.current = self.fetch_settings()
 
@@ -205,7 +204,7 @@ class panel(QWidget):
                     self.save_profile_button.setStatusTip(
                         f'Overwrite profile named "{chosen_profile_name}" with current settings.'
                     )
-                    
+
                     self.delete_profile_button.setEnabled(True)
                     self.delete_profile_button.setStatusTip(
                         f'Delete the profile named "{chosen_profile_name}." This action is irreversible.'
@@ -259,14 +258,11 @@ class panel(QWidget):
                     "Profile chooser entry box is empty. Enter the name of the profile to delete."
                 )
 
-
         def hook_widgets():
             # when the save profile button is clicked call save_profile()
             self.save_profile_button.clicked.connect(lambda: save_profile(self))
             # save button needs to be locked right after it's clicked
-            self.save_profile_button.clicked.connect(
-                lambda: input_box_changed(self, None)
-            )
+            self.save_profile_button.clicked.connect(input_box_changed)
 
             # when the delete profile button is clicked call delete_profile()
             self.delete_profile_button.clicked.connect(lambda: delete_profile(self))
@@ -274,9 +270,7 @@ class panel(QWidget):
             # when load profile button is clicked load storage.profiles
             self.load_profile_button.clicked.connect(lambda: load_profile(self))
             # load button needs to be locked right after it's clicked
-            self.load_profile_button.clicked.connect(
-                lambda: input_box_changed(self, None)
-            )
+            self.load_profile_button.clicked.connect(input_box_changed)
 
             # hook all inputs to the following input_box_changed function
             for input in (
@@ -291,8 +285,8 @@ class panel(QWidget):
                 self.theta_c,
                 self.theta_s,
             ):
-                input.valueChanged.connect(lambda: input_box_changed(self, input))
-            self.profile_chooser.currentTextChanged.connect(lambda: input_box_changed(self, input))
+                input.valueChanged.connect(input_box_changed)
+            self.profile_chooser.currentTextChanged.connect(input_box_changed)
 
             # add each profile from the save file to the combo box
             for profile_name in storage.profiles:
@@ -306,8 +300,7 @@ class panel(QWidget):
         self.profile_chooser.setCurrentText("")
 
         # set up button locking/other needed functions initially
-        input_box_changed(self, None)
-
+        input_box_changed()
 
     def _setting_descriptions(self):
         self.D.setToolTip = "Diameter of Domain"

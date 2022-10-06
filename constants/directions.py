@@ -1,0 +1,5 @@
+UP = 0
+LEFT = 0
+
+DOWN = 1
+RIGHT = 1

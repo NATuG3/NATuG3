@@ -27,7 +27,7 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tab_area">
      <property name="tabPosition">
       <enum>QTabWidget::North</enum>
      </property>
@@ -54,22 +54,6 @@
       </attribute>
      </widget>
     </widget>
-   </item>
-   <item>
-    <spacer name="spacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Expanding</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <layout class="QHBoxLayout" name="panel_settings_layout">
