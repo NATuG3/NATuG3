@@ -4,7 +4,7 @@ import sys
 from time import time
 import logging
 
-DEBUG = False
+DEBUG = True
 
 
 def main():

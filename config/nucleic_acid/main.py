@@ -1,8 +1,9 @@
 from config.nucleic_acid import storage
 import logging
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget, QMessageBox
+from PyQt6.QtWidgets import QWidget
 from resources import fetch_icon
+import helpers 
 
 
 logger = logging.getLogger(__name__)
@@ -74,16 +75,14 @@ class panel(QWidget):
         def save_profile(self):
             """Worker for the save profile button"""
             if self.save_profile_button.toolTip() == "Overwrite Profile":
-                choice = QMessageBox.question(
+                if not helpers.yes_no_prompt(
                     self,
                     "Overwrite confirmation",
-                    f"Are you sure you want to overwrite {self.profile_chooser.currentText()} with new settings?",
-                    QMessageBox.standardButtons.Yes | QMessageBox.standardButtons.No,
-                )
-                if choice == QMessageBox.Yes:
-                    print("Test")
-                else:
-                    pass
+                    f"Are you sure you want to overwrite the profile named \""+
+                    self.profile_chooser.currentText()+
+                    "\" with the currently chosen nucleic acid settings?",
+                ):
+                    return
 
             # obtain name of profile to save
             profile_name = self.profile_chooser.currentText()
@@ -106,6 +105,15 @@ class panel(QWidget):
 
         def delete_profile(self):
             """Worker for the delete profile button"""
+            if not helpers.yes_no_prompt(
+                    self,
+                    "Delete profile confirmation",
+                    f"Are you sure you want to delete the profile named \""+
+                    self.profile_chooser.currentText()+
+                    "\"?\nNote that this action cannot be undone!",
+                ):
+                    return
+
             # obtain name of profile to delete
             profile_name = self.profile_chooser.currentText()
 
@@ -128,6 +136,16 @@ class panel(QWidget):
 
         def load_profile(self):
             """Worker for the load profile button"""
+            if not helpers.yes_no_prompt(
+                    self,
+                    "Load profile confirmation",
+                    f"Are you sure you want to overwrite all currently chosen settings"+
+                    " with those of the profile named \""+
+                    self.profile_chooser.currentText()+
+                    "\"?",
+                ):
+                    return
+
             # obtain the name of profile to load
             profile_name = self.profile_chooser.currentText()
 
@@ -144,6 +162,9 @@ class panel(QWidget):
         def input_box_changed(self, input):
             """Worker for when any input box is changed"""
 
+            # log the initiation of the function
+            logger.debug(f"The input box \"{input}\" was changed.")
+
             # fetch settings of input boxes
             storage.current = self.fetch_settings()
 
@@ -157,15 +178,15 @@ class panel(QWidget):
             if chosen_profile_name in storage.profiles:
                 # if the chosen profile name's settings match the current input box values
                 if storage.profiles[chosen_profile_name] == storage.current:
+                    self.load_profile_button.setEnabled(False)
+                    self.load_profile_button.setStatusTip(
+                        f'Current settings match saved settings of profile named "{chosen_profile_name}."'
+                    )
+
                     self.save_profile_button.setEnabled(False)
                     self.save_profile_button.setToolTip("Save Profile")
                     self.save_profile_button.setStatusTip(
                         f'Current settings match saved settings of profile named "{chosen_profile_name}.".'
-                    )
-
-                    self.load_profile_button.setEnabled(False)
-                    self.load_profile_button.setStatusTip(
-                        f'Current settings match saved settings of profile named "{chosen_profile_name}."'
                     )
 
                     self.delete_profile_button.setEnabled(True)
@@ -174,32 +195,46 @@ class panel(QWidget):
                     )
                 # if the chosen profile name is not in
                 else:
-                    self.save_profile_button.setEnabled(True)
-                    self.save_profile_button.setToolTip("Overwrite Profile")
-                    self.save_profile_button.setStatusTip(
-                        f'Overwrite profile named "{chosen_profile_name}" with current settings.'
-                    )
-
                     self.load_profile_button.setEnabled(True)
                     self.load_profile_button.setStatusTip(
                         f'Load back the settings of "{chosen_profile_name}."'
                     )
 
+                    self.save_profile_button.setEnabled(True)
+                    self.save_profile_button.setToolTip("Overwrite Profile")
+                    self.save_profile_button.setStatusTip(
+                        f'Overwrite profile named "{chosen_profile_name}" with current settings.'
+                    )
+                    
                     self.delete_profile_button.setEnabled(True)
                     self.delete_profile_button.setStatusTip(
                         f'Delete the profile named "{chosen_profile_name}." This action is irreversible.'
                     )
+
+                # no matter what, do not let the user alter default profiles
+                if chosen_profile_name in storage.defaults:
+                    self.save_profile_button.setEnabled(False)
+                    self.save_profile_button.setToolTip("Save Profile")
+                    self.save_profile_button.setStatusTip(
+                        f'Cannot alter a default profile. "{chosen_profile_name}." is a default profile.'
+                    )
+
+                    self.delete_profile_button.setEnabled(False)
+                    self.delete_profile_button.setStatusTip(
+                        f'Cannot delete a default profile. "{chosen_profile_name}." is a default profile.'
+                    )
+
             # the chosen profile name is a brand new profile name (that has not already been saved)
             else:
+                self.load_profile_button.setEnabled(False)
+                self.load_profile_button.setStatusTip(
+                    f'No saved profile is named "{chosen_profile_name}." Cannot load a profile that does not exist.'
+                )
+
                 self.save_profile_button.setEnabled(True)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
                     f'Save current as a new profile named "{chosen_profile_name}.".'
-                )
-
-                self.load_profile_button.setEnabled(False)
-                self.load_profile_button.setStatusTip(
-                    f'No saved profile is named "{chosen_profile_name}." Cannot load a profile that does not exist.'
                 )
 
                 self.delete_profile_button.setEnabled(False)
@@ -209,20 +244,21 @@ class panel(QWidget):
 
             # No matter what we cannot save a profile with a blank name
             if chosen_profile_name == "":
-                self.save_profile_button.setEnabled(False)
-                self.save_profile_button.setStatusTip(
-                    "Profile chooser entry box is empty. Enter the name of the profile to save."
-                )
-
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
                     "Profile chooser entry box is empty. Enter the name of the profile to load."
+                )
+
+                self.save_profile_button.setEnabled(False)
+                self.save_profile_button.setStatusTip(
+                    "Profile chooser entry box is empty. Enter the name of the profile to save."
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
                     "Profile chooser entry box is empty. Enter the name of the profile to delete."
                 )
+
 
         def hook_widgets():
             # when the save profile button is clicked call save_profile()
@@ -256,6 +292,7 @@ class panel(QWidget):
                 self.theta_s,
             ):
                 input.valueChanged.connect(lambda: input_box_changed(self, input))
+            self.profile_chooser.currentTextChanged.connect(lambda: input_box_changed(self, input))
 
             # add each profile from the save file to the combo box
             for profile_name in storage.profiles:
@@ -264,12 +301,13 @@ class panel(QWidget):
         # hook all buttons to their workers
         hook_widgets()
 
-        # set up button locking/other needed functions initially
-        input_box_changed(self, None)
-
         # set placeholder text of profile chooser
         self.profile_chooser.lineEdit().setPlaceholderText("Name to save/load/delete")
         self.profile_chooser.setCurrentText("")
+
+        # set up button locking/other needed functions initially
+        input_box_changed(self, None)
+
 
     def _setting_descriptions(self):
         self.D.setToolTip = "Diameter of Domain"
