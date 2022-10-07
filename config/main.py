@@ -20,12 +20,12 @@ class panel(QWidget):
         # place the current settings into their respective boxes
         self.dump_settings(storage.current)
 
-        # prettify buttons
+        # prettify profile buttons
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
 
-        # restore the current settinsg
+        # restore the current settings
         self.dump_settings(storage.current)
 
         # set all setting descriptions

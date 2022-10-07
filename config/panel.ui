@@ -848,6 +848,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QPushButton" name="pushButton_3">
+     <property name="text">
+      <string>Update Graphs</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -862,6 +869,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resources/icons/launchers/launchers.qrc"/>
+ </resources>
  <connections/>
 </ui>

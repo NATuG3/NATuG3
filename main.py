@@ -3,6 +3,7 @@ from PyQt6.QtGui import QIcon
 import sys
 from time import time
 import logging
+from types import SimpleNamespace
 
 
 DEBUG = True
@@ -37,14 +38,17 @@ def main():
     app.setWindowIcon(QIcon("resources/icon.ico"))
 
     # QApplication must be created before we can import ui
-    import windows.constructor.main
+    import domains
+    import constructor
 
-    # obtain and generate window item
-    window = windows.constructor.main.window()
-    assert isinstance(window, windows.constructor.main.window)
+    windows = SimpleNamespace()
+    # constructor window
+    constructor = constructor.main.window()
+    constructor.show()
 
-    # show window
-    window.show()
+    domains = domains.main.window()
+    domains.show()
+
 
     # begin app event loop
     sys.exit(app.exec())

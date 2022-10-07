@@ -1,4 +1,7 @@
+import logging
 from types import SimpleNamespace
+
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QMainWindow,
     QStatusBar,
@@ -6,14 +9,14 @@ from PyQt6.QtWidgets import (
     QMenuBar,
     QVBoxLayout,
     QGroupBox,
-    QWidget,
+    QWidget
 )
-from PyQt6.QtCore import Qt, QTimer
+
 import config
-import plotting.top_view.runner, plotting.side_view.runner
-import references
-import logging
 import helpers
+import plotting.side_view.runner
+import plotting.top_view.runner
+import references
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +31,10 @@ class window(QMainWindow):
         menu_bar (QMenuBar): The menu bar.
         top_view (QWidget): Top view widget.
         side_view (QWidget): Side view widget.
+        config (QDockWidget): Config panel.
     """
 
     def __init__(self):
-        # this is an inherited class of QMainWindow
-        # so we must initialize the parent qt widget
         super().__init__()
 
         # store a reference to self in references for cross module use
@@ -46,9 +48,6 @@ class window(QMainWindow):
 
         # initialize menu bar
         self._menu_bar()
-
-        # initialize toolbars
-        self._tool_bars()
 
         # container to store references to all docked widgets
         self.docked_widgets = SimpleNamespace()
@@ -78,7 +77,7 @@ class window(QMainWindow):
             | Qt.DockWidgetArea(0x2)
         )
 
-        # dock the new docakble config widget
+        # dock the new dockable config widget
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
 
     def _top_view(self):
@@ -91,7 +90,7 @@ class window(QMainWindow):
             # create dockable widget for top view
             self.docked_widgets.top_view = QDockWidget()
             self.docked_widgets.top_view.setObjectName("Top View")
-            self.docked_widgets.top_view.setWindowTitle("Top View of Helicies")
+            self.docked_widgets.top_view.setWindowTitle("Top View of Helices")
             self.docked_widgets.top_view.setStatusTip(
                 "A plot of the top view of all domains"
             )
@@ -119,7 +118,6 @@ class window(QMainWindow):
             self.addDockWidget(Qt.DockWidgetArea(0x1), self.docked_widgets.top_view)
 
             logger.info("Loaded top view graph for the first time.")
-
 
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
@@ -157,7 +155,7 @@ class window(QMainWindow):
         self.menu_bar = QMenuBar()
 
         # import all menu bars
-        import windows.constructor.menus as menus
+        import constructor.menus as menus
 
         # add all the menus to the file menu
         self.menu_bar.addMenu(menus.file())
@@ -168,20 +166,10 @@ class window(QMainWindow):
         self.setMenuBar(self.menu_bar)
         logger.info("Created menu bar.")
 
-    def _tool_bars(self):
-        """Create a toolbar for the main application."""
-
-        # all toolbars are stored in a different submodule
-        import windows.constructor.toolbars
-
-        # add the various desired toolbars to the main constructor window
-        self.addToolBar(windows.constructor.toolbars.launchers(self))
-        self.addToolBar(windows.constructor.toolbars.tools(self))
-
     def resizeEvent(self, resizeEvent):
         """Triggers on window resize"""
         # Resize various windows based on the size of the screen
-        window_width = self.width() # obtain width of the main window
+        window_width = self.width()  # obtain width of the main window
 
         # side view resizing
         #
@@ -198,7 +186,7 @@ class window(QMainWindow):
             if new_width < self.config.width():
                 new_width = self.config.width()
             self.docked_widgets.top_view.setMaximumWidth(new_width)
-            self.docked_widgets.top_view.setMinimumWidth(int(self.config.width()/2))
+            self.docked_widgets.top_view.setMinimumWidth(int(self.config.width() / 2))
 
         # config resizing
         #

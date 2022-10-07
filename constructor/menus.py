@@ -2,7 +2,7 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 from resources import fetch_icon
 import webbrowser
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PyQt6.QtGui import QKeySequence
 import references
 
 parent = references.windows.constructor.menu_bar
