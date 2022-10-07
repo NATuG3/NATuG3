@@ -8,45 +8,14 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QWidget,
 )
-from PyQt6.QtCore import Qt
-import config.main, config.nucleic_acid
+from PyQt6.QtCore import Qt, QTimer
+import config
 import plotting.top_view.runner, plotting.side_view.runner
 import references
 import logging
-
+import helpers
 
 logger = logging.getLogger(__name__)
-
-
-def unrestrict_scale_upon_float(
-    widget: QWidget,
-    initial_width: int = 9999,
-    unbounded_width: int = 9999,
-    initial_height: int = 9999,
-    unbounded_height: int = 9999,
-):
-    """
-    Enable scaling beyond a dockable widget's normal maximum when it begins floating.
-
-    Args:
-        widget (QWidget): Widget to change size limitations upon floating/not floating of.
-        initial_width (int): Maximum widget width when not floating (in pixels).
-        unbounded_width (int): Maximum widget width when floating (in pixels).
-        initial_height (i)nt: Maximum widget height when not floating (in pixels).
-        unbounded_height (int): Maximum widget height when floating (in pixels).
-    """
-    if widget.isFloating():
-        widget.setMaximumWidth(unbounded_width)
-        widget.setMaximumHeight(unbounded_height)
-        logger.debug(
-            f'Widget "{widget.objectName()}" is floating. Maximum size has been changed to (width={unbounded_width}, height={unbounded_height}).'
-        )
-    else:
-        widget.setMaximumWidth(initial_width)
-        widget.setMaximumHeight(initial_height)
-        logger.debug(
-            f'Widget "{widget.objectName()}" is no longer floating. Maximum size has been changed to (width={initial_width}, height={initial_height}).'
-        )
 
 
 class window(QMainWindow):
@@ -62,38 +31,45 @@ class window(QMainWindow):
     """
 
     def __init__(self):
-        # this is an inherented class of QMainWindow
+        # this is an inherited class of QMainWindow
         # so we must initialize the parent qt widget
         super().__init__()
 
         # store a reference to self in references for cross module use
         references.windows.constructor = self
 
-        # utilize inhereted methods to set up the main window
+        # utilize inherited methods to set up the main window
         self.setWindowTitle("DNA Constructor")
 
-        # initilize status bar
+        # initialize status bar
         self._status_bar()
 
-        # initilize menu bar
+        # initialize menu bar
         self._menu_bar()
+
+        # initialize toolbars
+        self._tool_bars()
 
         # container to store references to all docked widgets
         self.docked_widgets = SimpleNamespace()
 
         # add all widgets
-        self.load_graphs()
+        self._top_view()
+        self._side_view()
         self._config()
+
+        # resize the widgets of the window based on the window's starting size
+        self.resizeEvent(None)
 
     def _config(self):
         # create a dockable config widget
         self.docked_widgets.config = QDockWidget()
-        self.docked_widgets.config.setObjectName("Config Panel")
+        self.docked_widgets.config.setObjectName("Config")
         self.docked_widgets.config.setWindowTitle("Config")
-        self.docked_widgets.config.setStatusTip("Config panel")
+        self.docked_widgets.config.setStatusTip("Config")
 
         # store the actual link to the widget in self.config
-        self.config = config.main.panel()
+        self.config = config.panel(self)
         self.docked_widgets.config.setWidget(self.config)
 
         self.docked_widgets.config.setAllowedAreas(
@@ -102,16 +78,8 @@ class window(QMainWindow):
             | Qt.DockWidgetArea(0x2)
         )
 
-        # set config widget width
-        self.docked_widgets.config.setFixedWidth(230)
-
         # dock the new docakble config widget
         self.addDockWidget(Qt.DockWidgetArea(0x2), self.docked_widgets.config)
-
-    def load_graphs(self):
-        """Load all nanotube graphs simultaniously."""
-        self._top_view()
-        self._side_view()
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
@@ -131,16 +99,13 @@ class window(QMainWindow):
             # store widget in class for easier direct access
             self.top_view = plotting.top_view.runner.plot()
 
-            # attach actaul top view widget to docked top view widget
+            # attach actual top view widget to docked top view widget
             self.docked_widgets.top_view.setWidget(self.top_view)
-
-            # limit max width of top view widget while docked to 340px
-            self.docked_widgets.top_view.setMaximumWidth(340)
 
             # when this widget floats remove width scaling limitation
             self.docked_widgets.top_view.topLevelChanged.connect(
-                lambda: unrestrict_scale_upon_float(
-                    self.docked_widgets.top_view, initial_width=340
+                lambda: helpers.unrestrict_scale_upon_float(
+                    self.docked_widgets.top_view, initial_width=400
                 )
             )
 
@@ -155,6 +120,7 @@ class window(QMainWindow):
 
             logger.info("Loaded top view graph for the first time.")
 
+
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
         try:
@@ -163,19 +129,18 @@ class window(QMainWindow):
             logger.info("Reloaded side view graph.")
         except AttributeError or AssertionError:
             # create group box to place side view widget in
-            prittified_side_view = QGroupBox()
-            prittified_side_view.setObjectName("Side View")
-            prittified_side_view.setLayout(QVBoxLayout())
-            prittified_side_view.setTitle("Side View of Helicies")
-            prittified_side_view.setStatusTip("A plot of the side view of all domains")
+            prettified_side_view = QGroupBox()
+            prettified_side_view.setObjectName("Side View")
+            prettified_side_view.setLayout(QVBoxLayout())
+            prettified_side_view.setTitle("Side View of Helices")
+            prettified_side_view.setStatusTip("A plot of the side view of all domains")
 
             # store widget in class for easier future direct widget access
             self.side_view = plotting.side_view.runner.plot()
-            prittified_side_view.layout().addWidget(self.side_view)
+            prettified_side_view.layout().addWidget(self.side_view)
 
-            # ensure this widget is always large enough to be useful (300px)
-            prittified_side_view.setMinimumWidth(300)
-            self.setCentralWidget(prittified_side_view)
+            # make side view plot the main window's central widget
+            self.setCentralWidget(prettified_side_view)
 
             logger.info("Loaded side view graph for the first time.")
 
@@ -194,7 +159,7 @@ class window(QMainWindow):
         # import all menu bars
         import windows.constructor.menus as menus
 
-        # add all the menus to the filemenu
+        # add all the menus to the file menu
         self.menu_bar.addMenu(menus.file())
         self.menu_bar.addMenu(menus.view())
         self.menu_bar.addMenu(menus.help())
@@ -202,3 +167,47 @@ class window(QMainWindow):
         # place the menu bar object into the actual menu bar
         self.setMenuBar(self.menu_bar)
         logger.info("Created menu bar.")
+
+    def _tool_bars(self):
+        """Create a toolbar for the main application."""
+
+        # all toolbars are stored in a different submodule
+        import windows.constructor.toolbars
+
+        # add the various desired toolbars to the main constructor window
+        self.addToolBar(windows.constructor.toolbars.launchers(self))
+        self.addToolBar(windows.constructor.toolbars.tools(self))
+
+    def resizeEvent(self, resizeEvent):
+        """Triggers on window resize"""
+        # Resize various windows based on the size of the screen
+        window_width = self.width() # obtain width of the main window
+
+        # side view resizing
+        #
+        # minimum width = window_width/2.5
+        # maximum width = no maximum width
+        self.side_view.setMinimumWidth(int(window_width / 2.5))
+
+        # top view resizing
+        #
+        # minimum width = half of the width of the config panel
+        # maximum width = window_width/3.5 (if smaller than config panel's width then set to the config panel's width)
+        if not self.docked_widgets.top_view.isFloating():
+            new_width = int(window_width / 3.5)
+            if new_width < self.config.width():
+                new_width = self.config.width()
+            self.docked_widgets.top_view.setMaximumWidth(new_width)
+            self.docked_widgets.top_view.setMinimumWidth(int(self.config.width()/2))
+
+        # config resizing
+        #
+        # width = 200 if window_width / 5 < 200
+        if window_width // 5 < 200:
+            self.config.setFixedWidth(200)
+        # width = 200 if window_width / 5 > 500
+        elif window_width // 5 > 500:
+            self.config.setFixedWidth(300)
+        # normally the config panel's width = window width / 5
+        else:
+            self.config.setFixedWidth(int(window_width // 5))

@@ -1,6 +1,4 @@
-import config.nucleic_acid.storage
-import config.domains.storage
+from config.main import panel
+from config import storage
 
-
-config.nucleic_acid.storage.load()
-config.domains.storage.load()
+storage.load()

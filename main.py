@@ -4,11 +4,12 @@ import sys
 from time import time
 import logging
 
+
 DEBUG = True
 
 
 def main():
-    # initilize logging
+    # initialize logging
     if DEBUG:
         logging.basicConfig(
             level=logging.DEBUG,
@@ -23,14 +24,14 @@ def main():
     logging.getLogger("PyQt6").setLevel(logging.INFO)
 
     if sys.platform.startswith("win"):
-        # to get icon to work properly on windows this code must be run
+        # to get icon to work properly on Windows this code must be run
         # consult the below stackoverflow link for information on why
         # https://stackoverflow.com/questions/1551605/how-to-set-applications-taskbar-icon-in-windows-7/1552105#1552105
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
 
-    # initilize PyQt6 application
+    # initialize PyQt6 application
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     app.setWindowIcon(QIcon("resources/icon.ico"))

@@ -1,11 +1,13 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import config.nucleic_acid, config.domains, config.main
 import logging
 import plotting.side_view.worker
 from contextlib import suppress
+import config.storage
+import plotting.datatypes
+from constants.directions import *
 
-
+domains = [plotting.datatypes.domain(9, (UP, DOWN))] * 14
 logger = logging.getLogger(__name__)
 
 
@@ -31,9 +33,9 @@ class plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # fetch nucleic acid settings and the current domains
-        self.settings = config.nucleic_acid.storage.current
-        self.domains = config.domains.storage.current
-        self.count = config.main.count
+        self.settings = config.storage.current
+        self.domains = domains
+        self.count = config.storage.count
 
         # create instance of dna_nanotube_tools side view generation
         self.worker = plotting.side_view.worker.plot(
