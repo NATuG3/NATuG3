@@ -1,4 +1,6 @@
-from config.main import panel
-from config import storage
+import config.nucleic_acid.storage
+import config.domains.storage
 
-storage.load()
+
+config.nucleic_acid.storage.load()
+config.domains.storage.load()

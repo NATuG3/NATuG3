@@ -1,62 +1,38 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Tuple, Literal, Tuple, Union
+from typing import Tuple, Union, Literal
 from constants import bases
-import logging
-from constants.directions import *
-from constants.strand_switches import *
 
 
-logger = logging.getLogger(__name__)
-
-
-@dataclass(init=False)
+@dataclass
 class domain:
     """
     Domain storage object.
     Attributes:
-        theta_interior (int): Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency. Multiple of characteristic angle.
-        theta_switch_multiple (int): Strand switch angle per domain transition. Multiple of strand switch angle.
-        helix_joints (tuple): The upwardness/downwardness of the left and right helix joint.
+        theta_interior (int): The angle between domain #i/#i+1's line of tangency and domain #i+1/i+2's line of tangency
+        switch_angle_multiple (int): Strand switch angle per domain transition. Integer multiple of strand switch angle.
     """
 
-    def __init__(
-        self,
-        theta_interior_multiple: int,
-        helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
-    ):
-        """
-        Create domains dataclass.
-        Args:
-            theta_interior (int): Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency. Multiple of characteristic angle.
-            helix_joints (tuple): (left_joint, right_joint) where left/right_joint are constants.directions.UP/DOWN
-        """
-        # multiple of the characteristic angle (theta_c) for the interior angle
-        # between this domains[this domain's index] and this domains[this domain's index + 1]
-        self.theta_interior_multiple: int = theta_interior_multiple
+    # multiple of the characteristic angle (theta_c) for the interior angle
+    # between this domains[this domain's index] and this domains[this domain's index + 1]
+    theta_interior_multiple: int
 
-        # the left and right helical joints
-        # constants.directions.left = 0
-        # constants.directions.right = 1
-        # so...
-        # format is (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN
-        self.helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]] = helix_joints
+    # indicates that the left helix joint to right helix joint goes...
+    # (-1) up to down; (0) both up/down; (1) down to up
+    #
+    # this does not need to be defined if theta_switch_multiple is defined
+    theta_switch_multiple: Literal[-1, 0, 1] = None
 
-        # theta_switch_multiple
-        # indicates that the left helix joint to right helix joint goes either...
-        # (-1) up to down; (0) both up/down; (1) down to up
-        #
-        # this does not need to be defined if theta_switch_multiple is defined
-        if helix_joints == (UP, DOWN):
-            self.theta_switch_multiple = -1
-        elif helix_joints == (UP, UP):
-            self.theta_switch_multiple = 0
-        elif helix_joints == (DOWN, DOWN):
-            self.theta_switch_multiple = 0
-        elif helix_joints == (DOWN, UP):
-            self.theta_switch_multiple = 1
-        else:
-            raise ValueError(f"Helix Joints have invalid values. helix_joints={helix_joints}")
+    # [left_helix_joint, right_helix_joint]
+    # where left_helix_joint and right_helix_joint
+    # are either 0 (up) or 1 (down)
+    # for example...
+    # [0, 1] means that the left helix joint is upwards/right helix joint is downwards
+    #
+    # this does not need to be defined if theta_switch_multiple is -1 or 1
+    helix_joints: Tuple[
+        Literal[0, 1], Literal[0, 1]
+    ] = None
 
 
 @dataclass

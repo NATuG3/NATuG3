@@ -3,12 +3,8 @@ import pyqtgraph as pg
 import plotting.top_view.worker
 import logging
 from contextlib import suppress
-import config.storage
-import plotting.datatypes
-from constants.directions import *
+import config.nucleic_acid, config.domains
 
-
-domains = [plotting.datatypes.domain(9, (UP, DOWN))] * 14
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +31,8 @@ class plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # fetch nucleic acid settings and the current domains
-        self.settings = config.storage.current
-        self.domains = domains
+        self.settings = config.nucleic_acid.storage.current
+        self.domains = config.domains.storage.current
 
         self.worker = plotting.top_view.worker.plot(
             self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s
