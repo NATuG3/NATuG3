@@ -1,11 +1,12 @@
 import logging
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView
-from copy import deepcopy
+from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QAbstractItemView
 import config.domains.storage
 from config.domains.widgets import *
 from constants.directions import *
 from types import SimpleNamespace
+from typing import List
+
 
 logger = logging.getLogger(__name__)
 
@@ -15,17 +16,26 @@ class Table(QTableWidget):
 
     def __init__(self, parent) -> None:
         super().__init__()
-        self.rows = None
         self.parent = parent
 
-        self.setStyleSheet("QTableView::item{padding: 5px; text-align: center}")
+        # store headers
+        self.side_headers = None  # these get generated when dump_domains() is called
+        self.top_headers = ("left", "right", "s", "m", "count")  # these are static
 
-        # self.setShowGrid(False)
-
-        self.top_headers = ("left", "right", "s", "m", "count")
+        # apply top headers
         self.setColumnCount(len(self.top_headers))
-
         self.setHorizontalHeaderLabels(self.top_headers)
+
+        # each table row has its contents stored in this array for easy access
+        # see self.dump_domains() to see what specifically goes into each SimpleNamespace
+        self.rows: List[SimpleNamespace] = None
+
+        # styling
+        self.setStyleSheet("QTableView::item{padding: 5px; text-align: center}")
+        self.setShowGrid(True)
+
+        # enable smooth scrolling
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
 
         # dump the domains of the previous save
         self.dump_domains(config.domains.storage.current)
