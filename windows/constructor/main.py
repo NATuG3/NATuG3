@@ -60,6 +60,11 @@ class Window(QMainWindow):
         self.load_graphs()
         self._config()
 
+    def load_graphs(self):
+        """Load all nanotube graphs simultaneously."""
+        self._top_view()
+        self._side_view()
+
     def _config(self):
         # create a dockable config widget
         self.docked_widgets.config = QDockWidget()
@@ -79,15 +84,12 @@ class Window(QMainWindow):
         # remove config scaling limitations when config becomes floating
         self.docked_widgets.config.topLevelChanged.connect(self.resizeEvent)
 
+        self.docked_widgets.config.setMinimumWidth(200)
+
         # dock the new dockable config widget
         self.addDockWidget(
             Qt.DockWidgetArea.RightDockWidgetArea, self.docked_widgets.config
         )
-
-    def load_graphs(self):
-        """Load all nanotube graphs simultaneously."""
-        self._top_view()
-        self._side_view()
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
@@ -113,9 +115,14 @@ class Window(QMainWindow):
             self.docked_widgets.top_view.setAllowedAreas(
                 Qt.DockWidgetArea.LeftDockWidgetArea
             )
+
+            # disable closing of the panel
             self.docked_widgets.top_view.setFeatures(
                 QDockWidget.DockWidgetFeature.DockWidgetFloatable
+                | QDockWidget.DockWidgetFeature.DockWidgetMovable
             )
+
+            self.docked_widgets.top_view.setMinimumWidth(200)
 
             self.docked_widgets.top_view.topLevelChanged.connect(self.resizeEvent)
 
@@ -139,6 +146,7 @@ class Window(QMainWindow):
             prettified_side_view.setLayout(QVBoxLayout())
             prettified_side_view.setTitle("Side View of Helices")
             prettified_side_view.setStatusTip("A plot of the side view of all domains")
+            # prettified_side_view.setMinimumWidth(190)
 
             # store widget in class for easier future direct widget access
             self.side_view = plotting.side_view.runner.Plot()
@@ -183,7 +191,7 @@ class Window(QMainWindow):
         """
         # side view resizing
         #
-        self.side_view.setMinimumWidth(int(3 * self.size().width() / 8))
+        self.side_view.setMinimumWidth(int(3 * self.size().width() / 9))
 
         # top view resizing
         #
@@ -202,9 +210,6 @@ class Window(QMainWindow):
         if (
             not self.docked_widgets.config.isFloating()
         ):  # if config panel is not floating
-            self.docked_widgets.config.setMinimumWidth(
-                self.docked_widgets.config.minimumWidth() - 60
-            )
-            self.docked_widgets.config.setMaximumWidth(
+            self.docked_widgets.config.setFixedWidth(
                 round(2 * self.size().width() / 8)
             )

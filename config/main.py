@@ -53,19 +53,19 @@ class Panel(QWidget):
 
         def tab_changed():
             """Current tab changed event"""
-            if self.tabs.domains.isVisible():
-                # obtain the dockable config panel from the main window reference
-                config_panel = references.constructor.docked_widgets.config
+            # obtain the dockable config panel from the main window reference
+            config_panel = references.constructor.docked_widgets.config
 
-                # since the domains tab is visible make the config panel float
+            # if any of these tabs are visible then the config panel will float
+            float_on_visible_tabs = [self.tabs.domains]
+
+            if any([item.isVisible() for item in float_on_visible_tabs]):
+                # make the config panel float
                 config_panel.setFloating(True)
 
-                # make the config panel larger now that it is floating
-                config_panel.setMinimumWidth(
-                    round(references.constructor.width() / 2.5)
-                )
-                config_panel.setMaximumWidth(
-                    round(references.constructor.width() / 2.5) + 100
+                # increase the width of the config panel
+                config_panel.setFixedWidth(
+                    375
                 )
 
                 # set the height of the domains table to be
@@ -81,6 +81,13 @@ class Panel(QWidget):
                     config_panel.setMinimumHeight(desired_config_height)
                     # now that the height has grown allow the height to shrink again
                     config_panel.setMinimumHeight(0)
+            else:
+                # undo any set minimum height on the config panel
+                config_panel.setMinimumHeight(0)
+                # no longer float the config panel
+                config_panel.setFloating(False)
+                # force a resize of the config panel now that it is re-docked
+                references.constructor.resizeEvent(None)
 
         # if user attempts to unfloat domain tab don't let them
         references.constructor.docked_widgets.config.topLevelChanged.connect(
