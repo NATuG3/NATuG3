@@ -72,16 +72,22 @@ class Table(QTableWidget):
             self.setCellWidget(index, 1, row.right_helical_joint)
 
             # column 2 - theta switch multiple
-            row.theta_switch_multiple = StyledSpinBox(domain.theta_switch_multiple)
+            row.theta_switch_multiple = TableIntegerBox(
+                domain.theta_switch_multiple, show_buttons=False
+            )
             row.theta_switch_multiple.setEnabled(False)
             self.setCellWidget(index, 2, row.theta_switch_multiple)
 
             # column 3 - theta interior multiple
-            row.theta_interior_multiple = StyledSpinBox(domain.theta_interior_multiple)
+            row.theta_interior_multiple = TableIntegerBox(
+                domain.theta_interior_multiple
+            )
             self.setCellWidget(index, 3, row.theta_interior_multiple)
 
             # column 4 - initial NEMid count
-            row.theta_switch_multiple = StyledSpinBox(domain.count)
+            row.theta_switch_multiple = TableIntegerBox(
+                domain.count, show_buttons=False
+            )
             row.theta_switch_multiple.setEnabled(False)
             self.setCellWidget(index, 4, row.theta_switch_multiple)
 

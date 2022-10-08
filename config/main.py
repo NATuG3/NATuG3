@@ -17,37 +17,74 @@ class Panel(QWidget):
         super().__init__()
         uic.loadUi("config/panel.ui", self)
 
+        # call setup functions
+        self._styling()
+        self._tabs()
+
+    def _styling(self):
+        """Set icons/stylesheets/other styles for config panel."""
         self.update_graphs.setIcon(fetch_icon("reload-outline"))
 
-        # set config.panel.count (for cross module use)
-        def config_count_updater():
-            """Update config.panel.count to the current initial NEMid count box's value"""
-            global count
-            count = self.initial_NEMids.value()
-
-        # store default value in initial_NEMids box
-        self.initial_NEMids.setValue(config.main.count)
-        # when initial NEMid count box is changed store the change
-        self.initial_NEMids.valueChanged.connect(config_count_updater)
-
-        # container to store tabs in
-        self.tabs = SimpleNamespace()
-
+    def _tabs(self):
+        """Set up all tabs for config panel."""
         logger.debug("Building config panel...")
-        # set the nucleic acid tab
-        # store actual widget in the tabs container
-        self.tabs.nucleic_acid = config.nucleic_acid.Panel(self)
-        self.nucleic_acid_tab.setLayout(QVBoxLayout())
-        self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
 
-        # set the domains tab
-        # store actual widget in the tabs container
-        self.tabs.domains = config.domains.Panel()
-        self.domains_tab.setLayout(QVBoxLayout())
-        self.domains_tab.layout().addWidget(self.tabs.domains)
+        def build():
+            """Build all tabs"""
+            # container to store tabs in
+            self.tabs = SimpleNamespace()
 
-        # set up the update graphs button
-        self.update_graphs.clicked.connect(references.Windows.constructor.load_graphs)
+            # set the nucleic acid tab
+            # store actual widget in the tabs container
+            self.tabs.nucleic_acid = config.nucleic_acid.Panel(self)
+            self.nucleic_acid_tab.setLayout(QVBoxLayout())
+            self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
 
-        # if current tab is changed call the construction window's resizeEvent
-        self.tab_area.currentChanged.connect(references.Windows.constructor.resizeEvent)
+            # set the domains tab
+            # store actual widget in the tabs container
+            self.tabs.domains = config.domains.Panel()
+            self.domains_tab.setLayout(QVBoxLayout())
+            self.domains_tab.layout().addWidget(self.tabs.domains)
+
+            # set up the update graphs button
+            self.update_graphs.clicked.connect(references.constructor.load_graphs)
+
+        build()
+
+        def tab_changed():
+            """Current tab changed event"""
+            if self.tabs.domains.isVisible():
+                # obtain the dockable config panel from the main window reference
+                config_panel = references.constructor.docked_widgets.config
+
+                # since the domains tab is visible make the config panel float
+                config_panel.setFloating(True)
+
+                # make the config panel larger now that it is floating
+                config_panel.setMinimumWidth(
+                    round(references.constructor.width() / 2.5)
+                )
+                config_panel.setMaximumWidth(
+                    round(references.constructor.width() / 2.5) + 100
+                )
+
+                # set the height of the domains table to be
+                # the height of a singular domain entry * number of domains
+                desired_config_height = 45 * len(config.domains.storage.current)
+                screen_size = references.app.primaryScreen().size().height()
+
+                # but if this would require making the domains table taller than the actual screen size,
+                # just set the domains table height to the screen size
+                if desired_config_height > screen_size:
+                    config_panel.setMinimumHeight(screen_size)
+                else:
+                    config_panel.setMinimumHeight(desired_config_height)
+                    # now that the height has grown allow the height to shrink again
+                    config_panel.setMinimumHeight(0)
+
+        # if user attempts to unfloat domain tab don't let them
+        references.constructor.docked_widgets.config.topLevelChanged.connect(
+            tab_changed
+        )
+        # if user changes to certain tabs change size of the config panel/potentially float it
+        self.tab_area.currentChanged.connect(tab_changed)

@@ -5,7 +5,7 @@ import webbrowser
 from PyQt6.QtGui import QKeySequence, QShortcut
 import references
 
-parent = references.Windows.constructor.menu_bar
+parent = references.constructor.menu_bar
 
 
 class File(QMenu):

@@ -34,8 +34,25 @@ class DirectionalButton(QPushButton):
             self.setIcon(fetch_icon("arrow-down-outline"))
 
 
-class StyledSpinBox(QSpinBox):
-    def __init__(self, value):
+class TableIntegerBox(QSpinBox):
+    """Spin box for use in QTableWidgets."""
+
+    def __init__(self, value, show_buttons=True):
+        """
+        Initialize the integer box.
+
+        Args:
+            value (float): Initial value of the widget.
+            show_buttons (bool): Show/don't show +/- buttons of integer box.
+        """
         super().__init__()
         self.setValue(value)
-        self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+
+        if show_buttons:
+            self.setButtonSymbols(QSpinBox.ButtonSymbols.UpDownArrows)
+        else:
+            self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+
+    def wheelEvent(self, event):
+        """Since tables may be scrollable we don't want the user to accidentally change the value of the spinbox."""
+        event.ignore()  # do not do anything on scroll event

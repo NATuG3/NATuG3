@@ -42,7 +42,7 @@ class Window(QMainWindow):
         super().__init__()
 
         # store a reference to self in references for cross module use
-        references.Windows.constructor = self
+        references.constructor = self
 
         # utilize inherited methods to set up the main window
         self.setWindowTitle("DNA Constructor")
@@ -183,54 +183,28 @@ class Window(QMainWindow):
         """
         # side view resizing
         #
-        # self.side_view.setMinimumWidth(int(3 * window_width / 8))
+        self.side_view.setMinimumWidth(int(3 * self.size().width() / 8))
 
         # top view resizing
         #
         # set extra large width of the config panel if it is floating
         if self.docked_widgets.top_view.isFloating():
-            self.docked_widgets.top_view.setMinimumWidth(350)
             self.docked_widgets.top_view.setMaximumWidth(99999)
         # set reasonably sized width of not floating panel
         else:
-            self.docked_widgets.top_view.setMinimumWidth(180)
             self.docked_widgets.top_view.setMaximumWidth(
                 round(2 * self.size().width() / 8)
             )
 
         # config resizing
         #
-        # if the config panel's domain tab is visible make the config panel float
-        # and make it a third of the width of the main panel
-        if self.config.tabs.domains.isVisible():
-            # right when the config tab becomes visible do fancy resizing
-            # and make it float...
-            if not self.docked_widgets.config.isFloating():
-                self.docked_widgets.config.setFloating(True)
-                self.docked_widgets.config.setMinimumWidth(
-                    round(self.size().width() / 2.5)
-                )
-                self.docked_widgets.config.setMaximumWidth(
-                    round(self.size().width() / 2.5) + 100
-                )
-
-                # set the height of the domains table to (the height of a singular domain entry * number of domains)
-                desired_config_height = 45 * len(config.domains.storage.current)
-                screen_size = references.app.primaryScreen().size().height()
-                # but if this would require making the domains table taller than the actual screen size,
-                # just set the domains table height to the screen size
-                if desired_config_height > screen_size:
-                    self.docked_widgets.config.setMinimumHeight(screen_size)
-                else:
-
-                    self.docked_widgets.config.setMinimumHeight(desired_config_height)
-                    # now that the height has grown allow the height to shrink again
-                    self.docked_widgets.config.setMinimumHeight(0)
-
-        # if the config panel's domain tab is not visible then unfloat the config panel
-        else:
-            self.docked_widgets.config.setFloating(False)
-            self.docked_widgets.config.setMinimumWidth(190)
+        # if the config is floating allow config.domains.Panel.tab_changed to do the resizing
+        if (
+            not self.docked_widgets.config.isFloating()
+        ):  # if config panel is not floating
+            self.docked_widgets.config.setMinimumWidth(
+                self.docked_widgets.config.minimumWidth() - 60
+            )
             self.docked_widgets.config.setMaximumWidth(
                 round(2 * self.size().width() / 8)
             )
