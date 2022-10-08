@@ -18,4 +18,3 @@ def yes_no_prompt(parent, title, msg):
         return True
     else:
         return False
-

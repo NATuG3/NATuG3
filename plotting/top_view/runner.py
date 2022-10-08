@@ -9,7 +9,7 @@ import config.nucleic_acid, config.domains
 logger = logging.getLogger(__name__)
 
 
-class plot(QWidget):
+class Plot(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -34,7 +34,7 @@ class plot(QWidget):
         self.settings = config.nucleic_acid.storage.current
         self.domains = config.domains.storage.current
 
-        self.worker = plotting.top_view.worker.plot(
+        self.worker = plotting.top_view.worker.Plot(
             self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s
         )
         self.worker.compute()

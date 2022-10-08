@@ -2,7 +2,7 @@ import math
 from typing import List
 
 
-class plot:
+class Plot:
     """
     Generate top view features.
 

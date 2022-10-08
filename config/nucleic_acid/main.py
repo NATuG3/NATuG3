@@ -8,7 +8,7 @@ from config.nucleic_acid import storage
 logger = logging.getLogger(__name__)
 
 
-class panel(QWidget):
+class Panel(QWidget):
     """Nucleic Acid Config Tab"""
 
     def __init__(self, parent) -> None:

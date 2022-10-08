@@ -7,7 +7,7 @@ import atexit
 profiles_filename = "config/profiles.nano"
 restored_filename = "config/restored.nano"
 
-count: int = 50 # initial NEMids/strand count
+count: int = 50  # initial NEMids/strand count
 current: object = None  # current profile
 profiles: dict = None  # all profiles
 

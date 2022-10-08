@@ -41,8 +41,8 @@ if __name__ == "__main__":
     import windows.constructor.main
 
     # obtain and generate window item
-    constructor_window = windows.constructor.main.window()
-    constructor_window.show() # show constructor window
+    constructor_window = windows.constructor.main.Window()
+    constructor_window.show()  # show constructor window
 
     # begin app event loop
     sys.exit(app.exec())

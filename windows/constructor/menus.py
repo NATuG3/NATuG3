@@ -5,10 +5,10 @@ import webbrowser
 from PyQt6.QtGui import QKeySequence, QShortcut
 import references
 
-parent = references.windows.constructor.menu_bar
+parent = references.Windows.constructor.menu_bar
 
 
-class file(QMenu):
+class File(QMenu):
     def __init__(self):
         super().__init__("&File", parent)
 
@@ -57,7 +57,7 @@ class view(QMenu):
         config.setIcon(fetch_icon("eye-off-outline"))
         config.triggered.connect(
             lambda: hide_or_unhide(
-                references.windows.constructor.docked_widgets.config, config
+                references.Windows.constructor.docked_widgets.config, config
             )
         )
 
@@ -68,7 +68,7 @@ class view(QMenu):
         top_view.setIcon(fetch_icon("eye-off-outline"))
         top_view.triggered.connect(
             lambda: hide_or_unhide(
-                references.windows.constructor.docked_widgets.top_view, top_view
+                references.Windows.constructor.docked_widgets.top_view, top_view
             )
         )
 

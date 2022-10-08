@@ -13,7 +13,7 @@ DomainsContainer: FunctionType = lambda domain_count: tuple(
 DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 
 
-class plot:
+class Plot:
     """
     Generate data needed for a side view graph of helicies.
     """

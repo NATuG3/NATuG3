@@ -11,7 +11,7 @@ current = None
 logger = logging.getLogger(__name__)
 
 
-class domain:
+class Domain:
     """
     Domain storage object.
 
@@ -22,9 +22,10 @@ class domain:
     """
 
     def __init__(
-            self,
-            theta_interior_multiple: int,
-            helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
+        self,
+        theta_interior_multiple: int,
+        helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
+        count: int,
     ):
         """
         Create domains dataclass.
@@ -34,6 +35,8 @@ class domain:
                 Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency. Multiple of characteristic angle.
             helix_joints (tuple):
                 (left_joint, right_joint) where left/right_joint are constants.directions.UP/DOWN.
+            count (int):
+                Number of initial NEMids/strand to generate.
         """
         # multiple of the characteristic angle (theta_c) for the interior angle
         # between this domains[this domain's index] and this domains[this domain's index + 1]
@@ -45,6 +48,9 @@ class domain:
         # so...
         # format is (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN
         self.helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]] = helix_joints
+
+        # store the number of initial NEMids/strand to generate
+        self.count = count
 
         # theta_switch_multiple
         # indicates that the left helix joint to right helix joint goes either...
@@ -61,12 +67,14 @@ class domain:
             self.theta_switch_multiple = 1
 
     def __repr__(self) -> str:
-        return f"domain(" \
-               f"Θ_interior_multiple={self.theta_switch_multiple}, " \
-               f"helix_joints=(left={self.helix_joints[LEFT]}, " \
-               f"right={self.helix_joints[RIGHT]})" \
-               f")"
-
+        return (
+            f"domain("
+            f"Θ_interior_multiple={self.theta_interior_multiple}, "
+            f"helix_joints=(left={self.helix_joints[LEFT]}, "
+            f"right={self.helix_joints[RIGHT]}, "
+            f"Θ_switch_multiple={self.theta_switch_multiple}"
+            f")"
+        )
 
 
 def load():
@@ -79,7 +87,7 @@ def load():
         with open(restored_filename, "rb") as restored_file:
             current = pickle.load(restored_file)
     except FileNotFoundError:
-        current = [domain(9, (UP, UP))] * 14
+        current = [Domain(9, (UP, UP), 50)] * 14
 
 
 def dump():

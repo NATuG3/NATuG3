@@ -6,12 +6,11 @@ import config.nucleic_acid, config.domains, config.main
 import references
 from resources import fetch_icon
 
-
 count = 50
 logger = logging.getLogger(__name__)
 
 
-class panel(QWidget):
+class Panel(QWidget):
     """Config panel."""
 
     def __init__(self) -> None:
@@ -37,18 +36,18 @@ class panel(QWidget):
         logger.debug("Building config panel...")
         # set the nucleic acid tab
         # store actual widget in the tabs container
-        self.tabs.nucleic_acid = config.nucleic_acid.panel(self)
+        self.tabs.nucleic_acid = config.nucleic_acid.Panel(self)
         self.nucleic_acid_tab.setLayout(QVBoxLayout())
         self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
 
         # set the domains tab
         # store actual widget in the tabs container
-        self.tabs.domains = config.domains.panel()
+        self.tabs.domains = config.domains.Panel()
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
         # set up the update graphs button
-        self.update_graphs.clicked.connect(references.windows.constructor.load_graphs)
+        self.update_graphs.clicked.connect(references.Windows.constructor.load_graphs)
 
         # if current tab is changed call the construction window's resizeEvent
-        self.tab_area.currentChanged.connect(references.windows.constructor.resizeEvent)
+        self.tab_area.currentChanged.connect(references.Windows.constructor.resizeEvent)

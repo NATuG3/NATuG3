@@ -1,40 +1,41 @@
-from PyQt6.QtWidgets import QGroupBox, QHBoxLayout, QPushButton, QLabel, QWidget
-from constants.strand_switches import *  # all strand switch literals
+from PyQt6.QtWidgets import QSpinBox, QPushButton
 from constants.directions import *
-from config.domains.storage import domain
+from typing import Literal
+from resources.workers import fetch_icon
+
 
 up_arrow, down_arrow = "↑", "↓"
 
 
-class directional_button(QPushButton):
-    def __init__(self, parent, state: int):
+class DirectionalButton(QPushButton):
+    def __init__(self, parent, state: Literal[UP, DOWN]):
         super().__init__(parent)
 
-        assert state in (UP, DOWN)
+        self.state = state
 
-        if state == UP:
-            self.setText("↑")
-        elif state == DOWN:
-            self.setText("↓")
+        self.setStyleSheet(
+            "QPushButton{border: 2px solid rgb(220, 220, 220); border-radius: 5px; text-align: center}"
+        )
+        self.setFlat(True)
+        self.setFixedWidth(25)
+        self.text_updater()
+
+        @self.clicked.connect
+        def _(event):
+            # reverse the state of the button on click
+            self.state = int(not (bool(self.state)))
+            # set the arrow accordingly
+            self.text_updater()
+
+    def text_updater(self):
+        if self.state == UP:
+            self.setIcon(fetch_icon("arrow-up-outline"))
+        elif self.state == DOWN:
+            self.setIcon(fetch_icon("arrow-down-outline"))
 
 
-class domain(QWidget):
-    def __init__(self, index, domain: domain):
+class StyledSpinBox(QSpinBox):
+    def __init__(self, value):
         super().__init__()
-
-        # store domain object in class
-        self.domain = domain
-
-        # self.setTitle(f"Domain #{index}")
-        self.setLayout(QHBoxLayout())
-
-        self.joints = [
-            directional_button(self, self.domain.helix_joints[LEFT]),
-            directional_button(self, self.domain.helix_joints[RIGHT]),
-        ]
-
-        # left joint
-        self.layout().addWidget(self.joints[LEFT])
-
-        # right joint
-        self.layout().addWidget(self.joints[RIGHT])
+        self.setValue(value)
+        self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)

@@ -9,7 +9,7 @@ from contextlib import suppress
 logger = logging.getLogger(__name__)
 
 
-class plot(QWidget):
+class Plot(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -36,7 +36,7 @@ class plot(QWidget):
         self.count = config.main.count
 
         # create instance of dna_nanotube_tools side view generation
-        self.worker = plotting.side_view.worker.plot(
+        self.worker = plotting.side_view.worker.Plot(
             self.domains,
             self.settings.Z_b,
             self.settings.Z_s,
@@ -86,8 +86,12 @@ class plot(QWidget):
                 title = f"domain#{domain_index}-{str(strand_direction).replace('0','up').replace('1','down')}"
 
                 # obtain an array of x and z coords from the points container
-                x_coords = [point.x_coord for point in points[domain_index][strand_direction]]
-                z_coords = [point.z_coord for point in points[domain_index][strand_direction]]
+                x_coords = [
+                    point.x_coord for point in points[domain_index][strand_direction]
+                ]
+                z_coords = [
+                    point.z_coord for point in points[domain_index][strand_direction]
+                ]
 
                 main_plot.plot(  # actually plot the current strand of the current domain
                     x_coords,

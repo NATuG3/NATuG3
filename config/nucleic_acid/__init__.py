@@ -1,1 +1,1 @@
-from config.nucleic_acid.main import panel
+from config.nucleic_acid.main import Panel

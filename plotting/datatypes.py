@@ -30,9 +30,7 @@ class domain:
     # [0, 1] means that the left helix joint is upwards/right helix joint is downwards
     #
     # this does not need to be defined if theta_switch_multiple is -1 or 1
-    helix_joints: Tuple[
-        Literal[0, 1], Literal[0, 1]
-    ] = None
+    helix_joints: Tuple[Literal[0, 1], Literal[0, 1]] = None
 
 
 @dataclass
