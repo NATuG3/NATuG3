@@ -1,4 +1,0 @@
-UP_TO_DOWN = 0
-UP_TO_UP = 1
-DOWN_TO_DOWN = 2
-DOWN_TO_UP = 3
