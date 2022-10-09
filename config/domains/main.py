@@ -140,6 +140,8 @@ class Table(QTableWidget):
         """Called whenever a cell's value changes"""
         # update the current domains list
         config.domains.storage.current = self.load_domains()
+        # uneditable domain values may have changed
+        self.dump_domains(config.domains.storage.current)
 
 
 class Panel(QWidget):

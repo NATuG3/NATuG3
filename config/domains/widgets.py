@@ -46,6 +46,8 @@ class TableIntegerBox(QSpinBox):
             show_buttons (bool): Show/don't show +/- buttons of integer box.
         """
         super().__init__()
+        self.setMinimum(-1)
+        self.setMaximum(100)
         self.setValue(value)
 
         if show_buttons:

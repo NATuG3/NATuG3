@@ -46,7 +46,6 @@ class Profile:
     def __post_init__(self) -> None:
         # compute Z_b based on T, H, and B
         self.Z_b = (self.T * self.H) / self.B
-        self.Z_b = round(self.Z_b, 4)
 
     def __eq__(self, other: object) -> bool:
         """Returns true if identical profile is returned"""
@@ -129,6 +128,6 @@ defaults = {
         Z_s=1.26,
         theta_b=34.29,
         theta_c=17.1428,
-        theta_s=2.3,
+        theta_s=2.343,
     )
 }

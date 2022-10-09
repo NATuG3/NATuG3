@@ -51,7 +51,7 @@ class NEMid:
 
     def position(self, round_to=3) -> Tuple[float, float]:
         """Return coords of the NEMid as a tuple of form (x, z)"""
-        return (round(self.x_coord, round_to), round(self.z_coord, round_to))
+        return round(self.x_coord, round_to), round(self.z_coord, round_to)
 
 
 @dataclass

@@ -1,8 +1,11 @@
 from functools import lru_cache
 from types import FunctionType
-from typing import Deque, Tuple, Type
+from typing import Deque, Tuple, Type, Literal
 from collections import deque
+
+from config.domains.storage import Domain
 from plotting.datatypes import NEMid
+from constants.directions import *
 
 
 # container to store data for domains in
@@ -85,28 +88,47 @@ class Plot:
 
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
-        for domain_index in range(self.domain_count):
+        for domain_index in range(len(self.domains)):
             # one strand direction will be initially set to zero
             # whereas the other will be set to zero - theta_s
 
+            # which strand will begin at x=0 (+domain_index)
+            zeroed_strand: Literal[UP, DOWN]
+
+            previous_domain: Domain = self.domains[domain_index-1]
+
+            # very first domain will have its up strand begin at x=0
+            if domain_index == 0:
+                zeroed_strand = UP
+            # if the previous domain's right helical joint is set to down
+            # then set the down helix of this domain to be 0 (which will become the "left" helix)
+            elif previous_domain.helix_joints[RIGHT] == DOWN:
+                zeroed_strand = DOWN
+            # if the previous domain's right helical joint is set to down
+            # then set the down helix of this domain to be 0 (which will become the "left" helix)
+            elif previous_domain.helix_joints[RIGHT] == UP:
+                zeroed_strand = UP
+
+            not_zeroed_strand = int(not bool(zeroed_strand))
+
             # set initial NEMid angle values
-            NEMid_angles[domain_index][0].append(0.0)
-            NEMid_angles[domain_index][1].append(0.0 - self.theta_s)
+            NEMid_angles[domain_index][zeroed_strand].append(0.0)
+            NEMid_angles[domain_index][not_zeroed_strand].append(0.0 - self.theta_s)
 
             for i in range(count):
-
                 # generate the next UP STRAND NEMid angle
                 # "NEMid_angles[domain_index][0]" =
-                # NEMid angles -> current domain -> list of NEMid angles for up strand -> previous one
-                NEMid_angles[domain_index][0].append(
-                    NEMid_angles[domain_index][0][i] + self.theta_b
+                # list of NEMid angles for the strand that begins with zero -> previous one
+                NEMid_angles[domain_index][zeroed_strand].append(
+                    NEMid_angles[domain_index][zeroed_strand][i] + self.theta_b
                 )
 
                 # generate the next DOWN STRAND NEMid angle
                 # "NEMid_angles[domain_index][0][i+1]" =
-                # NEMid angles -> current domain -> list of NEMid angles for up strand -> one we just computed
-                NEMid_angles[domain_index][1].append(
-                    NEMid_angles[domain_index][0][i + 1] - self.theta_s
+                # list of NEMid angles for the strand that doesn't quite begin with zero ->
+                # one we just computed for other strand
+                NEMid_angles[domain_index][not_zeroed_strand].append(
+                    NEMid_angles[domain_index][zeroed_strand][i + 1] - self.theta_s
                 )
 
         return NEMid_angles
@@ -178,10 +200,10 @@ class Plot:
         z_coords[0][0].append(0.0)
         z_coords[0][1].append(0.0 - self.Z_s)
 
-        # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first one first
-        # the first domain has its initial z cords (up and down strands) set to (arbitrary) static values, whereas other domains do not
-        # for all domains except domain#0 the initial z cord will rely on a specific z cord of the previous
-        # and so, we calculate the z coords of domain#0...
+        # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first
+        # one first the first domain has its initial z cords (up and down strands) set to (arbitrary) static values,
+        # whereas other domains do not for all domains except domain#0 the initial z cord will rely on a specific z
+        # cord of the previous and so, we calculate the z coords of domain#0...
         for i in range(count):
             # generate the next z_coord for the down strand...
             # "z_coords[0][0][i] " means "z_coords -> domain#0 -> up_strand -> previous z_coord"
