@@ -32,6 +32,8 @@ class Panel(QWidget):
         # set up the profile manager
         self._profile_manager()
 
+        logger.debug("Loaded nucleic acid settings tab of config panel.")
+
     def dump_settings(self, profile: storage.Profile) -> None:
         """Saves current settings to profile with name in text edit input box."""
         # set the value of all widgets to their respective profile attribute

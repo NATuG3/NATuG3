@@ -57,7 +57,7 @@ class Domain:
         # (-1) up to down; (0) both up/down; (1) down to up
         #
         # this does not need to be defined if theta_switch_multiple is defined
-        helix_joints = tuple(helix_joints) #ensure helix_joints is a tuple
+        helix_joints = tuple(helix_joints)  # ensure helix_joints is a tuple
         if helix_joints == (UP, DOWN):
             self.theta_switch_multiple = -1
         elif helix_joints == (UP, UP):
@@ -91,8 +91,10 @@ def load():
             current = pickle.load(restored_file)
         logger.info("Restored previous domain editor state.")
     except FileNotFoundError:
-        logger.info("Previous domain editor state save file not found. Loading defaults...")
-        current = [Domain(9, (UP, UP), 50)] * 14
+        logger.warning(
+            "Previous domain editor state save file not found. Loading defaults..."
+        )
+        current = default
 
 
 def dump():
@@ -101,5 +103,11 @@ def dump():
         # perform data validation before save
         for domain in current:
             if not isinstance(domain, Domain):
-                raise TypeError("There is a domain in the domains list that is not a domain", domain)
+                logger.critical("Data validation for domains dump failed.")
+                raise TypeError(
+                    "There is a domain in the domains list that is not a domain", domain
+                )
         pickle.dump(current, restored_file)
+
+
+default = [Domain(9, (UP, UP), 50)] * 14

@@ -76,11 +76,9 @@ def load() -> None:
             assert isinstance(current, Profile)
 
         logger.debug("Saved profiles file loaded.")
-
     # if the settings file wasn't found then create a new one
     except FileNotFoundError:
-        logger.debug("Saved profiles file not found. Restoring defaults.")
-
+        logger.warning("Saved profiles file not found. Restoring defaults...")
         profiles = defaults
         current = next(iter(defaults.values()))
 
@@ -98,18 +96,26 @@ def dump() -> None:
         # perform data validation before save
         for name, profile in profiles.items():
             if not isinstance(profile, Profile):
-                raise TypeError(f"profile named \"{name}\" is not a profile", profile)
+                logger.critical(
+                    "Data validation for nucleic_acid profiles dump failed."
+                )
+                raise TypeError(f'profile named "{name}" is not a profile', profile)
 
         pickle.dump(profiles, settings_file)
+        logger.info(f'Dumped all profiles into "{settings_file}"')
 
     # dump current settings
     with open(restored_filename, "wb") as settings_file:
 
         # perform data validation before save
         if not isinstance(current, Profile):
+            logger.critical(
+                "Data validation for nucleic_acid current profile dump failed."
+            )
             raise TypeError("current is not a profile", profile)
 
         pickle.dump(current, settings_file)
+        logger.info(f'Dumped current nucleic_acid settings into "{settings_file}"')
 
 
 # defaults

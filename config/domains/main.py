@@ -77,31 +77,23 @@ class Table(QTableWidget):
             self.setCellWidget(index, 0, widget)
 
             # column 1 - right helical joint
-            widget = DirectionalButton(
-                self, domain.helix_joints[RIGHT]
-            )
+            widget = DirectionalButton(self, domain.helix_joints[RIGHT])
             widget.clicked.connect(self.cell_value_changed)
             self.setCellWidget(index, 1, widget)
 
             # column 2 - theta switch multiple
-            widget = TableIntegerBox(
-                domain.theta_switch_multiple, show_buttons=False
-            )
+            widget = TableIntegerBox(domain.theta_switch_multiple, show_buttons=False)
             widget.setEnabled(False)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 2, widget)
 
             # column 3 - theta interior multiple
-            widget = TableIntegerBox(
-                domain.theta_interior_multiple
-            )
+            widget = TableIntegerBox(domain.theta_interior_multiple)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 3, widget)
 
             # column 4 - initial NEMid count
-            widget = TableIntegerBox(
-                domain.count, show_buttons=False
-            )
+            widget = TableIntegerBox(domain.count, show_buttons=False)
             widget.setEnabled(False)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 4, widget)
@@ -117,7 +109,7 @@ class Table(QTableWidget):
         Returns:
             List(domains): A list of domain objects based on user input.
         """
-        domains = [] # output list of domains
+        domains = []  # output list of domains
         for domain in range(self.rowCount()):
             # column 0 - left helical joint
             left_helical_joint: Literal[UP, DOWN] = self.cellWidget(domain, 0).state
@@ -137,7 +129,7 @@ class Table(QTableWidget):
             domain = config.domains.storage.Domain(
                 theta_interior_multiple,
                 (left_helical_joint, right_helical_joint),
-                count
+                count,
             )
 
             domains.append(domain)
@@ -161,3 +153,5 @@ class Panel(QWidget):
 
         self.table = Table(self)
         self.layout().addWidget(self.table)
+
+        logger.info("Loaded domains tab of config panel.")
