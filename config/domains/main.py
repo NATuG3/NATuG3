@@ -98,7 +98,7 @@ class Table(QTableWidget):
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 4, widget)
 
-            self.side_headers.append(f"Domain #{index}")
+            self.side_headers.append(f"Domain #{index+1}")
 
         self.setVerticalHeaderLabels(self.side_headers)
 
@@ -118,7 +118,7 @@ class Table(QTableWidget):
             right_helical_joint: Literal[UP, DOWN] = self.cellWidget(domain, 1).state
 
             # column 2 - theta switch multiple
-            theta_switch_multiple: int = self.cellWidget(domain, 2).value()
+            # not needed since it can be calculated from left and right helical joints
 
             # column 3 - theta interior multiple
             theta_interior_multiple: int = self.cellWidget(domain, 3).value()
