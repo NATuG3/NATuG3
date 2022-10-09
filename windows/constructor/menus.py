@@ -2,8 +2,10 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 from resources import fetch_icon
 import webbrowser
-from PyQt6.QtGui import QKeySequence, QShortcut
+from PyQt6.QtGui import QKeySequence
 import references
+import windows.file_manager.save
+
 
 parent = references.constructor.menu_bar
 
@@ -26,6 +28,7 @@ class File(QMenu):
         save.setIcon(fetch_icon("save-outline"))
         save.setShortcut("ctrl+s")
         save.setStatusTip("Save current stage top file")
+        save.triggered.connect(lambda: windows.file_manager.main.runner(parent))
 
         # file -> save as
         save_as = self.actions.save_as = self.addAction("Save As")

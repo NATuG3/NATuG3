@@ -68,9 +68,11 @@ class Window(QMainWindow):
     def _config(self):
         # create a dockable config widget
         self.docked_widgets.config = QDockWidget()
+
+        # set titles/descriptions
         self.docked_widgets.config.setObjectName("Config Panel")
-        self.docked_widgets.config.setWindowTitle("Config")
         self.docked_widgets.config.setStatusTip("Config panel")
+        self.docked_widgets.config.setWindowTitle("Config")
 
         # store the actual link to the widget in self.config
         self.config = config.main.Panel()
@@ -82,9 +84,10 @@ class Window(QMainWindow):
         )
 
         self.docked_widgets.config.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
 
+        # trigger a resize event when the floatingness of the config panel changes
         self.docked_widgets.config.topLevelChanged.connect(self.resizeEvent)
 
         # disable closing of the panel
@@ -109,6 +112,8 @@ class Window(QMainWindow):
         except AttributeError:
             # create dockable widget for top view
             self.docked_widgets.top_view = QDockWidget()
+
+            # set titles/descriptions
             self.docked_widgets.top_view.setObjectName("Top View")
             self.docked_widgets.top_view.setWindowTitle("Top View of Helices")
             self.docked_widgets.top_view.setStatusTip(
@@ -121,8 +126,9 @@ class Window(QMainWindow):
             # attach actual top view widget to docked top view widget
             self.docked_widgets.top_view.setWidget(self.top_view)
 
+            # top view is only allowed on the sides
             self.docked_widgets.top_view.setAllowedAreas(
-                Qt.DockWidgetArea.LeftDockWidgetArea
+                Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
             )
 
             # disable closing of the panel
@@ -131,9 +137,11 @@ class Window(QMainWindow):
                 | QDockWidget.DockWidgetFeature.DockWidgetMovable
             )
 
-            self.docked_widgets.top_view.setMinimumWidth(200)
-
+            # trigger a resize event when the floatingness of the side view panel changes
             self.docked_widgets.top_view.topLevelChanged.connect(self.resizeEvent)
+
+            # don't let the user shrink top view under 100px
+            self.docked_widgets.top_view.setMinimumWidth(100)
 
             # dock the new dockable top view widget
             self.addDockWidget(
@@ -204,10 +212,10 @@ class Window(QMainWindow):
 
         # top view resizing
         #
-        # set extra large width of the config panel if it is floating
+        # if the top view plot is floating make the max size very large
         if self.docked_widgets.top_view.isFloating():
             self.docked_widgets.top_view.setMaximumWidth(99999)
-        # set reasonably sized width of not floating panel
+        # otherwise it can be resized up to 2/8ths of the screen
         else:
             self.docked_widgets.top_view.setMaximumWidth(
                 round(2 * self.size().width() / 8)
@@ -215,16 +223,18 @@ class Window(QMainWindow):
 
         # config resizing
         #
+        # if config is floating make the max size very large
         if self.docked_widgets.config.isFloating():
             self.docked_widgets.config.setMaximumWidth(600)
+        # otherwise check the current tab of the config panel
         else:
-            prospective_config_width = round(2 * self.size().width() / 8)
-            if (
-                self.config.tabs.domains.isVisible()
-            ):  # if config panel is not floating
-                if prospective_config_width > 280:
-                    self.docked_widgets.config.setFixedWidth(prospective_config_width)
-                else:
-                    self.docked_widgets.config.setFixedWidth(280)
-            else:
-                self.docked_widgets.config.setFixedWidth(prospective_config_width)
+            # if the domains tab of the config panel is visible:
+            if  self.config.tabs.domains.isVisible():
+                # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
+                # to be that of the domain tab's width
+                self.docked_widgets.config.setMaximumWidth(round(3 * self.size().width() / 8))
+                self.docked_widgets.config.setMinimumWidth(280)
+            # if the nucleic acid tab of the config panel is visible:
+            elif self.config.tabs.nucleic_acid.isVisible():
+                self.docked_widgets.config.setMaximumWidth(round(2 * self.size().width() / 8))
+                self.docked_widgets.config.setMinimumWidth(180)

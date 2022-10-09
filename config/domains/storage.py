@@ -1,11 +1,12 @@
 import logging
-from dataclasses import dataclass
+import config.settings
 from typing import Tuple, Literal
 from constants.directions import *
 import pickle
 import atexit
 
-restored_filename = "config/domains/restored.nano"
+
+restored_filename = f"config/domains/restored.{config.settings.extension}"
 current = None
 
 logger = logging.getLogger(__name__)
