@@ -78,11 +78,20 @@ class Window(QMainWindow):
 
         # floating will be determined by current tab (see self.resizeEvent)
         self.docked_widgets.config.setFeatures(
-            QDockWidget.DockWidgetFeature.NoDockWidgetFeatures
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
         )
 
-        # remove config scaling limitations when config becomes floating
+        self.docked_widgets.config.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea
+        )
+
         self.docked_widgets.config.topLevelChanged.connect(self.resizeEvent)
+
+        # disable closing of the panel
+        self.docked_widgets.top_view.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetFloatable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+        )
 
         self.docked_widgets.config.setMinimumWidth(200)
 
@@ -206,14 +215,16 @@ class Window(QMainWindow):
 
         # config resizing
         #
-        # if the config is floating allow config.domains.Panel.tab_changed to do the resizing
-        prospective_config_width = round(2 * self.size().width() / 8)
-        if (
-            self.config.tabs.domains.isVisible()
-        ):  # if config panel is not floating
-            if prospective_config_width > 280:
-                self.docked_widgets.config.setFixedWidth(prospective_config_width)
-            else:
-                self.docked_widgets.config.setFixedWidth(280)
+        if self.docked_widgets.config.isFloating():
+            self.docked_widgets.config.setMaximumWidth(600)
         else:
-            self.docked_widgets.config.setFixedWidth(prospective_config_width)
+            prospective_config_width = round(2 * self.size().width() / 8)
+            if (
+                self.config.tabs.domains.isVisible()
+            ):  # if config panel is not floating
+                if prospective_config_width > 280:
+                    self.docked_widgets.config.setFixedWidth(prospective_config_width)
+                else:
+                    self.docked_widgets.config.setFixedWidth(280)
+            else:
+                self.docked_widgets.config.setFixedWidth(prospective_config_width)
