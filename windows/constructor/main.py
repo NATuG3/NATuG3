@@ -208,6 +208,8 @@ class Window(QMainWindow):
         #
         # if the config is floating allow config.domains.Panel.tab_changed to do the resizing
         if (
-            not self.docked_widgets.config.isFloating()
+            self.config.tabs.domains.isVisible()
         ):  # if config panel is not floating
+            self.docked_widgets.config.setFixedWidth(333)
+        else:
             self.docked_widgets.config.setFixedWidth(round(2 * self.size().width() / 8))

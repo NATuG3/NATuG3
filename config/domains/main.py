@@ -98,7 +98,7 @@ class Table(QTableWidget):
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 4, widget)
 
-            self.side_headers.append(f"Domain #{index+1}")
+            self.side_headers.append(f"#{index+1}")
 
         self.setVerticalHeaderLabels(self.side_headers)
 

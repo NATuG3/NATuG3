@@ -88,47 +88,32 @@ class Plot:
 
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
-        for domain_index in range(len(self.domains)):
+        for index, domain in enumerate(self.domains):
             # one strand direction will be initially set to zero
             # whereas the other will be set to zero - theta_s
 
             # which strand will begin at x=0 (+domain_index)
-            zeroed_strand: Literal[UP, DOWN]
-
-            previous_domain: Domain = self.domains[domain_index-1]
-
-            # very first domain will have its up strand begin at x=0
-            if domain_index == 0:
-                zeroed_strand = UP
-            # if the previous domain's right helical joint is set to down
-            # then set the down helix of this domain to be 0 (which will become the "left" helix)
-            elif previous_domain.helix_joints[RIGHT] == DOWN:
-                zeroed_strand = DOWN
-            # if the previous domain's right helical joint is set to down
-            # then set the down helix of this domain to be 0 (which will become the "left" helix)
-            elif previous_domain.helix_joints[RIGHT] == UP:
-                zeroed_strand = UP
-
+            zeroed_strand = domain.helix_joints[LEFT]
             not_zeroed_strand = int(not bool(zeroed_strand))
 
             # set initial NEMid angle values
-            NEMid_angles[domain_index][zeroed_strand].append(0.0)
-            NEMid_angles[domain_index][not_zeroed_strand].append(0.0 - self.theta_s)
+            NEMid_angles[index][zeroed_strand].append(0.0)
+            NEMid_angles[index][not_zeroed_strand].append(0.0 - self.theta_s)
 
             for i in range(count):
                 # generate the next UP STRAND NEMid angle
                 # "NEMid_angles[domain_index][0]" =
                 # list of NEMid angles for the strand that begins with zero -> previous one
-                NEMid_angles[domain_index][zeroed_strand].append(
-                    NEMid_angles[domain_index][zeroed_strand][i] + self.theta_b
+                NEMid_angles[index][zeroed_strand].append(
+                    NEMid_angles[index][zeroed_strand][i] + self.theta_b
                 )
 
                 # generate the next DOWN STRAND NEMid angle
                 # "NEMid_angles[domain_index][0][i+1]" =
                 # list of NEMid angles for the strand that doesn't quite begin with zero ->
                 # one we just computed for other strand
-                NEMid_angles[domain_index][not_zeroed_strand].append(
-                    NEMid_angles[domain_index][zeroed_strand][i + 1] - self.theta_s
+                NEMid_angles[index][not_zeroed_strand].append(
+                    NEMid_angles[index][zeroed_strand][i + 1] - self.theta_s
                 )
 
         return NEMid_angles
@@ -219,7 +204,7 @@ class Plot:
 
             # step 1: find the initial z cord for the current domain_index
 
-            # lets find the maxmimum x cord for the previous domain
+            # lets find the maximum x cord for the previous domain
             # that will be the NEMid where, when placed adjacently to the right in the proper place
             # there will be an overlap of bases
             initial_z_coord: DomainsContainerType = self._x_coords(count)[
@@ -230,7 +215,8 @@ class Plot:
             initial_z_coord: int = initial_z_coord.index(max(initial_z_coord))
             # obtain the index of the rightmost x coord on the strand
 
-            # we are going to line up the next up strand so that its leftmost (first) NEMid touches the previous domain's rightmost
+            # we are going to line up the next up strand so that its leftmost (first) NEMid touches the previous
+            # domain's rightmost
             initial_z_coord: float = z_coords[previous_domain_index][0][initial_z_coord]
 
             # append this new initial z cord to the actual list of z_coords
