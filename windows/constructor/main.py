@@ -11,7 +11,6 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QWidget,
 )
-from PyQt6.QtGui import QScreen
 
 import config.main
 import config.nucleic_acid
@@ -19,7 +18,6 @@ import config.domains.storage
 import plotting.side_view.runner
 import plotting.top_view.runner
 import references
-from copy import deepcopy
 
 logger = logging.getLogger(__name__)
 
@@ -93,12 +91,6 @@ class Window(QMainWindow):
         # trigger a resize event when the floatingness of the config panel changes
         self.docked_widgets.config.topLevelChanged.connect(self.resizeEvent)
 
-        # disable closing of the panel
-        self.docked_widgets.top_view.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-            | QDockWidget.DockWidgetFeature.DockWidgetMovable
-        )
-
         self.docked_widgets.config.setMinimumWidth(200)
 
         # dock the new dockable config widget
@@ -135,17 +127,11 @@ class Window(QMainWindow):
                 | Qt.DockWidgetArea.RightDockWidgetArea
             )
 
-            # disable closing of the panel
-            self.docked_widgets.top_view.setFeatures(
-                QDockWidget.DockWidgetFeature.DockWidgetFloatable
-                | QDockWidget.DockWidgetFeature.DockWidgetMovable
-            )
-
             # trigger a resize event when the floatingness of the side view panel changes
             self.docked_widgets.top_view.topLevelChanged.connect(self.resizeEvent)
 
             # don't let the user shrink top view under 100px
-            self.docked_widgets.top_view.setMinimumWidth(100)
+            self.docked_widgets.top_view.setMinimumWidth(200)
 
             # dock the new dockable top view widget
             self.addDockWidget(
@@ -167,10 +153,12 @@ class Window(QMainWindow):
             prettified_side_view.setLayout(QVBoxLayout())
             prettified_side_view.setTitle("Side View of Helices")
             prettified_side_view.setStatusTip("A plot of the side view of all domains")
-            # prettified_side_view.setMinimumWidth(190)
+
+            # create side view plot
+            self.side_view = plotting.side_view.runner.Plot()
 
             # store widget in class for easier future direct widget access
-            self.side_view = plotting.side_view.runner.Plot()
+            prettified_side_view.setMinimumWidth(190)
             prettified_side_view.layout().addWidget(self.side_view)
 
             # set side view as the main widget

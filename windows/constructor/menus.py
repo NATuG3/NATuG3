@@ -1,5 +1,7 @@
 from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
+
+import helpers
 from resources import fetch_icon
 import webbrowser
 from PyQt6.QtGui import QKeySequence
@@ -50,8 +52,8 @@ class view(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(fetch_icon("eye-outline"))
         config.triggered.connect(
-            lambda: self.hide_or_unhide(
-                references.Windows.constructor.docked_widgets.config, config
+            lambda: helpers.reverse_hidenness(
+                references.Windows.constructor.docked_widgets.config
             )
         )
 
@@ -61,8 +63,8 @@ class view(QMenu):
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
-            lambda: self.hide_or_unhide(
-                references.Windows.constructor.docked_widgets.top_view, top_view
+            lambda: helpers.reverse_hidenness(
+                references.Windows.constructor.docked_widgets.top_view
             )
         )
 

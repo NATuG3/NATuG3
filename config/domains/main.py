@@ -4,11 +4,61 @@ from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QAbstractItemVie
 import config.domains.storage
 from config.domains.widgets import *
 from constants.directions import *
-from types import SimpleNamespace
-from typing import List
-
+import helpers
 
 logger = logging.getLogger(__name__)
+
+
+class Panel(QWidget):
+    """Nucleic Acid Config Tab."""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+        # load in the panel's designer UI
+        uic.loadUi("config/domains/panel.ui", self)
+
+        # create domains editor table and append it to the bottom of the domains panel
+        self.table = Table(self)
+        self.layout().addWidget(self.table)
+
+        # set initial values of domain table config widgets
+        self.domains_per_subunit.setValue(len(config.domains.storage.current))
+
+        # hook all widgets that need hooking
+        self._hook_widgets()
+
+        logger.info("Loaded domains tab of config panel.")
+
+    def _hook_widgets(self):
+        """Hook all widgets (buttons, boxes, ext.)."""
+
+        def update_domains_table(button_state):
+            """Worker for update domains table button"""
+            previous_domains_count = len(config.domains.storage.current)
+            new_domains_count = self.domains_per_subunit.value()
+
+            # if the domains list needs to be trimmed get user confirmation first
+            if new_domains_count < previous_domains_count:
+                if helpers.confirm(self, "Confirm domain deletion",
+                                   "The new domains/subunit value is less than the previous "
+                                   "one. This means that the domains list will need to be "
+                                   "truncated. Are you sure you want to lower the value of "
+                                   "the domains/subunit?"):
+                    config.domains.storage.current = config.domains.storage.current[:new_domains_count]
+            # add the additional domains
+            else:
+                # for each new requested domain append a template domain
+                for i in range(new_domains_count - previous_domains_count):
+                    # template/placeholder domain
+                    config.domains.storage.current.append(config.domains.storage.Domain(0, [0, 1], 50))
+
+            # refresh the table with the additional/lesser domains
+            self.table.dump_domains(config.domains.storage.current)
+
+        self.update_domains_table_button.clicked.connect(update_domains_table)
+
+
 
 
 class Table(QTableWidget):
@@ -69,6 +119,9 @@ class Table(QTableWidget):
         # create rows before we input widgets
         self.setRowCount(len(domains_list))
 
+        # clear out the side headers list
+        self.side_headers = []
+
         # insert all domains
         for index, domain in enumerate(domains_list):
             # column 0 - left helical joint
@@ -98,7 +151,7 @@ class Table(QTableWidget):
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 4, widget)
 
-            self.side_headers.append(f"#{index+1}")
+            self.side_headers.append(f"#{index + 1}")
 
         self.setVerticalHeaderLabels(self.side_headers)
 
@@ -142,18 +195,3 @@ class Table(QTableWidget):
         config.domains.storage.current = self.load_domains()
         # uneditable domain values may have changed
         self.dump_domains(config.domains.storage.current)
-
-
-class Panel(QWidget):
-    """Nucleic Acid Config Tab."""
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        # load in the panel's designer UI
-        uic.loadUi("config/domains/panel.ui", self)
-
-        self.table = Table(self)
-        self.layout().addWidget(self.table)
-
-        logger.info("Loaded domains tab of config panel.")

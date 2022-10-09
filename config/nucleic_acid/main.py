@@ -76,7 +76,7 @@ class Panel(QWidget):
         def save_profile(self):
             """Worker for the save profile button"""
             if self.save_profile_button.toolTip() == "Overwrite Profile":
-                if not helpers.yes_no_prompt(
+                if not helpers.confirm(
                     self,
                     "Overwrite confirmation",
                     f'Are you sure you want to overwrite the profile named "'
@@ -106,7 +106,7 @@ class Panel(QWidget):
 
         def delete_profile(self):
             """Worker for the delete profile button"""
-            if not helpers.yes_no_prompt(
+            if not helpers.confirm(
                 self,
                 "Delete profile confirmation",
                 f'Are you sure you want to delete the profile named "'
@@ -137,7 +137,7 @@ class Panel(QWidget):
 
         def load_profile(self):
             """Worker for the load profile button"""
-            if not helpers.yes_no_prompt(
+            if not helpers.confirm(
                 self,
                 "Load profile confirmation",
                 f"Are you sure you want to overwrite all currently chosen settings"

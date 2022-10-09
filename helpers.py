@@ -7,7 +7,7 @@ from contextlib import suppress
 logger = logging.getLogger(__name__)
 
 
-def yes_no_prompt(parent, title, msg):
+def confirm(parent, title, msg):
     choice = QMessageBox.warning(
         parent,
         title,
@@ -20,7 +20,7 @@ def yes_no_prompt(parent, title, msg):
         return False
 
 
-def hide_or_unhide(potentially_hidden_item, menu_item):
+def reverse_hidenness(potentially_hidden_item):
     """Reverse the hiddenness of a widget"""
     if potentially_hidden_item.isHidden():
         potentially_hidden_item.show()
