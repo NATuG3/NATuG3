@@ -39,6 +39,7 @@ class FileSelector(QFileDialog):
         # forces the appending of .nano
         self.setDefaultSuffix(".nano")
 
+
 class Saver(QDialog):
     def __int__(self, filepath) -> None:
         super().__init__()

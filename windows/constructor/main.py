@@ -128,7 +128,8 @@ class Window(QMainWindow):
 
             # top view is only allowed on the sides
             self.docked_widgets.top_view.setAllowedAreas(
-                Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
+                Qt.DockWidgetArea.LeftDockWidgetArea
+                | Qt.DockWidgetArea.RightDockWidgetArea
             )
 
             # disable closing of the panel
@@ -229,12 +230,16 @@ class Window(QMainWindow):
         # otherwise check the current tab of the config panel
         else:
             # if the domains tab of the config panel is visible:
-            if  self.config.tabs.domains.isVisible():
+            if self.config.tabs.domains.isVisible():
                 # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.docked_widgets.config.setMaximumWidth(round(3 * self.size().width() / 8))
+                self.docked_widgets.config.setMaximumWidth(
+                    round(3 * self.size().width() / 8)
+                )
                 self.docked_widgets.config.setMinimumWidth(280)
             # if the nucleic acid tab of the config panel is visible:
             elif self.config.tabs.nucleic_acid.isVisible():
-                self.docked_widgets.config.setMaximumWidth(round(2 * self.size().width() / 8))
+                self.docked_widgets.config.setMaximumWidth(
+                    round(2 * self.size().width() / 8)
+                )
                 self.docked_widgets.config.setMinimumWidth(180)
