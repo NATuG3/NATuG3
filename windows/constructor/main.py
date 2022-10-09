@@ -58,9 +58,6 @@ class Window(QMainWindow):
         self.load_graphs()
         self._config()
 
-        # trigger initial resize event
-        self.resizeEvent(None)
-
     def load_graphs(self):
         """Load all nanotube graphs simultaneously."""
         self._top_view()
@@ -90,8 +87,6 @@ class Window(QMainWindow):
 
         # trigger a resize event when the floatingness of the config panel changes
         self.docked_widgets.config.topLevelChanged.connect(self.resizeEvent)
-
-        self.docked_widgets.config.setMinimumWidth(200)
 
         # dock the new dockable config widget
         self.addDockWidget(
@@ -130,9 +125,6 @@ class Window(QMainWindow):
             # trigger a resize event when the floatingness of the side view panel changes
             self.docked_widgets.top_view.topLevelChanged.connect(self.resizeEvent)
 
-            # don't let the user shrink top view under 100px
-            self.docked_widgets.top_view.setMinimumWidth(200)
-
             # dock the new dockable top view widget
             self.addDockWidget(
                 Qt.DockWidgetArea.LeftDockWidgetArea, self.docked_widgets.top_view
@@ -158,7 +150,6 @@ class Window(QMainWindow):
             self.side_view = plotting.side_view.runner.Plot()
 
             # store widget in class for easier future direct widget access
-            prettified_side_view.setMinimumWidth(190)
             prettified_side_view.layout().addWidget(self.side_view)
 
             # set side view as the main widget
@@ -200,7 +191,7 @@ class Window(QMainWindow):
         """
         # side view resizing
         #
-        self.side_view.setMinimumWidth(int(3 * self.size().width() / 9))
+        self.side_view.setMinimumWidth(int(4 * self.size().width() / 9))
 
         # top view resizing
         #
@@ -227,10 +218,8 @@ class Window(QMainWindow):
                 self.docked_widgets.config.setMaximumWidth(
                     round(3 * self.size().width() / 8)
                 )
-                self.docked_widgets.config.setMinimumWidth(280)
             # if the nucleic acid tab of the config panel is visible:
             elif self.config.tabs.nucleic_acid.isVisible():
                 self.docked_widgets.config.setMaximumWidth(
                     round(2 * self.size().width() / 8)
                 )
-                self.docked_widgets.config.setMinimumWidth(180)

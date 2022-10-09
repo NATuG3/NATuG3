@@ -42,7 +42,12 @@ if __name__ == "__main__":
 
     # obtain and generate window item
     constructor_window = windows.constructor.main.Window()
-    constructor_window.show()  # show constructor window
+
+    # show constructor window
+    constructor_window.show()
+
+    # trigger initial resize event
+    constructor_window.resizeEvent(None)
 
     # begin app event loop
     sys.exit(app.exec())
