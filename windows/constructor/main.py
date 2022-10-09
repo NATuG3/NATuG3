@@ -60,6 +60,9 @@ class Window(QMainWindow):
         self.load_graphs()
         self._config()
 
+        # trigger initial resize event
+        self.resizeEvent(None)
+
     def load_graphs(self):
         """Load all nanotube graphs simultaneously."""
         self._top_view()

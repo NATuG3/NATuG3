@@ -18,3 +18,11 @@ def yes_no_prompt(parent, title, msg):
         return True
     else:
         return False
+
+
+def hide_or_unhide(potentially_hidden_item, menu_item):
+    """Reverse the hiddenness of a widget"""
+    if potentially_hidden_item.isHidden():
+        potentially_hidden_item.show()
+    else:
+        potentially_hidden_item.hide()

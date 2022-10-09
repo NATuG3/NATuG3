@@ -18,10 +18,10 @@ class File(QMenu):
         self.actions = SimpleNamespace()
 
         # file -> open
-        open = self.actions.open = self.addAction("Open")
-        open.setIcon(fetch_icon("open-outline"))
-        open.setShortcut("ctrl+o")
-        open.setStatusTip("Open saved stage from file")
+        open_ = self.actions.open = self.addAction("Open")
+        open_.setIcon(fetch_icon("open-outline"))
+        open_.setShortcut("ctrl+o")
+        open_.setStatusTip("Open saved stage from file")
 
         # file -> save
         save = self.actions.save = self.addAction("Save")
@@ -44,22 +44,13 @@ class view(QMenu):
         # container for actions
         self.actions = SimpleNamespace()
 
-        def hide_or_unhide(potentially_hidden_item, menu_item):
-            """Reverse the hiddenness of a widget"""
-            if potentially_hidden_item.isHidden():
-                potentially_hidden_item.show()
-                menu_item.setIcon(fetch_icon("eye-off-outline"))
-            else:
-                potentially_hidden_item.hide()
-                menu_item.setIcon(fetch_icon("eye-outline"))
-
         # view -> "Config" -> hide/unhide
         config = self.actions.config = self.addAction("Config")
         config.setStatusTip("Display the config tab menu")
         # will be checked/unchecked based on if widget is shown
-        config.setIcon(fetch_icon("eye-off-outline"))
+        config.setIcon(fetch_icon("eye-outline"))
         config.triggered.connect(
-            lambda: hide_or_unhide(
+            lambda: self.hide_or_unhide(
                 references.Windows.constructor.docked_widgets.config, config
             )
         )
@@ -68,9 +59,9 @@ class view(QMenu):
         top_view = self.actions.top_view = self.addAction("Helicies Top View")
         top_view.setStatusTip("Display the helicies top view graph")
         # will be checked/unchecked based on if widget is shown
-        top_view.setIcon(fetch_icon("eye-off-outline"))
+        top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
-            lambda: hide_or_unhide(
+            lambda: self.hide_or_unhide(
                 references.Windows.constructor.docked_widgets.top_view, top_view
             )
         )
