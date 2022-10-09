@@ -210,6 +210,6 @@ class Window(QMainWindow):
         if (
             self.config.tabs.domains.isVisible()
         ):  # if config panel is not floating
-            self.docked_widgets.config.setFixedWidth(333)
+            self.docked_widgets.config.setFixedWidth(280)
         else:
             self.docked_widgets.config.setFixedWidth(round(2 * self.size().width() / 8))
