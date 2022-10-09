@@ -32,7 +32,7 @@ class Panel(QWidget):
         # set up the profile manager
         self._profile_manager()
 
-    def dump_settings(self, profile: storage.profile) -> None:
+    def dump_settings(self, profile: storage.Profile) -> None:
         """Saves current settings to profile with name in text edit input box."""
         # set the value of all widgets to their respective profile attribute
         self.D.setValue(profile.D)
@@ -46,10 +46,10 @@ class Panel(QWidget):
         self.theta_c.setValue(profile.theta_c)
         self.theta_s.setValue(profile.theta_s)
 
-    def fetch_settings(self) -> storage.profile:
+    def fetch_settings(self) -> storage.Profile:
         """Fetch a profile object with all current nucleic acid settings from inputs."""
         # fetch the value of each needed attribute to build a profile from their respective widgets
-        return storage.profile(
+        return storage.Profile(
             D=self.D.value(),
             H=self.H.value(),
             T=self.T.value(),

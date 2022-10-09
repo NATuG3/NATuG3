@@ -16,36 +16,48 @@ class Table(QTableWidget):
 
     def __init__(self, parent) -> None:
         super().__init__()
+        # header storage areas
+        self.side_headers = []
+        self.top_headers = []
+
+        # store parent object
         self.parent = parent
 
-        # store headers
-        self.side_headers = None  # these get generated when dump_domains() is called
-        self.top_headers = ("left", "right", "s", "m", "count")  # these are static
+        # set up headers
+        self._headers()
 
-        # apply top headers
-        self.setColumnCount(len(self.top_headers))
-        self.setHorizontalHeaderLabels(self.top_headers)
-
-        # each table row has its contents stored in this array for easy access
-        # see self.dump_domains() to see what specifically goes into each SimpleNamespace
-        self.rows: List[SimpleNamespace] = None
-
-        # styling
-        self.setStyleSheet("QTableView::item{padding: 5px; text-align: center}")
-        self.setShowGrid(True)
-
-        # enable smooth scrolling
-        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        # style the widget
+        self._style()
 
         # dump the domains of the previous save
         self.dump_domains(config.domains.storage.current)
 
+    def _headers(self):
+        """Configure top headers of widget"""
+        # store headers (these do not change)
+        self.top_headers = ("left", "right", "s", "m", "count")
+        # create a column for each header
+        self.setColumnCount(len(self.top_headers))
+        # apply the headers
+        self.setHorizontalHeaderLabels(self.top_headers)
+
+    def _style(self):
+        """Style the domain panel."""
+        # set the style sheet of the panel
+        self.setStyleSheet("QTableView::item{padding: 5px; text-align: center}")
+        # show table grid
+        self.setShowGrid(True)
+        # enable smooth scrolling
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+
+        # first two columns are statically sized
         for i in range(2):
             self.setColumnWidth(i, 35)
             self.horizontalHeader().setSectionResizeMode(
                 i, QHeaderView.ResizeMode.Fixed
             )
 
+        # all others columns are dynamically sized
         for i in range(2, 6):
             self.horizontalHeader().setSectionResizeMode(
                 i, QHeaderView.ResizeMode.Stretch
@@ -53,48 +65,89 @@ class Table(QTableWidget):
 
     def dump_domains(self, domains_list: list) -> None:
         """Dump a list of domain objects."""
+
+        # create rows before we input widgets
         self.setRowCount(len(domains_list))
 
-        self.side_headers = []
-        rows = self.rows = []
-
+        # insert all domains
         for index, domain in enumerate(domains_list):
-            row = SimpleNamespace()
-
             # column 0 - left helical joint
-            row.left_helical_joint = DirectionalButton(self, domain.helix_joints[LEFT])
-            self.setCellWidget(index, 0, row.left_helical_joint)
+            widget = DirectionalButton(self, domain.helix_joints[LEFT])
+            widget.clicked.connect(self.cell_value_changed)
+            self.setCellWidget(index, 0, widget)
 
             # column 1 - right helical joint
-            row.right_helical_joint = DirectionalButton(
+            widget = DirectionalButton(
                 self, domain.helix_joints[RIGHT]
             )
-            self.setCellWidget(index, 1, row.right_helical_joint)
+            widget.clicked.connect(self.cell_value_changed)
+            self.setCellWidget(index, 1, widget)
 
             # column 2 - theta switch multiple
-            row.theta_switch_multiple = TableIntegerBox(
+            widget = TableIntegerBox(
                 domain.theta_switch_multiple, show_buttons=False
             )
-            row.theta_switch_multiple.setEnabled(False)
-            self.setCellWidget(index, 2, row.theta_switch_multiple)
+            widget.setEnabled(False)
+            widget.valueChanged.connect(self.cell_value_changed)
+            self.setCellWidget(index, 2, widget)
 
             # column 3 - theta interior multiple
-            row.theta_interior_multiple = TableIntegerBox(
+            widget = TableIntegerBox(
                 domain.theta_interior_multiple
             )
-            self.setCellWidget(index, 3, row.theta_interior_multiple)
+            widget.valueChanged.connect(self.cell_value_changed)
+            self.setCellWidget(index, 3, widget)
 
             # column 4 - initial NEMid count
-            row.theta_switch_multiple = TableIntegerBox(
+            widget = TableIntegerBox(
                 domain.count, show_buttons=False
             )
-            row.theta_switch_multiple.setEnabled(False)
-            self.setCellWidget(index, 4, row.theta_switch_multiple)
+            widget.setEnabled(False)
+            widget.valueChanged.connect(self.cell_value_changed)
+            self.setCellWidget(index, 4, widget)
 
-            rows.append(row)
             self.side_headers.append(f"Domain #{index}")
 
         self.setVerticalHeaderLabels(self.side_headers)
+
+    def load_domains(self) -> list:
+        """
+        Obtain a list of the currently chosen domains.
+
+        Returns:
+            List(domains): A list of domain objects based on user input.
+        """
+        domains = [] # output list of domains
+        for domain in range(self.rowCount()):
+            # column 0 - left helical joint
+            left_helical_joint: Literal[UP, DOWN] = self.cellWidget(domain, 0).state
+
+            # column 1 - right helical joint
+            right_helical_joint: Literal[UP, DOWN] = self.cellWidget(domain, 1).state
+
+            # column 2 - theta switch multiple
+            theta_switch_multiple: int = self.cellWidget(domain, 2).value()
+
+            # column 3 - theta interior multiple
+            theta_interior_multiple: int = self.cellWidget(domain, 3).value()
+
+            # column 4 - initial NEMid count
+            count: int = self.cellWidget(domain, 4).value()
+
+            domain = config.domains.storage.Domain(
+                theta_interior_multiple,
+                (left_helical_joint, right_helical_joint),
+                count
+            )
+
+            domains.append(domain)
+
+        return domains
+
+    def cell_value_changed(self):
+        """Called whenever a cell's value changes"""
+        # update the current domains list
+        config.domains.storage.current = self.load_domains()
 
 
 class Panel(QWidget):

@@ -64,9 +64,7 @@ class Panel(QWidget):
                 config_panel.setFloating(True)
 
                 # increase the width of the config panel
-                config_panel.setFixedWidth(
-                    375
-                )
+                config_panel.setFixedWidth(375)
 
                 # set the height of the domains table to be
                 # the height of a singular domain entry * number of domains

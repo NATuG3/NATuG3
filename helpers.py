@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 def yes_no_prompt(parent, title, msg):
-    choice = QMessageBox.question(
+    choice = QMessageBox.warning(
         parent,
         title,
         msg,

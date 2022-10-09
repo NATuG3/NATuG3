@@ -97,7 +97,7 @@ class Window(QMainWindow):
             assert isinstance(self.top_view, QWidget)
             self.top_view.load()
             logger.info("Reloaded top view graph.")
-        except AttributeError or AssertionError:
+        except AttributeError:
             # create dockable widget for top view
             self.docked_widgets.top_view = QDockWidget()
             self.docked_widgets.top_view.setObjectName("Top View")
@@ -139,7 +139,7 @@ class Window(QMainWindow):
             assert isinstance(self.side_view, QWidget)
             self.side_view.load()
             logger.info("Reloaded side view graph.")
-        except AttributeError or AssertionError:
+        except AttributeError:
             # create group box to place side view widget in
             prettified_side_view = QGroupBox()
             prettified_side_view.setObjectName("Side View")
@@ -210,6 +210,4 @@ class Window(QMainWindow):
         if (
             not self.docked_widgets.config.isFloating()
         ):  # if config panel is not floating
-            self.docked_widgets.config.setFixedWidth(
-                round(2 * self.size().width() / 8)
-            )
+            self.docked_widgets.config.setFixedWidth(round(2 * self.size().width() / 8))
