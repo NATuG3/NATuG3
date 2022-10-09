@@ -57,14 +57,17 @@ class Domain:
         # (-1) up to down; (0) both up/down; (1) down to up
         #
         # this does not need to be defined if theta_switch_multiple is defined
+        helix_joints = tuple(helix_joints) #ensure helix_joints is a tuple
         if helix_joints == (UP, DOWN):
             self.theta_switch_multiple = -1
-        if helix_joints == (UP, UP):
+        elif helix_joints == (UP, UP):
             self.theta_switch_multiple = 0
-        if helix_joints == (DOWN, DOWN):
+        elif helix_joints == (DOWN, DOWN):
             self.theta_switch_multiple = 0
-        if helix_joints == (DOWN, UP):
+        elif helix_joints == (DOWN, UP):
             self.theta_switch_multiple = 1
+        else:
+            raise ValueError("Invalid helical joint integer", helix_joints)
 
     def __repr__(self) -> str:
         return (
@@ -86,11 +89,17 @@ def load():
     try:
         with open(restored_filename, "rb") as restored_file:
             current = pickle.load(restored_file)
+        logger.info("Restored previous domain editor state.")
     except FileNotFoundError:
+        logger.info("Previous domain editor state save file not found. Loading defaults...")
         current = [Domain(9, (UP, UP), 50)] * 14
 
 
 def dump():
     """Save current domains state for state restoration on load."""
     with open(restored_filename, "wb") as restored_file:
+        # perform data validation before save
+        for domain in current:
+            if not isinstance(domain, Domain):
+                raise TypeError("There is a domain in the domains list that is not a domain", domain)
         pickle.dump(current, restored_file)

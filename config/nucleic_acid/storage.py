@@ -4,8 +4,8 @@ import pickle
 import atexit
 
 
-profiles_filename = "config/profiles.nano"
-restored_filename = "config/restored.nano"
+profiles_filename = "config/nucleic_acid/profiles.nano"
+restored_filename = "config/nucleic_acid/restored.nano"
 
 count: int = 50  # initial NEMids/strand count
 current: object = None  # current profile
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class profile:
+class Profile:
     """
     A settings profile.
     Attributes:
@@ -50,7 +50,7 @@ class profile:
 
     def __eq__(self, other: object) -> bool:
         """Returns true if identical profile is returned"""
-        if isinstance(other, profile):
+        if isinstance(other, Profile):
             return vars(self) == vars(other)
         else:
             return False
@@ -73,7 +73,7 @@ def load() -> None:
         # load restored settings
         with open(restored_filename, "rb") as restored_file:
             current = pickle.load(restored_file)
-            assert isinstance(current, profile)
+            assert isinstance(current, Profile)
 
         logger.debug("Saved profiles file loaded.")
 
@@ -91,21 +91,30 @@ def load() -> None:
 
 def dump() -> None:
     """Dump persisting attributes of this module to a file"""
-    assert isinstance(profiles, dict)
-    assert isinstance(current, profile)
-
     # dump all profiles
     with open(profiles_filename, "wb") as settings_file:
+        assert isinstance(profiles, dict)
+
+        # perform data validation before save
+        for name, profile in profiles.items():
+            if not isinstance(profile, Profile):
+                raise TypeError(f"profile named \"{name}\" is not a profile", profile)
+
         pickle.dump(profiles, settings_file)
 
     # dump current settings
     with open(restored_filename, "wb") as settings_file:
+
+        # perform data validation before save
+        if not isinstance(current, Profile):
+            raise TypeError("current is not a profile", profile)
+
         pickle.dump(current, settings_file)
 
 
 # defaults
 defaults = {
-    "B-DNA (MFD)": profile(
+    "B-DNA (MFD)": Profile(
         D=2.2,
         H=3.549,
         T=2,
