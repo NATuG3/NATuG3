@@ -12,11 +12,11 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import config.main
-import config.nucleic_acid
-import config.domains.storage
-import plotting.side_view.runner
-import plotting.top_view.runner
+import configuration.main
+import configuration.nucleic_acid
+import configuration.domains.storage
+import computers.side_view.runner
+import computers.top_view.runner
 import references
 
 logger = logging.getLogger(__name__)
@@ -56,41 +56,41 @@ class Window(QMainWindow):
 
         # add all widgets
         self.load_graphs()
-        self._config()
+        self._configuration()
 
     def load_graphs(self):
         """Load all nanotube graphs simultaneously."""
         self._top_view()
         self._side_view()
 
-    def _config(self):
-        # create a dockable config widget
-        self.docked_widgets.config = QDockWidget()
+    def _configuration(self):
+        # create a dockable configuration widget
+        self.docked_widgets.configuration = QDockWidget()
 
         # set titles/descriptions
-        self.docked_widgets.config.setObjectName("Config Panel")
-        self.docked_widgets.config.setStatusTip("Config panel")
-        self.docked_widgets.config.setWindowTitle("Config")
+        self.docked_widgets.configuration.setObjectName("Config Panel")
+        self.docked_widgets.configuration.setStatusTip("Config panel")
+        self.docked_widgets.configuration.setWindowTitle("Config")
 
-        # store the actual link to the widget in self.config
-        self.config = config.main.Panel()
-        self.docked_widgets.config.setWidget(self.config)
+        # store the actual link to the widget in self.configuration
+        self.configuration = configuration.main.Panel()
+        self.docked_widgets.configuration.setWidget(self.configuration)
 
         # floating will be determined by current tab (see self.resizeEvent)
-        self.docked_widgets.config.setFeatures(
+        self.docked_widgets.configuration.setFeatures(
             QDockWidget.DockWidgetFeature.DockWidgetFloatable
         )
 
-        self.docked_widgets.config.setAllowedAreas(
+        self.docked_widgets.configuration.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
 
-        # trigger a resize event when the floatingness of the config panel changes
-        self.docked_widgets.config.topLevelChanged.connect(self.resizeEvent)
+        # trigger a resize event when the floatingness of the configuration panel changes
+        self.docked_widgets.configuration.topLevelChanged.connect(self.resizeEvent)
 
-        # dock the new dockable config widget
+        # dock the new dockable configuration widget
         self.addDockWidget(
-            Qt.DockWidgetArea.RightDockWidgetArea, self.docked_widgets.config
+            Qt.DockWidgetArea.RightDockWidgetArea, self.docked_widgets.configuration
         )
 
     def _top_view(self):
@@ -111,7 +111,7 @@ class Window(QMainWindow):
             )
 
             # store widget in class for easier direct access
-            self.top_view = plotting.top_view.runner.Plot()
+            self.top_view = computers.top_view.runner.Plot()
 
             # attach actual top view widget to docked top view widget
             self.docked_widgets.top_view.setWidget(self.top_view)
@@ -147,7 +147,7 @@ class Window(QMainWindow):
             prettified_side_view.setStatusTip("A plot of the side view of all domains")
 
             # create side view plot
-            self.side_view = plotting.side_view.runner.Plot()
+            self.side_view = computers.side_view.runner.Plot()
 
             # store widget in class for easier future direct widget access
             prettified_side_view.layout().addWidget(self.side_view)
@@ -186,8 +186,8 @@ class Window(QMainWindow):
         Changes size of various widgets dynamically based on the main window's size.
 
         Notes:
-            - If domain tab of config panel is showing, makes config panel pop out and larger
-            - If domain tab of config panel is not showing, makes config panel unpop out and smaller
+            - If domain tab of configuration panel is showing, makes configuration panel pop out and larger
+            - If domain tab of configuration panel is not showing, makes configuration panel unpop out and smaller
         """
         # side view resizing
         #
@@ -204,24 +204,24 @@ class Window(QMainWindow):
                 round(2 * self.size().width() / 8)
             )
 
-        # config resizing
+        # configuration resizing
         #
-        # if config is floating make the max size very large
-        if self.docked_widgets.config.isFloating():
-            self.docked_widgets.config.setMaximumWidth(600)
-        # otherwise check the current tab of the config panel
+        # if configuration is floating make the max size very large
+        if self.docked_widgets.configuration.isFloating():
+            self.docked_widgets.configuration.setMaximumWidth(600)
+        # otherwise check the current tab of the configuration panel
         else:
-            # if the domains tab of the config panel is visible:
-            if self.config.tabs.domains.isVisible():
-                # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
+            # if the domains tab of the configuration panel is visible:
+            if self.configuration.tabs.domains.isVisible():
+                # set the maximum width of configuration to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.docked_widgets.config.setMaximumWidth(
+                self.docked_widgets.configuration.setMaximumWidth(
                     round(3 * self.size().width() / 8)
                 )
-                self.docked_widgets.config.setMinimumWidth(265)
-            # if the nucleic acid tab of the config panel is visible:
-            elif self.config.tabs.nucleic_acid.isVisible():
-                self.docked_widgets.config.setMaximumWidth(
+                self.docked_widgets.configuration.setMinimumWidth(265)
+            # if the nucleic acid tab of the configuration panel is visible:
+            elif self.configuration.tabs.nucleic_acid.isVisible():
+                self.docked_widgets.configuration.setMaximumWidth(
                     round(2 * self.size().width() / 8)
                 )
-                self.docked_widgets.config.setMinimumWidth(0)
+                self.docked_widgets.configuration.setMinimumWidth(0)

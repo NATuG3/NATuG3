@@ -1,20 +1,30 @@
-from PyQt6.QtWidgets import QFileDialog, QDialog
+from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtCore import QDir
-from PyQt6 import uic
+import pickle
+import logging
+import saves.datatypes
 
 
-# saving flow:
-#   1) runner() creates file dialog and has user choose file location
-#   2) runner() creates Window(QDialog) for save settings
-#   3) Window has "save" button which completes the save, or "cancel" button to cancel
+logger = logging.getLogger(__name__)
 
 
 def runner(parent):
-    # create file selector
-    file_selector = FileSelector(parent)
-    # show file selector
-    file_selector.show()
-    file_selector.finished.connect(lambda: Saver(file_selector.selectedFiles()[0]))
+    """Initiate save process flow."""
+    selector = FileSelector(parent)
+    selector.finished.connect(lambda: saver(selector.selectedFiles()[0]))
+
+
+def saver(filename):
+    """Runs after filename has been chosen."""
+
+    # obtain save package
+    package = saves.datatypes.Save()
+
+    # dump save object to filename
+    with open(filename, "wb") as file:
+        pickle.dump(package, file)
+
+    logger.info(f"Created save @{filename}.")
 
 
 class FileSelector(QFileDialog):
@@ -39,13 +49,7 @@ class FileSelector(QFileDialog):
         # forces the appending of .nano
         self.setDefaultSuffix(".nano")
 
-
-class Saver(QDialog):
-    def __int__(self, filepath) -> None:
-        super().__init__()
-
-        uic.loadUi("windows/file_manager/save.ui", self)
-
-        self.set
-
+        # begin flow
         self.show()
+
+

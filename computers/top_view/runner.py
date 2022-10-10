@@ -1,9 +1,9 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import plotting.top_view.worker
+import computers.top_view.worker
 import logging
 from contextlib import suppress
-import config.nucleic_acid, config.domains
+import configuration.nucleic_acid, configuration.domains
 
 
 logger = logging.getLogger(__name__)
@@ -31,10 +31,10 @@ class Plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # fetch nucleic acid settings and the current domains
-        self.settings = config.nucleic_acid.storage.current
-        self.domains = config.domains.storage.current
+        self.settings = configuration.nucleic_acid.storage.current
+        self.domains = configuration.domains.storage.current
 
-        self.worker = plotting.top_view.worker.Plot(
+        self.worker = computers.top_view.worker.Plot(
             self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s
         )
         self.worker.compute()
@@ -42,7 +42,7 @@ class Plot(QWidget):
 
         self.graph: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
-        )  # create main plotting window
+        )  # create main computers window
         self.graph.setBackground("w")  # make the background white
 
         main_plot = self.graph.addPlot()

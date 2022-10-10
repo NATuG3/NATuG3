@@ -6,7 +6,7 @@ from resources import fetch_icon
 import webbrowser
 from PyQt6.QtGui import QKeySequence
 import references
-import windows.file_manager.save
+import saves
 
 
 parent = references.constructor.menu_bar
@@ -24,13 +24,14 @@ class File(QMenu):
         open_.setIcon(fetch_icon("open-outline"))
         open_.setShortcut("ctrl+o")
         open_.setStatusTip("Open saved stage from file")
+        open_.triggered.connect(lambda: saves.load.runner(parent))
 
         # file -> save
         save = self.actions.save = self.addAction("Save")
         save.setIcon(fetch_icon("save-outline"))
         save.setShortcut("ctrl+s")
         save.setStatusTip("Save current stage top file")
-        save.triggered.connect(lambda: windows.file_manager.main.runner(parent))
+        save.triggered.connect(lambda: saves.save.runner(parent))
 
         # file -> save as
         save_as = self.actions.save_as = self.addAction("Save As")
@@ -47,13 +48,13 @@ class view(QMenu):
         self.actions = SimpleNamespace()
 
         # view -> "Config" -> hide/unhide
-        config = self.actions.config = self.addAction("Config")
-        config.setStatusTip("Display the config tab menu")
+        configuration = self.actions.configuration = self.addAction("Config")
+        configuration.setStatusTip("Display the configuration tab menu")
         # will be checked/unchecked based on if widget is shown
-        config.setIcon(fetch_icon("eye-outline"))
-        config.triggered.connect(
+        configuration.setIcon(fetch_icon("eye-outline"))
+        configuration.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                references.Windows.constructor.docked_widgets.config
+                references.Windows.constructor.docked_widgets.configuration
             )
         )
 

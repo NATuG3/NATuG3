@@ -1,10 +1,11 @@
 import logging
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QAbstractItemView
-import config.domains.storage
-from config.domains.widgets import *
+import configuration.domains.storage
+from configuration.domains.widgets import *
 from constants.directions import *
 import helpers
+
 
 logger = logging.getLogger(__name__)
 
@@ -16,26 +17,27 @@ class Panel(QWidget):
         super().__init__()
 
         # load in the panel's designer UI
-        uic.loadUi("config/domains/panel.ui", self)
+        uic.loadUi("configuration/domains/panel.ui", self)
 
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self)
         self.layout().addWidget(self.table)
 
-        # set initial values of domain table config widgets
-        self.domains_per_subunit.setValue(len(config.domains.storage.current))
+        # set initial values of domain table configuration widgets
+        self.domains_per_subunit.setValue(len(configuration.domains.storage.current))
 
         # hook all widgets that need hooking
         self._hook_widgets()
 
-        logger.info("Loaded domains tab of config panel.")
+        logger.info("Loaded domains tab of configuration panel.")
+
 
     def _hook_widgets(self):
         """Hook all widgets (buttons, boxes, ext.)."""
 
         def update_domains_table(button_state):
             """Worker for update domains table button"""
-            previous_domains_count = len(config.domains.storage.current)
+            previous_domains_count = len(configuration.domains.storage.current)
             new_domains_count = self.domains_per_subunit.value()
 
             # if the domains list needs to be trimmed get user confirmation first
@@ -48,20 +50,20 @@ class Panel(QWidget):
                     "truncated. Are you sure you want to lower the value of "
                     "the domains/subunit?",
                 ):
-                    config.domains.storage.current = config.domains.storage.current[
+                    configuration.domains.storage.current = configuration.domains.storage.current[
                         :new_domains_count
-                    ]
+                                                            ]
             # add the additional domains
             else:
                 # for each new requested domain append a template domain
                 for i in range(new_domains_count - previous_domains_count):
                     # template/placeholder domain
-                    config.domains.storage.current.append(
-                        config.domains.storage.Domain(0, [0, 1], 50)
+                    configuration.domains.storage.current.append(
+                        configuration.domains.storage.Domain(0, [0, 1], 50)
                     )
 
             # refresh the table with the additional/lesser domains
-            self.table.dump_domains(config.domains.storage.current)
+            self.table.dump_domains(configuration.domains.storage.current)
 
         self.update_domains_table_button.clicked.connect(update_domains_table)
 
@@ -85,7 +87,7 @@ class Table(QTableWidget):
         self._style()
 
         # dump the domains of the previous save
-        self.dump_domains(config.domains.storage.current)
+        self.dump_domains(configuration.domains.storage.current)
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -184,7 +186,7 @@ class Table(QTableWidget):
             # column 4 - initial NEMid count
             count: int = self.cellWidget(domain, 4).value()
 
-            domain = config.domains.storage.Domain(
+            domain = configuration.domains.storage.Domain(
                 theta_interior_multiple,
                 (left_helical_joint, right_helical_joint),
                 count,
@@ -197,6 +199,6 @@ class Table(QTableWidget):
     def cell_value_changed(self):
         """Called whenever a cell's value changes"""
         # update the current domains list
-        config.domains.storage.current = self.load_domains()
+        configuration.domains.storage.current = self.load_domains()
         # uneditable domain values may have changed
-        self.dump_domains(config.domains.storage.current)
+        self.dump_domains(configuration.domains.storage.current)

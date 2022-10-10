@@ -1,8 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 import pyqtgraph as pg
-import config.nucleic_acid, config.domains, config.main
+import configuration.nucleic_acid, configuration.domains, configuration.main
 import logging
-import plotting.side_view.worker
+import computers.side_view.worker
 from contextlib import suppress
 
 
@@ -12,6 +12,12 @@ logger = logging.getLogger(__name__)
 class Plot(QWidget):
     def __init__(self):
         super().__init__()
+
+        self.graph = None
+        self.count = None
+        self.worker = None
+        self.domains = None
+        self.settings = None
 
         # set layout of widget
         self.setLayout(QVBoxLayout())
@@ -31,12 +37,12 @@ class Plot(QWidget):
             self.layout().removeWidget(self.graph)
 
         # fetch nucleic acid settings and the current domains
-        self.settings = config.nucleic_acid.storage.current
-        self.domains = config.domains.storage.current
-        self.count = config.main.count
+        self.settings = configuration.nucleic_acid.storage.current
+        self.domains = configuration.domains.storage.current
+        self.count = configuration.main.count
 
         # create instance of dna_nanotube_tools side view generation
-        self.worker = plotting.side_view.worker.Plot(
+        self.worker = computers.side_view.worker.Plot(
             self.domains,
             self.settings.Z_b,
             self.settings.Z_s,
@@ -48,12 +54,12 @@ class Plot(QWidget):
 
         self.graph: pg.GraphicsLayoutWidget = (
             pg.GraphicsLayoutWidget()
-        )  # create main plotting window
+        )  # create main computers window
         self.graph.setWindowTitle("Side View of DNA")  # set the window's title
         self.graph.setBackground("w")  # make the background white
         main_plot: pg.plot = self.graph.addPlot()
 
-        # we can calculate the range at the end of generation; we don't need to continiously recalculate the range
+        # we can calculate the range at the end of generation; we don't need to continuously recalculate the range
         main_plot.disableAutoRange()
 
         # generate the coords

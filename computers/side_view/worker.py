@@ -3,8 +3,8 @@ from types import FunctionType
 from typing import Deque, Tuple, Type, Literal
 from collections import deque
 
-from config.domains.storage import Domain
-from plotting.datatypes import NEMid
+from configuration.domains.storage import Domain
+from computers.datatypes import NEMid
 from constants.directions import *
 
 
