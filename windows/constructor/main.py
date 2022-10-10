@@ -218,8 +218,10 @@ class Window(QMainWindow):
                 self.docked_widgets.config.setMaximumWidth(
                     round(3 * self.size().width() / 8)
                 )
+                self.docked_widgets.config.setMinimumWidth(265)
             # if the nucleic acid tab of the config panel is visible:
             elif self.config.tabs.nucleic_acid.isVisible():
                 self.docked_widgets.config.setMaximumWidth(
                     round(2 * self.size().width() / 8)
                 )
+                self.docked_widgets.config.setMinimumWidth(0)
