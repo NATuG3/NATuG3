@@ -40,25 +40,30 @@ class Panel(QWidget):
 
             # if the domains list needs to be trimmed get user confirmation first
             if new_domains_count < previous_domains_count:
-                if helpers.confirm(self, "Confirm domain deletion",
-                                   "The new domains/subunit value is less than the previous "
-                                   "one. This means that the domains list will need to be "
-                                   "truncated. Are you sure you want to lower the value of "
-                                   "the domains/subunit?"):
-                    config.domains.storage.current = config.domains.storage.current[:new_domains_count]
+                if helpers.confirm(
+                    self,
+                    "Confirm domain deletion",
+                    "The new domains/subunit value is less than the previous "
+                    "one. This means that the domains list will need to be "
+                    "truncated. Are you sure you want to lower the value of "
+                    "the domains/subunit?",
+                ):
+                    config.domains.storage.current = config.domains.storage.current[
+                        :new_domains_count
+                    ]
             # add the additional domains
             else:
                 # for each new requested domain append a template domain
                 for i in range(new_domains_count - previous_domains_count):
                     # template/placeholder domain
-                    config.domains.storage.current.append(config.domains.storage.Domain(0, [0, 1], 50))
+                    config.domains.storage.current.append(
+                        config.domains.storage.Domain(0, [0, 1], 50)
+                    )
 
             # refresh the table with the additional/lesser domains
             self.table.dump_domains(config.domains.storage.current)
 
         self.update_domains_table_button.clicked.connect(update_domains_table)
-
-
 
 
 class Table(QTableWidget):
