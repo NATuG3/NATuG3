@@ -101,9 +101,11 @@ class Table(QTableWidget):
     def _style(self):
         """Style the domain panel."""
         # set the style sheet of the panel
-        self.setStyleSheet("QTableView::item{padding: 5px; text-align: center}")
+        self.setStyleSheet("QTableView::item{padding: 3.25px; text-align: center}")
+
         # show table grid
         self.setShowGrid(True)
+
         # enable smooth scrolling
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
 
