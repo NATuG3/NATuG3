@@ -6,7 +6,8 @@ import logging
 import references
 
 
-DEBUG = False
+DEBUG = True
+
 
 # initialize logging
 if DEBUG:

@@ -142,18 +142,19 @@ class Table(QTableWidget):
             self.setCellWidget(index, 1, widget)
 
             # column 2 - theta switch multiple
-            widget = TableIntegerBox(domain.theta_switch_multiple, show_buttons=False)
+            widget = TableIntegerBox(domain.theta_switch_multiple)
             widget.setEnabled(False)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 2, widget)
 
             # column 3 - theta interior multiple
-            widget = TableIntegerBox(domain.theta_interior_multiple)
+            widget = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 3, widget)
 
             # column 4 - initial NEMid count
-            widget = TableIntegerBox(domain.count, show_buttons=False)
+            widget = TableIntegerBox(domain.count)
+            # not implemented so disable...
             widget.setEnabled(False)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 4, widget)

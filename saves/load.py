@@ -17,10 +17,10 @@ logger = logging.getLogger(__name__)
 def runner(parent):
     """Initiate save process flow."""
     selector = FileSelector(parent)
-    selector.finished.connect(lambda: opener(selector.selectedFiles()[0]))
+    selector.accepted.connect(lambda: worker(selector.selectedFiles()[0]))
 
 
-def opener(filename):
+def worker(filename):
     """Runs after filename has been chosen."""
 
     # load save package from chosen filename

@@ -37,7 +37,7 @@ class DirectionalButton(QPushButton):
 class TableIntegerBox(QSpinBox):
     """Spin box for use in QTableWidgets."""
 
-    def __init__(self, value, show_buttons=True):
+    def __init__(self, value, show_buttons=False):
         """
         Initialize the integer box.
 

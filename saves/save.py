@@ -10,11 +10,14 @@ logger = logging.getLogger(__name__)
 
 def runner(parent):
     """Initiate save process flow."""
+    # create file selector for save
     selector = FileSelector(parent)
-    selector.finished.connect(lambda: saver(selector.selectedFiles()[0]))
+
+    # run worker(filename) after file has been chosen
+    selector.accepted.connect(lambda: worker(selector.selectedFiles()[0]))
 
 
-def saver(filename):
+def worker(filename):
     """Runs after filename has been chosen."""
 
     # obtain save package
@@ -24,6 +27,7 @@ def saver(filename):
     with open(filename, "wb") as file:
         pickle.dump(package, file)
 
+    # log the save
     logger.info(f"Created save @{filename}.")
 
 
