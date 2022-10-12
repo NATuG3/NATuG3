@@ -1,8 +1,6 @@
 import logging
-
-from PyQt6.QtWidgets import QMessageBox, QWidget
-
-from contextlib import suppress
+from PyQt6.QtWidgets import QMessageBox
+from typing import Literal
 
 logger = logging.getLogger(__name__)
 
@@ -26,3 +24,16 @@ def reverse_hidenness(potentially_hidden_item):
         potentially_hidden_item.show()
     else:
         potentially_hidden_item.hide()
+
+
+def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
+    """
+    Returns int(not bool(integer)).
+
+    Args:
+        integer (Literal[0, 1]): Either 0 or 1.
+
+    Returns:
+        int: 0 or 1.
+    """
+    return int(not bool(integer))

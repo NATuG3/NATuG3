@@ -56,9 +56,21 @@ class Panel(QWidget):
             else:
                 # for each new requested domain append a template domain
                 for i in range(new_domains_count - previous_domains_count):
+                    # generate new domain placeholders based on previous domain
+                    last_domain = configuration.domains.storage.current[-1]
+
+                    # switch the strand direction by default (but w/o strand switches)
+                    helix_joints = last_domain.helix_joints[RIGHT]
+                    helix_joints = helpers.inverse(helix_joints)
+                    helix_joints = [helix_joints] * 2
+
+                    # reuse theta interior and count of previous domain
+                    theta_interior_multiple = last_domain.theta_interior_multiple
+                    count = last_domain.count
+
                     # template/placeholder domain
                     configuration.domains.storage.current.append(
-                        configuration.domains.storage.Domain(0, [0, 1], 50)
+                        configuration.domains.storage.Domain(theta_interior_multiple, helix_joints, count)
                     )
 
             # refresh the table with the additional/lesser domains

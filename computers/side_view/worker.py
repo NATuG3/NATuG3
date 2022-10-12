@@ -1,9 +1,8 @@
 from functools import cached_property
 from types import FunctionType
-from typing import Deque, Tuple, Type, Literal
+from typing import Deque, Tuple, Type
 from collections import deque
-
-from configuration.domains.storage import Domain
+from helpers import inverse
 from computers.datatypes import NEMid
 from constants.directions import *
 
@@ -13,19 +12,6 @@ DomainsContainer: FunctionType = lambda count: tuple(
 )
 # type annotation for the aforementioned container
 DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
-
-
-def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
-    """
-    Returns int(not bool(integer)).
-
-    Args:
-        integer (Literal[0, 1]): Either 0 or 1.
-
-    Returns:
-        int: 0 or 1.
-    """
-    return int(not bool(integer))
 
 
 class Plot:
