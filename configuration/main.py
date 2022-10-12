@@ -1,10 +1,13 @@
 import logging
 from types import SimpleNamespace
+
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
-from PyQt6.QtCore import Qt
-import configuration.nucleic_acid, configuration.domains, configuration.main
-import references
+
+import configuration.domains
+import configuration.main
+import configuration.nucleic_acid
+import storage
 from resources import fetch_icon
 
 count = 50
@@ -46,7 +49,7 @@ class Panel(QWidget):
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
         # set up the update graphs button
-        self.update_graphs.clicked.connect(references.constructor.load_graphs)
+        self.update_graphs.clicked.connect(storage.windows.constructor.load_graphs)
 
         # trigger a resize event on tab change
-        self.tab_area.currentChanged.connect(references.constructor.resizeEvent)
+        self.tab_area.currentChanged.connect(storage.windows.constructor.resizeEvent)

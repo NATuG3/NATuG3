@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QFileDialog
 import configuration.domains.main
 import configuration.domains.storage
 from configuration.domains.storage import Domain
-import references
+import storage
 import saves.datatypes
 
 from typing import List
@@ -30,7 +30,7 @@ def worker(filename):
     configuration.domains.storage.current: List[Domain] = package.domains
 
     # fetch the domains table in the domains tab of the config panel
-    domains_table = references.constructor.configuration.tabs.domains.table
+    domains_table = storage.windows.constructor.configuration.tabs.domains.table
     # dump the new (updated) domains array
     domains_table.dump_domains(package.domains)
 

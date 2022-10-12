@@ -17,7 +17,7 @@ import configuration.nucleic_acid
 import configuration.domains.storage
 import computers.side_view.runner
 import computers.top_view.runner
-import references
+import storage
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class Window(QMainWindow):
     The application's main window.
 
     Attributes:
-        docked_widgets (SimpleNamespace): All docked widgets.
+        panels (SimpleNamespace): All docked widgets.
         status_bar (QStatusBar): The status bar.
         menu_bar (QMenuBar): The menu bar.
         top_view (QWidget): Top view widget.
@@ -40,7 +40,7 @@ class Window(QMainWindow):
         super().__init__()
 
         # store a reference to self in references for cross module use
-        references.constructor = self
+        storage.windows.constructor = self
 
         # utilize inherited methods to set up the main window
         self.setWindowTitle("DNA Constructor")
@@ -52,7 +52,7 @@ class Window(QMainWindow):
         self._menu_bar()
 
         # container to store references to all docked widgets
-        self.docked_widgets = SimpleNamespace()
+        self.panels = SimpleNamespace()
 
         # add all widgets
         self.load_graphs()
@@ -65,64 +65,64 @@ class Window(QMainWindow):
 
     def _configuration(self):
         # create a dockable configuration widget
-        self.docked_widgets.configuration = QDockWidget()
+        self.panels.configuration = QDockWidget()
 
         # set titles/descriptions
-        self.docked_widgets.configuration.setObjectName("Config Panel")
-        self.docked_widgets.configuration.setStatusTip("Config panel")
-        self.docked_widgets.configuration.setWindowTitle("Config")
+        self.panels.configuration.setObjectName("Config Panel")
+        self.panels.configuration.setStatusTip("Config panel")
+        self.panels.configuration.setWindowTitle("Config")
 
         # store the actual link to the widget in self.configuration
         self.configuration = configuration.main.Panel()
-        self.docked_widgets.configuration.setWidget(self.configuration)
+        self.panels.configuration.setWidget(self.configuration)
 
-        self.docked_widgets.configuration.setAllowedAreas(
+        self.panels.configuration.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
 
         # trigger a resize event when the floatingness of the configuration panel changes
-        self.docked_widgets.configuration.topLevelChanged.connect(self.resizeEvent)
+        self.panels.configuration.topLevelChanged.connect(self.resizeEvent)
 
         # dock the new dockable configuration widget
         self.addDockWidget(
-            Qt.DockWidgetArea.RightDockWidgetArea, self.docked_widgets.configuration
+            Qt.DockWidgetArea.RightDockWidgetArea, self.panels.configuration
         )
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
         try:
-            assert isinstance(self.top_view, QWidget)
-            self.top_view.load()
+            assert isinstance(storage.top_view, QWidget)
+            storage.top_view.load()
             logger.info("Reloaded top view graph.")
         except AttributeError:
             # create dockable widget for top view
-            self.docked_widgets.top_view = QDockWidget()
+            self.panels.top_view = QDockWidget()
 
             # set titles/descriptions
-            self.docked_widgets.top_view.setObjectName("Top View")
-            self.docked_widgets.top_view.setWindowTitle("Top View of Helices")
-            self.docked_widgets.top_view.setStatusTip(
+            self.panels.top_view.setObjectName("Top View")
+            self.panels.top_view.setWindowTitle("Top View of Helices")
+            self.panels.top_view.setStatusTip(
                 "A plot of the top view of all domains"
             )
 
             # store widget in class for easier direct access
-            self.top_view = computers.top_view.runner.Plot()
+            storage.top_view = computers.top_view.runner.Plot()
 
             # attach actual top view widget to docked top view widget
-            self.docked_widgets.top_view.setWidget(self.top_view)
+            self.panels.top_view.setWidget(storage.top_view)
 
             # top view is only allowed on the sides
-            self.docked_widgets.top_view.setAllowedAreas(
+            self.panels.top_view.setAllowedAreas(
                 Qt.DockWidgetArea.LeftDockWidgetArea
                 | Qt.DockWidgetArea.RightDockWidgetArea
             )
 
             # trigger a resize event when the floatingness of the side view panel changes
-            self.docked_widgets.top_view.topLevelChanged.connect(self.resizeEvent)
+            self.panels.top_view.topLevelChanged.connect(self.resizeEvent)
 
             # dock the new dockable top view widget
             self.addDockWidget(
-                Qt.DockWidgetArea.LeftDockWidgetArea, self.docked_widgets.top_view
+                Qt.DockWidgetArea.LeftDockWidgetArea, self.panels.top_view
             )
 
             logger.info("Loaded top view graph for the first time.")
@@ -130,8 +130,8 @@ class Window(QMainWindow):
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
         try:
-            assert isinstance(self.side_view, QWidget)
-            self.side_view.load()
+            assert isinstance(storage.side_view, QWidget)
+            storage.side_view.load()
             logger.info("Reloaded side view graph.")
         except AttributeError:
             # create group box to place side view widget in
@@ -142,10 +142,10 @@ class Window(QMainWindow):
             prettified_side_view.setStatusTip("A plot of the side view of all domains")
 
             # create side view plot
-            self.side_view = computers.side_view.runner.Plot()
+            storage.side_view = computers.side_view.runner.Plot()
 
             # store widget in class for easier future direct widget access
-            prettified_side_view.layout().addWidget(self.side_view)
+            prettified_side_view.layout().addWidget(storage.side_view)
 
             # set side view as the main widget
             self.setCentralWidget(prettified_side_view)
@@ -186,37 +186,37 @@ class Window(QMainWindow):
         """
         # side view resizing
         #
-        self.side_view.setMinimumWidth(int(4 * self.size().width() / 9))
+        storage.side_view.setMinimumWidth(int(4 * self.size().width() / 9))
 
         # top view resizing
         #
         # if the top view plot is floating make the max size very large
-        if self.docked_widgets.top_view.isFloating():
-            self.docked_widgets.top_view.setMaximumWidth(99999)
+        if self.panels.top_view.isFloating():
+            self.panels.top_view.setMaximumWidth(99999)
         # otherwise it can be resized up to 2/8ths of the screen
         else:
-            self.docked_widgets.top_view.setMaximumWidth(
+            self.panels.top_view.setMaximumWidth(
                 round(2 * self.size().width() / 8)
             )
 
         # configuration resizing
         #
         # if configuration is floating make the max size very large
-        if self.docked_widgets.configuration.isFloating():
-            self.docked_widgets.configuration.setMaximumWidth(600)
+        if self.panels.configuration.isFloating():
+            self.panels.configuration.setMaximumWidth(600)
         # otherwise check the current tab of the configuration panel
         else:
             # if the domains tab of the configuration panel is visible:
             if self.configuration.tabs.domains.isVisible():
                 # set the maximum width of configuration to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.docked_widgets.configuration.setMaximumWidth(
+                self.panels.configuration.setMaximumWidth(
                     round(3 * self.size().width() / 8)
                 )
-                self.docked_widgets.configuration.setMinimumWidth(275)
+                self.panels.configuration.setMinimumWidth(275)
             # if the nucleic acid tab of the configuration panel is visible:
             elif self.configuration.tabs.nucleic_acid.isVisible():
-                self.docked_widgets.configuration.setMaximumWidth(
+                self.panels.configuration.setMaximumWidth(
                     round(2 * self.size().width() / 8)
                 )
-                self.docked_widgets.configuration.setMinimumWidth(0)
+                self.panels.configuration.setMinimumWidth(0)

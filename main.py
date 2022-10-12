@@ -3,28 +3,13 @@ from PyQt6.QtGui import QIcon
 import sys
 from time import time
 import logging
-import references
+import storage
 
 DEBUG = True
 
 
 def main():
     """Main program runner."""
-    # initialize logging
-    if DEBUG:
-        logging.basicConfig(
-            level=logging.DEBUG,
-        )
-    else:
-        logging.basicConfig(
-            level=logging.INFO,
-        )
-
-    # log boot statement
-    logging.debug(f"Booting @ {time()}")
-
-    # mute pyqt logs
-    logging.getLogger("PyQt6").setLevel(logging.INFO)
 
     if sys.platform.startswith("win"):
         # to get icon to work properly on Windows this code must be run
@@ -34,26 +19,43 @@ def main():
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
 
-    # initialize PyQt6 application
-    app = QApplication(sys.argv)
-    references.app = app
-    app.setStyle("Fusion")
-    app.setWindowIcon(QIcon("resources/icon.ico"))
+    def logger():
+        # initialize logging
+        if DEBUG:
+            logging.basicConfig(
+                level=logging.DEBUG,
+            )
+        else:
+            logging.basicConfig(
+                level=logging.INFO,
+            )
 
-    # QApplication must be created before we can import ui
-    import windows.constructor.main
+        # log boot statement
+        logging.debug(f"Booting @ {time()}")
 
-    # obtain and generate window item
-    constructor_window = windows.constructor.main.Window()
+        # mute pyqt logs
+        logging.getLogger("PyQt6").setLevel(logging.INFO)
 
-    # show constructor window
-    constructor_window.show()
+    def app():
+        # initialize PyQt6 application
+        application = QApplication(sys.argv)
+        storage.application = application
+        application.setStyle("Fusion")
+        application.setWindowIcon(QIcon("resources/icon.ico"))
 
-    # trigger initial resize event
-    constructor_window.resizeEvent(None)
+    def runner():
+        # QApplication must be created before we can import ui
+        app()
+        import windows.constructor.main
+        constructor = windows.constructor.main.Window()
+        constructor.show()
+        constructor.resizeEvent(None)  # trigger initial resize event
+
+    logger()
+    runner()
 
     # begin app event loop
-    sys.exit(app.exec())
+    sys.exit(storage.application.exec())
 
 
 if __name__ == "__main__":

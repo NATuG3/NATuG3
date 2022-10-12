@@ -5,11 +5,11 @@ import helpers
 from resources import fetch_icon
 import webbrowser
 from PyQt6.QtGui import QKeySequence
-import references
+import storage
 import saves
 
 
-parent = references.constructor.menu_bar
+parent = storage.windows.constructor.menu_bar
 
 
 class File(QMenu):
@@ -54,18 +54,18 @@ class view(QMenu):
         configuration.setIcon(fetch_icon("eye-outline"))
         configuration.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                references.constructor.docked_widgets.configuration
+                storage.windows.constructor.panels.configuration
             )
         )
 
         # view -> "top view" -> hide/unhide
-        top_view = self.actions.top_view = self.addAction("Helicies Top View")
+        top_view = self.actions.top_view = self.addAction("Helices Top View")
         top_view.setStatusTip("Display the helices top view graph")
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                references.constructor.docked_widgets.top_view
+                storage.constructor.panels.top_view
             )
         )
 
