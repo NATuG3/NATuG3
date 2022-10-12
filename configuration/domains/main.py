@@ -5,6 +5,7 @@ import configuration.domains.storage
 from configuration.domains.widgets import *
 from constants.directions import *
 import helpers
+from resources.workers import fetch_icon
 
 
 logger = logging.getLogger(__name__)
@@ -18,6 +19,9 @@ class Panel(QWidget):
 
         # load in the panel's designer UI
         uic.loadUi("configuration/domains/panel.ui", self)
+
+        # style buttons
+        self.update_domains_table_button.setIcon(fetch_icon("reload-outline"))
 
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self)

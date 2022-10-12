@@ -4,6 +4,7 @@ import configuration.nucleic_acid, configuration.domains, configuration.main
 import logging
 import computers.side_view.worker
 from contextlib import suppress
+from constants.directions import *
 
 
 logger = logging.getLogger(__name__)
@@ -78,13 +79,13 @@ class Plot(QWidget):
             # this way it will be easy to discern between different domains
             # (every other domain will be a different color scheme)
 
-            for strand_direction in range(2):
-                if strand_direction == 0:  # 0 means up strand
+            for strand_direction in (UP, DOWN):
+                if strand_direction == UP:  # 0 means up strand
                     symbol: str = "t1"  # up arrow for up strand
                     color: str = colors[
                         0
                     ]  # set the color to be the second option of current color scheme (which is "colors")
-                elif strand_direction == 1:  # 1 means down strand
+                elif strand_direction == DOWN:  # 1 means down strand
                     symbol: str = "t"  # down arrow for down strand
                     color: str = colors[
                         1
@@ -94,8 +95,8 @@ class Plot(QWidget):
                 title = f"domain#{index}-{str(strand_direction).replace('0','up').replace('1','down')}"
 
                 # obtain an array of x and z coords from the points container
-                x_coords = [point.x_coord for point in points[index][strand_direction]]
-                z_coords = [point.z_coord for point in points[index][strand_direction]]
+                x_coords = self.worker.x_coords[index][strand_direction]
+                z_coords = self.worker.z_coords[index][strand_direction]
 
                 main_plot.plot(  # actually plot the current strand of the current domain
                     x_coords,
