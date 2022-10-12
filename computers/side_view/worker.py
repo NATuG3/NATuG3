@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cached_property
 from types import FunctionType
 from typing import Deque, Tuple, Type, Literal
 from collections import deque
@@ -7,18 +7,34 @@ from configuration.domains.storage import Domain
 from computers.datatypes import NEMid
 from constants.directions import *
 
-
 # container to store data for domains in
-DomainsContainer: FunctionType = lambda domain_count: tuple(
-    (deque(), deque()) for _ in range(domain_count)
+DomainsContainer: FunctionType = lambda count: tuple(
+    (deque(), deque()) for _ in range(count)
 )
 # type annotation for the aforementioned container
 DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 
 
+def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
+    """
+    Returns int(not bool(integer)).
+
+    Args:
+        integer (Literal[0, 1]): Either 0 or 1.
+
+    Returns:
+        int: 0 or 1.
+    """
+    return int(not bool(integer))
+
+
 class Plot:
     """
-    Generate data needed for a side view graph of helicies.
+    Generate data needed for a side view graph of helices.
+
+    NEMid_angles (DomainsContainerType): All NEMid angles.
+    x_coords (DomainsContainerType): All x coords.
+    z_coords (DomainsContainerType) All z coords.
     """
 
     def __init__(
@@ -40,11 +56,8 @@ class Plot:
             theta_s (float): Switch angle (in degrees).
             theta_b (float): Base angle (in degrees).
             theta_c (float): Characteristic angle (in degrees).
-        Raises:
-            ValueError: Length of interior_angles does not match that of theta_ss.
         """
 
-        self.domain_count = len(domains)
         self.domains = domains
 
         self.Z_b = Z_b
@@ -54,98 +67,88 @@ class Plot:
         self.theta_b = theta_b
         self.theta_c = theta_c
 
-    def compute(self, count: int) -> DomainsContainerType:
+        self.strand_directions = (UP, DOWN)
+
+        # containers for class property workers to generate into
+        self._angles: DomainsContainerType = DomainsContainer(len(self.domains))
+        self._x_coords: DomainsContainerType = DomainsContainer(len(self.domains))
+        self._z_coords: DomainsContainerType = DomainsContainer(len(self.domains))
+
+    def compute(self) -> DomainsContainerType:
         """
-        Compute data for count# of NEMids.
+        Compute data for count number of NEMids.
+
         Args:
             count (int): Number of NEMids to compute data for.
+
         Returns:
             DomainsContainerType: A domains container of all NEMids.
         """
 
-        NEMids = DomainsContainer(self.domain_count)
+        NEMids = DomainsContainer(len(self.domains))
 
-        for domain_index in range(self.domain_count):
-            for strand_direction in range(2):
-                for i in range(count):
+        for index, domain in enumerate(self.domains):
+            for strand_direction in self.strand_directions:
+                for i in range(domain.count):
                     # generate/retrieve cached
-                    angle = self._NEMid_angles(count)[domain_index][strand_direction][i]
-                    x_coord = self._x_coords(count)[domain_index][strand_direction][i]
-                    z_coord = self._z_coords(count)[domain_index][strand_direction][i]
+                    angle = self.angles[index][strand_direction][i]
+                    x_coord = self.x_coords[index][strand_direction][i]
+                    z_coord = self.z_coords[index][strand_direction][i]
 
-                    # combine all data into NEMid objects
+                    # combine all data into NEMid object
                     _NEMid = NEMid(x_coord, z_coord, angle, None)
-                    NEMids[domain_index][strand_direction].append(_NEMid)
+
+                    # append the current NEMid to the to-be-outputted array
+                    NEMids[index][strand_direction].append(_NEMid)
 
         return NEMids
 
-    @lru_cache(maxsize=1)
-    def _NEMid_angles(self, count: int) -> DomainsContainerType:
-        """Generate angles made about the central axis going counter-clockwise from the line of tangency for count# of NEMids."""
-        NEMid_angles = DomainsContainer(
-            self.domain_count
-        )  # container to store generated angles in
-
+    @cached_property
+    def angles(self) -> DomainsContainerType:
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
         for index, domain in enumerate(self.domains):
-            # one strand direction will be initially set to zero
-            # whereas the other will be set to zero - theta_s
-
             # which strand will begin at x=0 (+domain_index)
             zeroed_strand = domain.helix_joints[LEFT]
-            not_zeroed_strand = int(not bool(zeroed_strand))
 
-            # set initial NEMid angle values
-            NEMid_angles[index][zeroed_strand].append(0.0)
-            NEMid_angles[index][not_zeroed_strand].append(0.0 - self.theta_s)
+            # the zeroed strand direction is set to have its first angle be 0
+            self._angles[index][zeroed_strand].append(0.0)
 
-            for i in range(count):
-                # generate the next UP STRAND NEMid angle
-                # "NEMid_angles[domain_index][0]" =
-                # list of NEMid angles for the strand that begins with zero -> previous one
-                NEMid_angles[index][zeroed_strand].append(
-                    NEMid_angles[index][zeroed_strand][i] + self.theta_b
+            # whereas the other is set to be 0-theta_switch
+            self._angles[index][inverse(zeroed_strand)].append(0.0 - self.theta_s)
+
+            for i in range(domain.count):
+                # generate the next zeroed_strand-direction STRAND NEMid angle
+                self._angles[index][zeroed_strand].append(
+                    # previous NEMid angle + theta_b
+                    self._angles[index][zeroed_strand][i]
+                    + self.theta_b
                 )
 
-                # generate the next DOWN STRAND NEMid angle
-                # "NEMid_angles[domain_index][0][i+1]" =
-                # list of NEMid angles for the strand that doesn't quite begin with zero ->
-                # one we just computed for other strand
-                NEMid_angles[index][not_zeroed_strand].append(
-                    NEMid_angles[index][zeroed_strand][i + 1] - self.theta_s
+                # generate the next inverse(zeroed_strand)-direction STRAND NEMid angle
+                self._angles[index][inverse(zeroed_strand)].append(
+                    # previous NEMid angle - theta_s
+                    self._angles[index][zeroed_strand][i + 1]
+                    - self.theta_s
                 )
 
-        return NEMid_angles
+        return self._angles
 
-    @lru_cache(maxsize=1)
-    def _x_coords(self, count: int) -> DomainsContainerType:
-        """Generate count# of x cords."""
-        x_coords: DomainsContainerType = DomainsContainer(self.domain_count)
-        NEMid_angles: DomainsContainerType = self._NEMid_angles(
-            count
-        )  # NEMid angles are needed to generate x coords
-
-        # generate count# of x coords on a domain-by-domain basis
-        # domain_index is the index of the current domain
-        for domain_index in range(self.domain_count):
+    @cached_property
+    def x_coords(self) -> DomainsContainerType:
+        for index, domain in enumerate(self.domains):
             # current exterior and interior angles
-            # note that "theta_exterior == 360 - interior_angle"
-            theta_interior: float = (
-                self.domains[domain_index].theta_interior_multiple * self.theta_c
-            )
+            theta_interior: float = domain.theta_interior_multiple * self.theta_c
             theta_exterior: float = 360 - theta_interior
 
-            for i in range(count):
-                for strand_direction in range(
-                    2
-                ):  # repeat same steps for up and down strand
-                    # find the current NEMid_angle and modulo it by 360
-                    # NEMid angles are "the angle about the central axis going counter-clockwise from the line of tangency."
-                    # they reset at 360, so we modulo the current NEMid angle here
-                    NEMid_angle: float = (
-                        NEMid_angles[domain_index][strand_direction][i] % 360
-                    )
+            for i in range(domain.count):
+                for (
+                    strand_direction
+                ) in self.strand_directions:  # repeat same steps for up and down strand
+                    # find the current NEMid_angle and modulo it by 360 NEMid angles are "the angle about the central
+                    # axis going counter-clockwise from the line of tangency." they reset at 360, so we modulo the
+                    # current NEMid angle here
+                    NEMid_angle: float = self.angles[index][strand_direction][i] % 360
 
                     if NEMid_angle < theta_exterior:
                         x_coord = NEMid_angle / theta_exterior
@@ -155,90 +158,63 @@ class Plot:
                     # domain 0 lies between [0, 1] on the x axis
                     # domain 1 lies between [1, 2] on the x axis
                     # ext...
-                    x_coord += domain_index
+                    x_coord += index
+
+                    # x_coord = round(x_coord, 3)
 
                     # store the new x_coord in the container object and continue
-                    x_coords[domain_index][strand_direction].append(x_coord)
+                    self._x_coords[index][strand_direction].append(x_coord)
 
-        return x_coords
+        return self._x_coords
 
-    @lru_cache(maxsize=1)
-    def _z_coords(self, count: int) -> DomainsContainerType:
-        """Generate count# of z cords."""
-        # if there are multiple domains ensure "count" is over 21, because we would not be able to get a full
-        # sample of the x coords for finding the best places to place bases
-        if self.domain_count > 0:
-            if count < 21:
-                raise Exception(
-                    "Not enough domains. Count must be > 21 when multiple domains are passed."
+    @cached_property
+    def z_coords(self) -> DomainsContainerType:
+        for index, domain in enumerate(self.domains):
+            # look at the right joint of the previous domain
+            # for calculating the initial z coord
+            zeroed_strand = self.domains[index - 1].helix_joints[RIGHT]
+
+            # step 1: find the initial z cord for the current domain
+            if index == 0:
+                # this is the first domain
+                # zero out the first domain's first NEMid
+                initial_z_coord = 0
+            else:
+                # let's find and index of x coord where the (previous domain's x coord) == (this domain's index-1)
+                # ...so if this is domain#2, let's find where domain#1 has an x coord of x=1 in its x coord list
+
+                # find the maximum x coord of the previous domain
+                # (should be ~this domain's index - 1)
+                initial_z_coord = max(self.x_coords[index - 1][zeroed_strand])
+
+                # find the index of that x coord of the previous domain
+                initial_z_coord = self.x_coords[index - 1][zeroed_strand].index(
+                    initial_z_coord
                 )
 
-        # since all initial z_coord values are pre-set we reduce the count (which is used for itterating) by 1
-        count -= 1
+                # obtain the z coord of that index
+                initial_z_coord = self._z_coords[index - 1][zeroed_strand][
+                    initial_z_coord
+                ]
 
-        # create container for all the z coords for each domain
-        # each z cord is in the form [(<up_strand>, <down_strand>), ...]
-        # tuple index is which domain it represents, and <up_strand> & <down_strand> are arrays of actual z coords
-        z_coords: DomainsContainerType = DomainsContainer(self.domain_count)
+            # look at the left joint of the current domain
+            # for calculating additional z coords
+            zeroed_strand = domain.helix_joints[LEFT]
 
-        # arbitrarily define the z_coord of the up strand of domain#0 to be 0
-        z_coords[0][0].append(0.0)
-        z_coords[0][1].append(0.0 - self.Z_s)
+            self._z_coords[index][zeroed_strand].append(initial_z_coord)
+            self._z_coords[index][inverse(zeroed_strand)].append(
+                initial_z_coord - self.Z_s
+            )
 
-        # we cannot calcuate the z_coords for domains after the first one unless we find the z_coords for the first
-        # one first the first domain has its initial z cords (up and down strands) set to (arbitrary) static values,
-        # whereas other domains do not for all domains except domain#0 the initial z cord will rely on a specific z
-        # cord of the previous and so, we calculate the z coords of domain#0...
-        for i in range(count):
-            # generate the next z_coord for the down strand...
-            # "z_coords[0][0][i] " means "z_coords -> domain#0 -> up_strand -> previous z_coord"
-            z_coords[0][0].append(z_coords[0][0][i] + self.Z_b)
-
-            # generate the next z_coord for the up strand...
-            # "z_coords[0][1][i+1]" means "z_coords -> domain#0 -> up_strand -> z_coord we just computed
-            z_coords[0][1].append(z_coords[0][0][i + 1] - self.Z_s)
-
-        # now find and append the initial z_coord for each domain
-        for domain_index in range(1, self.domain_count):
-            previous_domain_index: int = domain_index - 1  # the previous domain's index
-
-            # step 1: find the initial z cord for the current domain_index
-
-            # lets find the maximum x cord for the previous domain
-            # that will be the NEMid where, when placed adjacently to the right in the proper place
-            # there will be an overlap of bases
-            initial_z_coord: DomainsContainerType = self._x_coords(count)[
-                previous_domain_index
-            ][0]
-            # initial_z_coord = previous domains's up strand's rightmost x coord
-
-            initial_z_coord: int = initial_z_coord.index(max(initial_z_coord))
-            # obtain the index of the rightmost x coord on the strand
-
-            # we are going to line up the next up strand so that its leftmost (first) NEMid touches the previous
-            # domain's rightmost
-            initial_z_coord: float = z_coords[previous_domain_index][0][initial_z_coord]
-
-            # append this new initial z cord to the actual list of z_coords
-            z_coords[domain_index][1].append(initial_z_coord)
-            z_coords[domain_index][0].append(initial_z_coord - self.Z_s)
-
-            # step 2: actually calculate the z coords of this new domain
-
-            for i in range(count):  # (domain 0 is already calculated)
-                # append the previous z_coord + the Z_b
-                # "z_coords[i][0][i]" == "z_coords -> domain#i -> up_strand -> previous one"
-                z_coords[domain_index][1].append(
-                    z_coords[domain_index][1][i] + self.Z_b
+            for i in range(domain.count):
+                self._z_coords[index][zeroed_strand].append(
+                    self._z_coords[index][zeroed_strand][-1] + self.Z_b
+                )
+                self._z_coords[index][inverse(zeroed_strand)].append(
+                    self._z_coords[index][zeroed_strand][-1] - self.Z_s
                 )
 
-                # append the previous z_coord's up strand value, minus the strand switch distance
-                # "z_coords[i][0][i]" == "z_coords -> domain#i -> down_strand -> z_coord we just calculated"
-                z_coords[domain_index][0].append(
-                    z_coords[domain_index][1][i + 1] - self.Z_s
-                )
-
-        return z_coords
+        return self._z_coords
 
     def __repr__(self) -> str:
         output = "side_view("
@@ -251,3 +227,16 @@ class Plot:
         output = output[:-2]
         output += ")"
         return output
+
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, type(self)):
+            return False
+
+        if len(self.domains) != len(other.domains):
+            return False
+
+        for our_domain, their_domain in zip(self.domains):
+            if our_domain != their_domain:
+                return False
+
+        return True

@@ -10,6 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class Plot(QWidget):
+    """A widget that fetches current settings and generates helices side view."""
+
     def __init__(self):
         super().__init__()
 
@@ -22,7 +24,7 @@ class Plot(QWidget):
         # set layout of widget
         self.setLayout(QVBoxLayout())
 
-        # initilize the widget
+        # initialize the widget
         self.load()
 
     def load(self):
@@ -63,10 +65,10 @@ class Plot(QWidget):
         main_plot.disableAutoRange()
 
         # generate the coords
-        points = self.worker.compute(self.count)
+        points = self.worker.compute()
 
-        for domain_index in range(self.worker.domain_count):
-            if domain_index % 2:  # if the domain index is an even integer
+        for index, domain in enumerate(self.domains):
+            if index % 2:  # if the domain index is an even integer
                 colors: tuple = ((255, 0, 0), (0, 255, 0))  # use red and green colors
             else:  # but if it is an odd integer
                 colors: tuple = (
@@ -89,15 +91,11 @@ class Plot(QWidget):
                     ]  # set the color to be the first option of current color scheme (which is "colors")
 
                 # domain#i-up or domain#i-down
-                title = f"domain#{domain_index}-{str(strand_direction).replace('0','up').replace('1','down')}"
+                title = f"domain#{index}-{str(strand_direction).replace('0','up').replace('1','down')}"
 
                 # obtain an array of x and z coords from the points container
-                x_coords = [
-                    point.x_coord for point in points[domain_index][strand_direction]
-                ]
-                z_coords = [
-                    point.z_coord for point in points[domain_index][strand_direction]
-                ]
+                x_coords = [point.x_coord for point in points[index][strand_direction]]
+                z_coords = [point.z_coord for point in points[index][strand_direction]]
 
                 main_plot.plot(  # actually plot the current strand of the current domain
                     x_coords,
@@ -115,7 +113,7 @@ class Plot(QWidget):
                 )
 
         main_plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
-        main_plot.setXRange(0, self.worker.domain_count)
+        main_plot.setXRange(0, len(self.domains))
 
         # add the plot widget to the layout
         self.layout().addWidget(self.graph)

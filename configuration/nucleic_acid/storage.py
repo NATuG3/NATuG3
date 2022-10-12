@@ -5,8 +5,12 @@ import atexit
 import configuration.settings
 
 
-profiles_filename = f"configuration/nucleic_acid/profiles.{configuration.settings.extension}"
-restored_filename = f"configuration/nucleic_acid/restored.{configuration.settings.extension}"
+profiles_filename = (
+    f"configuration/nucleic_acid/profiles.{configuration.settings.extension}"
+)
+restored_filename = (
+    f"configuration/nucleic_acid/restored.{configuration.settings.extension}"
+)
 
 count: int = 50  # initial NEMids/strand count
 current: object = None  # current profile
@@ -21,6 +25,7 @@ logger = logging.getLogger(__name__)
 class Profile:
     """
     A settings profile.
+
     Attributes:
         D (float): Diameter of a domain.
         H (float): Height of a turn.

@@ -61,5 +61,3 @@ class FileSelector(QFileDialog):
 
         # begin flow
         self.show()
-
-

@@ -76,11 +76,6 @@ class Window(QMainWindow):
         self.configuration = configuration.main.Panel()
         self.docked_widgets.configuration.setWidget(self.configuration)
 
-        # floating will be determined by current tab (see self.resizeEvent)
-        self.docked_widgets.configuration.setFeatures(
-            QDockWidget.DockWidgetFeature.DockWidgetFloatable
-        )
-
         self.docked_widgets.configuration.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )

@@ -52,7 +52,7 @@ class TableIntegerBox(QSpinBox):
 
         # set range from -1 to 100
         self.setMinimum(-1)
-        self.setMaximum(100)
+        self.setMaximum(100000)
 
         # set the initial value to whatever was inputted into __init__
         self.setValue(value)

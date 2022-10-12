@@ -54,18 +54,18 @@ class view(QMenu):
         configuration.setIcon(fetch_icon("eye-outline"))
         configuration.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                references.Windows.constructor.docked_widgets.configuration
+                references.constructor.docked_widgets.configuration
             )
         )
 
         # view -> "top view" -> hide/unhide
         top_view = self.actions.top_view = self.addAction("Helicies Top View")
-        top_view.setStatusTip("Display the helicies top view graph")
+        top_view.setStatusTip("Display the helices top view graph")
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                references.Windows.constructor.docked_widgets.top_view
+                references.constructor.docked_widgets.top_view
             )
         )
 

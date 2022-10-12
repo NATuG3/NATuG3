@@ -31,7 +31,6 @@ class Panel(QWidget):
 
         logger.info("Loaded domains tab of configuration panel.")
 
-
     def _hook_widgets(self):
         """Hook all widgets (buttons, boxes, ext.)."""
 
@@ -50,9 +49,9 @@ class Panel(QWidget):
                     "truncated. Are you sure you want to lower the value of "
                     "the domains/subunit?",
                 ):
-                    configuration.domains.storage.current = configuration.domains.storage.current[
-                        :new_domains_count
-                                                            ]
+                    configuration.domains.storage.current = (
+                        configuration.domains.storage.current[:new_domains_count]
+                    )
             # add the additional domains
             else:
                 # for each new requested domain append a template domain
@@ -156,8 +155,6 @@ class Table(QTableWidget):
 
             # column 4 - initial NEMid count
             widget = TableIntegerBox(domain.count)
-            # not implemented so disable...
-            widget.setEnabled(False)
             widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 4, widget)
 
