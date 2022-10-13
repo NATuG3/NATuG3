@@ -1,6 +1,6 @@
-# dnaNaotubeGenerator
+# NATuG 3
 
-Tools for creating DNA nanotubes
+Tools for Designing Nucleic Acid Nanotubes
 
 # Credits
 Icons from https://ionic.io/ionicons
