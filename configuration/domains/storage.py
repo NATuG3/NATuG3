@@ -8,7 +8,6 @@ from computers.datatypes import Domain
 from typing import List
 from helpers import inverse
 
-
 restored_filename = f"configuration/domains/restored.{configuration.settings.extension}"
 
 current = None
@@ -17,47 +16,52 @@ settings = None
 logger = logging.getLogger(__name__)
 
 
-@dataclass()
-class Domains:
-    """
-    Container for multiple domains.
-    """
-    subunit_domains: List[Domain]
-    symmetry: int
+class Subunit:
+    def __init__(self, domains):
+        self.domains = domains
 
     @property
-    def domains(self):
-        """List of all domains."""
-        return tuple(self.subunit_domains * self.symmetry)
-
-    @property
-    def subunit_count(self):
+    def count(self):
         """Number of domains per subunit."""
-        return len(self.subunit_domains)
+        return len(self.domains)
 
-    @subunit_count.setter
-    def subunit_count(self, new_subunit_count):
+    @count.setter
+    def count(self, new):
         # if the subunit count has decreased then trim off extra domains
-        if new_subunit_count < self.subunit_count:
-            self.subunit_domains = self.subunit_domains[:new_subunit_count]
+        if new < self.count:
+            self.domains = self.domains[:new]
         # if the subunit count has increased then add placeholder domains based on last domain in domain list
         else:
-            while self.subunit_count < new_subunit_count:
-                previous_domain = self.subunit_domains[-1]
+            while self.count < new:
+                previous_domain = self.domains[-1]
                 # the new template domains will be of altering strand directions with assumed
                 # strand switches of 0
-                self.subunit_domains.append(
+                self.domains.append(
                     Domain(
                         previous_domain.theta_interior_multiple,
                         [inverse(previous_domain.helix_joints[1])] * 2,
                         previous_domain.count
-                           )
+                    )
                 )
 
+
+class Domains:
+    """
+    Container for multiple domains.
+    """
+    def __init__(self, domains, symmetry):
+        self.subunit = Subunit(domains)
+        self.symmetry = symmetry
+
     @property
-    def total_count(self):
+    def domains(self):
+        """List of all domains."""
+        return tuple(self.subunit.domains * self.symmetry)
+
+    @property
+    def count(self):
         """Total number of domains"""
-        return self.subunit_count * self.symmetry
+        return self.subunit.count * self.symmetry
 
 
 def load():

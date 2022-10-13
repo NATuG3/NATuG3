@@ -24,28 +24,24 @@ class Panel(QWidget):
         self.layout().addWidget(self.table)
 
         # set initial values of domain table configuration widgets
-        self.subunit_count.setValue(configuration.domains.storage.current.subunit_count)
+        self.subunit_count.setValue(configuration.domains.storage.current.subunit.count)
         self.symmetry.setValue(configuration.domains.storage.current.symmetry)
-        self.total_count.setValue(configuration.domains.storage.current.total_count)
+        self.total_count.setValue(configuration.domains.storage.current.count)
 
-        # hook all widgets that need hooking
-        self._hook_widgets()
+        # hook update domains button
+        self.update_table.clicked.connect(self.refresh)
 
         logger.info("Loaded domains tab of configuration panel.")
 
-    def _hook_widgets(self):
-        """Hook all widgets (buttons, boxes, ext.)."""
+    def refresh(self):
+        configuration.domains.storage.current.subunit.count = self.subunit_count.value()
+        configuration.domains.storage.current.symmetry = self.symmetry.value()
 
-        @self.update_table.clicked.connect
-        def _():
-            """Called when a domains settings input box is updated."""
-            configuration.domains.storage.current.subunit_count = self.subunit_count.value()
-            configuration.domains.storage.current.symmetry = self.symmetry.value()
-            # update total count (=subunit_count*symmetry)
-            self.total_count.setValue(configuration.domains.storage.current.total_count)
+        # update total count (=subunit_count*symmetry)
+        self.total_count.setValue(configuration.domains.storage.current.count)
 
-            # update domains table
-            self.table.dump_domains(configuration.domains.storage.current.subunit_domains)
+        # update domains table
+        self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
 
 
 class Table(QTableWidget):
@@ -67,7 +63,7 @@ class Table(QTableWidget):
         self._style()
 
         # dump the domains of the previous save
-        self.dump_domains(configuration.domains.storage.current.subunit_domains)
+        self.dump_domains(configuration.domains.storage.current.subunit.domains)
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -179,8 +175,4 @@ class Table(QTableWidget):
 
     def cell_value_changed(self):
         """Called whenever a cell's value changes"""
-        # update the current subunit domains list
-        configuration.domains.storage.current.subunit_domains = self.load_domains()
-
-        # uneditable domain values may have changed
-        self.dump_domains(configuration.domains.storage.current.subunit_domains)
+        self.parent.refresh()

@@ -1,23 +1,24 @@
 import math
 from typing import List
+from computers.top_view.interface import Plotter
 
-
-class Plot:
+class TopView:
     """
-    Generate top view features.
+    Top view plotter.
 
     Attributes:
-        theta_deltas (List[float]): List of all angle changes between domains.
-        coords (dna_nanotube_tools.cords): Dna_nanotube_tools cords type object. Schema can be found in dna_nanotube_tools/types.coords.
-        ui_widget (pyqtgraph.plot): Pyqtgraph widget to display the topview
+        domains (List[Domain]): All inputted domains.
+        u_coords (List[float]): All u coords.
+        v_coords (List[float]): All v coords.
+        angle_deltas (List[float]): All angle angle changes from NEMid-to-NEMid
     """
 
     def __init__(
-        self,
-        domains: list,
-        D: float,
-        theta_c=360 / 21,
-        theta_s=2.3,
+            self,
+            domains: list,
+            D: float,
+            theta_c=360 / 21,
+            theta_s=2.3,
     ) -> None:
         """
         Generate (u, v) cords for top view of helices generation.
@@ -28,35 +29,27 @@ class Plot:
             theta_c (float, optional): Characteristic angle.
             theta_s (float, optional): Strand switch angle.
         """
-        self.v_coords = None
-        self.u_coords = None
-        self.theta_deltas = None
-
         self.domains = domains
         self.D = D
 
         self.theta_c = theta_c
         self.theta_s = theta_s
 
-        self.computed = False  # has compute() been called?
-
-    def compute(self):
-        """
-        Compute helices' top-view graph data
-        """
-
         self.theta_deltas: List[float] = [0.0]  # list to store angle deltas in
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
+        self.compute()
 
+    def compute(self):
+        """Compute u_coords, v_coords, and angle_deltas."""
         for index, domain in enumerate(self.domains):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                self.domains[index - 1].theta_switch_multiple * self.theta_s
+                    self.domains[index - 1].theta_switch_multiple * self.theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                self.domains[index - 1].theta_interior_multiple * self.theta_c
+                    self.domains[index - 1].theta_interior_multiple * self.theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
@@ -77,21 +70,15 @@ class Plot:
             # append the v cord of the domain to "self.v_coords"
             self.v_coords.append(self.v_coords[-1] + self.D * math.sin(angle_delta))
 
-        self.computed = True
-        return self
+    def ui(self):
+        return Plotter(self)
 
     def __repr__(self) -> str:
         round_to = 3
-        match self.computed:
-            case False:
-                return "top_view(uncomputed top_view object)"
-            case True:
-                prettified_coords = list(
-                    zip(
-                        [round(coord, round_to) for coord in self.u_coords],
-                        [round(coord, round_to) for coord in self.v_coords],
-                    )
-                )
-                return f"top_view(coords={prettified_coords}, theta_deltas={[round(delta, round_to) for delta in self.theta_deltas]}"
-            case _:
-                return "top_view(uninitilized)"
+        prettified_coords = list(
+            zip(
+                [round(coord, round_to) for coord in self.u_coords],
+                [round(coord, round_to) for coord in self.v_coords],
+            )
+        )
+        return f"top_view(coords={prettified_coords}, theta_deltas={[round(delta, round_to) for delta in self.theta_deltas]}"

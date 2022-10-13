@@ -48,8 +48,10 @@ class Panel(QWidget):
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
-        # set up the update graphs button
-        self.update_graphs.clicked.connect(storage.windows.constructor.load_graphs)
+        @self.update_graphs.clicked.connect
+        def _():
+            storage.constructor.panels.top_view.setWidget(storage.top_view.ui())
+            storage.constructor.panels.side_view.setWidget(storage.side_view.ui())
 
         # trigger a resize event on tab change
         self.tab_area.currentChanged.connect(storage.windows.constructor.resizeEvent)

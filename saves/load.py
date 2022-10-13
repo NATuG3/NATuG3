@@ -34,13 +34,13 @@ def worker(filename):
 
     # update all domains settings/dump domains
     storage.windows.constructor.configuration.tabs.domains.subunit_count.setValue(
-        configuration.domains.storage.current.subunit_count
+        configuration.domains.storage.current.subunit.count
     )
     storage.windows.constructor.configuration.tabs.domains.symmetry.setValue(
         configuration.domains.storage.current.symmetry
     )
     storage.windows.constructor.configuration.tabs.domains.table.dump_domains(
-        configuration.domains.storage.current.subunit_domains
+        configuration.domains.storage.current.subunit.domains
     )
 
     logger.info(f"Loaded save @{filename}.")

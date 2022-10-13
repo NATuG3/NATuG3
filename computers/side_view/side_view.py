@@ -3,6 +3,7 @@ from types import FunctionType
 from typing import Deque, Tuple, Type
 from collections import deque
 from helpers import inverse
+from computers.side_view.interface import Plotter
 from computers.datatypes import NEMid
 from constants.directions import *
 
@@ -14,7 +15,7 @@ DomainsContainer: FunctionType = lambda count: tuple(
 DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 
 
-class Plot:
+class SideView:
     """
     Generate data needed for a side view graph of helices.
 
@@ -199,6 +200,8 @@ class Plot:
 
         return self._z_coords
 
+    def ui(self):
+        return Plotter(self)
 
     def __repr__(self) -> str:
         output = "side_view("

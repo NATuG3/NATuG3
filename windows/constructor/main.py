@@ -1,7 +1,7 @@
 import logging
 from types import SimpleNamespace
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
     QMainWindow,
     QStatusBar,
@@ -15,8 +15,6 @@ from PyQt6.QtWidgets import (
 import configuration.main
 import configuration.nucleic_acid
 import configuration.domains.storage
-import computers.side_view.runner
-import computers.top_view.runner
 import storage
 
 logger = logging.getLogger(__name__)
@@ -39,29 +37,25 @@ class Window(QMainWindow):
         # so we must initialize the parent qt widget
         super().__init__()
 
+        # create plot panels
+        self.panels = SimpleNamespace()  # container for all panels
+        self._top_view()
+        self._side_view()
+
         # store a reference to self in references for cross module use
         storage.windows.constructor = self
 
         # utilize inherited methods to set up the main window
         self.setWindowTitle("DNA Constructor")
 
+        # add all widgets
+        self._configuration()
+
         # initialize status bar
         self._status_bar()
 
         # initialize menu bar
         self._menu_bar()
-
-        # container to store references to all docked widgets
-        self.panels = SimpleNamespace()
-
-        # add all widgets
-        self.load_graphs()
-        self._configuration()
-
-    def load_graphs(self):
-        """Load all nanotube graphs simultaneously."""
-        self._top_view()
-        self._side_view()
 
     def _configuration(self):
         # create a dockable configuration widget
@@ -90,67 +84,51 @@ class Window(QMainWindow):
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
-        try:
-            assert isinstance(storage.top_view, QWidget)
-            storage.top_view.load()
-            logger.info("Reloaded top view graph.")
-        except AttributeError:
-            # create dockable widget for top view
-            self.panels.top_view = QDockWidget()
+        # create dockable widget for top view
+        self.panels.top_view = QDockWidget()
 
-            # set titles/descriptions
-            self.panels.top_view.setObjectName("Top View")
-            self.panels.top_view.setWindowTitle("Top View of Helices")
-            self.panels.top_view.setStatusTip(
-                "A plot of the top view of all domains"
-            )
+        # set titles/descriptions
+        self.panels.top_view.setObjectName("Top View")
+        self.panels.top_view.setWindowTitle("Top View of Helices")
+        self.panels.top_view.setStatusTip(
+            "A plot of the top view of all domains"
+        )
 
-            # store widget in class for easier direct access
-            storage.top_view = computers.top_view.runner.Plot()
+        # attach actual top view widget to docked top view widget
+        self.panels.top_view.setWidget(storage.top_view.ui())
 
-            # attach actual top view widget to docked top view widget
-            self.panels.top_view.setWidget(storage.top_view)
+        # top view is only allowed on the sides
+        self.panels.top_view.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea
+            | Qt.DockWidgetArea.RightDockWidgetArea
+        )
 
-            # top view is only allowed on the sides
-            self.panels.top_view.setAllowedAreas(
-                Qt.DockWidgetArea.LeftDockWidgetArea
-                | Qt.DockWidgetArea.RightDockWidgetArea
-            )
+        # trigger a resize event when the floatingness of the side view panel changes
+        self.panels.top_view.topLevelChanged.connect(self.resizeEvent)
 
-            # trigger a resize event when the floatingness of the side view panel changes
-            self.panels.top_view.topLevelChanged.connect(self.resizeEvent)
+        # dock the new dockable top view widget
+        self.addDockWidget(
+            Qt.DockWidgetArea.LeftDockWidgetArea, self.panels.top_view
+        )
 
-            # dock the new dockable top view widget
-            self.addDockWidget(
-                Qt.DockWidgetArea.LeftDockWidgetArea, self.panels.top_view
-            )
-
-            logger.info("Loaded top view graph for the first time.")
+        logger.info("Loaded top view graph for the first time.")
 
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
-        try:
-            assert isinstance(storage.side_view, QWidget)
-            storage.side_view.load()
-            logger.info("Reloaded side view graph.")
-        except AttributeError:
-            # create group box to place side view widget in
-            prettified_side_view = QGroupBox()
-            prettified_side_view.setObjectName("Side View")
-            prettified_side_view.setLayout(QVBoxLayout())
-            prettified_side_view.setTitle("Side View of Helices")
-            prettified_side_view.setStatusTip("A plot of the side view of all domains")
+        # create group box to place side view widget in
+        self.side_view = QGroupBox()
+        self.side_view.setObjectName("Side View")
+        self.side_view.setLayout(QVBoxLayout())
+        self.side_view.setTitle("Side View of Helices")
+        self.side_view.setStatusTip("A plot of the side view of all domains")
 
-            # create side view plot
-            storage.side_view = computers.side_view.runner.Plot()
+        # add actual plot to GroupBox
+        self.side_view.layout().addWidget(storage.side_view.ui())
 
-            # store widget in class for easier future direct widget access
-            prettified_side_view.layout().addWidget(storage.side_view)
+        # set the central widget of the window
+        self.setCentralWidget(self.side_view)
 
-            # set side view as the main widget
-            self.setCentralWidget(prettified_side_view)
-
-            logger.info("Loaded side view graph for the first time.")
+        logger.info("Loaded side view graph for the first time.")
 
     def _status_bar(self):
         """Create and add status bar."""
@@ -186,7 +164,7 @@ class Window(QMainWindow):
         """
         # side view resizing
         #
-        storage.side_view.setMinimumWidth(int(4 * self.size().width() / 9))
+        self.side_view.setMinimumWidth(int(4 * self.size().width() / 9))
 
         # top view resizing
         #
