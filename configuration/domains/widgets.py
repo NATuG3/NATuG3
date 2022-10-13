@@ -1,5 +1,4 @@
 from PyQt6.QtWidgets import QSpinBox, QPushButton
-from PyQt6.QtCore import Qt
 
 from constants.directions import *
 from typing import Literal
@@ -39,14 +38,13 @@ class DirectionalButton(QPushButton):
 class TableIntegerBox(QSpinBox):
     """Spin box for use in QTableWidgets."""
 
-    def __init__(self, value, show_buttons=False, ignore_scroll=True):
+    def __init__(self, value, show_buttons=False):
         """
         Initialize the integer box.
 
         Args:
             value (float): Initial value of the widget.
             show_buttons (bool): Show/don't show +/- buttons of integer box.
-            ignore_scroll (bool): Ignore attempted scrolling to change values.
         """
         super().__init__()
 
@@ -57,15 +55,9 @@ class TableIntegerBox(QSpinBox):
         # set the initial value to whatever was inputted into __init__
         self.setValue(value)
 
-        # left align interior text
-        self.setAlignment(Qt.AlignmentFlag.AlignLeft)
-
         # show/don't show buttons based on inputs
         if show_buttons:
             self.setButtonSymbols(QSpinBox.ButtonSymbols.UpDownArrows)
         else:
             self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
 
-        # if scrolling ought to be ignored then ignore it
-        if ignore_scroll:
-            self.wheelEvent = lambda event: event.ignore()

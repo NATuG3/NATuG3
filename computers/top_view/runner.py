@@ -16,7 +16,7 @@ class Plot(QWidget):
         # set layout of widget
         self.setLayout(QVBoxLayout())
 
-        # initilize the widget
+        # initialize the widget
         self.load()
 
     def load(self):
@@ -32,7 +32,7 @@ class Plot(QWidget):
 
         # fetch nucleic acid settings and the current domains
         self.settings = configuration.nucleic_acid.storage.current
-        self.domains = configuration.domains.storage.current
+        self.domains = configuration.domains.storage.current.domains
 
         self.worker = computers.top_view.worker.Plot(
             self.domains, self.settings.D, self.settings.theta_c, self.settings.theta_s
@@ -55,8 +55,8 @@ class Plot(QWidget):
             pxMode=False,
         )
 
-        # increase the view box padding, since...
-        # our symbols are VERY large circles and pyqtgraph calculates padding from the actual points, so the circles get cut off
+        # increase the view box padding, since... our symbols are VERY large circles and pyqtgraph calculates padding
+        # from the actual points, so the circles get cut off
         plotted_view_box = main_plot.getViewBox()
         plotted_view_box.setDefaultPadding(padding=0.18)
 

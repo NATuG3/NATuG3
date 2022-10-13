@@ -1,84 +1,63 @@
 import logging
 import configuration.settings
-from typing import Tuple, Literal
 from constants.directions import *
 import pickle
 import atexit
+from dataclasses import dataclass
+from computers.datatypes import Domain
+from typing import List
+from helpers import inverse
 
 
 restored_filename = f"configuration/domains/restored.{configuration.settings.extension}"
+
 current = None
+settings = None
 
 logger = logging.getLogger(__name__)
 
 
-class Domain:
+@dataclass()
+class Domains:
     """
-    Domain storage object.
-
-    Attributes:
-        theta_interior (int): Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency. Multiple of characteristic angle.
-        theta_switch_multiple (int): Strand switch angle per domain transition. Multiple of strand switch angle.
-        helix_joints (tuple): The upwardness/downwardness of the left and right helix joint.
+    Container for multiple domains.
     """
+    subunit_domains: List[Domain]
+    symmetry: int
 
-    def __init__(
-        self,
-        theta_interior_multiple: int,
-        helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
-        count: int,
-    ):
-        """
-        Create domains dataclass.
+    @property
+    def domains(self):
+        """List of all domains."""
+        return tuple(self.subunit_domains * self.symmetry)
 
-        Args:
-            theta_interior_multiple (int):
-                Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency. Multiple of characteristic angle.
-            helix_joints (tuple):
-                (left_joint, right_joint) where left/right_joint are constants.directions.UP/DOWN.
-            count (int):
-                Number of initial NEMids/strand to generate.
-        """
-        # multiple of the characteristic angle (theta_c) for the interior angle
-        # between this domains[this domain's index] and this domains[this domain's index + 1]
-        self.theta_interior_multiple: int = theta_interior_multiple
+    @property
+    def subunit_count(self):
+        """Number of domains per subunit."""
+        return len(self.subunit_domains)
 
-        # the left and right helical joints
-        # constants.directions.left = 0
-        # constants.directions.right = 1
-        # so...
-        # format is (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN
-        self.helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]] = helix_joints
-
-        # store the number of initial NEMids/strand to generate
-        self.count = count
-
-        # theta_switch_multiple
-        # indicates that the left helix joint to right helix joint goes either...
-        # (-1) up to down; (0) both up/down; (1) down to up
-        #
-        # this does not need to be defined if theta_switch_multiple is defined
-        helix_joints = tuple(helix_joints)  # ensure helix_joints is a tuple
-        if helix_joints == (UP, DOWN):
-            self.theta_switch_multiple = -1
-        elif helix_joints == (UP, UP):
-            self.theta_switch_multiple = 0
-        elif helix_joints == (DOWN, DOWN):
-            self.theta_switch_multiple = 0
-        elif helix_joints == (DOWN, UP):
-            self.theta_switch_multiple = 1
+    @subunit_count.setter
+    def subunit_count(self, new_subunit_count):
+        # if the subunit count has decreased then trim off extra domains
+        if new_subunit_count < self.subunit_count:
+            self.subunit_domains = self.subunit_domains[:new_subunit_count]
+        # if the subunit count has increased then add placeholder domains based on last domain in domain list
         else:
-            raise ValueError("Invalid helical joint integer", helix_joints)
+            while self.subunit_count < new_subunit_count:
+                previous_domain = self.subunit_domains[-1]
+                # the new template domains will be of altering strand directions with assumed
+                # strand switches of 0
+                self.subunit_domains.append(
+                    Domain(
+                        previous_domain.theta_interior_multiple,
+                        [inverse(previous_domain.helix_joints[1])] * 2,
+                        previous_domain.count
+                           )
+                )
 
-    def __repr__(self) -> str:
-        return (
-            f"domain("
-            f"Θ_interior_multiple={self.theta_interior_multiple}, "
-            f"helix_joints=(left={self.helix_joints[LEFT]}, "
-            f"right={self.helix_joints[RIGHT]}, "
-            f"Θ_switch_multiple={self.theta_switch_multiple}"
-            f")"
-        )
+    @property
+    def total_count(self):
+        """Total number of domains"""
+        return self.subunit_count * self.symmetry
 
 
 def load():
@@ -102,13 +81,12 @@ def dump():
     """Save current domains state for state restoration on load."""
     with open(restored_filename, "wb") as restored_file:
         # perform data validation before save
-        for domain in current:
-            if not isinstance(domain, Domain):
-                logger.critical("Data validation for domains dump failed.")
-                raise TypeError(
-                    "There is a domain in the domains list that is not a domain", domain
-                )
+        if not isinstance(current, Domains):
+            logger.critical("Data validation for domains dump failed.")
+            raise TypeError(
+                "Domains container is of wrong type.", Domains
+            )
         pickle.dump(current, restored_file)
 
 
-default = [Domain(9, (UP, UP), 50)] * 14
+default = Domains(([Domain(9, (UP, UP), 50)] * 14), 1)

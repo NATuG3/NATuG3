@@ -41,7 +41,7 @@ class Plot(QWidget):
 
         # fetch nucleic acid settings and the current domains
         self.settings = configuration.nucleic_acid.storage.current
-        self.domains = configuration.domains.storage.current
+        self.domains = configuration.domains.storage.current.domains
         self.count = configuration.main.count
 
         # create instance of dna_nanotube_tools side view generation
@@ -91,9 +91,6 @@ class Plot(QWidget):
                         1
                     ]  # set the color to be the first option of current color scheme (which is "colors")
 
-                # domain#i-up or domain#i-down
-                title = f"domain#{index}-{str(strand_direction).replace('0','up').replace('1','down')}"
-
                 # obtain an array of x and z coords from the points container
                 x_coords = self.worker.x_coords[index][strand_direction]
                 z_coords = self.worker.z_coords[index][strand_direction]
@@ -101,7 +98,6 @@ class Plot(QWidget):
                 main_plot.plot(  # actually plot the current strand of the current domain
                     x_coords,
                     z_coords,
-                    title=title,  # name of what was just plotted
                     symbol=symbol,  # type of symbol (in this case up/down arrow)
                     symbolSize=6,  # size of arrows in px
                     pxMode=True,  # means that symbol size is in px

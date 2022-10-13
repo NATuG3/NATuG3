@@ -7,7 +7,6 @@ from constants.directions import *
 import helpers
 from resources.workers import fetch_icon
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -20,15 +19,14 @@ class Panel(QWidget):
         # load in the panel's designer UI
         uic.loadUi("configuration/domains/panel.ui", self)
 
-        # style buttons
-        self.update_domains_table_button.setIcon(fetch_icon("reload-outline"))
-
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self)
         self.layout().addWidget(self.table)
 
         # set initial values of domain table configuration widgets
-        self.domains_per_subunit.setValue(len(configuration.domains.storage.current))
+        self.subunit_count.setValue(configuration.domains.storage.current.subunit_count)
+        self.symmetry.setValue(configuration.domains.storage.current.symmetry)
+        self.total_count.setValue(configuration.domains.storage.current.total_count)
 
         # hook all widgets that need hooking
         self._hook_widgets()
@@ -38,49 +36,16 @@ class Panel(QWidget):
     def _hook_widgets(self):
         """Hook all widgets (buttons, boxes, ext.)."""
 
-        def update_domains_table(button_state):
-            """Worker for update domains table button"""
-            previous_domains_count = len(configuration.domains.storage.current)
-            new_domains_count = self.domains_per_subunit.value()
+        @self.update_table.clicked.connect
+        def _():
+            """Called when a domains settings input box is updated."""
+            configuration.domains.storage.current.subunit_count = self.subunit_count.value()
+            configuration.domains.storage.current.symmetry = self.symmetry.value()
+            # update total count (=subunit_count*symmetry)
+            self.total_count.setValue(configuration.domains.storage.current.total_count)
 
-            # if the domains list needs to be trimmed get user confirmation first
-            if new_domains_count < previous_domains_count:
-                if helpers.confirm(
-                    self,
-                    "Confirm domain deletion",
-                    "The new domains/subunit value is less than the previous "
-                    "one. This means that the domains list will need to be "
-                    "truncated. Are you sure you want to lower the value of "
-                    "the domains/subunit?",
-                ):
-                    configuration.domains.storage.current = (
-                        configuration.domains.storage.current[:new_domains_count]
-                    )
-            # add the additional domains
-            else:
-                # for each new requested domain append a template domain
-                for i in range(new_domains_count - previous_domains_count):
-                    # generate new domain placeholders based on previous domain
-                    last_domain = configuration.domains.storage.current[-1]
-
-                    # switch the strand direction by default (but w/o strand switches)
-                    helix_joints = last_domain.helix_joints[RIGHT]
-                    helix_joints = helpers.inverse(helix_joints)
-                    helix_joints = [helix_joints] * 2
-
-                    # reuse theta interior and count of previous domain
-                    theta_interior_multiple = last_domain.theta_interior_multiple
-                    count = last_domain.count
-
-                    # template/placeholder domain
-                    configuration.domains.storage.current.append(
-                        configuration.domains.storage.Domain(theta_interior_multiple, helix_joints, count)
-                    )
-
-            # refresh the table with the additional/lesser domains
-            self.table.dump_domains(configuration.domains.storage.current)
-
-        self.update_domains_table_button.clicked.connect(update_domains_table)
+            # update domains table
+            self.table.dump_domains(configuration.domains.storage.current.subunit_domains)
 
 
 class Table(QTableWidget):
@@ -102,7 +67,7 @@ class Table(QTableWidget):
         self._style()
 
         # dump the domains of the previous save
-        self.dump_domains(configuration.domains.storage.current)
+        self.dump_domains(configuration.domains.storage.current.subunit_domains)
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -214,7 +179,8 @@ class Table(QTableWidget):
 
     def cell_value_changed(self):
         """Called whenever a cell's value changes"""
-        # update the current domains list
-        configuration.domains.storage.current = self.load_domains()
+        # update the current subunit domains list
+        configuration.domains.storage.current.subunit_domains = self.load_domains()
+
         # uneditable domain values may have changed
-        self.dump_domains(configuration.domains.storage.current)
+        self.dump_domains(configuration.domains.storage.current.subunit_domains)

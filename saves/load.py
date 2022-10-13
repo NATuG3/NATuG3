@@ -31,8 +31,17 @@ def worker(filename):
 
     # fetch the domains table in the domains tab of the config panel
     domains_table = storage.windows.constructor.configuration.tabs.domains.table
-    # dump the new (updated) domains array
-    domains_table.dump_domains(package.domains)
+
+    # update all domains settings/dump domains
+    storage.windows.constructor.configuration.tabs.domains.subunit_count.setValue(
+        configuration.domains.storage.current.subunit_count
+    )
+    storage.windows.constructor.configuration.tabs.domains.symmetry.setValue(
+        configuration.domains.storage.current.symmetry
+    )
+    storage.windows.constructor.configuration.tabs.domains.table.dump_domains(
+        configuration.domains.storage.current.subunit_domains
+    )
 
     logger.info(f"Loaded save @{filename}.")
 

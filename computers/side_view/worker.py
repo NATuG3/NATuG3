@@ -62,10 +62,7 @@ class Plot:
 
     def compute(self) -> DomainsContainerType:
         """
-        Compute data for count number of NEMids.
-
-        Args:
-            count (int): Number of NEMids to compute data for.
+        Compute NEMid data.
 
         Returns:
             DomainsContainerType: A domains container of all NEMids.
@@ -201,6 +198,7 @@ class Plot:
                 )
 
         return self._z_coords
+
 
     def __repr__(self) -> str:
         output = "side_view("

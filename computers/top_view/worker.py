@@ -28,13 +28,17 @@ class Plot:
             theta_c (float, optional): Characteristic angle.
             theta_s (float, optional): Strand switch angle.
         """
-        self.domains = domains
-        self.domain_count = len(domains)
-        self.D = D
-        self.computed = False  # has compute() been called?
+        self.v_coords = None
+        self.u_coords = None
+        self.theta_deltas = None
 
-        self._theta_c = theta_c
-        self._theta_s = theta_s
+        self.domains = domains
+        self.D = D
+
+        self.theta_c = theta_c
+        self.theta_s = theta_s
+
+        self.computed = False  # has compute() been called?
 
     def compute(self):
         """
@@ -45,14 +49,14 @@ class Plot:
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
 
-        for domain_index in range(self.domain_count):
+        for index, domain in enumerate(self.domains):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                self.domains[domain_index - 1].theta_switch_multiple * self._theta_s
+                self.domains[index - 1].theta_switch_multiple * self.theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                self.domains[domain_index - 1].theta_interior_multiple * self._theta_c
+                self.domains[index - 1].theta_interior_multiple * self.theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
