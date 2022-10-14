@@ -27,7 +27,7 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="">
+    <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Settings</string>
      </property>
@@ -194,7 +194,7 @@
       <item row="0" column="6" rowspan="2">
        <widget class="QPushButton" name="update_table">
         <property name="text">
-         <string>Update Table</string>
+         <string/>
         </property>
        </widget>
       </item>

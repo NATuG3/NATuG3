@@ -1,10 +1,10 @@
 import logging
 from PyQt6 import uic
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QAbstractItemView
 import configuration.domains.storage
 from configuration.domains.widgets import *
 from constants.directions import *
-import helpers
 from resources.workers import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,9 @@ class Panel(QWidget):
         # load in the panel's designer UI
         uic.loadUi("configuration/domains/panel.ui", self)
 
+        # set reload table widget
+        self.update_table.setIcon(fetch_icon("reload-outline"))
+
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self)
         self.layout().addWidget(self.table)
@@ -32,20 +35,39 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         logger.info("Loaded domains tab of configuration panel.")
+        self.table.cellUpdated.connect(self.refresh)
 
     def refresh(self):
+        """Refresh panel settings/domain table."""
+        # update storage settings
         configuration.domains.storage.current.subunit.count = self.subunit_count.value()
         configuration.domains.storage.current.symmetry = self.symmetry.value()
 
-        # update total count (=subunit_count*symmetry)
+        # update settings boxes
         self.total_count.setValue(configuration.domains.storage.current.count)
 
-        # update domains table
-        self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
+        # try:
+        #     # block signals while updating table values so that the updating of the table
+        #     # values does not trigger infinite recursion
+        #     self.table.blockSignals(True)
+        #
+        #     # update domain table settings boxes
+        #     configuration.domains.storage.current.subunit.count = self.subunit_count.value()
+        #     configuration.domains.storage.current.symmetry = self.symmetry.value()
+        #
+        #     # update total count (=subunit_count*symmetry)
+        #     self.total_count.setValue(configuration.domains.storage.current.count)
+        #
+        #     # update actual domains table
+        #     self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
+        # finally:
+        #     self.table.blockSignals(False)
 
 
 class Table(QTableWidget):
     """Nucleic Acid Config Tab."""
+
+    cellUpdated = pyqtSignal()
 
     def __init__(self, parent) -> None:
         super().__init__()
@@ -98,41 +120,40 @@ class Table(QTableWidget):
                 i, QHeaderView.ResizeMode.Stretch
             )
 
-    def dump_domains(self, domains_list: list) -> None:
+    def dump_domains(self, domains: list) -> None:
         """Dump a list of domain objects."""
 
         # create rows before we input widgets
-        self.setRowCount(len(domains_list))
+        self.setRowCount(len(domains))
 
         # clear out the side headers list
         self.side_headers = []
 
         # insert all domains
-        for index, domain in enumerate(domains_list):
+        for index, domain in enumerate(domains):
             # column 0 - left helical joint
             widget = DirectionalButton(self, domain.helix_joints[LEFT])
-            widget.clicked.connect(self.cell_value_changed)
+            widget.clicked.connect(self.cellUpdated.emit)
             self.setCellWidget(index, 0, widget)
 
             # column 1 - right helical joint
             widget = DirectionalButton(self, domain.helix_joints[RIGHT])
-            widget.clicked.connect(self.cell_value_changed)
+            widget.clicked.connect(self.cellUpdated.emit)
             self.setCellWidget(index, 1, widget)
 
             # column 2 - theta switch multiple
             widget = TableIntegerBox(domain.theta_switch_multiple)
             widget.setEnabled(False)
-            widget.valueChanged.connect(self.cell_value_changed)
             self.setCellWidget(index, 2, widget)
 
             # column 3 - theta interior multiple
             widget = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True)
-            widget.valueChanged.connect(self.cell_value_changed)
+            widget.valueChanged.connect(self.cellUpdated.emit)
             self.setCellWidget(index, 3, widget)
 
             # column 4 - initial NEMid count
             widget = TableIntegerBox(domain.count)
-            widget.valueChanged.connect(self.cell_value_changed)
+            widget.valueChanged.connect(self.cellUpdated.emit)
             self.setCellWidget(index, 4, widget)
 
             self.side_headers.append(f"#{index + 1}")
@@ -173,6 +194,3 @@ class Table(QTableWidget):
 
         return domains
 
-    def cell_value_changed(self):
-        """Called whenever a cell's value changes"""
-        self.parent.refresh()

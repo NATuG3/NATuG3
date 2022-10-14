@@ -88,7 +88,7 @@ def dump():
         if not isinstance(current, Domains):
             logger.critical("Data validation for domains dump failed.")
             raise TypeError(
-                "Domains container is of wrong type.", Domains
+                "Domains container is of wrong type.", current
             )
         pickle.dump(current, restored_file)
 

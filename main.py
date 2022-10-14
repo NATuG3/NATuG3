@@ -1,8 +1,3 @@
-import sys
-from time import time
-import logging
-
-
 def main():
     import storage
     import configuration.domains
@@ -47,6 +42,10 @@ def main():
 
 
 if __name__ == "__main__":
+    import sys
+    from time import time
+    import logging
+
     global logger
 
     logging.basicConfig(

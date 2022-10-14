@@ -50,8 +50,8 @@ class Panel(QWidget):
 
         @self.update_graphs.clicked.connect
         def _():
-            storage.constructor.panels.top_view.setWidget(storage.top_view.ui())
-            storage.constructor.panels.side_view.setWidget(storage.side_view.ui())
+            storage.windows.constructor.panels.top_view.setWidget(storage.top_view.ui())
+            storage.windows.constructor.setCentralWidget(storage.side_view.ui())
 
         # trigger a resize event on tab change
         self.tab_area.currentChanged.connect(storage.windows.constructor.resizeEvent)
