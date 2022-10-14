@@ -9,11 +9,8 @@ import storage
 import saves
 
 
-parent = storage.windows.constructor.menu_bar
-
-
 class File(QMenu):
-    def __init__(self):
+    def __init__(self, parent):
         super().__init__("&File", parent)
 
         # container for actions
@@ -40,8 +37,8 @@ class File(QMenu):
         save_as.setStatusTip("Save current stage as new file")
 
 
-class view(QMenu):
-    def __init__(self):
+class View(QMenu):
+    def __init__(self, parent):
         super().__init__("&View", parent)
 
         # container for actions
@@ -70,8 +67,8 @@ class view(QMenu):
         )
 
 
-class help(QMenu):
-    def __init__(self):
+class Help(QMenu):
+    def __init__(self, parent):
         super().__init__("&Help", parent)
 
         # container for actions

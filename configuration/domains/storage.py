@@ -3,9 +3,7 @@ import configuration.settings
 from constants.directions import *
 import pickle
 import atexit
-from dataclasses import dataclass
 from computers.datatypes import Domain
-from typing import List
 from helpers import inverse
 
 restored_filename = f"configuration/domains/restored.{configuration.settings.extension}"

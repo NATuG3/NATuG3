@@ -44,7 +44,6 @@ class SideView:
             theta_b (float): Base angle (in degrees).
             theta_c (float): Characteristic angle (in degrees).
         """
-
         self.domains = domains
 
         self.Z_b = Z_b

@@ -1,4 +1,5 @@
-from PyQt6.QtWidgets import QSpinBox, QPushButton
+from PyQt6.QtWidgets import QPushButton, QSpinBox, QStyle, QStyleOptionSpinBox
+from PyQt6.QtCore import pyqtSignal
 
 from constants.directions import *
 from typing import Literal
@@ -38,7 +39,10 @@ class DirectionalButton(QPushButton):
 class TableIntegerBox(QSpinBox):
     """Spin box for use in QTableWidgets."""
 
-    def __init__(self, value, show_buttons=False):
+    up_button_clicked = pyqtSignal()
+    down_button_clicked = pyqtSignal()
+
+    def __init__(self, value, show_buttons=False, minimum=0, maximum=999):
         """
         Initialize the integer box.
 
@@ -49,8 +53,8 @@ class TableIntegerBox(QSpinBox):
         super().__init__()
 
         # set range from -1 to 100
-        self.setMinimum(-1)
-        self.setMaximum(100000)
+        self.setMinimum(minimum)
+        self.setMaximum(maximum)
 
         # set the initial value to whatever was inputted into __init__
         self.setValue(value)
@@ -61,3 +65,18 @@ class TableIntegerBox(QSpinBox):
         else:
             self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
 
+
+    def mousePressEvent(self, event):
+        # https://stackoverflow.com/a/65226649
+        super().mousePressEvent(event)
+
+        opt = QStyleOptionSpinBox()
+        self.initStyleOption(opt)
+
+        control = self.style().hitTestComplexControl(
+            QStyle.ComplexControl.CC_SpinBox, opt, event.pos(), self
+        )
+        if control == QStyle.SubControl.SC_SpinBoxUp:
+            self.up_button_clicked.emit()
+        elif control == QStyle.SubControl.SC_SpinBoxDown:
+            self.down_button_clicked.emit()

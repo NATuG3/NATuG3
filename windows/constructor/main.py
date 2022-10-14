@@ -42,9 +42,6 @@ class Window(QMainWindow):
         self._top_view()
         self._side_view()
 
-        # store a reference to self in references for cross module use
-        storage.windows.constructor = self
-
         # utilize inherited methods to set up the main window
         self.setWindowTitle("DNA Constructor")
 
@@ -77,6 +74,9 @@ class Window(QMainWindow):
         # trigger a resize event when the floatingness of the configuration panel changes
         self.panels.configuration.topLevelChanged.connect(self.resizeEvent)
 
+        # trigger a resize event on tab change
+        self.configuration.tab_area.currentChanged.connect(self.resizeEvent)
+
         # dock the new dockable configuration widget
         self.addDockWidget(
             Qt.DockWidgetArea.RightDockWidgetArea, self.panels.configuration
@@ -95,7 +95,7 @@ class Window(QMainWindow):
         )
 
         # attach actual top view widget to docked top view widget
-        self.panels.top_view.setWidget(storage.top_view.ui())
+        self.panels.top_view.setWidget(storage.plots.top_view.ui())
 
         # top view is only allowed on the sides
         self.panels.top_view.setAllowedAreas(
@@ -123,7 +123,7 @@ class Window(QMainWindow):
         self.side_view.setStatusTip("A plot of the side view of all domains")
 
         # add actual plot to GroupBox
-        self.side_view.layout().addWidget(storage.side_view.ui())
+        self.side_view.layout().addWidget(storage.plots.side_view.ui())
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)
@@ -146,9 +146,9 @@ class Window(QMainWindow):
         import windows.constructor.menus as menus
 
         # add all the menus to the filemenu
-        self.menu_bar.addMenu(menus.File())
-        self.menu_bar.addMenu(menus.view())
-        self.menu_bar.addMenu(menus.help())
+        self.menu_bar.addMenu(menus.File(self))
+        self.menu_bar.addMenu(menus.View(self))
+        self.menu_bar.addMenu(menus.Help(self))
 
         # place the menu bar object into the actual menu bar
         self.setMenuBar(self.menu_bar)
@@ -164,7 +164,7 @@ class Window(QMainWindow):
         """
         # side view resizing
         #
-        self.side_view.setMinimumWidth(int(4 * self.size().width() / 9))
+        self.centralWidget().setMinimumWidth(int(4 * self.size().width() / 9))
 
         # top view resizing
         #

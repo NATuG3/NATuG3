@@ -1,7 +1,9 @@
 import logging
+from types import SimpleNamespace
+
 from PyQt6 import uic
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QAbstractItemView
+
 import configuration.domains.storage
 from configuration.domains.widgets import *
 from constants.directions import *
@@ -35,7 +37,11 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         logger.info("Loaded domains tab of configuration panel.")
-        self.table.cellUpdated.connect(self.refresh)
+        self.table.helix_joint_updated.connect(self.updater)
+
+    def updater(self):
+        configuration.domains.storage.current.subunit.domains = self.table.load_domains()
+        self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
 
     def refresh(self):
         """Refresh panel settings/domain table."""
@@ -46,34 +52,21 @@ class Panel(QWidget):
         # update settings boxes
         self.total_count.setValue(configuration.domains.storage.current.count)
 
-        # try:
-        #     # block signals while updating table values so that the updating of the table
-        #     # values does not trigger infinite recursion
-        #     self.table.blockSignals(True)
-        #
-        #     # update domain table settings boxes
-        #     configuration.domains.storage.current.subunit.count = self.subunit_count.value()
-        #     configuration.domains.storage.current.symmetry = self.symmetry.value()
-        #
-        #     # update total count (=subunit_count*symmetry)
-        #     self.total_count.setValue(configuration.domains.storage.current.count)
-        #
-        #     # update actual domains table
-        #     self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
-        # finally:
-        #     self.table.blockSignals(False)
-
 
 class Table(QTableWidget):
     """Nucleic Acid Config Tab."""
 
-    cellUpdated = pyqtSignal()
+    helix_joint_updated = pyqtSignal()
 
     def __init__(self, parent) -> None:
         super().__init__()
         # header storage areas
         self.side_headers = []
         self.top_headers = []
+
+        # all current row data
+        # (domain index = row index)
+        self.rows = []
 
         # store parent object
         self.parent = parent
@@ -121,7 +114,12 @@ class Table(QTableWidget):
             )
 
     def dump_domains(self, domains: list) -> None:
-        """Dump a list of domain objects."""
+        """
+        Dump a list of domain objects.
+
+        Args:
+            domains (List(Domain)): A list of all domains to dump
+        """
 
         # create rows before we input widgets
         self.setRowCount(len(domains))
@@ -129,34 +127,52 @@ class Table(QTableWidget):
         # clear out the side headers list
         self.side_headers = []
 
+        # container for current row items
+        self.rows.clear()
+
         # insert all domains
         for index, domain in enumerate(domains):
+            # container for currently-being-added widgets
+            row = SimpleNamespace()
+
             # column 0 - left helical joint
-            widget = DirectionalButton(self, domain.helix_joints[LEFT])
-            widget.clicked.connect(self.cellUpdated.emit)
-            self.setCellWidget(index, 0, widget)
+            row.left_helix_joint = DirectionalButton(self, domain.helix_joints[LEFT])
+            row.left_helix_joint.clicked.connect(self.helix_joint_updated.emit)
+            self.setCellWidget(index, 0, row.left_helix_joint)
 
             # column 1 - right helical joint
-            widget = DirectionalButton(self, domain.helix_joints[RIGHT])
-            widget.clicked.connect(self.cellUpdated.emit)
-            self.setCellWidget(index, 1, widget)
+            row.right_helix_joint = DirectionalButton(self, domain.helix_joints[RIGHT])
+            row.right_helix_joint.clicked.connect(self.helix_joint_updated.emit)
+            self.setCellWidget(index, 1, row.right_helix_joint)
 
             # column 2 - theta switch multiple
-            widget = TableIntegerBox(domain.theta_switch_multiple)
-            widget.setEnabled(False)
-            self.setCellWidget(index, 2, widget)
+            row.theta_switch_multiple = TableIntegerBox(domain.theta_switch_multiple)
+            row.theta_switch_multiple.setEnabled(False)
+            self.setCellWidget(index, 2, row.theta_switch_multiple)
 
             # column 3 - theta interior multiple
-            widget = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True)
-            widget.valueChanged.connect(self.cellUpdated.emit)
-            self.setCellWidget(index, 3, widget)
+            row.theta_interior_multiple = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True, minimum=1, maximum=20)
+            self.setCellWidget(index, 3, row.theta_interior_multiple)
 
             # column 4 - initial NEMid count
-            widget = TableIntegerBox(domain.count)
-            widget.valueChanged.connect(self.cellUpdated.emit)
-            self.setCellWidget(index, 4, widget)
+            row.domain_count = TableIntegerBox(domain.count)
+            self.setCellWidget(index, 4, row.domain_count)
 
             self.side_headers.append(f"#{index + 1}")
+
+            # append to the main row storage container
+            self.rows.append(row)
+
+        def down_clicked(index):
+            configuration.domains.storage.current.subunit.domains[index - 1].theta_interior_multiple += 1
+            configuration.domains.storage.current.subunit.domains[index].theta_interior_multiple -= 2
+            configuration.domains.storage.current.subunit.domains[index + 1].theta_interior_multiple += 1
+            self.dump_domains()
+
+        for index, row in enumerate(self.rows):
+            print(index)
+            row.theta_interior_multiple.down_button_clicked.connect(lambda index: down_clicked)
+
 
         self.setVerticalHeaderLabels(self.side_headers)
 
@@ -193,4 +209,3 @@ class Table(QTableWidget):
             domains.append(domain)
 
         return domains
-
