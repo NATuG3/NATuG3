@@ -163,17 +163,6 @@ class Table(QTableWidget):
             # append to the main row storage container
             self.rows.append(row)
 
-        def down_clicked(index):
-            configuration.domains.storage.current.subunit.domains[index - 1].theta_interior_multiple += 1
-            configuration.domains.storage.current.subunit.domains[index].theta_interior_multiple -= 2
-            configuration.domains.storage.current.subunit.domains[index + 1].theta_interior_multiple += 1
-            self.dump_domains()
-
-        for index, row in enumerate(self.rows):
-            print(index)
-            row.theta_interior_multiple.down_button_clicked.connect(lambda index: down_clicked)
-
-
         self.setVerticalHeaderLabels(self.side_headers)
 
     def load_domains(self) -> list:
