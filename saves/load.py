@@ -29,9 +29,6 @@ def worker(filename):
     # update the current domains array
     configuration.domains.storage.current: List[Domain] = package.domains
 
-    # fetch the domains table in the domains tab of the config panel
-    domains_table = storage.windows.constructor.configuration.tabs.domains.table
-
     # update all domains settings/dump domains
     storage.windows.constructor.configuration.tabs.domains.subunit_count.setValue(
         configuration.domains.storage.current.subunit.count

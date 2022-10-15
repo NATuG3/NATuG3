@@ -8,6 +8,7 @@ import configuration.domains.storage
 from configuration.domains.widgets import *
 from constants.directions import *
 from resources.workers import fetch_icon
+import helpers
 
 logger = logging.getLogger(__name__)
 
@@ -37,20 +38,25 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         logger.info("Loaded domains tab of configuration panel.")
-        self.table.helix_joint_updated.connect(self.updater)
+        self.table.helix_joint_updated.connect(self.refresh)
 
-    def updater(self):
-        configuration.domains.storage.current.subunit.domains = self.table.load_domains()
-        self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
+        self.symmetry.valueChanged.connect(self.refresh)
+        self.subunit_count.valueChanged.connect(self.refresh)
 
     def refresh(self):
         """Refresh panel settings/domain table."""
+        # obtain current domain inputs
+        configuration.domains.storage.current.subunit.domains = self.table.fetch_domains()
+
         # update storage settings
         configuration.domains.storage.current.subunit.count = self.subunit_count.value()
         configuration.domains.storage.current.symmetry = self.symmetry.value()
 
         # update settings boxes
         self.total_count.setValue(configuration.domains.storage.current.count)
+
+        # refresh table
+        self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
 
 
 class Table(QTableWidget):
@@ -151,7 +157,8 @@ class Table(QTableWidget):
             self.setCellWidget(index, 2, row.theta_switch_multiple)
 
             # column 3 - theta interior multiple
-            row.theta_interior_multiple = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True, minimum=1, maximum=20)
+            row.theta_interior_multiple = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True, minimum=1,
+                                                          maximum=20)
             self.setCellWidget(index, 3, row.theta_interior_multiple)
 
             # column 4 - initial NEMid count
@@ -165,7 +172,7 @@ class Table(QTableWidget):
 
         self.setVerticalHeaderLabels(self.side_headers)
 
-    def load_domains(self) -> list:
+    def fetch_domains(self) -> list:
         """
         Obtain a list of the currently chosen domains.
 
