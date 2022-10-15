@@ -184,7 +184,9 @@ class Table(QTableWidget):
                 minimum=1,
                 maximum=20,
             )
-            row.theta_interior_multiple.valueChanged.connect(self.cell_widget_updated.emit)
+            row.theta_interior_multiple.valueChanged.connect(
+                self.cell_widget_updated.emit
+            )
             self.setCellWidget(index, 3, row.theta_interior_multiple)
 
             # column 4 - initial NEMid count
@@ -205,7 +207,7 @@ class Table(QTableWidget):
                 if i == len(self.rows):
                     surrounding = (i - 1, i, 0)
                 elif i == 0:
-                    surrounding = (len(self.rows)-1, 0, i + 1)
+                    surrounding = (len(self.rows) - 1, 0, i + 1)
                 else:
                     surrounding = (i - 1, i, i + 1)
 
