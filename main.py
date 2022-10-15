@@ -1,21 +1,24 @@
-def main():
-    import logging
+import logging
+from time import time
 
+# main script logger
+logger = logging.getLogger("main")
+
+# mute pyqt logs
+logging.getLogger("PyQt6").setLevel(logging.INFO)
+
+# log boot statement
+logger.debug(f"Booting @ {time()}")
+
+
+def main():
     # set log level
     logging.basicConfig(
         level=logging.DEBUG,
     )
-
-    import config
+    import config  # for initialization
     import storage
-    from time import time
     import sys
-
-    # mute pyqt logs
-    logging.getLogger("PyQt6").setLevel(logging.INFO)
-
-    # log boot statement
-    logging.debug(f"Booting @ {time()}")
 
     if sys.platform.startswith("win"):
         # to get icon to work properly on Windows this code must be run
@@ -28,10 +31,10 @@ def main():
     # show the constructor window
     storage.windows.constructor.show()
     storage.windows.constructor.resizeEvent(None)  # trigger initial resize event
-    logging.debug("Set up main window")
+    logger.debug("Set up main window")
 
     # begin app event loop
-    logging.debug("Beginning event loop...")
+    logger.debug("Beginning event loop...")
     sys.exit(storage.application.exec())
 
 

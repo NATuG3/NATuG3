@@ -27,7 +27,9 @@ class SideView:
     def __init__(
         self,
         domains: list,
-        Z_b: float,
+        T: float,
+        B: int,
+        H: float,
         Z_s: float,
         theta_s: float,
         theta_b: float,
@@ -38,7 +40,9 @@ class SideView:
 
         Args:
             domains (list): List of domains.
-            Z_b (float): Base height (in nm)
+            T (int): There are T turns per B bases.
+            B (int): There are B bases per T turns.
+            H (float): Height of one helical twist.
             Z_s (float): Strand switch distance (in nm).
             theta_s (float): Switch angle (in degrees).
             theta_b (float): Base angle (in degrees).
@@ -46,7 +50,11 @@ class SideView:
         """
         self.domains = domains
 
-        self.Z_b = Z_b
+        self.T = T
+        self.B = B
+        self.H = H
+
+        self.Z_b = (T*H)/B
         self.Z_s = Z_s
 
         self.theta_s = theta_s
@@ -179,6 +187,12 @@ class SideView:
                 initial_z_coord = self._z_coords[index - 1][zeroed_strand][
                     initial_z_coord
                 ]
+
+                # move the initial Z coord down until it is as close to z=0 as possible
+                # this way the graphs don't skew upwards weirdly
+                while initial_z_coord > 0:
+                    initial_z_coord -= self.H
+                initial_z_coord += self.H
 
             # look at the left joint of the current domain
             # for calculating additional z coords

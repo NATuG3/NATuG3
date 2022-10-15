@@ -22,7 +22,9 @@ class Plots:
     def side_view(self):
         return SideView(
             config.domains.storage.current.domains,
-            config.nucleic_acid.storage.current.Z_b,
+            config.nucleic_acid.storage.current.T,
+            config.nucleic_acid.storage.current.B,
+            config.nucleic_acid.storage.current.H,
             config.nucleic_acid.storage.current.Z_s,
             config.nucleic_acid.storage.current.theta_s,
             config.nucleic_acid.storage.current.theta_b,
