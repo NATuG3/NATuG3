@@ -5,7 +5,6 @@ from constants.directions import *
 from typing import Literal
 from resources.workers import fetch_icon
 
-
 up_arrow, down_arrow = "↑", "↓"
 
 
@@ -52,15 +51,16 @@ class TableIntegerBox(QSpinBox):
         Args:
             value (float): Initial value of the widget.
             show_buttons (bool): Show/don't show +/- buttons of integer box.
+            minimum (int): Minimum allowed value.
+            maximum (int): Maximum allowed value.
         """
-        super().__init__()
+        super().__init__(
+            value=value, minimum=minimum, maximum=maximum
+        )
 
         # set range from -1 to 100
         self.setMinimum(minimum)
         self.setMaximum(maximum)
-
-        # set the initial value to whatever was inputted into __init__
-        self.setValue(value)
 
         # show/don't show buttons based on inputs
         if show_buttons:

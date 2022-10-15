@@ -4,7 +4,6 @@ import pickle
 import logging
 import saves.datatypes
 
-
 logger = logging.getLogger(__name__)
 
 

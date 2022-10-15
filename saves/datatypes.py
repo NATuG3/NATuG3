@@ -1,5 +1,5 @@
 import pickle
-import configuration.domains.storage
+import config.domains.storage
 
 
 class Save:
@@ -11,7 +11,7 @@ class Save:
     """
 
     def __init__(self):
-        self.domains = configuration.domains.storage.current
+        self.domains = config.domains.storage.current
 
     @classmethod
     def from_file(cls, filename):

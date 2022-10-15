@@ -45,14 +45,12 @@ class View(QMenu):
         self.actions = SimpleNamespace()
 
         # view -> "Config" -> hide/unhide
-        configuration = self.actions.configuration = self.addAction("Config")
-        configuration.setStatusTip("Display the configuration tab menu")
+        config = self.actions.config = self.addAction("Config")
+        config.setStatusTip("Display the config tab menu")
         # will be checked/unchecked based on if widget is shown
-        configuration.setIcon(fetch_icon("eye-outline"))
-        configuration.triggered.connect(
-            lambda: helpers.reverse_hidenness(
-                storage.windows.constructor.panels.configuration
-            )
+        config.setIcon(fetch_icon("eye-outline"))
+        config.triggered.connect(
+            lambda: helpers.reverse_hidenness(storage.windows.constructor.panels.config)
         )
 
         # view -> "top view" -> hide/unhide

@@ -108,7 +108,7 @@ class nucleoside:
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType]
 
     def __repr__(self) -> str:
-        return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None','unset')}"
+        return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None', 'unset')}"
 
     def __eq__(self, other):
         if not isinstance(other, type(self)):

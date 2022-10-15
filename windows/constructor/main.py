@@ -12,9 +12,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import configuration.main
-import configuration.nucleic_acid
-import configuration.domains.storage
+import config.main
+import config.nucleic_acid
+import config.domains.storage
 import storage
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class Window(QMainWindow):
         self.setWindowTitle("DNA Constructor")
 
         # add all widgets
-        self._configuration()
+        self._config()
 
         # initialize status bar
         self._status_bar()
@@ -54,33 +54,31 @@ class Window(QMainWindow):
         # initialize menu bar
         self._menu_bar()
 
-    def _configuration(self):
-        # create a dockable configuration widget
-        self.panels.configuration = QDockWidget()
+    def _config(self):
+        # create a dockable config widget
+        self.panels.config = QDockWidget()
 
         # set titles/descriptions
-        self.panels.configuration.setObjectName("Config Panel")
-        self.panels.configuration.setStatusTip("Config panel")
-        self.panels.configuration.setWindowTitle("Config")
+        self.panels.config.setObjectName("Config Panel")
+        self.panels.config.setStatusTip("Config panel")
+        self.panels.config.setWindowTitle("Config")
 
-        # store the actual link to the widget in self.configuration
-        self.configuration = configuration.main.Panel()
-        self.panels.configuration.setWidget(self.configuration)
+        # store the actual link to the widget in self.config
+        self.config = config.main.Panel()
+        self.panels.config.setWidget(self.config)
 
-        self.panels.configuration.setAllowedAreas(
+        self.panels.config.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
 
-        # trigger a resize event when the floatingness of the configuration panel changes
-        self.panels.configuration.topLevelChanged.connect(self.resizeEvent)
+        # trigger a resize event when the floatingness of the config panel changes
+        self.panels.config.topLevelChanged.connect(self.resizeEvent)
 
         # trigger a resize event on tab change
-        self.configuration.tab_area.currentChanged.connect(self.resizeEvent)
+        self.config.tab_area.currentChanged.connect(self.resizeEvent)
 
-        # dock the new dockable configuration widget
-        self.addDockWidget(
-            Qt.DockWidgetArea.RightDockWidgetArea, self.panels.configuration
-        )
+        # dock the new dockable config widget
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.panels.config)
 
     def _top_view(self):
         """Attach top view to main window/replace current top view widget"""
@@ -154,8 +152,8 @@ class Window(QMainWindow):
         Changes size of various widgets dynamically based on the main window's size.
 
         Notes:
-            - If domain tab of configuration panel is showing, makes configuration panel pop out and larger
-            - If domain tab of configuration panel is not showing, makes configuration panel unpop out and smaller
+            - If domain tab of config panel is showing, makes config panel pop out and larger
+            - If domain tab of config panel is not showing, makes config panel unpop out and smaller
         """
         # side view resizing
         #
@@ -170,24 +168,20 @@ class Window(QMainWindow):
         else:
             self.panels.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
 
-        # configuration resizing
+        # config resizing
         #
-        # if configuration is floating make the max size very large
-        if self.panels.configuration.isFloating():
-            self.panels.configuration.setMaximumWidth(600)
-        # otherwise check the current tab of the configuration panel
+        # if config is floating make the max size very large
+        if self.panels.config.isFloating():
+            self.panels.config.setMaximumWidth(600)
+        # otherwise check the current tab of the config panel
         else:
-            # if the domains tab of the configuration panel is visible:
-            if self.configuration.tabs.domains.isVisible():
-                # set the maximum width of configuration to be 3/8ths of the screen, and the minimum possible size
+            # if the domains tab of the config panel is visible:
+            if self.config.tabs.domains.isVisible():
+                # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.panels.configuration.setMaximumWidth(
-                    round(3 * self.size().width() / 8)
-                )
-                self.panels.configuration.setMinimumWidth(275)
-            # if the nucleic acid tab of the configuration panel is visible:
-            elif self.configuration.tabs.nucleic_acid.isVisible():
-                self.panels.configuration.setMaximumWidth(
-                    round(2 * self.size().width() / 8)
-                )
-                self.panels.configuration.setMinimumWidth(0)
+                self.panels.config.setMaximumWidth(round(3 * self.size().width() / 8))
+                self.panels.config.setMinimumWidth(275)
+            # if the nucleic acid tab of the config panel is visible:
+            elif self.config.tabs.nucleic_acid.isVisible():
+                self.panels.config.setMaximumWidth(round(2 * self.size().width() / 8))
+                self.panels.config.setMinimumWidth(0)

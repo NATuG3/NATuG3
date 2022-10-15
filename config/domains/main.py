@@ -1,14 +1,20 @@
 import logging
 from types import SimpleNamespace
+from copy import deepcopy
 
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget, QTableWidget, QHeaderView, QAbstractItemView
+from PyQt6.QtWidgets import (
+    QWidget,
+    QTableWidget,
+    QHeaderView,
+    QAbstractItemView,
+    QSizePolicy,
+)
 
-import configuration.domains.storage
-from configuration.domains.widgets import *
+import config.domains.storage
+from config.domains.widgets import *
 from constants.directions import *
 from resources.workers import fetch_icon
-
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +26,7 @@ class Panel(QWidget):
         super().__init__()
 
         # load in the panel's designer UI
-        uic.loadUi("configuration/domains/panel.ui", self)
+        uic.loadUi("config/domains/panel.ui", self)
 
         # set reload table widget
         self.update_table.setIcon(fetch_icon("reload-outline"))
@@ -29,15 +35,20 @@ class Panel(QWidget):
         self.table = Table(self)
         self.layout().addWidget(self.table)
 
-        # set initial values of domain table configuration widgets
-        self.subunit_count.setValue(configuration.domains.storage.current.subunit.count)
-        self.symmetry.setValue(configuration.domains.storage.current.symmetry)
-        self.total_count.setValue(configuration.domains.storage.current.count)
+        # set scaling settings for config and main table
+        _ = QSizePolicy()
+        _.setVerticalPolicy(QSizePolicy.Policy.Fixed)
+        self.config.setSizePolicy(_)
+
+        # set initial values of domain table config widgets
+        self.subunit_count.setValue(config.domains.storage.current.subunit.count)
+        self.symmetry.setValue(config.domains.storage.current.symmetry)
+        self.total_count.setValue(config.domains.storage.current.count)
 
         # hook update domains button
         self.update_table.clicked.connect(self.refresh)
 
-        logger.info("Loaded domains tab of configuration panel.")
+        logger.info("Loaded domains tab of config panel.")
         self.table.helix_joint_updated.connect(self.refresh)
 
         self.symmetry.valueChanged.connect(self.refresh)
@@ -46,25 +57,24 @@ class Panel(QWidget):
     def refresh(self):
         """Refresh panel settings/domain table."""
         # obtain current domain inputs
-        configuration.domains.storage.current.subunit.domains = (
-            self.table.fetch_domains()
-        )
+        config.domains.storage.current.subunit.domains = self.table.fetch_domains()
 
         # update storage settings
-        configuration.domains.storage.current.subunit.count = self.subunit_count.value()
-        configuration.domains.storage.current.symmetry = self.symmetry.value()
+        config.domains.storage.current.subunit.count = self.subunit_count.value()
+        config.domains.storage.current.symmetry = self.symmetry.value()
 
         # update settings boxes
-        self.total_count.setValue(configuration.domains.storage.current.count)
+        self.total_count.setValue(config.domains.storage.current.count)
 
         # refresh table
-        self.table.dump_domains(configuration.domains.storage.current.subunit.domains)
+        self.table.dump_domains(config.domains.storage.current.subunit.domains)
 
 
 class Table(QTableWidget):
     """Nucleic Acid Config Tab."""
 
     helix_joint_updated = pyqtSignal()
+    cell_widget_updated = pyqtSignal()
 
     def __init__(self, parent) -> None:
         super().__init__()
@@ -86,7 +96,12 @@ class Table(QTableWidget):
         self._style()
 
         # dump the domains of the previous save
-        self.dump_domains(configuration.domains.storage.current.subunit.domains)
+        self.dump_domains(config.domains.storage.current.subunit.domains)
+
+        # when widget value is changed run fetch_domains and update current settings
+        @self.cell_widget_updated.connect
+        def _():
+            config.domains.storage.current.subunit.domains = self.fetch_domains()
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -146,32 +161,85 @@ class Table(QTableWidget):
             # column 0 - left helical joint
             row.left_helix_joint = DirectionalButton(self, domain.helix_joints[LEFT])
             row.left_helix_joint.clicked.connect(self.helix_joint_updated.emit)
+            row.left_helix_joint.clicked.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 0, row.left_helix_joint)
 
             # column 1 - right helical joint
             row.right_helix_joint = DirectionalButton(self, domain.helix_joints[RIGHT])
             row.right_helix_joint.clicked.connect(self.helix_joint_updated.emit)
+            row.right_helix_joint.clicked.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 1, row.right_helix_joint)
 
             # column 2 - theta switch multiple
-            row.theta_switch_multiple = TableIntegerBox(domain.theta_switch_multiple, minimum=-1)
+            row.theta_switch_multiple = TableIntegerBox(
+                domain.theta_switch_multiple, minimum=-1
+            )
             row.theta_switch_multiple.setEnabled(False)
             self.setCellWidget(index, 2, row.theta_switch_multiple)
 
             # column 3 - theta interior multiple
             row.theta_interior_multiple = TableIntegerBox(
-                domain.theta_interior_multiple, show_buttons=True, minimum=1, maximum=20
+                domain.theta_interior_multiple,
+                show_buttons=True,
+                minimum=1,
+                maximum=20,
             )
+            row.theta_interior_multiple.valueChanged.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 3, row.theta_interior_multiple)
 
             # column 4 - initial NEMid count
             row.domain_count = TableIntegerBox(domain.count)
+            row.domain_count.valueChanged.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 4, row.domain_count)
 
             self.side_headers.append(f"#{index + 1}")
 
             # append to the main row storage container
             self.rows.append(row)
+
+        class smooth_interior_updating:
+            @classmethod
+            def surrounding(cls, i):
+                # make sure to wrap around to the beginning/end of the domains list
+                # if "i" is the length of the list or is 0
+                if i == len(self.rows):
+                    surrounding = (i - 1, i, 0)
+                elif i == 0:
+                    surrounding = (len(self.rows), 0, i + 1)
+                else:
+                    surrounding = (i - 1, i, i + 1)
+
+                surrounding = [
+                    self.rows[surrounding[0]].theta_interior_multiple,
+                    self.rows[surrounding[1]].theta_interior_multiple,
+                    self.rows[surrounding[2]].theta_interior_multiple,
+                ]
+
+                return surrounding
+
+            @classmethod
+            def down(cls, i):
+                surrounding = cls.surrounding(i)
+                surrounding[0].setValue(surrounding[0].value() + 1)
+                # it was just ticked down 1, so tick it down 1 more
+                surrounding[1].setValue(surrounding[1].value() - 1)
+                surrounding[2].setValue(surrounding[2].value() + 1)
+
+            @classmethod
+            def up(cls, i):
+                surrounding = cls.surrounding(i)
+                surrounding[0].setValue(surrounding[0].value() - 1)
+                # it was just ticked up 1, so tick it up 1 more
+                surrounding[1].setValue(surrounding[1].value() + 1)
+                surrounding[2].setValue(surrounding[2].value() - 1)
+
+        for index, row in enumerate(self.rows):
+            row.theta_interior_multiple.down_button_clicked.connect(
+                lambda i=index: smooth_interior_updating.down(i)
+            )
+            row.theta_interior_multiple.up_button_clicked.connect(
+                lambda i=index: smooth_interior_updating.up(i)
+            )
 
         self.setVerticalHeaderLabels(self.side_headers)
 
@@ -199,7 +267,7 @@ class Table(QTableWidget):
             # column 4 - initial NEMid count
             count: int = self.cellWidget(domain, 4).value()
 
-            domain = configuration.domains.storage.Domain(
+            domain = config.domains.storage.Domain(
                 theta_interior_multiple,
                 (left_helical_joint, right_helical_joint),
                 count,

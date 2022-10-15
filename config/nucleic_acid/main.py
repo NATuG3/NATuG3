@@ -3,7 +3,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 from resources import fetch_icon
 import helpers
-from configuration.nucleic_acid import storage
+from config.nucleic_acid import storage
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class Panel(QWidget):
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
-        uic.loadUi("configuration/nucleic_acid/panel.ui", self)
+        uic.loadUi("config/nucleic_acid/panel.ui", self)
 
         # place the current settings into their respective boxes
         self.dump_settings(storage.current)
@@ -32,7 +32,7 @@ class Panel(QWidget):
         # set up the profile manager
         self._profile_manager()
 
-        logger.debug("Loaded nucleic acid settings tab of configuration panel.")
+        logger.debug("Loaded nucleic acid settings tab of config panel.")
 
     def dump_settings(self, profile: storage.Profile) -> None:
         """Saves current settings to profile with name in text edit input box."""

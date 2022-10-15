@@ -6,7 +6,7 @@ def main():
         level=logging.DEBUG,
     )
 
-    import configuration
+    import config
     import storage
     from time import time
     import sys
