@@ -2,6 +2,7 @@ import math
 from typing import List
 from computers.top_view.interface import Plotter
 
+
 class TopView:
     """
     Top view plotter.
@@ -14,11 +15,11 @@ class TopView:
     """
 
     def __init__(
-            self,
-            domains: list,
-            D: float,
-            theta_c=360 / 21,
-            theta_s=2.3,
+        self,
+        domains: list,
+        D: float,
+        theta_c=360 / 21,
+        theta_s=2.3,
     ) -> None:
         """
         Generate (u, v) cords for top view of helices generation.
@@ -45,11 +46,11 @@ class TopView:
         for index, domain in enumerate(self.domains):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                    self.domains[index - 1].theta_switch_multiple * self.theta_s
+                self.domains[index - 1].theta_switch_multiple * self.theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                    self.domains[index - 1].theta_interior_multiple * self.theta_c
+                self.domains[index - 1].theta_interior_multiple * self.theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)

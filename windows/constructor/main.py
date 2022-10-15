@@ -90,26 +90,21 @@ class Window(QMainWindow):
         # set titles/descriptions
         self.panels.top_view.setObjectName("Top View")
         self.panels.top_view.setWindowTitle("Top View of Helices")
-        self.panels.top_view.setStatusTip(
-            "A plot of the top view of all domains"
-        )
+        self.panels.top_view.setStatusTip("A plot of the top view of all domains")
 
         # attach actual top view widget to docked top view widget
         self.panels.top_view.setWidget(storage.plots.top_view.ui())
 
         # top view is only allowed on the sides
         self.panels.top_view.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea
-            | Qt.DockWidgetArea.RightDockWidgetArea
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
         )
 
         # trigger a resize event when the floatingness of the side view panel changes
         self.panels.top_view.topLevelChanged.connect(self.resizeEvent)
 
         # dock the new dockable top view widget
-        self.addDockWidget(
-            Qt.DockWidgetArea.LeftDockWidgetArea, self.panels.top_view
-        )
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.panels.top_view)
 
         logger.info("Loaded top view graph for the first time.")
 
@@ -173,9 +168,7 @@ class Window(QMainWindow):
             self.panels.top_view.setMaximumWidth(99999)
         # otherwise it can be resized up to 2/8ths of the screen
         else:
-            self.panels.top_view.setMaximumWidth(
-                round(2 * self.size().width() / 8)
-            )
+            self.panels.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
 
         # configuration resizing
         #

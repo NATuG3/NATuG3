@@ -65,4 +65,3 @@ class Plotter(pg.GraphicsLayoutWidget):
 
         self.plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
         self.plot.setXRange(0, len(self.worker.domains))
-

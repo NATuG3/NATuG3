@@ -61,9 +61,7 @@ class View(QMenu):
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
-            lambda: helpers.reverse_hidenness(
-                storage.constructor.panels.top_view
-            )
+            lambda: helpers.reverse_hidenness(storage.constructor.panels.top_view)
         )
 
 

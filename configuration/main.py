@@ -50,5 +50,7 @@ class Panel(QWidget):
 
         @self.update_graphs.clicked.connect
         def _():
-            storage.windows.constructor.panels.top_view.setWidget(storage.plots.top_view.ui())
+            storage.windows.constructor.panels.top_view.setWidget(
+                storage.plots.top_view.ui()
+            )
             storage.windows.constructor.setCentralWidget(storage.plots.side_view.ui())

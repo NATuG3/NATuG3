@@ -8,5 +8,3 @@ plots = workers.Plots()
 
 # All windows of application
 windows = workers.Windows()
-
-

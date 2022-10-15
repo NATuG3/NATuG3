@@ -126,7 +126,7 @@ class Table(QTableWidget):
         Dump a list of domain objects.
 
         Args:
-            domains (List(Domain)): A list of all domains to dump
+            domains (List(Domain)): A list of all domains to dump.
         """
 
         # create rows before we input widgets

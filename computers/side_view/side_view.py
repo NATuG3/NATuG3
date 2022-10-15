@@ -189,7 +189,9 @@ class SideView:
                 initial_z_coord - self.Z_s
             )
 
-            for i in range(domain.count - 1):  # we already calculated for the first domain
+            for i in range(
+                domain.count - 1
+            ):  # we already calculated for the first domain
                 self._z_coords[index][zeroed_strand].append(
                     self._z_coords[index][zeroed_strand][-1] + self.Z_b
                 )
