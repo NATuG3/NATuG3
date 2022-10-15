@@ -1,7 +1,6 @@
 import pyqtgraph as pg
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -3,8 +3,8 @@ import sys
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
 
-import configuration.domains
-import configuration.nucleic_acid
+import config.domains
+import config.nucleic_acid
 import windows.constructor.main
 from computers.side_view import SideView
 from computers.top_view import TopView
@@ -21,21 +21,21 @@ class Plots:
     @property
     def side_view(self):
         return SideView(
-            configuration.domains.storage.current.domains,
-            configuration.nucleic_acid.storage.current.Z_b,
-            configuration.nucleic_acid.storage.current.Z_s,
-            configuration.nucleic_acid.storage.current.theta_s,
-            configuration.nucleic_acid.storage.current.theta_b,
-            configuration.nucleic_acid.storage.current.theta_c,
+            config.domains.storage.current.domains,
+            config.nucleic_acid.storage.current.Z_b,
+            config.nucleic_acid.storage.current.Z_s,
+            config.nucleic_acid.storage.current.theta_s,
+            config.nucleic_acid.storage.current.theta_b,
+            config.nucleic_acid.storage.current.theta_c,
         )
 
     @property
     def top_view(self):
         return TopView(
-            configuration.domains.storage.current.domains,
-            configuration.nucleic_acid.storage.current.D,
-            configuration.nucleic_acid.storage.current.theta_c,
-            configuration.nucleic_acid.storage.current.theta_s,
+            config.domains.storage.current.domains,
+            config.nucleic_acid.storage.current.D,
+            config.nucleic_acid.storage.current.theta_c,
+            config.nucleic_acid.storage.current.theta_s,
         )
 
 

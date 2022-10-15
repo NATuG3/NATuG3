@@ -2,7 +2,6 @@ import pyqtgraph as pg
 import logging
 from constants.directions import *
 
-
 logger = logging.getLogger(__name__)
 
 
