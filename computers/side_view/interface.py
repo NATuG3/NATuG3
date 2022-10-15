@@ -15,11 +15,21 @@ class Plotter(pg.GraphicsLayoutWidget):
         # set up styling
         self.setWindowTitle("Side View of DNA")  # set the window's title
         self.setBackground("w")  # make the background white
-        self.plot: pg.plot = self.addPlot()
+
+        self.plot = Plot(worker)
+        self.addItem(self.plot)
+
+
+class Plot(pg.PlotItem):
+    """The main plot widget for the Plotter"""
+
+    def __init__(self, worker):
+        super().__init__()
+        self.worker = worker
 
         # we can calculate the axis scales at the end of generation;
         # we don't need to continuously recalculate the range
-        self.plot.disableAutoRange()
+        self.disableAutoRange()
 
         for index, domain in enumerate(worker.domains):
             if index % 2:  # if the domain index is an even integer
@@ -48,7 +58,7 @@ class Plotter(pg.GraphicsLayoutWidget):
                 x_coords = self.worker.x_coords[index][strand_direction]
                 z_coords = self.worker.z_coords[index][strand_direction]
 
-                self.plot.plot(  # actually plot the current strand of the current domain
+                self.plot(  # actually plot the current strand of the current domain
                     x_coords,
                     z_coords,
                     symbol=symbol,  # type of symbol (in this case up/down arrow)
@@ -62,5 +72,7 @@ class Plotter(pg.GraphicsLayoutWidget):
                     ),  # set color of pen to current color (but darker)
                 )
 
-        self.plot.autoRange()  # reenable autorange so that it isn't zoomed out weirdly
-        self.plot.setXRange(0, len(self.worker.domains))
+        self.showGrid(x=True, y=False, alpha=5)
+        self.setLabel("bottom", text=None, units=None, unitPrefix=None)
+        self.autoRange()  # re-enable auto-range so that it isn't zoomed out weirdly
+        self.setXRange(0, len(self.worker.domains))
