@@ -38,7 +38,7 @@ class Subunit:
                     Domain(
                         previous_domain.theta_interior_multiple,
                         [inverse(previous_domain.helix_joints[1])] * 2,
-                        previous_domain.count
+                        previous_domain.count,
                     )
                 )
 
@@ -47,6 +47,7 @@ class Domains:
     """
     Container for multiple domains.
     """
+
     def __init__(self, domains, symmetry):
         self.subunit = Subunit(domains)
         self.symmetry = symmetry
@@ -85,9 +86,7 @@ def dump():
         # perform data validation before save
         if not isinstance(current, Domains):
             logger.critical("Data validation for domains dump failed.")
-            raise TypeError(
-                "Domains container is of wrong type.", current
-            )
+            raise TypeError("Domains container is of wrong type.", current)
         pickle.dump(current, restored_file)
 
 

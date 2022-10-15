@@ -25,7 +25,10 @@ class DirectionalButton(QPushButton):
         @self.clicked.connect
         def _(event):
             # reverse the state of the button on click
-            self.state = int(not (bool(self.state)))
+            if self.state == UP:
+                self.state = DOWN
+            elif self.state == DOWN:
+                self.state = UP
             # set the arrow accordingly
             self.text_updater()
 
@@ -64,7 +67,6 @@ class TableIntegerBox(QSpinBox):
             self.setButtonSymbols(QSpinBox.ButtonSymbols.UpDownArrows)
         else:
             self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
-
 
     def mousePressEvent(self, event):
         # https://stackoverflow.com/a/65226649

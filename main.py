@@ -1,5 +1,6 @@
 def main():
     import logging
+
     # set log level
     logging.basicConfig(
         level=logging.DEBUG,

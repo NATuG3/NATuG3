@@ -8,7 +8,7 @@ import configuration.domains.storage
 from configuration.domains.widgets import *
 from constants.directions import *
 from resources.workers import fetch_icon
-import helpers
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +46,9 @@ class Panel(QWidget):
     def refresh(self):
         """Refresh panel settings/domain table."""
         # obtain current domain inputs
-        configuration.domains.storage.current.subunit.domains = self.table.fetch_domains()
+        configuration.domains.storage.current.subunit.domains = (
+            self.table.fetch_domains()
+        )
 
         # update storage settings
         configuration.domains.storage.current.subunit.count = self.subunit_count.value()
@@ -152,13 +154,14 @@ class Table(QTableWidget):
             self.setCellWidget(index, 1, row.right_helix_joint)
 
             # column 2 - theta switch multiple
-            row.theta_switch_multiple = TableIntegerBox(domain.theta_switch_multiple)
+            row.theta_switch_multiple = TableIntegerBox(domain.theta_switch_multiple, minimum=-1)
             row.theta_switch_multiple.setEnabled(False)
             self.setCellWidget(index, 2, row.theta_switch_multiple)
 
             # column 3 - theta interior multiple
-            row.theta_interior_multiple = TableIntegerBox(domain.theta_interior_multiple, show_buttons=True, minimum=1,
-                                                          maximum=20)
+            row.theta_interior_multiple = TableIntegerBox(
+                domain.theta_interior_multiple, show_buttons=True, minimum=1, maximum=20
+            )
             self.setCellWidget(index, 3, row.theta_interior_multiple)
 
             # column 4 - initial NEMid count
