@@ -205,7 +205,7 @@ class Table(QTableWidget):
                 if i == len(self.rows):
                     surrounding = (i - 1, i, 0)
                 elif i == 0:
-                    surrounding = (len(self.rows), 0, i + 1)
+                    surrounding = (len(self.rows)-1, 0, i + 1)
                 else:
                     surrounding = (i - 1, i, i + 1)
 
