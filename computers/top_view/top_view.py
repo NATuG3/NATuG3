@@ -82,4 +82,4 @@ class TopView:
                 [round(coord, round_to) for coord in self.v_coords],
             )
         )
-        return f"top_view(coords={prettified_coords}, theta_deltas={[round(delta, round_to) for delta in self.theta_deltas]}"
+        return f"top_view(coords={prettified_coords}, theta_deltas={[round(delta, round_to) for delta in self.theta_deltas]} "

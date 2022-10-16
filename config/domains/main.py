@@ -1,6 +1,5 @@
 import logging
 from types import SimpleNamespace
-from copy import deepcopy
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import (
@@ -10,8 +9,10 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QSizePolicy,
 )
+from PyQt6.QtCore import QTimer
 
 import config.domains.storage
+import helpers
 from config.domains.widgets import *
 from constants.directions import *
 from resources.workers import fetch_icon
@@ -29,16 +30,17 @@ class Panel(QWidget):
         uic.loadUi("config/domains/panel.ui", self)
 
         # set reload table widget
-        self.update_table.setIcon(fetch_icon("reload-outline"))
+        self.update_table.setIcon(fetch_icon("checkmark-outline"))
 
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self)
         self.layout().addWidget(self.table)
 
         # set scaling settings for config and main table
-        _ = QSizePolicy()
-        _.setVerticalPolicy(QSizePolicy.Policy.Fixed)
-        self.config.setSizePolicy(_)
+        config_size_policy = QSizePolicy()
+        config_size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
+        config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
+        self.config.setSizePolicy(config_size_policy)
 
         # set initial values of domain table config widgets
         self.subunit_count.setValue(config.domains.storage.current.subunit.count)
@@ -51,20 +53,43 @@ class Panel(QWidget):
         logger.info("Loaded domains tab of config panel.")
         self.table.helix_joint_updated.connect(self.refresh)
 
-        self.symmetry.valueChanged.connect(self.refresh)
-        self.subunit_count.valueChanged.connect(self.refresh)
+        domain_counter = lambda: self.total_count.setValue(
+            self.symmetry.value() * self.subunit_count.value()
+        )
+        self.symmetry.valueChanged.connect(domain_counter)
+        self.subunit_count.valueChanged.connect(domain_counter)
 
     def refresh(self):
         """Refresh panel settings/domain table."""
         # obtain current domain inputs
         config.domains.storage.current.subunit.domains = self.table.fetch_domains()
 
-        # update storage settings
-        config.domains.storage.current.subunit.count = self.subunit_count.value()
-        config.domains.storage.current.symmetry = self.symmetry.value()
+        confirmation: bool = True
+        # double-check with user if they want to truncate the domains/subunit count
+        # (if that is what they are attempting to do)
+        if self.subunit_count.value() < config.domains.storage.current.subunit.count:
+            # helpers.confirm will return a bool
+            confirmation: bool = helpers.confirm(
+                self.parent(),
+                "Subunit Count Reduction",
+                f"The prospective subunit count ({self.subunit_count.value()}) is lower than the number of domains in "
+                f"the domains table ({self.table.rowCount()}). \n\nAre you sure you want to truncate the "
+                f"domains/subunit count to {self.subunit_count.value()}?",
+            )
+        if confirmation:
+            # update storage settings
+            config.domains.storage.current.subunit.count = self.subunit_count.value()
+            config.domains.storage.current.symmetry = self.symmetry.value()
 
-        # update settings boxes
-        self.total_count.setValue(config.domains.storage.current.count)
+            # update settings boxes
+            self.total_count.setValue(config.domains.storage.current.count)
+
+            self.update_table.setStyleSheet("background-color: rgb(192, 209, 188)")
+            timer = QTimer(self.parent())
+            timer.setInterval(400)
+            timer.setSingleShot(True)
+            timer.timeout.connect(lambda: self.update_table.setStyleSheet("background-color: light grey"))
+            timer.start()
 
         # refresh table
         self.table.dump_domains(config.domains.storage.current.subunit.domains)
