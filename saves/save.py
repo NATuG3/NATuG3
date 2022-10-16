@@ -29,7 +29,7 @@ def worker(filename):
         pickle.dump(package, file)
 
     # log the save
-    logger.info(f"Created save @{filename}.")
+    logger.info(f"Created save @ {filename}.")
 
 
 class FileSelector(QFileDialog):

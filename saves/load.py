@@ -39,7 +39,7 @@ def worker(filename):
         config.domains.storage.current.subunit.domains
     )
 
-    logger.info(f"Loaded save @{filename}.")
+    logger.info(f"Loaded save @ {filename}.")
 
 
 class FileSelector(QFileDialog):
