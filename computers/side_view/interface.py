@@ -89,7 +89,7 @@ class Plot(pg.PlotItem):
         for i in range(-1, ceil(overall_height / worker.H) + 2):
             self.addLine(y=(i * worker.H), pen=grid_pen)
 
-        # add axis lables
+        # add axis labels
         self.setLabel("bottom", text="Helical Domain", units="#")
         self.setLabel("left", text="Helical Twists", units="#")
 

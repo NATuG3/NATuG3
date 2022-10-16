@@ -6,6 +6,8 @@ from helpers import inverse
 from computers.side_view.interface import Plotter
 from computers.datatypes import NEMid
 from constants.directions import *
+from math import ceil
+
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda count: tuple(
@@ -170,6 +172,9 @@ class SideView:
                 # this is the first domain
                 # zero out the first domain's first NEMid
                 initial_z_coord = 0
+
+                # extra bases for first domain is zero
+                extra_bases = 0
             else:
                 # let's find and index of x coord where the (previous domain's x coord) == (this domain's index-1)
                 # ...so if this is domain#2, let's find where domain#1 has an x coord of x=1 in its x coord list
@@ -190,9 +195,9 @@ class SideView:
 
                 # move the initial Z coord down until it is as close to z=0 as possible
                 # this way the graphs don't skew upwards weirdly
+                offset_amount = self.B * self.Z_b
                 while initial_z_coord > 0:
-                    initial_z_coord -= self.H
-                initial_z_coord += self.H
+                    initial_z_coord -= offset_amount
 
             # look at the left joint of the current domain
             # for calculating additional z coords
@@ -204,7 +209,7 @@ class SideView:
             )
 
             for i in range(
-                domain.count - 1
+                (domain.count - 1)
             ):  # we already calculated for the first domain
                 self._z_coords[index][zeroed_strand].append(
                     self._z_coords[index][zeroed_strand][-1] + self.Z_b
