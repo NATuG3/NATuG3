@@ -42,14 +42,18 @@ class Plotter(pg.PlotWidget):
         if self.sceneBoundingRect().contains(scene_coords):
             clicked_coord = vb.mapSceneToView(scene_coords)
             clicked_coord = (clicked_coord.x(), clicked_coord.y())
-        logger.info(f"Side view plot clicked @ {round(clicked_coord[0], 3), round(clicked_coord[1], 3)}")
+        logger.info(
+            f"Side view plot clicked @ {round(clicked_coord[0], 3), round(clicked_coord[1], 3)}"
+        )
 
         # check to see if this is a potential junction click
-        if 0 < clicked_coord[0] < len(self.worker.domains):
+        if 0 < clicked_coord[0] < (len(self.worker.domains)-1):
             # scan both up and down strand of domain#round(x coord of click)
             for strand_direction in self.worker.strand_directions:
                 # for each NEMid in that strand
-                for NEMid in self.worker.computed[round(clicked_coord[0])][strand_direction]:
+                for NEMid in self.worker.computed[round(clicked_coord[0])][
+                    strand_direction
+                ]:
                     # if it is a NEMid that could be made into a junction
                     if NEMid.junctable:
                         # check to see if the click was close enough to the NEMid
@@ -87,8 +91,14 @@ class Plotter(pg.PlotWidget):
                     ]  # set the color to be the first option of current color scheme (which is "colors")
 
                 # obtain an array of x and z coords from the points container
-                x_coords = [NEMid.x_coord for NEMid in self.worker.computed[index][strand_direction]]
-                z_coords = [NEMid.z_coord for NEMid in self.worker.computed[index][strand_direction]]
+                x_coords = [
+                    NEMid.x_coord
+                    for NEMid in self.worker.computed[index][strand_direction]
+                ]
+                z_coords = [
+                    NEMid.z_coord
+                    for NEMid in self.worker.computed[index][strand_direction]
+                ]
 
                 self.plot(  # actually plot the current strand of the current domain
                     x_coords,
@@ -113,7 +123,9 @@ class Plotter(pg.PlotWidget):
 
         # helical twist grid
         # overall_height = the tallest domain's height (the overall height of the plot's contents)
-        overall_height = max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
+        overall_height = (
+            max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
+        )
         # for i in <number of helical twists of the tallest domain>...
         for i in range(-1, ceil(overall_height / self.worker.H) + 2):
             self.addLine(y=(i * self.worker.H), pen=grid_pen)

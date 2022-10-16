@@ -93,7 +93,7 @@ class SideView:
                     x_coord = self.x_coords[index][strand_direction][i]
                     z_coord = self.z_coords[index][strand_direction][i]
 
-                    if abs(x_coord-index) < 0.001:
+                    if abs(x_coord - index) < 0.001:
                         junctable = True
                     else:
                         junctable = False

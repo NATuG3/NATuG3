@@ -95,11 +95,13 @@ class NEMid:
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
-        return f"NEMid(" \
-               f"pos={tuple(map(lambda i: round(i, 3), self.position))}), " \
-               f"angle={round(self.angle, 3)}°, " \
-               f"is-a-junction={str(self.junction).lower()}, " \
-               f"could-be-a-junction={str(self.junctable).lower()}"
+        return (
+            f"NEMid("
+            f"pos={tuple(map(lambda i: round(i, 3), self.position))}), "
+            f"angle={round(self.angle, 3)}°, "
+            f"is-a-junction={str(self.junction).lower()}, "
+            f"could-be-a-junction={str(self.junctable).lower()}"
+        )
 
 
 @dataclass
