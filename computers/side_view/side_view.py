@@ -1,20 +1,18 @@
-import itertools
-from typing import Generator, List
-from copy import copy
 from functools import cached_property
 from types import FunctionType
-from typing import Tuple, Type
-
-from computers.datatypes import NEMid
-from computers.side_view.interface import Plotter
-from constants.directions import *
+from typing import Deque, Tuple, Type
+from collections import deque
 from helpers import inverse
+from computers.side_view.interface import Plotter
+from computers.datatypes import NEMid
+from constants.directions import *
 
 # container to store data for domains in
-DomainsContainer: FunctionType = lambda count: [[[], []] for _ in range(count)]
-
+DomainsContainer: FunctionType = lambda count: tuple(
+    (deque(), deque()) for _ in range(count)
+)
 # type annotation for the aforementioned container
-DomainsContainerType: Type = Tuple[Tuple[Generator, Generator], ...]
+DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 
 
 class SideView:
@@ -27,15 +25,15 @@ class SideView:
     """
 
     def __init__(
-            self,
-            domains: list,
-            T: float,
-            B: int,
-            H: float,
-            Z_s: float,
-            theta_s: float,
-            theta_b: float,
-            theta_c: float,
+        self,
+        domains: list,
+        T: float,
+        B: int,
+        H: float,
+        Z_s: float,
+        theta_s: float,
+        theta_b: float,
+        theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -70,9 +68,6 @@ class SideView:
         self._x_coords: DomainsContainerType = DomainsContainer(len(self.domains))
         self._z_coords: DomainsContainerType = DomainsContainer(len(self.domains))
 
-        # the extra bases to trim (as a byproduct of z_coord generation)
-        self._extraneous_bases: Tuple[List[int, int], ...] = tuple([[0, 0] for domain in self.domains])
-
     def compute(self) -> DomainsContainerType:
         """
         Compute NEMid data.
@@ -85,11 +80,12 @@ class SideView:
 
         for index, domain in enumerate(self.domains):
             for strand_direction in self.strand_directions:
-                angles = itertools.islice(self.angles[index][strand_direction], 0, domain.count)
-                x_coords = itertools.islice(self.x_coords[index][strand_direction], 0, domain.count)
-                z_coords = itertools.islice(self.z_coords[index][strand_direction], 0, domain.count)
+                for i in range(domain.count):
+                    # generate/retrieve cached
+                    angle = self.angles[index][strand_direction][i]
+                    x_coord = self.x_coords[index][strand_direction][i]
+                    z_coord = self.z_coords[index][strand_direction][i]
 
-                for angle, x_coord, z_coord in zip(angles, x_coords, z_coords):
                     # combine all data into NEMid object
                     _NEMid = NEMid(x_coord, z_coord, angle, None)
 
@@ -106,39 +102,40 @@ class SideView:
             # which strand will begin at x=0 (+domain_index)
             zeroed_strand = domain.helix_joints[LEFT]
 
-            # create infinite generators for the zeroed and non zeroed strands
-            self._angles[index][zeroed_strand] = itertools.count(
-                start=0.0,  # zeroed strand starts at 0
-                step=self.theta_b,  # and steps by self.theta_b
-            )
-            self._angles[index][inverse(zeroed_strand)] = itertools.count(
-                start=0.0 - self.theta_s,  # non-zeroed strand starts at 0-self.theta_s
-                step=self.theta_b,  # and steps by self.theta_b
-            )
+            # the zeroed strand direction is set to have its first angle be 0
+            self._angles[index][zeroed_strand].append(0.0)
 
-        output = copy(self._angles)
-        for index, domain in enumerate(self.domains):
-            for strand_direction in self.strand_directions:
-                output[index][strand_direction] = tuple(
-                    itertools.islice(output[index][strand_direction], 0, domain.count)
+            # whereas the other is set to be 0-theta_switch
+            self._angles[index][inverse(zeroed_strand)].append(0.0 - self.theta_s)
+
+            for i in range(domain.count):
+                # generate the next zeroed_strand-direction STRAND NEMid angle
+                self._angles[index][zeroed_strand].append(
+                    # previous NEMid angle + theta_b
+                    self._angles[index][zeroed_strand][i]
+                    + self.theta_b
+                )
+
+                # generate the next inverse(zeroed_strand)-direction STRAND NEMid angle
+                self._angles[index][inverse(zeroed_strand)].append(
+                    # previous NEMid angle - theta_s
+                    self._angles[index][zeroed_strand][i + 1]
+                    - self.theta_s
                 )
 
         return self._angles
 
     @cached_property
     def x_coords(self) -> DomainsContainerType:
-        # make container for output
-        output = copy(self._x_coords)
-
-        # make a copy of the angles iterator for use in generating x coords
         for index, domain in enumerate(self.domains):
             # current exterior and interior angles
             theta_interior: float = domain.theta_interior_multiple * self.theta_c
             theta_exterior: float = 360 - theta_interior
 
-            # since every T NEMids the x coords repeat we only need to generate x coords for the first T NEMids
-            for strand_direction in self.strand_directions:
-                for i in range(domain.count):
+            for i in range(domain.count):
+                for (
+                    strand_direction
+                ) in self.strand_directions:  # repeat same steps for up and down strand
                     # find the current NEMid_angle and modulo it by 360 NEMid angles are "the angle about the central
                     # axis going counter-clockwise from the line of tangency." they reset at 360, so we modulo the
                     # current NEMid angle here
@@ -157,8 +154,6 @@ class SideView:
                     # store the new x_coord in the container object and continue
                     self._x_coords[index][strand_direction].append(x_coord)
 
-            self._x_coords[index][strand_direction] = itertools.cycle(self._x_coords[index][strand_direction])
-
         return self._x_coords
 
     @cached_property
@@ -173,21 +168,16 @@ class SideView:
                 # this is the first domain
                 # zero out the first domain's first NEMid
                 initial_z_coord = 0
-
-                # extra bases for first domain is zero
-                extra_bases = 0
             else:
                 # let's find and index of x coord where the (previous domain's x coord) == (this domain's index-1)
                 # ...so if this is domain#2, let's find where domain#1 has an x coord of x=1 in its x coord list
 
-                x_coords = tuple(itertools.islice(self.x_coords[index - 1][zeroed_strand], 0, self.B))
-
                 # find the maximum x coord of the previous domain
                 # (should be ~this domain's index - 1)
-                initial_z_coord = max(x_coords)
+                initial_z_coord = max(self.x_coords[index - 1][zeroed_strand])
 
                 # find the index of that x coord of the previous domain
-                initial_z_coord = x_coords.index(
+                initial_z_coord = self.x_coords[index - 1][zeroed_strand].index(
                     initial_z_coord
                 )
 
@@ -198,43 +188,30 @@ class SideView:
 
                 # move the initial Z coord down until it is as close to z=0 as possible
                 # this way the graphs don't skew upwards weirdly
-                # offset_amount = self.B * self.Z_b
-                # while initial_z_coord > 0:
-                #     initial_z_coord -= offset_amount
+                while initial_z_coord > 0:
+                    initial_z_coord -= self.H
+                initial_z_coord += self.H
 
             # look at the left joint of the current domain
             # for calculating additional z coords
             zeroed_strand = domain.helix_joints[LEFT]
 
-            # zeroed strand
-            self._z_coords[index][zeroed_strand] = itertools.count(
-                start=initial_z_coord,
-                step=self.Z_b
-            )
-            self._z_coords[index][zeroed_strand] = tuple(
-                itertools.islice(self._z_coords[index][zeroed_strand], 0, domain.count)
+            self._z_coords[index][zeroed_strand].append(initial_z_coord)
+            self._z_coords[index][inverse(zeroed_strand)].append(
+                initial_z_coord - self.Z_s
             )
 
-            # non-zeroed strad
-            self._z_coords[index][inverse(zeroed_strand)] = itertools.count(
-                start=initial_z_coord - self.Z_s,
-                step=self.Z_b
-            )
-            self._z_coords[index][inverse(zeroed_strand)] = tuple(
-                itertools.islice(self._z_coords[index][inverse(zeroed_strand)], 0, domain.count)
-            )
+            for i in range(
+                domain.count - 1
+            ):  # we already calculated for the first domain
+                self._z_coords[index][zeroed_strand].append(
+                    self._z_coords[index][zeroed_strand][-1] + self.Z_b
+                )
+                self._z_coords[index][inverse(zeroed_strand)].append(
+                    self._z_coords[index][zeroed_strand][-1] - self.Z_s
+                )
 
         return self._z_coords
-
-    @cached_property
-    def extraneous_bases(self):
-        for index, domain in enumerate(self.domains):
-            for strand_direction in self.strand_directions:
-                while (
-                        self.z_coords[index][strand_direction][0] + (self.extraneous_bases[index] * self.Z_b)
-                ) < 0:
-                    self.extraneous_bases[index][strand_direction] += 1
-        return self._extraneous_bases
 
     def ui(self):
         return Plotter(self)
@@ -263,3 +240,6 @@ class SideView:
                 return False
 
         return True
+
+    def __len__(self):
+        return len(self.domains)
