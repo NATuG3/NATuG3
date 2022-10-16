@@ -30,12 +30,6 @@ class File(QMenu):
         save.setStatusTip("Save current stage top file")
         save.triggered.connect(lambda: saves.save.runner(parent))
 
-        # file -> save as
-        save_as = self.actions.save_as = self.addAction("Save As")
-        save_as.setIcon(fetch_icon("save-outline"))
-        save_as.setShortcut(QKeySequence("ctrl+shift+s"))
-        save_as.setStatusTip("Save current stage as new file")
-
 
 class View(QMenu):
     def __init__(self, parent):

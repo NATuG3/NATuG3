@@ -84,11 +84,13 @@ class Panel(QWidget):
             # update settings boxes
             self.total_count.setValue(config.domains.storage.current.count)
 
-            self.update_table.setStyleSheet("background-color: rgb(192, 209, 188)")
+            self.update_table.setStyleSheet(f"background-color: rgb{str(config.colors.green)}")
             timer = QTimer(self.parent())
             timer.setInterval(400)
             timer.setSingleShot(True)
-            timer.timeout.connect(lambda: self.update_table.setStyleSheet("background-color: light grey"))
+            timer.timeout.connect(
+                lambda: self.update_table.setStyleSheet("background-color: light grey")
+            )
             timer.start()
 
         # refresh table

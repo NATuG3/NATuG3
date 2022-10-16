@@ -2,10 +2,10 @@ from dataclasses import dataclass
 import logging
 import pickle
 import atexit
-import config.settings
+import config
 
-profiles_filename = f"config/nucleic_acid/profiles.{config.settings.extension}"
-restored_filename = f"config/nucleic_acid/restored.{config.settings.extension}"
+profiles_filename = f"config/nucleic_acid/profiles.{config.extension}"
+restored_filename = f"config/nucleic_acid/restored.{config.extension}"
 
 count: int = 50  # initial NEMids/strand count
 current: object = None  # current profile

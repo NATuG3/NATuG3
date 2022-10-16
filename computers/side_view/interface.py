@@ -3,6 +3,8 @@ import logging
 from math import ceil
 from constants.directions import *
 from PyQt6.QtGui import QPen
+import config
+
 
 logger = logging.getLogger(__name__)
 
@@ -71,12 +73,12 @@ class Plot(pg.PlotItem):
                         color=color
                     ),  # set color of points to current color
                     pen=pg.mkPen(
-                        color=(120, 120, 120), width=1.8
+                        color=config.colors.grey, width=1.8
                     ),  # set color of pen to current color (but darker)
                 )
 
         # create pen for custom grid
-        grid_pen: QPen = pg.mkPen(color=(220, 220, 220), width=1.4)
+        grid_pen: QPen = pg.mkPen(color=config.colors.grey, width=1.4)
 
         # domain index grid
         for i in range(len(self.worker.domains) + 1):

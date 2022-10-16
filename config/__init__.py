@@ -1,3 +1,4 @@
+from config.settings import *
 import config.nucleic_acid.storage
 import config.domains.storage
 import logging

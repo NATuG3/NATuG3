@@ -6,7 +6,7 @@ import atexit
 from computers.datatypes import Domain
 from helpers import inverse
 
-restored_filename = f"config/domains/restored.{config.settings.extension}"
+restored_filename = f"config/domains/restored.{config.extension}"
 
 current = None
 settings = None

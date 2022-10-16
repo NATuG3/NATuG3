@@ -49,6 +49,7 @@ class Panel(QWidget):
 
         @self.update_graphs.clicked.connect
         def _():
+            # load and set new plot areas
             storage.windows.constructor.panels.top_view.setWidget(
                 storage.plots.top_view.ui()
             )

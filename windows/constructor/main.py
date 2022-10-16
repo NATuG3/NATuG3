@@ -43,7 +43,7 @@ class Window(QMainWindow):
         self._side_view()
 
         # utilize inherited methods to set up the main window
-        self.setWindowTitle("DNA Constructor")
+        self.setWindowTitle(config.name)
 
         # add all widgets
         self._config()
