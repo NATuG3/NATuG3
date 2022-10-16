@@ -14,9 +14,20 @@ class Plotter(pg.GraphicsLayoutWidget):
         # make the background white
         self.setBackground("w")
 
-        self.plot = self.addPlot()
+        # create and add the main plot
+        self.plot = Plot(worker)
+        self.addItem(self.plot)
 
-        self.plot.plot(
+
+class Plot(pg.PlotItem):
+    """The main plot widget for the Plotter"""
+
+    def __init__(self, worker):
+        super().__init__()
+        self.worker = worker
+
+        # create main plot
+        self.plot(
             self.worker.u_coords,
             self.worker.v_coords,
             symbol="o",
@@ -26,8 +37,11 @@ class Plotter(pg.GraphicsLayoutWidget):
 
         # increase the view box padding, since... our symbols are VERY large circles and pyqtgraph calculates padding
         # from the actual points, so the circles get cut off
-        plotted_view_box = self.plot.getViewBox()
-        plotted_view_box.setDefaultPadding(padding=0.18)
+        self.getViewBox().setDefaultPadding(padding=0.18)
 
         # prevent user from interacting with the graph
-        plotted_view_box.setAspectLocked(lock=True, ratio=1)
+        self.getViewBox().setAspectLocked(lock=True, ratio=1)
+
+        # set axis units
+        self.setLabel("bottom", units="Nanometers")
+        self.setLabel("left", units="Nanometers")

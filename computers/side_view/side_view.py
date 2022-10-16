@@ -54,7 +54,7 @@ class SideView:
         self.B = B
         self.H = H
 
-        self.Z_b = (T*H)/B
+        self.Z_b = (T * H) / B
         self.Z_s = Z_s
 
         self.theta_s = theta_s

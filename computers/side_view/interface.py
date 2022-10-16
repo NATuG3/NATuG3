@@ -1,6 +1,8 @@
 import pyqtgraph as pg
 import logging
+from math import ceil
 from constants.directions import *
+from PyQt6.QtGui import QPen
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +18,7 @@ class Plotter(pg.GraphicsLayoutWidget):
         self.setWindowTitle("Side View of DNA")  # set the window's title
         self.setBackground("w")  # make the background white
 
+        # create and add the main plot
         self.plot = Plot(worker)
         self.addItem(self.plot)
 
@@ -72,7 +75,25 @@ class Plot(pg.PlotItem):
                     ),  # set color of pen to current color (but darker)
                 )
 
-        self.showGrid(x=True, y=False, alpha=5)
-        self.setLabel("bottom", text=None, units=None, unitPrefix=None)
-        self.autoRange()  # re-enable auto-range so that it isn't zoomed out weirdly
+        # create pen for custom grid
+        grid_pen: QPen = pg.mkPen(color=(220, 220, 220), width=1.4)
+
+        # domain index grid
+        for i in range(len(self.worker.domains) + 1):
+            self.addLine(x=i, pen=grid_pen)
+
+        # helical twist grid
+        # overall_height = the tallest domain's height (the overall height of the plot's contents)
+        overall_height = max([domain.count for domain in worker.domains]) * worker.Z_b
+        # for i in <number of helical twists of the tallest domain>...
+        for i in range(-1, ceil(overall_height / worker.H) + 2):
+            self.addLine(y=(i * worker.H), pen=grid_pen)
+
+        # add axis lables
+        self.setLabel("bottom", text="Helical Domain", units="#")
+        self.setLabel("left", text="Helical Twists", units="#")
+
+        # re-enable auto-range so that it isn't zoomed out weirdly
+        self.autoRange()
+        # set custom X range of plot
         self.setXRange(0, len(self.worker.domains))
