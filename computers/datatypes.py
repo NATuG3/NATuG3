@@ -85,20 +85,25 @@ class NEMid:
     angle: float
 
     # NEMid Specific Attributes
-    active_junction: bool = False
-    potential_junction: bool = False
+    junction: bool = False
+    junctable: bool = False
+
+    @property
+    def position(self) -> Tuple[float, float]:
+        """Return coords of the base as a tuple of form (x, z)"""
+        return self.x_coord, self.z_coord
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
-        return f"NEMid(pos={self.position()}), angle={round(self.angle, 3)}°, is_junction={str(self.is_junction).lower()}"
-
-    def position(self, round_to=3) -> Tuple[float, float]:
-        """Return coords of the NEMid as a tuple of form (x, z)"""
-        return round(self.x_coord, round_to), round(self.z_coord, round_to)
+        return f"NEMid(" \
+               f"pos={tuple(map(lambda i: round(i, 3), self.position))}), " \
+               f"angle={round(self.angle, 3)}°, " \
+               f"is-a-junction={str(self.junction).lower()}, " \
+               f"could-be-a-junction={str(self.junctable).lower()}"
 
 
 @dataclass
-class nucleoside:
+class Nucleoside:
     """Dataclass for a nucleoside."""
 
     # Generic Attributes
@@ -109,9 +114,10 @@ class nucleoside:
     # Base Specific Attributes
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType]
 
-    def position(self, round_to=3) -> Tuple[float, float]:
+    @property
+    def position(self) -> Tuple[float, float]:
         """Return coords of the base as a tuple of form (x, z)"""
-        return (round(self.x_coord, round_to), round(self.z_coord, round_to))
+        return self.x_coord, self.z_coord
 
     def complementary_base(self) -> str:
         "Return the complement of this base"

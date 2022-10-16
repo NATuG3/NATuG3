@@ -1,4 +1,4 @@
-from functools import cached_property
+from functools import cached_property, lru_cache
 from types import FunctionType
 from typing import Deque, Tuple, Type
 from collections import deque
@@ -6,6 +6,7 @@ from helpers import inverse
 from computers.side_view.interface import Plotter
 from computers.datatypes import NEMid
 from constants.directions import *
+from contextlib import suppress
 
 # container to store data for domains in
 DomainsContainer: FunctionType = lambda count: tuple(
@@ -76,6 +77,12 @@ class SideView:
             DomainsContainerType: A domains container of all NEMids.
         """
 
+        with suppress(KeyError):
+            del self.__dict__["x_coords"]
+            del self.__dict__["z_coords"]
+            del self.__dict__["angles"]
+            del self.__dict__["NEMids"]
+
         NEMids = DomainsContainer(len(self.domains))
 
         for index, domain in enumerate(self.domains):
@@ -87,15 +94,15 @@ class SideView:
                     z_coord = self.z_coords[index][strand_direction][i]
 
                     if abs(x_coord-index) < 0.001:
-                        potential_junction = True
+                        junctable = True
                     else:
-                        potential_junction = False
+                        junctable = False
 
                     # combine all data into NEMid object
-                    _NEMid = NEMid(x_coord, z_coord, angle, potential_junction=potential_junction)
+                    NEMid_ = NEMid(x_coord, z_coord, angle, junctable=junctable)
 
                     # append the current NEMid to the to-be-outputted array
-                    NEMids[index][strand_direction].append(_NEMid)
+                    NEMids[index][strand_direction].append(NEMid_)
 
         return NEMids
 

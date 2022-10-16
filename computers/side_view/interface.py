@@ -1,10 +1,11 @@
 import logging
-from math import ceil
+from math import ceil, dist
 
 import pyqtgraph as pg
 from PyQt6.QtGui import QPen
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 
+import computers.datatypes
 import config
 from constants.directions import *
 
@@ -14,9 +15,12 @@ logger = logging.getLogger(__name__)
 class Plotter(pg.PlotWidget):
     """The main plot widget for the Plotter"""
 
+    junctable_NEMid_clicked = pyqtSignal(computers.datatypes.NEMid)
+
     def __init__(self, worker):
         super().__init__()
         self.worker = worker
+        self.worker.computed = self.worker.compute()
 
         # plot data
         self._plot()
@@ -31,6 +35,7 @@ class Plotter(pg.PlotWidget):
         if event.button() != Qt.MouseButton.LeftButton:
             return
 
+        # obtain clicked coord
         # https://stackoverflow.com/a/70852527
         vb = self.plotItem.vb
         scene_coords = event.scenePos()
@@ -38,6 +43,20 @@ class Plotter(pg.PlotWidget):
             clicked_coord = vb.mapSceneToView(scene_coords)
             clicked_coord = (clicked_coord.x(), clicked_coord.y())
         logger.info(f"Side view plot clicked @ {round(clicked_coord[0], 3), round(clicked_coord[1], 3)}")
+
+        # check to see if this is a potential junction click
+        if 0 < clicked_coord[0] < len(self.worker.domains):
+            # scan both up and down strand of domain#round(x coord of click)
+            for strand_direction in self.worker.strand_directions:
+                # for each NEMid in that strand
+                for NEMid in self.worker.computed[round(clicked_coord[0])][strand_direction]:
+                    # if it is a NEMid that could be made into a junction
+                    if NEMid.junctable:
+                        # check to see if the click was close enough to the NEMid
+                        if dist(NEMid.position, clicked_coord) < 0.08:
+                            # if it was then this could be a junction!
+                            logger.info(f"A junctable NEMid was clicked.\n{NEMid}")
+                            self.junctable_NEMid_clicked.emit(NEMid)
 
     def _plot(self):
         # we can calculate the axis scales at the end of generation;
@@ -67,12 +86,9 @@ class Plotter(pg.PlotWidget):
                         1
                     ]  # set the color to be the first option of current color scheme (which is "colors")
 
-                # compute NEMid data
-                computed = self.worker.compute()
-
                 # obtain an array of x and z coords from the points container
-                x_coords = [NEMid.x_coord for NEMid in computed[index][strand_direction]]
-                z_coords = [NEMid.z_coord for NEMid in computed[index][strand_direction]]
+                x_coords = [NEMid.x_coord for NEMid in self.worker.computed[index][strand_direction]]
+                z_coords = [NEMid.z_coord for NEMid in self.worker.computed[index][strand_direction]]
 
                 self.plot(  # actually plot the current strand of the current domain
                     x_coords,
