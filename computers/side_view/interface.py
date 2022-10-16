@@ -1,10 +1,11 @@
-import pyqtgraph as pg
 import logging
 from math import ceil
-from constants.directions import *
-from PyQt6.QtGui import QPen
-import config
 
+import pyqtgraph as pg
+from PyQt6.QtGui import QPen
+
+import config
+from constants.directions import *
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +60,12 @@ class Plot(pg.PlotItem):
                         1
                     ]  # set the color to be the first option of current color scheme (which is "colors")
 
+                # compute NEMid data
+                computed = self.worker.compute()
+
                 # obtain an array of x and z coords from the points container
-                x_coords = self.worker.x_coords[index][strand_direction]
-                z_coords = self.worker.z_coords[index][strand_direction]
+                x_coords = [NEMid.x_coord for NEMid in computed[index][strand_direction]]
+                z_coords = [NEMid.z_coord for NEMid in computed[index][strand_direction]]
 
                 self.plot(  # actually plot the current strand of the current domain
                     x_coords,

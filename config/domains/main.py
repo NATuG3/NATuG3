@@ -2,6 +2,7 @@ import logging
 from types import SimpleNamespace
 
 from PyQt6 import uic
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import (
     QWidget,
     QTableWidget,
@@ -9,7 +10,6 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
     QSizePolicy,
 )
-from PyQt6.QtCore import QTimer
 
 import config.domains.storage
 import helpers
@@ -84,7 +84,9 @@ class Panel(QWidget):
             # update settings boxes
             self.total_count.setValue(config.domains.storage.current.count)
 
-            self.update_table.setStyleSheet(f"background-color: rgb{str(config.colors.green)}")
+            self.update_table.setStyleSheet(
+                f"background-color: rgb{str(config.colors.green)}"
+            )
             timer = QTimer(self.parent())
             timer.setInterval(400)
             timer.setSingleShot(True)

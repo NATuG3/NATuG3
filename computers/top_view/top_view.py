@@ -1,5 +1,6 @@
 import math
 from typing import List
+
 from computers.top_view.interface import Plotter
 
 

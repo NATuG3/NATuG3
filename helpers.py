@@ -1,6 +1,7 @@
 import logging
-from PyQt6.QtWidgets import QMessageBox
 from typing import Literal
+
+from PyQt6.QtWidgets import QMessageBox
 
 logger = logging.getLogger(__name__)
 

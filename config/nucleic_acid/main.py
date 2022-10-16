@@ -1,9 +1,11 @@
 import logging
+
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
-from resources import fetch_icon
+
 import helpers
 from config.nucleic_acid import storage
+from resources import fetch_icon
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,14 @@
 import logging
+from typing import List
 
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
 import config.domains.main
 import config.domains.storage
-from config.domains.storage import Domain
-import storage
 import saves.datatypes
-
-from typing import List
+import storage
+from config.domains.storage import Domain
 
 logger = logging.getLogger(__name__)
 

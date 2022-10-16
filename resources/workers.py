@@ -1,4 +1,5 @@
 from functools import cache
+
 from PyQt6.QtGui import QIcon
 
 

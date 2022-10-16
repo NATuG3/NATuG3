@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from types import NoneType
 from typing import Tuple, Union, Literal
+
 from constants import bases
 from constants.directions import *
 

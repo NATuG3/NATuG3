@@ -1,1 +1,29 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><defs><style>.cls-1{fill:#e6e7e8;}.cls-2,.cls-3,.cls-5,.cls-7{fill:none;stroke-linecap:round;stroke-linejoin:round;}.cls-2{stroke:#fff57c;stroke-width:30px;}.cls-3{stroke:#be1e2d;}.cls-3,.cls-5{stroke-width:6px;}.cls-4{fill:#be1e2d;}.cls-5{stroke:#2e3192;}.cls-6{fill:#2e3192;}.cls-7{stroke:#231f20;stroke-width:21px;}.cls-8{fill:#231f20;}</style></defs><g id="backdrops"><circle class="cls-1" cx="150" cy="150" r="150"/></g><g id="icons"><path class="cls-2" d="M139.35,102.26l10.34-10.33a1.11,1.11,0,0,1,1.58,0l10.33,10.33"/><polyline class="cls-3" points="89.86 95.93 146.46 152.53 102.4 196.6"/><path class="cls-4" d="M89.6,209.4c3.79-8.26,7.45-19.55,8-28.22l6.44,13.74,13.73,6.43C109.14,202,97.85,205.61,89.6,209.4Z"/><polyline class="cls-5" points="133.4 108.73 89.6 152.53 146.46 209.4"/><path class="cls-6" d="M146.2,95.93c-8.26,3.79-19.55,7.45-28.22,8l13.74,6.44,6.43,13.74C138.75,115.48,142.41,104.19,146.2,95.93Z"/><polyline class="cls-3" points="153.8 95.93 210.4 152.53 166.34 196.6"/><path class="cls-4" d="M153.54,209.4c3.79-8.26,7.45-19.55,8-28.22L168,194.92l13.74,6.43C173.08,202,161.79,205.61,153.54,209.4Z"/><polyline class="cls-5" points="197.34 108.73 153.54 152.53 210.4 209.4"/><path class="cls-6" d="M210.14,95.93c-8.26,3.79-19.55,7.45-28.22,8l13.74,6.44,6.44,13.74C202.69,115.48,206.35,104.19,210.14,95.93Z"/><line class="cls-7" x1="48.79" y1="223.35" x2="48.79" y2="121.86"/><polygon class="cls-8" points="80.2 131.05 48.79 76.65 17.38 131.05 80.2 131.05"/><line class="cls-7" x1="256.51" y1="76.65" x2="256.51" y2="178.14"/><polygon class="cls-8" points="225.1 168.95 256.51 223.35 287.93 168.95 225.1 168.95"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+    <defs>
+        <style>
+            .cls-1{fill:#e6e7e8;}.cls-2,.cls-3,.cls-5,.cls-7{fill:none;stroke-linecap:round;stroke-linejoin:round;}.cls-2{stroke:#fff57c;stroke-width:30px;}.cls-3{stroke:#be1e2d;}.cls-3,.cls-5{stroke-width:6px;}.cls-4{fill:#be1e2d;}.cls-5{stroke:#2e3192;}.cls-6{fill:#2e3192;}.cls-7{stroke:#231f20;stroke-width:21px;}.cls-8{fill:#231f20;}
+        </style>
+    </defs>
+    <g id="backdrops">
+        <circle class="cls-1" cx="150" cy="150" r="150"/>
+    </g>
+    <g id="icons">
+        <path class="cls-2" d="M139.35,102.26l10.34-10.33a1.11,1.11,0,0,1,1.58,0l10.33,10.33"/>
+        <polyline class="cls-3" points="89.86 95.93 146.46 152.53 102.4 196.6"/>
+        <path class="cls-4"
+              d="M89.6,209.4c3.79-8.26,7.45-19.55,8-28.22l6.44,13.74,13.73,6.43C109.14,202,97.85,205.61,89.6,209.4Z"/>
+        <polyline class="cls-5" points="133.4 108.73 89.6 152.53 146.46 209.4"/>
+        <path class="cls-6"
+              d="M146.2,95.93c-8.26,3.79-19.55,7.45-28.22,8l13.74,6.44,6.43,13.74C138.75,115.48,142.41,104.19,146.2,95.93Z"/>
+        <polyline class="cls-3" points="153.8 95.93 210.4 152.53 166.34 196.6"/>
+        <path class="cls-4"
+              d="M153.54,209.4c3.79-8.26,7.45-19.55,8-28.22L168,194.92l13.74,6.43C173.08,202,161.79,205.61,153.54,209.4Z"/>
+        <polyline class="cls-5" points="197.34 108.73 153.54 152.53 210.4 209.4"/>
+        <path class="cls-6"
+              d="M210.14,95.93c-8.26,3.79-19.55,7.45-28.22,8l13.74,6.44,6.44,13.74C202.69,115.48,206.35,104.19,210.14,95.93Z"/>
+        <line class="cls-7" x1="48.79" y1="223.35" x2="48.79" y2="121.86"/>
+        <polygon class="cls-8" points="80.2 131.05 48.79 76.65 17.38 131.05 80.2 131.05"/>
+        <line class="cls-7" x1="256.51" y1="76.65" x2="256.51" y2="178.14"/>
+        <polygon class="cls-8" points="225.1 168.95 256.51 223.35 287.93 168.95 225.1 168.95"/>
+    </g>
+</svg>

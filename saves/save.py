@@ -1,7 +1,9 @@
-from PyQt6.QtWidgets import QFileDialog
-from PyQt6.QtCore import QDir
-import pickle
 import logging
+import pickle
+
+from PyQt6.QtCore import QDir
+from PyQt6.QtWidgets import QFileDialog
+
 import saves.datatypes
 
 logger = logging.getLogger(__name__)

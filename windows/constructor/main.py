@@ -12,9 +12,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+import config.domains.storage
 import config.main
 import config.nucleic_acid
-import config.domains.storage
 import storage
 
 logger = logging.getLogger(__name__)
@@ -104,7 +104,7 @@ class Window(QMainWindow):
         # dock the new dockable top view widget
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.panels.top_view)
 
-        logger.info("Loaded top view graph for the first time.")
+        logger.info("Loaded top view graph.")
 
     def _side_view(self):
         """Attach side view to main window/replace current side view widget"""
@@ -121,7 +121,7 @@ class Window(QMainWindow):
         # set the central widget of the window
         self.setCentralWidget(self.side_view)
 
-        logger.info("Loaded side view graph for the first time.")
+        logger.info("Loaded side view graph.")
 
     def _status_bar(self):
         """Create and add status bar."""

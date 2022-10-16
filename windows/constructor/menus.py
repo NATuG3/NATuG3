@@ -1,12 +1,12 @@
+import webbrowser
 from types import SimpleNamespace
+
 from PyQt6.QtWidgets import QMenu
 
 import helpers
-from resources import fetch_icon
-import webbrowser
-from PyQt6.QtGui import QKeySequence
-import storage
 import saves
+import storage
+from resources import fetch_icon
 
 
 class File(QMenu):

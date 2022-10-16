@@ -1,9 +1,10 @@
-import logging
-import config.settings
-from constants.directions import *
-import pickle
 import atexit
+import logging
+import pickle
+
+import config.settings
 from computers.datatypes import Domain
+from constants.directions import *
 from helpers import inverse
 
 restored_filename = f"config/domains/restored.{config.extension}"

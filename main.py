@@ -16,7 +16,6 @@ def main():
     logging.basicConfig(
         level=logging.DEBUG,
     )
-    import config  # for initialization
     import storage
     import sys
 

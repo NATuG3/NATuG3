@@ -1,8 +1,9 @@
-from PyQt6.QtWidgets import QPushButton, QSpinBox, QStyle, QStyleOptionSpinBox
+from typing import Literal
+
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QPushButton, QSpinBox, QStyle, QStyleOptionSpinBox
 
 from constants.directions import *
-from typing import Literal
 from resources.workers import fetch_icon
 
 up_arrow, down_arrow = "↑", "↓"

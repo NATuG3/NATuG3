@@ -1,7 +1,8 @@
-from dataclasses import dataclass
+import atexit
 import logging
 import pickle
-import atexit
+from dataclasses import dataclass
+
 import config
 
 profiles_filename = f"config/nucleic_acid/profiles.{config.extension}"

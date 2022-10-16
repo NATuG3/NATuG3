@@ -1,7 +1,8 @@
 from config.settings import *
-import config.nucleic_acid.storage
-import config.domains.storage
 import logging
+
+import config.domains.storage
+import config.nucleic_acid.storage
 
 config.nucleic_acid.storage.load()
 config.domains.storage.load()
