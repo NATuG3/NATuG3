@@ -85,7 +85,8 @@ class NEMid:
     angle: float
 
     # NEMid Specific Attributes
-    is_junction: bool = False
+    active_junction: bool = False
+    potential_junction: bool = False
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
@@ -108,18 +109,6 @@ class nucleoside:
     # Base Specific Attributes
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType]
 
-    def __repr__(self) -> str:
-        return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None', 'unset')}"
-
-    def __eq__(self, other):
-        if not isinstance(other, type(self)):
-            return None
-        try:
-            if self.base == other.base:
-                return True
-        except AttributeError:
-            return False
-
     def position(self, round_to=3) -> Tuple[float, float]:
         """Return coords of the base as a tuple of form (x, z)"""
         return (round(self.x_coord, round_to), round(self.z_coord, round_to))
@@ -135,3 +124,15 @@ class nucleoside:
             "G": "C",
         }
         return complements[self.nucleoside]
+
+    def __repr__(self) -> str:
+        return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None', 'unset')}"
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return None
+        try:
+            if self.base == other.base:
+                return True
+        except AttributeError:
+            return False

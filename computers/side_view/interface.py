@@ -3,6 +3,7 @@ from math import ceil
 
 import pyqtgraph as pg
 from PyQt6.QtGui import QPen
+from PyQt6.QtCore import Qt
 
 import config
 from constants.directions import *
@@ -10,34 +11,40 @@ from constants.directions import *
 logger = logging.getLogger(__name__)
 
 
-class Plotter(pg.GraphicsLayoutWidget):
-    """A widget that fetches current settings and generates helices side view."""
-
-    def __init__(self, worker):
-        super().__init__()
-        self.worker = worker
-
-        # set up styling
-        self.setWindowTitle("Side View of DNA")  # set the window's title
-        self.setBackground("w")  # make the background white
-
-        # create and add the main plot
-        self.plot = Plot(worker)
-        self.addItem(self.plot)
-
-
-class Plot(pg.PlotItem):
+class Plotter(pg.PlotWidget):
     """The main plot widget for the Plotter"""
 
     def __init__(self, worker):
         super().__init__()
         self.worker = worker
 
+        # plot data
+        self._plot()
+
+        # set up styling
+        self.setWindowTitle("Side View of DNA")  # set the window's title
+        self.setBackground("w")  # make the background white
+
+        self.scene().sigMouseClicked.connect(self.mouse_clicked)
+
+    def mouse_clicked(self, event):
+        if event.button() != Qt.MouseButton.LeftButton:
+            return
+
+        # https://stackoverflow.com/a/70852527
+        vb = self.plotItem.vb
+        scene_coords = event.scenePos()
+        if self.sceneBoundingRect().contains(scene_coords):
+            clicked_coord = vb.mapSceneToView(scene_coords)
+            clicked_coord = (clicked_coord.x(), clicked_coord.y())
+        logger.info(f"Side view plot clicked @ {clicked_coord}")
+
+    def _plot(self):
         # we can calculate the axis scales at the end of generation;
         # we don't need to continuously recalculate the range
         self.disableAutoRange()
 
-        for index, domain in enumerate(worker.domains):
+        for index, domain in enumerate(self.worker.domains):
             if index % 2:  # if the domain index is an even integer
                 colors: tuple = ((255, 0, 0), (0, 255, 0))  # use red and green colors
             else:  # but if it is an odd integer
@@ -90,10 +97,10 @@ class Plot(pg.PlotItem):
 
         # helical twist grid
         # overall_height = the tallest domain's height (the overall height of the plot's contents)
-        overall_height = max([domain.count for domain in worker.domains]) * worker.Z_b
+        overall_height = max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
         # for i in <number of helical twists of the tallest domain>...
-        for i in range(-1, ceil(overall_height / worker.H) + 2):
-            self.addLine(y=(i * worker.H), pen=grid_pen)
+        for i in range(-1, ceil(overall_height / self.worker.H) + 2):
+            self.addLine(y=(i * self.worker.H), pen=grid_pen)
 
         # add axis labels
         self.setLabel("bottom", text="Helical Domain", units="#")

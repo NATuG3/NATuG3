@@ -86,8 +86,13 @@ class SideView:
                     x_coord = self.x_coords[index][strand_direction][i]
                     z_coord = self.z_coords[index][strand_direction][i]
 
+                    if abs(x_coord-index) < 0.001:
+                        potential_junction = True
+                    else:
+                        potential_junction = False
+
                     # combine all data into NEMid object
-                    _NEMid = NEMid(x_coord, z_coord, angle, None)
+                    _NEMid = NEMid(x_coord, z_coord, angle, potential_junction=potential_junction)
 
                     # append the current NEMid to the to-be-outputted array
                     NEMids[index][strand_direction].append(_NEMid)
