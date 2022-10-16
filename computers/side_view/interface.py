@@ -37,7 +37,7 @@ class Plotter(pg.PlotWidget):
         if self.sceneBoundingRect().contains(scene_coords):
             clicked_coord = vb.mapSceneToView(scene_coords)
             clicked_coord = (clicked_coord.x(), clicked_coord.y())
-        logger.info(f"Side view plot clicked @ {clicked_coord}")
+        logger.info(f"Side view plot clicked @ {round(clicked_coord[0], 3), round(clicked_coord[1], 3)}")
 
     def _plot(self):
         # we can calculate the axis scales at the end of generation;

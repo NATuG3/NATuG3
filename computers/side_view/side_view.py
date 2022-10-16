@@ -193,9 +193,10 @@ class SideView:
 
                 # move the initial Z coord down until it is as close to z=0 as possible
                 # this way the graphs don't skew upwards weirdly
+                offset_interval = self.Z_b * self.B
                 while initial_z_coord > 0:
-                    initial_z_coord -= self.H
-                initial_z_coord += self.H
+                    initial_z_coord -= offset_interval
+                initial_z_coord += offset_interval
 
             # look at the left joint of the current domain
             # for calculating additional z coords
