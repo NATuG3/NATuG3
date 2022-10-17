@@ -23,8 +23,8 @@ logger = logging.getLogger(__name__)
 class Panel(QWidget):
     """Nucleic Acid Config Tab."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
 
         # load in the panel's designer UI
         uic.loadUi("config/domains/panel.ui", self)
@@ -51,13 +51,20 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         logger.info("Loaded domains tab of config panel.")
-        self.table.helix_joint_updated.connect(self.refresh)
 
+        # update the "total domains" count box
+        # when symmetry or subunit count are changed
         domain_counter = lambda: self.total_count.setValue(
             self.symmetry.value() * self.subunit_count.value()
         )
         self.symmetry.valueChanged.connect(domain_counter)
         self.subunit_count.valueChanged.connect(domain_counter)
+
+        # when helix joint buttons are clicked refresh the table
+        # so that the switch values (-1, 0, 1) get udpated
+        self.table.helix_joint_updated.connect(
+            lambda: self.table.dump_domains(self.table.fetch_domains())
+        )
 
     def refresh(self):
         """Refresh panel settings/domain table."""

@@ -296,7 +296,7 @@ class Panel(QWidget):
         hook_widgets()
 
         # set placeholder text of profile chooser
-        self.profile_chooser.lineEdit().setPlaceholderText("Name to save/load/delete")
+        self.profile_chooser.lineEdit().setPlaceholderText("Profile Name Here")
         self.profile_chooser.setCurrentText("")
 
         # set up button locking/other needed functions initially

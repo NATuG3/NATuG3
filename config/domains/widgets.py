@@ -55,11 +55,7 @@ class TableIntegerBox(QSpinBox):
             minimum (int): Minimum allowed value.
             maximum (int): Maximum allowed value.
         """
-        super().__init__(value=value, minimum=minimum, maximum=maximum)
-
-        # set range from -1 to 100
-        self.setMinimum(minimum)
-        self.setMaximum(maximum)
+        super().__init__(minimum=minimum, maximum=maximum, value=value)
 
         # show/don't show buttons based on inputs
         if show_buttons:

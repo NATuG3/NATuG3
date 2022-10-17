@@ -16,8 +16,8 @@ logger = logging.getLogger(__name__)
 class Panel(QWidget):
     """Config panel."""
 
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, parent) -> None:
+        super().__init__(parent)
         uic.loadUi("config/panel.ui", self)
 
         # call setup functions
@@ -43,7 +43,7 @@ class Panel(QWidget):
 
         # set the domains tab
         # store actual widget in the tabs container
-        self.tabs.domains = config.domains.Panel()
+        self.tabs.domains = config.domains.Panel(self.parent())
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 

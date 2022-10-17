@@ -64,7 +64,7 @@ class Window(QMainWindow):
         self.panels.config.setWindowTitle("Config")
 
         # store the actual link to the widget in self.config
-        self.config = config.main.Panel()
+        self.config = config.main.Panel(self)
         self.panels.config.setWidget(self.config)
 
         self.panels.config.setAllowedAreas(
