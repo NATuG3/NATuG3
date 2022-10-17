@@ -233,7 +233,7 @@ class Table(QTableWidget):
             def surrounding(cls, i):
                 # make sure to wrap around to the beginning/end of the domains list
                 # if "i" is the length of the list or is 0
-                if i == len(self.rows):
+                if i == (len(self.rows)-1):
                     surrounding = (i - 1, i, 0)
                 elif i == 0:
                     surrounding = (len(self.rows) - 1, 0, i + 1)
