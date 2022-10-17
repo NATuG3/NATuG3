@@ -166,7 +166,7 @@ class Window(QMainWindow):
             self.panels.top_view.setMaximumWidth(99999)
         # otherwise it can be resized up to 2/8ths of the screen
         else:
-            self.panels.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
+            self.panels.top_view.setMaximumWidth(round(2.5 * self.size().width() / 8))
 
         # config resizing
         #
@@ -179,8 +179,7 @@ class Window(QMainWindow):
             if self.config.tabs.domains.isVisible():
                 # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.panels.config.setFixedWidth(265)
+                self.panels.config.setFixedWidth(270)
             # if the nucleic acid tab of the config panel is visible:
             elif self.config.tabs.nucleic_acid.isVisible():
-                self.panels.config.setMaximumWidth(round(2 * self.size().width() / 8))
-                self.panels.config.setMinimumWidth(0)
+                self.panels.config.setFixedWidth(200)

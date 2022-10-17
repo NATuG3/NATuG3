@@ -68,8 +68,10 @@ class SideView:
         Returns:
             DomainsContainerType: A domains container of all NEMids.
         """
+        # the output container for all NEMids
         NEMids = DomainsContainer(len(self.domains))
 
+        # obtain generators for angles and coords
         angles = self._angles()
         x_coords = self._x_coords()
         z_coords = self._z_coords()
@@ -106,6 +108,12 @@ class SideView:
         return NEMids
 
     def _angles(self) -> DomainsContainerType:
+        """
+        Create a generator of angles for NEMids in the side view plot.
+
+        Returns:
+            DomainsContainerType: A domains container with innermost entries of generators.
+        """
         angles: DomainsContainerType = DomainsContainer(len(self.domains))
 
         # generate count# of NEMid angles on a domain-by-domain basis
@@ -127,6 +135,12 @@ class SideView:
         return angles
 
     def _x_coords(self) -> DomainsContainerType:
+        """
+        Create a generator of X coords of NEMids for the side view plot.
+
+        Returns:
+            DomainsContainerType: A domains container with innermost entries of generators.
+        """
         angles = self._angles()
         x_coords = DomainsContainer(len(self.domains))
 
@@ -157,6 +171,8 @@ class SideView:
                     # store the new x_coord in the container object and continue
                     x_coords[index][strand_direction].append(x_coord)
 
+                # there are self.B unique x coords
+                # itertools.cycle infinitely loops through them
                 x_coords[index][strand_direction] = itertools.cycle(
                     x_coords[index][strand_direction]
                 )
@@ -164,6 +180,12 @@ class SideView:
         return x_coords
 
     def _z_coords(self) -> DomainsContainerType:
+        """
+        Create a generator of Z coords of NEMids for the side view plot.
+
+        Returns:
+            DomainsContainerType: A domains container with innermost entries of generators.
+        """
         x_coords = self._x_coords()
         z_coords = DomainsContainer(len(self.domains))
 
@@ -226,11 +248,13 @@ class SideView:
             z_coords[index][zeroed_strand] = itertools.count(
                 start=initial_z_coord, step=self.Z_b
             )
+            # begin at the initial z coord and step by self.Z_b
 
-            # non-zeroed strad
+            # non-zeroed strand
             z_coords[index][inverse(zeroed_strand)] = itertools.count(
                 start=initial_z_coord - self.Z_s, step=self.Z_b
             )
+            # begin at the (initial z coord - z switch) and step by self.Z_b
 
         return z_coords
 
