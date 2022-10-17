@@ -12,6 +12,7 @@ DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
 # container to store data for domains in
 DomainsContainer = lambda count: tuple([[], []] for _ in range(count))
 
+
 class SideView:
     """
     Generate data needed for a side view graph of helices.
@@ -22,15 +23,15 @@ class SideView:
     """
 
     def __init__(
-            self,
-            domains: list,
-            T: float,
-            B: int,
-            H: float,
-            Z_s: float,
-            theta_s: float,
-            theta_b: float,
-            theta_c: float,
+        self,
+        domains: list,
+        T: float,
+        B: int,
+        H: float,
+        Z_s: float,
+        theta_s: float,
+        theta_b: float,
+        theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -77,9 +78,9 @@ class SideView:
             for strand_direction in self.strand_directions:
                 i = 0
                 for angle, x_coord, z_coord in zip(
-                        angles[index][strand_direction],
-                        x_coords[index][strand_direction],
-                        z_coords[index][strand_direction]
+                    angles[index][strand_direction],
+                    x_coords[index][strand_direction],
+                    z_coords[index][strand_direction],
                 ):
                     # we will skip all z coords until they reach zero
                     if z_coord < 0:
@@ -103,7 +104,6 @@ class SideView:
                     NEMids[index][strand_direction].append(NEMid_)
 
         return NEMids
-
 
     def _angles(self) -> DomainsContainerType:
         angles: DomainsContainerType = DomainsContainer(len(self.domains))
@@ -157,7 +157,9 @@ class SideView:
                     # store the new x_coord in the container object and continue
                     x_coords[index][strand_direction].append(x_coord)
 
-                x_coords[index][strand_direction] = itertools.cycle(x_coords[index][strand_direction])
+                x_coords[index][strand_direction] = itertools.cycle(
+                    x_coords[index][strand_direction]
+                )
 
         return x_coords
 
@@ -168,12 +170,11 @@ class SideView:
         for index, domain in enumerate(self.domains):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
-                    x_coords[index][strand_direction],
-                    0,
-                    self.B
+                    x_coords[index][strand_direction], 0, self.B
                 )
-                x_coords[index][strand_direction] = tuple(x_coords[index][strand_direction])
-
+                x_coords[index][strand_direction] = tuple(
+                    x_coords[index][strand_direction]
+                )
 
         for index, domain in enumerate(self.domains):
             # look at the right joint of the previous domain
@@ -192,11 +193,7 @@ class SideView:
                 # generated the needed portion of the previous index's
                 # z coords, of this domain's left helix joint (zeroed_strand)
                 previous_z_coords = tuple(
-                        itertools.islice(
-                            z_coords[index - 1][zeroed_strand],
-                            0,
-                            self.B
-                    )
+                    itertools.islice(z_coords[index - 1][zeroed_strand], 0, self.B)
                 )
 
                 # find the maximum x coord of the previous domain
@@ -223,20 +220,16 @@ class SideView:
             zeroed_strand = domain.helix_joints[LEFT]
 
             z_coords[index][zeroed_strand].append(initial_z_coord)
-            z_coords[index][inverse(zeroed_strand)].append(
-                initial_z_coord - self.Z_s
-            )
+            z_coords[index][inverse(zeroed_strand)].append(initial_z_coord - self.Z_s)
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(
-                start=initial_z_coord,
-                step=self.Z_b
+                start=initial_z_coord, step=self.Z_b
             )
 
             # non-zeroed strad
             z_coords[index][inverse(zeroed_strand)] = itertools.count(
-                start=initial_z_coord - self.Z_s,
-                step=self.Z_b
+                start=initial_z_coord - self.Z_s, step=self.Z_b
             )
 
         return z_coords
