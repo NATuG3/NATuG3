@@ -179,7 +179,7 @@ class Window(QMainWindow):
             if self.config.tabs.domains.isVisible():
                 # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.panels.config.setFixedWidth(250)
+                self.panels.config.setFixedWidth(265)
             # if the nucleic acid tab of the config panel is visible:
             elif self.config.tabs.nucleic_acid.isVisible():
                 self.panels.config.setMaximumWidth(round(2 * self.size().width() / 8))

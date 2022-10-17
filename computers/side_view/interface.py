@@ -2,8 +2,8 @@ import logging
 from math import ceil, dist
 
 import pyqtgraph as pg
-from PyQt6.QtGui import QPen
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QPen
 
 import computers.datatypes
 import config
@@ -127,7 +127,7 @@ class Plotter(pg.PlotWidget):
             max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
         )
         # for i in <number of helical twists of the tallest domain>...
-        for i in range(-1, ceil(overall_height / self.worker.H) + 2):
+        for i in range(0, ceil(overall_height / self.worker.H) + 1):
             self.addLine(y=(i * self.worker.H), pen=grid_pen)
 
         # add axis labels
