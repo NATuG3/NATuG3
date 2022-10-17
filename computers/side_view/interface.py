@@ -47,7 +47,7 @@ class Plotter(pg.PlotWidget):
         )
 
         # check to see if this is a potential junction click
-        if 0 < clicked_coord[0] < (len(self.worker.domains)-1):
+        if 0 < clicked_coord[0] < (len(self.worker.domains) - 1):
             # scan both up and down strand of domain#round(x coord of click)
             for strand_direction in self.worker.strand_directions:
                 # for each NEMid in that strand
