@@ -1,5 +1,5 @@
-from functools import cached_property, lru_cache
-from types import FunctionType
+from functools import cached_property
+from types import LambdaType
 from typing import Deque, Tuple, Type
 from collections import deque
 from helpers import inverse
@@ -9,7 +9,7 @@ from constants.directions import *
 from contextlib import suppress
 
 # container to store data for domains in
-DomainsContainer: FunctionType = lambda count: tuple(
+DomainsContainer: LambdaType = lambda count: tuple(
     (deque(), deque()) for _ in range(count)
 )
 # type annotation for the aforementioned container
