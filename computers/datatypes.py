@@ -17,10 +17,10 @@ class Domain:
     """
 
     def __init__(
-        self,
-        theta_interior_multiple: int,
-        helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
-        count: int,
+            self,
+            theta_interior_multiple: int,
+            helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
+            count: int,
     ):
         """
         Create domains dataclass.

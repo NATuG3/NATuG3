@@ -1,5 +1,5 @@
-from typing import Deque, Tuple, Type
 import itertools
+from typing import Deque, Tuple, Type
 
 from computers.datatypes import NEMid
 from computers.side_view.interface import Plotter
@@ -23,15 +23,15 @@ class SideView:
     """
 
     def __init__(
-        self,
-        domains: list,
-        T: float,
-        B: int,
-        H: float,
-        Z_s: float,
-        theta_s: float,
-        theta_b: float,
-        theta_c: float,
+            self,
+            domains: list,
+            T: float,
+            B: int,
+            H: float,
+            Z_s: float,
+            theta_s: float,
+            theta_b: float,
+            theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -80,9 +80,9 @@ class SideView:
             for strand_direction in self.strand_directions:
                 i = 0
                 for angle, x_coord, z_coord in zip(
-                    angles[index][strand_direction],
-                    x_coords[index][strand_direction],
-                    z_coords[index][strand_direction],
+                        angles[index][strand_direction],
+                        x_coords[index][strand_direction],
+                        z_coords[index][strand_direction],
                 ):
                     # we will skip all z coords until they reach zero
                     if z_coord < 0:

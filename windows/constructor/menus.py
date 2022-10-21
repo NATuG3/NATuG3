@@ -44,7 +44,7 @@ class View(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(fetch_icon("eye-outline"))
         config.triggered.connect(
-            lambda: helpers.reverse_hidenness(storage.windows.constructor.panels.config)
+            lambda: helpers.reverse_hidenness(storage.Windows().constructor.panels.config)
         )
 
         # view -> "top view" -> hide/unhide
@@ -53,7 +53,7 @@ class View(QMenu):
         # will be checked/unchecked based on if widget is shown
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
-            lambda: helpers.reverse_hidenness(storage.windows.constructor.panels.top_view)
+            lambda: helpers.reverse_hidenness(storage.Windows().constructor.panels.top_view)
         )
 
 

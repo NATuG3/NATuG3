@@ -79,11 +79,11 @@ class Panel(QWidget):
             """Worker for the save profile button"""
             if self.save_profile_button.toolTip() == "Overwrite Profile":
                 if not helpers.confirm(
-                    self,
-                    "Overwrite confirmation",
-                    f'Are you sure you want to overwrite the profile named "'
-                    + self.profile_chooser.currentText()
-                    + '" with the currently chosen nucleic acid settings?',
+                        self,
+                        "Overwrite confirmation",
+                        f'Are you sure you want to overwrite the profile named "'
+                        + self.profile_chooser.currentText()
+                        + '" with the currently chosen nucleic acid settings?',
                 ):
                     return
 
@@ -109,11 +109,11 @@ class Panel(QWidget):
         def delete_profile(self):
             """Worker for the delete profile button"""
             if not helpers.confirm(
-                self,
-                "Delete profile confirmation",
-                f'Are you sure you want to delete the profile named "'
-                + self.profile_chooser.currentText()
-                + '"?\nNote that this action cannot be undone!',
+                    self,
+                    "Delete profile confirmation",
+                    f'Are you sure you want to delete the profile named "'
+                    + self.profile_chooser.currentText()
+                    + '"?\nNote that this action cannot be undone!',
             ):
                 return
 
@@ -140,12 +140,12 @@ class Panel(QWidget):
         def load_profile(self):
             """Worker for the load profile button"""
             if not helpers.confirm(
-                self,
-                "Load profile confirmation",
-                f"Are you sure you want to overwrite all currently chosen settings"
-                + ' with those of the profile named "'
-                + self.profile_chooser.currentText()
-                + '"?',
+                    self,
+                    "Load profile confirmation",
+                    f"Are you sure you want to overwrite all currently chosen settings"
+                    + ' with those of the profile named "'
+                    + self.profile_chooser.currentText()
+                    + '"?',
             ):
                 return
 
@@ -274,16 +274,16 @@ class Panel(QWidget):
 
             # hook all inputs to the following input_box_changed function
             for input in (
-                self.D,
-                self.H,
-                self.T,
-                self.B,
-                self.Z_b,
-                self.Z_c,
-                self.Z_s,
-                self.theta_b,
-                self.theta_c,
-                self.theta_s,
+                    self.D,
+                    self.H,
+                    self.T,
+                    self.B,
+                    self.Z_b,
+                    self.Z_c,
+                    self.Z_s,
+                    self.theta_b,
+                    self.theta_c,
+                    self.theta_s,
             ):
                 input.valueChanged.connect(input_box_changed)
             self.profile_chooser.currentTextChanged.connect(input_box_changed)
