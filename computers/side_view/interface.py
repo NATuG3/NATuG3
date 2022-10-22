@@ -131,8 +131,8 @@ class Plotter(pg.PlotWidget):
             self.addLine(y=(i * self.worker.H), pen=grid_pen)
 
         # add axis labels
-        self.setLabel("bottom", text="Helical Domain", units="#")
-        self.setLabel("left", text="Helical Twists", units="#")
+        self.setLabel("bottom", text="Helical Domain", units="nanometers")
+        self.setLabel("left", text="Helical Twists", units="nanometers")
 
         # re-enable auto-range so that it isn't zoomed out weirdly
         self.autoRange()

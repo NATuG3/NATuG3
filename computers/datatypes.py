@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from types import NoneType
+from typing import TypeVar
 from typing import Tuple, Union, Literal
 
 from constants import bases
@@ -34,23 +35,15 @@ class Domain:
                 Number of initial NEMids/strand to generate.
         """
         # multiple of the characteristic angle (theta_c) for the interior angle
-        # between this domains[this domain's index] and this domains[this domain's index + 1]
         self.theta_interior_multiple: int = theta_interior_multiple
 
-        # the left and right helical joints
-        # constants.directions.left = 0
-        # constants.directions.right = 1
-        # so...
-        # format is (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN
+        # (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN
         self.helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]] = helix_joints
 
         # store the number of initial NEMids/strand to generate
         self.count = count
 
-        # theta_switch_multiple
-        # indicates that the left helix joint to right helix joint goes either...
         # (-1) up to down; (0) both up/down; (1) down to up
-        #
         # this does not need to be defined if theta_switch_multiple is defined
         helix_joints = tuple(helix_joints)  # ensure helix_joints is a tuple
         if helix_joints == (UP, DOWN):
@@ -77,16 +70,32 @@ class Domain:
 
 @dataclass
 class NEMid:
-    """Dataclass for a NEMid."""
+    """
+    NEMid object.
+
+    Attributes:
+        x_coord (float): The x coord of the NEMid.
+        z_coord (float): The z coord of the NEMid.
+        angle (float): Angle from this domain and next domains' line of tangency going counterclockwise.
+        direction (Literal[UP, DOWN]): The direction of the helix at this NEMid.
+        matching (NEMid): NEMid in same domain on other direction's helix across from this one.
+        juncmate (Union[NEMid, None]): NEMid that can this NEMid can conjunct-with. NoneType if this no NEMid overlaps.
+        junction (bool): Whether this NEMid is at the site of an active junction.
+        junctable (bool): Whether this NEMid overlaps another NEMid and can thus can conjunct.
+    """
 
     # Generic Attributes
     x_coord: float
     z_coord: float
     angle: float
+    direction: Literal[UP, DOWN]
+    matching: TypeVar = None
 
     # NEMid Specific Attributes
+    juncmate: Union[TypeVar, NoneType] = None
     junction: bool = False
     junctable: bool = False
+
 
     @property
     def position(self) -> Tuple[float, float]:

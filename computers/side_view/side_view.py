@@ -1,5 +1,7 @@
-from typing import Deque, Tuple, Type
+from pprint import pprint
+from typing import Deque, Tuple, Type, List
 import itertools
+from copy import copy, deepcopy
 
 from computers.datatypes import NEMid
 from computers.side_view.interface import Plotter
@@ -22,16 +24,18 @@ class SideView:
     z_coords (DomainsContainerType) All z coords.
     """
 
+    strand_directions = (UP, DOWN)
+
     def __init__(
-        self,
-        domains: list,
-        T: float,
-        B: int,
-        H: float,
-        Z_s: float,
-        theta_s: float,
-        theta_b: float,
-        theta_c: float,
+            self,
+            domains: list,
+            T: float,
+            B: int,
+            H: float,
+            Z_s: float,
+            theta_s: float,
+            theta_b: float,
+            theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -59,8 +63,6 @@ class SideView:
         self.theta_b = theta_b
         self.theta_c = theta_c
 
-        self.strand_directions = (UP, DOWN)
-
     def compute(self) -> DomainsContainerType:
         """
         Compute NEMid data.
@@ -77,20 +79,45 @@ class SideView:
         z_coords = self._z_coords()
 
         for index, domain in enumerate(self.domains):
+            # create generators for up and down strand z coords
+            levelers = (self._z_coords()[index][UP], self._z_coords()[index][DOWN])
+
+            # generate the first z coord for the up and down strand levelers
+            # then use this list as a way to store current values of the leveler generators
+            current_z_coords = [next(levelers[UP]), next(levelers[DOWN])]
+
+            # how many NEMids to skip over for the up and down strand
+            begin_at = [0, 0]
+
+            # while the z coord leveler's current z coord up strand output is less than zero
+            # generate a new up strand and down strand NEMid one position higher
+            while current_z_coords[UP] < 0:
+                current_z_coords[UP] = next(levelers[UP])
+                begin_at[UP] += 1
+
+            # while the distance between the current z coord output up and down strand is less than 0.094 angstroms
+            # keep on ticking the down strand's NEMids-to-skip by 1 and by generating a down strand z coord
+            # that is one position higher (until the distances are less than 0.094)
+            while current_z_coords[DOWN]-current_z_coords[UP] < 0.094:
+                current_z_coords[DOWN] = next(levelers[DOWN])
+                begin_at[DOWN] += 1
+
             for strand_direction in self.strand_directions:
-                i = 0
+                counter = 0
                 for angle, x_coord, z_coord in zip(
                     angles[index][strand_direction],
                     x_coords[index][strand_direction],
                     z_coords[index][strand_direction],
                 ):
-                    # we will skip all z coords until they reach zero
-                    if z_coord < 0:
-                        continue
-                    elif i == domain.count:
-                        break
-                    else:
-                        i += 1
+                    try:
+                        # do counter checks
+                        if counter < begin_at[strand_direction]:
+                            continue
+                        elif counter == domain.count+begin_at[strand_direction]:
+                            break
+                    finally:
+                        # tick counter
+                        counter += 1
 
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid
@@ -100,7 +127,7 @@ class SideView:
                         junctable = False
 
                     # combine all data into NEMid object
-                    NEMid_ = NEMid(x_coord, z_coord, angle, junctable=junctable)
+                    NEMid_ = NEMid(x_coord, z_coord, angle, strand_direction, junctable=junctable)
 
                     # append the current NEMid to the to-be-outputted array
                     NEMids[index][strand_direction].append(NEMid_)
@@ -120,7 +147,7 @@ class SideView:
         # domain_index is the index of the current domain
         for index, domain in enumerate(self.domains):
             # which strand will begin at x=0 (+domain_index)
-            zeroed_strand = domain.helix_joints[LEFT]
+            zeroed_strand = self.domains[index - 1].helix_joints[RIGHT]
 
             # create infinite generators for the zeroed and non zeroed strands
             angles[index][zeroed_strand] = itertools.count(
@@ -152,16 +179,13 @@ class SideView:
 
             # since every T NEMids the x coords repeat we only need to generate x coords for the first T NEMids
             for strand_direction in self.strand_directions:
-                for i in range(self.B):
-                    # find the current NEMid_angle and modulo it by 360 NEMid angles are "the angle about the central
-                    # axis going counter-clockwise from the line of tangency." they reset at 360, so we modulo the
-                    # current NEMid angle here
-                    NEMid_angle: float = next(angles[index][strand_direction]) % 360
+                for counter, angle in enumerate(angles[index][strand_direction]):
+                    angle %= 360
 
-                    if NEMid_angle < theta_exterior:
-                        x_coord = NEMid_angle / theta_exterior
+                    if angle < theta_exterior:
+                        x_coord = angle / theta_exterior
                     else:
-                        x_coord = (360 - NEMid_angle) / theta_interior
+                        x_coord = (360 - angle) / theta_interior
 
                     # domain 0 lies between [0, 1] on the x axis
                     # domain 1 lies between [1, 2] on the x axis
@@ -170,6 +194,10 @@ class SideView:
 
                     # store the new x_coord in the container object and continue
                     x_coords[index][strand_direction].append(x_coord)
+
+                    # break once self.B x coords have been generated
+                    if len(x_coords[index][strand_direction]) == self.B:
+                        break
 
                 # there are self.B unique x coords
                 # itertools.cycle infinitely loops through them
@@ -240,9 +268,6 @@ class SideView:
             # look at the left joint of the current domain
             # for calculating additional z coords
             zeroed_strand = domain.helix_joints[LEFT]
-
-            z_coords[index][zeroed_strand].append(initial_z_coord)
-            z_coords[index][inverse(zeroed_strand)].append(initial_z_coord - self.Z_s)
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(
