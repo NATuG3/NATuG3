@@ -124,7 +124,7 @@ class Plotter(pg.PlotWidget):
         # helical twist grid
         # overall_height = the tallest domain's height (the overall height of the plot's contents)
         overall_height = (
-            max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
+                max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
         )
         # for i in <number of helical twists of the tallest domain>...
         for i in range(0, ceil(overall_height / self.worker.H) + 1):

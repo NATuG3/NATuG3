@@ -1,4 +1,5 @@
 import sys
+from functools import cache
 
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
@@ -8,8 +9,10 @@ import config.nucleic_acid
 import windows.constructor.main
 from computers.side_view import SideView
 from computers.top_view import TopView
+from helpers import singleton
 
 
+@cache
 def application() -> QApplication:
     output = QApplication(sys.argv)
     output.setStyle("Fusion")
@@ -17,6 +20,10 @@ def application() -> QApplication:
     return output
 
 
+application()
+
+
+@singleton
 class Plots:
     @property
     def side_view(self):
@@ -41,6 +48,7 @@ class Plots:
         )
 
 
+@singleton
 class Windows:
     def __init__(self):
         self.constructor = windows.constructor.main.Window()

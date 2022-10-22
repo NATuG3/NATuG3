@@ -1,9 +1,28 @@
 import logging
+from functools import wraps
 from typing import Literal
 
 from PyQt6.QtWidgets import QMessageBox
 
 logger = logging.getLogger(__name__)
+
+
+def singleton(orig_cls):
+    """Decorator to convert a class instance into a singleton."""
+    # https://igeorgiev.eu/python/design-patterns/python-singleton-pattern-decorator/
+
+    orig_new = orig_cls.__new__
+    instance = None
+
+    @wraps(orig_cls.__new__)
+    def __new__(cls, *args, **kwargs):
+        nonlocal instance  # we are referring to the above instance variable
+        if instance is None:  # if there is no instance of the class already than create one
+            instance = orig_new(cls, *args, **kwargs)
+        return instance  # return class instance
+
+    orig_cls.__new__ = __new__
+    return orig_cls
 
 
 def confirm(parent, title, msg):
