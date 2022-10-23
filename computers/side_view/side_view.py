@@ -25,15 +25,15 @@ class SideView:
     strand_directions = (UP, DOWN)
 
     def __init__(
-        self,
-        domains: list,
-        T: float,
-        B: int,
-        H: float,
-        Z_s: float,
-        theta_s: float,
-        theta_b: float,
-        theta_c: float,
+            self,
+            domains: list,
+            T: float,
+            B: int,
+            H: float,
+            Z_s: float,
+            theta_s: float,
+            theta_b: float,
+            theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -84,7 +84,7 @@ class SideView:
                         # then keep moving the initial down-strand NEMid up until it is within .094 nm
                         # of the up-strand's initial NEMid (determined above)
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
-                            if down_strand_z_coord-up_strand_z_coord < 0.094:
+                            if down_strand_z_coord - up_strand_z_coord < 0.094:
                                 begin_at[DOWN] += 1
                             else:
                                 # break out of nested loop
@@ -106,21 +106,33 @@ class SideView:
 
                 # append tuples of the properly spliced values
                 angles.append(
-                    tuple(itertools.islice(self._angles()[index][strand_direction], start, end))
+                    tuple(
+                        itertools.islice(
+                            self._angles()[index][strand_direction], start, end
+                        )
+                    )
                 )
                 x_coords.append(
-                    tuple(itertools.islice(self._x_coords()[index][strand_direction], start, end))
+                    tuple(
+                        itertools.islice(
+                            self._x_coords()[index][strand_direction], start, end
+                        )
+                    )
                 )
                 z_coords.append(
-                    tuple(itertools.islice(self._z_coords()[index][strand_direction], start, end))
+                    tuple(
+                        itertools.islice(
+                            self._z_coords()[index][strand_direction], start, end
+                        )
+                    )
                 )
 
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                    angles[strand_direction],
-                    x_coords[strand_direction],
-                    z_coords[strand_direction],
+                        angles[strand_direction],
+                        x_coords[strand_direction],
+                        z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid
@@ -137,15 +149,11 @@ class SideView:
                     # append the current NEMid to the to-be-outputted array
                     NEMids[index][strand_direction].append(NEMid_)
 
-            # for strand_direction in self.strand_directions:
-            #     for index, NEMid_ in enumerate(NEMids[index][strand_direction]):
-            #         NEMid_.juncmate = NEMids[index][strand_direction][index]
+        # assign matching NEMids to each other's matching slots
         for domain_index in range(len(self.domains)):
-            for strand_direction in self.strand_directions:
-                for NEMid_index, NEMid_ in enumerate(NEMids[domain_index][strand_direction]):
-                    NEMids[domain_index][strand_direction][NEMid_index].juncmate = (
-                        NEMids[domain_index][inverse(strand_direction)][NEMid_index]
-                    )
+            for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
+                NEMid1.matching, NEMid2.matching = NEMid1, NEMid2
+
         return NEMids
 
     def _angles(self) -> DomainsContainerType:

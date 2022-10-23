@@ -1,47 +1,56 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Tuple, Union
+from typing import Union, TypeVar
 
+from computers.datatypes.point import Point
 from constants import bases
 
 
 @dataclass
-class Nucleoside:
-    """Dataclass for a nucleoside."""
+class Nucleoside(Point):
+    """
+    Nucleoside object.
 
-    # Generic Attributes
-    x_coord: float
-    z_coord: float
-    angle: float
+    Attributes:
+        matching (NEMid): NEMid in same domain on other direction's helix across from this one.
+        base (Union["A", "T", "G", "C", "U"]): The base of the nucleoside.
+        complement (Union["A", "T", "G", "C", "U"]): The complementary base of the nucleoside.
+    """
 
-    # Base Specific Attributes
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType]
+    matching: TypeVar = None
 
     @property
-    def position(self) -> Tuple[float, float]:
-        """Return coords of the base as a tuple of form (x, z)"""
-        return self.x_coord, self.z_coord
-
-    def complementary_base(self) -> str:
+    def complement(self) -> str:
         "Return the complement of this base"
         complements = {
             "A": "T",
             "T": "A",
-            "U": "A",
-            "A": "U",
             "C": "G",
             "G": "C",
         }
-        return complements[self.nucleoside]
+        return complements[self.base]
 
     def __repr__(self) -> str:
-        return f"base(pos={self.position()}), angle={round(self.angle, 3)}°, base={str(self.base).replace('None', 'unset')}"
+        return (
+            f"nucleoside("
+            f"base(pos={self.position()}), "
+            f"angle={round(self.angle, 3)}°, "
+            f"base={str(self.base).replace('None', 'unset')}"
+            f")"
+        )
 
     def __eq__(self, other):
+        """
+        Determine equality based on whether the nucleoside base of the other instance matches ours.
+        """
+        # if it isn't the same type then it cannot be equal
         if not isinstance(other, type(self)):
             return None
         try:
+            # if it is the same type and the bases match return true
             if self.base == other.base:
                 return True
+        # if the .base attribute was missing return false
         except AttributeError:
             return False
