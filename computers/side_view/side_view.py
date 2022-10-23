@@ -77,28 +77,27 @@ class SideView:
         z_coords = self._z_coords()
 
         for index, domain in enumerate(self.domains):
-            # create generators for up and down strand z coords
-            levelers = (self._z_coords()[index][UP], self._z_coords()[index][DOWN])
-
-            # generate the first z coord for the up and down strand levelers
-            # then use this list as a way to store current values of the leveler generators
-            current_z_coords = [next(levelers[UP]), next(levelers[DOWN])]
-
             # how many NEMids to skip over for the up and down strand
             begin_at = [0, 0]
 
-            # while the z coord leveler's current z coord up strand output is less than zero
-            # generate a new up strand and down strand NEMid one position higher
-            while current_z_coords[UP] < 0:
-                current_z_coords[UP] = next(levelers[UP])
-                begin_at[UP] += 1
-
-            # while the distance between the current z coord output up and down strand is less than 0.094 angstroms
-            # keep on ticking the down strand's NEMids-to-skip by 1 and by generating a down strand z coord
-            # that is one position higher (until the distances are less than 0.094)
-            while current_z_coords[DOWN] - current_z_coords[UP] < 0.094:
-                current_z_coords[DOWN] = next(levelers[DOWN])
-                begin_at[DOWN] += 1
+            for up_strand_z_coord in self._z_coords()[index][UP]:
+                try:
+                    # keep on moving the initial up-strand NEMid up until it begins above zero
+                    if up_strand_z_coord < 0:
+                        begin_at[UP] += 1
+                    else:
+                        # then keep moving the initial down-strand NEMid up until it is within .094 nm
+                        # of the up-strand's initial NEMid (determined above)
+                        for down_strand_z_coord in self._z_coords()[index][DOWN]:
+                            print(down_strand_z_coord, up_strand_z_coord)
+                            if down_strand_z_coord-up_strand_z_coord < 0.094:
+                                begin_at[DOWN] += 1
+                            else:
+                                # break out of nested loop
+                                raise StopIteration
+                # allow breaking out of nested loop
+                except StopIteration:
+                    break
 
             for strand_direction in self.strand_directions:
                 counter = 0
