@@ -1,6 +1,7 @@
-from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QIcon
 import sys
+
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QApplication
 
 
 class Application(QApplication):
