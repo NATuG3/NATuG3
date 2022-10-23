@@ -7,6 +7,7 @@ logger = logging.getLogger("main")
 # mute pyqt logs
 logging.getLogger("PyQt6").setLevel(logging.INFO)
 
+
 def main():
     # set log level
     logging.basicConfig(

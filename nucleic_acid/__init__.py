@@ -1,1 +1,1 @@
-from .main import Panel
+from .panel import Panel

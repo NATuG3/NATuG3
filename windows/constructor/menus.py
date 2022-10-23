@@ -4,8 +4,8 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 
 import helpers
-import storage.saver
 import storage
+import storage.saver
 from resources import fetch_icon
 
 

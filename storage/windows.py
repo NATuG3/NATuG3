@@ -1,7 +1,7 @@
-import windows.constructor.main
+import windows.constructor
 
 
 class Windows:
     def __init__(self):
-        self.constructor = windows.constructor.main.Window()
+        self.constructor = windows.constructor.Window()
         self.sequencer = None

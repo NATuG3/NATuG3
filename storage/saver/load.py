@@ -4,10 +4,10 @@ from typing import List
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-import domains.main
+from storage.saver.datatypes import Save
 import domains.storage
-import storage.saver.datatypes
 import storage
+import storage.saver.datatypes
 from domains.storage import Domain
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ def worker(filename):
     """Runs after filename has been chosen."""
 
     # load save package from chosen filename
-    package = saves.datatypes.Save.from_file(filename)
+    package = Save.from_file(filename)
 
     # update the current domains array
     domains.storage.current: List[Domain] = package.domains

@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 import domains
 import nucleic_acid
-import config.main
 import storage
 from resources import fetch_icon
 

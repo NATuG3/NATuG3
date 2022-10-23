@@ -1,1 +1,2 @@
-from .main import Panel
+import domains.datatypes
+from .panel import Panel

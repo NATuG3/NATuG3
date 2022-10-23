@@ -2,7 +2,7 @@ import logging
 from types import SimpleNamespace
 
 from PyQt6 import uic
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
     QTableWidget,
@@ -11,10 +11,11 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 
+import config
 import domains.storage
 import helpers
-from domains.widgets import *
 from constants.directions import *
+from domains.widgets import *
 from resources.workers import fetch_icon
 
 logger = logging.getLogger(__name__)

@@ -12,9 +12,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import domains.storage
 import config.main
-import nucleic_acid
 import storage
 
 logger = logging.getLogger(__name__)
