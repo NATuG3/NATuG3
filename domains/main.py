@@ -11,9 +11,9 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 
-import config.domains.storage
+import domains.storage
 import helpers
-from config.domains.widgets import *
+from domains.widgets import *
 from constants.directions import *
 from resources.workers import fetch_icon
 
@@ -27,7 +27,7 @@ class Panel(QWidget):
         super().__init__(parent)
 
         # load in the panel's designer UI
-        uic.loadUi("config/domains/panel.ui", self)
+        uic.loadUi("domains/panel.ui", self)
 
         # set reload table widget
         self.update_table.setIcon(fetch_icon("checkmark-outline"))
@@ -43,9 +43,9 @@ class Panel(QWidget):
         self.config.setSizePolicy(config_size_policy)
 
         # set initial values of domain table config widgets
-        self.subunit_count.setValue(config.domains.storage.current.subunit.count)
-        self.symmetry.setValue(config.domains.storage.current.symmetry)
-        self.total_count.setValue(config.domains.storage.current.count)
+        self.subunit_count.setValue(domains.storage.current.subunit.count)
+        self.symmetry.setValue(domains.storage.current.symmetry)
+        self.total_count.setValue(domains.storage.current.count)
 
         # hook update domains button
         self.update_table.clicked.connect(self.refresh)
@@ -69,12 +69,12 @@ class Panel(QWidget):
     def refresh(self):
         """Refresh panel settings/domain table."""
         # obtain current domain inputs
-        config.domains.storage.current.subunit.domains = self.table.fetch_domains()
+        domains.storage.current.subunit.domains = self.table.fetch_domains()
 
         confirmation: bool = True
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)
-        if self.subunit_count.value() < config.domains.storage.current.subunit.count:
+        if self.subunit_count.value() < domains.storage.current.subunit.count:
             # helpers.confirm will return a bool
             confirmation: bool = helpers.confirm(
                 self.parent(),
@@ -85,11 +85,11 @@ class Panel(QWidget):
             )
         if confirmation:
             # update storage settings
-            config.domains.storage.current.subunit.count = self.subunit_count.value()
-            config.domains.storage.current.symmetry = self.symmetry.value()
+            domains.storage.current.subunit.count = self.subunit_count.value()
+            domains.storage.current.symmetry = self.symmetry.value()
 
             # update settings boxes
-            self.total_count.setValue(config.domains.storage.current.count)
+            self.total_count.setValue(domains.storage.current.count)
 
             self.update_table.setStyleSheet(
                 f"background-color: rgb{str(config.colors.green)}"
@@ -103,7 +103,7 @@ class Panel(QWidget):
             timer.start()
 
         # refresh table
-        self.table.dump_domains(config.domains.storage.current.subunit.domains)
+        self.table.dump_domains(domains.storage.current.subunit.domains)
 
 
 class Table(QTableWidget):
@@ -132,12 +132,12 @@ class Table(QTableWidget):
         self._style()
 
         # dump the domains of the previous save
-        self.dump_domains(config.domains.storage.current.subunit.domains)
+        self.dump_domains(domains.storage.current.subunit.domains)
 
         # when widget value is changed run fetch_domains and update current settings
         @self.cell_widget_updated.connect
         def _():
-            config.domains.storage.current.subunit.domains = self.fetch_domains()
+            domains.storage.current.subunit.domains = self.fetch_domains()
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -305,7 +305,7 @@ class Table(QTableWidget):
             # column 4 - initial NEMid count
             count: int = self.cellWidget(domain, 4).value()
 
-            domain = config.domains.storage.Domain(
+            domain = domains.storage.Domain(
                 theta_interior_multiple,
                 (left_helical_joint, right_helical_joint),
                 count,

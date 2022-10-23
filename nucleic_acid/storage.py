@@ -1,12 +1,13 @@
 import atexit
 import logging
+import os
 import pickle
 from dataclasses import dataclass
 
 import config
 
-profiles_filename = f"config/nucleic_acid/profiles.{config.extension}"
-restored_filename = f"config/nucleic_acid/restored.{config.extension}"
+profiles_filename = f"nucleic_acid/profiles.{config.extension}"
+restored_filename = f"nucleic_acid/restored.{config.extension}"
 
 count: int = 50  # initial NEMids/strand count
 current: object = None  # current profile
@@ -64,7 +65,7 @@ def load() -> None:
     atexit.register(dump)
 
     # attempt to load the nucleic acid settings file
-    try:
+    if profiles_filename in os.listdir():
         # load all profiles
         with open(profiles_filename, "rb") as settings_file:
             profiles = pickle.load(settings_file)
@@ -77,7 +78,7 @@ def load() -> None:
 
         logger.debug("Saved profiles file loaded.")
     # if the settings file wasn't found then create a new one
-    except FileNotFoundError:
+    else:
         logger.warning("Saved profiles file not found. Restoring defaults...")
         profiles = defaults
         current = next(iter(defaults.values()))

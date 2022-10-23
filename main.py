@@ -7,15 +7,22 @@ logger = logging.getLogger("main")
 # mute pyqt logs
 logging.getLogger("PyQt6").setLevel(logging.INFO)
 
-# log boot statement
-logger.debug(f"Booting @ {time()}")
-
-
 def main():
     # set log level
     logging.basicConfig(
         level=logging.DEBUG,
     )
+
+    logger.debug(f"Booting @ {time()}")
+
+    import domains.storage
+    import nucleic_acid.storage
+
+    domains.storage.load()
+    nucleic_acid.storage.load()
+
+    logger.info("Loaded profiles and domain settings.")
+
     import storage
     import sys
 
@@ -26,6 +33,8 @@ def main():
         import ctypes
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
+
+    logger.info("Loaded the config.")
 
     # show the constructor window
     storage.windows.constructor.show()

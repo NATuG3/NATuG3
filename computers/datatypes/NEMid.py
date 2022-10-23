@@ -6,7 +6,7 @@ from typing import Union
 from computers.datatypes.point import Point
 
 
-@dataclass
+@dataclass(slots=True)
 class NEMid(Point):
     """
     NEMid object.

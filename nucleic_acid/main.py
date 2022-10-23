@@ -4,7 +4,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 
 import helpers
-from config.nucleic_acid import storage
+from nucleic_acid import storage
 from resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class Panel(QWidget):
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
-        uic.loadUi("config/nucleic_acid/panel.ui", self)
+        uic.loadUi("nucleic_acid/panel.ui", self)
 
         # place the current settings into their respective boxes
         self.dump_settings(storage.current)

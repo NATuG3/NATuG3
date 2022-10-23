@@ -4,7 +4,7 @@ from typing import Tuple, Literal
 from constants.directions import *
 
 
-@dataclass
+@dataclass(slots=True)
 class Point:
     """
     NEMid object.

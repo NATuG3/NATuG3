@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 
 import helpers
-import saves
+import storage.saver
 import storage
 from resources import fetch_icon
 
@@ -21,14 +21,14 @@ class File(QMenu):
         open_.setIcon(fetch_icon("open-outline"))
         open_.setShortcut("ctrl+o")
         open_.setStatusTip("Open saved stage from file")
-        open_.triggered.connect(lambda: saves.load.runner(parent))
+        open_.triggered.connect(lambda: storage.saver.load.runner(parent))
 
         # file -> save
         save = self.actions.save = self.addAction("Save")
         save.setIcon(fetch_icon("save-outline"))
         save.setShortcut("ctrl+s")
         save.setStatusTip("Save current stage top file")
-        save.triggered.connect(lambda: saves.save.runner(parent))
+        save.triggered.connect(lambda: storage.saver.save.runner(parent))
 
 
 class View(QMenu):

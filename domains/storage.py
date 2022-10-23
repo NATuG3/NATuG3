@@ -1,13 +1,14 @@
 import atexit
 import logging
 import pickle
+from typing import List
 
 import config.settings
 from computers.datatypes import Domain
 from constants.directions import *
 from helpers import inverse
 
-restored_filename = f"config/domains/restored.{config.extension}"
+restored_filename = f"domains/restored.{config.extension}"
 
 current = None
 settings = None
@@ -16,11 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 class Subunit:
-    def __init__(self, domains):
+    def __init__(self, domains: List[Domain]) -> None:
         self.domains = domains
 
     @property
-    def count(self):
+    def count(self) -> int:
         """Number of domains per subunit."""
         return len(self.domains)
 

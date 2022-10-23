@@ -4,7 +4,7 @@ import pickle
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-import saves.datatypes
+import storage.saver.datatypes
 
 logger = logging.getLogger(__name__)
 

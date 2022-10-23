@@ -6,7 +6,7 @@ from computers.datatypes.point import Point
 from constants import bases
 
 
-@dataclass
+@dataclass(slots=True)
 class Nucleoside(Point):
     """
     Nucleoside object.

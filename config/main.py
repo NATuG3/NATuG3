@@ -4,9 +4,9 @@ from types import SimpleNamespace
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
-import config.domains
+import domains
+import nucleic_acid
 import config.main
-import config.nucleic_acid
 import storage
 from resources import fetch_icon
 
@@ -37,13 +37,13 @@ class Panel(QWidget):
 
         # set the nucleic acid tab
         # store actual widget in the tabs container
-        self.tabs.nucleic_acid = config.nucleic_acid.Panel(self)
+        self.tabs.nucleic_acid = nucleic_acid.Panel(self)
         self.nucleic_acid_tab.setLayout(QVBoxLayout())
         self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
 
         # set the domains tab
         # store actual widget in the tabs container
-        self.tabs.domains = config.domains.Panel(self.parent())
+        self.tabs.domains = domains.Panel(self.parent())
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
