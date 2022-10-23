@@ -91,7 +91,7 @@ class Window(QMainWindow):
         self.panels.top_view.setStatusTip("A plot of the top view of all domains")
 
         # attach actual top view widget to docked top view widget
-        self.panels.top_view.setWidget(storage.Plots().top_view.ui())
+        self.panels.top_view.setWidget(storage.plots.top_view.ui())
 
         # top view is only allowed on the sides
         self.panels.top_view.setAllowedAreas(
@@ -116,7 +116,7 @@ class Window(QMainWindow):
         self.side_view.setStatusTip("A plot of the side view of all domains")
 
         # add actual plot to GroupBox
-        self.side_view.layout().addWidget(storage.Plots().side_view.ui())
+        self.side_view.layout().addWidget(storage.plots.side_view.ui())
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)

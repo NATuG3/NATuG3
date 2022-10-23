@@ -50,7 +50,7 @@ class Panel(QWidget):
         @self.update_graphs.clicked.connect
         def _():
             # load and set new plot areas
-            storage.Windows().constructor.panels.top_view.setWidget(
-                storage.Plots().top_view.ui()
+            storage.windows.constructor.panels.top_view.setWidget(
+                storage.plots.top_view.ui()
             )
-            storage.Windows().constructor.setCentralWidget(storage.Plots().side_view.ui())
+            storage.windows.constructor.setCentralWidget(storage.plots.side_view.ui())

@@ -29,13 +29,13 @@ def worker(filename):
     config.domains.storage.current: List[Domain] = package.domains
 
     # update all domains settings/dump domains
-    storage.Windows().constructor.config.tabs.domains.subunit_count.setValue(
+    storage.windows.constructor.config.tabs.domains.subunit_count.setValue(
         config.domains.storage.current.subunit.count
     )
-    storage.Windows().constructor.config.tabs.domains.symmetry.setValue(
+    storage.windows.constructor.config.tabs.domains.symmetry.setValue(
         config.domains.storage.current.symmetry
     )
-    storage.Windows().constructor.config.tabs.domains.table.dump_domains(
+    storage.windows.constructor.config.tabs.domains.table.dump_domains(
         config.domains.storage.current.subunit.domains
     )
 

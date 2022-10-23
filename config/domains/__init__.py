@@ -1,1 +1,1 @@
-from config.domains.main import Panel
+from .main import Panel

@@ -28,13 +28,13 @@ def main():
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
 
     # show the constructor window
-    storage.Windows().constructor.show()
-    storage.Windows().constructor.resizeEvent(None)  # trigger initial resize event
+    storage.windows.constructor.show()
+    storage.windows.constructor.resizeEvent(None)  # trigger initial resize event
     logger.debug("Set up main window")
 
     # begin app event loop
     logger.debug("Beginning event loop...")
-    sys.exit(storage.application().exec())
+    sys.exit(storage.application.exec())
 
 
 if __name__ == "__main__":

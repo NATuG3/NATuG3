@@ -1,1 +1,1 @@
-from computers.top_view.top_view import TopView
+from .top_view import TopView

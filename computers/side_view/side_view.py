@@ -1,7 +1,5 @@
-from pprint import pprint
-from typing import Deque, Tuple, Type, List
 import itertools
-from copy import copy, deepcopy
+from typing import Deque, Tuple, Type
 
 from computers.datatypes import NEMid
 from computers.side_view.interface import Plotter
@@ -27,15 +25,15 @@ class SideView:
     strand_directions = (UP, DOWN)
 
     def __init__(
-            self,
-            domains: list,
-            T: float,
-            B: int,
-            H: float,
-            Z_s: float,
-            theta_s: float,
-            theta_b: float,
-            theta_c: float,
+        self,
+        domains: list,
+        T: float,
+        B: int,
+        H: float,
+        Z_s: float,
+        theta_s: float,
+        theta_b: float,
+        theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -98,7 +96,7 @@ class SideView:
             # while the distance between the current z coord output up and down strand is less than 0.094 angstroms
             # keep on ticking the down strand's NEMids-to-skip by 1 and by generating a down strand z coord
             # that is one position higher (until the distances are less than 0.094)
-            while current_z_coords[DOWN]-current_z_coords[UP] < 0.094:
+            while current_z_coords[DOWN] - current_z_coords[UP] < 0.094:
                 current_z_coords[DOWN] = next(levelers[DOWN])
                 begin_at[DOWN] += 1
 
@@ -113,7 +111,7 @@ class SideView:
                         # do counter checks
                         if counter < begin_at[strand_direction]:
                             continue
-                        elif counter == domain.count+begin_at[strand_direction]:
+                        elif counter == domain.count + begin_at[strand_direction]:
                             break
                     finally:
                         # tick counter
@@ -127,7 +125,9 @@ class SideView:
                         junctable = False
 
                     # combine all data into NEMid object
-                    NEMid_ = NEMid(x_coord, z_coord, angle, strand_direction, junctable=junctable)
+                    NEMid_ = NEMid(
+                        x_coord, z_coord, angle, strand_direction, junctable=junctable
+                    )
 
                     # append the current NEMid to the to-be-outputted array
                     NEMids[index][strand_direction].append(NEMid_)
