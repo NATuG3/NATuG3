@@ -71,11 +71,6 @@ class SideView:
         # the output container for all NEMids
         NEMids = DomainsContainer(len(self.domains))
 
-        # obtain generators for angles and coords
-        angles = self._angles()
-        x_coords = self._x_coords()
-        z_coords = self._z_coords()
-
         for index, domain in enumerate(self.domains):
             # how many NEMids to skip over for the up and down strand
             begin_at = [0, 0]
@@ -89,7 +84,6 @@ class SideView:
                         # then keep moving the initial down-strand NEMid up until it is within .094 nm
                         # of the up-strand's initial NEMid (determined above)
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
-                            print(down_strand_z_coord, up_strand_z_coord)
                             if down_strand_z_coord-up_strand_z_coord < 0.094:
                                 begin_at[DOWN] += 1
                             else:
@@ -99,23 +93,35 @@ class SideView:
                 except StopIteration:
                     break
 
-            for strand_direction in self.strand_directions:
-                counter = 0
-                for angle, x_coord, z_coord in zip(
-                    angles[index][strand_direction],
-                    x_coords[index][strand_direction],
-                    z_coords[index][strand_direction],
-                ):
-                    try:
-                        # do counter checks
-                        if counter < begin_at[strand_direction]:
-                            continue
-                        elif counter == domain.count + begin_at[strand_direction]:
-                            break
-                    finally:
-                        # tick counter
-                        counter += 1
+            # create this domain's data iterators
+            angles = []
+            x_coords = []
+            z_coords = []
 
+            # up-strand initial NEMid index; down-strand initial NEMid index
+            for strand_direction, initial_index in enumerate(begin_at):
+                # where to begin and end iterator (index)
+                start = initial_index
+                end = initial_index + domain.count
+
+                # append tuples of the properly spliced values
+                angles.append(
+                    tuple(itertools.islice(self._angles()[index][strand_direction], start, end))
+                )
+                x_coords.append(
+                    tuple(itertools.islice(self._x_coords()[index][strand_direction], start, end))
+                )
+                z_coords.append(
+                    tuple(itertools.islice(self._z_coords()[index][strand_direction], start, end))
+                )
+
+            # create NEMid objects for final return DomainContainer
+            for strand_direction in self.strand_directions:
+                for angle, x_coord, z_coord in zip(
+                    angles[strand_direction],
+                    x_coords[strand_direction],
+                    z_coords[strand_direction],
+                ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid
                     if abs(x_coord - index) < 0.001:
@@ -131,6 +137,15 @@ class SideView:
                     # append the current NEMid to the to-be-outputted array
                     NEMids[index][strand_direction].append(NEMid_)
 
+            # for strand_direction in self.strand_directions:
+            #     for index, NEMid_ in enumerate(NEMids[index][strand_direction]):
+            #         NEMid_.juncmate = NEMids[index][strand_direction][index]
+        for domain_index in range(len(self.domains)):
+            for strand_direction in self.strand_directions:
+                for NEMid_index, NEMid_ in enumerate(NEMids[domain_index][strand_direction]):
+                    NEMids[domain_index][strand_direction][NEMid_index].juncmate = (
+                        NEMids[domain_index][inverse(strand_direction)][NEMid_index]
+                    )
         return NEMids
 
     def _angles(self) -> DomainsContainerType:
