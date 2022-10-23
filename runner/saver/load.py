@@ -4,10 +4,10 @@ from typing import List
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-from storage.saver.datatypes import Save
+from runner.saver.datatypes import Save
 import domains.storage
-import storage
-import storage.saver.datatypes
+import runner
+import runner.saver.datatypes
 from domains.storage import Domain
 
 logger = logging.getLogger(__name__)
@@ -29,13 +29,13 @@ def worker(filename):
     domains.storage.current: List[Domain] = package.domains
 
     # update all domains settings/dump domains
-    storage.windows.constructor.config.tabs.domains.subunit_count.setValue(
+    runner.windows.constructor.config.tabs.domains.subunit_count.setValue(
         domains.storage.current.subunit.count
     )
-    storage.windows.constructor.config.tabs.domains.symmetry.setValue(
+    runner.windows.constructor.config.tabs.domains.symmetry.setValue(
         domains.storage.current.symmetry
     )
-    storage.windows.constructor.config.tabs.domains.table.dump_domains(
+    runner.windows.constructor.config.tabs.domains.table.dump_domains(
         domains.storage.current.subunit.domains
     )
 

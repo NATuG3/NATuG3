@@ -4,8 +4,8 @@ from types import SimpleNamespace
 from PyQt6.QtWidgets import QMenu
 
 import helpers
-import storage
-import storage.saver
+import runner
+import runner.saver
 from resources import fetch_icon
 
 
@@ -21,14 +21,14 @@ class File(QMenu):
         open_.setIcon(fetch_icon("open-outline"))
         open_.setShortcut("ctrl+o")
         open_.setStatusTip("Open saved stage from file")
-        open_.triggered.connect(lambda: storage.saver.load.runner(parent))
+        open_.triggered.connect(lambda: runner.saver.load.runner(parent))
 
         # file -> save
         save = self.actions.save = self.addAction("Save")
         save.setIcon(fetch_icon("save-outline"))
         save.setShortcut("ctrl+s")
         save.setStatusTip("Save current stage top file")
-        save.triggered.connect(lambda: storage.saver.save.runner(parent))
+        save.triggered.connect(lambda: runner.saver.save.runner(parent))
 
 
 class View(QMenu):
@@ -44,7 +44,7 @@ class View(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(fetch_icon("eye-outline"))
         config.triggered.connect(
-            lambda: helpers.reverse_hidenness(storage.windows.constructor.panels.config)
+            lambda: helpers.reverse_hidenness(runner.windows.constructor.panels.config)
         )
 
         # view -> "top view" -> hide/unhide
@@ -54,7 +54,7 @@ class View(QMenu):
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                storage.windows.constructor.panels.top_view
+                runner.windows.constructor.panels.top_view
             )
         )
 

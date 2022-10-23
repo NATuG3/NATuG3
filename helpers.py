@@ -18,7 +18,7 @@ def singleton(orig_cls):
     def __new__(cls, *args, **kwargs):
         nonlocal instance  # we are referring to the above instance variable
         if (
-                instance is None
+            instance is None
         ):  # if there is no instance of the class already than create one
             instance = orig_new(cls, *args, **kwargs)
         return instance  # return class instance

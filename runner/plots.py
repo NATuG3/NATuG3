@@ -8,7 +8,7 @@ class Plots:
     @property
     def side_view(self):
         return SideView(
-            domains.storage.current.domains,
+            domains.storage.current,
             nucleic_acid.storage.current.T,
             nucleic_acid.storage.current.B,
             nucleic_acid.storage.current.H,
@@ -21,7 +21,7 @@ class Plots:
     @property
     def top_view(self):
         return TopView(
-            domains.storage.current.domains,
+            domains.storage.current,
             nucleic_acid.storage.current.D,
             nucleic_acid.storage.current.theta_c,
             nucleic_acid.storage.current.theta_s,

@@ -24,7 +24,7 @@ def main():
 
     logger.info("Loaded profiles and domain settings.")
 
-    import storage
+    import runner
     import sys
 
     if sys.platform.startswith("win"):
@@ -38,13 +38,13 @@ def main():
     logger.info("Loaded the config.")
 
     # show the constructor window
-    storage.windows.constructor.show()
-    storage.windows.constructor.resizeEvent(None)  # trigger initial resize event
+    runner.windows.constructor.show()
+    runner.windows.constructor.resizeEvent(None)  # trigger initial resize event
     logger.debug("Set up main window")
 
     # begin app event loop
     logger.debug("Beginning event loop...")
-    sys.exit(storage.application.exec())
+    sys.exit(runner.application.exec())
 
 
 if __name__ == "__main__":

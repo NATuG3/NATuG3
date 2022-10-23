@@ -1,16 +1,10 @@
 import itertools
-from typing import Deque, Tuple, Type
-
 from computers.datatypes import NEMid
 from computers.side_view.interface import Plotter
 from constants.directions import *
 from helpers import inverse
-
-# type annotation for the aforementioned container
-DomainsContainerType: Type = Tuple[Tuple[Deque[float], Deque[float]], ...]
-
-# container to store data for domains in
-DomainsContainer = lambda count: tuple([[], []] for _ in range(count))
+from .datatypes import *
+from domains.datatypes import Domains
 
 
 class SideView:
@@ -25,15 +19,15 @@ class SideView:
     strand_directions = (UP, DOWN)
 
     def __init__(
-            self,
-            domains: list,
-            T: float,
-            B: int,
-            H: float,
-            Z_s: float,
-            theta_s: float,
-            theta_b: float,
-            theta_c: float,
+        self,
+        domains: Domains,
+        T: float,
+        B: int,
+        H: float,
+        Z_s: float,
+        theta_s: float,
+        theta_b: float,
+        theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -48,7 +42,7 @@ class SideView:
             theta_b (float): Base angle (in degrees).
             theta_c (float): Characteristic angle (in degrees).
         """
-        self.domains = domains
+        self.domains = domains.domains
 
         self.T = T
         self.B = B
@@ -130,9 +124,9 @@ class SideView:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                        angles[strand_direction],
-                        x_coords[strand_direction],
-                        z_coords[strand_direction],
+                    angles[strand_direction],
+                    x_coords[strand_direction],
+                    z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid

@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 import domains
 import nucleic_acid
-import storage
+import runner
 from resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class Panel(QWidget):
         @self.update_graphs.clicked.connect
         def _():
             # load and set new plot areas
-            storage.windows.constructor.panels.top_view.setWidget(
-                storage.plots.top_view.ui()
+            runner.windows.constructor.panels.top_view.setWidget(
+                runner.plots.top_view.ui()
             )
-            storage.windows.constructor.setCentralWidget(storage.plots.side_view.ui())
+            runner.windows.constructor.setCentralWidget(runner.plots.side_view.ui())
