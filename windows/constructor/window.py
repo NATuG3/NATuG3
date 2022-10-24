@@ -77,6 +77,7 @@ class Window(QMainWindow):
     def _top_view(self):
         """Setup top view plot."""
         from .panels import TopView
+
         self.top_view = TopView()
 
         # top view is only allowed on the sides
@@ -95,6 +96,7 @@ class Window(QMainWindow):
     def _side_view(self):
         """Setup side view plot."""
         from .panels import SideView
+
         self.side_view = SideView()
 
         # set the central widget of the window
