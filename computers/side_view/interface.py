@@ -32,12 +32,14 @@ class Plotter(pg.PlotWidget):
 
     def point_clicked(self, event, points):
         point = points[0]
+        located = []
         for strand in self.worker.computed:
             for NEMid_ in strand:
                 if dist(point.pos(), NEMid_.position()) < .01:
-                    self.junctable_NEMid_clicked.emit(NEMid_)
-                    logger.info("A junctable NEMid was clicked!"
-                                f"\n{NEMid_}")
+                    located.append(NEMid_)
+        if len(located) == 2:
+            self.junctable_NEMid_clicked.emit(NEMid_)
+            logger.info(f"A junctable NEMid was clicked!\n{located}")
 
     def _plot(self):
         # we can calculate the axis scales at the end of generation;

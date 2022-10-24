@@ -54,7 +54,7 @@ class View(QMenu):
         top_view.setIcon(fetch_icon("eye-outline"))
         top_view.triggered.connect(
             lambda: helpers.reverse_hidenness(
-                runner.windows.constructor.panels.top_view
+                runner.windows.constructor.top_view
             )
         )
 

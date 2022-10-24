@@ -2,7 +2,7 @@ import logging
 from types import SimpleNamespace
 
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDockWidget
 
 import domains
 import nucleic_acid
@@ -12,12 +12,26 @@ from resources import fetch_icon
 logger = logging.getLogger(__name__)
 
 
-class Panel(QWidget):
+class Config(QDockWidget):
+    def __init__(self):
+        super().__init__()
+
+        # set titles/descriptions
+        self.setObjectName("Config Panel")
+        self.setStatusTip("Config panel")
+        self.setWindowTitle("Config")
+
+        # store the actual link to the widget in self.config
+        self.panel = _Panel(self)
+        self.setWidget(self.panel)
+
+
+class _Panel(QWidget):
     """Config panel."""
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
-        uic.loadUi("config/panel.ui", self)
+        uic.loadUi("windows/constructor/panels/config.ui", self)
 
         # call setup functions
         self._styling()
@@ -49,7 +63,5 @@ class Panel(QWidget):
         @self.update_graphs.clicked.connect
         def _():
             # load and set new plot areas
-            runner.windows.constructor.panels.top_view.setWidget(
-                runner.plots.top_view.ui()
-            )
+            runner.windows.constructor.top_view.refresh()
             runner.windows.constructor.setCentralWidget(runner.plots.side_view.ui())

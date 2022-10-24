@@ -79,7 +79,6 @@ class SideView:
                         # revert to the previous z coord
                         # (since the begin-at-up didn't tick)
                         up_strand_z_coord -= self.Z_b
-                        print(up_strand_z_coord)
                         # then keep moving the initial down-strand NEMid up
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)

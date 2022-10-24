@@ -28,7 +28,6 @@ class Panel(QWidget):
     def __init__(self, parent) -> None:
         super().__init__(parent)
 
-        # load in the panel's designer UI
         uic.loadUi("domains/panel.ui", self)
 
         # set reload table widget
