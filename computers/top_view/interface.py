@@ -23,6 +23,8 @@ class Plotter(pg.GraphicsLayoutWidget):
 class Plot(pg.PlotItem):
     """The main plot widget for the Plotter"""
 
+    domain_brush = pg.mkBrush(color=(90, 90, 90))
+
     def __init__(self, worker):
         super().__init__()
         self.worker = worker
@@ -33,6 +35,7 @@ class Plot(pg.PlotItem):
             self.worker.v_coords,
             symbol="o",
             symbolSize=self.worker.D,
+            symbolBrush=self.domain_brush,
             pxMode=False,
         )
 

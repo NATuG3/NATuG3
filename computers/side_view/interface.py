@@ -21,14 +21,9 @@ class Plotter(pg.PlotWidget):
 
     line_pen = pg.mkPen(color=settings.colors.grey)
 
-    up_strand_brushes = (
-        pg.mkBrush(color=(0, 63, 77)),
-        pg.mkBrush(color=(255, 211, 0))
-    )
-
-    down_strand_brushes = (
-        pg.mkBrush(color=(249, 87, 0)),
-        pg.mkBrush(color=(35, 91, 154))
+    strand_brush = (
+        pg.mkBrush(color=(255, 245, 0)),
+        pg.mkBrush(color=(0, 0, 255))
     )
 
     def __init__(self, worker):
@@ -59,11 +54,7 @@ class Plotter(pg.PlotWidget):
         # we don't need to continuously recalculate the range
         self.disableAutoRange()
 
-        pallet = 0
         for counter, strand in enumerate(self.worker.computed):
-            if counter % 4 == 0:
-                pallet = inverse(pallet)
-
             symbols = []
             symbols_brushes = []
             x_coords = []
@@ -76,10 +67,10 @@ class Plotter(pg.PlotWidget):
 
                 if NEMid_.direction == UP:
                     symbols.append("t1")  # up arrow
-                    symbols_brushes.append(self.up_strand_brushes[pallet])
+                    symbols_brushes.append(self.strand_brush[counter % 2])
                 elif NEMid_.direction == DOWN:
                     symbols.append("t")  # down arrow
-                    symbols_brushes.append(self.down_strand_brushes[pallet])
+                    symbols_brushes.append(self.strand_brush[counter % 2])
 
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)
