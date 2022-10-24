@@ -149,16 +149,6 @@ class SideView:
             for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
                 NEMid1.matching, NEMid2.matching = NEMid1, NEMid2
 
-        # experimental code
-        from computers.side_view.datatypes.strand import Strand
-        strands = []
-        for domain in NEMids:
-            for strand in domain:
-                strands.append(strand)
-        strands = [Strand(strand) for strand in strands]
-        print(strands[0].from_coord(0, 0))
-        # -----------------
-
         return NEMids
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
