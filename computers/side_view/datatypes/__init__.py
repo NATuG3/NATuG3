@@ -1,1 +1,1 @@
-from .domains_containers import DomainsContainerType, DomainsContainer
+from .strand import Strand

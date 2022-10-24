@@ -23,13 +23,6 @@ class Point:
     direction: Literal[UP, DOWN]
 
     @property
-    def matched(self) -> bool:
-        """
-        Returns whether if there is point on the complementary helix that matches this NEMid.
-        """
-        return bool(self.matching)
-
-    @property
     def position(self) -> Tuple[float, float]:
         """
         Obtain coords of the point as a tuple of form (x, z).

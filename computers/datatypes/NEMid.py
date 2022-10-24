@@ -27,8 +27,9 @@ class NEMid(Point):
         """Determine what to print when instance is printed directly."""
         return (
             f"NEMid("
-            f"pos={tuple(map(lambda i: round(i, 3), self.position))}), "
+            f"pos=({tuple(map(lambda i: round(i, 3), self.position))}), "
             f"angle={round(self.angle, 3)}°, "
             f"junction={str(self.junction).lower()}, "
             f"junctable={str(self.junctable).lower()}"
+            f")"
         )

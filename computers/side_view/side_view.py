@@ -1,10 +1,11 @@
 import itertools
+from typing import List, Tuple
+
 from computers.datatypes import NEMid
 from computers.side_view.interface import Plotter
 from constants.directions import *
-from helpers import inverse
-from .datatypes import *
 from domains.datatypes import Domains
+from helpers import inverse
 
 
 class SideView:
@@ -55,15 +56,15 @@ class SideView:
         self.theta_b = theta_b
         self.theta_c = theta_c
 
-    def compute(self) -> DomainsContainerType:
+    def compute(self) -> List[Tuple[List[NEMid], List[NEMid]]]:
         """
-        Compute NEMid data.
+        Compute all NEMid data.
 
         Returns:
-            DomainsContainerType: A domains container of all NEMids.
+            List[Tuple[List[NEMid], List[NEMid]]]: List of tuple(up-strand, down-strand) for each domain.
         """
         # the output container for all NEMids
-        NEMids = DomainsContainer(len(self.domains))
+        NEMids = [([], []) for _ in range(len(self.domains))]
 
         for index, domain in enumerate(self.domains):
             # how many NEMids to skip over for the up and down strand
@@ -148,16 +149,26 @@ class SideView:
             for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
                 NEMid1.matching, NEMid2.matching = NEMid1, NEMid2
 
+        # experimental code
+        from computers.side_view.datatypes.strand import Strand
+        strands = []
+        for domain in NEMids:
+            for strand in domain:
+                strands.append(strand)
+        strands = [Strand(strand) for strand in strands]
+        print(strands[0].from_coord(0, 0))
+        # -----------------
+
         return NEMids
 
-    def _angles(self) -> DomainsContainerType:
+    def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
         """
         Create a generator of angles for NEMids in the side view plot.
 
         Returns:
             DomainsContainerType: A domains container with innermost entries of generators.
         """
-        angles: DomainsContainerType = DomainsContainer(len(self.domains))
+        angles = [[None, None] for _ in range(len(self.domains))]
 
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
@@ -175,9 +186,13 @@ class SideView:
                 step=self.theta_b,  # and steps by self.theta_b
             )
 
+        for index in range(len(self.domains)):
+            # tuplify the angles index
+            angles[index] = tuple(angles[index])
+
         return angles
 
-    def _x_coords(self) -> DomainsContainerType:
+    def _x_coords(self) -> List[Tuple[itertools.cycle, itertools.cycle]]:
         """
         Create a generator of X coords of NEMids for the side view plot.
 
@@ -185,7 +200,7 @@ class SideView:
             DomainsContainerType: A domains container with innermost entries of generators.
         """
         angles = self._angles()
-        x_coords = DomainsContainer(len(self.domains))
+        x_coords = [[[], []] for _ in range(len(self.domains))]
 
         # make a copy of the angles iterator for use in generating x coords
         for index, domain in enumerate(self.domains):
@@ -221,17 +236,20 @@ class SideView:
                     x_coords[index][strand_direction]
                 )
 
+            # tuplify the index
+            x_coords[index] = tuple(x_coords[index])
+
         return x_coords
 
-    def _z_coords(self) -> DomainsContainerType:
+    def _z_coords(self) -> List[Tuple[itertools.count, itertools.count]]:
         """
         Create a generator of Z coords of NEMids for the side view plot.
 
         Returns:
             DomainsContainerType: A domains container with innermost entries of generators.
         """
-        x_coords = self._x_coords()
-        z_coords = DomainsContainer(len(self.domains))
+        x_coords = [list(domain) for domain in self._x_coords()]
+        z_coords = [[None, None] for _ in range(len(self.domains))]
 
         for index, domain in enumerate(self.domains):
             for strand_direction in self.strand_directions:
@@ -297,9 +315,12 @@ class SideView:
             )
             # begin at the (initial z coord - z switch) and step by self.Z_b
 
+            # tuplify the index
+            z_coords[index] = tuple(z_coords[index])
+
         return z_coords
 
-    def ui(self):
+    def ui(self) -> Plotter:
         return Plotter(self)
 
     def __repr__(self) -> str:
