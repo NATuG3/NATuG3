@@ -7,6 +7,7 @@ from PyQt6.QtGui import QPen
 
 import computers.datatypes
 import config
+from computers.datatypes import NEMid
 from constants.directions import *
 
 logger = logging.getLogger(__name__)
@@ -29,90 +30,58 @@ class Plotter(pg.PlotWidget):
         self.setWindowTitle("Side View of DNA")  # set the window's title
         self.setBackground("w")  # make the background white
 
-        self.scene().sigMouseClicked.connect(self.mouse_clicked)
-
-    def mouse_clicked(self, event):
-        if event.button() != Qt.MouseButton.LeftButton:
-            return
-
-        # obtain clicked coord
-        # https://stackoverflow.com/a/70852527
-        vb = self.plotItem.vb
-        scene_coords = event.scenePos()
-        if self.sceneBoundingRect().contains(scene_coords):
-            clicked_coord = vb.mapSceneToView(scene_coords)
-            clicked_coord = (clicked_coord.x(), clicked_coord.y())
-        logger.info(
-            f"Side view plot clicked @ {round(clicked_coord[0], 3), round(clicked_coord[1], 3)}"
-        )
-
-        # check to see if this is a potential junction click
-        if 0 < clicked_coord[0] < (len(self.worker.domains) - 1):
-            # scan both up and down strand of domain#round(x coord of click)
-            for strand_direction in self.worker.strand_directions:
-                # for each NEMid in that strand
-                for NEMid in self.worker.computed[round(clicked_coord[0])][
-                    strand_direction
-                ]:
-                    # if it is a NEMid that could be made into a junction
-                    if NEMid.junctable:
-                        # check to see if the click was close enough to the NEMid
-                        if dist(NEMid.position, clicked_coord) < 0.08:
-                            # if it was then this could be a junction!
-                            logger.info(f"A junctable NEMid was clicked.\n{NEMid}")
-                            self.junctable_NEMid_clicked.emit(NEMid)
+    def point_clicked(self, event, points):
+        point = points[0]
+        for strand in self.worker.computed:
+            for NEMid_ in strand:
+                if dist(point.pos(), NEMid_.position()) < .01:
+                    self.junctable_NEMid_clicked.emit(NEMid_)
+                    logger.info("A junctable NEMid was clicked!"
+                                f"\n{NEMid_}")
 
     def _plot(self):
         # we can calculate the axis scales at the end of generation;
         # we don't need to continuously recalculate the range
         self.disableAutoRange()
 
-        for index, domain in enumerate(self.worker.domains):
-            if index % 2:  # if the domain index is an even integer
-                colors: tuple = ((255, 0, 0), (0, 255, 0))  # use red and green colors
-            else:  # but if it is an odd integer
-                colors: tuple = (
-                    (0, 0, 255),
-                    (255, 255, 0),
-                )  # use blue and yellow colors
-            # this way it will be easy to discern between different domains
-            # (every other domain will be a different color scheme)
+        line_pen = pg.mkPen(color=config.colors.grey, width=1.8)
 
-            for strand_direction in (UP, DOWN):
-                if strand_direction == UP:  # 0 means up strand
-                    symbol: str = "t1"  # up arrow for up strand
-                    color: str = colors[
-                        0
-                    ]  # set the color to be the second option of current color scheme (which is "colors")
-                elif strand_direction == DOWN:  # 1 means down strand
-                    symbol: str = "t"  # down arrow for down strand
-                    color: str = colors[
-                        1
-                    ]  # set the color to be the first option of current color scheme (which is "colors")
+        symbol_pen_pallet: tuple = (
+            pg.mkBrush(color=(240, 10, 0)),
+            pg.mkBrush(color=(0, 120, 240))
+        )
 
-                # obtain an array of x and z coords from the points container
-                x_coords = [
-                    NEMid.x_coord
-                    for NEMid in self.worker.computed[index][strand_direction]
-                ]
-                z_coords = [
-                    NEMid.z_coord
-                    for NEMid in self.worker.computed[index][strand_direction]
-                ]
+        for counter, strand in enumerate(self.worker.computed):
+            symbols = []
+            symbols_brushes = []
+            x_coords = []
+            z_coords = []
+            for NEMid_ in strand:
+                NEMid_: NEMid
 
-                self.plot(  # actually plot the current strand of the current domain
-                    x_coords,
-                    z_coords,
-                    symbol=symbol,  # type of symbol (in this case up/down arrow)
-                    symbolSize=6,  # size of arrows in px
-                    pxMode=True,  # means that symbol size is in px
-                    symbolPen=pg.mkPen(
-                        color=color
-                    ),  # set color of points to current color
-                    pen=pg.mkPen(
-                        color=config.colors.grey, width=1.8
-                    ),  # set color of pen to current color (but darker)
-                )
+                assert NEMid_.direction in (UP, DOWN)
+
+                if NEMid_.direction == UP:
+                    symbols.append("t1")
+                    symbols_brushes.append(symbol_pen_pallet[UP])
+                elif NEMid_.direction == DOWN:
+                    symbols.append("t")
+                    symbols_brushes.append(symbol_pen_pallet[DOWN])
+
+                x_coords.append(NEMid_.x_coord)
+                z_coords.append(NEMid_.z_coord)
+
+            plotted = self.plot(  # actually plot the current strand of the current domain
+                x_coords,
+                z_coords,
+                symbol=symbols,  # type of symbol (in this case up/down arrow)
+                symbolSize=6,  # size of arrows in px
+                pxMode=True,  # means that symbol size is in px
+                symbolBrush=symbols_brushes,  # set color of points to current color
+                pen=line_pen
+            )
+
+            plotted.sigPointsClicked.connect(self.point_clicked)
 
         # create pen for custom grid
         grid_pen: QPen = pg.mkPen(color=config.colors.grey, width=1.4)

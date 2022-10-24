@@ -22,7 +22,6 @@ class Point:
     angle: float
     direction: Literal[UP, DOWN]
 
-    @property
     def position(self) -> Tuple[float, float]:
         """
         Obtain coords of the point as a tuple of form (x, z).
@@ -35,7 +34,7 @@ class Point:
         """
         return (
             f"NEMid("
-            f"pos={tuple(map(lambda i: round(i, 3), self.position))}), "
+            f"pos={tuple(map(lambda i: round(i, 3), self.position()))}), "
             f"angle={round(self.angle, 3)}°,"
             f"matched={self.matched}"
         )

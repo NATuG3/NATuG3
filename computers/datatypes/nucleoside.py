@@ -34,7 +34,7 @@ class Nucleoside(Point):
     def __repr__(self) -> str:
         return (
             f"nucleoside("
-            f"base(pos={self.position}), "
+            f"base(pos={self.position()}), "
             f"angle={round(self.angle, 3)}°, "
             f"base={str(self.base).replace('None', 'unset')}"
             f")"

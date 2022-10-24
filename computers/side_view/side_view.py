@@ -56,7 +56,7 @@ class SideView:
         self.theta_b = theta_b
         self.theta_c = theta_c
 
-    def compute(self) -> List[Tuple[List[NEMid], List[NEMid]]]:
+    def compute(self) -> List[List[NEMid]]:
         """
         Compute all NEMid data.
 
@@ -147,9 +147,14 @@ class SideView:
         # assign matching NEMids to each other's matching slots
         for domain_index in range(len(self.domains)):
             for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
-                NEMid1.matching, NEMid2.matching = NEMid1, NEMid2
+                NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
 
-        return NEMids
+        strands = []
+        for index, domain in enumerate(self.domains):
+            for strand_direction in self.strand_directions:
+                strands.append(NEMids[index][strand_direction])
+
+        return strands
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
         """
