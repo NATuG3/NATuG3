@@ -21,6 +21,5 @@ class SideView(QGroupBox):
 
     def refresh(self):
         """Update the current plot."""
-        with suppress(TypeError):
-            self.layout().removeWidget(self.plot)
+        self.layout().removeItem(self.plot)
         self.layout().addWidget(runner.plots.side_view.ui())

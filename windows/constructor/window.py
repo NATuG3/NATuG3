@@ -114,31 +114,24 @@ class Window(QMainWindow):
         self.menu_bar = QMenuBar()
 
         # import all menu bars
-        import windows.constructor.menus as menus
+        from .menus import File, View, Help
 
         # add all the menus to the filemenu
-        self.menu_bar.addMenu(menus.File(self))
-        self.menu_bar.addMenu(menus.View(self))
-        self.menu_bar.addMenu(menus.Help(self))
+        self.menu_bar.addMenu(File(self))
+        self.menu_bar.addMenu(View(self))
+        self.menu_bar.addMenu(Help(self))
 
         # place the menu bar object into the actual menu bar
         self.setMenuBar(self.menu_bar)
         logger.info("Created menu bar.")
 
     def resizeEvent(self, event):
-        """
-        Changes size of various widgets dynamically based on the main window's size.
+        """Dynamically resize panels."""
 
-        Notes:
-            - If domain tab of config panel is showing, makes config panel pop out and larger
-            - If domain tab of config panel is not showing, makes config panel unpop out and smaller
-        """
-        # side view resizing
-        #
+        # side view resizing...
         self.centralWidget().setMinimumWidth(int(4 * self.size().width() / 9))
 
-        # top view resizing
-        #
+        # top view resizing...
         # if the top view plot is floating make the max size very large
         if self.top_view.isFloating():
             self.top_view.setMaximumWidth(99999)
@@ -146,8 +139,7 @@ class Window(QMainWindow):
         else:
             self.top_view.setMaximumWidth(round(2.5 * self.size().width() / 8))
 
-        # config resizing
-        #
+        # config resizing...
         # if config is floating make the max size very large
         if self.config.isFloating():
             self.config.setMaximumWidth(600)

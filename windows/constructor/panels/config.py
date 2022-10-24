@@ -64,4 +64,4 @@ class _Panel(QWidget):
         def _():
             # load and set new plot areas
             runner.windows.constructor.top_view.refresh()
-            runner.windows.constructor.setCentralWidget(runner.plots.side_view.ui())
+            runner.windows.constructor.side_view.refresh()
