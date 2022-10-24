@@ -20,15 +20,15 @@ class SideView:
     strand_directions = (UP, DOWN)
 
     def __init__(
-        self,
-        domains: Domains,
-        T: float,
-        B: int,
-        H: float,
-        Z_s: float,
-        theta_s: float,
-        theta_b: float,
-        theta_c: float,
+            self,
+            domains: Domains,
+            T: float,
+            B: int,
+            H: float,
+            Z_s: float,
+            theta_s: float,
+            theta_b: float,
+            theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -76,14 +76,20 @@ class SideView:
                     if up_strand_z_coord < 0:
                         begin_at[UP] += 1
                     else:
-                        # then keep moving the initial down-strand NEMid up until it is within .094 nm
-                        # of the up-strand's initial NEMid (determined above)
+                        # revert to the previous z coord
+                        # (since the begin-at-up didn't tick)
+                        up_strand_z_coord -= self.Z_b
+                        print(up_strand_z_coord)
+                        # then keep moving the initial down-strand NEMid up
+                        # until it is within .094 nm of the up-strand's initial NEMid
+                        # (determined above)
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
-                            if down_strand_z_coord - up_strand_z_coord < 0.094:
+                            if abs(up_strand_z_coord-down_strand_z_coord) >= 0.094:
                                 begin_at[DOWN] += 1
                             else:
                                 # break out of nested loop
                                 raise StopIteration
+
                 # allow breaking out of nested loop
                 except StopIteration:
                     break
@@ -125,9 +131,9 @@ class SideView:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                    angles[strand_direction],
-                    x_coords[strand_direction],
-                    z_coords[strand_direction],
+                        angles[strand_direction],
+                        x_coords[strand_direction],
+                        z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid

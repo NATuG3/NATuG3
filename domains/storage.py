@@ -3,12 +3,11 @@ import logging
 import os
 import pickle
 
-import config.settings
-from computers.datatypes import Domain
+import settings
 from constants.directions import *
-from domains.datatypes import Domains
+from domains.datatypes import Domains, Domain
 
-restored_filename = f"domains/restored.{config.extension}"
+restored_filename = f"domains/restored.{settings.extension}"
 
 current = None
 settings = None

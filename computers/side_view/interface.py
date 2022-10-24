@@ -2,11 +2,11 @@ import logging
 from math import ceil, dist
 
 import pyqtgraph as pg
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QPen
 
 import computers.datatypes
-import config
+import settings
 from computers.datatypes import NEMid
 from constants.directions import *
 
@@ -44,7 +44,7 @@ class Plotter(pg.PlotWidget):
         # we don't need to continuously recalculate the range
         self.disableAutoRange()
 
-        line_pen = pg.mkPen(color=config.colors.grey, width=1.8)
+        line_pen = pg.mkPen(color=settings.colors.grey, width=1.8)
 
         symbol_pen_pallet: tuple = (
             pg.mkBrush(color=(240, 10, 0)),
@@ -84,7 +84,7 @@ class Plotter(pg.PlotWidget):
             plotted.sigPointsClicked.connect(self.point_clicked)
 
         # create pen for custom grid
-        grid_pen: QPen = pg.mkPen(color=config.colors.grey, width=1.4)
+        grid_pen: QPen = pg.mkPen(color=settings.colors.grey, width=1.4)
 
         # domain index grid
         for i in range(len(self.worker.domains) + 1):
@@ -93,14 +93,14 @@ class Plotter(pg.PlotWidget):
         # helical twist grid
         # overall_height = the tallest domain's height (the overall height of the plot's contents)
         overall_height = (
-            max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
+                max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
         )
         # for i in <number of helical twists of the tallest domain>...
         for i in range(0, ceil(overall_height / self.worker.H) + 1):
             self.addLine(y=(i * self.worker.H), pen=grid_pen)
 
         # add axis labels
-        self.setLabel("bottom", text="Helical Domain", units="nanometers")
+        self.setLabel("bottom", text="Helical Domain")
         self.setLabel("left", text="Helical Twists", units="nanometers")
 
         # re-enable auto-range so that it isn't zoomed out weirdly

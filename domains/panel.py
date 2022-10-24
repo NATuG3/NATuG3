@@ -11,7 +11,8 @@ from PyQt6.QtWidgets import (
     QSizePolicy,
 )
 
-import config
+import settings
+from domains.datatypes import Domain
 import domains.storage
 import helpers
 from constants.directions import *
@@ -93,7 +94,7 @@ class Panel(QWidget):
             self.total_count.setValue(domains.storage.current.count)
 
             self.update_table.setStyleSheet(
-                f"background-color: rgb{str(config.colors.green)}"
+                f"background-color: rgb{str(settings.colors.green)}"
             )
             timer = QTimer(self.parent())
             timer.setInterval(400)
@@ -306,7 +307,7 @@ class Table(QTableWidget):
             # column 4 - initial NEMid count
             count: int = self.cellWidget(domain, 4).value()
 
-            domain = domains.storage.Domain(
+            domain = Domain(
                 theta_interior_multiple,
                 (left_helical_joint, right_helical_joint),
                 count,

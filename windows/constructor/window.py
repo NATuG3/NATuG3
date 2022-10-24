@@ -12,8 +12,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import config.main
 import runner
+import config.main
+import settings
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +42,7 @@ class Window(QMainWindow):
         self._side_view()
 
         # utilize inherited methods to set up the main window
-        self.setWindowTitle(config.name)
+        self.setWindowTitle(settings.name)
 
         # add all widgets
         self._config()

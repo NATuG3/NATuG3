@@ -1,6 +1,6 @@
 from typing import List
 
-from computers.datatypes import Domain
+from domains.datatypes import Domain
 from helpers import inverse
 
 

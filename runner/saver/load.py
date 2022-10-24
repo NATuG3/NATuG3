@@ -4,11 +4,11 @@ from typing import List
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-from runner.saver.datatypes import Save
 import domains.storage
 import runner
 import runner.saver.datatypes
 from domains.storage import Domain
+from runner.saver.datatypes import Save
 
 logger = logging.getLogger(__name__)
 
