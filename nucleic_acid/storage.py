@@ -25,7 +25,7 @@ def load() -> None:
     atexit.register(dump)
 
     # attempt to load the nucleic acid settings file
-    if profiles_filename in os.listdir():
+    try:
         # load all profiles
         with open(profiles_filename, "rb") as settings_file:
             profiles = pickle.load(settings_file)
@@ -38,7 +38,7 @@ def load() -> None:
 
         logger.debug("Saved profiles file loaded.")
     # if the settings file wasn't found then create a new one
-    else:
+    except FileNotFoundError:
         logger.warning("Saved profiles file not found. Restoring defaults...")
         profiles = defaults
         current = next(iter(defaults.values()))

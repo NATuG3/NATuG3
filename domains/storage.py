@@ -21,11 +21,11 @@ def load():
 
     atexit.register(dump)
 
-    if restored_filename in os.listdir():
+    try:
         with open(restored_filename, "rb") as restored_file:
             current = pickle.load(restored_file)
         logger.info("Restored previous domain editor state.")
-    else:
+    except FileNotFoundError:
         logger.warning(
             "Previous domain editor state save file not found. Loading defaults..."
         )
@@ -42,4 +42,22 @@ def dump():
         pickle.dump(current, restored_file)
 
 
-default = Domains(([Domain(9, (UP, UP), 50)] * 14), 1)
+default = Domains(
+    (
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50),
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50),
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50),
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50),
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50),
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50),
+        Domain(9, (UP, UP), 50),
+        Domain(9, (DOWN, DOWN), 50)
+    ),
+    1
+)
