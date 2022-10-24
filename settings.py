@@ -1,9 +1,9 @@
 from types import SimpleNamespace
 
-extension: str = "nano"
+extension = "nano"
 
-name: str = "NATuG3"
+name = "NATuG3"
 
-colors: SimpleNamespace = SimpleNamespace(
+colors = SimpleNamespace(
     grey=(220, 220, 220), green=(192, 209, 188), red=(192, 209, 188)
 )

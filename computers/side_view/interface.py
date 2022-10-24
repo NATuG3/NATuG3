@@ -9,6 +9,7 @@ import computers.datatypes
 import settings
 from computers.datatypes import NEMid
 from constants.directions import *
+from helpers import inverse
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,18 @@ class Plotter(pg.PlotWidget):
     """The main plot widget for the Plotter"""
 
     junctable_NEMid_clicked = pyqtSignal(computers.datatypes.NEMid)
+
+    line_pen = pg.mkPen(color=settings.colors.grey)
+
+    up_strand_brushes = (
+        pg.mkBrush(color=(0, 63, 77)),
+        pg.mkBrush(color=(255, 211, 0))
+    )
+
+    down_strand_brushes = (
+        pg.mkBrush(color=(249, 87, 0)),
+        pg.mkBrush(color=(35, 91, 154))
+    )
 
     def __init__(self, worker):
         super().__init__()
@@ -46,29 +59,27 @@ class Plotter(pg.PlotWidget):
         # we don't need to continuously recalculate the range
         self.disableAutoRange()
 
-        line_pen = pg.mkPen(color=settings.colors.grey, width=1.8)
-
-        symbol_pen_pallet: tuple = (
-            pg.mkBrush(color=(240, 10, 0)),
-            pg.mkBrush(color=(0, 120, 240))
-        )
-
+        pallet = 0
         for counter, strand in enumerate(self.worker.computed):
+            if counter % 4 == 0:
+                pallet = inverse(pallet)
+
             symbols = []
             symbols_brushes = []
             x_coords = []
             z_coords = []
+
             for NEMid_ in strand:
                 NEMid_: NEMid
 
                 assert NEMid_.direction in (UP, DOWN)
 
                 if NEMid_.direction == UP:
-                    symbols.append("t1")
-                    symbols_brushes.append(symbol_pen_pallet[UP])
+                    symbols.append("t1")  # up arrow
+                    symbols_brushes.append(self.up_strand_brushes[pallet])
                 elif NEMid_.direction == DOWN:
-                    symbols.append("t")
-                    symbols_brushes.append(symbol_pen_pallet[DOWN])
+                    symbols.append("t")  # down arrow
+                    symbols_brushes.append(self.down_strand_brushes[pallet])
 
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)
@@ -80,7 +91,7 @@ class Plotter(pg.PlotWidget):
                 symbolSize=6,  # size of arrows in px
                 pxMode=True,  # means that symbol size is in px
                 symbolBrush=symbols_brushes,  # set color of points to current color
-                pen=line_pen
+                pen=self.line_pen
             )
 
             plotted.sigPointsClicked.connect(self.point_clicked)
