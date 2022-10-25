@@ -9,7 +9,6 @@ import computers.datatypes
 import settings
 from computers.datatypes import NEMid
 from constants.directions import *
-from helpers import inverse
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +19,6 @@ class Plotter(pg.PlotWidget):
     junctable_NEMid_clicked = pyqtSignal(computers.datatypes.NEMid)
 
     line_pen = pg.mkPen(color=settings.colors.grey)
-
-    strand_brush = (
-        pg.mkBrush(color=(255, 245, 0)),
-        pg.mkBrush(color=(0, 0, 255))
-    )
 
     def __init__(self, worker):
         super().__init__()
@@ -54,23 +48,22 @@ class Plotter(pg.PlotWidget):
         # we don't need to continuously recalculate the range
         self.disableAutoRange()
 
-        for counter, strand in enumerate(self.worker.computed):
+        for strand in self.worker.computed:
             symbols = []
             symbols_brushes = []
             x_coords = []
             z_coords = []
 
             for NEMid_ in strand:
-                NEMid_: NEMid
-
+                assert isinstance(NEMid_, NEMid)
                 assert NEMid_.direction in (UP, DOWN)
 
                 if NEMid_.direction == UP:
                     symbols.append("t1")  # up arrow
-                    symbols_brushes.append(self.strand_brush[counter % 2])
+                    symbols_brushes.append(strand.color)
                 elif NEMid_.direction == DOWN:
                     symbols.append("t")  # down arrow
-                    symbols_brushes.append(self.strand_brush[counter % 2])
+                    symbols_brushes.append(strand.color)
 
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)

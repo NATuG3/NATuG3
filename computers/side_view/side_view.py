@@ -1,7 +1,7 @@
 import itertools
 from typing import List, Tuple
 
-from computers.datatypes import NEMid
+from computers.datatypes import NEMid, Strand
 from computers.side_view.interface import Plotter
 from constants.directions import *
 from domains.datatypes import Domains
@@ -83,7 +83,7 @@ class SideView:
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
-                            if abs(up_strand_z_coord-down_strand_z_coord) >= 0.094:
+                            if abs(up_strand_z_coord - down_strand_z_coord) >= 0.094:
                                 begin_at[DOWN] += 1
                             else:
                                 # break out of nested loop
@@ -154,10 +154,15 @@ class SideView:
             for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
                 NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
 
+
         strands = []
         for index, domain in enumerate(self.domains):
             for strand_direction in self.strand_directions:
                 strands.append(NEMids[index][strand_direction])
+
+        pallet = ((255, 245, 0), (0, 0, 255))
+        for index, strand in enumerate(strands):
+            strands[index] = Strand(strand, color=pallet[index % 2])
 
         return strands
 

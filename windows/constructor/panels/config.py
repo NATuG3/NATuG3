@@ -68,7 +68,7 @@ class _Panel(QWidget):
                 if not self.auto_update_graph.updating:
                     self.auto_update_graph.updating = True
                     timer = QTimer(runner.application)
-                    timer.setInterval(300)
+                    timer.setInterval(200)
                     timer.setSingleShot(True)
 
                     @timer.timeout.connect
