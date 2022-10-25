@@ -2,6 +2,7 @@ import logging
 from types import SimpleNamespace
 
 from PyQt6 import uic
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDockWidget
 
 import domains
@@ -32,14 +33,8 @@ class _Panel(QWidget):
     def __init__(self, parent) -> None:
         super().__init__(parent)
         uic.loadUi("windows/constructor/panels/config.ui", self)
-
-        # call setup functions
-        self._styling()
-        self._tabs()
-
-    def _styling(self):
-        """Set icons/stylesheets/other styles for config panel."""
         self.update_graphs.setIcon(fetch_icon("reload-outline"))
+        self._tabs()
 
     def _tabs(self):
         """Set up all tabs for config panel."""
@@ -60,8 +55,28 @@ class _Panel(QWidget):
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
-        @self.update_graphs.clicked.connect
-        def _():
-            # load and set new plot areas
+        def graph_updater():
+            """Worker for auto plot updating."""
             runner.windows.constructor.top_view.refresh()
             runner.windows.constructor.side_view.refresh()
+
+        self.update_graphs.clicked.connect(graph_updater)
+
+        self.auto_update_graph.updating = False
+        def auto_graph_updater():
+            if self.auto_update_graph.isChecked():
+                if not self.auto_update_graph.updating:
+                    self.auto_update_graph.updating = True
+                    timer = QTimer(runner.application)
+                    timer.setInterval(300)
+                    timer.setSingleShot(True)
+
+                    @timer.timeout.connect
+                    def _():
+                        graph_updater()
+                        self.auto_update_graph.updating = False
+
+                    timer.start()
+
+        self.tabs.domains.updated.connect(auto_graph_updater)
+        self.tabs.nucleic_acid.updated.connect(auto_graph_updater)
