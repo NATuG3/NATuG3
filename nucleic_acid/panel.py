@@ -1,6 +1,7 @@
 import logging
 
 from PyQt6 import uic
+from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget
 
 import helpers
@@ -12,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 class Panel(QWidget):
     """Nucleic Acid Config Tab"""
+
+    updated = pyqtSignal()
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -301,6 +304,9 @@ class Panel(QWidget):
 
         # set up button locking/other needed functions initially
         input_box_changed()
+
+        # emit updated signal
+        self.updated.emit()
 
     def _setting_descriptions(self):
         self.D.setToolTip = "Diameter of Domain"

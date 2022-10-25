@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 class Panel(QWidget):
     """Nucleic Acid Config Tab."""
 
+    updated = pyqtSignal()
+
     def __init__(self, parent) -> None:
         super().__init__(parent)
 
@@ -51,6 +53,9 @@ class Panel(QWidget):
         # hook update domains button
         self.update_table.clicked.connect(self.refresh)
 
+        # updated event linking
+        self.table.cell_widget_updated.connect(self.updated.emit)
+
         logger.info("Loaded domains tab of config panel.")
 
         # update the "total domains" count box
@@ -71,6 +76,8 @@ class Panel(QWidget):
         """Refresh panel settings/domain table."""
         # obtain current domain inputs
         domains.storage.current.subunit.domains = self.table.fetch_domains()
+
+        self.updated.emit()
 
         confirmation: bool = True
         # double-check with user if they want to truncate the domains/subunit count
