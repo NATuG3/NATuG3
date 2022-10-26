@@ -1,6 +1,6 @@
 import pickle
 
-from constructor.panels import domains
+import references
 
 
 class Save:
@@ -12,7 +12,7 @@ class Save:
     """
 
     def __init__(self):
-        self.domains = domains.storage.current
+        self.domains = references.domains.current
 
     @classmethod
     def from_file(cls, filename):
