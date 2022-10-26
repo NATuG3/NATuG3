@@ -33,8 +33,8 @@ def main():
     logger.info("Loaded the config.")
 
     # show the constructor window
-    references.constructor.constructor.show()
-    references.constructor.constructor.resizeEvent(None)  # trigger initial resize event
+    references.constructor.show()
+    references.constructor.resizeEvent(None)  # trigger initial resize event
     logger.debug("Set up references window")
 
     # begin app event loop

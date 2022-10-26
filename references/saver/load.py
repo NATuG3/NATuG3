@@ -1,12 +1,11 @@
 import logging
-from typing import List
 
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-from constructor.panels import domains
-from datatypes.domains import Domain
-from references.saver.datatypes import Save
+import references
+from datatypes.domains import Domains
+from datatypes.misc.save import Save
 
 logger = logging.getLogger(__name__)
 
@@ -24,17 +23,18 @@ def worker(filename):
     package = Save.from_file(filename)
 
     # update the current domains array
-    domains.storage.current: List[Domain] = package.domains
+    assert isinstance(references.domains.current, Domains)
+    references.domains.current: Domains = package.domains
 
     # update all domains settings/dump domains
-    runner.windows.constructor.config.tabs.domains.subunit_count.setValue(
-        domains.storage.current.subunit.count
+    references.constructor.config.tabs.domains.subunit_count.setValue(
+        references.domains.current.subunit.count
     )
-    runner.windows.constructor.config.tabs.domains.symmetry.setValue(
-        domains.storage.current.symmetry
+    references.constructor.config.tabs.domains.symmetry.setValue(
+        references.domains.current.symmetry
     )
-    runner.windows.constructor.config.tabs.domains.table.dump_domains(
-        domains.storage.current.subunit.domains
+    references.constructor.config.tabs.domains.table.dump_domains(
+        references.domains.current.subunit.domains
     )
 
     logger.info(f"Loaded save @ {filename}.")

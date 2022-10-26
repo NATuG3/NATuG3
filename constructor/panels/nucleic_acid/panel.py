@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget
 
 import helpers
 import references
-from datatypes.other import Profile
+from datatypes.misc import Profile
 from resources import fetch_icon
 
 logger = logging.getLogger(__name__)

@@ -12,21 +12,7 @@ from resources import fetch_icon
 logger = logging.getLogger(__name__)
 
 
-class Panel(QDockWidget):
-    def __init__(self):
-        super().__init__()
-
-        # set titles/descriptions
-        self.setObjectName("Config Panel")
-        self.setStatusTip("Config panel")
-        self.setWindowTitle("Config")
-
-        # store the actual link to the widget in self.config
-        self.panel = _Panel(self)
-        self.setWidget(self.panel)
-
-
-class _Panel(QWidget):
+class Panel(QWidget):
     """Config panel."""
 
     def __init__(self, parent) -> None:
@@ -56,8 +42,8 @@ class _Panel(QWidget):
 
         def graph_updater():
             """Worker for auto plot updating."""
-            references.constructor.constructor.top_view.refresh()
-            references.constructor.constructor.side_view.refresh()
+            references.constructor.top_view.refresh()
+            references.constructor.side_view.refresh()
 
         self.update_graphs.clicked.connect(graph_updater)
 

@@ -1,1 +1,1 @@
-from .config import Panel
+from .dockable import Dockable

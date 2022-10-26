@@ -13,7 +13,7 @@ domains = _Domains()
 
 # import all other modules
 from ._plots import _Plots
-from ._constructor import _Constructor
+import constructor
 
 plots = _Plots()
-constructor = _Constructor()
+constructor = constructor.Window()

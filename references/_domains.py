@@ -41,7 +41,7 @@ class _Domains:
     def load(self):
         try:
             with open(self.filename, "rb") as filename:
-                current = pickle.load(filename)
+                self.current = pickle.load(filename)
             logger.info("Restored previous domain editor state.")
         except FileNotFoundError:
             logger.warning(

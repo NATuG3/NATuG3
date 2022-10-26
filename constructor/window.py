@@ -56,7 +56,7 @@ class Window(QMainWindow):
         import constructor.panels.config
 
         # initialize the config panel
-        self.config = constructor.panels.config.Panel()
+        self.config = constructor.panels.config.Dockable()
 
         # only allow config to dock left/right
         self.config.setAllowedAreas(
