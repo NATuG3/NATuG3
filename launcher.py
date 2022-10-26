@@ -1,14 +1,25 @@
 import logging
 from time import time
 
+# delete restoration files
+RESET = False
+
 # references script logger
-logger = logging.getLogger("references")
+logger = logging.getLogger(__name__)
 
 # mute pyqt logs
 logging.getLogger("PyQt6").setLevel(logging.INFO)
 
 
 def main():
+    if RESET:
+        from os import remove
+        from contextlib import suppress
+        with suppress(FileNotFoundError):
+            remove("saves/nucleic_acid/profiles.nano")
+            remove("saves/nucleic_acid/restored.nano")
+            remove("saves/domains/restored.nano")
+
     import references
 
     # set log level

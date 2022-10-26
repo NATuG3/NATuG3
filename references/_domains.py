@@ -45,7 +45,7 @@ class _Domains:
             logger.info("Restored previous domain editor state.")
         except FileNotFoundError:
             logger.warning(
-                "Previous domain editor state save file not found. Loaded defaults."
+                "Previous domain editor state save file not found. Defaults restored."
             )
 
     def dump(self):

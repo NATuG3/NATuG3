@@ -1,4 +1,5 @@
 import itertools
+import logging
 from typing import List, Tuple
 
 from computers.side_view.interface import Plotter
@@ -7,6 +8,8 @@ from datatypes.domains import Domains
 from datatypes.points import NEMid
 from datatypes.strands import Strand
 from helpers import inverse
+
+logger = logging.getLogger(__name__)
 
 
 class SideView:
@@ -57,7 +60,17 @@ class SideView:
         self.theta_b = theta_b
         self.theta_c = theta_c
 
-    def compute(self) -> List[List[NEMid]]:
+        self.theta_exteriors = []
+        self.theta_interiors = []
+        for domain in self.domains:
+            theta_interior = domain.theta_interior_multiple * self.theta_c
+            theta_interior -= domain.theta_switch_multiple * self.theta_s
+            theta_exterior = 360 - theta_interior
+            self.theta_interiors.append(theta_interior)
+            self.theta_exteriors.append(theta_exterior)
+        logger.debug(f"Computed interior multiples\n{self.theta_interiors}")
+
+    def compute(self) -> List[Strand]:
         """
         Compute all NEMid data.
 
@@ -84,7 +97,7 @@ class SideView:
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
-                            if abs(up_strand_z_coord - down_strand_z_coord) >= 0.094:
+                            if abs(up_strand_z_coord - down_strand_z_coord) > 0.094:
                                 begin_at[DOWN] += 1
                             else:
                                 # break out of nested loop
@@ -178,16 +191,23 @@ class SideView:
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
         for index, domain in enumerate(self.domains):
-            # which strand will begin at x=0 (+domain_index)
-            zeroed_strand = self.domains[index - 1].helix_joints[RIGHT]
+            # look at left current domain helix joint
+            zeroed_strand = domain.helix_joints[LEFT]
 
             # create infinite generators for the zeroed and non zeroed strands
             angles[index][zeroed_strand] = itertools.count(
                 start=0.0,  # zeroed strand starts at 0
                 step=self.theta_b,  # and steps by self.theta_b
             )
+
+            # calculate the start value of the inverse(zeroed_strand)
+            if zeroed_strand == UP:
+                start = 0.0 - self.theta_s
+            else:  # zeroed_strand == DOWN:
+                start = 0.0 + self.theta_s
+
             angles[index][inverse(zeroed_strand)] = itertools.count(
-                start=0.0 - self.theta_s,  # non-zeroed strand starts at 0-self.theta_s
+                start=start,  # non-zeroed strand starts at 0-self.theta_s
                 step=self.theta_b,  # and steps by self.theta_b
             )
 
@@ -209,16 +229,15 @@ class SideView:
 
         # make a copy of the angles iterator for use in generating x coords
         for index, domain in enumerate(self.domains):
-            # current exterior and interior angles
-            theta_interior: float = domain.theta_interior_multiple * self.theta_c
-            theta_exterior: float = 360 - theta_interior
-
             # since every T NEMids the x coords repeat we only need to generate x coords for the first T NEMids
-            for strand_direction in self.strand_directions:
+            for strand_direction in self.strand_directions:  # (UP, DOWN)
                 for counter, angle in enumerate(angles[index][strand_direction]):
                     angle %= 360
 
-                    if angle < theta_exterior:
+                    theta_interior = self.theta_interiors[index]
+                    theta_exterior = self.theta_exteriors[index]
+
+                    if angle < self.theta_exteriors[index]:
                         x_coord = angle / theta_exterior
                     else:
                         x_coord = (360 - angle) / theta_interior
