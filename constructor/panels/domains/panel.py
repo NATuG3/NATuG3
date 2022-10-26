@@ -1,26 +1,17 @@
 import logging
-from types import SimpleNamespace
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
-    QTableWidget,
-    QHeaderView,
-    QAbstractItemView,
     QSizePolicy,
 )
 
-import references
 import helpers
-
+import references
 import settings
-from constants.directions import *
-from constructor.panels import domains
-from constructor.panels.domains.widgets import *
-from datatypes.domains import Domain
-from resources.workers import fetch_icon
 from constructor.panels.domains.table import Table
+from resources.workers import fetch_icon
 
 logger = logging.getLogger(__name__)
 

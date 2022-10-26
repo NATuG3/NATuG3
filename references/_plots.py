@@ -1,7 +1,6 @@
+import references
 from computers.side_view import SideView
 from computers.top_view import TopView
-from constructor.panels import domains, nucleic_acid
-import references
 
 
 class _Plots:

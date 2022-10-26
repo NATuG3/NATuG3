@@ -3,9 +3,9 @@ from typing import List, Tuple
 
 from computers.side_view.interface import Plotter
 from constants.directions import *
+from datatypes.domains import Domains
 from datatypes.points import NEMid
 from datatypes.strands import Strand
-from datatypes.domains import Domains
 from helpers import inverse
 
 

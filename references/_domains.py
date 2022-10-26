@@ -2,10 +2,9 @@ import atexit
 import logging
 import pickle
 
-from datatypes.domains import Domains, Domain
-from constants.directions import *
 import settings
-
+from constants.directions import *
+from datatypes.domains import Domains, Domain
 
 logger = logging.getLogger(__name__)
 

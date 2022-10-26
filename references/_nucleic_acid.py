@@ -1,6 +1,5 @@
 import atexit
 import logging
-from types import SimpleNamespace
 import pickle
 from typing import Dict
 
