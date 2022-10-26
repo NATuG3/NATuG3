@@ -12,16 +12,13 @@ class Plotter(pg.GraphicsLayoutWidget):
         # TopView object
         self.worker = worker
 
-        # make the background white
-        self.setBackground("w")
-
-        # create and add the main plot
+        # create and add the references plot
         self.plot = Plot(worker)
         self.addItem(self.plot)
 
 
 class Plot(pg.PlotItem):
-    """The main plot widget for the Plotter"""
+    """The references plot widget for the Plotter"""
 
     domain_brush = pg.mkBrush(color=(90, 90, 90))
 
@@ -29,7 +26,7 @@ class Plot(pg.PlotItem):
         super().__init__()
         self.worker = worker
 
-        # create main plot
+        # create references plot
         self.plot(
             self.worker.u_coords,
             self.worker.v_coords,

@@ -1,11 +1,12 @@
 import itertools
 from typing import List, Tuple
 
-from computers.datatypes import NEMid, Strand
 from computers.side_view.interface import Plotter
 from constants.directions import *
-from domains.datatypes import Domains
-from helpers import inverse
+from datatypes.points import NEMid
+from datatypes.strands import Strand
+from datatypes.domains import Domains
+from references._helpers import inverse
 
 
 class SideView:
@@ -153,7 +154,6 @@ class SideView:
         for domain_index in range(len(self.domains)):
             for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
                 NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
-
 
         strands = []
         for index, domain in enumerate(self.domains):

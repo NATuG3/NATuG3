@@ -2,7 +2,7 @@ import math
 from typing import List
 
 from computers.top_view.interface import Plotter
-from domains.datatypes import Domains
+from datatypes.domains import Domains
 
 
 class TopView:

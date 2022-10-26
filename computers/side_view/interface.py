@@ -5,18 +5,17 @@ import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QPen
 
-import computers.datatypes
 import settings
-from computers.datatypes import NEMid
 from constants.directions import *
+from datatypes.points import NEMid
 
 logger = logging.getLogger(__name__)
 
 
 class Plotter(pg.PlotWidget):
-    """The main plot widget for the Plotter"""
+    """The references plot widget for the Plotter"""
 
-    junctable_NEMid_clicked = pyqtSignal(computers.datatypes.NEMid)
+    junctable_NEMid_clicked = pyqtSignal(NEMid)
 
     line_pen = pg.mkPen(color=settings.colors.grey)
 
@@ -30,7 +29,6 @@ class Plotter(pg.PlotWidget):
 
         # set up styling
         self.setWindowTitle("Side View of DNA")  # set the window's title
-        self.setBackground("w")  # make the background white
 
     def point_clicked(self, event, points):
         point = points[0]
