@@ -27,15 +27,19 @@ def worker(filename):
     references.domains.current: Domains = package.domains
 
     # update all domains settings/dump domains
-    references.constructor.config.tabs.domains.subunit_count.setValue(
+    references.constructor.config.panel.tabs.domains.subunit_count.setValue(
         references.domains.current.subunit.count
     )
-    references.constructor.config.tabs.domains.symmetry.setValue(
+    references.constructor.config.panel.tabs.domains.symmetry.setValue(
         references.domains.current.symmetry
     )
-    references.constructor.config.tabs.domains.table.dump_domains(
+    references.constructor.config.panel.tabs.domains.table.dump_domains(
         references.domains.current.subunit.domains
     )
+
+    # refresh graphs
+    references.constructor.top_view.refresh()
+    references.constructor.side_view.refresh()
 
     logger.info(f"Loaded save @ {filename}.")
 
