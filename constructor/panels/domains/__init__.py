@@ -1,1 +1,1 @@
-from .domains import Panel
+from .panel import Panel

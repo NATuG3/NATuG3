@@ -9,10 +9,6 @@ class Strand(list):
         color (tuple[int, int, int]): RGB color of strand.
     """
 
-    def __init__(
-            self,
-            *args: NEMid,
-            color=(0, 0, 0)
-    ):
+    def __init__(self, *args: NEMid, color=(0, 0, 0)):
         super().__init__(*args)
         self.color = color

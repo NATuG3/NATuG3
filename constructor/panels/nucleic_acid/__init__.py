@@ -1,1 +1,1 @@
-from .nucleic_acid import Panel
+from .panel import Panel

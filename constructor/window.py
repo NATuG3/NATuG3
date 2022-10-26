@@ -1,5 +1,4 @@
 import logging
-from types import SimpleNamespace
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import (
@@ -19,12 +18,15 @@ class Window(QMainWindow):
     The application's references window.
 
     Attributes:
-        panels (SimpleNamespace): All docked widgets.
+        panels: All docked widgets.
         status_bar (QStatusBar): The status bar.
         menu_bar (QMenuBar): The menu bar.
         top_view (QWidget): Top view widget.
         side_view (QWidget): Side view widget.
     """
+
+    class panels:
+        __slots__ = ("config", "top_view", "side_view")
 
     def __init__(self):
         # this is an inherited class of QMainWindow,
@@ -32,7 +34,6 @@ class Window(QMainWindow):
         super().__init__()
 
         # create plot panels
-        self.panels = SimpleNamespace()  # container for all panels
         self._top_view()
         self._side_view()
 

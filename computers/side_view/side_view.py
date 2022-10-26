@@ -6,7 +6,7 @@ from constants.directions import *
 from datatypes.points import NEMid
 from datatypes.strands import Strand
 from datatypes.domains import Domains
-from references._helpers import inverse
+from helpers import inverse
 
 
 class SideView:
@@ -21,15 +21,15 @@ class SideView:
     strand_directions = (UP, DOWN)
 
     def __init__(
-            self,
-            domains: Domains,
-            T: float,
-            B: int,
-            H: float,
-            Z_s: float,
-            theta_s: float,
-            theta_b: float,
-            theta_c: float,
+        self,
+        domains: Domains,
+        T: float,
+        B: int,
+        H: float,
+        Z_s: float,
+        theta_s: float,
+        theta_b: float,
+        theta_c: float,
     ) -> None:
         """
         Initialize side_view generation class.
@@ -131,9 +131,9 @@ class SideView:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                        angles[strand_direction],
-                        x_coords[strand_direction],
-                        z_coords[strand_direction],
+                    angles[strand_direction],
+                    x_coords[strand_direction],
+                    z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid

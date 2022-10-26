@@ -2,9 +2,9 @@ from types import SimpleNamespace
 
 from PyQt6.QtWidgets import QMenu
 
+import helpers
 import references
 import references.saver
-from references import _helpers
 from resources import fetch_icon
 
 
@@ -21,7 +21,9 @@ class View(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(fetch_icon("eye-outline"))
         config.triggered.connect(
-            lambda: helpers.reverse_hidenness(references.constructor.constructor.panels.config)
+            lambda: helpers.reverse_hidenness(
+                references.constructor.constructor.panels.config
+            )
         )
 
         # view -> "top view" -> hide/unhide

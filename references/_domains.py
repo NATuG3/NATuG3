@@ -28,9 +28,9 @@ class _Domains:
             Domain(9, (UP, UP), 50),
             Domain(9, (DOWN, DOWN), 50),
             Domain(9, (UP, UP), 50),
-            Domain(9, (DOWN, DOWN), 50)
+            Domain(9, (DOWN, DOWN), 50),
         ),
-        1
+        1,
     )
 
     def __init__(self):

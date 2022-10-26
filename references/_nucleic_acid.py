@@ -30,8 +30,12 @@ class _NucleicAcid:
     }
 
     def __init__(self):
-        self.profiles: Dict[str, Profile] = self.defaults  # by default set profiles to the defaults
-        self.current: Profile = next(iter(self.defaults.values()))  # by default choose the first profile in defaults
+        self.profiles: Dict[
+            str, Profile
+        ] = self.defaults  # by default set profiles to the defaults
+        self.current: Profile = next(
+            iter(self.defaults.values())
+        )  # by default choose the first profile in defaults
 
         self.load()
         atexit.register(self.dump)

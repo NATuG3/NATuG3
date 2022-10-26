@@ -3,6 +3,7 @@ from computers.top_view import TopView
 from constructor.panels import domains, nucleic_acid
 import references
 
+
 class _Plots:
     @property
     def side_view(self):

@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 from datatypes.domains import Domain
-from references._helpers import inverse
+from helpers import inverse
 
 logger = logging.getLogger(__name__)
 

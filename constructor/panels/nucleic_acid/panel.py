@@ -3,6 +3,8 @@ import logging
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget
+
+import helpers
 import references
 from datatypes.other import Profile
 from resources import fetch_icon
@@ -11,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Panel(QWidget):
-    """Nucleic Acid Config Tab"""
+    """Nucleic Acid Config Tab."""
 
     updated = pyqtSignal()
 
@@ -76,11 +78,11 @@ class Panel(QWidget):
             """Worker for the save profile button"""
             if self.save_profile_button.toolTip() == "Overwrite Profile":
                 if not references.helpers.confirm(
-                        self,
-                        "Overwrite confirmation",
-                        f'Are you sure you want to overwrite the profile named "'
-                        + self.profile_chooser.currentText()
-                        + '" with the currently chosen nucleic acid settings?',
+                    self,
+                    "Overwrite confirmation",
+                    f'Are you sure you want to overwrite the profile named "'
+                    + self.profile_chooser.currentText()
+                    + '" with the currently chosen nucleic acid settings?',
                 ):
                     return
 
@@ -95,7 +97,9 @@ class Panel(QWidget):
             self.profile_chooser.setCurrentText("")
 
             # log that the profile was saved (and print the name/repr of the saved profile)
-            logger.debug(f"Current settings: {references.nucleic_acid.profiles[profile_name]}")
+            logger.debug(
+                f"Current settings: {references.nucleic_acid.profiles[profile_name]}"
+            )
             logger.info(f'Saved current settings as profile named "{profile_name}"')
 
             # if the profile name is not already in the profile chooser...
@@ -106,11 +110,11 @@ class Panel(QWidget):
         def delete_profile(self):
             """Worker for the delete profile button"""
             if not helpers.confirm(
-                    self,
-                    "Delete profile confirmation",
-                    f'Are you sure you want to delete the profile named "'
-                    + self.profile_chooser.currentText()
-                    + '"?\nNote that this action cannot be undone!',
+                self,
+                "Delete profile confirmation",
+                f'Are you sure you want to delete the profile named "'
+                + self.profile_chooser.currentText()
+                + '"?\nNote that this action cannot be undone!',
             ):
                 return
 
@@ -137,12 +141,12 @@ class Panel(QWidget):
         def load_profile(self):
             """Worker for the load profile button"""
             if not helpers.confirm(
-                    self,
-                    "Load profile confirmation",
-                    f"Are you sure you want to overwrite all currently chosen settings"
-                    + ' with those of the profile named "'
-                    + self.profile_chooser.currentText()
-                    + '"?',
+                self,
+                "Load profile confirmation",
+                f"Are you sure you want to overwrite all currently chosen settings"
+                + ' with those of the profile named "'
+                + self.profile_chooser.currentText()
+                + '"?',
             ):
                 return
 
@@ -156,7 +160,9 @@ class Panel(QWidget):
             self.profile_chooser.setCurrentText("")
 
             # log that the profile was loaded
-            logger.debug(f"Settings that were loaded: {references.nucleic_acid.profiles[profile_name]}")
+            logger.debug(
+                f"Settings that were loaded: {references.nucleic_acid.profiles[profile_name]}"
+            )
             logger.info(f'Loaded profile named "{profile_name}"')
 
         def input_box_changed():
@@ -173,7 +179,10 @@ class Panel(QWidget):
             # if the chosen profile name is in the saved profiles list:
             if chosen_profile_name in references.nucleic_acid.profiles:
                 # if the chosen profile name's settings match the current input box values
-                if references.nucleic_acid.profiles[chosen_profile_name] == references.nucleic_acid.current:
+                if (
+                    references.nucleic_acid.profiles[chosen_profile_name]
+                    == references.nucleic_acid.current
+                ):
                     self.load_profile_button.setEnabled(False)
                     self.load_profile_button.setStatusTip(
                         f'Current settings match saved settings of profile named "{chosen_profile_name}."'
@@ -255,6 +264,8 @@ class Panel(QWidget):
                     "Profile chooser entry box is empty. Enter the name of the profile to delete."
                 )
 
+            self.updated.emit()
+
         def hook_widgets():
             # when the save profile button is clicked call save_profile()
             self.save_profile_button.clicked.connect(lambda: save_profile(self))
@@ -271,16 +282,16 @@ class Panel(QWidget):
 
             # hook all inputs to the following input_box_changed function
             for input in (
-                    self.D,
-                    self.H,
-                    self.T,
-                    self.B,
-                    self.Z_b,
-                    self.Z_c,
-                    self.Z_s,
-                    self.theta_b,
-                    self.theta_c,
-                    self.theta_s,
+                self.D,
+                self.H,
+                self.T,
+                self.B,
+                self.Z_b,
+                self.Z_c,
+                self.Z_s,
+                self.theta_b,
+                self.theta_c,
+                self.theta_s,
             ):
                 input.valueChanged.connect(input_box_changed)
             self.profile_chooser.currentTextChanged.connect(input_box_changed)

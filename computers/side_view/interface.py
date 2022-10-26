@@ -35,7 +35,7 @@ class Plotter(pg.PlotWidget):
         located = []
         for strand in self.worker.computed:
             for NEMid_ in strand:
-                if dist(point.pos(), NEMid_.position()) < .01:
+                if dist(point.pos(), NEMid_.position()) < 0.01:
                     located.append(NEMid_)
         if len(located) == 2:
             self.junctable_NEMid_clicked.emit(NEMid_)
@@ -66,14 +66,16 @@ class Plotter(pg.PlotWidget):
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)
 
-            plotted = self.plot(  # actually plot the current strand of the current domain
-                x_coords,
-                z_coords,
-                symbol=symbols,  # type of symbol (in this case up/down arrow)
-                symbolSize=6,  # size of arrows in px
-                pxMode=True,  # means that symbol size is in px
-                symbolBrush=symbols_brushes,  # set color of points to current color
-                pen=self.line_pen
+            plotted = (
+                self.plot(  # actually plot the current strand of the current domain
+                    x_coords,
+                    z_coords,
+                    symbol=symbols,  # type of symbol (in this case up/down arrow)
+                    symbolSize=6,  # size of arrows in px
+                    pxMode=True,  # means that symbol size is in px
+                    symbolBrush=symbols_brushes,  # set color of points to current color
+                    pen=self.line_pen,
+                )
             )
 
             plotted.sigPointsClicked.connect(self.point_clicked)
@@ -88,7 +90,7 @@ class Plotter(pg.PlotWidget):
         # helical twist grid
         # overall_height = the tallest domain's height (the overall height of the plot's contents)
         overall_height = (
-                max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
+            max([domain.count for domain in self.worker.domains]) * self.worker.Z_b
         )
         # for i in <number of helical twists of the tallest domain>...
         for i in range(0, ceil(overall_height / self.worker.H) + 1):
