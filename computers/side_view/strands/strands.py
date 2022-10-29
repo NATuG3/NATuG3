@@ -4,6 +4,7 @@ from typing import List, NamedTuple
 import logging
 
 import settings
+from constants.directions import *
 from computers.side_view.strands.interface import Plotter
 from computers.side_view.strands.strand import Strand
 from datatypes.misc import Profile
@@ -45,13 +46,45 @@ class Strands:
                 NEMid1.position(),
                 NEMid2.position()
             )
-        if NEMid1.strand == NEMid2.strand:
-            raise ValueError(
-                "NEMids are on the same strand. Cannot create same-strand junction.",
-                NEMid1.strand,
-                NEMid2.strand
+
+
+        NEMid1_strand_index = self.strands.index(NEMid1.strand)
+        NEMid2_strand_index = self.strands.index(NEMid2.strand)
+        insert_at = NEMid1_strand_index
+
+        # remove the strands that we are going to replace with 4 new strands
+        del self.strands[NEMid1_strand_index]
+        del self.strands[NEMid2_strand_index-1]
+
+        new_strands = [
+            Strand(
+                [], color=(110, 255, 117)
+            ), Strand(
+                [], color=(250, 145, 255)
             )
-        print("good")
+        ]
+
+        for NEMid_ in NEMid1.strand:
+            if NEMid1.domain.helix_joints[RIGHT] == UP:
+                if NEMid_.z_coord < NEMid1.z_coord:
+                    new_strands[0].append(NEMid_)
+            else:  # NEMid1.domain.helix_joints[DOWN]:
+                if NEMid_.z_coord > NEMid1.z_coord:
+                    new_strands[0].append(NEMid_)
+
+        for NEMid_ in NEMid2.strand:
+            if NEMid2.domain.helix_joints[LEFT] == UP:
+                if NEMid_.z_coord < NEMid2.z_coord:
+                    new_strands[1].append(NEMid_)
+            else:  # NEMid1.domain.helix_joints[DOWN]:
+                if NEMid_.z_coord > NEMid2.z_coord:
+                    new_strands[1].append(NEMid_)
+
+
+        self.strands.insert(insert_at, new_strands[0])
+        self.strands.insert(insert_at+1, new_strands[1])
+
+
 
     def ui(self) -> Plotter:
         return Plotter(

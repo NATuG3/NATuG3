@@ -1,11 +1,12 @@
 import logging
+from contextlib import suppress
 from math import ceil, dist
 from typing import List
 
 import pyqtgraph as pg
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QPen
 
+import references
 import settings
 from constants.directions import *
 from datatypes.misc import Profile
@@ -57,7 +58,9 @@ class Plotter(pg.PlotWidget):
 
     def junctable_NEMid_clicked(self, NEMid1, NEMid2):
         """Called when a NEMid that could be made a junction is clicked."""
-        self.strands.add_junction()
+        self.strands.add_junction(NEMid1, NEMid2)
+        references.strands = self.strands
+        self.refresh()
 
     def point_clicked(self, event, points):
         """Called when a point on a strand is clicked."""

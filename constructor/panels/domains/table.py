@@ -1,4 +1,5 @@
 from types import SimpleNamespace
+from typing import Literal
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
@@ -213,6 +214,7 @@ class Table(QTableWidget):
             count: int = self.cellWidget(domain, 4).value()
 
             domain = Domain(
+                domain,
                 theta_interior_multiple,
                 (left_helical_joint, right_helical_joint),
                 count,

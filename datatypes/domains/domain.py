@@ -8,29 +8,32 @@ class Domain:
     Domain storage object.
 
     Attributes:
+        index (int): THe index of the domain.
         theta_interior (int): Angle between domain #i/#i+1's & #i+1/i+2's tangency lines. Multiple of theta_c.
         theta_switch_multiple (int): Strand switch angle per domain transition. Multiple of theta_s.
         helix_joints (tuple): The upwardness/downwardness of the left and right helix joint.
     """
 
     def __init__(
-        self,
-        theta_interior_multiple: int,
-        helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
-        count: int,
+            self,
+            index,
+            theta_interior_multiple: int,
+            helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
+            count: int,
     ):
         """
         Create domains dataclass.
 
         Args:
-            theta_interior_multiple (int):
-                Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency. Multiple of characteristic angle.
-            helix_joints (tuple):
-                (left_joint, right_joint) where left/right_joint are constants.directions.UP/DOWN.
-            count (int):
-                Number of initial NEMids/strand to generate.
+            index (int): THe index of the domain.
+            theta_interior_multiple:
+                Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency.
+                Multiple of characteristic angle.
+            helix_joints (tuple): (left_joint, right_joint) where left/right_joint are constants.directions.UP/DOWN.
+            count (int): Number of initial NEMids/strand to generate.
         """
         # multiple of the characteristic angle (theta_c) for the interior angle
+        self.index = index
         self.theta_interior_multiple: int = theta_interior_multiple
 
         # (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN

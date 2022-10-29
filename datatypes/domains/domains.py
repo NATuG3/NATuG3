@@ -19,7 +19,10 @@ class Domains:
     @property
     def domains(self):
         """List of all domains."""
-        return tuple(self.subunit.domains * self.symmetry)
+        output = tuple(self.subunit.domains * self.symmetry)
+        for index, domain in enumerate(output):
+            domain.index = index
+        return output
 
     @property
     def count(self):

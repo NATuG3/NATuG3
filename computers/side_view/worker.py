@@ -153,8 +153,6 @@ class SideView:
         pallet = ((255, 245, 0), (0, 0, 255))
         for index, strand in enumerate(strands):
             strands[index] = Strand(strand, color=pallet[index % 2])
-            for NEMid_ in strand:
-                NEMid_.strand = strand
 
         return Strands(strands, self.profile)
 
