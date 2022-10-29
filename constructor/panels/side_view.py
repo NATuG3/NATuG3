@@ -1,9 +1,8 @@
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
+import computers.side_view
+import computers.side_view.strands.interface
 import references
-
-
-previous_bounding_box = None
 
 
 class SideView(QGroupBox):
@@ -15,14 +14,12 @@ class SideView(QGroupBox):
         self.setTitle("Side View of Helices")
         self.setStatusTip("A plot of the side view of all domains")
 
-        self.refresh()
-
-    @property
-    def plot(self):
-        """The current plot."""
-        return self.layout().itemAt(0)
+        self.plot = references.plots.side_view.ui()
+        self.layout().addWidget(self.plot)
 
     def refresh(self):
         """Update the current plot."""
-        self.layout().removeItem(self.plot)
-        self.layout().addWidget(references.plots.side_view.ui(restore_bound=True))
+        self.plot.strands = references.strands
+        self.plot.profile = references.nucleic_acid.current
+        self.plot.refresh()
+

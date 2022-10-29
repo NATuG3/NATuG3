@@ -68,8 +68,8 @@ class TopView:
             # append the v cord of the domain to "self.v_coords"
             self.v_coords.append(self.v_coords[-1] + self.profile.D * math.sin(angle_delta))
 
-    def ui(self, restore_bound=False) -> Plotter:
-        return Plotter(self, self.profile, restore_bound=restore_bound)
+    def ui(self) -> Plotter:
+        return Plotter(self, self.profile)
 
     def __repr__(self) -> str:
         round_to = 3

@@ -5,37 +5,31 @@ import pyqtgraph as pg
 from datatypes.misc import Profile
 
 logger = logging.getLogger(__name__)
-previous_bounding_box = None
 
 
 class Plotter(pg.PlotWidget):
 
     domain_brush = pg.mkBrush(color=(90, 90, 90))
 
-    def __init__(self, worker, profile: Profile, restore_bound: bool = False):
+    def __init__(self, worker, profile: Profile):
         """
         Initialize plotter instance.
 
         Args:
             worker (SideView): The actual side view worker item.
-            restore_bound (bool, optional): Restore previous bounding box. Defaults to false
         """
         super().__init__()
         self.profile = profile
         self.worker = worker
         self._plot()
+        self.disableAutoRange()
 
-        # keep the global previous-bounding-box up to date
-        @self.sigRangeChanged.connect
-        def _():
-            global previous_bounding_box
-            previous_bounding_box = self.visibleRange()
+    def refresh(self):
+        self.clear()
+        self._plot()
 
-        # restore the previous bounds if requested
-        if restore_bound:
-            global previous_bounding_box
-            if previous_bounding_box is not None:
-                self.setRange(previous_bounding_box)
+    def clear(self):
+        self.getPlotItem().clear()
 
     def _plot(self):
         # create references plot

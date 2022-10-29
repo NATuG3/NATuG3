@@ -7,29 +7,24 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QPen
 
 import settings
-from computers.side_view.strands.strand import Strand
 from constants.directions import *
 from datatypes.misc import Profile
 from datatypes.points import NEMid
 
 logger = logging.getLogger(__name__)
 
-previous_bounding_box = None
-
 
 class Plotter(pg.PlotWidget):
     """The references plot widget for the Plotter"""
 
-    junctable_NEMid_clicked = pyqtSignal(NEMid)
-
     line_pen = pg.mkPen(color=settings.colors.grey)
 
     def __init__(self,
-                 strands: List[Strand],
+                 strands,  #: computers.side_view.strands.Strands
                  width: float,
                  height: float,
-                 profile: Profile,
-                 restore_bound: bool = False):
+                 profile: Profile
+                 ):
         """
         Initialize plotter instance.
 
@@ -38,47 +33,46 @@ class Plotter(pg.PlotWidget):
             width: Width of plot. In nanometers.
             height: Height of plot. In nanometers.
             profile: The settings profile to use for grid line computations.
-            restore_bound: Restore previous bounding box. Defaults to false
         """
         super().__init__()
         self.strands = strands
         self._width = width
         self._height = height
         self.profile = profile
+        self.disableAutoRange()
         self._plot()
-
-        # keep the global previous-bounding-box up to date
-        @self.sigRangeChanged.connect
-        def _():
-            global previous_bounding_box
-            previous_bounding_box = self.visibleRange()
-
-        # restore the previous bounds if requested
-        if restore_bound:
-            global previous_bounding_box
-            if previous_bounding_box is not None:
-                self.setRange(previous_bounding_box)
+        # for the first run compute a reasonable range
+        self.autoRange()
+        self.setXRange(0, self._width)
 
         # set up styling
         self.setWindowTitle("Side View of DNA")  # set the window's title
 
+    def refresh(self):
+        self.clear()
+        self._plot()
+
+    def clear(self):
+        self.getPlotItem().clear()
+
+    def junctable_NEMid_clicked(self, NEMid1, NEMid2):
+        """Called when a NEMid that could be made a junction is clicked."""
+        self.strands.add_junction()
+
     def point_clicked(self, event, points):
+        """Called when a point on a strand is clicked."""
         point = points[0]
         located = []
-        for strand in self.strands:
+        for strand in self.strands.strands:
             for NEMid_ in strand:
                 if dist(point.pos(), NEMid_.position()) < settings.junction_threshold:
                     located.append(NEMid_)
         if len(located) == 2:
-            self.junctable_NEMid_clicked.emit(NEMid_)
             logger.info(f"A junctable NEMid was clicked!\n{located}")
+            self.junctable_NEMid_clicked(*located)
 
     def _plot(self):
-        # we can calculate the axis scales at the end of generation;
-        # we don't need to continuously recalculate the range
-        self.disableAutoRange()
-
-        for strand in self.strands:
+        for strand in self.strands.strands:
             symbols = []
             symbols_brushes = []
             x_coords = []
@@ -116,7 +110,7 @@ class Plotter(pg.PlotWidget):
         grid_pen: QPen = pg.mkPen(color=settings.colors.grey, width=1.4)
 
         # domain index grid
-        for i in range(len(self.strands)*2 + 1):
+        for i in range(len(self.strands.strands) * 2 + 1):
             self.addLine(x=i, pen=grid_pen)
 
         # for i in <number of helical twists of the tallest domain>...
@@ -126,8 +120,3 @@ class Plotter(pg.PlotWidget):
         # add axis labels
         self.setLabel("bottom", text="Helical Domain")
         self.setLabel("left", text="Helical Twists", units="nanometers")
-
-        # re-enable auto-range so that it isn't zoomed out weirdly
-        self.autoRange()
-        # set custom X range of plot
-        self.setXRange(0, self._width)
