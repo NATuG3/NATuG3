@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 import references
 
 
+previous_bounding_box = None
+
+
 class SideView(QGroupBox):
     def __init__(self):
         super().__init__()
@@ -22,4 +25,4 @@ class SideView(QGroupBox):
     def refresh(self):
         """Update the current plot."""
         self.layout().removeItem(self.plot)
-        self.layout().addWidget(references.plots.side_view.ui())
+        self.layout().addWidget(references.plots.side_view.ui(restore_bound=True))

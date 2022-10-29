@@ -3,6 +3,7 @@ from typing import List
 
 from computers.top_view.interface import Plotter
 from datatypes.domains import Domains
+from datatypes.misc import Profile
 
 
 class TopView:
@@ -10,18 +11,16 @@ class TopView:
     Top view plotter.
 
     Attributes:
-        domains (List[Domain]): All inputted domains.
-        u_coords (List[float]): All u coords.
-        v_coords (List[float]): All v coords.
-        angle_deltas (List[float]): All angle angle changes from NEMid-to-NEMid
+        domains: All inputted domains.
+        u_coords: All u coords.
+        v_coords: All v coords.
+        angle_deltas: All angle changes from NEMid-to-NEMid
     """
 
     def __init__(
         self,
         domains: Domains,
-        D: float,
-        theta_c=360 / 21,
-        theta_s=2.3,
+        profile: Profile
     ) -> None:
         """
         Generate (u, v) cords for top view of helices generation.
@@ -33,26 +32,22 @@ class TopView:
             theta_s (float, optional): Strand switch angle.
         """
         self.domains = domains.domains
-        self.D = D
-
-        self.theta_c = theta_c
-        self.theta_s = theta_s
-
+        self.profile = profile
         self.theta_deltas: List[float] = [0.0]  # list to store angle deltas in
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
         self.compute()
 
-    def compute(self):
+    def compute(self) -> None:
         """Compute u_coords, v_coords, and angle_deltas."""
         for index, domain in enumerate(self.domains):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                self.domains[index - 1].theta_switch_multiple * self.theta_s
+                self.domains[index - 1].theta_switch_multiple * self.profile.theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                self.domains[index - 1].theta_interior_multiple * self.theta_c
+                self.domains[index - 1].theta_interior_multiple * self.profile.theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
@@ -68,13 +63,13 @@ class TopView:
             )  # convert to radians (AKA angle_delta*(180/pi))
 
             # append the u cord of the domain to "self.u_coords"
-            self.u_coords.append(self.u_coords[-1] + self.D * math.cos(angle_delta))
+            self.u_coords.append(self.u_coords[-1] + self.profile.D * math.cos(angle_delta))
 
             # append the v cord of the domain to "self.v_coords"
-            self.v_coords.append(self.v_coords[-1] + self.D * math.sin(angle_delta))
+            self.v_coords.append(self.v_coords[-1] + self.profile.D * math.sin(angle_delta))
 
-    def ui(self):
-        return Plotter(self)
+    def ui(self, restore_bound=False) -> Plotter:
+        return Plotter(self, self.profile, restore_bound=restore_bound)
 
     def __repr__(self) -> str:
         round_to = 3

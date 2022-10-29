@@ -1,1 +1,1 @@
-from .side_view import SideView
+from .worker import SideView

@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import QDockWidget
 import references
 
 
+previous_bounding_box = None
+
+
 class TopView(QDockWidget):
     def __init__(self):
         super().__init__()

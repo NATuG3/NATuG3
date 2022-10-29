@@ -2,11 +2,12 @@ import itertools
 import logging
 from typing import List, Tuple
 
-from computers.side_view.interface import Plotter
+from computers.side_view.strands.strands import Strands
 from constants.directions import *
 from datatypes.domains import Domains
+from datatypes.misc import Profile
 from datatypes.points import NEMid
-from datatypes.strands import Strand
+from computers.side_view.strands.strand import Strand
 from helpers import inverse
 
 logger = logging.getLogger(__name__)
@@ -14,63 +15,36 @@ logger = logging.getLogger(__name__)
 
 class SideView:
     """
-    Generate data needed for a side view graph of helices.
-
-    NEMid_angles (DomainsContainerType): All NEMid angles.
-    x_coords (DomainsContainerType): All x coords.
-    z_coords (DomainsContainerType) All z coords.
+    Class for generating data needed for a side view graph of helices.
     """
 
     strand_directions = (UP, DOWN)
 
     def __init__(
-        self,
-        domains: Domains,
-        T: float,
-        B: int,
-        H: float,
-        Z_s: float,
-        theta_s: float,
-        theta_b: float,
-        theta_c: float,
+            self,
+            domains: Domains,
+            profile: Profile
     ) -> None:
         """
         Initialize side_view generation class.
 
         Args:
             domains (list): List of domains.
-            T (int): There are T turns per B bases.
-            B (int): There are B bases per T turns.
-            H (float): Height of one helical twist.
-            Z_s (float): Strand switch distance (in nm).
-            theta_s (float): Switch angle (in degrees).
-            theta_b (float): Base angle (in degrees).
-            theta_c (float): Characteristic angle (in degrees).
         """
+        self.profile = profile
         self.domains = domains.domains
-
-        self.T = T
-        self.B = B
-        self.H = H
-
-        self.Z_b = (T * H) / B
-        self.Z_s = Z_s
-
-        self.theta_s = theta_s
-        self.theta_b = theta_b
-        self.theta_c = theta_c
 
         self.theta_exteriors = []
         self.theta_interiors = []
         for domain in self.domains:
-            theta_interior = domain.theta_interior_multiple * self.theta_c
-            theta_interior -= domain.theta_switch_multiple * self.theta_s
+            theta_interior = domain.theta_interior_multiple * self.profile.theta_c
+            theta_interior -= domain.theta_switch_multiple * self.profile.theta_s
             theta_exterior = 360 - theta_interior
             self.theta_interiors.append(theta_interior)
             self.theta_exteriors.append(theta_exterior)
         logger.debug(f"Computed interior multiples\n{self.theta_interiors}")
 
-    def compute(self) -> List[Strand]:
+    def compute(self) -> Strands:
         """
         Compute all NEMid data.
 
@@ -92,7 +66,7 @@ class SideView:
                     else:
                         # revert to the previous z coord
                         # (since the begin-at-up didn't tick)
-                        up_strand_z_coord -= self.Z_b
+                        up_strand_z_coord -= self.profile.Z_b
                         # then keep moving the initial down-strand NEMid up
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)
@@ -144,9 +118,9 @@ class SideView:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                    angles[strand_direction],
-                    x_coords[strand_direction],
-                    z_coords[strand_direction],
+                        angles[strand_direction],
+                        x_coords[strand_direction],
+                        z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid
@@ -164,9 +138,12 @@ class SideView:
                     NEMids[index][strand_direction].append(NEMid_)
 
         # assign matching NEMids to each other's matching slots
-        for domain_index in range(len(self.domains)):
-            for NEMid1, NEMid2 in zip(*NEMids[domain_index]):
+        for index, domain in enumerate(self.domains):
+            NEMid1: NEMid
+            NEMid2: NEMid
+            for NEMid1, NEMid2 in zip(*NEMids[index]):
                 NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
+                NEMid1.domain, NEMid2.domain = domain, domain
 
         strands = []
         for index, domain in enumerate(self.domains):
@@ -176,8 +153,10 @@ class SideView:
         pallet = ((255, 245, 0), (0, 0, 255))
         for index, strand in enumerate(strands):
             strands[index] = Strand(strand, color=pallet[index % 2])
+            for NEMid_ in strand:
+                NEMid_.strand = strand
 
-        return strands
+        return Strands(strands, self.profile)
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
         """
@@ -197,18 +176,18 @@ class SideView:
             # create infinite generators for the zeroed and non zeroed strands
             angles[index][zeroed_strand] = itertools.count(
                 start=0.0,  # zeroed strand starts at 0
-                step=self.theta_b,  # and steps by self.theta_b
+                step=self.profile.theta_b,  # and steps by self.theta_b
             )
 
             # calculate the start value of the inverse(zeroed_strand)
             if zeroed_strand == UP:
-                start = 0.0 - self.theta_s
+                start = 0.0 - self.profile.theta_s
             else:  # zeroed_strand == DOWN:
-                start = 0.0 + self.theta_s
+                start = 0.0 + self.profile.theta_s
 
             angles[index][inverse(zeroed_strand)] = itertools.count(
                 start=start,  # non-zeroed strand starts at 0-self.theta_s
-                step=self.theta_b,  # and steps by self.theta_b
+                step=self.profile.theta_b,  # and steps by self.theta_b
             )
 
         for index in range(len(self.domains)):
@@ -251,7 +230,7 @@ class SideView:
                     x_coords[index][strand_direction].append(x_coord)
 
                     # break once self.B x coords have been generated
-                    if len(x_coords[index][strand_direction]) == self.B:
+                    if len(x_coords[index][strand_direction]) == self.profile.B:
                         break
 
                 # there are self.B unique x coords
@@ -278,7 +257,7 @@ class SideView:
         for index, domain in enumerate(self.domains):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
-                    x_coords[index][strand_direction], 0, self.B
+                    x_coords[index][strand_direction], 0, self.profile.B
                 )
                 x_coords[index][strand_direction] = tuple(
                     x_coords[index][strand_direction]
@@ -301,7 +280,7 @@ class SideView:
                 # generated the needed portion of the previous index's
                 # z coords, of this domain's left helix joint (zeroed_strand)
                 previous_z_coords = tuple(
-                    itertools.islice(z_coords[index - 1][zeroed_strand], 0, self.B)
+                    itertools.islice(z_coords[index - 1][zeroed_strand], 0, self.profile.B)
                 )
 
                 # find the maximum x coord of the previous domain
@@ -318,7 +297,7 @@ class SideView:
 
             # move the initial Z coord down until it is as close to z=0 as possible
             # this way the graphs don't skew upwards weirdly
-            offset_interval = self.Z_b * self.B
+            offset_interval = self.profile.Z_b * self.profile.B
             while initial_z_coord > 0:
                 initial_z_coord -= offset_interval
             initial_z_coord -= offset_interval
@@ -329,13 +308,13 @@ class SideView:
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(
-                start=initial_z_coord, step=self.Z_b
+                start=initial_z_coord, step=self.profile.Z_b
             )
             # begin at the initial z coord and step by self.Z_b
 
             # non-zeroed strand
             z_coords[index][inverse(zeroed_strand)] = itertools.count(
-                start=initial_z_coord - self.Z_s, step=self.Z_b
+                start=initial_z_coord - self.profile.Z_s, step=self.profile.Z_b
             )
             # begin at the (initial z coord - z switch) and step by self.Z_b
 
@@ -343,9 +322,6 @@ class SideView:
             z_coords[index] = tuple(z_coords[index])
 
         return z_coords
-
-    def ui(self) -> Plotter:
-        return Plotter(self)
 
     def __repr__(self) -> str:
         output = "side_view("
