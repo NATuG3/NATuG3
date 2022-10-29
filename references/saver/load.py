@@ -24,7 +24,8 @@ def worker(filename):
 
     # update the current domains array
     assert isinstance(references.domains.current, Domains)
-    references.domains.current: Domains = package.domains
+    references.domains.current = package.domains
+    references.strands = package.strands
 
     # update all domains settings/dump domains
     references.constructor.config.panel.tabs.domains.subunit_count.setValue(
