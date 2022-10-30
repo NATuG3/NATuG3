@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDockWidget
+from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 import references
 from constructor.panels import domains, nucleic_acid

@@ -47,6 +47,8 @@ class Strands:
                 NEMid2.position()
             )
 
+        # assert NEMid1.juncmate == NEMid2
+        # assert NEMid2.juncmate == NEMid1
 
         NEMid1_strand_index = self.strands.index(NEMid1.strand)
         NEMid2_strand_index = self.strands.index(NEMid2.strand)
@@ -64,22 +66,35 @@ class Strands:
             )
         ]
 
+        junction_site_z_coord = (NEMid1.z_coord + NEMid2.z_coord)/2
+
+        # crawl up NEMid # 1's strand
+        # and append NEMids to a new strand
+        # until we reach right below the junction site's z-coord
         for NEMid_ in NEMid1.strand:
-            if NEMid1.domain.helix_joints[RIGHT] == UP:
-                if NEMid_.z_coord < NEMid1.z_coord:
-                    new_strands[0].append(NEMid_)
-            else:  # NEMid1.domain.helix_joints[DOWN]:
-                if NEMid_.z_coord > NEMid1.z_coord:
-                    new_strands[0].append(NEMid_)
+            if NEMid_.z_coord < junction_site_z_coord:
+                new_strands[0].append(NEMid_)
 
+        # crawl down NEMid # 2's strand
+        # and append NEMids to the same strand we were just appending to
+        # until we reach right below the junction site's z-coord
+        for NEMid_ in reversed(NEMid2.strand):
+            if NEMid_.z_coord < junction_site_z_coord:
+                new_strands[0].append(NEMid_)
+
+        # crawl down NEMid # 1's strand
+        # and append NEMids to a new strand
+        # until we reach right above the junction site's z-coord
+        for NEMid_ in reversed(NEMid1.strand):
+            if NEMid_.z_coord > junction_site_z_coord:
+                new_strands[1].append(NEMid_)
+
+        # crawl up NEMid # 2's strand
+        # and append NEMids to a new strand
+        # for each coord that is above the junction site
         for NEMid_ in NEMid2.strand:
-            if NEMid2.domain.helix_joints[LEFT] == UP:
-                if NEMid_.z_coord < NEMid2.z_coord:
-                    new_strands[1].append(NEMid_)
-            else:  # NEMid1.domain.helix_joints[DOWN]:
-                if NEMid_.z_coord > NEMid2.z_coord:
-                    new_strands[1].append(NEMid_)
-
+            if NEMid_.z_coord > junction_site_z_coord:
+                new_strands[1].append(NEMid_)
 
         self.strands.insert(insert_at, new_strands[0])
         self.strands.insert(insert_at+1, new_strands[1])

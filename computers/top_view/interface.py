@@ -21,26 +21,25 @@ class Plotter(pg.PlotWidget):
         super().__init__()
         self.profile = profile
         self.worker = worker
-        self._plot()
         self.disableAutoRange()
+        self._plot()
+        self._prettify()
+
+    def clear(self):
+        for plot_item in self.plot_items:
+            self.removeItem(plot_item)
 
     def refresh(self):
         self.clear()
         self._plot()
 
-    def clear(self):
-        self.getPlotItem().clear()
+    def _prettify(self):
+        # set correct range
+        self.autoRange()
 
-    def _plot(self):
-        # create references plot
-        self.plot(
-            self.worker.u_coords,
-            self.worker.v_coords,
-            symbol="o",
-            symbolSize=self.profile.D,
-            symbolBrush=self.domain_brush,
-            pxMode=False,
-        )
+        # set axis labels
+        self.setLabel("bottom", units="Nanometers")
+        self.setLabel("left", units="Nanometers")
 
         # increase the view box padding, since... our symbols are VERY large circles and pyqtgraph calculates padding
         # from the actual points, so the circles get cut off
@@ -49,6 +48,15 @@ class Plotter(pg.PlotWidget):
         # prevent user from interacting with the graph
         self.getViewBox().setAspectLocked(lock=True, ratio=1)
 
-        # set axis units
-        self.setLabel("bottom", units="Nanometers")
-        self.setLabel("left", units="Nanometers")
+    def _plot(self):
+        """Plot all the data."""
+
+        # plot the data
+        self.plot(
+            self.worker.u_coords,
+            self.worker.v_coords,
+            symbol="o",
+            symbolSize=self.profile.D,
+            symbolBrush=self.domain_brush,
+            pxMode=False,
+        )

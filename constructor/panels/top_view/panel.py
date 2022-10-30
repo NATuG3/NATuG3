@@ -4,10 +4,7 @@ import computers.top_view
 import references
 
 
-previous_bounding_box = None
-
-
-class TopView(QDockWidget):
+class Panel(QDockWidget):
     def __init__(self):
         super().__init__()
 

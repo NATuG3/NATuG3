@@ -49,6 +49,7 @@ class Window(QMainWindow):
         # initialize menu bar
         self._menu_bar()
 
+
     def _config(self):
         """Setup config panel."""
 
@@ -74,9 +75,9 @@ class Window(QMainWindow):
 
     def _top_view(self):
         """Setup top view plot."""
-        from constructor.panels import TopView
+        from constructor.panels.top_view import Panel
 
-        self.top_view = TopView()
+        self.top_view = Panel()
 
         # top view is only allowed on the sides
         self.top_view.setAllowedAreas(
@@ -93,9 +94,9 @@ class Window(QMainWindow):
 
     def _side_view(self):
         """Setup side view plot."""
-        from .panels import SideView
+        from .panels.side_view import Panel
 
-        self.side_view = SideView()
+        self.side_view = Panel()
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)
@@ -124,6 +125,7 @@ class Window(QMainWindow):
         # place the menu bar object into the actual menu bar
         self.setMenuBar(self.menu_bar)
         logger.info("Created menu bar.")
+
 
     def resizeEvent(self, event):
         """Dynamically resize panels."""
