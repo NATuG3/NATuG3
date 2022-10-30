@@ -6,6 +6,7 @@ class Action(QPushButton):
         super().__init__(title)
         self.setFixedWidth(50)
 
+
 class Actions:
     class Juncter(Action):
         def __init__(self):

@@ -1,6 +1,5 @@
 import references
-from computers.side_view import SideView
-from computers.top_view import TopView
+from constructor.panels.top_view.worker import TopView
 
 
 class _Plots:

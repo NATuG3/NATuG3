@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget
 
 import helpers
 import references
-from computers.side_view import SideView
+from constructor.panels.side_view.worker import SideView
 from datatypes.misc import Profile
 from resources import fetch_icon
 
@@ -168,9 +168,7 @@ class Panel(QWidget):
 
         def input_box_changed():
             """Worker for when any input box is changed"""
-            references.strands = SideView(
-                references.domains.current, references.nucleic_acid.current
-            ).compute()
+            references.strands.recompute()
 
             # fetch settings of input boxes
             references.nucleic_acid.current = self.fetch_settings()

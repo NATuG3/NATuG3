@@ -10,8 +10,8 @@ from PyQt6.QtWidgets import (
 import helpers
 import references
 import settings
-from computers.side_view import SideView
 from constructor.panels.domains.table import Table
+from constructor.panels.side_view.worker import SideView
 from resources.workers import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -68,11 +68,7 @@ class Panel(QWidget):
             lambda: self.table.dump_domains(self.table.fetch_domains())
         )
 
-        @self.table.cell_widget_updated.connect
-        def _():
-            references.strands = SideView(
-                references.domains.current, references.nucleic_acid.current
-            ).compute()
+        self.table.cell_widget_updated.connect(references.strands.recompute)
 
     def refresh(self):
         """Refresh panel settings/domain table."""

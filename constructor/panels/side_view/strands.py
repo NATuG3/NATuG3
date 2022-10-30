@@ -1,12 +1,11 @@
+import logging
 from collections import namedtuple
 from math import dist
 from typing import List, NamedTuple
-import logging
 
 import settings
-from constants.directions import *
-from computers.side_view.strands.interface import Plotter
-from computers.side_view.strands.strand import Strand
+from constructor.panels.side_view.plotter import Plotter as Plotter
+from constructor.panels.side_view.strand import Strand
 from datatypes.misc import Profile
 from datatypes.points import NEMid
 
@@ -27,7 +26,6 @@ class Strands:
 
         assert isinstance(profile, Profile)
         self.profile = profile
-
 
     def add_junction(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
@@ -56,7 +54,7 @@ class Strands:
 
         # remove the strands that we are going to replace with 4 new strands
         del self.strands[NEMid1_strand_index]
-        del self.strands[NEMid2_strand_index-1]
+        del self.strands[NEMid2_strand_index - 1]
 
         new_strands = [
             Strand(
@@ -66,7 +64,7 @@ class Strands:
             )
         ]
 
-        junction_site_z_coord = (NEMid1.z_coord + NEMid2.z_coord)/2
+        junction_site_z_coord = (NEMid1.z_coord + NEMid2.z_coord) / 2
 
         # crawl up NEMid # 1's strand
         # and append NEMids to a new strand
@@ -97,9 +95,7 @@ class Strands:
                 new_strands[1].append(NEMid_)
 
         self.strands.insert(insert_at, new_strands[0])
-        self.strands.insert(insert_at+1, new_strands[1])
-
-
+        self.strands.insert(insert_at + 1, new_strands[1])
 
     def ui(self) -> Plotter:
         return Plotter(

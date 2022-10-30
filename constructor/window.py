@@ -94,9 +94,9 @@ class Window(QMainWindow):
 
     def _side_view(self):
         """Setup side view plot."""
-        from .panels.side_view import Panel
+        from .panels.side_view import Plotter
 
-        self.side_view = Panel()
+        self.side_view = Plotter()
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)

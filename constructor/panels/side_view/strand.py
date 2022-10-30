@@ -1,7 +1,5 @@
-from math import dist
 from typing import List
 
-import settings
 from datatypes.points import NEMid
 
 

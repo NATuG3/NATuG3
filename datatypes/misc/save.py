@@ -13,7 +13,7 @@ class Save:
 
     def __init__(self):
         self.domains = references.domains.current
-        self.strands = references.strands
+        self.strands = references.strands.current
 
     @classmethod
     def from_file(cls, filename):

@@ -1,7 +1,7 @@
 import math
 from typing import List
 
-from computers.top_view.interface import Plotter
+from constructor.panels.top_view.interface import Plotter
 from datatypes.domains import Domains
 from datatypes.misc import Profile
 

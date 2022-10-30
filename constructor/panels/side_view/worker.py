@@ -2,12 +2,11 @@ import itertools
 import logging
 from typing import List, Tuple
 
-from computers.side_view.strands.strands import Strands
+import references as refs
 from constants.directions import *
-from datatypes.domains import Domains
-from datatypes.misc import Profile
+from constructor.panels.side_view.strand import Strand
+from constructor.panels.side_view.strands import Strands
 from datatypes.points import NEMid
-from computers.side_view.strands.strand import Strand
 from helpers import inverse
 
 logger = logging.getLogger(__name__)
@@ -20,29 +19,28 @@ class SideView:
 
     strand_directions = (UP, DOWN)
 
-    def __init__(
-            self,
-            domains: Domains,
-            profile: Profile
-    ) -> None:
+    def __init__(self) -> None:
         """
         Initialize side_view generation class.
-
-        Args:
-            domains (list): List of domains.
         """
-        self.profile = profile
-        self.domains = domains.domains
+        pass
 
-        self.theta_exteriors = []
-        self.theta_interiors = []
-        for domain in self.domains:
-            theta_interior = domain.theta_interior_multiple * self.profile.theta_c
-            theta_interior -= domain.theta_switch_multiple * self.profile.theta_s
-            theta_exterior = 360 - theta_interior
-            self.theta_interiors.append(theta_interior)
-            self.theta_exteriors.append(theta_exterior)
-        logger.debug(f"Computed interior multiples\n{self.theta_interiors}")
+    @property
+    def theta_exteriors(self):
+        theta_exteriors = []
+        for theta_interior in self.theta_interiors:
+            theta_exteriors.append(360-theta_interior)
+        return theta_exteriors
+
+    @property
+    def theta_interiors(self):
+        theta_interiors = []
+        for domain in refs.domains.current.domains:
+            theta_interior = domain.theta_interior_multiple * refs.nucleic_acid.current.theta_c
+            theta_interior -= domain.theta_switch_multiple * refs.nucleic_acid.current.theta_s
+            theta_interiors.append(theta_interior)
+        return theta_interiors
+        logger.debug(f"Computed theta interiors\n{self.theta_interiors}")
 
     def compute(self) -> Strands:
         """
@@ -52,9 +50,9 @@ class SideView:
             List[Tuple[List[NEMid], List[NEMid]]]: List of tuple(up-strand, down-strand) for each domain.
         """
         # the output container for all NEMids
-        NEMids = [([], []) for _ in range(len(self.domains))]
+        NEMids = [([], []) for _ in range(refs.domains.current.count)]
 
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             # how many NEMids to skip over for the up and down strand
             begin_at = [0, 0]
 
@@ -66,7 +64,7 @@ class SideView:
                     else:
                         # revert to the previous z coord
                         # (since the begin-at-up didn't tick)
-                        up_strand_z_coord -= self.profile.Z_b
+                        up_strand_z_coord -= refs.nucleic_acid.current.Z_b
                         # then keep moving the initial down-strand NEMid up
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)
@@ -138,7 +136,7 @@ class SideView:
                     NEMids[index][strand_direction].append(NEMid_)
 
         # assign matching NEMids to each other's matching slots
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             NEMid1: NEMid
             NEMid2: NEMid
             for NEMid1, NEMid2 in zip(*NEMids[index]):
@@ -146,7 +144,7 @@ class SideView:
                 NEMid1.domain, NEMid2.domain = domain, domain
 
         strands = []
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             for strand_direction in self.strand_directions:
                 strands.append(NEMids[index][strand_direction])
 
@@ -154,7 +152,7 @@ class SideView:
         for index, strand in enumerate(strands):
             strands[index] = Strand(strand, color=pallet[index % 2])
 
-        return Strands(strands, self.profile)
+        return Strands(strands, refs.nucleic_acid.current)
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
         """
@@ -163,32 +161,32 @@ class SideView:
         Returns:
             DomainsContainerType: A domains container with innermost entries of generators.
         """
-        angles = [[None, None] for _ in range(len(self.domains))]
+        angles = [[None, None] for _ in range(refs.domains.current.count)]
 
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             # look at left current domain helix joint
             zeroed_strand = domain.helix_joints[LEFT]
 
             # create infinite generators for the zeroed and non zeroed strands
             angles[index][zeroed_strand] = itertools.count(
                 start=0.0,  # zeroed strand starts at 0
-                step=self.profile.theta_b,  # and steps by self.theta_b
+                step=refs.nucleic_acid.current.theta_b,  # and steps by self.theta_b
             )
 
             # calculate the start value of the inverse(zeroed_strand)
             if zeroed_strand == UP:
-                start = 0.0 - self.profile.theta_s
+                start = 0.0 - refs.nucleic_acid.current.theta_s
             else:  # zeroed_strand == DOWN:
-                start = 0.0 + self.profile.theta_s
+                start = 0.0 + refs.nucleic_acid.current.theta_s
 
             angles[index][inverse(zeroed_strand)] = itertools.count(
                 start=start,  # non-zeroed strand starts at 0-self.theta_s
-                step=self.profile.theta_b,  # and steps by self.theta_b
+                step=refs.nucleic_acid.current.theta_b,  # and steps by self.theta_b
             )
 
-        for index in range(len(self.domains)):
+        for index in range(refs.domains.current.count):
             # tuplify the angles index
             angles[index] = tuple(angles[index])
 
@@ -202,10 +200,10 @@ class SideView:
             DomainsContainerType: A domains container with innermost entries of generators.
         """
         angles = self._angles()
-        x_coords = [[[], []] for _ in range(len(self.domains))]
+        x_coords = [[[], []] for _ in range(refs.domains.current.count)]
 
         # make a copy of the angles iterator for use in generating x coords
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             # since every T NEMids the x coords repeat we only need to generate x coords for the first T NEMids
             for strand_direction in self.strand_directions:  # (UP, DOWN)
                 for counter, angle in enumerate(angles[index][strand_direction]):
@@ -228,7 +226,7 @@ class SideView:
                     x_coords[index][strand_direction].append(x_coord)
 
                     # break once self.B x coords have been generated
-                    if len(x_coords[index][strand_direction]) == self.profile.B:
+                    if len(x_coords[index][strand_direction]) == refs.nucleic_acid.current.B:
                         break
 
                 # there are self.B unique x coords
@@ -250,21 +248,21 @@ class SideView:
             DomainsContainerType: A domains container with innermost entries of generators.
         """
         x_coords = [list(domain) for domain in self._x_coords()]
-        z_coords = [[None, None] for _ in range(len(self.domains))]
+        z_coords = [[None, None] for _ in range(refs.domains.current.count)]
 
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
-                    x_coords[index][strand_direction], 0, self.profile.B
+                    x_coords[index][strand_direction], 0, refs.nucleic_acid.current.B
                 )
                 x_coords[index][strand_direction] = tuple(
                     x_coords[index][strand_direction]
                 )
 
-        for index, domain in enumerate(self.domains):
+        for index, domain in enumerate(refs.domains.current.domains):
             # look at the right joint of the previous domain
             # for calculating the initial z coord
-            zeroed_strand = self.domains[index - 1].helix_joints[RIGHT]
+            zeroed_strand = refs.domains.current.domains[index - 1].helix_joints[RIGHT]
 
             # step 1: find the initial z cord for the current domain
             if index == 0:
@@ -278,7 +276,7 @@ class SideView:
                 # generated the needed portion of the previous index's
                 # z coords, of this domain's left helix joint (zeroed_strand)
                 previous_z_coords = tuple(
-                    itertools.islice(z_coords[index - 1][zeroed_strand], 0, self.profile.B)
+                    itertools.islice(z_coords[index - 1][zeroed_strand], 0, refs.nucleic_acid.current.B)
                 )
 
                 # find the maximum x coord of the previous domain
@@ -295,7 +293,7 @@ class SideView:
 
             # move the initial Z coord down until it is as close to z=0 as possible
             # this way the graphs don't skew upwards weirdly
-            offset_interval = self.profile.Z_b * self.profile.B
+            offset_interval = refs.nucleic_acid.current.Z_b * refs.nucleic_acid.current.B
             while initial_z_coord > 0:
                 initial_z_coord -= offset_interval
             initial_z_coord -= offset_interval
@@ -306,13 +304,13 @@ class SideView:
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(
-                start=initial_z_coord, step=self.profile.Z_b
+                start=initial_z_coord, step=refs.nucleic_acid.current.Z_b
             )
             # begin at the initial z coord and step by self.Z_b
 
             # non-zeroed strand
             z_coords[index][inverse(zeroed_strand)] = itertools.count(
-                start=initial_z_coord - self.profile.Z_s, step=self.profile.Z_b
+                start=initial_z_coord - refs.nucleic_acid.current.Z_s, step=refs.nucleic_acid.current.Z_b
             )
             # begin at the (initial z coord - z switch) and step by self.Z_b
 
@@ -337,14 +335,14 @@ class SideView:
         if not isinstance(other, type(self)):
             return False
 
-        if len(self.domains) != len(other.domains):
+        if refs.domains.current.count != len(other.domains):
             return False
 
-        for our_domain, their_domain in zip(self.domains):
+        for our_domain, their_domain in zip(refs.domains.current.domains):
             if our_domain != their_domain:
                 return False
 
         return True
 
     def __len__(self):
-        return len(self.domains)
+        return refs.domains.current.domains.count
