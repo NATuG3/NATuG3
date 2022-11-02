@@ -168,8 +168,6 @@ class Panel(QWidget):
 
         def input_box_changed():
             """Worker for when any input box is changed"""
-            references.strands.recompute()
-
             # fetch settings of input boxes
             references.nucleic_acid.current = self.fetch_settings()
 

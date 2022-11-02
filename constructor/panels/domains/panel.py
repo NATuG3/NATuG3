@@ -68,8 +68,6 @@ class Panel(QWidget):
             lambda: self.table.dump_domains(self.table.fetch_domains())
         )
 
-        self.table.cell_widget_updated.connect(references.strands.recompute)
-
     def refresh(self):
         """Refresh panel settings/domain table."""
         # obtain current domain inputs

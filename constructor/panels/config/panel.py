@@ -59,6 +59,8 @@ class Panel(QWidget):
 
                     @timer.timeout.connect
                     def _():
+                        logger.info("Auto updating...")
+                        references.strands.recompute()
                         graph_updater()
                         self.auto_update_graph.updating = False
 
