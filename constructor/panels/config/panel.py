@@ -45,6 +45,7 @@ class Panel(QWidget):
             references.constructor.top_view.refresh()
             references.constructor.side_view.refresh()
 
+        self.update_graphs.clicked.connect(references.strands.recompute)  # TEMP
         self.update_graphs.clicked.connect(graph_updater)
 
         self.auto_update_graph.updating = False
