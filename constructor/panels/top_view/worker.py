@@ -1,7 +1,6 @@
 import math
 from typing import List
 
-from constructor.panels.top_view.interface import Plotter
 from datatypes.domains import Domains
 from datatypes.misc import Profile
 
@@ -32,10 +31,14 @@ class TopView:
             theta_s (float, optional): Strand switch angle.
         """
         self.domains = domains.domains
+        assert isinstance(domains, Domains)
         self.profile = profile
+        assert isinstance(profile, Profile)
+
         self.theta_deltas: List[float] = [0.0]  # list to store angle deltas in
         self.u_coords: List[float] = [0.0]  # list to store u cords in
         self.v_coords: List[float] = [0.0]  # list to store v cords in
+
         self.compute()
 
     def compute(self) -> None:
@@ -67,9 +70,6 @@ class TopView:
 
             # append the v cord of the domain to "self.v_coords"
             self.v_coords.append(self.v_coords[-1] + self.profile.D * math.sin(angle_delta))
-
-    def ui(self) -> Plotter:
-        return Plotter(self, self.profile)
 
     def __repr__(self) -> str:
         round_to = 3

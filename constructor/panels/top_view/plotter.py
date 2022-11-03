@@ -2,7 +2,8 @@ import logging
 
 import pyqtgraph as pg
 
-from datatypes.misc import Profile
+import references as refs
+from constructor.panels.top_view.worker import TopView
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ class Plotter(pg.PlotWidget):
 
     domain_brush = pg.mkBrush(color=(90, 90, 90))
 
-    def __init__(self, worker, profile: Profile):
+    def __init__(self):
         """
         Initialize plotter instance.
 
@@ -19,9 +20,10 @@ class Plotter(pg.PlotWidget):
             worker (SideView): The actual side view worker item.
         """
         super().__init__()
-        self.profile = profile
-        self.worker = worker
+
+        self.getViewBox().setDefaultPadding(padding=0.18)
         self.disableAutoRange()
+
         self._plot()
         self._prettify()
 
@@ -41,22 +43,18 @@ class Plotter(pg.PlotWidget):
         self.setLabel("bottom", units="Nanometers")
         self.setLabel("left", units="Nanometers")
 
-        # increase the view box padding, since... our symbols are VERY large circles and pyqtgraph calculates padding
-        # from the actual points, so the circles get cut off
-        self.getViewBox().setDefaultPadding(padding=0.18)
-
         # prevent user from interacting with the graph
         self.getViewBox().setAspectLocked(lock=True, ratio=1)
 
     def _plot(self):
         """Plot all the data."""
+        worker = TopView(refs.domains.current, refs.nucleic_acid.current)
 
-        # plot the data
         self.plot(
-            self.worker.u_coords,
-            self.worker.v_coords,
+            worker.u_coords,
+            worker.v_coords,
             symbol="o",
-            symbolSize=self.profile.D,
+            symbolSize=refs.nucleic_acid.current.D,
             symbolBrush=self.domain_brush,
             pxMode=False,
         )

@@ -4,7 +4,6 @@ from copy import copy
 from math import dist
 from typing import List, NamedTuple
 
-import references
 import settings
 from constructor.panels.side_view.plotter import Plotter as Plotter
 from constructor.panels.side_view.strand import Strand
@@ -51,65 +50,15 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        junction_site_z_coord = (NEMid1.z_coord + NEMid2.z_coord) / 2
+        if NEMid1.strand is not NEMid2.strand:
+            new_strands = [Strand([], color=(110, 255, 117)), Strand([], color=(250, 145, 255))]
 
-        if NEMid1.strand is NEMid2.strand:
-            new_strands = Strand([], color=(255, 30, 30)), Strand([], color=(51, 255, 51))
+            new_strands[0] = NEMid1.strand[NEMid1.index():]
+            new_strands[0] = NEMid2.strand[NEMid2.index():]
 
-            strand = NEMid1.strand  # = NEMid2.strand
-            self.strands.remove(NEMid1.strand)
-
-            if strand.loops_down:
-                # crawl up the strand from the bottom left
-                # until we reach a bit below the junction site
-                # and append all NEMids a bit higher than the junction site
-                # to a new strand until we are back to a bit above the junction site
-                for NEMid_ in strand:
-                    # once we are above the junction site begin appending
-                    # and stop checking if the z coord is above the junction site
-                    once_above = False
-                    if once_above or (NEMid_.z_coord > junction_site_z_coord):
-                        new_strands[0].append(copy(NEMid_))
-                        once_above = True
-                # force it to wrap back around
-                new_strands[0].append(new_strands[-1])
-
-            self.strands.append(new_strands[0])
-
-        elif NEMid1.strand is not NEMid2.strand:
-            new_strands = Strand([], color=(110, 255, 117)), Strand([], color=(250, 145, 255))
 
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
-
-            # [1a] building the top strand's left side
-            # crawl down NEMid # 1's strand
-            # and append for NEMids that are above the junction site
-            for NEMid_ in reversed(NEMid1.strand):
-                if NEMid_.z_coord >= junction_site_z_coord:
-                    new_strands[0].append(copy(NEMid_))
-
-            # [1b] building the top strand's right side
-            # crawl up NEMid # 2's strand
-            # and append for NEMids that are above the junction site
-            for NEMid_ in NEMid2.strand:
-                if NEMid_.z_coord >= junction_site_z_coord:
-                    new_strands[0].append(copy(NEMid_))
-
-            # [2a] building the bottom strand's left side
-            # crawl up NEMid # 1's strand
-            # and append for NEMids that are below the junction site
-            for NEMid_ in NEMid1.strand:
-                if NEMid_.z_coord <= junction_site_z_coord:
-                    new_strands[1].append(copy(NEMid_))
-
-            # [2b] building the bottom strand's right side
-            # crawl down NEMid # 2's strand
-            # and append for NEMids that are below the junction site
-            for NEMid_ in reversed(NEMid2.strand):
-                if NEMid_.z_coord <= junction_site_z_coord:
-                    new_strands[1].append(copy(NEMid_))
-
             self.strands.append(new_strands[0])
             self.strands.append(new_strands[1])
 

@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QDockWidget
 
-from constructor.panels.top_view.worker import TopView
 import references
+from constructor.panels.top_view.worker import TopView
+from references import constructor
 
 
 class Panel(QDockWidget):
@@ -12,7 +13,8 @@ class Panel(QDockWidget):
         self.setWindowTitle("Top View of Helices")
         self.setStatusTip("A plot of the top view of all domains")
 
-        self.plot = references.plots.top_view.ui()
+        self.plot = constructor.panels.top_view.Plotter()
+
         self.setWidget(self.plot)
         self.refresh()
 

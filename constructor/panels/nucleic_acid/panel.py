@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QWidget
 
 import helpers
 import references
-from constructor.panels.side_view.worker import SideView
 from datatypes.misc import Profile
 from resources import fetch_icon
 

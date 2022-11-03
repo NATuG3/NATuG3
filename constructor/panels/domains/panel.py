@@ -11,7 +11,6 @@ import helpers
 import references
 import settings
 from constructor.panels.domains.table import Table
-from constructor.panels.side_view.worker import SideView
 from resources.workers import fetch_icon
 
 logger = logging.getLogger(__name__)

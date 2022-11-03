@@ -28,6 +28,10 @@ class NEMid(Point):
     junctable: bool = False
     strand: None = None
 
+    def index(self):
+        """Obtain the index of this domain in its respective parent strand."""
+        return self.strand.index(self)
+
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
         return (

@@ -21,6 +21,7 @@ class Point:
     z_coord: float
     angle: float
     direction: Literal[UP, DOWN]
+    prime: Literal[TOWARDS_START, TOWARDS_END]
 
     def position(self) -> Tuple[float, float]:
         """
