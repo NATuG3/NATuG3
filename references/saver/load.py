@@ -4,8 +4,8 @@ from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
 import references
-from datatypes.domains import Domains
-from datatypes.misc.save import Save
+from structures.domains import Domains
+from structures.misc.save import Save
 
 logger = logging.getLogger(__name__)
 

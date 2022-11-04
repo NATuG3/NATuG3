@@ -4,13 +4,12 @@ import pickle
 
 import settings
 from constants.directions import *
-from datatypes.domains import Domains, Domain
+from structures.domains import Domains, Domain
 
 logger = logging.getLogger(__name__)
 
 
 class _Domains:
-
     filename: str = f"saves/domains/restored.{settings.extension}"
     default: Domains = Domains(
         (

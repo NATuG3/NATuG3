@@ -4,7 +4,7 @@ import pickle
 from typing import Dict
 
 import settings
-from datatypes.misc import Profile
+from structures.misc import Profile
 
 logger = logging.getLogger(__name__)
 

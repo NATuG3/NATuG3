@@ -5,12 +5,12 @@ from functools import cached_property, cache
 from typing import List, Tuple
 
 from constants.directions import *
-from datatypes.strands.strand import Strand
-from datatypes.strands.strands import Strands
-from datatypes.domains import Domains
-from datatypes.misc import Profile
-from datatypes.points import NEMid
 from helpers import inverse
+from structures.domains import Domains
+from structures.misc import Profile
+from structures.points import NEMid
+from structures.strands.strand import Strand
+from structures.strands.strands import Strands
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +22,7 @@ class SideView:
 
     strand_directions = (UP, DOWN)
     pallet = ((195, 195, 195), (70, 70, 70))
-    cache_clearers = (
-        "domains",
-        "profile"
-    )
+    cache_clearers = ("domains", "profile")
 
     def __init__(self, domains: Domains, profile: Profile) -> None:
         """
@@ -53,7 +50,7 @@ class SideView:
     def theta_exteriors(self):
         theta_exteriors = []
         for theta_interior in self.theta_interiors:
-            theta_exteriors.append(360-theta_interior)
+            theta_exteriors.append(360 - theta_interior)
         return theta_exteriors
 
     @cached_property
@@ -158,7 +155,7 @@ class SideView:
                         angle,
                         strand_direction,
                         TOWARDS_END,
-                        junctable=junctable
+                        junctable=junctable,
                     )
 
                     # append the current NEMid to the to-be-outputted array
@@ -308,7 +305,9 @@ class SideView:
                 # generated the needed portion of the previous index's
                 # z coords, of this domain's left helix joint (zeroed_strand)
                 previous_z_coords = tuple(
-                    itertools.islice(z_coords[index - 1][zeroed_strand], 0, self.profile.B)
+                    itertools.islice(
+                        z_coords[index - 1][zeroed_strand], 0, self.profile.B
+                    )
                 )
 
                 # find the maximum x coord of the previous domain

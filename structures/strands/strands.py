@@ -1,13 +1,13 @@
 import logging
 from collections import namedtuple
-from copy import deepcopy, copy
+from copy import copy
 from math import dist
 from typing import List, NamedTuple
 
 import settings
-from datatypes.strands.strand import Strand
-from datatypes.misc import Profile
-from datatypes.points import NEMid
+from structures.misc import Profile
+from structures.points import NEMid
+from structures.strands.strand import Strand
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class Strands:
             raise ValueError(
                 "NEMids are not close enough to create a junction.",
                 NEMid1.position(),
-                NEMid2.position()
+                NEMid2.position(),
             )
 
         # ensure that NEMid1 is the lefter NEMid
@@ -53,17 +53,17 @@ class Strands:
             new_strands = [Strand([], color=(255, 0, 0)), Strand([], color=(0, 255, 0))]
 
             # first new strand
-            for NEMid_ in tuple(NEMid1.strand)[:NEMid1.index()+1]:
+            for NEMid_ in tuple(NEMid1.strand)[: NEMid1.index() + 1]:
                 new_strands[0].append(copy(NEMid_))
             #
-            for NEMid_ in tuple(NEMid2.strand)[NEMid2.index()+1:]:
+            for NEMid_ in tuple(NEMid2.strand)[NEMid2.index() + 1:]:
                 new_strands[0].append(copy(NEMid_))
 
             # second new strand
-            for NEMid_ in tuple(NEMid2.strand)[:NEMid2.index()+1]:
+            for NEMid_ in tuple(NEMid2.strand)[: NEMid2.index() + 1]:
                 new_strands[1].append(copy(NEMid_))
             #
-            for NEMid_ in tuple(NEMid1.strand)[NEMid1.index()+1:]:
+            for NEMid_ in tuple(NEMid1.strand)[NEMid1.index() + 1:]:
                 new_strands[1].append(copy(NEMid_))
 
             self.strands.remove(NEMid1.strand)
@@ -91,6 +91,5 @@ class Strands:
                 z_coords.append(NEMid_.z_coord)
 
         return namedtuple("Size", "width height")(
-            max(x_coords) - min(x_coords),
-            max(z_coords) - min(z_coords)
+            max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
         )

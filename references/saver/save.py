@@ -4,7 +4,7 @@ import pickle
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-import datatypes
+import structures
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ def worker(filename):
     """Runs after filename has been chosen."""
 
     # obtain save package
-    package = datatypes.misc.Save()
+    package = structures.misc.Save()
 
     # dump save object to filename
     with open(filename, "wb") as file:

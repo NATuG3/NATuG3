@@ -49,15 +49,26 @@ class Window(QMainWindow):
         # initialize menu bar
         self._menu_bar()
 
+        # initialize toolbar
+        self._toolbar()
+
+    def _toolbar(self):
+        """Setup toolbar."""
+
+        # import the needed panel
+        from constructor.toolbar import Toolbar
+
+        self.toolbar = Toolbar(self)
+        self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
 
     def _config(self):
         """Setup config panel."""
 
         # import the needed panel
-        import constructor.panels.config
+        from constructor.panels.config import Dockable
 
         # initialize the config panel
-        self.config = constructor.panels.config.Dockable()
+        self.config = Dockable()
 
         # only allow config to dock left/right
         self.config.setAllowedAreas(
@@ -94,9 +105,9 @@ class Window(QMainWindow):
 
     def _side_view(self):
         """Setup side view plot."""
-        from .panels.side_view import Plotter
+        from .panels.side_view import Panel
 
-        self.side_view = Plotter()
+        self.side_view = Panel()
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)
@@ -112,20 +123,12 @@ class Window(QMainWindow):
 
     def _menu_bar(self):
         """Setup menu bar."""
-        self.menu_bar = QMenuBar()
+        from .menubar import Menubar
 
-        # import all menu bars
-        from .menus import File, View, Help
-
-        # add all the menus to the filemenu
-        self.menu_bar.addMenu(File(self))
-        self.menu_bar.addMenu(View(self))
-        self.menu_bar.addMenu(Help(self))
-
-        # place the menu bar object into the actual menu bar
+        self.menu_bar = Menubar()
         self.setMenuBar(self.menu_bar)
-        logger.info("Created menu bar.")
 
+        logger.info("Created menu bar.")
 
     def resizeEvent(self, event):
         """Dynamically resize panels."""

@@ -1,8 +1,8 @@
 import logging
 from typing import List
 
-from datatypes.domains import Domain
 from helpers import inverse
+from structures.domains import Domain
 
 logger = logging.getLogger(__name__)
 

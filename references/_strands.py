@@ -1,9 +1,9 @@
 from types import NoneType
+from typing import Union
 
 import references
-from datatypes.strands.strands import Strands
 from constructor.panels.side_view.worker import SideView
-from typing import Union
+from structures.strands.strands import Strands
 
 
 class _Strands:
@@ -15,7 +15,6 @@ class _Strands:
 
     def recompute(self) -> Strands:
         self.current: Strands = SideView(
-            references.domains.current,
-            references.nucleic_acid.current
+            references.domains.current, references.nucleic_acid.current
         ).compute()
         return self.current

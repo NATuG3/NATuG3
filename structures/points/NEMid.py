@@ -3,8 +3,8 @@ from types import NoneType
 from typing import TypeVar
 from typing import Union
 
-from datatypes.domains import Domain
-from datatypes.points.point import Point
+from structures.domains import Domain
+from structures.points.point import Point
 
 
 @dataclass(slots=True)

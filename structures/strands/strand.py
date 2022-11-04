@@ -1,8 +1,7 @@
 from collections import deque
-from math import inf
 from typing import List
 
-from datatypes.points import NEMid
+from structures.points import NEMid
 
 
 class Strand(deque):
@@ -25,8 +24,12 @@ class Strand(deque):
     @property
     def size(self):
         """The overall size of the strand in nanometers."""
-        width = max([NEMid_.x_coord for NEMid_ in self]) - min([NEMid_.x_coord for NEMid_ in self])
-        height = max([NEMid_.z_coord for NEMid_ in self]) - min([NEMid_.z_coord for NEMid_ in self])
+        width = max([NEMid_.x_coord for NEMid_ in self]) - min(
+            [NEMid_.x_coord for NEMid_ in self]
+        )
+        height = max([NEMid_.z_coord for NEMid_ in self]) - min(
+            [NEMid_.z_coord for NEMid_ in self]
+        )
         return width, height
 
     @property
@@ -44,4 +47,3 @@ class Strand(deque):
     def is_closed(self):
         """Return whether this is a closed strand or not."""
         return self[0] == self[-1]
-

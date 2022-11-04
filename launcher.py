@@ -15,12 +15,14 @@ def main():
     if RESET:
         from os import remove
         from contextlib import suppress
+
         with suppress(FileNotFoundError):
             remove("saves/nucleic_acid/profiles.nano")
             remove("saves/nucleic_acid/restored.nano")
             remove("saves/domains/restored.nano")
 
     import pyqtgraph as pg
+
     pg.setConfigOptions(
         useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
     )

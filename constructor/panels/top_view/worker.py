@@ -1,8 +1,8 @@
 import math
 from typing import List
 
-from datatypes.domains import Domains
-from datatypes.misc import Profile
+from structures.domains import Domains
+from structures.misc import Profile
 
 
 class TopView:
@@ -16,11 +16,7 @@ class TopView:
         angle_deltas: All angle changes from NEMid-to-NEMid
     """
 
-    def __init__(
-        self,
-        domains: Domains,
-        profile: Profile
-    ) -> None:
+    def __init__(self, domains: Domains, profile: Profile) -> None:
         """
         Generate (u, v) cords for top view of helices generation.
 
@@ -46,11 +42,11 @@ class TopView:
         for index, domain in enumerate(self.domains):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                self.domains[index - 1].theta_switch_multiple * self.profile.theta_s
+                    self.domains[index - 1].theta_switch_multiple * self.profile.theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                self.domains[index - 1].theta_interior_multiple * self.profile.theta_c
+                    self.domains[index - 1].theta_interior_multiple * self.profile.theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
@@ -66,10 +62,14 @@ class TopView:
             )  # convert to radians (AKA angle_delta*(180/pi))
 
             # append the u cord of the domain to "self.u_coords"
-            self.u_coords.append(self.u_coords[-1] + self.profile.D * math.cos(angle_delta))
+            self.u_coords.append(
+                self.u_coords[-1] + self.profile.D * math.cos(angle_delta)
+            )
 
             # append the v cord of the domain to "self.v_coords"
-            self.v_coords.append(self.v_coords[-1] + self.profile.D * math.sin(angle_delta))
+            self.v_coords.append(
+                self.v_coords[-1] + self.profile.D * math.sin(angle_delta)
+            )
 
     def __repr__(self) -> str:
         round_to = 3

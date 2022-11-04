@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
 import references
 from constants.directions import *
 from constructor.panels.domains.widgets import *
-from datatypes.domains import Domain
+from structures.domains import Domain
 
 
 class Table(QTableWidget):

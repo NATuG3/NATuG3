@@ -3,7 +3,7 @@ from types import NoneType
 from typing import Union, TypeVar
 
 from constants import bases
-from datatypes.points.point import Point
+from structures.points.point import Point
 
 
 @dataclass(slots=True)

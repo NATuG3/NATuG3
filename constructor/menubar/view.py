@@ -21,9 +21,7 @@ class View(QMenu):
         # will be checked/unchecked based on if widget is shown
         config.setIcon(fetch_icon("eye-outline"))
         config.triggered.connect(
-            lambda: helpers.reverse_hidenness(
-                references.constructor.panels.config
-            )
+            lambda: helpers.reverse_hidenness(references.constructor.panels.config)
         )
 
         # view -> "top view" -> hide/unhide
