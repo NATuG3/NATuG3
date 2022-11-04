@@ -35,8 +35,8 @@ class Plotter(pg.PlotWidget):
         )
         range = self.worker.u_coords.index(point[0])
 
-        refs.constructor.side_view.setXRange(range - 1, range + 2)
-        refs.constructor.side_view.setYRange(0 - 1, refs.strands.current.size[1] + 1)
+        refs.constructor.side_view.plot.setXRange(range - 1, range + 2)
+        refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size.height+1)
 
     def clear(self):
         self.removeItem(self.plotted)

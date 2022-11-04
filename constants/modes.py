@@ -1,3 +1,3 @@
-JUNCTER: int = 0
-SPLICER: int = 1
-RESETTER: int = 2
+JUNCTER: int = 1
+SPLICER: int = 2
+RESETTER: int = 3

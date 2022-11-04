@@ -32,6 +32,14 @@ class NEMid(Point):
         """Obtain the index of this domain in its respective parent strand."""
         return self.strand.index(self)
 
+    def __hash__(self):
+        hashed = 0
+        hashed += hash(self.x_coord)
+        hashed += hash(self.z_coord)
+        hashed += hash(self.direction)
+        hashed += hash(self.prime)
+        return hashed
+
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
         return (

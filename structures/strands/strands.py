@@ -1,6 +1,7 @@
 import logging
+import sys
 from collections import namedtuple
-from copy import copy
+from copy import copy, deepcopy
 from math import dist
 from typing import List, NamedTuple
 
@@ -26,6 +27,8 @@ class Strands:
 
         assert isinstance(profile, Profile)
         self.profile = profile
+
+        self.previous_strands = {}
 
     def add_junction(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
@@ -66,11 +69,20 @@ class Strands:
             for NEMid_ in tuple(NEMid1.strand)[NEMid1.index() + 1:]:
                 new_strands[1].append(copy(NEMid_))
 
+            # store hashes of the previous strands in case undoes strand in future
+            self.previous_strands[(hash(tuple(NEMid1.strand)))] = NEMid1.strand
+            self.previous_strands[(hash(tuple(NEMid2.strand)))] = NEMid2.strand
+
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
 
+            for new_strand in new_strands:
+                if hash(tuple(new_strand)) in self.previous_strands:
+                    new_strand.color = self.previous_strands[hash(tuple(new_strand))].color
+
             self.strands.append(new_strands[0])
             self.strands.append(new_strands[1])
+
 
     @property
     def size(self) -> NamedTuple("Size", width=float, height=float):

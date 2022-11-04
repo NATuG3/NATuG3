@@ -39,3 +39,12 @@ class Point:
             f"angle={round(self.angle, 3)}°,"
             f"matched={self.matched}"
         )
+
+    def __eq__(self, other):
+        print(self, other)
+        if not isinstance(other, type(self)):
+            return False
+        if self.position() == other.position():
+            if self.angle == other.angle:
+                return True
+        return False

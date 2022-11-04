@@ -12,4 +12,4 @@ class _Mode:
     @property
     def current(self):
         """See constants.modes for meanings of the various IDs."""
-        self.actions.checkedId()
+        return self.actions.checkedId()
