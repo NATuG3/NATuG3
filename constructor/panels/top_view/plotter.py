@@ -77,16 +77,22 @@ class Plotter(pg.PlotWidget):
             pxMode=False,
         )
 
+        greatest_counter  = len(self.worker.u_coords)
         for counter, position in enumerate(
                 tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
         ):
+            counter = str(counter+1)
+            while len(counter) < greatest_counter:
+                counter += " "
+            counter = f"#{counter}"
             text = self.plot(
                 [position[0]],
                 [position[1]],
-                symbol=helpers.custom_symbol(f"#{counter+1}"),
+                symbol=helpers.custom_symbol(counter),
                 symbolBrush=pg.mkBrush(color=(180, 180, 180)),
-                symbolSize=refs.nucleic_acid.current.D / 4,
+                symbolSize=refs.nucleic_acid.current.D / 3,
                 pxMode=False,
+                pen=None
             )
             self.text.append(text)
 

@@ -54,6 +54,12 @@ class Strands:
 
         if NEMid1.strand is not NEMid2.strand:
             new_strands = [Strand([], color=(255, 0, 0)), Strand([], color=(0, 255, 0))]
+            alt_colors = {
+                (255, 0, 0): (10, 255, 255),
+                (10, 255, 255): (255, 0, 0),
+                (0, 0, 255): (0, 255, 0),
+                (0, 255, 0): (0, 0, 255)
+            }
 
             # first new strand
             for NEMid_ in tuple(NEMid1.strand)[: NEMid1.index() + 1]:
@@ -72,18 +78,26 @@ class Strands:
             # store hashes of the previous strands in case undoes strand in future
             self.previous_strands[(hash(tuple(NEMid1.strand)))] = NEMid1.strand.color
             self.previous_strands[(hash(tuple(NEMid2.strand)))] = NEMid2.strand.color
-            print(self.previous_strands)
 
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
 
             for new_strand in new_strands:
+                for existing_strand in self.strands:
+                    existing_strand_location = existing_strand.location
+                    new_strand_location = new_strand.location
+                    for check in range(4):
+                        if abs(
+                                existing_strand_location[check]-new_strand_location[check]
+                        ) < .5:
+                            if not existing_strand.greyscale:
+                                new_strand.color = alt_colors[new_strand.color]
+
                 if hash(tuple(new_strand)) in self.previous_strands:
                     new_strand.color = self.previous_strands[hash(tuple(new_strand))]
 
             self.strands.append(new_strands[0])
             self.strands.append(new_strands[1])
-
 
     @property
     def size(self) -> NamedTuple("Size", width=float, height=float):

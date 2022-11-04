@@ -33,6 +33,16 @@ class Strand(deque):
         return width, height
 
     @property
+    def location(self):
+        """The location of the bounding box of the strand in nanometers."""
+        return (
+            min(NEMid_.x_coord for NEMid_ in self),
+            max(NEMid_.x_coord for NEMid_ in self),
+            min(NEMid_.z_coord for NEMid_ in self),
+            max(NEMid_.z_coord for NEMid_ in self)
+        )
+
+    @property
     def greyscale(self):
         if self.color[0] == self.color[1] == self.color[2]:
             return True

@@ -64,7 +64,8 @@ def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
 
 @cache
 def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
-    """Create custom symbol with font"""
+    """Create custom symbol with font for pyqtgraph."""
+    # https://stackoverflow.com/a/70789822
     pg_symbol = QPainterPath()
     pg_symbol.addText(0, 0, font, symbol)
     br = pg_symbol.boundingRect()
