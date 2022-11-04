@@ -14,3 +14,9 @@ class Toolbar(QToolBar):
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.addWidget(spacer)
+
+        self._prettify()
+
+    def _prettify(self):
+        self.setFloatable(False)
+        self.setMovable(False)

@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QPushButton, QButtonGroup, QAbstractButton
+from constants.modes import *
 
 
 class Action(QPushButton):
@@ -16,9 +17,9 @@ class Actions(QButtonGroup):
         self._add_buttons()
 
     def _add_buttons(self):
-        self.addButton(self.Juncter(), 0)
-        self.addButton(self.Splicer(), 1)
-        self.addButton(self.Resetter(), 2)
+        self.addButton(self.Juncter(), JUNCTER)
+        self.addButton(self.Splicer(), SPLICER)
+        self.addButton(self.Resetter(), RESETTER)
 
     def addButton(self, button: QAbstractButton, id: int) -> None:
         self.buttons.append(button)
@@ -27,7 +28,6 @@ class Actions(QButtonGroup):
     class Juncter(Action):
         def __init__(self):
             super().__init__("Juncter")
-            self.setChecked(True)
 
     class Splicer(Action):
         def __init__(self):
