@@ -70,15 +70,16 @@ class Strands:
                 new_strands[1].append(copy(NEMid_))
 
             # store hashes of the previous strands in case undoes strand in future
-            self.previous_strands[(hash(tuple(NEMid1.strand)))] = NEMid1.strand
-            self.previous_strands[(hash(tuple(NEMid2.strand)))] = NEMid2.strand
+            self.previous_strands[(hash(tuple(NEMid1.strand)))] = NEMid1.strand.color
+            self.previous_strands[(hash(tuple(NEMid2.strand)))] = NEMid2.strand.color
+            print(self.previous_strands)
 
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
 
             for new_strand in new_strands:
                 if hash(tuple(new_strand)) in self.previous_strands:
-                    new_strand.color = self.previous_strands[hash(tuple(new_strand))].color
+                    new_strand.color = self.previous_strands[hash(tuple(new_strand))]
 
             self.strands.append(new_strands[0])
             self.strands.append(new_strands[1])

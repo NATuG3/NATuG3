@@ -2,6 +2,7 @@ import logging
 
 import pyqtgraph as pg
 
+import helpers
 import references as refs
 from constructor.panels.top_view.worker import TopView
 
@@ -20,6 +21,8 @@ class Plotter(pg.PlotWidget):
         """
         super().__init__()
         self.worker = None
+        self.text = []
+        self.plotted = None
 
         self.getViewBox().setDefaultPadding(padding=0.18)
         self.disableAutoRange()
@@ -34,12 +37,17 @@ class Plotter(pg.PlotWidget):
             point[1]
         )
         range = self.worker.u_coords.index(point[0])
-
-        refs.constructor.side_view.plot.setXRange(range - 1, range + 2)
+        if range == 0:
+            range = -1, range
+        else:
+            range = range - 1, range + 2
+        refs.constructor.side_view.plot.setXRange(*range)
         refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size.height+1)
 
     def clear(self):
         self.removeItem(self.plotted)
+        self.removeItem(self.text)
+        self.text.clear()
 
     def refresh(self):
         self.clear()
@@ -69,13 +77,17 @@ class Plotter(pg.PlotWidget):
             pxMode=False,
         )
 
-        spacing = refs.nucleic_acid.current.D / 4
-
         for counter, position in enumerate(
                 tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
         ):
-            text = pg.TextItem(str(f"#{counter + 1}"), anchor=(0, 0))
-            text.setPos(position[0] - spacing, position[1] + spacing)
-            self.addItem(text)
+            text = self.plot(
+                [position[0]],
+                [position[1]],
+                symbol=helpers.custom_symbol(f"#{counter+1}"),
+                symbolBrush=pg.mkBrush(color=(180, 180, 180)),
+                symbolSize=refs.nucleic_acid.current.D / 4,
+                pxMode=False,
+            )
+            self.text.append(text)
 
         self.plotted.sigPointsClicked.connect(self.point_clicked)

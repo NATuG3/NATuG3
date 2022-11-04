@@ -1,7 +1,8 @@
 import logging
-from functools import wraps
+from functools import wraps, cache
 from typing import Literal
 
+from PyQt6.QtGui import QFont, QPainterPath, QTransform
 from PyQt6.QtWidgets import QMessageBox
 
 logger = logging.getLogger(__name__)
@@ -59,3 +60,16 @@ def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
         int: 0 or 1.
     """
     return int(not bool(integer))
+
+
+@cache
+def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
+    """Create custom symbol with font"""
+    pg_symbol = QPainterPath()
+    pg_symbol.addText(0, 0, font, symbol)
+    br = pg_symbol.boundingRect()
+    scale = min(1. / br.width(), 1. / br.height())
+    tr = QTransform()
+    tr.scale(scale, -scale)
+    tr.translate(-br.x() - br.width() / 2., -br.y() - br.height() / 2.)
+    return tr.map(pg_symbol)
