@@ -1,10 +1,12 @@
 import itertools
 import logging
+from contextlib import suppress
+from functools import cached_property, cache
 from typing import List, Tuple
 
 from constants.directions import *
-from constructor.panels.side_view.strand import Strand
-from constructor.panels.side_view.strands import Strands
+from datatypes.strands.strand import Strand
+from datatypes.strands.strands import Strands
 from datatypes.domains import Domains
 from datatypes.misc import Profile
 from datatypes.points import NEMid
@@ -19,6 +21,11 @@ class SideView:
     """
 
     strand_directions = (UP, DOWN)
+    pallet = ((195, 195, 195), (70, 70, 70))
+    cache_clearers = (
+        "domains",
+        "profile"
+    )
 
     def __init__(self, domains: Domains, profile: Profile) -> None:
         """
@@ -29,23 +36,36 @@ class SideView:
         self.profile = profile
         assert isinstance(profile, Profile)
 
-    @property
+    def __setattr__(self, key, value):
+        if key in self.cache_clearers:
+            self.clear_cache()
+        super().__setattr__(key, value)
+
+    def clear_cache(self):
+        with suppress(KeyError):
+            del self.__dict__["theta_exteriors"]
+        with suppress(KeyError):
+            del self.__dict__["theta_interiors"]
+        self.compute.cache_clear()
+        self.__repr__.cache_clear()
+
+    @cached_property
     def theta_exteriors(self):
         theta_exteriors = []
         for theta_interior in self.theta_interiors:
             theta_exteriors.append(360-theta_interior)
         return theta_exteriors
 
-    @property
+    @cached_property
     def theta_interiors(self):
         theta_interiors = []
         for domain in self.domains.domains:
             theta_interior = domain.theta_interior_multiple * self.profile.theta_c
             theta_interior -= domain.theta_switch_multiple * self.profile.theta_s
             theta_interiors.append(theta_interior)
-        logger.debug(f"Computed theta interiors\n{theta_interiors}")
         return theta_interiors
 
+    @cache
     def compute(self) -> Strands:
         """
         Compute all NEMid data.
@@ -160,9 +180,8 @@ class SideView:
             for strand_direction in self.strand_directions:
                 strands.append(NEMids[index][strand_direction])
 
-        pallet = ((255, 245, 0), (0, 0, 255))
         for index, strand in enumerate(strands):
-            strands[index] = Strand(strand, color=pallet[index % 2])
+            strands[index] = Strand(strand, color=self.pallet[index % 2])
 
         output = Strands(strands, self.profile)
         return output
@@ -332,6 +351,7 @@ class SideView:
 
         return z_coords
 
+    @cache
     def __repr__(self) -> str:
         output = "side_view("
         blacklist = "domains"

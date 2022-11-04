@@ -1,12 +1,11 @@
 import logging
 from collections import namedtuple
-from copy import copy
+from copy import deepcopy, copy
 from math import dist
 from typing import List, NamedTuple
 
 import settings
-from constructor.panels.side_view.plotter import Plotter as Plotter
-from constructor.panels.side_view.strand import Strand
+from datatypes.strands.strand import Strand
 from datatypes.misc import Profile
 from datatypes.points import NEMid
 
@@ -51,24 +50,27 @@ class Strands:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
         if NEMid1.strand is not NEMid2.strand:
-            new_strands = [Strand([], color=(110, 255, 117)), Strand([], color=(250, 145, 255))]
+            new_strands = [Strand([], color=(255, 0, 0)), Strand([], color=(0, 255, 0))]
 
-            new_strands[0] = NEMid1.strand[NEMid1.index():]
-            new_strands[0] = NEMid2.strand[NEMid2.index():]
+            # first new strand
+            for NEMid_ in tuple(NEMid1.strand)[:NEMid1.index()+1]:
+                new_strands[0].append(copy(NEMid_))
+            #
+            for NEMid_ in tuple(NEMid2.strand)[NEMid2.index()+1:]:
+                new_strands[0].append(copy(NEMid_))
 
+            # second new strand
+            for NEMid_ in tuple(NEMid2.strand)[:NEMid2.index()+1]:
+                new_strands[1].append(copy(NEMid_))
+            #
+            for NEMid_ in tuple(NEMid1.strand)[NEMid1.index()+1:]:
+                new_strands[1].append(copy(NEMid_))
 
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
+
             self.strands.append(new_strands[0])
             self.strands.append(new_strands[1])
-
-    def ui(self) -> Plotter:
-        return Plotter(
-            self,
-            self.size.width,
-            self.size.height,
-            self.profile
-        )
 
     @property
     def size(self) -> NamedTuple("Size", width=float, height=float):

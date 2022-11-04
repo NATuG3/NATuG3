@@ -1,7 +1,7 @@
 from types import NoneType
 
 import references
-from constructor.panels.side_view.strands import Strands
+from datatypes.strands.strands import Strands
 from constructor.panels.side_view.worker import SideView
 from typing import Union
 

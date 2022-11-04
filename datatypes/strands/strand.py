@@ -22,6 +22,20 @@ class Strand(deque):
 
         self.color = color
 
+    @property
+    def size(self):
+        """The overall size of the strand in nanometers."""
+        width = max([NEMid_.x_coord for NEMid_ in self]) - min([NEMid_.x_coord for NEMid_ in self])
+        height = max([NEMid_.z_coord for NEMid_ in self]) - min([NEMid_.z_coord for NEMid_ in self])
+        return width, height
+
+    @property
+    def greyscale(self):
+        if self.color[0] == self.color[1] == self.color[2]:
+            return True
+        else:
+            return False
+
     def append(self, NEMid_) -> None:
         NEMid_.strand = self
         super().append(NEMid_)
@@ -31,22 +45,3 @@ class Strand(deque):
         """Return whether this is a closed strand or not."""
         return self[0] == self[-1]
 
-    @property
-    def loops_down(self):
-        """Whether the top of the strand loops upwards."""
-        previous_z_coord = inf
-        for NEMid_ in self:
-            NEMid_: NEMid
-            if NEMid_.z_coord < previous_z_coord:
-                return True
-        return False
-
-    @property
-    def loops_up(self):
-        """Whether the bottom of the strand loops upwards."""
-        previous_z_coord = -inf
-        for NEMid_ in self:
-            NEMid_: NEMid
-            if NEMid_.z_coord > previous_z_coord:
-                return True
-        return False
