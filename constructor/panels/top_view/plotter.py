@@ -94,6 +94,7 @@ class Plotter(pg.PlotWidget):
                 pxMode=False,
                 pen=None
             )
+            text.sigPointsClicked.connect(self.point_clicked)
             self.text.append(text)
 
         self.plotted.sigPointsClicked.connect(self.point_clicked)
