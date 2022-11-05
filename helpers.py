@@ -19,7 +19,7 @@ def singleton(orig_cls):
     def __new__(cls, *args, **kwargs):
         nonlocal instance  # we are referring to the above instance variable
         if (
-            instance is None
+                instance is None
         ):  # if there is no instance of the class already than create one
             instance = orig_new(cls, *args, **kwargs)
         return instance  # return class instance
@@ -64,13 +64,12 @@ def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
 
 @cache
 def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
-    """Create custom symbol with font for pyqtgraph."""
-    # https://stackoverflow.com/a/70789822
+    """Create custom symbol with font"""
     pg_symbol = QPainterPath()
     pg_symbol.addText(0, 0, font, symbol)
     br = pg_symbol.boundingRect()
-    scale = min(1.0 / br.width(), 1.0 / br.height())
+    scale = min(1. / br.width(), 1. / br.height())
     tr = QTransform()
     tr.scale(scale, -scale)
-    tr.translate(-br.x() - br.width() / 2.0, -br.y() - br.height() / 2.0)
+    tr.translate(-br.x() - br.width() / 2., -br.y() - br.height() / 2.)
     return tr.map(pg_symbol)

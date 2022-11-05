@@ -78,45 +78,58 @@ class Strands:
         self.strands.remove(NEMid1.strand)
         self.strands.remove(NEMid2.strand)
 
+        # flag the new NEMids as junctions
+        NEMid1.junction, NEMid2.junction = True, True
+        NEMid1.juncmate, NEMid2.juncmate = NEMid2, NEMid1
+
         new_strands = [Strand([]), Strand([])]
 
         if NEMid1.strand is NEMid2.strand:
             # first new strand
-            new_strands[0].NEMids.extend(
-                islice(NEMid1.strand.NEMids, NEMid1.index(), NEMid2.index() + 1)
+            new_strands[0].items.extend(
+                islice(NEMid1.strand.items, NEMid1.index, NEMid2.index + 1)
             )
 
             # second new strand
-            new_strands[1].NEMids.extend(
-                islice(NEMid1.strand.NEMids, 0, NEMid1.index() + 1)
+            new_strands[1].items.extend(
+                islice(NEMid1.strand.items, 0, NEMid1.index + 1)
             )
-            new_strands[1].NEMids.extend(
-                islice(NEMid1.strand.NEMids, NEMid2.index(), None)
+            new_strands[1].items.extend(
+                islice(NEMid1.strand.items, NEMid2.index, None)
             )
 
             logger.info("Created same-strand junction.")
         elif NEMid1.strand is not NEMid2.strand:
             # first new strand
-            new_strands[0].NEMids.extend(
-                islice(NEMid1.strand.NEMids, 0, NEMid1.index() + 1)
+            new_strands[0].items.extend(
+                islice(NEMid1.strand.items, 0, NEMid1.index + 1)
             )
-            new_strands[0].NEMids.extend(
-                islice(NEMid2.strand.NEMids, NEMid2.index() + 1, None)
+            new_strands[0].items.extend(
+                islice(NEMid2.strand.items, NEMid2.index + 1, None)
             )
 
             # second new strand
-            new_strands[1].NEMids.extend(
-                islice(NEMid2.strand.NEMids, 0, NEMid2.index() + 1)
+            new_strands[1].items.extend(
+                islice(NEMid2.strand.items, 0, NEMid2.index + 1)
             )
-            new_strands[1].NEMids.extend(
-                islice(NEMid1.strand.NEMids, NEMid1.index() + 1, None)
+            new_strands[1].items.extend(
+                islice(NEMid1.strand.items, NEMid1.index + 1, None)
             )
 
             logger.info("Created same-strand junction.")
 
+        # assign the new strand to each NEMid
+        # (updates NEMid.strand for all NEMids moved)
         for new_strand in new_strands:
             new_strand.assign_strands()
 
+        # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
+        # then mark NEMid1 as not-a-junction
+        for NEMid_ in (NEMid1, NEMid2):
+            if not NEMid_.strand.interdomain:
+                NEMid_.junction = False
+
+        # add the new strands to the internal list of strands
         self.strands.append(new_strands[0])
         self.strands.append(new_strands[1])
 
@@ -135,7 +148,7 @@ class Strands:
 
         for strand in self.strands:
             strand: Strand
-            for NEMid_ in strand.NEMids:
+            for NEMid_ in strand.items:
                 NEMid_: NEMid
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)

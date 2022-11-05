@@ -91,7 +91,7 @@ class Plotter(pg.PlotWidget):
 
         greatest_counter = len(self.worker.u_coords)
         for counter, position in enumerate(
-            tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
+                tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
         ):
             counter = str(counter + 1)
             while len(counter) < greatest_counter:

@@ -1,3 +1,3 @@
 JUNCTER: int = 1
-SPLICER: int = 2
-RESETTER: int = 3
+NICKER: int = 2
+INFORMER: int = 3

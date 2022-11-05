@@ -16,7 +16,6 @@ class Point:
         direction (Literal[UP, DOWN]): The direction of the helix at this NEMid.
     """
 
-    # Generic Attributes
     x_coord: float
     z_coord: float
     angle: float

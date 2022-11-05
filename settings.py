@@ -6,6 +6,7 @@ junction_threshold = 0.01
 
 colors = {
     "grid_lines": (220, 220, 220),
+    "nicks": (130, 14, 14),
     "strands": {
         "greys": ((195, 195, 195), (70, 70, 70)),
         "colors": (

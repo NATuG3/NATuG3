@@ -1,7 +1,7 @@
 from collections import deque
 from math import dist
 from random import shuffle
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 from structures.points import NEMid
 
@@ -11,20 +11,21 @@ class Strand:
     A strand of NEMids.
 
     Attributes:
+        items: An iterable of all NEMids.
         color (tuple[int, int, int]): RGB color of strand.
     """
 
     def __init__(self, NEMids: List[NEMid], color=(0, 1, 2)):
-        self.NEMids = NEMids
+        self.items = deque(NEMids)
         self.color = color
         self.assign_strands()
 
     def assign_strands(self):
-        # assign strand to NEMids
-        for index, NEMid_ in enumerate(self.NEMids):
-            self.NEMids[index].strand = self
+        """Set NEMid.Strand to be self for all items in self."""
+        for index, NEMid_ in enumerate(self.items):
+            self.items[index].strand = self
 
-    def touching(self, other, touching_distance=0.1) -> bool:
+    def touching(self, other: Type["Strand"], touching_distance=0.1) -> bool:
         """
         Check whether this strand is touching a different strand.
 
@@ -38,10 +39,10 @@ class Strand:
             shuffle(output)
             return output
 
-        for our_NEMid in shuffled(self.NEMids):
-            for their_NEMid in shuffled(other.NEMids):
+        for our_item in shuffled(self.items):
+            for their_item in shuffled(other.items):
                 if (
-                    dist(our_NEMid.position(), their_NEMid.position())
+                    dist(our_item.position(), their_item.position())
                     < touching_distance
                 ):
                     return True
@@ -49,16 +50,29 @@ class Strand:
 
     @property
     def up_strand(self):
-        return all([bool(NEMid_.direction) for NEMid_ in self.NEMids])
+        checks = []
+        for item in self.items:
+            if isinstance(item, NEMid):
+                checks.append(bool(item.direction))
+        return all(checks)
 
     @property
     def down_strand(self):
-        return all([(not bool(NEMid_.direction)) for NEMid_ in self.NEMids])
+        checks = []
+        for item in self.items:
+            if isinstance(item, NEMid):
+                checks.append(not bool(item.direction))
+        return all(checks)
 
     @property
     def interdomain(self) -> bool:
         """Whether all the NEMids in this strand belong to the same domain."""
-        domains = [NEMid_.domain for NEMid_ in self.NEMids]
+        domains = []
+        for item in self.items:
+            if isinstance(item, NEMid):
+                domains.append(item)
+        domains = [NEMid_.domain for NEMid_ in domains]
+
         if len(domains) == 0:
             return False
         checker = domains[0]
@@ -70,11 +84,11 @@ class Strand:
     @property
     def size(self) -> Tuple[float, float]:
         """The overall size of the strand in nanometers."""
-        width = max([NEMid_.x_coord for NEMid_ in self.NEMids]) - min(
-            [NEMid_.x_coord for NEMid_ in self.NEMids]
+        width = max([NEMid_.x_coord for NEMid_ in self.items]) - min(
+            [NEMid_.x_coord for NEMid_ in self.items]
         )
-        height = max([NEMid_.z_coord for NEMid_ in self.NEMids]) - min(
-            [NEMid_.z_coord for NEMid_ in self.NEMids]
+        height = max([NEMid_.z_coord for NEMid_ in self.items]) - min(
+            [NEMid_.z_coord for NEMid_ in self.items]
         )
         return width, height
 
@@ -82,13 +96,13 @@ class Strand:
     def location(self) -> Tuple[float, float, float, float]:
         """The location of the bounding box of the strand in nanometers."""
         return (
-            min(NEMid_.x_coord for NEMid_ in self.NEMids),
-            max(NEMid_.x_coord for NEMid_ in self.NEMids),
-            min(NEMid_.z_coord for NEMid_ in self.NEMids),
-            max(NEMid_.z_coord for NEMid_ in self.NEMids),
+            min(NEMid_.x_coord for NEMid_ in self.items),
+            max(NEMid_.x_coord for NEMid_ in self.items),
+            min(NEMid_.z_coord for NEMid_ in self.items),
+            max(NEMid_.z_coord for NEMid_ in self.items),
         )
 
     @property
     def is_closed(self) -> bool:
         """Return whether this is a closed strand or not."""
-        return self.NEMids[0] == self.NEMids[-1]
+        return self.items[0] == self.items[-1]

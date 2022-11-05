@@ -137,9 +137,9 @@ class SideView:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                    angles[strand_direction],
-                    x_coords[strand_direction],
-                    z_coords[strand_direction],
+                        angles[strand_direction],
+                        x_coords[strand_direction],
+                        z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid

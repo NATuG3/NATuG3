@@ -18,22 +18,28 @@ class Actions(QButtonGroup):
         self._add_buttons()
 
     def _add_buttons(self):
+        """Add all toolbar buttons to the toolbar."""
+        # note that the first button will be checked automatically
+        self.addButton(self.Informer(), INFORMER)
         self.addButton(self.Juncter(), JUNCTER)
-        self.addButton(self.Splicer(), SPLICER)
-        self.addButton(self.Resetter(), RESETTER)
+        self.addButton(self.Nicker(), NICKER)
 
     def addButton(self, button: QAbstractButton, id: int) -> None:
+        """Before calling the inherited addButton store the new button in self.buttons."""
         self.buttons.append(button)
         super().addButton(button, id)
 
+    class Informer(Action):
+        """Mode for obtaining information on the clicked item."""
+        def __init__(self):
+            super().__init__("Informer")
+
     class Juncter(Action):
+        """Mode for making junctions."""
         def __init__(self):
             super().__init__("Juncter")
 
-    class Splicer(Action):
+    class Nicker(Action):
+        """Mode for making nicks."""
         def __init__(self):
-            super().__init__("Splicer")
-
-    class Resetter(Action):
-        def __init__(self):
-            super().__init__("Resetter")
+            super().__init__("Nicker")
