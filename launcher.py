@@ -20,6 +20,7 @@ def main():
             remove("saves/nucleic_acid/profiles.nano")
             remove("saves/nucleic_acid/restored.nano")
             remove("saves/domains/restored.nano")
+            remove("saves/strands/restored.nano")
 
     import pyqtgraph as pg
 

@@ -42,7 +42,7 @@ class Plotter(pg.PlotWidget):
         else:
             range = range - 1, range + 2
         refs.constructor.side_view.plot.setXRange(*range)
-        refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size.height+1)
+        refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size.height + 1)
 
     def clear(self):
         self.removeItem(self.plotted)
@@ -77,11 +77,11 @@ class Plotter(pg.PlotWidget):
             pxMode=False,
         )
 
-        greatest_counter  = len(self.worker.u_coords)
+        greatest_counter = len(self.worker.u_coords)
         for counter, position in enumerate(
                 tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
         ):
-            counter = str(counter+1)
+            counter = str(counter + 1)
             while len(counter) < greatest_counter:
                 counter += " "
             counter = f"#{counter}"

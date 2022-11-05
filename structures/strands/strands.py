@@ -1,6 +1,6 @@
 import logging
-from itertools import islice
 from collections import namedtuple
+from itertools import islice
 from math import dist
 from typing import List, NamedTuple
 
@@ -50,7 +50,6 @@ class Strands:
                 else:
                     raise ValueError("Strand should all be up/down if it is single-domain.")
 
-
     def add_junction(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
         Add a cross-strand junction where NEMid1 and NEMid2 overlap.
@@ -81,21 +80,35 @@ class Strands:
 
         if NEMid1.strand is NEMid2.strand:
             # first new strand
-            new_strands[0].extend(islice(NEMid1.strand, NEMid1.index(), NEMid2.index()+1))
+            new_strands[0].NEMids.extend(
+                islice(NEMid1.strand.NEMids, NEMid1.index(), NEMid2.index() + 1)
+            )
 
             # second new strand
-            new_strands[1].extend(islice(NEMid1.strand, 0, NEMid1.index() + 1))
-            new_strands[1].extend(islice(NEMid1.strand, NEMid2.index(), None))
+            new_strands[1].NEMids.extend(
+                islice(NEMid1.strand.NEMids, 0, NEMid1.index() + 1)
+            )
+            new_strands[1].NEMids.extend(
+                islice(NEMid1.strand.NEMids, NEMid2.index(), None)
+            )
 
             logger.info("Created same-strand junction.")
         elif NEMid1.strand is not NEMid2.strand:
             # first new strand
-            new_strands[0].extend(islice(NEMid1.strand, 0, NEMid1.index() + 1))
-            new_strands[0].extend(islice(NEMid2.strand, NEMid2.index() + 1, None))
+            new_strands[0].NEMids.extend(
+                islice(NEMid1.strand.NEMids, 0, NEMid1.index() + 1)
+            )
+            new_strands[0].NEMids.extend(
+                islice(NEMid2.strand.NEMids, NEMid2.index() + 1, None)
+            )
 
             # second new strand
-            new_strands[1].extend(islice(NEMid2.strand, 0, NEMid2.index() + 1))
-            new_strands[1].extend(islice(NEMid1.strand, NEMid1.index() + 1, None))
+            new_strands[1].NEMids.extend(
+                islice(NEMid2.strand.NEMids, 0, NEMid2.index() + 1)
+            )
+            new_strands[1].NEMids.extend(
+                islice(NEMid1.strand.NEMids, NEMid1.index() + 1, None)
+            )
 
             logger.info("Created same-strand junction.")
 
@@ -120,7 +133,7 @@ class Strands:
 
         for strand in self.strands:
             strand: Strand
-            for NEMid_ in strand:
+            for NEMid_ in strand.NEMids:
                 NEMid_: NEMid
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)

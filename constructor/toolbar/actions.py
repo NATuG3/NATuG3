@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QPushButton, QButtonGroup, QAbstractButton
+
 from constants.modes import *
 
 

@@ -30,7 +30,7 @@ class NEMid(Point):
 
     def index(self):
         """Obtain the index of this domain in its respective parent strand."""
-        return self.strand.index(self)
+        return self.strand.NEMids.index(self)
 
     def __hash__(self):
         hashed = 0
