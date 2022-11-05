@@ -48,7 +48,9 @@ class Strands:
                 elif strand.down_strand:
                     strand.color = settings.colors["strands"]["greys"][0]
                 else:
-                    raise ValueError("Strand should all be up/down if it is single-domain.")
+                    raise ValueError(
+                        "Strand should all be up/down if it is single-domain."
+                    )
 
     def add_junction(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """

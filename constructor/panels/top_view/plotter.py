@@ -46,7 +46,9 @@ class Plotter(pg.PlotWidget):
         previous = refs.constructor.side_view.plot.visibleRange()
 
         refs.constructor.side_view.plot.setXRange(*range)
-        refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size.height + 1)
+        refs.constructor.side_view.plot.setYRange(
+            -1, refs.strands.current.size.height + 1
+        )
 
         # if the new range is the same as the old range then this means
         # that the user has clicked on the button a second time and wants
@@ -89,7 +91,7 @@ class Plotter(pg.PlotWidget):
 
         greatest_counter = len(self.worker.u_coords)
         for counter, position in enumerate(
-                tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
+            tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
         ):
             counter = str(counter + 1)
             while len(counter) < greatest_counter:
@@ -102,7 +104,7 @@ class Plotter(pg.PlotWidget):
                 symbolBrush=pg.mkBrush(color=(180, 180, 180)),
                 symbolSize=refs.nucleic_acid.current.D / 3,
                 pxMode=False,
-                pen=None
+                pen=None,
             )
             text.sigPointsClicked.connect(self.point_clicked)
             self.text.append(text)

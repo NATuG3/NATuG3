@@ -24,7 +24,7 @@ class Strand:
         for index, NEMid_ in enumerate(self.NEMids):
             self.NEMids[index].strand = self
 
-    def touching(self, other, touching_distance=.1) -> bool:
+    def touching(self, other, touching_distance=0.1) -> bool:
         """
         Check whether this strand is touching a different strand.
 
@@ -40,7 +40,10 @@ class Strand:
 
         for our_NEMid in shuffled(self.NEMids):
             for their_NEMid in shuffled(other.NEMids):
-                if dist(our_NEMid.position(), their_NEMid.position()) < touching_distance:
+                if (
+                    dist(our_NEMid.position(), their_NEMid.position())
+                    < touching_distance
+                ):
                     return True
         return False
 
@@ -82,7 +85,7 @@ class Strand:
             min(NEMid_.x_coord for NEMid_ in self.NEMids),
             max(NEMid_.x_coord for NEMid_ in self.NEMids),
             min(NEMid_.z_coord for NEMid_ in self.NEMids),
-            max(NEMid_.z_coord for NEMid_ in self.NEMids)
+            max(NEMid_.z_coord for NEMid_ in self.NEMids),
         )
 
     @property
