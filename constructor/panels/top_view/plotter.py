@@ -41,8 +41,18 @@ class Plotter(pg.PlotWidget):
             range = -1, range
         else:
             range = range - 1, range + 2
+
+        # store the previous range of the constructor
+        previous = refs.constructor.side_view.plot.visibleRange()
+
         refs.constructor.side_view.plot.setXRange(*range)
         refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size.height + 1)
+
+        # if the new range is the same as the old range then this means
+        # that the user has clicked on the button a second time and wants
+        # to revert to the auto range of the side view plot
+        if previous == refs.constructor.side_view.plot.visibleRange():
+            refs.constructor.side_view.plot.autoRange()
 
     def clear(self):
         self.removeItem(self.plotted)
