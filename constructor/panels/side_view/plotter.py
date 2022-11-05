@@ -61,11 +61,12 @@ class Plotter(pg.PlotWidget):
         refresh = refs.constructor.side_view.refresh
 
         if refs.mode.current == INFORMER:
-            for item in located:
-                if isinstance(item, NEMid):
-                    item.color = (255, 255, 0)
-                    refresh()
+            dialogs = []
 
+            for item in located:
+                item.highlighted = True
+
+                if isinstance(item, NEMid):
                     dialog = QDialog(references.constructor)
                     dialog.setWindowTitle("NEMid Information")
                     uic.loadUi("constructor/panels/side_view/informers/NEMid.ui", dialog)
@@ -94,12 +95,20 @@ class Plotter(pg.PlotWidget):
                     dialog.junctable.setChecked(item.junctable)
                     dialog.junction.setChecked(item.junction)
 
-                    @dialog.finished.connect
-                    def _():
-                        item.color = None
-                        refresh()
+                    dialogs.append(dialog)
 
-                    dialog.show()
+            def dialog_complete():
+                for dialog in dialogs:
+                    dialog.close()
+                for item in located:
+                    item.highlighted = False
+                refresh()
+
+            for dialog in dialogs:
+                dialog.finished.connect(dialog_complete)
+                dialog.show()
+
+            refresh()
 
         if refs.mode.current == JUNCTER:
             if len(located) == 2:
@@ -161,13 +170,12 @@ class Plotter(pg.PlotWidget):
                     else:
                         raise ValueError("point.direction is not UP or DOWN.", point)
 
-                    if point.color is None:
+                    if point.highlighted:
+                        symbol_sizes.append(12)
+                        brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
+                    else:
                         symbol_sizes.append(6)
                         brushes.append(NEMid_brush)
-                    else:
-                        symbol_sizes.append(12)
-                        brushes.append(pg.mkBrush(color=point.color))
-
 
                 elif isinstance(point, Nick):
                     symbol_sizes.append(6)

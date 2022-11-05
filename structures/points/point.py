@@ -4,7 +4,7 @@ from typing import Tuple, Literal
 from constants.directions import *
 
 
-@dataclass(slots=True)
+@dataclass
 class Point:
     """
     NEMid object.
@@ -21,6 +21,9 @@ class Point:
     angle: float
     direction: Literal[UP, DOWN]
     prime: Literal[TOWARDS_START, TOWARDS_END]
+
+    def __post_init__(self):
+        self.highlighted = False
 
     def position(self) -> Tuple[float, float]:
         """

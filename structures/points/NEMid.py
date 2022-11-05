@@ -7,7 +7,7 @@ from structures.domains import Domain
 from structures.points.point import Point
 
 
-@dataclass(slots=True)
+@dataclass
 class NEMid(Point):
     """
     NEMid object.
@@ -19,7 +19,6 @@ class NEMid(Point):
         junction (bool): Whether this NEMid is at the site of an active junction.
         junctable (bool): Whether this NEMid overlaps another NEMid and can thus can conjunct.
         strand (list or None): The strand that this NEMid belongs to.
-        color (tuple or None): If not none then this NEMid is forced to be this color.
     """
 
     domain: Domain = None
@@ -28,7 +27,6 @@ class NEMid(Point):
     junction: bool = False
     junctable: bool = False
     strand: None | Type["Strand"] = None
-    color: Tuple[int, int, int] | None = None
 
     @property
     def index(self):
