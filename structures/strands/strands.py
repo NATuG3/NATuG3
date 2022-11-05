@@ -1,7 +1,6 @@
 import logging
-import sys
+from itertools import islice
 from collections import namedtuple
-from copy import copy, deepcopy
 from math import dist
 from typing import List, NamedTuple
 
@@ -30,6 +29,28 @@ class Strands:
 
         self.previous_strands = {}
 
+    def recolor(self):
+        for strand in self.strands:
+            if strand.interdomain:
+                illegal_colors = []
+
+                for potentially_touching in self.strands:
+                    if strand.touching(potentially_touching):
+                        illegal_colors.append(potentially_touching.color)
+
+                for color in settings.colors["strands"]["colors"]:
+                    if color not in illegal_colors:
+                        strand.color = color
+                        break
+            else:
+                if strand.up_strand:
+                    strand.color = settings.colors["strands"]["greys"][1]
+                elif strand.down_strand:
+                    strand.color = settings.colors["strands"]["greys"][0]
+                else:
+                    raise ValueError("Strand should all be up/down if it is single-domain.")
+
+
     def add_junction(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
         Add a cross-strand junction where NEMid1 and NEMid2 overlap.
@@ -52,52 +73,39 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        if NEMid1.strand is not NEMid2.strand:
-            new_strands = [Strand([], color=(255, 0, 0)), Strand([], color=(0, 255, 0))]
-            alt_colors = {
-                (255, 0, 0): (10, 255, 255),
-                (10, 255, 255): (255, 0, 0),
-                (0, 0, 255): (0, 255, 0),
-                (0, 255, 0): (0, 0, 255)
-            }
+        # remove the old strands
+        self.strands.remove(NEMid1.strand)
+        self.strands.remove(NEMid2.strand)
 
+        new_strands = [Strand([]), Strand([])]
+
+        if NEMid1.strand is NEMid2.strand:
             # first new strand
-            for NEMid_ in tuple(NEMid1.strand)[: NEMid1.index() + 1]:
-                new_strands[0].append(copy(NEMid_))
-            #
-            for NEMid_ in tuple(NEMid2.strand)[NEMid2.index() + 1:]:
-                new_strands[0].append(copy(NEMid_))
+            new_strands[0].extend(islice(NEMid1.strand, NEMid1.index(), NEMid2.index()+1))
 
             # second new strand
-            for NEMid_ in tuple(NEMid2.strand)[: NEMid2.index() + 1]:
-                new_strands[1].append(copy(NEMid_))
-            #
-            for NEMid_ in tuple(NEMid1.strand)[NEMid1.index() + 1:]:
-                new_strands[1].append(copy(NEMid_))
+            new_strands[1].extend(islice(NEMid1.strand, 0, NEMid1.index() + 1))
+            new_strands[1].extend(islice(NEMid1.strand, NEMid2.index(), None))
 
-            # store hashes of the previous strands in case undoes strand in future
-            self.previous_strands[(hash(tuple(NEMid1.strand)))] = NEMid1.strand.color
-            self.previous_strands[(hash(tuple(NEMid2.strand)))] = NEMid2.strand.color
+            logger.info("Created same-strand junction.")
+        elif NEMid1.strand is not NEMid2.strand:
+            # first new strand
+            new_strands[0].extend(islice(NEMid1.strand, 0, NEMid1.index() + 1))
+            new_strands[0].extend(islice(NEMid2.strand, NEMid2.index() + 1, None))
 
-            self.strands.remove(NEMid1.strand)
-            self.strands.remove(NEMid2.strand)
+            # second new strand
+            new_strands[1].extend(islice(NEMid2.strand, 0, NEMid2.index() + 1))
+            new_strands[1].extend(islice(NEMid1.strand, NEMid1.index() + 1, None))
 
-            for new_strand in new_strands:
-                for existing_strand in self.strands:
-                    existing_strand_location = existing_strand.location
-                    new_strand_location = new_strand.location
-                    for check in range(4):
-                        if abs(
-                                existing_strand_location[check]-new_strand_location[check]
-                        ) < .5:
-                            if not existing_strand.greyscale:
-                                new_strand.color = alt_colors[new_strand.color]
+            logger.info("Created same-strand junction.")
 
-                if hash(tuple(new_strand)) in self.previous_strands:
-                    new_strand.color = self.previous_strands[hash(tuple(new_strand))]
+        for new_strand in new_strands:
+            new_strand.assign_strands()
 
-            self.strands.append(new_strands[0])
-            self.strands.append(new_strands[1])
+        self.strands.append(new_strands[0])
+        self.strands.append(new_strands[1])
+
+        self.recolor()
 
     @property
     def size(self) -> NamedTuple("Size", width=float, height=float):

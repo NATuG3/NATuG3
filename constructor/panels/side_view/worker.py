@@ -4,6 +4,7 @@ from contextlib import suppress
 from functools import cached_property, cache
 from typing import List, Tuple
 
+import settings
 from constants.directions import *
 from helpers import inverse
 from structures.domains import Domains
@@ -21,7 +22,6 @@ class SideView:
     """
 
     strand_directions = (UP, DOWN)
-    pallet = ((195, 195, 195), (70, 70, 70))
     cache_clearers = ("domains", "profile")
 
     def __init__(self, domains: Domains, profile: Profile) -> None:
@@ -175,10 +175,12 @@ class SideView:
         strands = []
         for index, domain in enumerate(self.domains.domains):
             for strand_direction in self.strand_directions:
-                strands.append(NEMids[index][strand_direction])
-
-        for index, strand in enumerate(strands):
-            strands[index] = Strand(strand, color=self.pallet[index % 2])
+                strands.append(
+                    Strand(
+                        NEMids[index][strand_direction],
+                        color=settings.colors["strands"]["greys"][strand_direction]
+                    )
+                )
 
         output = Strands(strands, self.profile)
         return output

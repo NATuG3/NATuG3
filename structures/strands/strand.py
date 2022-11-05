@@ -1,6 +1,8 @@
 from collections import deque
-from typing import List
+from math import dist
+from typing import List, Tuple
 
+import settings
 from structures.points import NEMid
 
 
@@ -12,17 +14,52 @@ class Strand(deque):
         color (tuple[int, int, int]): RGB color of strand.
     """
 
-    def __init__(self, NEMids: List[NEMid], color=(0, 0, 0)):
+    def __init__(self, NEMids: List[NEMid], color=(0, 1, 2)):
         super().__init__(NEMids)
+        self.color = color
+        self.assign_strands()
 
+    def assign_strands(self):
         # assign strand to NEMids
-        for index, NEMid_ in enumerate(NEMids):
+        for index, NEMid_ in enumerate(self):
             self[index].strand = self
 
-        self.color = color
+    def touching(self, other, touching_distance=.1) -> bool:
+        """
+        Check whether this strand is touching a different strand.
+
+        Args:
+            other: The strand potentially touching this one.
+            touching_distance: The distance to be considered touching.
+        """
+        for our_NEMid in self:
+            for their_NEMid in other:
+                if dist(our_NEMid.position(), their_NEMid.position()) < touching_distance:
+                    return True
+        return False
 
     @property
-    def size(self):
+    def up_strand(self):
+        return all([bool(NEMid_.direction) for NEMid_ in self])
+
+    @property
+    def down_strand(self):
+        return all([(not bool(NEMid_.direction)) for NEMid_ in self])
+
+    @property
+    def interdomain(self) -> bool:
+        """Whether all the NEMids in this strand belong to the same domain."""
+        domains = [NEMid_.domain for NEMid_ in self]
+        if len(domains) == 0:
+            return False
+        checker = domains[0]
+        for domain in domains:
+            if domain != checker:
+                return True
+        return False
+
+    @property
+    def size(self) -> Tuple[float, float]:
         """The overall size of the strand in nanometers."""
         width = max([NEMid_.x_coord for NEMid_ in self]) - min(
             [NEMid_.x_coord for NEMid_ in self]
@@ -33,7 +70,7 @@ class Strand(deque):
         return width, height
 
     @property
-    def location(self):
+    def location(self) -> Tuple[float, float, float, float]:
         """The location of the bounding box of the strand in nanometers."""
         return (
             min(NEMid_.x_coord for NEMid_ in self),
@@ -43,17 +80,6 @@ class Strand(deque):
         )
 
     @property
-    def greyscale(self):
-        if self.color[0] == self.color[1] == self.color[2]:
-            return True
-        else:
-            return False
-
-    def append(self, NEMid_) -> None:
-        NEMid_.strand = self
-        super().append(NEMid_)
-
-    @property
-    def is_closed(self):
+    def is_closed(self) -> bool:
         """Return whether this is a closed strand or not."""
         return self[0] == self[-1]

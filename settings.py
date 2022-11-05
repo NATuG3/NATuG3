@@ -1,11 +1,22 @@
-from types import SimpleNamespace
-
 extension = "nano"
 
 name = "NATuG3"
 
-colors = SimpleNamespace(
-    grey=(220, 220, 220), green=(192, 209, 188), red=(192, 209, 188)
-)
-
 junction_threshold = 0.01
+
+colors = {
+    "grid_lines": (220, 220, 220),
+    "strands": {
+        "greys": ((195, 195, 195), (70, 70, 70)),
+        "colors":
+            (
+                (255, 0, 0),
+                (0, 255, 0),
+                (0, 0, 255),
+                (255, 255, 0),
+                (0, 255, 255),
+                (225, 0, 127),
+                (255, 162, 0)
+            )
+    }
+}
