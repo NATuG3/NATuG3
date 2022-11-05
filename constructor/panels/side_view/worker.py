@@ -143,7 +143,7 @@ class SideView:
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid
-                    if abs(x_coord - index) < 0.001:
+                    if abs(x_coord - round(x_coord)) < settings.junction_threshold:
                         junctable = True
                     else:
                         junctable = False

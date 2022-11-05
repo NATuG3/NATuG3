@@ -1,3 +1,4 @@
+import atexit
 import logging
 from math import ceil, dist
 from typing import List
@@ -107,6 +108,7 @@ class Plotter(pg.PlotWidget):
             for dialog in dialogs:
                 dialog.finished.connect(dialog_complete)
                 dialog.show()
+            atexit.register(dialog_complete)
 
             refresh()
 
