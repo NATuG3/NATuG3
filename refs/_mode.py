@@ -1,12 +1,11 @@
 from PyQt6.QtWidgets import QButtonGroup
 
-import references
-from constructor.toolbar.actions import Actions
+import refs
 
 
 class _Mode:
     def __init__(self):
-        self.actions: QButtonGroup = references.constructor.toolbar.actions
+        self.actions: QButtonGroup = refs.constructor.toolbar.actions
         self.actions.buttons[0].setChecked(True)
 
     @property

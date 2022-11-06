@@ -81,22 +81,41 @@ class Strands:
         new_strands = [Strand([]), Strand([])]
 
         if NEMid1.strand is NEMid2.strand:
+            # create shorthand for strand since they are the same
+            strand = NEMid1.strand # == NEMid2.strand
+
             # remove the old strands
             # note that NEMid1.strand IS NEMid2.strand
-            self.strands.remove(NEMid1.strand)
+            self.strands.remove(strand)
 
-            # first new strand
-            new_strands[0].items.extend(
-                islice(NEMid1.strand.items, NEMid1.index, NEMid2.index + 1)
-            )
+            if NEMid2.index < NEMid1.index:
+                # crawl from the index of the right NEMid to the index of the left NEMid
+                new_strands[0].items.extend(
+                    islice(strand.items, NEMid2.index, NEMid1.index + 1)
+                )
 
-            # second new strand
-            new_strands[1].items.extend(
-                islice(NEMid1.strand.items, 0, NEMid1.index + 1)
-            )
-            new_strands[1].items.extend(
-                islice(NEMid1.strand.items, NEMid2.index, None)
-            )
+                # crawl from the beginning of the strand to the index of the right NEMid
+                new_strands[1].items.extend(
+                    islice(strand.items, 0, NEMid2.index + 1)
+                )
+                # crawl from the index of the left NEMid to the end of the strand
+                new_strands[1].items.extend(
+                    islice(strand.items, NEMid1.index, None)
+                )
+            elif NEMid1.index < NEMid2.index:
+                # crawl from the index of the left NEMid to the index of the right NEMid
+                new_strands[0].items.extend(
+                    islice(strand.items, NEMid1.index, NEMid2.index + 1)
+                )
+
+                # crawl from the beginning of the strand to the index of the left NEMid
+                new_strands[1].items.extend(
+                    islice(strand.items, 0, NEMid1.index + 1)
+                )
+                # crawl from the index of the right NEMid to the end of the strand
+                new_strands[1].items.extend(
+                    islice(strand.items, NEMid2.index, None)
+                )
 
             logger.info("Created same-strand junction.")
         elif NEMid1.strand is not NEMid2.strand:

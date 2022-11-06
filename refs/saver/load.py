@@ -3,7 +3,7 @@ import logging
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
-import references
+import refs
 from structures.domains import Domains
 from structures.misc.save import Save
 
@@ -23,24 +23,24 @@ def worker(filename):
     package = Save.from_file(filename)
 
     # update the current domains array
-    assert isinstance(references.domains.current, Domains)
-    references.domains.current = package.domains
-    references.strands.current = package.strands
+    assert isinstance(refs.domains.current, Domains)
+    refs.domains.current = package.domains
+    refs.strands.current = package.strands
 
     # update all domains settings/dump domains
-    references.constructor.config.panel.tabs.domains.subunit_count.setValue(
-        references.domains.current.subunit.count
+    refs.constructor.config.panel.tabs.domains.subunit_count.setValue(
+        refs.domains.current.subunit.count
     )
-    references.constructor.config.panel.tabs.domains.symmetry.setValue(
-        references.domains.current.symmetry
+    refs.constructor.config.panel.tabs.domains.symmetry.setValue(
+        refs.domains.current.symmetry
     )
-    references.constructor.config.panel.tabs.domains.table.dump_domains(
-        references.domains.current.subunit.domains
+    refs.constructor.config.panel.tabs.domains.table.dump_domains(
+        refs.domains.current.subunit.domains
     )
 
     # refresh graphs
-    references.constructor.top_view.refresh()
-    references.constructor.side_view.refresh()
+    refs.constructor.top_view.refresh()
+    refs.constructor.side_view.refresh()
 
     logger.info(f"Loaded save @ {filename}.")
 

@@ -12,6 +12,7 @@ class Nick:
         z_coord: Z coord of the nick.
         prior: The object that this was before it became a nick.
     """
+
     def __init__(self, NEMid_: NEMid):
         self.x_coord, self.z_coord = NEMid_.x_coord, NEMid_.z_coord
         self.prior = NEMid_

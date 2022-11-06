@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from types import NoneType
-from typing import TypeVar, Type, Tuple
-from typing import Union
+from typing import Type
 
 from structures.domains import Domain
 from structures.points.point import Point
@@ -39,14 +37,6 @@ class NEMid(Point):
         if self.strand is None:
             return None
         return self.strand.items.index(self)
-
-    def __hash__(self):
-        hashed = 0
-        hashed += hash(self.x_coord)
-        hashed += hash(self.z_coord)
-        hashed += hash(self.direction)
-        hashed += hash(self.prime)
-        return hashed
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""

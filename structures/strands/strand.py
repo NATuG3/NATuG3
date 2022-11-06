@@ -42,36 +42,34 @@ class Strand:
         for our_item in shuffled(self.items):
             for their_item in shuffled(other.items):
                 if (
-                    dist(our_item.position(), their_item.position())
-                    < touching_distance
+                        dist(our_item.position(), their_item.position())
+                        < touching_distance
                 ):
                     return True
         return False
 
     @property
-    def up_strand(self):
-        checks = []
+    def NEMids(self):
+        output = []
         for item in self.items:
             if isinstance(item, NEMid):
-                checks.append(bool(item.direction))
+                output.append(item)
+        return output
+
+    @property
+    def up_strand(self):
+        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids]
         return all(checks)
 
     @property
     def down_strand(self):
-        checks = []
-        for item in self.items:
-            if isinstance(item, NEMid):
-                checks.append(not bool(item.direction))
+        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids]
         return all(checks)
 
     @property
     def interdomain(self) -> bool:
         """Whether all the NEMids in this strand belong to the same domain."""
-        domains = []
-        for item in self.items:
-            if isinstance(item, NEMid):
-                domains.append(item)
-        domains = [NEMid_.domain for NEMid_ in domains]
+        domains = [NEMid_.domain for NEMid_ in self.NEMids]
 
         if len(domains) == 0:
             return False

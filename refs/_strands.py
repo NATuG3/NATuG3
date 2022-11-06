@@ -3,9 +3,9 @@ import pickle
 from types import NoneType
 from typing import Union
 
-import references
-from constructor.panels.side_view.worker import SideView
+import refs
 from structures.strands.strands import Strands
+from ui.panels.side_view.worker import SideView
 
 
 class _Strands:
@@ -34,6 +34,6 @@ class _Strands:
 
     def recompute(self) -> Strands:
         self.current: Strands = SideView(
-            references.domains.current, references.nucleic_acid.current
+            refs.domains.current, refs.nucleic_acid.current
         ).compute()
         return self.current

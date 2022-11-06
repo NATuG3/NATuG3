@@ -3,7 +3,7 @@ from typing import Literal
 from PyQt6.QtWidgets import QPushButton
 
 from constants.directions import *
-from resources.workers import fetch_icon
+from ui.resources import fetch_icon
 
 up_arrow, down_arrow = "↑", "↓"
 
