@@ -25,7 +25,7 @@ class Strand:
         for index, NEMid_ in enumerate(self.items):
             self.items[index].strand = self
 
-    def touching(self, other: Type["Strand"], touching_distance=0.22) -> bool:
+    def touching(self, other: Type["Strand"], touching_distance=0.25) -> bool:
         """
         Check whether this strand is touching a different strand.
 

@@ -173,7 +173,7 @@ class Plotter(pg.PlotWidget):
                         raise ValueError("point.direction is not UP or DOWN.", point)
 
                     if point.highlighted:
-                        symbol_sizes.append(12)
+                        symbol_sizes.append(18)
                         brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                     else:
                         symbol_sizes.append(6)

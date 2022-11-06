@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+import refs
 import settings
 
 logger = logging.getLogger(__name__)
@@ -15,23 +16,23 @@ logger = logging.getLogger(__name__)
 
 class Window(QMainWindow):
     """
-    The application's refs window.
+    The nanotube constructor main window.
 
     Attributes:
-        panels: All docked widgets.
         status_bar (QStatusBar): The status bar.
         menu_bar (QMenuBar): The menu bar.
+        toolbar (QToolBar): The toolbar.
         top_view (QWidget): Top view widget.
         side_view (QWidget): Side view widget.
     """
-
-    class panels:
-        __slots__ = ("config", "top_view", "side_view")
 
     def __init__(self):
         # this is an inherited class of QMainWindow,
         # so we must initialize the parent qt widget
         super().__init__()
+
+        # store reference to self in refs
+        refs.constructor = self
 
         # create plot panels
         self._top_view()

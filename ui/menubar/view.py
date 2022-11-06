@@ -15,20 +15,21 @@ class View(QMenu):
         # container for actions
         self.actions = SimpleNamespace()
 
-        # view -> "Config" -> hide/unhide
-        config = self.actions.config = self.addAction("Config")
-        config.setStatusTip("Display the config tab menu")
-        # will be checked/unchecked based on if widget is shown
-        config.setIcon(fetch_icon("eye-outline"))
-        config.triggered.connect(
-            lambda: helpers.reverse_hidenness(refs.constructor.panels.config)
-        )
+        self.actions.config = self.addAction("Config")
+        self.actions.config.setStatusTip("Display the config tab menu")
+        self.actions.config.setIcon(fetch_icon("eye-outline"))
+        self.actions.config.triggered.connect(
+            lambda: helpers.reverse_hidenness(refs.constructor.panels.config))
 
-        # view -> "top view" -> hide/unhide
-        top_view = self.actions.top_view = self.addAction("Helices Top View")
-        top_view.setStatusTip("Display the helices top view graph")
-        # will be checked/unchecked based on if widget is shown
-        top_view.setIcon(fetch_icon("eye-outline"))
-        top_view.triggered.connect(
+        self.actions.top_view = self.addAction("Helices Top View")
+        self.actions.top_view.setStatusTip("Display the helices top view graph")
+        self.actions.top_view.setIcon(fetch_icon("eye-outline"))
+        self.actions.top_view.triggered.connect(
             lambda: helpers.reverse_hidenness(refs.constructor.top_view)
         )
+
+        self.actions.recolor = self.addAction("Recolor Strands")
+        self.actions.recolor.setStatusTip("Recompute colors for strands")
+        self.actions.recolor.setIcon(fetch_icon("color-palette-outline"))
+        self.actions.recolor.triggered.connect(refs.strands.current.recolor)
+        self.actions.recolor.triggered.connect(refs.constructor.side_view.refresh)
