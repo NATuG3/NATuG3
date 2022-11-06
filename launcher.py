@@ -4,7 +4,7 @@ from time import time
 # delete restoration files
 RESET = False
 
-# references script logger
+# refs script logger
 logger = logging.getLogger(__name__)
 
 # mute pyqt logs
@@ -28,7 +28,7 @@ def main():
         useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
     )
 
-    import references
+    import refs
 
     # set log level
     logging.basicConfig(
@@ -51,14 +51,14 @@ def main():
 
     logger.info("Loaded the config.")
 
-    # show the constructor window
-    references.constructor.show()
-    references.constructor.resizeEvent(None)  # trigger initial resize event
-    logger.debug("Set up references window")
+    # show the ui window
+    refs.constructor.show()
+    refs.constructor.resizeEvent(None)  # trigger initial resize event
+    logger.debug("Set up refs window")
 
     # begin app event loop
     logger.debug("Beginning event loop...")
-    sys.exit(references.application.exec())
+    sys.exit(refs.application.exec())
 
 
 if __name__ == "__main__":
