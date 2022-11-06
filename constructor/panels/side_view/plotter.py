@@ -89,8 +89,10 @@ class Plotter(pg.PlotWidget):
                         dialog.down.setChecked(True)
 
                     if item.prime == TOWARDS_END:
+                        print("true")
                         dialog.towards_end.setChecked(True)
                     elif item.prime == TOWARDS_START:
+                        print("true")
                         dialog.towards_start.setChecked(True)
 
                     dialog.junctable.setChecked(item.junctable)
@@ -114,8 +116,9 @@ class Plotter(pg.PlotWidget):
 
         if refs.mode.current == JUNCTER:
             if len(located) == 2:
-                refs.strands.current.add_junction(located[0], located[1])
-            refresh()
+                if all([isinstance(item, NEMid) for item in located]):
+                    refs.strands.current.add_junction(located[0], located[1])
+                    refresh()
         elif refs.mode.current == NICKER:
             for item in located:
                 if refs.mode.current == NICKER:

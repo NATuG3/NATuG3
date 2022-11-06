@@ -1,1 +1,1 @@
-from .window import Window
+from .constructor import Window

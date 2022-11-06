@@ -74,10 +74,6 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        # remove the old strands
-        self.strands.remove(NEMid1.strand)
-        self.strands.remove(NEMid2.strand)
-
         # flag the new NEMids as junctions
         NEMid1.junction, NEMid2.junction = True, True
         NEMid1.juncmate, NEMid2.juncmate = NEMid2, NEMid1
@@ -85,6 +81,10 @@ class Strands:
         new_strands = [Strand([]), Strand([])]
 
         if NEMid1.strand is NEMid2.strand:
+            # remove the old strands
+            # note that NEMid1.strand IS NEMid2.strand
+            self.strands.remove(NEMid1.strand)
+
             # first new strand
             new_strands[0].items.extend(
                 islice(NEMid1.strand.items, NEMid1.index, NEMid2.index + 1)
@@ -100,18 +100,24 @@ class Strands:
 
             logger.info("Created same-strand junction.")
         elif NEMid1.strand is not NEMid2.strand:
-            # first new strand
+            # remove the old strands
+            self.strands.remove(NEMid1.strand)
+            self.strands.remove(NEMid2.strand)
+
+            # crawl from beginning of NEMid#1's strand to the junction site
             new_strands[0].items.extend(
                 islice(NEMid1.strand.items, 0, NEMid1.index + 1)
             )
+            # crawl from the junction site on NEMid#2's strand to the end of the strand
             new_strands[0].items.extend(
                 islice(NEMid2.strand.items, NEMid2.index + 1, None)
             )
 
-            # second new strand
+            # crawl from the beginning of NEMid#2's strand to the junction site
             new_strands[1].items.extend(
                 islice(NEMid2.strand.items, 0, NEMid2.index + 1)
             )
+            # crawl from the junction on NEMid #1's strand to the end of the strand
             new_strands[1].items.extend(
                 islice(NEMid1.strand.items, NEMid1.index + 1, None)
             )

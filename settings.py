@@ -8,6 +8,7 @@ colors = {
     "grid_lines": (220, 220, 220),
     "nicks": (130, 14, 14),
     "highlighted": (245, 245, 0),
+    "success": (192, 209, 188),
     "strands": {
         "greys": ((195, 195, 195), (70, 70, 70)),
         "colors": (

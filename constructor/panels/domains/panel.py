@@ -93,7 +93,7 @@ class Panel(QWidget):
             self.total_count.setValue(references.domains.current.count)
 
             self.update_table.setStyleSheet(
-                f"background-color: rgb{str(settings.colors.green)}"
+                f"background-color: rgb{str(settings.colors['success'])}"
             )
             timer = QTimer(self.parent())
             timer.setInterval(400)

@@ -43,7 +43,6 @@ class Point:
         )
 
     def __eq__(self, other):
-        print(self, other)
         if not isinstance(other, type(self)):
             return False
         if self.position() == other.position():
