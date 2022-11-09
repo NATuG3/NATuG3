@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from typing import List
 
 from helpers import inverse
@@ -18,8 +19,17 @@ class Domains:
 
     @property
     def domains(self):
-        """List of all domains."""
-        output = tuple(self.subunit.domains * self.symmetry)
+        """
+        List of all domains.
+
+        Notes:
+            - This returns a copy of each domain.
+            - The output is based off of self.subunit.domains.
+        """
+        output = []
+        for cycle in range(self.symmetry):
+            for domain in self.subunit.domains:
+                output.append(copy(domain))
         for index, domain in enumerate(output):
             domain.index = index
         return output

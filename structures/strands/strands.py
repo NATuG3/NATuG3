@@ -1,5 +1,6 @@
 import logging
 from collections import namedtuple
+from contextlib import suppress
 from itertools import islice
 from math import dist
 from typing import List, NamedTuple
@@ -74,6 +75,9 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
+        # save the old strand references
+        old_strands = (NEMid1.strand, NEMid2.strand)
+
         # flag the new NEMids as junctions
         NEMid1.junction, NEMid2.junction = True, True
         NEMid1.juncmate, NEMid2.juncmate = NEMid2, NEMid1
@@ -118,28 +122,41 @@ class Strands:
                 )
 
             logger.info("Created same-strand junction.")
+
         elif NEMid1.strand is not NEMid2.strand:
             # remove the old strands
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
 
-            # crawl from beginning of NEMid#1's strand to the junction site
-            new_strands[0].items.extend(
-                islice(NEMid1.strand.items, 0, NEMid1.index + 1)
-            )
-            # crawl from the junction site on NEMid#2's strand to the end of the strand
-            new_strands[0].items.extend(
-                islice(NEMid2.strand.items, NEMid2.index + 1, None)
-            )
+            if NEMid1.strand.closed and NEMid2.strand.closed:
+                raise NotImplementedError
 
-            # crawl from the beginning of NEMid#2's strand to the junction site
-            new_strands[1].items.extend(
-                islice(NEMid2.strand.items, 0, NEMid2.index + 1)
-            )
-            # crawl from the junction on NEMid #1's strand to the end of the strand
-            new_strands[1].items.extend(
-                islice(NEMid1.strand.items, NEMid1.index + 1, None)
-            )
+                new_strands[0].items.extend(
+                    islice(NEMid1.strand.items, 0, NEMid1.index)
+                )
+                new_strands[0].items.extend(NEMid2.strand.items)
+                new_strands[0].items.extend(
+                    islice(NEMid1.strand.items, NEMid1.index, None)
+                )
+
+            elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
+                # crawl from beginning of NEMid#1's strand to the junction site
+                new_strands[0].items.extend(
+                    islice(NEMid1.strand.items, 0, NEMid1.index + 1)
+                )
+                # crawl from the junction site on NEMid#2's strand to the end of the strand
+                new_strands[0].items.extend(
+                    islice(NEMid2.strand.items, NEMid2.index + 1, None)
+                )
+
+                # crawl from the beginning of NEMid#2's strand to the junction site
+                new_strands[1].items.extend(
+                    islice(NEMid2.strand.items, 0, NEMid2.index + 1)
+                )
+                # crawl from the junction on NEMid #1's strand to the end of the strand
+                new_strands[1].items.extend(
+                    islice(NEMid1.strand.items, NEMid1.index + 1, None)
+                )
 
             logger.info("Created same-strand junction.")
 
@@ -154,9 +171,13 @@ class Strands:
             if not NEMid_.strand.interdomain:
                 NEMid_.junction = False
 
-        # add the new strands to the internal list of strands
-        self.strands.append(new_strands[0])
-        self.strands.append(new_strands[1])
+        for old_strand, new_strand in zip(old_strands, new_strands):
+            # if the strand isn't empty then remove the old one and add the new one
+            if not new_strand.empty:
+                self.strands.append(new_strand)
+                # ValueError = already was removed
+                with suppress(ValueError):
+                    self.strands.remove(old_strand)
 
         self.recolor()
 

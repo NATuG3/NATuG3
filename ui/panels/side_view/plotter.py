@@ -45,9 +45,9 @@ class Plotter(pg.PlotWidget):
             self.removeItem(plot_item)
 
     def refresh(self):
-        logger.info("Refreshing side view.")
         self.clear()
         self._plot()
+        logger.info("Refreshed side view.")
 
     def point_clicked(self, event, points):
         """Called when a point on a strand is clicked."""

@@ -36,11 +36,10 @@ class Plotter(pg.PlotWidget):
         assert self.worker.u_coords.index(point[0]) == self.worker.v_coords.index(
             point[1]
         )
+
+        # create the new active x-range for the plot
         range = self.worker.u_coords.index(point[0])
-        if range == 0:
-            range = -1, range
-        else:
-            range = range - 1, range + 2
+        range = range - 1, range + 2
 
         # store the previous range of the ui
         previous = refs.constructor.side_view.plot.visibleRange()
@@ -108,5 +107,3 @@ class Plotter(pg.PlotWidget):
             )
             text.sigPointsClicked.connect(self.point_clicked)
             self.text.append(text)
-
-        self.plotted.sigPointsClicked.connect(self.point_clicked)

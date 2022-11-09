@@ -1,3 +1,2 @@
-from .NEMid import NEMid
-from .nucleoside import Nucleoside
-from .point import Point
+from structures.points.NEMid import NEMid
+from structures.points.nucleoside import Nucleoside

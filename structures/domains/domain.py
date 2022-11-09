@@ -64,6 +64,7 @@ class Domain:
     def __repr__(self) -> str:
         return (
             f"domain("
+            f"index={self.index}, "
             f"Θ_interior_multiple={self.theta_interior_multiple}, "
             f"helix_joints=(left={self.helix_joints[LEFT]}, "
             f"right={self.helix_joints[RIGHT]}, "

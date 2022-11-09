@@ -152,9 +152,10 @@ class SideView:
                     NEMid_ = NEMid(
                         x_coord,
                         z_coord,
-                        angle,
+                        angle % 360,
                         strand_direction,
                         TOWARDS_END,
+                        domain=domain,
                         junctable=junctable,
                     )
 
@@ -170,7 +171,6 @@ class SideView:
             NEMid2: NEMid
             for NEMid1, NEMid2 in zip(*NEMids[index]):
                 NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
-                NEMid1.domain, NEMid2.domain = domain, domain
 
         strands = []
         for index, domain in enumerate(self.domains.domains):
@@ -281,6 +281,7 @@ class SideView:
         x_coords = [list(domain) for domain in self._x_coords()]
         z_coords = [[None, None] for _ in range(self.domains.count)]
 
+        # creating a sample of x coords
         for index, domain in enumerate(self.domains.domains):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
@@ -341,9 +342,17 @@ class SideView:
             )
             # begin at the initial z coord and step by self.Z_b
 
+            # helix switch is the change in the z coord of a watson crick base pair
+            # as we go from the left helix to the other helix (may not be left/right)
+            helix_switch = self.profile.Z_s
+            if zeroed_strand == UP:
+                helix_switch *= -1
+            # elif zeroed_strand == DOWN:
+            #     helix_switch *= 1
+
             # non-zeroed strand
             z_coords[index][inverse(zeroed_strand)] = itertools.count(
-                start=initial_z_coord - self.profile.Z_s, step=self.profile.Z_b
+                start=initial_z_coord + helix_switch, step=self.profile.Z_b
             )
             # begin at the (initial z coord - z switch) and step by self.Z_b
 
