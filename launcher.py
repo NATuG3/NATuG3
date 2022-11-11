@@ -2,7 +2,7 @@ import logging
 from time import time
 
 # delete restoration files
-RESET = True
+RESET = False
 
 # refs script logger
 logger = logging.getLogger(__name__)

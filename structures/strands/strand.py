@@ -1,6 +1,7 @@
 import itertools
 from collections import deque
 from contextlib import suppress
+from copy import copy
 from functools import cached_property
 from math import dist
 from random import shuffle
@@ -31,19 +32,22 @@ class Strand:
         interdomain (bool): Whether this strand spans multiple domains.
     """
 
-    __cached = ("NEMids", "empty", "up_strand", "down_strand", "interdomain", "boundaries")
+    __cached = ("NEMids", "up_strand", "down_strand", "interdomain", "boundaries")
 
     def __init__(
             self,
-            items: list = deque([]),
+            items: list = None,
             color: Tuple[int, int, int] = (0, 0, 0),
             closed: bool = False
     ):
         self.color = color
         self.closed = closed
 
-        self.items = items
-        if not isinstance(self.items, deque):
+        if items is None:
+            self.items = deque([])
+        elif isinstance(items, deque):
+            self.items = items
+        else:
             self.items = deque(items)
 
         self.recompute()
@@ -56,29 +60,9 @@ class Strand:
         """Determine whether item is in strand."""
         return item in self.items
 
-    def sliced(self, start: int, end: int) -> tuple:
+    def sliced(self, start: int, end: int) -> list:
         """Return self.items as a list."""
-        return tuple(itertools.islice(self.items, start, end))
-
-    def append(self, item: object) -> None:
-        """Append an item to the right of this strand's items."""
-        self.items.append(item)
-        self.recompute()
-
-    def appendleft(self, item: object) -> None:
-        """Append an item to the right of this strand's items."""
-        self.items.appendleft(item)
-        self.recompute()
-
-    def extend(self, iterable: Iterable) -> None:
-        """Extend this strands items to the right with iterable"""
-        self.items.extend(iterable)
-        self.recompute()
-
-    def extendleft(self, iterable: Iterable) -> None:
-        """Extend this strand's items to the left with iterable"""
-        self.items.extendleft(iterable)
-        self.recompute()
+        return list(itertools.islice(self.items, start, end))
 
     def recompute(self) -> None:
         """Clear cached methods."""
@@ -116,15 +100,6 @@ class Strand:
             # we were not touching
             return False
 
-    def split(self, NEMid_: NEMid) -> Tuple[Type["Strand"], Type["Strand"]]:
-        """
-        Split strand at NEMid NEMid_.
-
-        Args:
-            NEMid_: The NEMid to remove, resulting in a split strand.
-        """
-        return [self.__init__(NEMid_.strand[:NEMid_.index]), self.__init__(NEMid_.strand[NEMid_.index:])]
-
     @cached_property
     def NEMids(self) -> List[NEMid]:
         """
@@ -139,10 +114,10 @@ class Strand:
                 output.append(item)
         return output
 
-    @cached_property
+    @property
     def empty(self) -> bool:
         """Whether this strand is empty."""
-        return len(self.items) <= 0
+        return len(self.items) == 0
 
     @cached_property
     def up_strand(self) -> bool:

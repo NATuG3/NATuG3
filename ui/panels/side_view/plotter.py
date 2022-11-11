@@ -1,5 +1,6 @@
 import atexit
 import logging
+from copy import copy
 from math import ceil, dist
 from typing import List
 
@@ -57,6 +58,9 @@ class Plotter(pg.PlotWidget):
             for item in strand.items:
                 if dist(point.pos(), item.position()) < settings.junction_threshold:
                     located.append(item)
+        for item in located:
+            if item.pseudo:
+                located.remove(item)
 
         refresh = refs.constructor.side_view.refresh
 
@@ -139,8 +143,13 @@ class Plotter(pg.PlotWidget):
         self.setLabel("left", text="Helical Twists", units="nanometers")
 
     def _plot(self):
-        for strand in refs.strands.current.strands:
+        for _strand in refs.strands.current.strands:
+            strand = copy(_strand)
             assert isinstance(strand, Strand)
+
+            if strand.closed:
+                strand.items.append(strand.items[0])
+                strand.items[-1].pseudo = True
 
             symbols: List[str] = []
             symbol_sizes: List[str] = []

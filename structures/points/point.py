@@ -22,7 +22,8 @@ class Point:
     direction: Literal[UP, DOWN]
 
     def __post_init__(self):
-        self.highlighted = False
+        self.highlighted: bool = False
+        self.pseudo: bool = False
 
     def position(self) -> Tuple[float, float]:
         """
