@@ -28,6 +28,15 @@ def singleton(orig_cls):
     return orig_cls
 
 
+def factors(number):
+    # https://www.programiz.com/python-programming/examples/factor-number
+    output = []
+    for i in range(1, number + 1):
+        if number % i == 0:
+            output.append(i)
+    return output
+
+
 def confirm(parent, title, msg):
     choice = QMessageBox.warning(
         parent,

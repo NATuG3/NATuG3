@@ -181,7 +181,7 @@ class SideView:
                     )
                 )
 
-        output = Strands(strands, self.profile)
+        output = Strands(strands)
         return output
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:

@@ -1,9 +1,11 @@
 import logging
+import math
 from collections import namedtuple, deque
 from contextlib import suppress
 from math import dist
 from typing import List, NamedTuple
 
+import helpers
 import settings
 from structures.misc import Profile
 from structures.points import NEMid
@@ -13,19 +15,24 @@ logger = logging.getLogger(__name__)
 
 
 class Strands:
-    def __init__(self, strands: List[Strand], profile: Profile) -> None:
+    def __init__(self, strands: List[Strand]) -> None:
         """
         Initialize an instance of Strands.
 
         Args:
             strands: A list of strands to create a Strands object from.
-            profile: The settings profile to use for computations.
         """
         assert [isinstance(strand, Strand) for strand in strands]
         self.strands = strands
 
-        assert isinstance(profile, Profile)
-        self.profile = profile
+        # assign juncmates
+        for strand in self.strands:
+            for NEMid_ in strand.NEMids:
+                for test_strand in self.strands:
+                    for test_NEMid in test_strand.NEMids:
+                        if dist(NEMid_.position(), test_NEMid.position()) < settings.junction_threshold:
+                            NEMid_.juncmate = test_NEMid
+                            test_NEMid.juncmate = NEMid_
 
     def recolor(self):
         """
@@ -83,32 +90,64 @@ class Strands:
         NEMid1.junction, NEMid2.junction = True, True
         NEMid1.juncmate, NEMid2.juncmate = NEMid2, NEMid1
 
-        new_strands = [[], []]
+        # new strands we are creating
+        new_strands = [Strand(), Strand()]
+
+        # log basic info for debugging
+        logger.debug(f"NEMid1.index={NEMid1.index}; NEMid2.index={NEMid2.index}")
+        logger.debug(f"NEMid1.closed={NEMid1.strand.closed}; NEMid2.closed={NEMid2.strand.closed}")
+        logger.debug(f"NEMid1-strand-length={len(NEMid1.strand)}; NEMid1-strand-length={len(NEMid2.strand)}")
 
         if NEMid1.strand is NEMid2.strand:
             # create shorthand for strand since they are the same
             strand: Strand = NEMid1.strand  # == NEMid2.strand
 
-            # remove the old strands
+            # remove the old strand
             # note that NEMid1.strand IS NEMid2.strand
             self.strands.remove(strand)
+            if strand.closed:
+                # append NEMids to a new strand until we reach the junction site
+                for NEMid_ in strand.NEMids:
+                    # start out by appending to the first new strand
+                    if not dist(NEMid_.position(), NEMid1.position()) < settings.junction_threshold:
+                        new_strands[0].append(NEMid_)
+                    else:
+                        new_strands[0].append(NEMid_)
+                        break
 
-            if NEMid2.index < NEMid1.index:
-                # crawl from the index of the right NEMid to the index of the left NEMid
-                new_strands[0].extend(strand.items[NEMid2.index: NEMid1.index + 1])
+                # append all other NEMids to the other new strand
+                for NEMid_ in strand.NEMids:
+                    if NEMid_ not in new_strands[0]:
+                        new_strands[1].append(NEMid_)
+                # ensure that the second new strand starts at the right junction-site NEMid
+                new_strands[1] = deque(new_strands[1])
+                new_strands[1].rotate(1)
+                new_strands[1] = list(new_strands[1])
+                # new_strands[1].insert(0, NEMid2)
+                # del new_strands[1][-1]
 
-                # crawl from the beginning of the strand to the index of the right NEMid
-                new_strands[1].extend(strand.items[0 : NEMid2.index + 1])
-                # crawl from the index of the left NEMid to the end of the strand
-                new_strands[1].extend(strand.items[NEMid1.index:])
-            elif NEMid1.index < NEMid2.index:
-                # crawl from the index of the left NEMid to the index of the right NEMid
-                new_strands[0].extend(strand.items[NEMid1.index: NEMid2.index + 1])
+                # new_strands[0].append(NEMid1)
+                # new_strands[0].append(new_strands[0][0])
 
-                # crawl from the beginning of the strand to the index of the left NEMid
-                new_strands[1].extend(strand.items[0 : NEMid1.index + 1])
-                # crawl from the index of the right NEMid to the end of the strand
-                new_strands[1].extend(strand.items[NEMid2.index:])
+            elif not strand.closed:
+                if NEMid2.index < NEMid1.index:
+                    # crawl from the index of the right NEMid to the index of the left NEMid
+                    new_strands[0].extend(strand.sliced(NEMid2.index, NEMid1.index))
+
+                    # crawl from the beginning of the strand to the index of the right NEMid
+                    new_strands[1].extend(strand.sliced(0, NEMid2.index))
+
+                    # crawl from the index of the left NEMid to the end of the strand
+                    new_strands[1].extend(strand.sliced(NEMid1.index, None))
+                elif NEMid1.index < NEMid2.index:
+                    # crawl from the index of the left NEMid to the index of the right NEMid
+                    new_strands[0].extend(strand.sliced(NEMid1.index, NEMid2.index))
+
+                    # crawl from the beginning of the strand to the index of the left NEMid
+                    new_strands[1].extend(strand.sliced(None, NEMid1.index))
+
+                    # crawl from the index of the right NEMid to the end of the strand
+                    new_strands[1].extend(strand.sliced(NEMid2.index, None))
 
             logger.info("Created same-strand junction.")
 
@@ -119,29 +158,32 @@ class Strands:
 
             if NEMid1.strand.closed and NEMid2.strand.closed:
                 # alternate strands that starts and ends at the junction site
-                reordered_strands = [deque(NEMid1.strand.items), deque(NEMid2.strand.items)]
-                reordered_strands[0].rotate(len(reordered_strands[0])-1-NEMid1.index)
-                reordered_strands[1].rotate(len(reordered_strands[1])-1-NEMid1.index)
-                reordered_strands = [list(strand) for strand in reordered_strands]
+                for NEMid_ in (NEMid1, NEMid2):
+                    NEMid_.strand.items.rotate(len(NEMid_.strand)-1-NEMid_.index)
 
-                new_strands[0].extend(reordered_strands[0][:-1])
-                new_strands[0].extend(reordered_strands[1])
+                # add the entire first reordered strand to the new strand
+                new_strands[0].extend(NEMid1.strand)
+                # add the junction site left NEMid to the new strand
+                new_strands[0].append(NEMid1)
+                # add the entire second reordered strand to the new strand
+                new_strands[0].extend(NEMid2.strand)
+                # add the junction site right NEMid to the new strand
+                new_strands[0].append(NEMid2)
 
-                new_strands[0].append(reordered_strands[0][-1])
-                new_strands[0].append(reordered_strands[0][0])
+                logger.info("Created cross-strand junction for two closed NEMids.")
 
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
-                new_strands[0].extend(NEMid1.strand.items[0: NEMid1.index + 1])
+                new_strands[0].extend(NEMid1.strand.sliced(0, NEMid1.index))
                 # crawl from the junction site on NEMid#2's strand to the end of the strand
-                new_strands[0].extend(NEMid2.strand.items[NEMid2.index + 1:])
+                new_strands[0].extend(NEMid2.strand.sliced(NEMid2.index, None))
 
                 # crawl from the beginning of NEMid#2's strand to the junction site
-                new_strands[1].extend(NEMid2.strand.items[0: NEMid2.index + 1])
+                new_strands[1].extend(NEMid2.strand.sliced(0, NEMid2.index))
                 # crawl from the junction on NEMid #1's strand to the end of the strand
-                new_strands[1].extend(NEMid1.strand.items[NEMid1.index + 1:])
+                new_strands[1].extend(NEMid1.strand.sliced(NEMid1.index, None))
 
-            logger.info("Created same-strand junction.")
+                logger.info("Created cross-strand junction for two non-closed NEMids.")
 
         # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
         # then mark NEMid1 as not-a-junction
@@ -150,9 +192,6 @@ class Strands:
                 NEMid_.junction = False
 
         for old_strand, new_strand in zip(old_strands, new_strands):
-            # convert new strand to a real strand object
-            new_strand = Strand(new_strand)
-
             # if the strand isn't empty then remove the old one and add the new one
             if not new_strand.empty:
                 self.strands.append(new_strand)

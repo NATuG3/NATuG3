@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+import itertools
+from collections import deque
+from contextlib import suppress
 from functools import cached_property
 from math import dist
 from random import shuffle
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Iterable
 
-import settings
 from structures.points import NEMid
 
 
@@ -14,7 +15,6 @@ def shuffled(array):
     return output
 
 
-@dataclass
 class Strand:
     """
     A strand of items.
@@ -23,7 +23,7 @@ class Strand:
         items: All items contained within the strand (NEMids, Nicks, etc.).
         NEMids: All NEMids contained within the strand.
         color (tuple[int, int, int]): RGB color of strand.
-        closed (bool): Whether the strand is closed.
+        closed (bool): Whether the strand is closed. Must be manually set.
         empty (bool): Whether the strand is empty.
         boundaries (tuple[minX, maxX, minY, maxY]): The boundary box of the strand.
         up_strand (bool): Whether all NEMids in this strand are up-NEMids.
@@ -31,19 +31,61 @@ class Strand:
         interdomain (bool): Whether this strand spans multiple domains.
     """
 
-    items: list
-    color: Tuple[int, int, int] = (0, 0, 0)
+    __cached = ("NEMids", "empty", "up_strand", "down_strand", "interdomain", "boundaries")
 
-    def __post_init__(self):
-        """
-        Initialize a Strand object.
+    def __init__(
+            self,
+            items: list = deque([]),
+            color: Tuple[int, int, int] = (0, 0, 0),
+            closed: bool = False
+    ):
+        self.color = color
+        self.closed = closed
 
-        Args:
-            items: All items in the strand.
-            color: The color of the strand as (R, G, B). Defaults to black.
-        """
-        # make our items immutable
-        self.items, tuple(self.items)
+        self.items = items
+        if not isinstance(self.items, deque):
+            self.items = deque(items)
+
+        self.recompute()
+
+    def __len__(self) -> int:
+        """Obtain number of items in strand."""
+        return len(self.items)
+
+    def __contains__(self, item) -> bool:
+        """Determine whether item is in strand."""
+        return item in self.items
+
+    def sliced(self, start: int, end: int) -> tuple:
+        """Return self.items as a list."""
+        return tuple(itertools.islice(self.items, start, end))
+
+    def append(self, item: object) -> None:
+        """Append an item to the right of this strand's items."""
+        self.items.append(item)
+        self.recompute()
+
+    def appendleft(self, item: object) -> None:
+        """Append an item to the right of this strand's items."""
+        self.items.appendleft(item)
+        self.recompute()
+
+    def extend(self, iterable: Iterable) -> None:
+        """Extend this strands items to the right with iterable"""
+        self.items.extend(iterable)
+        self.recompute()
+
+    def extendleft(self, iterable: Iterable) -> None:
+        """Extend this strand's items to the left with iterable"""
+        self.items.extendleft(iterable)
+        self.recompute()
+
+    def recompute(self) -> None:
+        """Clear cached methods."""
+        # clear all cache
+        for cached in self.__cached:
+            with suppress(KeyError):
+                del self.__dict__[cached]
 
         # assign all our NEMids US as the parent strand
         for index, NEMid_ in enumerate(self.items):
@@ -101,17 +143,6 @@ class Strand:
     def empty(self) -> bool:
         """Whether this strand is empty."""
         return len(self.items) <= 0
-
-    @cached_property
-    def closed(self) -> bool:
-        """Whether this strand is closed."""
-        try:
-            return (
-                dist(self.items[0].position(), self.items[-1].position())
-                < settings.junction_threshold
-            )
-        except AttributeError:
-            return False
 
     @cached_property
     def up_strand(self) -> bool:
