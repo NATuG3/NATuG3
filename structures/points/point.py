@@ -20,7 +20,6 @@ class Point:
     z_coord: float
     angle: float
     direction: Literal[UP, DOWN]
-    prime: Literal[TOWARDS_START, TOWARDS_END]
 
     def __post_init__(self):
         self.highlighted = False

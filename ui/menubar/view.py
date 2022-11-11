@@ -19,7 +19,8 @@ class View(QMenu):
         self.actions.config.setStatusTip("Display the config tab menu")
         self.actions.config.setIcon(fetch_icon("eye-outline"))
         self.actions.config.triggered.connect(
-            lambda: helpers.reverse_hidenness(refs.constructor.panels.config))
+            lambda: helpers.reverse_hidenness(refs.constructor.panels.config)
+        )
 
         self.actions.top_view = self.addAction("Helices Top View")
         self.actions.top_view.setStatusTip("Display the helices top view graph")

@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QDockWidget
 
 import refs
 import ui
-from ui.panels.top_view.worker import TopView
+from workers.top_view import TopView
 
 
 class Panel(QDockWidget):
@@ -20,8 +20,6 @@ class Panel(QDockWidget):
 
     def refresh(self):
         """Update the current plot."""
-        self.plot.worker = TopView(
-            refs.domains.current, refs.nucleic_acid.current
-        )
+        self.plot.worker = TopView(refs.domains.current, refs.nucleic_acid.current)
         self.plot.profile = refs.nucleic_acid.current
         self.plot.refresh()

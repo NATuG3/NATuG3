@@ -154,7 +154,6 @@ class SideView:
                         z_coord,
                         angle % 360,
                         strand_direction,
-                        TOWARDS_END,
                         domain=domain,
                         junctable=junctable,
                     )

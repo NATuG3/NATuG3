@@ -4,7 +4,7 @@ import pyqtgraph as pg
 
 import helpers
 import refs
-from ui.panels.top_view.worker import TopView
+from workers.top_view import TopView
 
 logger = logging.getLogger(__name__)
 
@@ -89,7 +89,7 @@ class Plotter(pg.PlotWidget):
         )
 
         for counter, position in enumerate(
-                tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
+            tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
         ):
             counter = str(counter + 1)
             symbol_size = refs.nucleic_acid.current.D / 3

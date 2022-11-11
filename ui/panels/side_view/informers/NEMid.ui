@@ -1,346 +1,298 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <class>Dialog</class>
-    <widget class="QDialog" name="Dialog">
-        <property name="geometry">
-            <rect>
-                <x>0</x>
-                <y>0</y>
-                <width>241</width>
-                <height>200</height>
-            </rect>
-        </property>
-        <property name="minimumSize">
-            <size>
-                <width>0</width>
-                <height>200</height>
-            </size>
-        </property>
-        <property name="maximumSize">
-            <size>
-                <width>241</width>
-                <height>200</height>
-            </size>
-        </property>
-        <property name="windowTitle">
-            <string>NEMid Information</string>
-        </property>
-        <layout class="QGridLayout" name="gridLayout">
-            <item row="3" column="2">
-                <widget class="QLineEdit" name="parent_strand_index">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="6" column="0">
-                <widget class="QCheckBox" name="junction">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QCheckBox::disabled{
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>241</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>200</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>241</width>
+    <height>200</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>NEMid Information</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="5" column="0">
+    <widget class="QCheckBox" name="junctable">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QCheckBox::disabled{
                             color: rgb(0, 0, 0)
                             }
                         </string>
-                    </property>
-                    <property name="text">
-                        <string>Is Active Junction</string>
-                    </property>
-                    <property name="checkable">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="5" column="0">
-                <widget class="QCheckBox" name="junctable">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QCheckBox::disabled{
-                            color: rgb(0, 0, 0)
-                            }
-                        </string>
-                    </property>
-                    <property name="text">
-                        <string>Could Be Junction</string>
-                    </property>
-                    <property name="checkable">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="4" column="0">
-                <widget class="QLineEdit" name="lineEdit_4">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="text">
-                        <string>Original Domain</string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="0" column="0">
-                <widget class="QLineEdit" name="lineEdit_2">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="text">
-                        <string>X Coordinate</string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="4" column="2">
-                <widget class="QLineEdit" name="original_domain">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="3" column="0">
-                <widget class="QLineEdit" name="lineEdit_5">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="text">
-                        <string>Parent Strand Index</string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="2" column="0">
-                <widget class="QLineEdit" name="lineEdit">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="text">
-                        <string>Angle</string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="1" column="0">
-                <widget class="QLineEdit" name="lineEdit_3">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="text">
-                        <string>Z Coordinate</string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="2" column="2">
-                <widget class="QLineEdit" name="angle">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="0" column="2">
-                <widget class="QLineEdit" name="x_coordinate">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="1" column="2">
-                <widget class="QLineEdit" name="z_coordinate">
-                    <property name="enabled">
-                        <bool>false</bool>
-                    </property>
-                    <property name="styleSheet">
-                        <string notr="true">QLineEdit::disabled{
-                            color: rgb(0, 0, 0);
-                            background: rgb(255, 255, 255)
-                            }
-                        </string>
-                    </property>
-                    <property name="readOnly">
-                        <bool>true</bool>
-                    </property>
-                </widget>
-            </item>
-            <item row="5" column="2">
-                <layout class="QHBoxLayout" name="horizontalLayout">
-                    <item>
-                        <widget class="QPushButton" name="up">
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="styleSheet">
-                                <string notr="true">QPushButton::disabled{
-                                    color: rgb(0, 0, 0)
-                                    }
-                                </string>
-                            </property>
-                            <property name="text">
-                                <string>Up</string>
-                            </property>
-                            <property name="checkable">
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                    </item>
-                    <item>
-                        <widget class="QPushButton" name="down">
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="styleSheet">
-                                <string notr="true">QPushButton::disabled{
-                                    color: rgb(0, 0, 0)
-                                    }
-                                </string>
-                            </property>
-                            <property name="text">
-                                <string>Down</string>
-                            </property>
-                            <property name="checkable">
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                    </item>
-                </layout>
-            </item>
-            <item row="6" column="2">
-                <layout class="QHBoxLayout" name="horizontalLayout_2">
-                    <item>
-                        <widget class="QPushButton" name="towards_end">
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="toolTip">
-                                <string>Towards End</string>
-                            </property>
-                            <property name="styleSheet">
-                                <string notr="true">QPushButton::disabled{
-                                    color: rgb(0, 0, 0)
-                                    }
-                                </string>
-                            </property>
-                            <property name="text">
-                                <string>5' to 3'</string>
-                            </property>
-                            <property name="checkable">
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                    </item>
-                    <item>
-                        <widget class="QPushButton" name="towards_start">
-                            <property name="enabled">
-                                <bool>false</bool>
-                            </property>
-                            <property name="toolTip">
-                                <string>Towards Start</string>
-                            </property>
-                            <property name="styleSheet">
-                                <string notr="true">QPushButton::disabled{
-                                    color: rgb(0, 0, 0)
-                                    }
-                                </string>
-                            </property>
-                            <property name="text">
-                                <string>5' to 3'</string>
-                            </property>
-                            <property name="checkable">
-                                <bool>true</bool>
-                            </property>
-                        </widget>
-                    </item>
-                </layout>
-            </item>
-        </layout>
+     </property>
+     <property name="text">
+      <string>Could Be Junction</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
     </widget>
-    <resources/>
-    <connections/>
+   </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="junction">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QCheckBox::disabled{
+                            color: rgb(0, 0, 0)
+                            }
+                        </string>
+     </property>
+     <property name="text">
+      <string>Is Active Junction</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QLineEdit" name="strand">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QLineEdit" name="original_domain">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLineEdit" name="lineEdit_2">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="text">
+      <string>X Coordinate</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QLineEdit" name="lineEdit_4">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="text">
+      <string>Original Domain</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLineEdit" name="lineEdit_3">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="text">
+      <string>Z Coordinate</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLineEdit" name="lineEdit_5">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="text">
+      <string>Strand</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLineEdit" name="angle">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="text">
+      <string>Angle</string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QLineEdit" name="z_coordinate">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QLineEdit" name="x_coordinate">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QLineEdit::disabled{
+                            color: rgb(0, 0, 0);
+                            background: rgb(255, 255, 255)
+                            }
+                        </string>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="2" rowspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="up">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton::disabled{
+                                    color: rgb(0, 0, 0)
+                                    }
+                                </string>
+       </property>
+       <property name="text">
+        <string>Up</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="down">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton::disabled{
+                                    color: rgb(0, 0, 0)
+                                    }
+                                </string>
+       </property>
+       <property name="text">
+        <string>Down</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
 </ui>

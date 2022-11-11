@@ -5,7 +5,7 @@ from typing import Union
 
 import refs
 from structures.strands.strands import Strands
-from ui.panels.side_view.worker import SideView
+from workers.side_view import SideView
 
 
 class _Strands:

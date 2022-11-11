@@ -74,8 +74,9 @@ class Plotter(pg.PlotWidget):
                     dialog.z_coordinate.setText(f"{item.z_coord:.4f} nanometers")
                     dialog.angle.setText(f"{item.angle:.4f}°")
 
-                    dialog.parent_strand_index.setText(
-                        f"item #{item.index} of {len(item.strand.items) + 1} items"
+                    strand_index = refs.strands.current.strands.index(item.strand)
+                    dialog.strand.setText(
+                        f"item #{item.index} in strand #{strand_index}"
                     )
 
                     dialog.original_domain.setText(
@@ -86,11 +87,6 @@ class Plotter(pg.PlotWidget):
                         dialog.up.setChecked(True)
                     elif item.direction == DOWN:
                         dialog.down.setChecked(True)
-
-                    if item.prime == TOWARDS_END:
-                        dialog.towards_end.setChecked(True)
-                    elif item.prime == TOWARDS_START:
-                        dialog.towards_start.setChecked(True)
 
                     dialog.junctable.setChecked(item.junctable)
                     dialog.junction.setChecked(item.junction)
@@ -180,7 +176,7 @@ class Plotter(pg.PlotWidget):
                         brushes.append(NEMid_brush)
 
                 elif isinstance(point, Nick):
-                    symbol_sizes.append(6)
+                    symbol_sizes.append(15)
                     symbols.append("o")
                     brushes.append(nick_brush)
 
