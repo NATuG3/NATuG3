@@ -1,10 +1,10 @@
 import logging
 from time import time
 
-# delete restoration files
+# whether to delete restoration files
 RESET = False
 
-# refs script logger
+# refs script logger object
 logger = logging.getLogger(__name__)
 
 # mute pyqt logs
@@ -12,6 +12,8 @@ logging.getLogger("PyQt6").setLevel(logging.INFO)
 
 
 def main():
+    """Main runner for program."""
+
     if RESET:
         from os import remove
         from contextlib import suppress

@@ -38,7 +38,7 @@ class Strand:
             self,
             items: list = None,
             color: Tuple[int, int, int] = (0, 0, 0),
-            closed: bool = False
+            closed: bool | None = False
     ):
         self.color = color
         self.closed = closed
@@ -146,7 +146,12 @@ class Strand:
 
     @cached_property
     def size(self) -> Tuple[float, float]:
-        """The overall size of the strand in nanometers."""
+        """
+        The overall size of the strand in nanometers.
+
+        Returns:
+            Tuple(width, height): The strand size.
+        """
         width = max([item.x_coord for item in self.items]) - min(
             [item.x_coord for item in self.items]
         )
@@ -157,7 +162,12 @@ class Strand:
 
     @cached_property
     def boundaries(self) -> Tuple[float, float, float, float]:
-        """The location of the bounding box of the strand."""
+        """
+        The location of the bounding box of the strand.
+
+        Returns:
+            Tuple[xMin, xMax, zMin, zMax]: The boundary box of the strand.
+        """
         return (
             min(item.x_coord for item in self.items),
             max(item.x_coord for item in self.items),

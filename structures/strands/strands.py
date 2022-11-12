@@ -35,11 +35,29 @@ class Strands:
                             test_NEMid.juncmate = NEMid_
 
     def append(self, strand: Strand):
-        """Add a strand."""
+        """
+        Add a strand.
+
+        Args:
+            strand: The strand to add.
+
+        Raises:
+            TypeError: Strand being appended is not of type Strand.
+        """
+        if not isinstance(strand, Strand):
+            raise TypeError("Cannot add non-strand to strand list.", strand)
         self.strands.append(strand)
 
     def remove(self, strand: Strand):
-        """Remove a strand."""
+        """
+        Remove a strand.
+
+        Args:
+            strand: The strand to remove.
+
+        Raises:
+            ValueError: Strand is not in strands.
+        """
         self.strands.remove(strand)
 
     def recolor(self):
@@ -71,7 +89,7 @@ class Strands:
 
     def junct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
-        Add a cross-strand junction where NEMid1 and NEMid2 overlap.
+        Add/remove a junction where NEMid1 and NEMid2 overlap.
 
         Args:
             NEMid1: One NEMid at the junction site.
@@ -79,6 +97,10 @@ class Strands:
 
         Raises:
             ValueError: NEMids are ineligible to be made into a junction.
+
+        Notes:
+            - The order of NEMid1 and NEMid2 is arbitrary.
+            - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
         """
         if dist(NEMid1.position(), NEMid2.position()) > settings.junction_threshold:
             raise ValueError(
