@@ -1,5 +1,6 @@
 import atexit
 import logging
+from contextlib import suppress
 from copy import copy
 from math import ceil, dist
 from typing import List
@@ -59,8 +60,9 @@ class Plotter(pg.PlotWidget):
                 if dist(point.pos(), item.position()) < settings.junction_threshold:
                     located.append(item)
         for item in located:
-            if item.pseudo:
-                located.remove(item)
+            with suppress(AttributeError):
+                if item.pseudo:
+                    located.remove(item)
 
         refresh = refs.constructor.side_view.refresh
 
@@ -119,7 +121,7 @@ class Plotter(pg.PlotWidget):
         if refs.mode.current == JUNCTER:
             if len(located) == 2:
                 if all([isinstance(item, NEMid) for item in located]):
-                    refs.strands.current.add_junction(located[0], located[1])
+                    refs.strands.current.junct(located[0], located[1])
                     refresh()
         elif refs.mode.current == NICKER:
             for item in located:
