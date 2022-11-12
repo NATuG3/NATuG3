@@ -106,6 +106,8 @@ class Strands:
             # note that NEMid1.strand IS NEMid2.strand
             self.strands.remove(strand)
             if strand.closed:
+                # this is the "undoing" a loop connected to a loop case
+
                 # append NEMids to a new strand until we reach the junction site
                 for NEMid_ in strand.NEMids:
                     # start out by appending to the first new strand
@@ -126,6 +128,8 @@ class Strands:
                 logger.info("Created closed-strand same-strand junction.")
 
             elif not strand.closed:
+                # this is the creating a loop strand case
+
                 if NEMid2.index < NEMid1.index:
                     # crawl from the index of the right NEMid to the index of the left NEMid
                     new_strands[0].items.extend(strand.sliced(NEMid2.index, NEMid1.index))
@@ -148,6 +152,7 @@ class Strands:
 
                 # the first new strand will now be closed
                 new_strands[0].closed = True
+                new_strands[1].closed = False
 
                 logger.info("Created open-strand same-strand junction.")
 
@@ -156,7 +161,7 @@ class Strands:
             self.strands.remove(NEMid1.strand)
             self.strands.remove(NEMid2.strand)
 
-            if NEMid1.strand.closed or NEMid2.strand.closed:
+            if (NEMid1.strand.closed, NEMid2.strand.closed).count(True) == 1:
                 if NEMid1.strand.closed:
                     closed_strand_NEMid: NEMid = NEMid1
                     open_strand_NEMid: NEMid = NEMid2
@@ -169,6 +174,11 @@ class Strands:
                 new_strands[0].items.extend(closed_strand_NEMid.strand.sliced(0, closed_strand_NEMid.index))
                 new_strands[0].items.extend(open_strand_NEMid.strand.sliced(open_strand_NEMid.index, None))
 
+                # set closedness of the strands
+                new_strands[0].closed = False
+
+                logger.info("Created open to closed strand cross-strand junction.")
+
             elif NEMid1.strand.closed and NEMid2.strand.closed:
                 # alternate strands that starts and ends at the junction site
                 for NEMid_ in (NEMid1, NEMid2):
@@ -179,10 +189,10 @@ class Strands:
                 # add the entire second reordered strand to the new strand
                 new_strands[0].items.extend(NEMid2.strand.items)
 
-                # this new strand is closed
+                # set closedness of the strands
                 new_strands[0].closed = True
 
-                logger.info("Created cross-strand junction for two closed NEMids.")
+                logger.info("Created cross-strand junction for two closed strands.")
 
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
@@ -194,6 +204,10 @@ class Strands:
                 new_strands[1].items.extend(NEMid2.strand.sliced(0, NEMid2.index))
                 # crawl from the junction on NEMid #1's strand to the end of the strand
                 new_strands[1].items.extend(NEMid1.strand.sliced(NEMid1.index, None))
+
+                # set closedness of the strands
+                new_strands[0].closed = False
+                new_strands[1].closed = False
 
                 logger.info("Created cross-strand junction for two non-closed NEMids.")
 

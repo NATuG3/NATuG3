@@ -79,8 +79,13 @@ class Plotter(pg.PlotWidget):
                     dialog.angle.setText(f"{item.angle:.4f}°")
 
                     strand_index = refs.strands.current.strands.index(item.strand)
+                    openness = None
+                    if item.strand.closed:
+                        openness = "closed"
+                    else:  # not item.strand.closed
+                        openness = "open"
                     dialog.strand.setText(
-                        f"item #{item.index} in strand #{strand_index}"
+                        f"item #{item.index} in {openness} strand #{strand_index}"
                     )
 
                     dialog.original_domain.setText(
