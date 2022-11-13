@@ -1,6 +1,7 @@
 extension = "nano"
 
-name = "NATuG3"
+name = "NATuG"
+version = 3.0
 
 junction_threshold = 0.01
 

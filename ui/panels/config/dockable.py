@@ -18,4 +18,5 @@ class Dockable(QDockWidget):
 
         # store the actual link to the widget in self.config
         self.panel = Panel(self)
+        self.tab_area = self.panel.tab_area
         self.setWidget(self.panel)

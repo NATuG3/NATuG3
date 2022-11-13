@@ -7,7 +7,7 @@ class Action(QPushButton):
     def __init__(self, title):
         super().__init__(title)
         self.setCheckable(True)
-        self.setFixedWidth(50)
+        self.setFixedWidth(67)
 
 
 class Actions(QButtonGroup):
@@ -23,6 +23,7 @@ class Actions(QButtonGroup):
         self.addButton(self.Informer(), INFORMER)
         self.addButton(self.Juncter(), JUNCTER)
         self.addButton(self.Nicker(), NICKER)
+        self.addButton(self.Hairpinner(), HAIRPINNER)
 
     def addButton(self, button: QAbstractButton, id: int) -> None:
         """Before calling the inherited addButton store the new button in self.buttons."""
@@ -46,3 +47,9 @@ class Actions(QButtonGroup):
 
         def __init__(self):
             super().__init__("Nicker")
+
+    class Hairpinner(Action):
+        """Mode for making nicks."""
+
+        def __init__(self):
+            super().__init__("Hairpinner")

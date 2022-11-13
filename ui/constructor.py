@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QStatusBar,
     QMenuBar,
-    QWidget,
+    QWidget, QTabWidget,
 )
 
 import refs
@@ -91,6 +91,9 @@ class Window(QMainWindow):
 
         self.top_view = Panel()
 
+        # set minimum width for top view
+        self.top_view.setMinimumWidth(150)
+
         # top view is only allowed on the sides
         self.top_view.setAllowedAreas(
             Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
@@ -145,17 +148,20 @@ class Window(QMainWindow):
         else:
             self.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
 
+        self.config.tab_area: QTabWidget
         # config resizing...
         # if config is floating make the max size very large
         if self.config.isFloating():
+            self.config.tab_area.setTabPosition(QTabWidget.TabPosition.North)
             self.config.setMaximumWidth(600)
         # otherwise check the current tab of the config panel
         else:
+            self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
             # if the domains tab of the config panel is visible:
             if self.config.panel.tabs.domains.isVisible():
                 # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
-                self.config.setFixedWidth(270)
+                self.config.setFixedWidth(290)
             # if the nucleic acid tab of the config panel is visible:
             elif self.config.panel.tabs.nucleic_acid.isVisible():
-                self.config.setFixedWidth(200)
+                self.config.setFixedWidth(220)
