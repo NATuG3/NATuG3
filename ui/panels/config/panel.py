@@ -47,22 +47,25 @@ class Panel(QWidget):
             # (if there are not then we do not need to warn the user)
             for strand in refs.strands.current.strands:
                 if strand.interdomain:
+                    # create popup
                     popup = QDialog(refs.constructor)
                     uic.loadUi("ui/panels/config/warn_and_refresh.ui", popup)
 
+                    # create default filename
                     popup.location.setText(
                         f"NATuG3/saves/{round(time())}.{settings.extension}"
                     )
 
+                    # hook buttons of popup
+                    popup.refresh.clicked.connect(popup.close)
+                    popup.refresh.clicked.connect(refs.strands.recompute)
+                    popup.refresh.clicked.connect(refs.constructor.side_view.refresh)
+
                     popup.show()
                     break
-                    # refs.strands.recompute()
-                    # refs.constructor.top_view.refresh()
-                    # refs.constructor.side_view.refresh()
             return False
 
         self.update_graphs.clicked.connect(warn_and_refresh)
-
         self.auto_update_graph.updating = False
 
         def auto_graph_updater():

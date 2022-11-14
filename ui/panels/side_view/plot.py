@@ -5,6 +5,8 @@ from copy import copy
 from math import ceil, dist
 from typing import List
 
+from scipy.interpolate import interp1d, UnivariateSpline
+import numpy as np
 import pyqtgraph as pg
 from PyQt6 import uic
 from PyQt6.QtGui import (
@@ -16,6 +18,7 @@ import refs
 import settings
 from constants.directions import *
 from constants.modes import *
+from helpers import chaikins_corner_cutting
 from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.strands.strand import Strand
@@ -156,8 +159,7 @@ class Plotter(pg.PlotWidget):
         self.setLabel("left", text="Helical Twists", units="nanometers")
 
     def _plot(self):
-        bars = []
-        plotted_strands = []
+        plotted: List[pg.PlotDataItem] = []
 
         for _strand in refs.strands.current.strands:
             strand = copy(_strand)
@@ -179,49 +181,9 @@ class Plotter(pg.PlotWidget):
             if not strand.interdomain:
                 pen = pg.mkPen(color=strand.color, width=2, pxMode=False)
             else:
-                pen = pg.mkPen(color=strand.color, width=10, pxMode=False)
+                pen = pg.mkPen(color=strand.color, width=7, pxMode=False)
 
             for index, item in enumerate(strand.items):
-                # if the item is junctable and its juncmate is in this strand
-                # it may be plot as if it were two different strands
-                # so we add a white line to fix this issue
-                if (
-                    isinstance(item, NEMid)
-                    and item.junctable
-                    and item.juncmate is not None
-                    and item.juncmate.strand is _strand
-                    and strand.interdomain
-                ):
-                    with suppress(IndexError):
-                        # if we've reached a junctable area and the strand continues to change its z coord
-                        # create a horizontal line so that it doesn't look like it's branched into a new strand
-                        if (
-                            abs(item.z_coord - strand.items[index + 1].z_coord) > 0.2
-                            and abs(item.z_coord - strand.items[index + 2].z_coord)
-                            > 0.2
-                        ):
-                            # create horizontal line
-                            bar_x_coords = item.x_coord - 0.4, item.x_coord + 0.4
-                            bar_z_coords = [item.z_coord] * 2
-                            # if near_boundaries:
-                            #     # create horizontal line
-                            #     bar_x_coords = item.x_coord - 0.4, item.x_coord + 0.4
-                            #     bar_z_coords = [item.z_coord] * 2
-                            #
-                            # else:
-                            #     # create vertical line
-                            #     bar_x_coords = [item.x_coord] * 2
-                            #     bar_z_coords = item.z_coord - 0.4, item.z_coord + 0.4
-
-                        bar = pg.PlotDataItem(
-                            bar_x_coords,
-                            bar_z_coords,
-                            pen=pg.mkPen(
-                                color=(255, 255, 255), width=8, px_mode=False
-                            ),
-                        )
-                        bars.append(bar)
-
                 x_coords.append(item.x_coord)
                 z_coords.append(item.z_coord)
 
@@ -245,17 +207,23 @@ class Plotter(pg.PlotWidget):
                     symbols.append("o")
                     brushes.append(nick_brush)
 
-            # create a PlotDataItem of the strand to be plotted later
-            outline_only = pg.PlotDataItem(
-                x_coords,
-                z_coords,
-                symbol=None,  # type of symbol (in this case up/down arrow)
-                symbolSize=None,  # size of arrows in px
-                pxMode=False,  # means that symbol size is in px and non-dynamic
-                symbolBrush=None,  # set color of points to current color
-                pen=pen,
-            )
-            points_only = pg.PlotDataItem(
+            if strand.interdomain:
+                outline_coords = chaikins_corner_cutting(
+                    tuple(zip(x_coords, z_coords)), refinements=2
+                )
+                outline = pg.PlotDataItem(
+                    [coord[0] for coord in outline_coords],
+                    [coord[1] for coord in outline_coords],
+                    pen=pen,
+                )
+            else:
+                outline = pg.PlotDataItem(
+                    x_coords,
+                    z_coords,
+                    pen=pen,
+                )
+
+            points = pg.PlotDataItem(
                 x_coords,
                 z_coords,
                 symbol=symbols,  # type of symbol (in this case up/down arrow)
@@ -265,23 +233,21 @@ class Plotter(pg.PlotWidget):
                 pen=None,
             )
 
-            plotted_strands.append(
+            plotted.append(
                 (
-                    outline_only,
-                    points_only,
+                    outline,
+                    points,
                 )
             )
 
-        for outline_only, points_only in plotted_strands:
+        for outline_only, points_only in plotted:
+            # plot the outline
             self.addItem(outline_only)
             self.plot_items.append(outline_only)
 
-        for bar in bars:
-            self.addItem(bar)
-            self.plot_items.append(bar)
-
-        for outline_only, points_only in plotted_strands:
+            # plot the points
             self.addItem(points_only)
+            # add trigger to points
             points_only.sigPointsClicked.connect(self.point_clicked)
             self.plot_items.append(points_only)
 

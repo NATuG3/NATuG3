@@ -2,6 +2,7 @@ import logging
 from functools import wraps, cache
 from typing import Literal
 
+import numpy as np
 from PyQt6.QtGui import QFont, QPainterPath, QTransform
 from PyQt6.QtWidgets import QMessageBox
 
@@ -83,3 +84,19 @@ def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
     tr.scale(scale, -scale)
     tr.translate(-br.x() - br.width() / 2.0, -br.y() - br.height() / 2.0)
     return tr.map(pg_symbol)
+
+
+def chaikins_corner_cutting(coords, refinements=5):
+    # https://stackoverflow.com/a/47255374
+    coords = np.array(coords)
+
+    for i in range(refinements):
+        L = coords.repeat(2, axis=0)
+        R = np.empty_like(L)
+        R[0] = L[0]
+        R[2::2] = L[1:-1:2]
+        R[1:-1:2] = L[2::2]
+        R[-1] = L[-1]
+        coords = L * 0.6 + R * 0.4
+
+    return coords
