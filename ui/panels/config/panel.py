@@ -1,11 +1,13 @@
 import logging
+from time import time
 from types import SimpleNamespace
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QMessageBox, QPushButton, QDialog
 
 import refs
+import settings
 from ui.panels import domains, nucleic_acid
 from ui.resources import fetch_icon
 
@@ -40,17 +42,33 @@ class Panel(QWidget):
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
-        def graph_updater():
-            """Worker for auto plot updating."""
-            refs.constructor.top_view.refresh()
-            refs.constructor.side_view.refresh()
+        def warn_and_refresh(self):
+            # determine if there are any strands that the user has made
+            # (if there are not then we do not need to warn the user)
+            for strand in refs.strands.current.strands:
+                if strand.interdomain:
+                    popup = QDialog(refs.constructor)
+                    uic.loadUi("ui/panels/config/warn_and_refresh.ui", popup)
 
-        self.update_graphs.clicked.connect(refs.strands.recompute)  # TEMP
-        self.update_graphs.clicked.connect(graph_updater)
+                    popup.location.setText(
+                        f"NATuG3/saves/{round(time())}.{settings.extension}"
+                    )
+
+                    popup.show()
+                    break
+                    # refs.strands.recompute()
+                    # refs.constructor.top_view.refresh()
+                    # refs.constructor.side_view.refresh()
+            return False
+
+        self.update_graphs.clicked.connect(warn_and_refresh)
 
         self.auto_update_graph.updating = False
 
         def auto_graph_updater():
+            for strand in refs.strands.current.strands:
+                if strand.interdomain:
+                    return
             if self.auto_update_graph.isChecked():
                 if not self.auto_update_graph.updating:
                     self.auto_update_graph.updating = True
@@ -62,7 +80,8 @@ class Panel(QWidget):
                     def _():
                         logger.info("Auto updating...")
                         refs.strands.recompute()
-                        graph_updater()
+                        refs.constructor.top_view.refresh()
+                        refs.constructor.side_view.refresh()
                         self.auto_update_graph.updating = False
 
                     timer.start()

@@ -8,7 +8,7 @@ RESET = False
 logger = logging.getLogger(__name__)
 
 # mute pyqt logs
-logging.getLogger("PyQt6").setLevel(logging.INFO)
+logging.getLogger("PyQt6").setLevel(logging.WARNING)
 
 
 def main():

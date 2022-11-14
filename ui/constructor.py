@@ -5,7 +5,8 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QStatusBar,
     QMenuBar,
-    QWidget, QTabWidget,
+    QWidget,
+    QTabWidget,
 )
 
 import refs

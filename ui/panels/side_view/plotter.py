@@ -73,6 +73,13 @@ class Plotter(pg.PlotWidget):
                 item.highlighted = True
 
                 if isinstance(item, NEMid):
+                    if item.junctable:
+                        logger.debug(
+                            f"NEMid's juncmate is in strand#{refs.strands.current.strands.index(item.juncmate.strand)}"
+                        )
+                        logger.debug(
+                            f"NEMid is in strand#{refs.strands.current.strands.index(item.strand)}"
+                        )
                     dialog = QDialog(refs.constructor)
                     dialog.setWindowTitle("NEMid Information")
                     uic.loadUi("ui/panels/side_view/informers/NEMid.ui", dialog)
@@ -81,7 +88,6 @@ class Plotter(pg.PlotWidget):
                     dialog.angle.setText(f"{item.angle:.4f}°")
 
                     strand_index = refs.strands.current.strands.index(item.strand)
-                    openness = None
                     if item.strand.closed:
                         openness = "closed"
                     else:  # not item.strand.closed
@@ -150,6 +156,9 @@ class Plotter(pg.PlotWidget):
         self.setLabel("left", text="Helical Twists", units="nanometers")
 
     def _plot(self):
+        bars = []
+        plotted_strands = []
+
         for _strand in refs.strands.current.strands:
             strand = copy(_strand)
             assert isinstance(strand, Strand)
@@ -168,48 +177,112 @@ class Plotter(pg.PlotWidget):
             brushes = []
 
             if not strand.interdomain:
-                pen = pg.mkPen(color=strand.color, width=2)
+                pen = pg.mkPen(color=strand.color, width=2, pxMode=False)
             else:
-                pen = pg.mkPen(color=(*strand.color, 150), width=15)
+                pen = pg.mkPen(color=strand.color, width=10, pxMode=False)
 
-            for point in strand.items:
-                x_coords.append(point.x_coord)
-                z_coords.append(point.z_coord)
+            for index, item in enumerate(strand.items):
+                # if the item is junctable and its juncmate is in this strand
+                # it may be plot as if it were two different strands
+                # so we add a white line to fix this issue
+                if (
+                    isinstance(item, NEMid)
+                    and item.junctable
+                    and item.juncmate is not None
+                    and item.juncmate.strand is _strand
+                    and strand.interdomain
+                ):
+                    with suppress(IndexError):
+                        # if we've reached a junctable area and the strand continues to change its z coord
+                        # create a horizontal line so that it doesn't look like it's branched into a new strand
+                        if (
+                            abs(item.z_coord - strand.items[index + 1].z_coord) > 0.2
+                            and abs(item.z_coord - strand.items[index + 2].z_coord)
+                            > 0.2
+                        ):
+                            # create horizontal line
+                            bar_x_coords = item.x_coord - 0.4, item.x_coord + 0.4
+                            bar_z_coords = [item.z_coord] * 2
+                            # if near_boundaries:
+                            #     # create horizontal line
+                            #     bar_x_coords = item.x_coord - 0.4, item.x_coord + 0.4
+                            #     bar_z_coords = [item.z_coord] * 2
+                            #
+                            # else:
+                            #     # create vertical line
+                            #     bar_x_coords = [item.x_coord] * 2
+                            #     bar_z_coords = item.z_coord - 0.4, item.z_coord + 0.4
 
-                if isinstance(point, NEMid):
-                    if point.direction == UP:
+                        bar = pg.PlotDataItem(
+                            bar_x_coords,
+                            bar_z_coords,
+                            pen=pg.mkPen(
+                                color=(255, 255, 255), width=8, px_mode=False
+                            ),
+                        )
+                        bars.append(bar)
+
+                x_coords.append(item.x_coord)
+                z_coords.append(item.z_coord)
+
+                if isinstance(item, NEMid):
+                    if item.direction == UP:
                         symbols.append("t1")  # up arrow
-                    elif point.direction == DOWN:
+                    elif item.direction == DOWN:
                         symbols.append("t")  # down arrow
                     else:
-                        raise ValueError("point.direction is not UP or DOWN.", point)
+                        raise ValueError("item.direction is not UP or DOWN.", item)
 
-                    if point.highlighted:
+                    if item.highlighted:
                         symbol_sizes.append(18)
                         brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                     else:
                         symbol_sizes.append(6)
                         brushes.append(NEMid_brush)
 
-                elif isinstance(point, Nick):
+                elif isinstance(item, Nick):
                     symbol_sizes.append(15)
                     symbols.append("o")
                     brushes.append(nick_brush)
 
-            self.plot_items.append(
+            # create a PlotDataItem of the strand to be plotted later
+            outline_only = pg.PlotDataItem(
+                x_coords,
+                z_coords,
+                symbol=None,  # type of symbol (in this case up/down arrow)
+                symbolSize=None,  # size of arrows in px
+                pxMode=False,  # means that symbol size is in px and non-dynamic
+                symbolBrush=None,  # set color of points to current color
+                pen=pen,
+            )
+            points_only = pg.PlotDataItem(
+                x_coords,
+                z_coords,
+                symbol=symbols,  # type of symbol (in this case up/down arrow)
+                symbolSize=symbol_sizes,  # size of arrows in px
+                pxMode=True,  # means that symbol size is in px and non-dynamic
+                symbolBrush=brushes,  # set color of points to current color
+                pen=None,
+            )
+
+            plotted_strands.append(
                 (
-                    self.plot(  # actually plot the current strand of the current domain
-                        x_coords,
-                        z_coords,
-                        symbol=symbols,  # type of symbol (in this case up/down arrow)
-                        symbolSize=symbol_sizes,  # size of arrows in px
-                        pxMode=True,  # means that symbol size is in px and non-dynamic
-                        symbolBrush=brushes,  # set color of points to current color
-                        pen=pen,
-                    )
+                    outline_only,
+                    points_only,
                 )
             )
 
-            self.plot_items[-1].sigPointsClicked.connect(self.point_clicked)
+        for outline_only, points_only in plotted_strands:
+            self.addItem(outline_only)
+            self.plot_items.append(outline_only)
+
+        for bar in bars:
+            self.addItem(bar)
+            self.plot_items.append(bar)
+
+        for outline_only, points_only in plotted_strands:
+            self.addItem(points_only)
+            points_only.sigPointsClicked.connect(self.point_clicked)
+            self.plot_items.append(points_only)
 
         self._prettify()

@@ -1,12 +1,12 @@
 import itertools
 from collections import deque
 from contextlib import suppress
-from copy import copy
 from functools import cached_property
 from math import dist
 from random import shuffle
-from typing import List, Tuple, Type, Iterable
+from typing import List, Tuple, Type
 
+import settings
 from structures.points import NEMid
 
 
@@ -35,10 +35,10 @@ class Strand:
     __cached = ("NEMids", "up_strand", "down_strand", "interdomain", "boundaries")
 
     def __init__(
-            self,
-            items: list = None,
-            color: Tuple[int, int, int] = (0, 0, 0),
-            closed: bool | None = False
+        self,
+        items: list = None,
+        color: Tuple[int, int, int] = (0, 0, 0),
+        closed: bool | None = False,
     ):
         self.color = color
         self.closed = closed
@@ -49,8 +49,6 @@ class Strand:
             self.items = items
         else:
             self.items = deque(items)
-
-        self.recompute()
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
@@ -71,9 +69,21 @@ class Strand:
             with suppress(KeyError):
                 del self.__dict__[cached]
 
-        # assign all our NEMids US as the parent strand
-        for index, NEMid_ in enumerate(self.items):
+        # assign all our items to have us as their parent strand
+        for index, item in enumerate(self.items):
             self.items[index].strand = self
+
+            # assign juncmates
+            if isinstance(item, NEMid) and item.junctable:
+                for test_item in self.items:
+                    if test_item is item:
+                        continue
+                    elif (
+                        dist(item.position(), test_item.position())
+                        < settings.junction_threshold
+                    ):
+                        item.juncmate = test_item
+                        test_item.juncmate = item
 
     def touching(self, other: Type["Strand"], touching_distance=0.2) -> bool:
         """

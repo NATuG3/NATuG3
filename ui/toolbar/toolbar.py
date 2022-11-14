@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QToolBar, QWidget, QSizePolicy, QLabel, QLineEdit
+from PyQt6.QtWidgets import QToolBar, QWidget, QSizePolicy, QLineEdit
 
 import settings
 from ui.toolbar.actions import Actions
@@ -19,11 +19,13 @@ class Toolbar(QToolBar):
 
         program_label = QLineEdit(f"{settings.name} {settings.version}")
         program_label.setEnabled(False)
-        program_label.setStyleSheet("""
+        program_label.setStyleSheet(
+            """
         QLineEdit::disabled{
             color: rgb(0, 0, 0); 
             background:rgb(245, 245, 245);
-        }""")
+        }"""
+        )
         program_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         program_label.setFixedWidth(80)
         self.addWidget(program_label)
