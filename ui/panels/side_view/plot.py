@@ -76,13 +76,13 @@ class Plotter(pg.PlotWidget):
                 item.highlighted = True
 
                 if isinstance(item, NEMid):
-                    if item.junctable:
-                        logger.debug(
-                            f"NEMid's juncmate is in strand#{refs.strands.current.strands.index(item.juncmate.strand)}"
-                        )
-                        logger.debug(
-                            f"NEMid is in strand#{refs.strands.current.strands.index(item.strand)}"
-                        )
+                    # if item.junctable:
+                    #     logger.debug(
+                    #         f"NEMid's juncmate is in strand#{refs.strands.current.strands.index(item.juncmate.strand)}"
+                    #     )
+                    #     logger.debug(
+                    #         f"NEMid is in strand#{refs.strands.current.strands.index(item.strand)}"
+                    #     )
                     dialog = QDialog(refs.constructor)
                     dialog.setWindowTitle("NEMid Information")
                     uic.loadUi("ui/panels/side_view/informers/NEMid.ui", dialog)
@@ -173,15 +173,23 @@ class Plotter(pg.PlotWidget):
             symbol_sizes: List[str] = []
             x_coords: List[float] = []
             z_coords: List[float] = []
+            brushes = []
 
             NEMid_brush = pg.mkBrush(color=strand.color)
             nick_brush = pg.mkBrush(color=(settings.colors["nicks"]))
-            brushes = []
+
+            dim_brush = []
+            for pigment in strand.color:
+                pigment += 230
+                if pigment > 255:
+                    pigment = 255
+                dim_brush.append(pigment)
+            dim_brush = pg.mkBrush(color=dim_brush)
 
             if not strand.interdomain:
                 pen = pg.mkPen(color=strand.color, width=2, pxMode=False)
             else:
-                pen = pg.mkPen(color=strand.color, width=7, pxMode=False)
+                pen = pg.mkPen(color=strand.color, width=12, pxMode=False)
 
             for index, item in enumerate(strand.items):
                 x_coords.append(item.x_coord)
@@ -200,29 +208,17 @@ class Plotter(pg.PlotWidget):
                         brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                     else:
                         symbol_sizes.append(6)
-                        brushes.append(NEMid_brush)
+                        if item.junctable:
+                            brushes.append(dim_brush)
+                        else:
+                            brushes.append(NEMid_brush)
 
                 elif isinstance(item, Nick):
                     symbol_sizes.append(15)
                     symbols.append("o")
                     brushes.append(nick_brush)
 
-            if strand.interdomain:
-                outline_coords = chaikins_corner_cutting(
-                    tuple(zip(x_coords, z_coords)), refinements=2
-                )
-                outline = pg.PlotDataItem(
-                    [coord[0] for coord in outline_coords],
-                    [coord[1] for coord in outline_coords],
-                    pen=pen,
-                )
-            else:
-                outline = pg.PlotDataItem(
-                    x_coords,
-                    z_coords,
-                    pen=pen,
-                )
-
+            # graph the points separately
             points = pg.PlotDataItem(
                 x_coords,
                 z_coords,
@@ -231,6 +227,19 @@ class Plotter(pg.PlotWidget):
                 pxMode=True,  # means that symbol size is in px and non-dynamic
                 symbolBrush=brushes,  # set color of points to current color
                 pen=None,
+            )
+
+            # if this strand contains a junction then
+            # round the corners of the outline for aesthetics
+            if strand.interdomain:
+                coords = chaikins_corner_cutting(tuple(zip(x_coords, z_coords)), offset=.325, refinements=1)
+                coords = chaikins_corner_cutting(coords, refinements=3)
+                x_coords = [coord[0] for coord in coords]
+                z_coords = [coord[1] for coord in coords]
+            outline = pg.PlotDataItem(
+                x_coords,
+                z_coords,
+                pen=pen,
             )
 
             plotted.append(
