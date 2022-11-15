@@ -8,8 +8,9 @@ from PyQt6.QtWidgets import QApplication
 
 def make_dpi_aware():
     # https://stackoverflow.com/a/66299344
-    if int(platform.release()) >= 8:
-        ctypes.windll.shcore.SetProcessDpiAwareness(True)
+    if sys.platform.startswith("win"):
+        if int(platform.release()) >= 8:
+            ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
 
 class _Application(QApplication):
