@@ -1,6 +1,6 @@
 # NATuG 3
 
-Tools for Designing Nucleic Acid Nanotubes
+Application for designing geometrically constrained DNA nanotubes. Features interactive plotting, junctions, and high configurability.
 
 # Credits
 
