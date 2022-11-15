@@ -166,7 +166,7 @@ class Plotter(pg.PlotWidget):
                 strand.items[-1].pseudo = True
 
             symbols: List[str] = []
-            symbol_sizes: List[str] = []
+            symbol_sizes: List[int] = []
             x_coords: List[float] = []
             z_coords: List[float] = []
             brushes = []
@@ -185,7 +185,7 @@ class Plotter(pg.PlotWidget):
             if not strand.interdomain:
                 pen = pg.mkPen(color=strand.color, width=2, pxMode=False)
             else:
-                pen = pg.mkPen(color=strand.color, width=12, pxMode=False)
+                pen = pg.mkPen(color=strand.color, width=9.5, pxMode=False)
 
             for index, item in enumerate(strand.items):
                 x_coords.append(item.x_coord)
@@ -203,11 +203,12 @@ class Plotter(pg.PlotWidget):
                         symbol_sizes.append(18)
                         brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                     else:
-                        symbol_sizes.append(6)
                         if item.junctable:
                             brushes.append(dim_brush)
+                            symbol_sizes.append(6)
                         else:
                             brushes.append(NEMid_brush)
+                            symbol_sizes.append(6)
 
                 elif isinstance(item, Nick):
                     symbol_sizes.append(15)
@@ -230,8 +231,12 @@ class Plotter(pg.PlotWidget):
             if strand.interdomain:
                 coords = chaikins_corner_cutting(
                     tuple(zip(x_coords, z_coords)),
-                    offset=.33,
-                    refinements=3
+                    offset=.4,
+                    refinements=1
+                )
+                coords = chaikins_corner_cutting(
+                    coords,
+                    refinements=1
                 )
                 x_coords = [coord[0] for coord in coords]
                 z_coords = [coord[1] for coord in coords]
