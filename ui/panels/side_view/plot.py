@@ -3,10 +3,8 @@ import logging
 from contextlib import suppress
 from copy import copy
 from math import ceil, dist
-from typing import List
+from typing import List, Tuple
 
-from scipy.interpolate import interp1d, UnivariateSpline
-import numpy as np
 import pyqtgraph as pg
 from PyQt6 import uic
 from PyQt6.QtGui import (
@@ -76,13 +74,6 @@ class Plotter(pg.PlotWidget):
                 item.highlighted = True
 
                 if isinstance(item, NEMid):
-                    # if item.junctable:
-                    #     logger.debug(
-                    #         f"NEMid's juncmate is in strand#{refs.strands.current.strands.index(item.juncmate.strand)}"
-                    #     )
-                    #     logger.debug(
-                    #         f"NEMid is in strand#{refs.strands.current.strands.index(item.strand)}"
-                    #     )
                     dialog = QDialog(refs.constructor)
                     dialog.setWindowTitle("NEMid Information")
                     uic.loadUi("ui/panels/side_view/informers/NEMid.ui", dialog)
@@ -128,10 +119,15 @@ class Plotter(pg.PlotWidget):
             refresh()
 
         if refs.mode.current == JUNCTER:
+            # if exactly two overlapping points are clicked trigger the junction creation process
             if len(located) == 2:
                 if all([isinstance(item, NEMid) for item in located]):
-                    refs.strands.current.junct(located[0], located[1])
+                    refs.strands.current.conjunct(located[0], located[1])
                     refresh()
+            # disable auto updating after we've created a junction
+            for strand in refs.strands.current.strands:
+                if strand.interdomain:
+                    refs.constructor.config.panel.auto_update_graph.setChecked(False)
         elif refs.mode.current == NICKER:
             for item in located:
                 if refs.mode.current == NICKER:
@@ -159,7 +155,7 @@ class Plotter(pg.PlotWidget):
         self.setLabel("left", text="Helical Twists", units="nanometers")
 
     def _plot(self):
-        plotted: List[pg.PlotDataItem] = []
+        plotted: List[Tuple[pg.PlotDataItem, pg.PlotDataItem]] = []
 
         for _strand in refs.strands.current.strands:
             strand = copy(_strand)
@@ -232,22 +228,21 @@ class Plotter(pg.PlotWidget):
             # if this strand contains a junction then
             # round the corners of the outline for aesthetics
             if strand.interdomain:
-                coords = chaikins_corner_cutting(tuple(zip(x_coords, z_coords)), offset=.325, refinements=1)
-                coords = chaikins_corner_cutting(coords, refinements=3)
+                coords = chaikins_corner_cutting(
+                    tuple(zip(x_coords, z_coords)),
+                    offset=.33,
+                    refinements=3
+                )
                 x_coords = [coord[0] for coord in coords]
                 z_coords = [coord[1] for coord in coords]
+
             outline = pg.PlotDataItem(
                 x_coords,
                 z_coords,
                 pen=pen,
             )
 
-            plotted.append(
-                (
-                    outline,
-                    points,
-                )
-            )
+            plotted.append((outline, points,))
 
         for outline_only, points_only in plotted:
             # plot the outline

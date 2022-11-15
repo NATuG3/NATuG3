@@ -86,7 +86,7 @@ def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
     return tr.map(pg_symbol)
 
 
-def chaikins_corner_cutting(coords, offset=.25, refinements=5):
+def chaikins_corner_cutting(coords, offset=0.25, refinements=5):
     # https://stackoverflow.com/a/47255374
     coords = np.array(coords)
 
@@ -97,6 +97,6 @@ def chaikins_corner_cutting(coords, offset=.25, refinements=5):
         R[2::2] = L[1:-1:2]
         R[1:-1:2] = L[2::2]
         R[-1] = L[-1]
-        coords = L * (1-offset) + R * offset
+        coords = L * (1 - offset) + R * offset
 
     return coords

@@ -77,7 +77,7 @@ class Strands:
                         "Strand should all be up/down if it is single-domain."
                     )
 
-    def junct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+    def conjunct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
         Add/remove a junction where NEMid1 and NEMid2 overlap.
 
@@ -240,7 +240,6 @@ class Strands:
 
         # recompute the new strands
         [new_strand.recompute() for new_strand in new_strands]
-        print(NEMid1.juncmate.strand)
 
         self.recolor()
 
