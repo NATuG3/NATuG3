@@ -55,7 +55,8 @@ class Panel(QWidget):
                     dialog = RefreshConfirmer(refs.constructor)
                     dialog.show()
                     break
-            return False
+            refs.constructor.side_view.refresh()
+            refs.constructor.top_view.refresh()
 
         self.update_graphs.clicked.connect(warn_and_refresh)
         self.auto_update_graph.updating = False
@@ -132,9 +133,11 @@ class RefreshConfirmer(QDialog):
         self.refresh.clicked.connect(self.close)
         self.refresh.clicked.connect(refs.strands.recompute)
         self.refresh.clicked.connect(refs.constructor.side_view.refresh)
+        self.refresh.clicked.connect(refs.constructor.top_view.refresh)
 
         # save and refresh button
         self.save_and_refresh.clicked.connect(self.close)
         self.save_and_refresh.clicked.connect(lambda: refs.saver.save.worker(self.default_path))
         self.save_and_refresh.clicked.connect(refs.strands.recompute)
         self.save_and_refresh.clicked.connect(refs.constructor.side_view.refresh)
+        self.save_and_refresh.clicked.connect(refs.constructor.top_view.refresh)
