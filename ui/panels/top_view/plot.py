@@ -46,7 +46,7 @@ class Plotter(pg.PlotWidget):
 
         refs.constructor.side_view.plot.setXRange(*range)
         refs.constructor.side_view.plot.setYRange(
-            -1, refs.strands.current.size.height + 1
+            -1, refs.strands.current.size[1] + 1
         )
 
         # if the new range is the same as the old range then this means
