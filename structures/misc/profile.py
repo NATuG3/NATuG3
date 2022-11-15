@@ -4,7 +4,7 @@ from dataclasses import dataclass
 @dataclass
 class Profile:
     """
-    A settings profile.
+    A settings profiles.
 
     Attributes:
         D (float): Diameter of a domain.
@@ -34,7 +34,7 @@ class Profile:
         self.Z_b = (self.T * self.H) / self.B
 
     def __eq__(self, other: object) -> bool:
-        """Returns true if identical profile is returned"""
+        """Returns true if identical profiles is returned"""
         if isinstance(other, Profile):
             return vars(self) == vars(other)
         else:

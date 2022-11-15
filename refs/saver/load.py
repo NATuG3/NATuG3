@@ -49,9 +49,6 @@ class FileSelector(QFileDialog):
     def __init__(self, parent) -> None:
         super().__init__(parent, caption="Choose location to save file")
 
-        # store parent reference
-        self.parent = parent
-
         # file dialog is of the AcceptSave type
         self.setAcceptMode(QFileDialog.AcceptMode.AcceptOpen)
 

@@ -124,10 +124,6 @@ class Plotter(pg.PlotWidget):
                 if all([isinstance(item, NEMid) for item in located]):
                     refs.strands.current.conjunct(located[0], located[1])
                     refresh()
-            # disable auto updating after we've created a junction
-            for strand in refs.strands.current.strands:
-                if strand.interdomain:
-                    refs.constructor.config.panel.auto_update_graph.setChecked(False)
         elif refs.mode.current == NICKER:
             for item in located:
                 if refs.mode.current == NICKER:

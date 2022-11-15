@@ -70,7 +70,7 @@ class Window(QMainWindow):
         from ui.panels.config import Dockable
 
         # initialize the config panel
-        self.config = Dockable()
+        self.config = Dockable(refs.nucleic_acid.profiles, refs.domains.current)
 
         # only allow config to dock left/right
         self.config.setAllowedAreas(

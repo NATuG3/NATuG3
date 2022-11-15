@@ -89,9 +89,10 @@ class Plotter(pg.PlotWidget):
         )
 
         for counter, position in enumerate(
-            tuple(zip(self.worker.u_coords, self.worker.v_coords))[:-1]
+            tuple(zip(self.worker.u_coords, self.worker.v_coords))[1:],
+            start=1
         ):
-            counter = str(counter + 1)
+            counter = str(counter)
             symbol_size = refs.nucleic_acid.current.D / 3
             symbol_size *= 1 + (0.255 * (len(counter) - 1))
             counter = f"#{counter}"

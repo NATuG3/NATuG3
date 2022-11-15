@@ -23,7 +23,7 @@ class SideView:
     """
 
     strand_directions = (UP, DOWN)
-    cache_clearers = ("domains", "profile")
+    cache_clearers = ("domains", "profiles")
 
     def __init__(self, domains: Domains, profile: Profile) -> None:
         """

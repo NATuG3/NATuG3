@@ -4,29 +4,36 @@ from contextlib import suppress
 from datetime import datetime
 from time import time
 from types import SimpleNamespace
-from typing import List
+from typing import List, Dict
 
 from PyQt6 import uic
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDialog
 
 import refs
 import refs.saver.save
 import settings
+from structures.domains import Domains
+from structures.misc import Profile
 from ui.panels import domains, nucleic_acid
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
+dialog = None
 
 
 class Panel(QWidget):
     """Config panel."""
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, profiles: Dict[str, Profile], domains: Domains) -> None:
         super().__init__(parent)
+        self.profiles = profiles
+        self.domains = domains
         uic.loadUi("ui/panels/config/panel.ui", self)
         self.update_graphs.setIcon(fetch_icon("reload-outline"))
+
         self._tabs()
+        self._signals()
 
     def _tabs(self):
         """Set up all tabs for config panel."""
@@ -37,53 +44,42 @@ class Panel(QWidget):
 
         # set the nucleic acid tab
         # store actual widget in the tabs container
-        self.tabs.nucleic_acid = nucleic_acid.Panel(self)
+        self.tabs.nucleic_acid = nucleic_acid.Panel(self, self.profiles)
         self.nucleic_acid_tab.setLayout(QVBoxLayout())
         self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
 
         # set the domains tab
         # store actual widget in the tabs container
-        self.tabs.domains = domains.Panel(self.parent())
+        self.tabs.domains = domains.Panel(self.parent(), self.domains)
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
-        def warn_and_refresh(self):
+    def _signals(self):
+        """Setup pyqt signals."""
+
+        """Setup auto graph updating system."""
+        def warn_and_refresh():
+            global dialog
             # determine if there are any strands that the user has made
             # (if there are not then we do not need to warn the user)
             for strand in refs.strands.current.strands:
                 if strand.interdomain:
-                    dialog = RefreshConfirmer(refs.constructor)
-                    dialog.show()
-                    break
+                    if (dialog is None) or (not dialog.isVisible()):
+                        dialog = RefreshConfirmer(refs.constructor)
+                        dialog.show()
+                    elif (dialog is not None) and dialog.isVisible():
+                        logger.info("User is attempting to update graphs even though"
+                                    "warning is visible. Ignoring button request.")
+                    return
+            refs.nucleic_acid.current = self.tabs.nucleic_acid.fetch_profile()
+            refs.domains.current = self.tabs.domains.fetch_domains()
+            refs.strands.recompute()
             refs.constructor.side_view.refresh()
             refs.constructor.top_view.refresh()
 
         self.update_graphs.clicked.connect(warn_and_refresh)
-        self.auto_update_graph.updating = False
-
-        def auto_graph_updater():
-            for strand in refs.strands.current.strands:
-                if strand.interdomain:
-                    return
-            if self.auto_update_graph.isChecked():
-                if not self.auto_update_graph.updating:
-                    self.auto_update_graph.updating = True
-                    timer = QTimer(refs.application)
-                    timer.setInterval(200)
-                    timer.setSingleShot(True)
-
-                    @timer.timeout.connect
-                    def _():
-                        logger.info("Auto updating...")
-                        refs.strands.recompute()
-                        refs.constructor.top_view.refresh()
-                        refs.constructor.side_view.refresh()
-                        self.auto_update_graph.updating = False
-
-                    timer.start()
-
-        self.tabs.domains.updated.connect(auto_graph_updater)
-        self.tabs.nucleic_acid.updated.connect(auto_graph_updater)
+        self.tabs.domains.domains_updated.connect(warn_and_refresh)
+        self.tabs.nucleic_acid.updated.connect(warn_and_refresh)
 
 
 class RefreshConfirmer(QDialog):
@@ -118,8 +114,8 @@ class RefreshConfirmer(QDialog):
 
     def _prettify(self):
         # set default sizes
-        self.setFixedWidth(310)
-        self.setFixedHeight(170)
+        self.setFixedWidth(340)
+        self.setFixedHeight(200)
 
     def _buttons(self):
         # change location button

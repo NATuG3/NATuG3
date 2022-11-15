@@ -34,7 +34,7 @@ class _NucleicAcid:
         ] = self.defaults  # by default set profiles to the defaults
         self.current: Profile = next(
             iter(self.defaults.values())
-        )  # by default choose the first profile in defaults
+        )  # by default choose the first profiles in defaults
 
         self.load()
         atexit.register(self.dump)
@@ -71,7 +71,7 @@ class _NucleicAcid:
                     logger.critical(
                         "Data validation for nucleic_acid profiles dump failed."
                     )
-                    raise TypeError(f'profile named "{name}" is not a profile', profile)
+                    raise TypeError(f'profiles named "{name}" is not a profiles', profile)
 
             pickle.dump(self.profiles, file)
             logger.info(f'Dumped all profiles into "{file}"')
@@ -81,8 +81,8 @@ class _NucleicAcid:
             # perform data validation before save
             if not isinstance(self.current, Profile):
                 logger.critical(
-                    "Data validation for nucleic_acid current profile dump failed."
+                    "Data validation for nucleic_acid current profiles dump failed."
                 )
-                raise TypeError("current is not a profile", profile)
+                raise TypeError("current is not a profiles", profile)
             pickle.dump(self.current, settings_file)
             logger.info(f'Dumped current nucleic_acid settings into "{settings_file}"')

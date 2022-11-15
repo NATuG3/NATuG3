@@ -1,4 +1,5 @@
 import logging
+from typing import Dict
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
@@ -15,30 +16,28 @@ logger = logging.getLogger(__name__)
 class Panel(QWidget):
     """Nucleic Acid Config Tab."""
 
-    updated = pyqtSignal()
+    updated = pyqtSignal(Profile)
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, profiles: Dict[str, Profile]) -> None:
         super().__init__(parent)
+        self.profiles: Dict[str, Profile] = profiles
         uic.loadUi("ui/panels/nucleic_acid/panel.ui", self)
 
-        # prettify profile buttons
+        # prettify profiles buttons
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
         self.delete_profile_button.setIcon(fetch_icon("trash-outline"))
 
-        # restore the current settings
-        self.dump_settings(refs.nucleic_acid.current)
-
         # set all setting descriptions
         self._setting_descriptions()
 
-        # set up the profile manager
+        # set up the profiles manager
         self._profile_manager()
 
         logger.debug("Loaded nucleic acid settings tab of config panel.")
 
     def dump_settings(self, profile: Profile) -> None:
-        """Saves current settings to profile with name in text edit input box."""
+        """Saves current settings to profiles with name in text edit input box."""
         self.D.setValue(profile.D)
         self.H.setValue(profile.H)
         self.T.setValue(profile.T)
@@ -51,7 +50,7 @@ class Panel(QWidget):
         self.theta_s.setValue(profile.theta_s)
 
     def fetch_settings(self) -> Profile:
-        """Fetch a profile object with all current nucleic acid settings from inputs."""
+        """Fetch a profiles object with all current nucleic acid settings from inputs."""
         return Profile(
             D=self.D.value(),
             H=self.H.value(),
@@ -75,130 +74,130 @@ class Panel(QWidget):
         )
 
         def save_profile(self):
-            """Worker for the save profile button"""
+            """Worker for the save profiles button"""
             if self.save_profile_button.toolTip() == "Overwrite Profile":
-                if not refs.helpers.confirm(
+                if not helpers.confirm(
                     self,
                     "Overwrite confirmation",
-                    f'Are you sure you want to overwrite the profile named "'
+                    f'Are you sure you want to overwrite the profiles named "'
                     + self.profile_chooser.currentText()
                     + '" with the currently chosen nucleic acid settings?',
                 ):
                     return
 
-            # obtain name of profile to save
+            # obtain name of profiles to save
             profile_name = self.profile_chooser.currentText()
             assert len(profile_name) > 0
 
             # fetch current settings and store them under the chosen name
-            refs.nucleic_acid.profiles[profile_name] = self.fetch_settings()
+            self.profiles[profile_name] = self.fetch_settings()
 
-            # clear profile chooser to make placeholder text visable
+            # clear profiles chooser to make placeholder text visable
             self.profile_chooser.setCurrentText("")
 
-            # log that the profile was saved (and print the name/repr of the saved profile)
+            # log that the profiles was saved (and print the name/repr of the saved profiles)
             logger.debug(
-                f"Current settings: {refs.nucleic_acid.profiles[profile_name]}"
+                f"Current settings: {self.profiles[profile_name]}"
             )
-            logger.info(f'Saved current settings as profile named "{profile_name}"')
+            logger.info(f'Saved current settings as profiles named "{profile_name}"')
 
-            # if the profile name is not already in the profile chooser...
+            # if the profiles name is not already in the profiles chooser...
             if profile_name not in self.profile_chooser.list():
-                # add the new profile to the profile chooser
+                # add the new profiles to the profiles chooser
                 self.profile_chooser.addItem(profile_name)
 
         def delete_profile(self):
-            """Worker for the delete profile button"""
+            """Worker for the delete profiles button"""
             if not helpers.confirm(
                 self,
-                "Delete profile confirmation",
-                f'Are you sure you want to delete the profile named "'
+                "Delete profiles confirmation",
+                f'Are you sure you want to delete the profiles named "'
                 + self.profile_chooser.currentText()
                 + '"?\nNote that this action cannot be undone!',
             ):
                 return
 
-            # obtain name of profile to delete
+            # obtain name of profiles to delete
             profile_name = self.profile_chooser.currentText()
 
-            # delete stored profile
-            assert profile_name in refs.nucleic_acid.profiles
-            del refs.nucleic_acid.profiles[profile_name]
+            # delete stored profiles
+            assert profile_name in self.profiles
+            del self.profiles[profile_name]
 
-            # remove profile by index from profile chooser
+            # remove profiles by index from profiles chooser
             self.profile_chooser.removeItem(self.profile_chooser.index(profile_name))
 
-            # the profile with the name of the previous contents of the box has been deleted
-            # so now empty the profile chooser's box
+            # the profiles with the name of the previous contents of the box has been deleted
+            # so now empty the profiles chooser's box
             self.profile_chooser.setCurrentText("")
 
-            # clear profile chooser to make placeholder text visable
+            # clear profiles chooser to make placeholder text visable
             self.profile_chooser.setCurrentText("")
 
-            # log that the profile was deleted
-            logger.info(f'Deleted profile named "{profile_name}"')
+            # log that the profiles was deleted
+            logger.info(f'Deleted profiles named "{profile_name}"')
 
         def load_profile(self):
-            """Worker for the load profile button"""
+            """Worker for the load profiles button"""
             if not helpers.confirm(
                 self,
-                "Load profile confirmation",
+                "Load profiles confirmation",
                 f"Are you sure you want to overwrite all currently chosen settings"
-                + ' with those of the profile named "'
+                + ' with those of the profiles named "'
                 + self.profile_chooser.currentText()
                 + '"?',
             ):
                 return
 
-            # obtain the name of profile to load
+            # obtain the name of profiles to load
             profile_name = self.profile_chooser.currentText()
 
-            # dump settings of profile chooser's text
-            self.dump_settings(refs.nucleic_acid.profiles[profile_name])
+            # dump settings of profiles chooser's text
+            self.dump_settings(self.profiles[profile_name])
 
-            # clear profile chooser to make placeholder text visable
+            # clear profiles chooser to make placeholder text visable
             self.profile_chooser.setCurrentText("")
 
-            # log that the profile was loaded
+            # log that the profiles was loaded
             logger.debug(
-                f"Settings that were loaded: {refs.nucleic_acid.profiles[profile_name]}"
+                f"Settings that were loaded: {self.profiles[profile_name]}"
             )
-            logger.info(f'Loaded profile named "{profile_name}"')
+            logger.info(f'Loaded profiles named "{profile_name}"')
 
         def input_box_changed():
             """Worker for when any input box is changed"""
             # fetch settings of input boxes
-            refs.nucleic_acid.current = self.fetch_settings()
+            self.updated.emit(self.fetch_settings())
 
             # if B or T or H were changed Z_b also will have changed
-            self.Z_b.setValue(refs.nucleic_acid.current.Z_b)
+            self.Z_b.setValue(self.fetch_settings().Z_b)
 
-            # the currently chosen/inputted profile name
+            # the currently chosen/inputted profiles name
             chosen_profile_name = self.profile_chooser.currentText()
 
-            # if the chosen profile name is in the saved profiles list:
-            if chosen_profile_name in refs.nucleic_acid.profiles:
-                # if the chosen profile name's settings match the current input box values
+            # if the chosen profiles name is in the saved profiles list:
+            if chosen_profile_name in self.profiles:
+                # if the chosen profiles name's settings match the current input box values
                 if (
-                    refs.nucleic_acid.profiles[chosen_profile_name]
-                    == refs.nucleic_acid.current
+                    self.profiles[chosen_profile_name]
+                    == self.fetch_settings()
                 ):
                     self.load_profile_button.setEnabled(False)
                     self.load_profile_button.setStatusTip(
-                        f'Current settings match saved settings of profile named "{chosen_profile_name}."'
+                        f'Current settings match saved settings of profiles named "{chosen_profile_name}."'
                     )
 
                     self.save_profile_button.setEnabled(False)
                     self.save_profile_button.setToolTip("Save Profile")
                     self.save_profile_button.setStatusTip(
-                        f'Current settings match saved settings of profile named "{chosen_profile_name}.".'
+                        f'Current settings match saved settings of profiles named "{chosen_profile_name}.".'
                     )
 
                     self.delete_profile_button.setEnabled(True)
                     self.delete_profile_button.setStatusTip(
-                        f'Delete the profile named "{chosen_profile_name}." This action is irreversible.'
+                        f'Delete the profiles named "{chosen_profile_name}." This action is irreversible.'
                     )
-                # if the chosen profile name is not in
+                # if the chosen profiles name is not in
                 else:
                     self.load_profile_button.setEnabled(True)
                     self.load_profile_button.setStatusTip(
@@ -208,12 +207,12 @@ class Panel(QWidget):
                     self.save_profile_button.setEnabled(True)
                     self.save_profile_button.setToolTip("Overwrite Profile")
                     self.save_profile_button.setStatusTip(
-                        f'Overwrite profile named "{chosen_profile_name}" with current settings.'
+                        f'Overwrite profiles named "{chosen_profile_name}" with current settings.'
                     )
 
                     self.delete_profile_button.setEnabled(True)
                     self.delete_profile_button.setStatusTip(
-                        f'Delete the profile named "{chosen_profile_name}." This action is irreversible.'
+                        f'Delete the profiles named "{chosen_profile_name}." This action is irreversible.'
                     )
 
                 # no matter what, do not let the user alter default profiles
@@ -221,61 +220,59 @@ class Panel(QWidget):
                     self.save_profile_button.setEnabled(False)
                     self.save_profile_button.setToolTip("Save Profile")
                     self.save_profile_button.setStatusTip(
-                        f'Cannot alter a default profile. "{chosen_profile_name}." is a default profile.'
+                        f'Cannot alter a default profiles. "{chosen_profile_name}." is a default profiles.'
                     )
 
                     self.delete_profile_button.setEnabled(False)
                     self.delete_profile_button.setStatusTip(
-                        f'Cannot delete a default profile. "{chosen_profile_name}." is a default profile.'
+                        f'Cannot delete a default profiles. "{chosen_profile_name}." is a default profiles.'
                     )
 
-            # the chosen profile name is a brand-new profile name (that has not already been saved)
+            # the chosen profiles name is a brand-new profiles name (that has not already been saved)
             else:
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
-                    f'No saved profile is named "{chosen_profile_name}." Cannot load a profile that does not exist.'
+                    f'No saved profiles is named "{chosen_profile_name}." Cannot load a profiles that does not exist.'
                 )
 
                 self.save_profile_button.setEnabled(True)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Save current as a new profile named "{chosen_profile_name}.".'
+                    f'Save current as a new profiles named "{chosen_profile_name}.".'
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
-                    f'No saved profile is named "{chosen_profile_name}." Cannot delete a profile that does not exist.'
+                    f'No saved profiles is named "{chosen_profile_name}." Cannot delete a profiles that does not exist.'
                 )
 
-            # No matter what we cannot save a profile with a blank name
+            # No matter what we cannot save a profiles with a blank name
             if chosen_profile_name == "":
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
-                    "Profile chooser entry box is empty. Enter the name of the profile to load."
+                    "Profile chooser entry box is empty. Enter the name of the profiles to load."
                 )
 
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setStatusTip(
-                    "Profile chooser entry box is empty. Enter the name of the profile to save."
+                    "Profile chooser entry box is empty. Enter the name of the profiles to save."
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
-                    "Profile chooser entry box is empty. Enter the name of the profile to delete."
+                    "Profile chooser entry box is empty. Enter the name of the profiles to delete."
                 )
 
-            self.updated.emit()
-
         def hook_widgets():
-            # when the save profile button is clicked call save_profile()
+            # when the save profiles button is clicked call save_profile()
             self.save_profile_button.clicked.connect(lambda: save_profile(self))
             # save button needs to be locked right after it's clicked
             self.save_profile_button.clicked.connect(input_box_changed)
 
-            # when the delete profile button is clicked call delete_profile()
+            # when the delete profiles button is clicked call delete_profile()
             self.delete_profile_button.clicked.connect(lambda: delete_profile(self))
 
-            # when load profile button is clicked load profiles
+            # when load profiles button is clicked load profiles
             self.load_profile_button.clicked.connect(lambda: load_profile(self))
             # load button needs to be locked right after it's clicked
             self.load_profile_button.clicked.connect(input_box_changed)
@@ -296,22 +293,19 @@ class Panel(QWidget):
                 input.valueChanged.connect(input_box_changed)
             self.profile_chooser.currentTextChanged.connect(input_box_changed)
 
-            # add each profile from the save file to the combo box
-            for profile_name in refs.nucleic_acid.profiles:
+            # add each profiles from the save file to the combo box
+            for profile_name in self.profiles:
                 self.profile_chooser.addItem(profile_name)
 
         # hook all buttons to their workers
         hook_widgets()
 
-        # set placeholder text of profile chooser
+        # set placeholder text of profiles chooser
         self.profile_chooser.lineEdit().setPlaceholderText("Profile Name Here")
         self.profile_chooser.setCurrentText("")
 
         # set up button locking/other needed functions initially
         input_box_changed()
-
-        # emit updated signal
-        self.updated.emit()
 
     def _setting_descriptions(self):
         self.D.setToolTip = "Diameter of Domain"

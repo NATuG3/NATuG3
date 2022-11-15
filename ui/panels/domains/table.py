@@ -8,7 +8,6 @@ from PyQt6.QtWidgets import (
     QAbstractItemView,
 )
 
-import refs
 from constants.directions import *
 from structures.domains import Domain
 from ui.panels.domains.widgets import *
@@ -21,7 +20,7 @@ class Table(QTableWidget):
     cell_widget_updated = pyqtSignal()
 
     def __init__(self, parent) -> None:
-        super().__init__()
+        super().__init__(parent)
         # header storage areas
         self.side_headers = []
         self.top_headers = []
@@ -30,22 +29,11 @@ class Table(QTableWidget):
         # (domain index = row index)
         self.rows = []
 
-        # store parent object
-        self.parent = parent
-
         # set up headers
         self._headers()
 
         # style the widget
         self._style()
-
-        # dump the domains of the previous save
-        self.dump_domains(refs.domains.current.subunit.domains)
-
-        # when widget value is changed run fetch_domains and update current settings
-        @self.cell_widget_updated.connect
-        def _():
-            refs.domains.current.subunit.domains = self.fetch_domains()
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -140,7 +128,7 @@ class Table(QTableWidget):
 
             self.side_headers.append(f"#{index + 1}")
 
-            # append to the refs row storage container
+            # append to the row storage container
             self.rows.append(row)
 
         class smooth_interior_updating:
@@ -194,7 +182,7 @@ class Table(QTableWidget):
         Obtain a list of the currently chosen domains.
 
         Returns:
-            List(domains): A list of domain objects based on user input.
+            List(Domain): A list of domain objects based on user input.
         """
         domains = []  # output list of domains
         for domain in range(self.rowCount()):
