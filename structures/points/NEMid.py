@@ -36,7 +36,7 @@ class NEMid(Point):
         """
         if self.strand is None:
             return None
-        return self.strand.items.profile_index(self)
+        return self.strand.items.index(self)
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""

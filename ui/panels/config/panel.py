@@ -27,6 +27,7 @@ class Panel(QWidget):
 
     def __init__(self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains) -> None:
         super().__init__(parent)
+        self.auto_updating_plots = False
         self.profiles = profiles
         self.domains = domains
         uic.loadUi("ui/panels/config/panel.ui", self)
@@ -58,7 +59,7 @@ class Panel(QWidget):
         """Setup pyqt signals."""
 
         """Setup auto graph updating system."""
-        def warn_and_refresh():
+        def warn_and_refresh(top_view, side_view):
             global dialog
             # determine if there are any strands that the user has made
             # (if there are not then we do not need to warn the user)
@@ -69,16 +70,39 @@ class Panel(QWidget):
                         dialog.show()
                     elif (dialog is not None) and dialog.isVisible():
                         logger.info("User is attempting to update graphs even though"
-                                    "warning is visible. Ignoring button request.")
+                                    " warning is visible. Ignoring button request.")
                     return
-            refs.domains.current = self.tabs.domains.table.fetch_domains()
-            refs.strands.recompute()
-            refs.constructor.side_view.refresh()
-            refs.constructor.top_view.refresh()
 
-        self.update_graphs.clicked.connect(warn_and_refresh)
-        self.tabs.domains.updated.connect(warn_and_refresh)
-        self.tabs.nucleic_acid.updated.connect(warn_and_refresh)
+            if top_view or side_view:
+                refs.domains.current = self.tabs.domains.table.fetch_domains()
+            if side_view:
+                refs.strands.recompute()
+                refs.constructor.side_view.refresh()
+            if top_view:
+                refs.constructor.top_view.refresh()
+
+        self.update_graphs.clicked.connect(lambda: warn_and_refresh(True, True))
+
+        def auto_plot_updater():
+            if not self.auto_updating_plots:
+                self.auto_updating_plots = True
+
+                timer = QTimer(refs.application)
+                timer.setInterval(200)
+                timer.setSingleShot(True)
+
+                @timer.timeout.connect
+                def _():
+                    warn_and_refresh(
+                        self.auto_update_top_view.isChecked(),
+                        self.auto_update_side_view.isChecked()
+                    )
+                    self.auto_updating_plots = False
+
+                timer.start()
+
+        self.tabs.domains.updated.connect(auto_plot_updater)
+        self.tabs.nucleic_acid.updated.connect(auto_plot_updater)
 
 
 class RefreshConfirmer(QDialog):
