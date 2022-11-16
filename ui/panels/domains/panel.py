@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (
 )
 
 import helpers
+import refs
 import settings
 from structures.domains import Domains
 from ui.panels.domains.table import Table
@@ -19,53 +20,62 @@ logger = logging.getLogger(__name__)
 class Panel(QWidget):
     """Nucleic Acid Config Tab."""
 
-    domains_updated = pyqtSignal(Domains)
+    updated = pyqtSignal(Domains)
 
     def __init__(self, parent, domains: Domains) -> None:
         super().__init__(parent)
         self.domains: Domains = domains
         uic.loadUi("ui/panels/domains/panel.ui", self)
 
-        # set reload table widget
-        self.update_table.setIcon(fetch_icon("checkmark-outline"))
-
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self)
         self.layout().addWidget(self.table)
-
-        # set scaling settings for config and table
-        config_size_policy = QSizePolicy()
-        config_size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
-        config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
-        self.config.setSizePolicy(config_size_policy)
 
         # set initial values of domain table config widgets
         self.subunit_count.setValue(self.domains.subunit.count)
         self.symmetry.setValue(self.domains.symmetry)
         self.total_count.setValue(self.domains.count)
 
-        # hook update domains button
-        self.update_table.clicked.connect(self.refresh)
-
-        # updated event linking
-        self.table.cell_widget_updated.connect(self.domains_updated.emit)
-        self.update_table.clicked.connect(self.domains_updated.emit)
-
         logger.info("Loaded domains tab of config panel.")
 
-        # update the "total domains" count box
-        # when symmetry or subunit count are changed
-        domain_counter = lambda: self.total_count.setValue(
-            self.symmetry.value() * self.subunit_count.value()
-        )
-        self.symmetry.valueChanged.connect(domain_counter)
-        self.subunit_count.valueChanged.connect(domain_counter)
+        self._signals()
+        self._prettify()
+
+    def _signals(self):
+        """Set up panel signals."""
+        def update_total_domain_box():
+            self.total_count.setValue(
+                self.symmetry.value() * self.subunit_count.value()
+            )
+        self.symmetry.valueChanged.connect(update_total_domain_box)
+        self.subunit_count.valueChanged.connect(update_total_domain_box)
 
         # when helix joint buttons are clicked refresh the table
         # so that the switch values (-1, 0, 1) get udpated
         self.table.helix_joint_updated.connect(
             lambda: self.table.dump_domains(self.table.fetch_domains())
         )
+
+        # dump the initial domains
+        self.table.dump_domains(refs.domains.current)
+
+        # hook update domains button
+        self.update_table.clicked.connect(self.refresh)
+
+        # updated event linking
+        self.table.cell_widget_updated.connect(lambda: self.updated.emit(self.table.fetch_domains()))
+        self.update_table.clicked.connect(lambda: self.updated.emit(self.table.fetch_domains()))
+
+    def _prettify(self):
+        """Set up styles of panel."""
+        # set reload table widget
+        self.update_table.setIcon(fetch_icon("checkmark-outline"))
+
+        # set scaling settings for config and table
+        config_size_policy = QSizePolicy()
+        config_size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
+        config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
+        self.config.setSizePolicy(config_size_policy)
 
     def refresh(self):
         """Refresh panel settings/domain table."""
@@ -86,7 +96,7 @@ class Panel(QWidget):
                 f"domains/subunit count to {self.subunit_count.value()}?",
             )
             if confirmation:
-                self.domains_updated.emit(new_domains)
+                self.updated.emit(new_domains)
                 self.total_count.setValue(self.domains.count)
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
@@ -99,7 +109,7 @@ class Panel(QWidget):
                 )
                 timer.start()
         else:
-            self.domains_updated.emit(new_domains)
+            self.updated.emit(new_domains)
 
         # refresh table
         self.table.dump_domains(new_domains)

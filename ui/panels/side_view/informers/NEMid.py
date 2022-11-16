@@ -17,7 +17,7 @@ class NEMidInformer(QDialog):
         self.z_coordinate.setText(f"{NEMid_.z_coord:.4f} nanometers")
         self.angle.setText(f"{NEMid_.angle:.4f}°")
 
-        strand_index = refs.strands.current.strands.index(NEMid_.strand)
+        strand_index = refs.strands.current.strands.profile_index(NEMid_.strand)
         if NEMid_.strand.closed:
             openness = "closed"
         else:  # not item.strand.closed

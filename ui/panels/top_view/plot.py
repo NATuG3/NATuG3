@@ -33,12 +33,12 @@ class Plotter(pg.PlotWidget):
     def point_clicked(self, event, points):
         point = points[0].pos()
 
-        assert self.worker.u_coords.index(point[0]) == self.worker.v_coords.index(
+        assert self.worker.u_coords.profile_index(point[0]) == self.worker.v_coords.profile_index(
             point[1]
         )
 
         # create the new active x-range for the plot
-        range = self.worker.u_coords.index(point[0])
+        range = self.worker.u_coords.profile_index(point[0])
         range = range - 1, range + 2
 
         # store the previous range of the ui

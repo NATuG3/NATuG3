@@ -4,7 +4,7 @@ import pickle
 from typing import Dict
 
 import settings
-from structures.misc import Profile
+from structures.profiles import NucleicAcidProfile
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class _NucleicAcid:
         restored = f"saves/nucleic_acid/restored.{settings.extension}"
 
     defaults = {
-        "B-DNA (MFD)": Profile(
+        "B-DNA (MFD)": NucleicAcidProfile(
             D=2.2,
             H=3.549,
             T=2,
@@ -49,7 +49,7 @@ class _NucleicAcid:
             # load restored settings
             with open(self.filenames.restored, "rb") as file:
                 self.current = pickle.load(file)
-                assert isinstance(self.current, Profile)
+                assert isinstance(self.current, NucleicAcidProfile)
 
             logger.debug("Saved profiles file loaded.")
         # if unable to locate nucleic acid settings file then
@@ -67,7 +67,7 @@ class _NucleicAcid:
 
             # perform data validation before save
             for name, profile in self.profiles.items():
-                if not isinstance(profile, Profile):
+                if not isinstance(profile, NucleicAcidProfile):
                     logger.critical(
                         "Data validation for nucleic_acid profiles dump failed."
                     )
@@ -79,7 +79,7 @@ class _NucleicAcid:
         # dump current settings
         with open(self.filenames.restored, "wb") as settings_file:
             # perform data validation before save
-            if not isinstance(self.current, Profile):
+            if not isinstance(self.current, NucleicAcidProfile):
                 logger.critical(
                     "Data validation for nucleic_acid current profiles dump failed."
                 )

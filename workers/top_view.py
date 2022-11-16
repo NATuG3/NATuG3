@@ -2,7 +2,7 @@ import math
 from typing import List
 
 from structures.domains import Domains
-from structures.misc import Profile
+from structures.profiles import NucleicAcidProfile
 
 
 class TopView:
@@ -16,7 +16,7 @@ class TopView:
         angle_deltas: All angle changes from NEMid-to-NEMid
     """
 
-    def __init__(self, domains: Domains, profile: Profile) -> None:
+    def __init__(self, domains: Domains, profile: NucleicAcidProfile) -> None:
         """
         Generate (u, v) cords for top view of helices generation.
 
@@ -29,7 +29,7 @@ class TopView:
         self.domains = domains.domains
         assert isinstance(domains, Domains)
         self.profile = profile
-        assert isinstance(profile, Profile)
+        assert isinstance(profile, NucleicAcidProfile)
 
         self.theta_deltas: List[float] = [0.0]  # list to store angle deltas in
         self.u_coords: List[float] = [0.0]  # list to store u cords in

@@ -81,7 +81,7 @@ class Plotter(pg.PlotWidget):
                     dialog.z_coordinate.setText(f"{item.z_coord:.4f} nanometers")
                     dialog.angle.setText(f"{item.angle:.4f}°")
 
-                    strand_index = refs.strands.current.strands.index(item.strand)
+                    strand_index = refs.strands.current.strands.profile_index(item.strand)
                     if item.strand.closed:
                         openness = "closed"
                     else:  # not item.strand.closed
@@ -131,7 +131,7 @@ class Plotter(pg.PlotWidget):
                         Nick.to_nick(item)
                     elif isinstance(item, Nick):
                         strand = item.prior.strand
-                        strand.items[strand.items.index(item)] = item.prior
+                        strand.items[strand.items.profile_index(item)] = item.prior
             refresh()
 
     def _prettify(self):

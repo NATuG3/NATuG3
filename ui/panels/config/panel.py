@@ -14,7 +14,7 @@ import refs
 import refs.saver.save
 import settings
 from structures.domains import Domains
-from structures.misc import Profile
+from structures.profiles import NucleicAcidProfile
 from ui.panels import domains, nucleic_acid
 from ui.resources import fetch_icon
 
@@ -25,7 +25,7 @@ dialog = None
 class Panel(QWidget):
     """Config panel."""
 
-    def __init__(self, parent, profiles: Dict[str, Profile], domains: Domains) -> None:
+    def __init__(self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains) -> None:
         super().__init__(parent)
         self.profiles = profiles
         self.domains = domains
@@ -71,14 +71,13 @@ class Panel(QWidget):
                         logger.info("User is attempting to update graphs even though"
                                     "warning is visible. Ignoring button request.")
                     return
-            refs.nucleic_acid.current = self.tabs.nucleic_acid.fetch_profile()
-            refs.domains.current = self.tabs.domains.fetch_domains()
+            refs.domains.current = self.tabs.domains.table.fetch_domains()
             refs.strands.recompute()
             refs.constructor.side_view.refresh()
             refs.constructor.top_view.refresh()
 
         self.update_graphs.clicked.connect(warn_and_refresh)
-        self.tabs.domains.domains_updated.connect(warn_and_refresh)
+        self.tabs.domains.updated.connect(warn_and_refresh)
         self.tabs.nucleic_acid.updated.connect(warn_and_refresh)
 
 

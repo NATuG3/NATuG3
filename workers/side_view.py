@@ -9,7 +9,7 @@ import settings
 from constants.directions import *
 from helpers import inverse
 from structures.domains import Domains
-from structures.misc import Profile
+from structures.profiles import NucleicAcidProfile
 from structures.points import NEMid
 from structures.strands.strand import Strand
 from structures.strands.strands import Strands
@@ -25,14 +25,14 @@ class SideView:
     strand_directions = (UP, DOWN)
     cache_clearers = ("domains", "profiles")
 
-    def __init__(self, domains: Domains, profile: Profile) -> None:
+    def __init__(self, domains: Domains, profile: NucleicAcidProfile) -> None:
         """
         Initialize side_view generation class.
         """
         self.domains = domains
         assert isinstance(domains, Domains)
         self.profile = profile
-        assert isinstance(profile, Profile)
+        assert isinstance(profile, NucleicAcidProfile)
 
     def __setattr__(self, key, value):
         if key in self.cache_clearers:

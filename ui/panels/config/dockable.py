@@ -4,14 +4,14 @@ from typing import Dict
 from PyQt6.QtWidgets import QDockWidget
 
 from structures.domains import Domains
-from structures.misc import Profile
+from structures.profiles import NucleicAcidProfile
 from ui.panels.config.panel import Panel
 
 logger = logging.getLogger(__name__)
 
 
 class Dockable(QDockWidget):
-    def __init__(self, profiles: Dict[str, Profile], domains: Domains):
+    def __init__(self, profiles: Dict[str, NucleicAcidProfile], domains: Domains):
         super().__init__()
 
         # set titles/descriptions

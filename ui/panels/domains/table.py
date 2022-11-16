@@ -9,8 +9,8 @@ from PyQt6.QtWidgets import (
 )
 
 from constants.directions import *
-from structures.domains import Domain
-from ui.panels.domains.widgets import *
+from structures.domains import Domain, Domains
+from ui.widgets import directional_button, table_integer_box, DirectionalButton, TableIntegerBox
 
 
 class Table(QTableWidget):
@@ -68,7 +68,7 @@ class Table(QTableWidget):
                 i, QHeaderView.ResizeMode.Stretch
             )
 
-    def dump_domains(self, domains: list) -> None:
+    def dump_domains(self, domains: Domains) -> None:
         """
         Dump a list of domain objects.
 
@@ -77,7 +77,7 @@ class Table(QTableWidget):
         """
 
         # create rows before we input widgets
-        self.setRowCount(len(domains))
+        self.setRowCount(domains.count)
 
         # clear out the side headers list
         self.side_headers = []
@@ -86,7 +86,7 @@ class Table(QTableWidget):
         self.rows.clear()
 
         # insert all domains
-        for index, domain in enumerate(domains):
+        for index, domain in enumerate(domains.subunit.domains):
             # container for currently-being-added widgets
             row = SimpleNamespace()
 
@@ -209,5 +209,7 @@ class Table(QTableWidget):
             )
 
             domains.append(domain)
+
+        domains = Domains(domains, self.parent().symmetry.value())
 
         return domains
