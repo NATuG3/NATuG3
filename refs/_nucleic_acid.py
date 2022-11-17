@@ -71,7 +71,9 @@ class _NucleicAcid:
                     logger.critical(
                         "Data validation for nucleic_acid profiles dump failed."
                     )
-                    raise TypeError(f'profiles named "{name}" is not a profiles', profile)
+                    raise TypeError(
+                        f'profiles named "{name}" is not a profiles', profile
+                    )
 
             pickle.dump(self.profiles, file)
             logger.info(f'Dumped all profiles into "{file}"')

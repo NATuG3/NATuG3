@@ -1,10 +1,10 @@
+import logging
 from types import FunctionType
 from typing import Iterable, Dict
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QGroupBox
-import logging
 
 import helpers
 from ui.resources import fetch_icon

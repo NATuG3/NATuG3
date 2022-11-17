@@ -5,7 +5,6 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget
 
-import helpers
 import refs
 from structures.profiles import NucleicAcidProfile
 from ui.widgets.profile_manager import ProfileManager
@@ -42,10 +41,12 @@ class Panel(QWidget):
             self.fetch_settings,
             self.dump_settings,
             profiles=refs.nucleic_acid.profiles,
-            defaults=refs.nucleic_acid.defaults
+            defaults=refs.nucleic_acid.defaults,
         )
         self.profile_manager.profile_saved.connect(
-            lambda: setattr(refs.nucleic_acid, "profiles", self.profile_manager.profiles)
+            lambda: setattr(
+                refs.nucleic_acid, "profiles", self.profile_manager.profiles
+            )
         )
         self.layout().insertWidget(0, self.profile_manager)
 

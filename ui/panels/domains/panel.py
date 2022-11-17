@@ -43,10 +43,12 @@ class Panel(QWidget):
 
     def _signals(self):
         """Set up panel signals."""
+
         def update_total_domain_box():
             self.total_count.setValue(
                 self.symmetry.value() * self.subunit_count.value()
             )
+
         self.symmetry.valueChanged.connect(update_total_domain_box)
         self.subunit_count.valueChanged.connect(update_total_domain_box)
 
@@ -63,8 +65,12 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         # updated event linking
-        self.table.cell_widget_updated.connect(lambda: self.updated.emit(self.table.fetch_domains()))
-        self.update_table.clicked.connect(lambda: self.updated.emit(self.table.fetch_domains()))
+        self.table.cell_widget_updated.connect(
+            lambda: self.updated.emit(self.table.fetch_domains())
+        )
+        self.update_table.clicked.connect(
+            lambda: self.updated.emit(self.table.fetch_domains())
+        )
 
     def _prettify(self):
         """Set up styles of panel."""
@@ -105,7 +111,9 @@ class Panel(QWidget):
                 timer.setInterval(400)
                 timer.setSingleShot(True)
                 timer.timeout.connect(
-                    lambda: self.update_table.setStyleSheet("background-color: light grey")
+                    lambda: self.update_table.setStyleSheet(
+                        "background-color: light grey"
+                    )
                 )
                 timer.start()
         else:

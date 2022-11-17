@@ -34,9 +34,7 @@ def worker(filename):
     refs.constructor.config.panel.tabs.domains.symmetry.setValue(
         refs.domains.current.symmetry
     )
-    refs.constructor.config.panel.tabs.domains.table.dump_domains(
-        refs.domains.current
-    )
+    refs.constructor.config.panel.tabs.domains.table.dump_domains(refs.domains.current)
 
     # refresh graphs
     refs.constructor.top_view.refresh()

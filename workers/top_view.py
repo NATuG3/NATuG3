@@ -5,7 +5,7 @@ from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
 
 
-class TopView:
+class TopViewWorker:
     """
     Top view plotter.
 

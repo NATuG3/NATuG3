@@ -10,6 +10,7 @@ colors = {
     "nicks": (255, 0, 0),
     "highlighted": (245, 245, 0),
     "success": (192, 209, 188),
+    "domains": (90, 90, 90),
     "strands": {
         "greys": ((195, 195, 195), (70, 70, 70)),
         "colors": (

@@ -9,15 +9,15 @@ import settings
 from constants.directions import *
 from helpers import inverse
 from structures.domains import Domains
-from structures.profiles import NucleicAcidProfile
 from structures.points import NEMid
+from structures.profiles import NucleicAcidProfile
 from structures.strands.strand import Strand
 from structures.strands.strands import Strands
 
 logger = logging.getLogger(__name__)
 
 
-class SideView:
+class SideViewWorker:
     """
     Class for generating data needed for a side view graph of helices.
     """

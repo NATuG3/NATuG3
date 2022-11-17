@@ -2,12 +2,11 @@ import logging
 import os
 from contextlib import suppress
 from datetime import datetime
-from time import time
 from types import SimpleNamespace
 from typing import List, Dict
 
 from PyQt6 import uic
-from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDialog
 
 import refs
@@ -25,7 +24,9 @@ dialog = None
 class Panel(QWidget):
     """Config panel."""
 
-    def __init__(self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains) -> None:
+    def __init__(
+        self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
+    ) -> None:
         super().__init__(parent)
         self.auto_updating_plots = False
         self.profiles = profiles
@@ -59,6 +60,7 @@ class Panel(QWidget):
         """Setup pyqt signals."""
 
         """Setup auto graph updating system."""
+
         def warn_and_refresh(top_view, side_view):
             global dialog
             # determine if there are any strands that the user has made
@@ -69,8 +71,10 @@ class Panel(QWidget):
                         dialog = RefreshConfirmer(refs.constructor)
                         dialog.show()
                     elif (dialog is not None) and dialog.isVisible():
-                        logger.info("User is attempting to update graphs even though"
-                                    " warning is visible. Ignoring button request.")
+                        logger.info(
+                            "User is attempting to update graphs even though"
+                            " warning is visible. Ignoring button request."
+                        )
                     return
 
             if top_view or side_view:
@@ -95,7 +99,7 @@ class Panel(QWidget):
                 def _():
                     warn_and_refresh(
                         self.auto_update_top_view.isChecked(),
-                        self.auto_update_side_view.isChecked()
+                        self.auto_update_side_view.isChecked(),
                     )
                     self.auto_updating_plots = False
 
@@ -115,7 +119,7 @@ class RefreshConfirmer(QDialog):
 
     def _fileselector(self):
         # create a timestamp
-        timestamp = datetime.now().strftime('%m-%d-%Y')
+        timestamp = datetime.now().strftime("%m-%d-%Y")
         counter: List[int] = [0]
         # check to see if there are other saves with the default filename from today
         for filename in os.listdir(f"{os.getcwd()}/saves"):
@@ -123,12 +127,16 @@ class RefreshConfirmer(QDialog):
                 with suppress(ValueError):
                     # if we find a save that contains a timestamp, see if it has a # at the end of it
                     # and if it does than append that number to the counter list
-                    counter.append(int(filename[filename.find("_")+1:].replace(".nano", "")))
+                    counter.append(
+                        int(filename[filename.find("_") + 1 :].replace(".nano", ""))
+                    )
         # let counter be the highest counter in the list of counters found
-        counter: int = max(counter)+1
+        counter: int = max(counter) + 1
 
         # create str of the new filepath
-        self.default_path: str = f"{os.getcwd()}\\saves\\{timestamp}_{counter}.{settings.extension}"
+        self.default_path: str = (
+            f"{os.getcwd()}\\saves\\{timestamp}_{counter}.{settings.extension}"
+        )
 
         # create default filename
         self.location.setText(
@@ -143,7 +151,9 @@ class RefreshConfirmer(QDialog):
     def _buttons(self):
         # change location button
         self.change_location.clicked.connect(self.close)
-        self.change_location.clicked.connect(lambda: refs.saver.save.runner(refs.constructor))
+        self.change_location.clicked.connect(
+            lambda: refs.saver.save.runner(refs.constructor)
+        )
 
         # cancel button
         self.cancel.clicked.connect(self.close)
@@ -156,7 +166,9 @@ class RefreshConfirmer(QDialog):
 
         # save and refresh button
         self.save_and_refresh.clicked.connect(self.close)
-        self.save_and_refresh.clicked.connect(lambda: refs.saver.save.worker(self.default_path))
+        self.save_and_refresh.clicked.connect(
+            lambda: refs.saver.save.worker(self.default_path)
+        )
         self.save_and_refresh.clicked.connect(refs.strands.recompute)
         self.save_and_refresh.clicked.connect(refs.constructor.side_view.refresh)
         self.save_and_refresh.clicked.connect(refs.constructor.top_view.refresh)

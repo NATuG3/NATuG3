@@ -24,6 +24,10 @@ class Strands:
         """Obtain the number of strands this Strands object contains."""
         return len(self.strands)
 
+    def index(self, item: object) -> int:
+        """Obtain the index of a given strand."""
+        return self.strands.index(item)
+
     def append(self, strand: Strand):
         """
         Add a strand.

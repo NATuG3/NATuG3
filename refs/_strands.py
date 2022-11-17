@@ -5,7 +5,7 @@ from typing import Union
 
 import refs
 from structures.strands.strands import Strands
-from workers.side_view import SideView
+from workers.side_view import SideViewWorker
 
 
 class _Strands:
@@ -33,7 +33,7 @@ class _Strands:
             pickle.dump(self.current, file)
 
     def recompute(self) -> Strands:
-        self.current: Strands = SideView(
+        self.current: Strands = SideViewWorker(
             refs.domains.current, refs.nucleic_acid.current
         ).compute()
         return self.current

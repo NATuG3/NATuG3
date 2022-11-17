@@ -1,4 +1,6 @@
 import logging
+import os
+from contextlib import suppress
 from time import time
 
 # whether to delete restoration files
@@ -15,14 +17,16 @@ def main():
     """Main runner for program."""
 
     if RESET:
-        from os import remove
-        from contextlib import suppress
-
         with suppress(FileNotFoundError):
-            remove("saves/nucleic_acid/profiles.nano")
-            remove("saves/nucleic_acid/restored.nano")
-            remove("saves/domains/restored.nano")
-            remove("saves/strands/restored.nano")
+            os.remove("saves/nucleic_acid/profiles.nano")
+            os.remove("saves/nucleic_acid/restored.nano")
+            os.remove("saves/domains/restored.nano")
+            os.remove("saves/strands/restored.nano")
+
+    with suppress(FileExistsError):
+        os.mkdir(f"{os.getcwd()}\\saves\\nucleic_acid")
+        os.mkdir(f"{os.getcwd()}\\saves\\domains")
+        os.mkdir(f"{os.getcwd()}\\saves\\strands")
 
     import pyqtgraph as pg
 

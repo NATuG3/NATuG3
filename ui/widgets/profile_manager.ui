@@ -1,189 +1,189 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>244</width>
-    <height>400</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
-    <number>2</number>
-   </property>
-   <item>
-    <widget class="QWidget" name="profile_manager" native="true">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="leftMargin">
-       <number>4</number>
-      </property>
-      <property name="topMargin">
-       <number>4</number>
-      </property>
-      <property name="rightMargin">
-       <number>4</number>
-      </property>
-      <property name="bottomMargin">
-       <number>4</number>
-      </property>
-      <property name="spacing">
-       <number>5</number>
-      </property>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="divider">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+    <class>Form</class>
+    <widget class="QWidget" name="Form">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>244</width>
+                <height>400</height>
+            </rect>
         </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
-       <layout class="QGridLayout" name="profile_tools_layout">
-        <item row="0" column="3">
-         <widget class="QPushButton" name="delete_profile_button">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Delete Profile</string>
-          </property>
-          <property name="statusTip">
-           <string/>
-          </property>
-          <property name="whatsThis">
-           <string>Delete Profile</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210,
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="leftMargin">
+                <number>2</number>
+            </property>
+            <property name="topMargin">
+                <number>2</number>
+            </property>
+            <property name="rightMargin">
+                <number>2</number>
+            </property>
+            <property name="bottomMargin">
+                <number>2</number>
+            </property>
+            <item>
+                <widget class="QWidget" name="profile_manager" native="true">
+                    <property name="sizePolicy">
+                        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                        </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                        <size>
+                            <width>16777215</width>
+                            <height>16777215</height>
+                        </size>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout">
+                        <property name="leftMargin">
+                            <number>4</number>
+                        </property>
+                        <property name="topMargin">
+                            <number>4</number>
+                        </property>
+                        <property name="rightMargin">
+                            <number>4</number>
+                        </property>
+                        <property name="bottomMargin">
+                            <number>4</number>
+                        </property>
+                        <property name="spacing">
+                            <number>5</number>
+                        </property>
+                        <item row="1" column="0" colspan="2">
+                            <widget class="Line" name="divider">
+                                <property name="orientation">
+                                    <enum>Qt::Horizontal</enum>
+                                </property>
+                            </widget>
+                        </item>
+                        <item row="2" column="0" colspan="2">
+                            <layout class="QGridLayout" name="profile_tools_layout">
+                                <item row="0" column="3">
+                                    <widget class="QPushButton" name="delete_profile_button">
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="maximumSize">
+                                            <size>
+                                                <width>16777215</width>
+                                                <height>16777215</height>
+                                            </size>
+                                        </property>
+                                        <property name="toolTip">
+                                            <string>Delete Profile</string>
+                                        </property>
+                                        <property name="statusTip">
+                                            <string/>
+                                        </property>
+                                        <property name="whatsThis">
+                                            <string>Delete Profile</string>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QPushButton::disabled{background-color: rgb(210, 210,
                                                 210)}
                                             </string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="save_profile_button">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Save Profile</string>
-          </property>
-          <property name="statusTip">
-           <string/>
-          </property>
-          <property name="whatsThis">
-           <string>Save Profile</string>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210,
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                        <property name="checkable">
+                                            <bool>false</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="0" column="1">
+                                    <widget class="QPushButton" name="save_profile_button">
+                                        <property name="enabled">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="sizePolicy">
+                                            <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                                                <horstretch>0</horstretch>
+                                                <verstretch>0</verstretch>
+                                            </sizepolicy>
+                                        </property>
+                                        <property name="maximumSize">
+                                            <size>
+                                                <width>16777215</width>
+                                                <height>16777215</height>
+                                            </size>
+                                        </property>
+                                        <property name="toolTip">
+                                            <string>Save Profile</string>
+                                        </property>
+                                        <property name="statusTip">
+                                            <string/>
+                                        </property>
+                                        <property name="whatsThis">
+                                            <string>Save Profile</string>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QPushButton::disabled{background-color: rgb(210, 210,
                                                 210)}
                                             </string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="load_profile_button">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="toolTip">
-           <string>Load Profile</string>
-          </property>
-          <property name="statusTip">
-           <string/>
-          </property>
-          <property name="whatsThis">
-           <string/>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">QPushButton::disabled{background-color: rgb(210, 210,
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                        <property name="checkable">
+                                            <bool>false</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                                <item row="0" column="0">
+                                    <widget class="QPushButton" name="load_profile_button">
+                                        <property name="enabled">
+                                            <bool>true</bool>
+                                        </property>
+                                        <property name="toolTip">
+                                            <string>Load Profile</string>
+                                        </property>
+                                        <property name="statusTip">
+                                            <string/>
+                                        </property>
+                                        <property name="whatsThis">
+                                            <string/>
+                                        </property>
+                                        <property name="styleSheet">
+                                            <string notr="true">QPushButton::disabled{background-color: rgb(210, 210,
                                                 210)}
                                             </string>
-          </property>
-          <property name="text">
-           <string/>
-          </property>
-          <property name="checkable">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QComboBox" name="profile_chooser">
-        <property name="toolTip">
-         <string/>
-        </property>
-        <property name="editable">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+                                        </property>
+                                        <property name="text">
+                                            <string/>
+                                        </property>
+                                        <property name="checkable">
+                                            <bool>false</bool>
+                                        </property>
+                                    </widget>
+                                </item>
+                            </layout>
+                        </item>
+                        <item row="0" column="0" colspan="2">
+                            <widget class="QComboBox" name="profile_chooser">
+                                <property name="toolTip">
+                                    <string/>
+                                </property>
+                                <property name="editable">
+                                    <bool>true</bool>
+                                </property>
+                            </widget>
+                        </item>
+                    </layout>
+                </widget>
+            </item>
+        </layout>
     </widget>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
+    <resources/>
+    <connections/>
 </ui>

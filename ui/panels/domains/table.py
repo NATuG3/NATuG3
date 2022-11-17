@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
 
 from constants.directions import *
 from structures.domains import Domain, Domains
-from ui.widgets import directional_button, table_integer_box, DirectionalButton, TableIntegerBox
+from ui.widgets import DirectionalButton, TableIntegerBox
 
 
 class Table(QTableWidget):
