@@ -1,5 +1,6 @@
 from types import SimpleNamespace
-from typing import Literal
+from typing import Literal, List
+import logging
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
@@ -11,6 +12,9 @@ from PyQt6.QtWidgets import (
 from constants.directions import *
 from structures.domains import Domain, Domains
 from ui.widgets import DirectionalButton, TableIntegerBox
+
+
+logger = logging.getLogger(__name__)
 
 
 class Table(QTableWidget):
@@ -177,7 +181,7 @@ class Table(QTableWidget):
 
         self.setVerticalHeaderLabels(self.side_headers)
 
-    def fetch_domains(self) -> list:
+    def fetch_domains(self) -> List[Domain]:
         """
         Obtain a list of the currently chosen domains.
 
@@ -210,6 +214,5 @@ class Table(QTableWidget):
 
             domains.append(domain)
 
-        domains = Domains(domains, self.parent().symmetry.value())
-
+        logger.info(f"Fetched {len(domains)} domains from domains table.")
         return domains

@@ -52,7 +52,7 @@ class Panel(QWidget):
 
         # set the domains tab
         # store actual widget in the tabs container
-        self.tabs.domains = domains.Panel(self.parent(), self.domains)
+        self.tabs.domains = domains.Panel(self.parent())
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
@@ -77,8 +77,6 @@ class Panel(QWidget):
                         )
                     return
 
-            if top_view or side_view:
-                refs.domains.current = self.tabs.domains.table.fetch_domains()
             if side_view:
                 refs.strands.recompute()
                 refs.constructor.side_view.refresh()

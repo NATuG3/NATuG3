@@ -1,6 +1,6 @@
 import logging
 from copy import copy
-from typing import List
+from typing import List, Iterable
 
 from helpers import inverse
 from structures.domains import Domain
@@ -13,8 +13,10 @@ class Domains:
     Container for multiple domains.
     """
 
-    def __init__(self, domains, symmetry):
-        self.subunit = Subunit(domains)
+    def __init__(self, domains: Iterable, symmetry: int):
+        assert isinstance(domains, Iterable)
+        assert isinstance(symmetry, int)
+        self.subunit = Subunit(list(domains))
         self.symmetry = symmetry
 
     @property
@@ -42,6 +44,7 @@ class Domains:
 
 class Subunit:
     def __init__(self, domains: List[Domain]) -> None:
+        assert isinstance(domains, list)
         self.domains = domains
 
     @property

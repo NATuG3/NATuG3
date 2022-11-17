@@ -20,11 +20,10 @@ logger = logging.getLogger(__name__)
 class Panel(QWidget):
     """Nucleic Acid Config Tab."""
 
-    updated = pyqtSignal(Domains)
+    updated = pyqtSignal()
 
-    def __init__(self, parent, domains: Domains) -> None:
+    def __init__(self, parent) -> None:
         super().__init__(parent)
-        self.domains: Domains = domains
         uic.loadUi("ui/panels/domains/panel.ui", self)
 
         # create domains editor table and append it to the bottom of the domains panel
@@ -32,9 +31,9 @@ class Panel(QWidget):
         self.layout().addWidget(self.table)
 
         # set initial values of domain table config widgets
-        self.subunit_count.setValue(self.domains.subunit.count)
-        self.symmetry.setValue(self.domains.symmetry)
-        self.total_count.setValue(self.domains.count)
+        self.subunit_count.setValue(refs.domains.current.subunit.count)
+        self.symmetry.setValue(refs.domains.current.symmetry)
+        self.total_count.setValue(refs.domains.current.count)
 
         logger.info("Loaded domains tab of config panel.")
 
@@ -65,12 +64,8 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         # updated event linking
-        self.table.cell_widget_updated.connect(
-            lambda: self.updated.emit(self.table.fetch_domains())
-        )
-        self.update_table.clicked.connect(
-            lambda: self.updated.emit(self.table.fetch_domains())
-        )
+        self.table.cell_widget_updated.connect(self.updated.emit)
+        self.update_table.clicked.connect(lambda: self.updated.emit)
 
     def _prettify(self):
         """Set up styles of panel."""
@@ -85,14 +80,11 @@ class Panel(QWidget):
 
     def refresh(self):
         """Refresh panel settings/domain table."""
-        # obtain current domain inputs
-        new_domains = self.table.fetch_domains()
-        new_domains = Domains(new_domains, self.symmetry.value())
-
-        confirmation: bool = True
+        confirmation: bool
+        new_domains: Domains = Domains(self.table.fetch_domains(), self.symmetry.value())
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)
-        if self.subunit_count.value() < self.domains.subunit.count:
+        if self.subunit_count.value() < refs.domains.current.subunit.count:
             # helpers.confirm will return a bool
             confirmation: bool = helpers.confirm(
                 self.parent(),
@@ -102,8 +94,9 @@ class Panel(QWidget):
                 f"domains/subunit count to {self.subunit_count.value()}?",
             )
             if confirmation:
-                self.updated.emit(new_domains)
-                self.total_count.setValue(self.domains.count)
+                logger.info("User confirmed that they would like the subunit count reduced.")
+                new_domains.subunit.count = self.subunit_count.value()
+                refs.domains.current = new_domains
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
@@ -116,8 +109,11 @@ class Panel(QWidget):
                     )
                 )
                 timer.start()
+                self.updated.emit()
         else:
-            self.updated.emit(new_domains)
+            new_domains.subunit.count = self.subunit_count.value()
+            refs.domains.current = new_domains
+            self.updated.emit()
 
         # refresh table
-        self.table.dump_domains(new_domains)
+        self.table.dump_domains(refs.domains.current)
