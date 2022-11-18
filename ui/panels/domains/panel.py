@@ -81,7 +81,9 @@ class Panel(QWidget):
     def refresh(self):
         """Refresh panel settings/domain table."""
         confirmation: bool
-        new_domains: Domains = Domains(self.table.fetch_domains(), self.symmetry.value())
+        new_domains: Domains = Domains(
+            self.table.fetch_domains(), self.symmetry.value()
+        )
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)
         if self.subunit_count.value() < refs.domains.current.subunit.count:
@@ -94,7 +96,9 @@ class Panel(QWidget):
                 f"domains/subunit count to {self.subunit_count.value()}?",
             )
             if confirmation:
-                logger.info("User confirmed that they would like the subunit count reduced.")
+                logger.info(
+                    "User confirmed that they would like the subunit count reduced."
+                )
                 new_domains.subunit.count = self.subunit_count.value()
                 refs.domains.current = new_domains
                 self.update_table.setStyleSheet(

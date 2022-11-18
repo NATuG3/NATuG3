@@ -1,6 +1,6 @@
+import logging
 from types import SimpleNamespace
 from typing import Literal, List
-import logging
 
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
@@ -12,7 +12,6 @@ from PyQt6.QtWidgets import (
 from constants.directions import *
 from structures.domains import Domain, Domains
 from ui.widgets import DirectionalButton, TableIntegerBox
-
 
 logger = logging.getLogger(__name__)
 

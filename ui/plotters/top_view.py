@@ -74,7 +74,7 @@ class TopViewPlotter(pg.PlotWidget):
         )
 
         for counter, position in enumerate(
-            tuple(zip(self.worker.u_coords, self.worker.v_coords))[1:], start=1
+                tuple(zip(self.worker.u_coords, self.worker.v_coords))[1:], start=1
         ):
             counter = str(counter)
             symbol_size = self.circle_radius / 3

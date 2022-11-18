@@ -35,10 +35,10 @@ class Strand:
     __cached = ("NEMids", "up_strand", "down_strand", "interdomain", "boundaries")
 
     def __init__(
-        self,
-        items: list = None,
-        color: Tuple[int, int, int] = (0, 0, 0),
-        closed: bool | None = False,
+            self,
+            items: list = None,
+            color: Tuple[int, int, int] = (0, 0, 0),
+            closed: bool | None = False,
     ):
         self.color = color
         self.closed = closed
@@ -79,8 +79,8 @@ class Strand:
                     if test_item is item:
                         continue
                     elif (
-                        dist(item.position(), test_item.position())
-                        < settings.junction_threshold
+                            dist(item.position(), test_item.position())
+                            < settings.junction_threshold
                     ):
                         item.juncmate = test_item
                         test_item.juncmate = item
@@ -95,14 +95,14 @@ class Strand:
         """
         # check boundary boxes of the strands before doing heavy touch-check computations
         if (self.boundaries[0] + self.size[0] > other.boundaries[0]) or (
-            self.boundaries[1] + self.size[1] > other.boundaries[1]
+                self.boundaries[1] + self.size[1] > other.boundaries[1]
         ):  # if our bottom left corner x coord + our width is greater than their bottom left corner than we overlap
             for our_item in shuffled(self.items):
                 for their_item in shuffled(other.items):
                     # for each item in us, for each item in them, check if we are sufficiently close
                     if (
-                        dist(our_item.position(), their_item.position())
-                        < touching_distance
+                            dist(our_item.position(), their_item.position())
+                            < touching_distance
                     ):
                         # if we've detected that even a single item touches, we ARE touching
                         return True
