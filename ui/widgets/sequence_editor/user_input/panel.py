@@ -1,24 +1,16 @@
+from functools import partial
 from typing import List
 
-from PyQt6.QtCore import Qt, QPoint, QTimer
-from PyQt6.QtGui import QTextCursor
-from PyQt6.QtWidgets import (
-    QScrollArea,
-    QVBoxLayout,
-    QWidget,
-    QPlainTextEdit,
-    QApplication,
-)
+from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget, QApplication
 
-import constants
-from helpers import bases_only
-from .display_area import DisplayArea
-from .editor_area import EditorArea, BaseEntryBox
+from .display import DisplayArea
+from .editor import EditorArea
 
-tester = ["A", "T", "G", "C", "T", "A"]
+tester = ["A", "T", "C", "G", None, "A"]
 
 
-class SequenceEditor(QWidget):
+class UserInputSequenceEditor(QWidget):
     def __init__(self, base_count: int = 5):
         super().__init__()
         self.setWindowTitle("Sequence Editor")
@@ -31,51 +23,52 @@ class SequenceEditor(QWidget):
         self._signals()
         self._prettify()
 
+        self.display_area.setPlainText(self.editor_area.sequence)
+
     def _prettify(self):
         self.setMinimumWidth(650)
-        self.setFixedHeight(450)
+        self.setFixedHeight(400)
         self.scrollable_editor_area.setFixedHeight(100)
 
     def _signals(self):
-        def editor_area_updated(widget: BaseEntryBox | None):
-            sequence = self.editor_area.bases
-            sequence = "".join(sequence)
+        def update_display_area():
             self.display_area.blockSignals(True)
-            self.display_area.setPlainText(sequence)
+            self.display_area.setPlainText(self.editor_area.sequence)
+            for index, widget in enumerate(self.editor_area.widgets):
+                if widget.hasFocus():
+                    self.display_area.highlight(index)
+                    break
             self.display_area.blockSignals(False)
 
-        self.editor_area.updated.connect(editor_area_updated)
-        editor_area_updated(None)
-
-        def editor_area_appended(index: int, base: str, widget: BaseEntryBox):
-            def awaiter():
-                self.scrollable_editor_area.ensureWidgetVisible(widget)
-                QTimer.singleShot(
-                    1,
-                    lambda: self.scrollable_editor_area.horizontalScrollBar().setValue(
-                        self.scrollable_editor_area.horizontalScrollBar().value() + 28
-                    ),
-                )
-
-            QTimer.singleShot(0, awaiter)
-            self.scrollable_editor_area.ensureWidgetVisible(widget, 0, 0)
-
-        self.editor_area.base_added.connect(editor_area_appended)
-
         def display_area_edited(new_bases: List[str]):
+            self.editor_area.blockSignals(True)
+            hide_while_updating = (
+                abs(len(self.editor_area) - len(self.display_area.toPlainText())) > 10
+            )
             self.editor_area.bases = new_bases
+            self.editor_area.blockSignals(False)
 
-        self.display_area.updated.connect(display_area_edited)
+        def editor_area_added(index: int, base: str):
+            widget = self.editor_area.widgets[index]
+            scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
+            QTimer.singleShot(
+                0, partial(self.scrollable_editor_area.ensureWidgetVisible, widget)
+            )
+            QTimer.singleShot(1, partial(scroll_bar.setValue, scroll_bar.value() + 30))
+            self.scrollable_editor_area.ensureWidgetVisible(widget, 0, 0)
+            update_display_area()
 
-        def editor_area_selection_changed(index: int, widget: BaseEntryBox):
-            def awaiter():
-                self.display_area.blockSignals(True)
-                self.display_area.highlight(index)
-                self.display_area.blockSignals(False)
+        def editor_area_selection_changed(index: int):
+            # highlight the active editor area's base
+            self.display_area.blockSignals(True)
+            self.display_area.highlight(index)
+            self.display_area.blockSignals(False)
 
-            QTimer.singleShot(1, awaiter)
-
+        self.editor_area.base_added.connect(editor_area_added)
+        self.editor_area.base_added.connect(update_display_area)
+        self.editor_area.updated.connect(update_display_area)
         self.editor_area.selection_changed.connect(editor_area_selection_changed)
+        self.display_area.updated.connect(display_area_edited)
 
     def _editor_area(self):
         """Create the base editor area."""
@@ -101,3 +94,4 @@ class SequenceEditor(QWidget):
         """Create the sequence viewer area."""
         self.display_area = DisplayArea(self)
         self.layout().addWidget(self.display_area)
+        # self.display_area.setReadOnly(True)

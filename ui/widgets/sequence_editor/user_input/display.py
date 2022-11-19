@@ -9,10 +9,12 @@ from helpers import bases_only
 class DisplayArea(QTextEdit):
     updated = pyqtSignal(list)
 
-    def __init__(self, parent):
+    def __init__(self, parent, max_length = 1000):
         super().__init__(parent)
+        self.max_length = max_length
         self._prettify()
-        self._signals()
+
+        self.textChanged.connect(self.on_text_change)
 
     def _prettify(self):
         font = QFont("Courier New", 12)
@@ -24,8 +26,9 @@ class DisplayArea(QTextEdit):
             }"""
         )
 
-    def _signals(self):
-        self.textChanged.connect(self.on_text_change)
+    def unhighlight(self):
+        """Clear any highlighted bases."""
+        self.setPlainText(self.toPlainText())
 
     def highlight(self, index):
         """
@@ -35,41 +38,52 @@ class DisplayArea(QTextEdit):
             index: Character index to highlight.
         """
         html = list(self.toPlainText())
-        html[index] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{html[index]}</span>"
+        base_to_highlight = html[index]
+        html[index] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
         html = "".join(html)
         self.setHtml(html)
 
-    def obtain_cursor_data(self):
-        c = self.textCursor()
-        p = c.position()
-        a = c.anchor()
-
-        vsb = self.verticalScrollBar()
-        old_pos_ratio = vsb.value() / (vsb.maximum() or 1)
-        return c, p, a, vsb, old_pos_ratio
-
-    def dump_cursor_data(self, c, p, a, vsb, old_pos_ratio):
-        c.setPosition(a)
-        op = QTextCursor.NextCharacter if p > a else QTextCursor.MoveOperation.PreviousCharacter
-        c.movePosition(op, QTextCursor.MoveMode.KeepAnchor, abs(p - a))
-        self.setTextCursor(c)
-
-        vsb.setValue(round(old_pos_ratio * vsb.maximum()))
-
     def insertFromMimeData(self, source: QMimeData) -> None:
+        if len(source.text()+self.toPlainText()) > self.max_length:
+            return
         self.insertPlainText(bases_only(source.text()))
+        self.unhighlight()
 
     def on_text_change(self) -> None:
         new_sequence_string = bases_only(self.toPlainText())
 
         if self.toPlainText() != new_sequence_string:
-
-            previous_cursor_data = self.obtain_cursor_data()
+            cursor_data = self.obtain_cursor_data()
 
             self.blockSignals(True)
             self.setPlainText(new_sequence_string)
             self.blockSignals(False)
 
-            self.dump_cursor_data(*previous_cursor_data)
+            self.dump_cursor_data(*cursor_data)
 
         self.updated.emit(list(new_sequence_string))
+
+    def obtain_cursor_data(self):
+        try:
+            hBar = self.horizontalScrollBar()
+            hPos = hBar.value() / hBar.maximum()
+        except ZeroDivisionError:
+            hPos = 0
+        try:
+            vBar = self.verticalScrollBar()
+            vPos = vBar.value() / vBar.maximum()
+        except ZeroDivisionError:
+            vPos = 0
+
+        c = self.textCursor()
+        p = c.position()
+
+        return hPos, vPos, c, p
+
+    def dump_cursor_data(self, hPos, vPos, c, p):
+        c.setPosition(p)
+        hBar = self.horizontalScrollBar()
+        vBar = self.verticalScrollBar()
+        self.setTextCursor(c)
+        hBar.setValue(hPos * hBar.maximum())
+        vBar.setValue(vPos * vBar.maximum())
