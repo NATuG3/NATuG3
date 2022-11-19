@@ -1,14 +1,13 @@
 import typing
-from contextlib import suppress
 from typing import List, Iterable
 
 from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.uic.Compiler.qtproxies import QtGui
 
 import settings
+from constants import bases
 from constants.bases import DNA
 
-from PyQt6.QtGui import QValidator, QKeyEvent
+from PyQt6.QtGui import QValidator, QKeyEvent, QFocusEvent
 from PyQt6.QtWidgets import (
     QWidget,
     QLineEdit,
@@ -22,6 +21,7 @@ class EditorArea(QWidget):
     updated = pyqtSignal(object)
     base_removed = pyqtSignal(int, str)
     base_added = pyqtSignal(int, str, object)
+    selection_changed = pyqtSignal(int, object)
 
     def __init__(self, parent, bases: Iterable | None = None):
         super().__init__(parent)
@@ -47,6 +47,11 @@ class EditorArea(QWidget):
             self._bases[index].index = index
 
     @property
+    def widgets(self):
+        """Obtain a list of all the EntryBox widgets."""
+        return self._bases
+
+    @property
     def bases(self) -> List[str]:
         """
         Obtain a list of all bases contained within.
@@ -58,6 +63,26 @@ class EditorArea(QWidget):
         for base in self._bases:
             bases.append(base.base)
         return bases
+
+    @bases.setter
+    def bases(self, new_bases):
+        """
+        Replace the current bases with new ones.
+
+        Args:
+            new_bases: The new bases.
+
+        Notes:
+            Deletes all old bases.
+        """
+        while True:
+            try:
+                self.remove_base()
+            except IndexError:
+                break
+        for base in new_bases:
+            self.add_base(base)
+
 
     def fetch_base(self, index: int) -> str:
         """
@@ -107,6 +132,7 @@ class EditorArea(QWidget):
         new_base.base_area.selectionChanged.connect(
             lambda: new_base.base_area.setCursorPosition(1)
         )
+        new_base.base_area.focused_in.connect(lambda: self.selection_changed.emit(new_base.index, new_base))
 
         @new_base.base_area.left_arrow_event.connect
         def new_base_left_arrow():
@@ -157,19 +183,25 @@ class BaseEntryBox(QWidget):
         self._index = index
         self._base = base
 
+        # set up the index area
+        self.index_area = self.InfoArea(self)
+        self.index_area.setText(f"{index}")
+
         # set up the base area
         self.base_area = self.BaseArea(self)
         if base in DNA:
             self.base_area.setText(base)
 
-        # set up the index area
-        self.index_area = self.IndexArea(self)
-        self.index_area.setText(f"{index}")
+        # set up the complement area
+        self.complement_area = self.InfoArea(self)
+        self.complement_area.setText(bases.COMPLEMENTS[self.base])
+        self.complement_area.textChanged.connect(lambda: self.complement_area.setText(bases.COMPLEMENTS[self.base]))
 
         # merge into one nice layout
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.index_area)
         self.layout().addWidget(self.base_area)
+        self.layout().addWidget(self.complement_area)
 
         # remove spacing
         self.layout().setSpacing(3)
@@ -178,6 +210,7 @@ class BaseEntryBox(QWidget):
     class BaseArea(QLineEdit):
         left_arrow_event = pyqtSignal()
         right_arrow_event = pyqtSignal()
+        focused_in = pyqtSignal()
 
         class Validator(QValidator):
             def __init__(self, parent):
@@ -210,6 +243,10 @@ class BaseEntryBox(QWidget):
             )
             self.mousePressEvent = lambda i: self.setCursorPosition(1)
 
+        def focusInEvent(self, event: QFocusEvent) -> None:
+            super().focusInEvent(event)
+            self.focused_in.emit()
+
         def keyPressEvent(self, event: QKeyEvent) -> None:
             if event.key() == Qt.Key.Key_Left:
                 self.left_arrow_event.emit()
@@ -218,12 +255,13 @@ class BaseEntryBox(QWidget):
             else:
                 super().keyPressEvent(event)
 
-    class IndexArea(QLineEdit):
+    class InfoArea(QLineEdit):
         def __init__(self, parent):
             super().__init__(parent)
             self.setStyleSheet(
-                """QLineEdit{border-radius: 2px};
-                QLineEdit::disabled{background-color: rgb(255, 255, 255); color: rgb(0, 0, 0)}"""
+                """QLineEdit{border-radius: 2px}
+                   QLineEdit::disabled{background-color: rgb(210, 210, 210); color: rgb(0, 0, 0)}
+                   """
             )
             self.setReadOnly(True)
             self.setEnabled(False)
