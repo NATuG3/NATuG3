@@ -32,7 +32,29 @@ class Panel(QWidget):
         # load defaults
         self.dump_settings(refs.nucleic_acid.current)
 
+        # setup signals
+        self._signals()
+
         logger.debug("Loaded nucleic acid settings tab of config panel.")
+
+    def _signals(self):
+        for input in (
+            self.D,
+            self.H,
+            self.T,
+            self.B,
+            self.Z_b,
+            self.Z_c,
+            self.Z_s,
+            self.theta_b,
+            self.theta_c,
+            self.theta_s,
+        ):
+            input.valueChanged.connect(lambda: self.updated.emit(self.fetch_settings()))
+
+        self.updated.connect(
+            lambda: setattr(refs.nucleic_acid, "current", self.fetch_settings())
+        )
 
     def _profile_manager(self):
         """Set up profile manager."""
