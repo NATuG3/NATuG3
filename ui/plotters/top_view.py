@@ -50,6 +50,7 @@ class TopViewPlotter(pg.PlotWidget):
     def refresh(self):
         self.clear()
         self._plot()
+        logger.info("Refreshed top view.")
 
     def _prettify(self):
         # set correct range

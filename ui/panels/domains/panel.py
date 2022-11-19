@@ -53,9 +53,7 @@ class Panel(QWidget):
 
         # when helix joint buttons are clicked refresh the table
         # so that the switch values (-1, 0, 1) get udpated
-        self.table.helix_joint_updated.connect(
-            lambda: self.table.dump_domains(self.table.fetch_domains())
-        )
+        self.table.helix_joint_updated.connect(self.refresh)
 
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
@@ -64,8 +62,8 @@ class Panel(QWidget):
         self.update_table.clicked.connect(self.refresh)
 
         # updated event linking
-        self.table.cell_widget_updated.connect(self.updated.emit)
-        self.update_table.clicked.connect(lambda: self.updated.emit)
+        self.table.cell_widget_updated.connect(self.refresh)
+        self.update_table.clicked.connect(self.refresh)
 
     def _prettify(self):
         """Set up styles of panel."""

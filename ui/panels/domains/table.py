@@ -78,6 +78,7 @@ class Table(QTableWidget):
         Args:
             domains (List(Domain)): A list of all domains to dump.
         """
+        assert isinstance(domains, Domains)
 
         # create rows before we input widgets
         self.setRowCount(domains.count)
