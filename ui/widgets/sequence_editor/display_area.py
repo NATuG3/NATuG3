@@ -1,11 +1,12 @@
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QTextCursor, QFont
-from PyQt6.QtWidgets import QPlainTextEdit
+from PyQt6.QtWidgets import QTextEdit
 
 import constants
+import settings
 
 
-class DisplayArea(QPlainTextEdit):
+class DisplayArea(QTextEdit):
     updated = pyqtSignal(list)
 
     def __init__(self, parent):
@@ -28,18 +29,27 @@ class DisplayArea(QPlainTextEdit):
 
     def cursor_to_end(self):
         while self.textCursor().position() < len(self.toPlainText()):
-            self.moveCursor(QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor)
+            self.moveCursor(
+                QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor
+            )
+
+    def highlight(self, index):
+        """
+        Highlight a specific index's character.
+
+        Args:
+            index: Character index to highlight.
+        """
+        html = list(self.toPlainText())
+        html[index] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{html[index]}</span>"
+        html = "".join(html)
+        self.setHtml(html)
 
     def move_cursor(self, position, move_mode=QTextCursor.MoveMode.MoveAnchor):
-        while position > self.textCursor().position():
+        while position >= self.textCursor().position():
             self.moveCursor(QTextCursor.MoveOperation.Right, move_mode)
         while position < self.textCursor().position():
             self.moveCursor(QTextCursor.MoveOperation.Left, move_mode)
-
-    def make_selection(self, start, end):
-        self.cursor_to_end()
-        self.move_cursor(start)
-        self.move_cursor(end, move_mode=QTextCursor.MoveMode.KeepAnchor)
 
     def on_text_change(self) -> None:
         new_bases = []
@@ -55,6 +65,6 @@ class DisplayArea(QPlainTextEdit):
             self.setPlainText("".join(new_bases))
             self.blockSignals(False)
 
-            self.move_cursor(previous_cursor_position)
+            self.move_cursor(previous_cursor_position - 1)
 
         self.updated.emit(new_bases)

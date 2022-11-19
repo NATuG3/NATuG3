@@ -62,7 +62,9 @@ class SequenceEditor(QWidget):
         self.editor_area.base_added.connect(editor_area_appended)
 
         def editor_area_selection_changed(index: int, widget: BaseEntryBox):
-            self.display_area.make_selection(index, index+1)
+            self.display_area.blockSignals(True)
+            self.display_area.highlight(index)
+            self.display_area.blockSignals(False)
 
         self.editor_area.selection_changed.connect(editor_area_selection_changed)
 
