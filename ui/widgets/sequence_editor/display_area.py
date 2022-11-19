@@ -1,9 +1,7 @@
 from PyQt6.QtCore import pyqtSignal, QMimeData
 from PyQt6.QtGui import QTextCursor, QFont
 from PyQt6.QtWidgets import QTextEdit
-import pyperclip
 
-import constants
 import settings
 from helpers import bases_only
 

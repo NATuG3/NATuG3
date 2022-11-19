@@ -3,5 +3,4 @@ PyQt6~=6.4.0
 PyQt5
 PyOpenGL
 
-pyperclip~=1.8.2
 numpy~=1.23.4

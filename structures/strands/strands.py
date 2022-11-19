@@ -155,7 +155,7 @@ class Strands:
                         strand.sliced(NEMid1.index, NEMid2.index)
                     )
                     # crawl from the beginning of the strand to the index of the left NEMid
-                    new_strands[1].items.extend(strand.sliced(None, NEMid1.index))
+                    new_strands[1].items.extend(strand.sliced(0, NEMid1.index))
                     # crawl from the index of the right NEMid to the end of the strand
                     new_strands[1].items.extend(strand.sliced(NEMid2.index, None))
 
