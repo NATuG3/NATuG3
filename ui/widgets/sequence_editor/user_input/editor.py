@@ -183,8 +183,9 @@ class EditorArea(QWidget):
             self.updated.emit()
         elif (len(new_text) == 2) and (" " in new_text):
             self.widgets[index].base = new_text.replace(" ", "")
+            if index != len(self):
+                self.widgets[index + 1].setFocus()
         elif len(new_text) == 2 and (" " not in new_text):
-            print("TWO")
             # remove the excess text from the old line edit
             self.widgets[index].base = new_text[0]
 
@@ -192,12 +193,12 @@ class EditorArea(QWidget):
             new_base = new_text[-1]
 
             if self.fixed_length:
-                if len(self) == index:
+                try:
+                    self.widgets[index + 1].setFocus()
+                    self.widgets[index].base = new_base
+                except IndexError:
                     self.widgets[-1].setFocus()
                     self.widgets[-1].base = new_base
-                else:
-                    self.widgets[index+1].setFocus()
-                    self.widgets[index+1].base = new_base
             else:
                 # create a new base
                 self.add_base(base=new_base, index=index + 1)

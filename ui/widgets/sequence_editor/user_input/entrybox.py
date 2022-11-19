@@ -110,6 +110,8 @@ class BaseArea(QLineEdit):
             self.left_arrow_event.emit()
         elif event.key() == Qt.Key.Key_Right:
             self.right_arrow_event.emit()
+        elif event.key() == Qt.Key.Key_Space:
+            self.right_arrow_event.emit()
         else:
             super().keyPressEvent(event)
 
