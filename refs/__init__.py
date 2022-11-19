@@ -1,4 +1,4 @@
-import ui
+import ui.constructor
 from ._application import _Application
 from ._domains import _Domains
 from ._mode import _Mode
@@ -12,6 +12,6 @@ domains = _Domains()
 
 strands = _Strands()
 
-constructor = ui.Window()
+constructor = ui.constructor.Window()
 
 mode = _Mode()

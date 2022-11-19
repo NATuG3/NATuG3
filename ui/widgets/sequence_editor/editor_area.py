@@ -1,3 +1,4 @@
+import itertools
 import typing
 from typing import List, Iterable
 
@@ -75,14 +76,14 @@ class EditorArea(QWidget):
         Notes:
             Deletes all old bases.
         """
-        while True:
-            try:
-                self.remove_base()
-            except IndexError:
-                break
-        for base in new_bases:
-            self.add_base(base)
-
+        i = 0
+        # for old_base, new_base in itertools.zip_longest(self.bases, new_bases, fillvalue=None):
+        #     if new_base is None:
+        #
+        #
+        #     if new_base != old_base:
+        #         self.remove_base(i)
+        #     i += 1
 
     def fetch_base(self, index: int) -> str:
         """
@@ -229,7 +230,7 @@ class BaseEntryBox(QWidget):
 
         def __init__(self, parent):
             super().__init__(parent)
-            self.setFixedWidth(25)
+            self.setFixedWidth(30)
             self.setValidator(self.Validator(self))
             self.setStyleSheet(
                 f"""
@@ -265,7 +266,7 @@ class BaseEntryBox(QWidget):
             )
             self.setReadOnly(True)
             self.setEnabled(False)
-            self.setFixedWidth(25)
+            self.setFixedWidth(30)
 
     def setFocus(self):
         self.base_area.setFocus()

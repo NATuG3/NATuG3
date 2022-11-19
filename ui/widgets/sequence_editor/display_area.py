@@ -1,9 +1,11 @@
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, QMimeData
 from PyQt6.QtGui import QTextCursor, QFont
 from PyQt6.QtWidgets import QTextEdit
+import pyperclip
 
 import constants
 import settings
+from helpers import bases_only
 
 
 class DisplayArea(QTextEdit):
@@ -27,12 +29,6 @@ class DisplayArea(QTextEdit):
     def _signals(self):
         self.textChanged.connect(self.on_text_change)
 
-    def cursor_to_end(self):
-        while self.textCursor().position() < len(self.toPlainText()):
-            self.moveCursor(
-                QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor
-            )
-
     def highlight(self, index):
         """
         Highlight a specific index's character.
@@ -45,26 +41,37 @@ class DisplayArea(QTextEdit):
         html = "".join(html)
         self.setHtml(html)
 
-    def move_cursor(self, position, move_mode=QTextCursor.MoveMode.MoveAnchor):
-        while position >= self.textCursor().position():
-            self.moveCursor(QTextCursor.MoveOperation.Right, move_mode)
-        while position < self.textCursor().position():
-            self.moveCursor(QTextCursor.MoveOperation.Left, move_mode)
+    def obtain_cursor_data(self):
+        c = self.textCursor()
+        p = c.position()
+        a = c.anchor()
+
+        vsb = self.verticalScrollBar()
+        old_pos_ratio = vsb.value() / (vsb.maximum() or 1)
+        return c, p, a, vsb, old_pos_ratio
+
+    def dump_cursor_data(self, c, p, a, vsb, old_pos_ratio):
+        c.setPosition(a)
+        op = QTextCursor.NextCharacter if p > a else QTextCursor.MoveOperation.PreviousCharacter
+        c.movePosition(op, QTextCursor.MoveMode.KeepAnchor, abs(p - a))
+        self.setTextCursor(c)
+
+        vsb.setValue(round(old_pos_ratio * vsb.maximum()))
+
+    def insertFromMimeData(self, source: QMimeData) -> None:
+        self.insertPlainText(bases_only(source.text()))
 
     def on_text_change(self) -> None:
-        new_bases = []
-        for potential_base in list(self.toPlainText()):
-            if potential_base.upper() in constants.bases.DNA:
-                new_bases.append(potential_base.upper())
+        new_sequence_string = bases_only(self.toPlainText())
 
-        new_sequence_string = "".join(new_bases)
         if self.toPlainText() != new_sequence_string:
-            previous_cursor_position = self.textCursor().position()
+
+            previous_cursor_data = self.obtain_cursor_data()
 
             self.blockSignals(True)
-            self.setPlainText("".join(new_bases))
+            self.setPlainText(new_sequence_string)
             self.blockSignals(False)
 
-            self.move_cursor(previous_cursor_position - 1)
+            self.dump_cursor_data(*previous_cursor_data)
 
-        self.updated.emit(new_bases)
+        self.updated.emit(list(new_sequence_string))

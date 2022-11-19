@@ -6,7 +6,18 @@ import numpy as np
 from PyQt6.QtGui import QFont, QPainterPath, QTransform
 from PyQt6.QtWidgets import QMessageBox
 
+import constants
+
 logger = logging.getLogger(__name__)
+
+
+def bases_only(blended: str):
+    """Take an input string and return a version with only bases."""
+    new_bases = []
+    for potential_base in blended:
+        if potential_base.upper() in constants.bases.DNA:
+            new_bases.append(potential_base.upper())
+    return "".join(new_bases)
 
 
 def singleton(orig_cls):
