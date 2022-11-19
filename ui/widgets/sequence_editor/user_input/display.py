@@ -8,12 +8,14 @@ from helpers import bases_only
 
 class DisplayArea(QTextEdit):
     updated = pyqtSignal(list)
+    space = "<span style='background-color: rgb(220, 220, 220)'>&nbsp;</span>"
 
-    def __init__(self, parent, max_length = 1000):
+    def __init__(self, parent, max_length=1000, fixed_length: bool = True):
         super().__init__(parent)
         self.max_length = max_length
+        if fixed_length:
+            self.setReadOnly(True)
         self._prettify()
-
         self.textChanged.connect(self.on_text_change)
 
     def _prettify(self):
@@ -25,6 +27,10 @@ class DisplayArea(QTextEdit):
             color: rgb(0, 0, 0)
             }"""
         )
+
+    def setPlainText(self, text: str) -> None:
+        text = text.replace(" ", self.space)
+        super().setHtml(text)
 
     def unhighlight(self):
         """Clear any highlighted bases."""
@@ -38,28 +44,33 @@ class DisplayArea(QTextEdit):
             index: Character index to highlight.
         """
         html = list(self.toPlainText())
+        for index_, item in enumerate(html):
+            if item == " " and index != index_:
+                html[index_] = self.space
         base_to_highlight = html[index]
-        html[index] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
+        html[
+            index
+        ] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
         html = "".join(html)
         self.setHtml(html)
 
     def insertFromMimeData(self, source: QMimeData) -> None:
-        if len(source.text()+self.toPlainText()) > self.max_length:
+        if len(source.text() + self.toPlainText()) > self.max_length:
             return
-        self.insertPlainText(bases_only(source.text()))
+        self.insertPlainText(bases_only(source.text()).replace(" ", "_"))
         self.unhighlight()
 
     def on_text_change(self) -> None:
         new_sequence_string = bases_only(self.toPlainText())
 
+        cursor_data = self.obtain_cursor_data()
+        self.blockSignals(True)
         if self.toPlainText() != new_sequence_string:
-            cursor_data = self.obtain_cursor_data()
-
-            self.blockSignals(True)
             self.setPlainText(new_sequence_string)
-            self.blockSignals(False)
-
-            self.dump_cursor_data(*cursor_data)
+        else:
+            self.setPlainText(self.toPlainText())
+        self.blockSignals(False)
+        self.dump_cursor_data(*cursor_data)
 
         self.updated.emit(list(new_sequence_string))
 

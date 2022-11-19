@@ -11,8 +11,9 @@ tester = ["A", "T", "C", "G", None, "A"]
 
 
 class UserInputSequenceEditor(QWidget):
-    def __init__(self, base_count: int = 5):
+    def __init__(self, base_count: int = 5, fixed_length: bool = True):
         super().__init__()
+        self.fixed_length = fixed_length
         self.setWindowTitle("Sequence Editor")
         self.base_count = base_count
 
@@ -42,9 +43,6 @@ class UserInputSequenceEditor(QWidget):
 
         def display_area_edited(new_bases: List[str]):
             self.editor_area.blockSignals(True)
-            hide_while_updating = (
-                abs(len(self.editor_area) - len(self.display_area.toPlainText())) > 10
-            )
             self.editor_area.bases = new_bases
             self.editor_area.blockSignals(False)
 
@@ -59,7 +57,6 @@ class UserInputSequenceEditor(QWidget):
             update_display_area()
 
         def editor_area_selection_changed(index: int):
-            # highlight the active editor area's base
             self.display_area.blockSignals(True)
             self.display_area.highlight(index)
             self.display_area.blockSignals(False)
@@ -68,11 +65,13 @@ class UserInputSequenceEditor(QWidget):
         self.editor_area.base_added.connect(update_display_area)
         self.editor_area.updated.connect(update_display_area)
         self.editor_area.selection_changed.connect(editor_area_selection_changed)
-        self.display_area.updated.connect(display_area_edited)
+
+        if not self.fixed_length:
+            self.display_area.updated.connect(display_area_edited)
 
     def _editor_area(self):
         """Create the base editor area."""
-        self.editor_area = EditorArea(self, tester)
+        self.editor_area = EditorArea(self, tester, fixed_length=self.fixed_length)
 
         self.scrollable_editor_area = QScrollArea()
         self.scrollable_editor_area.setWidget(self.editor_area)
@@ -92,6 +91,6 @@ class UserInputSequenceEditor(QWidget):
 
     def _display_area(self):
         """Create the sequence viewer area."""
-        self.display_area = DisplayArea(self)
+        self.display_area = DisplayArea(self, fixed_length=self.fixed_length)
         self.layout().addWidget(self.display_area)
         # self.display_area.setReadOnly(True)

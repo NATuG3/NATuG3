@@ -10,7 +10,7 @@ from constants.bases import DNA
 
 
 class BaseEntryBox(QWidget):
-    def __init__(self, parent, base: str, index: int):
+    def __init__(self, parent, base: str | None, index: int):
         super().__init__(parent)
         self._index = index
         self._base = base
@@ -47,17 +47,17 @@ class BaseEntryBox(QWidget):
         return self._base
 
     @base.setter
-    def base(self, base):
+    def base(self, new_base: str):
         # set the base
-        if base in ("", None):
+        if new_base is None:
             self._base = None
             self.base_area.setText(" ")
         else:
-            self._base = base
-            self.base_area.setText(base)
+            self._base = new_base
+            self.base_area.setText(new_base)
 
         # set the complement
-        if self._base is None:
+        if self._base in (None, " "):
             self.complement_area.setText(" ")
         else:
             self.complement_area.setText(bases.COMPLEMENTS[self.base])

@@ -9,7 +9,8 @@ from PyQt6.QtWidgets import (
     QWidget,
     QLineEdit,
     QHBoxLayout,
-    QSizePolicy, QApplication,
+    QSizePolicy,
+    QApplication,
 )
 
 from ui.widgets.sequence_editor.user_input.entrybox import BaseEntryBox
@@ -21,14 +22,25 @@ class EditorArea(QWidget):
     base_added = pyqtSignal(int, str)
     selection_changed = pyqtSignal(int)
 
-    def __init__(self, parent, bases: Iterable | None = None, max_length: int = 1000):
+    def __init__(
+        self,
+        parent,
+        bases: Iterable | None = None,
+        max_length: int = 1000,
+        fixed_length: bool = True,
+    ):
         super().__init__(parent)
+        self.fixed_length = fixed_length
         self.max_length = max_length
         self.widgets = None
         self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(0)
 
         if bases is None:
+            if self.fixed_length:
+                raise ValueError(
+                    "Cannot create a fixed length sequence when the length is zero."
+                )
             self.widgets: List[BaseEntryBox] = []
         else:
             self.widgets: List[BaseEntryBox] = []
@@ -56,6 +68,8 @@ class EditorArea(QWidget):
         for base in self.bases:
             if base not in ("", None):
                 output += base
+            else:
+                output += " "
         return output
 
     @property
@@ -102,7 +116,6 @@ class EditorArea(QWidget):
         self.widgets[index].deleteLater()
         self.base_removed.emit(index, self.widgets[index].base)
         del self.widgets[index]
-
         self._renumber()
 
     def add_base(self, base=None, index: int = None) -> QLineEdit:
@@ -121,7 +134,9 @@ class EditorArea(QWidget):
             index = len(self)
 
         new_base = BaseEntryBox(self, base, index)
-        new_base.base_area.textChanged.connect(lambda: self.base_text_changed(new_base.base_area.text(), new_base.index))
+        new_base.base_area.textChanged.connect(
+            lambda: self.base_text_changed(new_base.base_area.text(), new_base.index)
+        )
         new_base.base_area.selectionChanged.connect(
             partial(new_base.base_area.setCursorPosition, 1)
         )
@@ -152,22 +167,42 @@ class EditorArea(QWidget):
 
     def base_text_changed(self, new_text: str, index: int):
         if len(new_text) == 0:
-            # remove the base
-            self.remove_base(index=index)
+            if self.fixed_length:
+                # clear the base
+                self.widgets[index].base = None
+            else:
+                # remove the base
+                self.remove_base(index=index)
 
             # make the previous base have focus
             if index == 0:
                 self.widgets[0].setFocus()
             else:
                 self.widgets[index - 1].setFocus()
-        if len(new_text) == 2:
+
+            self.updated.emit()
+        elif (len(new_text) == 2) and (" " in new_text):
+            self.widgets[index].base = new_text.replace(" ", "")
+        elif len(new_text) == 2 and (" " not in new_text):
+            print("TWO")
             # remove the excess text from the old line edit
             self.widgets[index].base = new_text[0]
 
             # create a new base with the excess text
-            new_base = self.add_base(base=new_text[-1], index=index + 1)
+            new_base = new_text[-1]
 
-            # focus in on the new base
-            new_base.setFocus()
+            if self.fixed_length:
+                if len(self) == index:
+                    self.widgets[-1].setFocus()
+                    self.widgets[-1].base = new_base
+                else:
+                    self.widgets[index+1].setFocus()
+                    self.widgets[index+1].base = new_base
+            else:
+                # create a new base
+                self.add_base(base=new_base, index=index + 1)
 
-        self.updated.emit()
+                # focus in on the new base
+                new_base.setFocus()
+
+            self.updated.emit()

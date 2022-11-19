@@ -16,5 +16,5 @@ class SequenceEditor(QWidget):
         self.file_input.setLayout(QVBoxLayout())
         self.file_input.layout().addWidget(FileInputSequenceEditor())
 
-        self.setMinimumHeight(450)
-        self.setMinimumWidth(700)
+        self.setFixedHeight(450)
+        self.setFixedWidth(700)

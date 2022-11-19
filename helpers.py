@@ -15,7 +15,7 @@ def bases_only(blended: str):
     """Take an input string and return a version with only bases."""
     new_bases = []
     for potential_base in blended:
-        if potential_base.upper() in constants.bases.DNA:
+        if potential_base.upper() in constants.bases.DNA or potential_base == " ":
             new_bases.append(potential_base.upper())
     return "".join(new_bases)
 
