@@ -1,31 +1,32 @@
 import typing
+from contextlib import suppress
 from typing import List, Iterable
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.uic.Compiler.qtproxies import QtGui
 
+import settings
 from constants.bases import DNA
 
-from PyQt6.QtGui import QValidator
+from PyQt6.QtGui import QValidator, QKeyEvent
 from PyQt6.QtWidgets import (
     QWidget,
     QLineEdit,
     QHBoxLayout,
     QVBoxLayout,
     QSizePolicy,
-    QGroupBox,
-    QScrollArea,
 )
 
 
-class EditorArea(QGroupBox):
-    updated = pyqtSignal()
+class EditorArea(QWidget):
+    updated = pyqtSignal(object)
     base_removed = pyqtSignal(int, str)
-    base_added = pyqtSignal(int, str)
+    base_added = pyqtSignal(int, str, object)
 
     def __init__(self, parent, bases: Iterable | None = None):
         super().__init__(parent)
-
-        self.setLayout(QVBoxLayout(self))
+        self._bases = None
+        self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(0)
 
         if bases is None:
@@ -38,7 +39,6 @@ class EditorArea(QGroupBox):
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.layout().addWidget(spacer)
-        self.setFixedWidth(80)
         self.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
 
     def _renumber(self) -> None:
@@ -104,14 +104,32 @@ class EditorArea(QGroupBox):
         new_base.base_area.textChanged.connect(
             lambda new_text: self.base_text_changed(new_text, index)
         )
+        new_base.base_area.selectionChanged.connect(
+            lambda: new_base.base_area.setCursorPosition(1)
+        )
+
+        @new_base.base_area.left_arrow_event.connect
+        def new_base_left_arrow():
+            self._bases[new_base.index - 1].setFocus()
+
+        @new_base.base_area.right_arrow_event.connect
+        def new_base_right_arrow():
+            try:
+                self._bases[new_base.index + 1].setFocus()
+            except IndexError:
+                self._bases[0].setFocus()
 
         self.layout().insertWidget(index, new_base)
         self._bases.insert(index, new_base)
         self._renumber()
 
+        self.base_added.emit(index, new_base.base, new_base)
+
         return new_base
 
     def base_text_changed(self, new_text: str, index: int):
+        new_base = None
+
         if len(new_text) == 0:
             # remove the base
             self.remove_base(index=index)
@@ -129,7 +147,8 @@ class EditorArea(QGroupBox):
             new_base: str = new_text[-1]
             new_base: BaseEntryBox = self.add_base(base=new_base, index=index + 1)
             new_base.setFocus()
-        self.updated.emit()
+
+        self.updated.emit(new_base)
 
 
 class BaseEntryBox(QWidget):
@@ -148,15 +167,18 @@ class BaseEntryBox(QWidget):
         self.index_area.setText(f"{index}")
 
         # merge into one nice layout
-        self.setLayout(QHBoxLayout())
+        self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.index_area)
         self.layout().addWidget(self.base_area)
 
         # remove spacing
-        self.layout().setSpacing(2)
-        self.layout().setContentsMargins(2, 2, 2, 2)
+        self.layout().setSpacing(3)
+        self.layout().setContentsMargins(3, 2, 3, 2)
 
     class BaseArea(QLineEdit):
+        left_arrow_event = pyqtSignal()
+        right_arrow_event = pyqtSignal()
+
         class Validator(QValidator):
             def __init__(self, parent):
                 super().__init__(parent)
@@ -176,7 +198,25 @@ class BaseEntryBox(QWidget):
             super().__init__(parent)
             self.setFixedWidth(25)
             self.setValidator(self.Validator(self))
-            self.setStyleSheet("QLineEdit{border-radius: 2px}")
+            self.setStyleSheet(
+                f"""
+                QLineEdit{{
+                    border-radius: 2px
+                }}
+                QLineEdit::focus{{
+                    background: rgb{settings.colors['success']}
+                }}
+            """
+            )
+            self.mousePressEvent = lambda i: self.setCursorPosition(1)
+
+        def keyPressEvent(self, event: QKeyEvent) -> None:
+            if event.key() == Qt.Key.Key_Left:
+                self.left_arrow_event.emit()
+            elif event.key() == Qt.Key.Key_Right:
+                self.right_arrow_event.emit()
+            else:
+                super().keyPressEvent(event)
 
     class IndexArea(QLineEdit):
         def __init__(self, parent):
