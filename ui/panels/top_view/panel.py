@@ -20,7 +20,6 @@ class Panel(QDockWidget):
             refs.domains.current,
             refs.nucleic_acid.current.D,
         )
-        self.plot.point_clicked.connect(self.point_clicked)
 
         self.setWidget(self.plot)
         self.refresh()
@@ -32,6 +31,7 @@ class Panel(QDockWidget):
         )
         self.plot.profile = refs.nucleic_acid.current
         self.plot.refresh()
+        self.plot.point_clicked.connect(self.point_clicked)
 
     def point_clicked(self, point: Tuple[float, float]):
         """Signal for when a point in the plot is clicked."""

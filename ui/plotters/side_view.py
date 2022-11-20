@@ -1,6 +1,7 @@
 import logging
 from contextlib import suppress
 from copy import copy
+from functools import partial
 from math import ceil, dist
 from typing import List, Tuple
 
@@ -10,10 +11,11 @@ from PyQt6.QtGui import (
     QPen,
 )
 
+import refs
 import settings
 from constants.directions import *
 from helpers import chaikins_corner_cutting
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
@@ -26,6 +28,7 @@ class SideViewPlotter(pg.PlotWidget):
     """The refs plot widget for the Plotter"""
 
     points_clicked = pyqtSignal(tuple)
+    strand_clicked = pyqtSignal(Strand)
 
     def __init__(self, strands: Strands, nucleic_acid_profile: NucleicAcidProfile):
         """Initialize plotter instance."""
@@ -91,7 +94,7 @@ class SideViewPlotter(pg.PlotWidget):
         plotted: List[Tuple[pg.PlotDataItem, pg.PlotDataItem]] = []
 
         for _strand in self.strands.strands:
-            strand = copy(_strand)
+            strand = copy(_strand)  # this way we don't touch the real strand
             assert isinstance(strand, Strand)
 
             if strand.closed:
@@ -169,11 +172,14 @@ class SideViewPlotter(pg.PlotWidget):
                 x_coords = [coord[0] for coord in coords]
                 z_coords = [coord[1] for coord in coords]
 
+            # plot the outline separately
             outline = pg.PlotDataItem(
                 x_coords,
                 z_coords,
                 pen=pen,
             )
+            outline.setCurveClickable(True)
+            outline.sigClicked.connect(partial(self.strand_clicked.emit, _strand))
 
             plotted.append(
                 (

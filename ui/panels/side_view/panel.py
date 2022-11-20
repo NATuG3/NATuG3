@@ -25,8 +25,8 @@ class Panel(QGroupBox):
         self.plot = ui.plotters.SideViewPlotter(
             refs.strands.current, refs.nucleic_acid.current
         )
-        self.plot.points_clicked.connect(self.points_clicked)
         self.layout().addWidget(self.plot)
+        self.plot.points_clicked.connect(self.points_clicked)
 
     def refresh(self):
         """Update the current plot."""
