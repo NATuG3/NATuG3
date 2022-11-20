@@ -1,25 +1,24 @@
+from typing import List
+
 from PyQt6.QtCore import pyqtSignal, QMimeData
 from PyQt6.QtGui import QTextCursor, QFont
 from PyQt6.QtWidgets import QTextEdit
 
 import settings
+from constants.bases import DNA
 from helpers import bases_only
 
 
 class DisplayArea(QTextEdit):
-    updated = pyqtSignal(list)
+    space = "<span style='background-color: rgb(220, 220, 220)'>&nbsp;</span>"
 
-    def __init__(self, parent, max_length=1000, fixed_length: bool = True):
+    def __init__(self, parent):
         super().__init__(parent)
-        self.max_length = max_length
-        if fixed_length:
-            self.setReadOnly(True)
-        self._prettify()
-        self.textChanged.connect(self.on_text_change)
+        self._bases = []
 
-    def _prettify(self):
         font = QFont("Courier New", 12)
         self.setFont(font)
+        self.setReadOnly(True)
         self.setStyleSheet(
             """QPlainTextEdit::disabled{
             background-color: rgb(255, 255, 255); 
@@ -27,9 +26,29 @@ class DisplayArea(QTextEdit):
             }"""
         )
 
-    def unhighlight(self):
-        """Clear any highlighted bases."""
-        self.setPlainText(self.toPlainText())
+    @property
+    def bases(self):
+        """Obtain the current bases."""
+        return self._bases
+
+    @bases.setter
+    def bases(self, bases: List[str | None]):
+        """Change the displayed and stored bases."""
+        self._bases = bases
+        self.refresh()
+
+    def refresh(self):
+        cursor_data = self.obtain_cursor_data()
+        html = ""
+        for base in self.bases:
+            if base in DNA:
+                html += base
+            elif base is None:
+                html += self.space
+            else:
+                raise ValueError(f"Base {base} is not a valid base.")
+        self.setHtml(html)
+        self.dump_cursor_data(*cursor_data)
 
     def highlight(self, index):
         """
@@ -38,36 +57,18 @@ class DisplayArea(QTextEdit):
         Args:
             index: Character index to highlight.
         """
-        html = list(self.toPlainText())
-        for index_, item in enumerate(html):
-            if item == " ":
-                html[index_] = "&nbsp;"
+        html = self.bases.copy()
         base_to_highlight = html[index]
-        html[
-            index
-        ] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
+        if base_to_highlight is None:
+            base_to_highlight = "&nbsp;"
+        html[index] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
+
+        for index_, base in enumerate(html):
+            if (base is None) and (index_ != index):
+                html[index_] = self.space
         html = "".join(html)
+
         self.setHtml(html)
-
-    def insertFromMimeData(self, source: QMimeData) -> None:
-        if len(source.text() + self.toPlainText()) > self.max_length:
-            return
-        self.insertPlainText(bases_only(source.text()).replace(" ", "_"))
-        self.unhighlight()
-
-    def on_text_change(self) -> None:
-        new_sequence_string = bases_only(self.toPlainText())
-
-        cursor_data = self.obtain_cursor_data()
-        self.blockSignals(True)
-        if self.toPlainText() != new_sequence_string:
-            self.setPlainText(new_sequence_string)
-        else:
-            self.setPlainText(self.toPlainText())
-        self.blockSignals(False)
-        self.dump_cursor_data(*cursor_data)
-
-        self.updated.emit(list(new_sequence_string))
 
     def obtain_cursor_data(self):
         try:

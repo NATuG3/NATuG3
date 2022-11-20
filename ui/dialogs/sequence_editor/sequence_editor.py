@@ -8,7 +8,7 @@ from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
 class SequenceEditor(QDialog):
     def __init__(self):
         super().__init__()
-        uic.loadUi("ui/widgets/sequence_editor/sequence_editor.ui", self)
+        uic.loadUi("ui/dialogs/sequence_editor/sequence_editor.ui", self)
 
         self.manual_input.setLayout(QVBoxLayout())
         self.manual_input.layout().addWidget(UserInputSequenceEditor())
@@ -16,5 +16,5 @@ class SequenceEditor(QDialog):
         self.file_input.setLayout(QVBoxLayout())
         self.file_input.layout().addWidget(FileInputSequenceEditor())
 
-        self.setFixedHeight(450)
+        self.setFixedHeight(480)
         self.setFixedWidth(700)

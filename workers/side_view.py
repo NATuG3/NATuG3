@@ -69,7 +69,7 @@ class SideViewWorker:
         Compute all NEMid data.
 
         Returns:
-            List[Tuple[List[NEMid], List[NEMid]]]: List of tuple(up-strand, down-strand) for each domain.
+            Strands object for all strands that the domains can create.
         """
         # the output container for all NEMids
         NEMids = [([], []) for _ in range(self.domains.count)]
@@ -209,10 +209,10 @@ class SideViewWorker:
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
         """
-        Create a generator of angles for NEMids in the side view plot.
+        Create generators that yield NEMid angles.
 
         Returns:
-            DomainsContainerType: A domains container with innermost entries of generators.
+            A list of tuple(up-strand, down-strand) where up/down-strand are generators that yield floats.
         """
         angles = [[None, None] for _ in range(self.domains.count)]
 

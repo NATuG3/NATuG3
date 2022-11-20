@@ -126,7 +126,6 @@ class Panel(QWidget):
         new_domains: Domains = Domains(
             self.table.fetch_domains(), self.symmetry.value()
         )
-
         # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)

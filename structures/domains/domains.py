@@ -22,7 +22,7 @@ class Domains:
     @property
     def domains(self):
         """
-        List of all domains.
+        Obtain a list of all the domains.
 
         Notes:
             - This returns a copy of each domain.

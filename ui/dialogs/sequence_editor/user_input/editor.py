@@ -23,21 +23,15 @@ class EditorArea(QWidget):
         self,
         parent,
         bases: Iterable | None = None,
-        max_length: int = 1000,
-        fixed_length: bool = True,
+        max_length: int = 1000
     ):
         super().__init__(parent)
-        self.fixed_length = fixed_length
         self.max_length = max_length
         self.widgets = None
         self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(0)
 
         if bases is None:
-            if self.fixed_length:
-                raise ValueError(
-                    "Cannot create a fixed length sequence when the length is zero."
-                )
             self.widgets: List[BaseEntryBox] = []
         else:
             self.widgets: List[BaseEntryBox] = []
@@ -164,12 +158,8 @@ class EditorArea(QWidget):
 
     def base_text_changed(self, new_text: str, index: int):
         if len(new_text) == 0:
-            if self.fixed_length:
-                # clear the base
-                self.widgets[index].base = None
-            else:
-                # remove the base
-                self.remove_base(index=index)
+            # clear the base
+            self.widgets[index].base = None
 
             # make the previous base have focus
             if index == 0:
@@ -178,12 +168,16 @@ class EditorArea(QWidget):
                 self.widgets[index - 1].setFocus()
 
             self.updated.emit()
+
         elif (len(new_text) == 2) and (" " in new_text):
             self.widgets[index].base = new_text.replace(" ", "")
             try:
                 self.widgets[index + 1].setFocus()
             except IndexError:
                 self.widgets[index].setFocus()
+
+            self.updated.emit()
+
         elif len(new_text) == 2 and (" " not in new_text):
             # remove the excess text from the old line edit
             self.widgets[index].base = new_text[0]
@@ -191,18 +185,12 @@ class EditorArea(QWidget):
             # create a new base with the excess text
             new_base = new_text[-1]
 
-            if self.fixed_length:
-                try:
-                    self.widgets[index + 1].setFocus()
-                    self.widgets[index].base = new_base
-                except IndexError:
-                    self.widgets[index].setFocus()
-                    self.widgets[index].base = new_base
-            else:
-                # create a new base
-                self.add_base(base=new_base, index=index + 1)
-
-                # focus in on the new base
-                new_base.setFocus()
+            # change the focus
+            try:
+                self.widgets[index + 1].setFocus()
+                self.widgets[index].base = new_base
+            except IndexError:
+                self.widgets[index].setFocus()
+                self.widgets[index].base = new_base
 
             self.updated.emit()
