@@ -1,7 +1,8 @@
 from functools import partial
+from threading import Thread
 from typing import List, Iterable
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, QTimer, QThreadPool, QRunnable, pyqtSlot
 from PyQt6.QtWidgets import (
     QWidget,
     QLineEdit,
@@ -23,20 +24,20 @@ class EditorArea(QWidget):
         self,
         parent,
         bases: Iterable | None = None,
-        max_length: int = 1000
     ):
         super().__init__(parent)
-        self.max_length = max_length
         self.widgets = None
         self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(0)
+
+        self.base_adder_threadpool = QThreadPool()
 
         if bases is None:
             self.widgets: List[BaseEntryBox] = []
         else:
             self.widgets: List[BaseEntryBox] = []
-            for base in bases:
-                self.add_base(base)
+            for index, base in enumerate(bases):
+                Thread(target=lambda: QTimer.singleShot(1, partial(self.add_base, base))).run()
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -117,9 +118,6 @@ class EditorArea(QWidget):
             base: The base to add. If None then a new empty area for the user to add a base is created.
             index: Inserts a base at the index provided. If None then a base is appended to the bottom of the editor.
         """
-        if len(self.bases) == self.max_length:
-            return
-
         if index is None:
             # new index will be one after the end of the bases list
             index = len(self)

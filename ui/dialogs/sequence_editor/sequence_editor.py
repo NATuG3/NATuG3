@@ -5,7 +5,7 @@ from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
 from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
 
 
-tester = ["G", "A", "T", "C"] * 25
+tester = ["G", "A", "G", "C", "T", "A", "A", None] * 5
 
 
 class SequenceEditor(QDialog):

@@ -9,11 +9,12 @@ from .editor_area import EditorArea
 
 
 class UserInputSequenceEditor(QWidget):
-    def __init__(self, bases: Iterable, count: int = 5):
+    def __init__(self, bases: Iterable):
         super().__init__()
         self.setWindowTitle("Sequence Editor")
-        self.count = count
-        self._bases = bases
+        self._bases = list(bases)
+        if len(self.bases) > 1000:
+            raise OverflowError("Too many bases for manual input sequence editor!")
 
         self.setLayout(QVBoxLayout())
 
