@@ -1,20 +1,19 @@
 from functools import partial
-from typing import List
+from typing import List, Iterable
 
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget, QApplication
 
-from .display import DisplayArea
-from .editor import EditorArea
-
-tester = ["A", "T", "C", "G", None, "A"]
+from .display_area import DisplayArea
+from .editor_area import EditorArea
 
 
 class UserInputSequenceEditor(QWidget):
-    def __init__(self, base_count: int = 5):
+    def __init__(self, bases: Iterable, count: int = 5):
         super().__init__()
         self.setWindowTitle("Sequence Editor")
-        self.base_count = base_count
+        self.count = count
+        self._bases = bases
 
         self.setLayout(QVBoxLayout())
 
@@ -23,7 +22,25 @@ class UserInputSequenceEditor(QWidget):
         self._signals()
         self._prettify()
 
+    @property
+    def bases(self):
+        """Obtain all bases contained within."""
+        return self._bases
+
+    @bases.setter
+    def bases(self, bases):
+        self._bases = bases
+        self.refresh()
+
+    def refresh(self):
+        # update the display area
+        self.display_area.blockSignals(True)
         self.display_area.bases = self.editor_area.bases
+        for index, widget in enumerate(self.editor_area.widgets):
+            if widget.hasFocus():
+                self.display_area.highlight(index)
+                break
+        self.display_area.blockSignals(False)
 
     def _prettify(self):
         self.setMinimumWidth(650)
@@ -31,15 +48,6 @@ class UserInputSequenceEditor(QWidget):
         self.scrollable_editor_area.setFixedHeight(100)
 
     def _signals(self):
-        def update_display_area():
-            self.display_area.blockSignals(True)
-            self.display_area.bases = self.editor_area.bases
-            for index, widget in enumerate(self.editor_area.widgets):
-                if widget.hasFocus():
-                    self.display_area.highlight(index)
-                    break
-            self.display_area.blockSignals(False)
-
         def editor_area_added(index: int, base: str):
             widget = self.editor_area.widgets[index]
             scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
@@ -48,7 +56,9 @@ class UserInputSequenceEditor(QWidget):
             )
             QTimer.singleShot(1, partial(scroll_bar.setValue, scroll_bar.value() + 30))
             self.scrollable_editor_area.ensureWidgetVisible(widget, 0, 0)
-            update_display_area()
+
+        def editor_area_updated():
+            self.bases = self.editor_area.bases
 
         def editor_area_selection_changed(index: int):
             self.display_area.blockSignals(True)
@@ -56,12 +66,12 @@ class UserInputSequenceEditor(QWidget):
             self.display_area.blockSignals(False)
 
         self.editor_area.base_added.connect(editor_area_added)
-        self.editor_area.updated.connect(update_display_area)
+        self.editor_area.updated.connect(editor_area_updated)
         self.editor_area.selection_changed.connect(editor_area_selection_changed)
 
     def _editor_area(self):
         """Create the base editor area."""
-        self.editor_area = EditorArea(self, tester)
+        self.editor_area = EditorArea(self, self.bases)
 
         self.scrollable_editor_area = QScrollArea()
         self.scrollable_editor_area.setWidget(self.editor_area)
@@ -81,6 +91,5 @@ class UserInputSequenceEditor(QWidget):
 
     def _display_area(self):
         """Create the sequence viewer area."""
-        self.display_area = DisplayArea(self)
+        self.display_area = DisplayArea(self, self.bases)
         self.layout().addWidget(self.display_area)
-        # self.display_area.setReadOnly(True)

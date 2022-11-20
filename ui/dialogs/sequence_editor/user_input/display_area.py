@@ -12,9 +12,9 @@ from helpers import bases_only
 class DisplayArea(QTextEdit):
     space = "<span style='background-color: rgb(220, 220, 220)'>&nbsp;</span>"
 
-    def __init__(self, parent):
+    def __init__(self, parent, bases):
         super().__init__(parent)
-        self._bases = []
+        self._bases = bases
 
         font = QFont("Courier New", 12)
         self.setFont(font)
@@ -25,6 +25,8 @@ class DisplayArea(QTextEdit):
             color: rgb(0, 0, 0)
             }"""
         )
+
+        self.refresh()
 
     @property
     def bases(self):
