@@ -118,9 +118,9 @@ class Table(QTableWidget):
                 domain.theta_interior_multiple,
                 show_buttons=True,
                 minimum=1,
-                maximum=20,
+                maximum=30,
             )
-            row.theta_interior_multiple.valueChanged.connect(
+            row.theta_interior_multiple.editingFinished.connect(
                 self.cell_widget_updated.emit
             )
             self.setCellWidget(index, 3, row.theta_interior_multiple)
@@ -162,6 +162,7 @@ class Table(QTableWidget):
                 # it was just ticked down 1, so tick it down 1 more
                 surrounding[1].setValue(surrounding[1].value() - 1)
                 surrounding[2].setValue(surrounding[2].value() + 1)
+                self.cell_widget_updated.emit()
 
             @classmethod
             def up(cls, i):
@@ -170,6 +171,7 @@ class Table(QTableWidget):
                 # it was just ticked up 1, so tick it up 1 more
                 surrounding[1].setValue(surrounding[1].value() + 1)
                 surrounding[2].setValue(surrounding[2].value() - 1)
+                self.cell_widget_updated.emit()
 
         for index, row in enumerate(self.rows):
             row.theta_interior_multiple.down_button_clicked.connect(
@@ -214,5 +216,4 @@ class Table(QTableWidget):
 
             domains.append(domain)
 
-        logger.info(f"Fetched {len(domains)} domains from domains table.")
         return domains

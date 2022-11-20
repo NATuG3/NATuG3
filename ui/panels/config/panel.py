@@ -89,11 +89,6 @@ class Panel(QWidget):
             if not self.auto_updating_plots:
                 self.auto_updating_plots = True
 
-                timer = QTimer(refs.application)
-                timer.setInterval(200)
-                timer.setSingleShot(True)
-
-                @timer.timeout.connect
                 def _():
                     warn_and_refresh(
                         self.auto_update_top_view.isChecked(),
@@ -101,7 +96,7 @@ class Panel(QWidget):
                     )
                     self.auto_updating_plots = False
 
-                timer.start()
+                QTimer.singleShot(200, _)
 
         self.tabs.domains.updated.connect(auto_plot_updater)
         self.tabs.nucleic_acid.updated.connect(auto_plot_updater)

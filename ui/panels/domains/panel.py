@@ -1,10 +1,11 @@
 import logging
+from functools import partial
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
-    QSizePolicy,
+    QSizePolicy, QSpinBox, QDoubleSpinBox,
 )
 
 import helpers
@@ -35,10 +36,15 @@ class Panel(QWidget):
         self.symmetry.setValue(refs.domains.current.symmetry)
         self.total_count.setValue(refs.domains.current.count)
 
-        logger.info("Loaded domains tab of config panel.")
-
+        # run setup functions
         self._signals()
         self._prettify()
+
+        # run an initial refresh
+        self.table_refresh()
+        self.settings_refresh()
+
+        logger.info("Loaded domains tab of config panel.")
 
     def _signals(self):
         """Set up panel signals."""
@@ -53,17 +59,22 @@ class Panel(QWidget):
 
         # when helix joint buttons are clicked refresh the table
         # so that the switch values (-1, 0, 1) get udpated
-        self.table.helix_joint_updated.connect(self.refresh)
+        self.table.helix_joint_updated.connect(self.table_refresh)
 
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
 
         # hook update domains button
-        self.update_table.clicked.connect(self.refresh)
+        self.update_table.clicked.connect(self.table_refresh)
 
         # updated event linking
-        self.table.cell_widget_updated.connect(self.refresh)
-        self.update_table.clicked.connect(self.refresh)
+        self.update_table.clicked.connect(self.table_refresh)
+        self.update_table.clicked.connect(self.settings_refresh)
+        self.update_table.clicked.connect(self.updated.emit)
+
+        self.table.cell_widget_updated.connect(self.settings_refresh)
+        self.table.cell_widget_updated.connect(self.table_refresh)
+        self.table.cell_widget_updated.connect(self.updated.emit)
 
     def _prettify(self):
         """Set up styles of panel."""
@@ -76,12 +87,47 @@ class Panel(QWidget):
         config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
         self.config.setSizePolicy(config_size_policy)
 
-    def refresh(self):
+    def settings_refresh(self):
+        # set M and target M boxes
+        # https://github.com/404Wolf/NATuG3/issues/4
+        current_domains = Domains(self.table.fetch_domains(), self.symmetry.value())
+        M: int = sum([domain.theta_interior_multiple for domain in current_domains.domains])
+        N: int = current_domains.count
+        B: int = refs.nucleic_acid.current.B
+        R: int = current_domains.symmetry
+        target_M_over_R = (B * (N - 2)) / (2 * R)
+        M_over_R = M / R
+        self.M.setValue(M)
+        # remove trailing zeros if target_M_over_R is an int
+        if target_M_over_R == round(target_M_over_R):
+            self.target_M_over_R.setDecimals(0)
+        else:
+            self.target_M_over_R.setDecimals(3)
+        self.target_M_over_R.setValue(target_M_over_R)
+        # remove trailing zeros if M_over_R is an int
+        if M_over_R == round(M_over_R):
+            self.M_over_R.setDecimals(0)
+        else:
+            self.M_over_R.setDecimals(3)
+        self.M_over_R.setValue(M_over_R)
+        # make M_over_R and target_M_over_R box green if it is the target
+        if M_over_R == target_M_over_R:
+            style = f"QDoubleSpinBox{{" \
+                    f"background-color: rgb{settings.colors['success']}}}; " \
+                    f"color: rgb(0, 0, 0)}}"
+            self.M_over_R.setStyleSheet(style)
+        else:
+            style = None
+        self.M_over_R.setStyleSheet(style)
+        self.target_M_over_R.setStyleSheet(style)
+
+    def table_refresh(self):
         """Refresh panel settings/domain table."""
-        confirmation: bool
         new_domains: Domains = Domains(
             self.table.fetch_domains(), self.symmetry.value()
         )
+
+        # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)
         if self.subunit_count.value() < refs.domains.current.subunit.count:
@@ -102,20 +148,10 @@ class Panel(QWidget):
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
-                timer = QTimer(self.parent())
-                timer.setInterval(400)
-                timer.setSingleShot(True)
-                timer.timeout.connect(
-                    lambda: self.update_table.setStyleSheet(
-                        "background-color: light grey"
-                    )
-                )
-                timer.start()
-                self.updated.emit()
+                QTimer.singleShot(partial(self.update_table.setStyleSheet, "background-color: light grey"))
         else:
             new_domains.subunit.count = self.subunit_count.value()
             refs.domains.current = new_domains
-            self.updated.emit()
 
         # refresh table
         self.table.dump_domains(refs.domains.current)

@@ -8,7 +8,6 @@ from helpers import bases_only
 
 class DisplayArea(QTextEdit):
     updated = pyqtSignal(list)
-    space = "<span style='background-color: rgb(220, 220, 220)'>&nbsp;</span>"
 
     def __init__(self, parent, max_length=1000, fixed_length: bool = True):
         super().__init__(parent)
@@ -28,10 +27,6 @@ class DisplayArea(QTextEdit):
             }"""
         )
 
-    def setPlainText(self, text: str) -> None:
-        text = text.replace(" ", self.space)
-        super().setHtml(text)
-
     def unhighlight(self):
         """Clear any highlighted bases."""
         self.setPlainText(self.toPlainText())
@@ -45,8 +40,8 @@ class DisplayArea(QTextEdit):
         """
         html = list(self.toPlainText())
         for index_, item in enumerate(html):
-            if item == " " and index != index_:
-                html[index_] = self.space
+            if item == " ":
+                html[index_] = "&nbsp;"
         base_to_highlight = html[index]
         html[
             index

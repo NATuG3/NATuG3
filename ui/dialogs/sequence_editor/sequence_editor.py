@@ -1,11 +1,11 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QVBoxLayout, QDialog
 
-from ui.widgets.sequence_editor.user_input.panel import UserInputSequenceEditor
-from ui.widgets.sequence_editor.file_input.panel import FileInputSequenceEditor
+from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
+from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
 
 
-class SequenceEditor(QWidget):
+class SequenceEditor(QDialog):
     def __init__(self):
         super().__init__()
         uic.loadUi("ui/widgets/sequence_editor/sequence_editor.ui", self)

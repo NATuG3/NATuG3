@@ -65,15 +65,18 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot(self):
         """Plot all the data."""
+
+        # plot the circles
         self.plotted = self.plot(
             self.worker.u_coords,
             self.worker.v_coords,
             symbol="o",
             symbolSize=self.circle_radius,
-            symbolBrush=pg.mkBrush(settings.colors["domains"]),
+            symbolBrush=pg.mkBrush(settings.colors["domains"]["fill"]),
             pxMode=False,
         )
 
+        # plot the numbers
         for counter, position in enumerate(
                 tuple(zip(self.worker.u_coords, self.worker.v_coords))[1:], start=1
         ):
@@ -86,10 +89,19 @@ class TopViewPlotter(pg.PlotWidget):
                 [position[0]],
                 [position[1]],
                 symbol=helpers.custom_symbol(counter),
-                symbolBrush=pg.mkBrush(color=(180, 180, 180)),
+                symbolBrush=pg.mkBrush(color=settings.colors["domains"]["numbers"]),
                 symbolSize=symbol_size,
                 pxMode=False,
                 pen=None,
             )
             text.sigPointsClicked.connect(self._point_clicked)
             self.text.append(text)
+
+        # plot the stroke
+        self.plotted = self.plot(
+            self.worker.u_coords,
+            self.worker.v_coords,
+            pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=7),
+            symbol=None,
+            pxMode=False,
+        )

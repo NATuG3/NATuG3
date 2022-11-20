@@ -9,8 +9,12 @@ colors = {
     "grid_lines": (220, 220, 220),
     "nicks": (255, 0, 0),
     "highlighted": (245, 245, 0),
-    "success": (192, 209, 188),
-    "domains": (90, 90, 90),
+    "success": (212, 229, 208),
+    "domains": {
+        "pen": (0, 0, 0),
+        "fill": (125, 125, 125),
+        "numbers": (255, 255, 255)
+    },
     "strands": {
         "greys": ((195, 195, 195), (70, 70, 70)),
         "colors": (
