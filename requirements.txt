@@ -1,6 +1,7 @@
 pyqtgraph~=0.13.1
 PyQt6~=6.4.0
+PyQt6-sip
 PyQt5
 PyOpenGL
 
-numpy~=1.23.4
+numpy==1.23.5

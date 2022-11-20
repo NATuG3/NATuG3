@@ -10,11 +10,11 @@ from PyQt6.QtWidgets import (
     QApplication,
 )
 
-from ui.dialogs.sequence_editor.user_input.entrybox import BaseEntryBox
+from ui.dialogs.sequence_editor.user_input.entry_box import BaseEntryBox
 
 
 class EditorArea(QWidget):
-    updated = pyqtSignal()
+    updated = pyqtSignal(int)
     base_removed = pyqtSignal(int, str)
     base_added = pyqtSignal(int, str)
     selection_changed = pyqtSignal(int)
@@ -167,7 +167,7 @@ class EditorArea(QWidget):
             else:
                 self.widgets[index - 1].setFocus()
 
-            self.updated.emit()
+            self.updated.emit(index)
 
         elif (len(new_text) == 2) and (" " in new_text):
             self.widgets[index].base = new_text.replace(" ", "")
@@ -176,7 +176,7 @@ class EditorArea(QWidget):
             except IndexError:
                 self.widgets[index].setFocus()
 
-            self.updated.emit()
+            self.updated.emit(index)
 
         elif len(new_text) == 2 and (" " not in new_text):
             # remove the excess text from the old line edit
@@ -193,4 +193,4 @@ class EditorArea(QWidget):
                 self.widgets[index].setFocus()
                 self.widgets[index].base = new_base
 
-            self.updated.emit()
+            self.updated.emit(index)

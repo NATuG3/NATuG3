@@ -17,6 +17,7 @@ class UserInputSequenceEditor(QWidget):
 
         self.setLayout(QVBoxLayout())
 
+        # run setup functions
         self._display_area()
         self._editor_area()
         self._signals()
@@ -48,16 +49,16 @@ class UserInputSequenceEditor(QWidget):
         self.scrollable_editor_area.setFixedHeight(100)
 
     def _signals(self):
-        def editor_area_added(index: int, base: str):
-            widget = self.editor_area.widgets[index]
-            scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
-            QTimer.singleShot(
-                0, partial(self.scrollable_editor_area.ensureWidgetVisible, widget)
-            )
-            QTimer.singleShot(1, partial(scroll_bar.setValue, scroll_bar.value() + 30))
-            self.scrollable_editor_area.ensureWidgetVisible(widget, 0, 0)
+        def editor_area_updated(index):
+            if index > 0:
+                widget = self.editor_area.widgets[index]
+                scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
 
-        def editor_area_updated():
+                if self.bases.count(None) < self.editor_area.bases.count(None):
+                    scroll_bar.setValue(scroll_bar.value() - widget.width())
+                else:
+                    scroll_bar.setValue(scroll_bar.value() + widget.width())
+
             self.bases = self.editor_area.bases
 
         def editor_area_selection_changed(index: int):
@@ -65,7 +66,6 @@ class UserInputSequenceEditor(QWidget):
             self.display_area.highlight(index)
             self.display_area.blockSignals(False)
 
-        self.editor_area.base_added.connect(editor_area_added)
         self.editor_area.updated.connect(editor_area_updated)
         self.editor_area.selection_changed.connect(editor_area_selection_changed)
 

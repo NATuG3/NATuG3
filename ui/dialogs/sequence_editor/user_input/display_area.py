@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QTextEdit
 
 import settings
 from constants.bases import DNA
-from helpers import bases_only
 
 
 class DisplayArea(QTextEdit):
@@ -16,7 +15,7 @@ class DisplayArea(QTextEdit):
         super().__init__(parent)
         self._bases = bases
 
-        font = QFont("Courier New", 12)
+        font = QFont("Courier New", 11)
         self.setFont(font)
         self.setReadOnly(True)
         self.setStyleSheet(
@@ -25,6 +24,7 @@ class DisplayArea(QTextEdit):
             color: rgb(0, 0, 0)
             }"""
         )
+        self.setFixedHeight(285)
 
         self.refresh()
 
@@ -40,7 +40,6 @@ class DisplayArea(QTextEdit):
         self.refresh()
 
     def refresh(self):
-        cursor_data = self.obtain_cursor_data()
         html = ""
         for base in self.bases:
             if base in DNA:
@@ -50,7 +49,6 @@ class DisplayArea(QTextEdit):
             else:
                 raise ValueError(f"Base {base} is not a valid base.")
         self.setHtml(html)
-        self.dump_cursor_data(*cursor_data)
 
     def highlight(self, index):
         """
@@ -71,28 +69,3 @@ class DisplayArea(QTextEdit):
         html = "".join(html)
 
         self.setHtml(html)
-
-    def obtain_cursor_data(self):
-        try:
-            hBar = self.horizontalScrollBar()
-            hPos = hBar.value() / hBar.maximum()
-        except ZeroDivisionError:
-            hPos = 0
-        try:
-            vBar = self.verticalScrollBar()
-            vPos = vBar.value() / vBar.maximum()
-        except ZeroDivisionError:
-            vPos = 0
-
-        c = self.textCursor()
-        p = c.position()
-
-        return hPos, vPos, c, p
-
-    def dump_cursor_data(self, hPos, vPos, c, p):
-        c.setPosition(p)
-        hBar = self.horizontalScrollBar()
-        vBar = self.verticalScrollBar()
-        self.setTextCursor(c)
-        hBar.setValue(hPos * hBar.maximum())
-        vBar.setValue(vPos * vBar.maximum())

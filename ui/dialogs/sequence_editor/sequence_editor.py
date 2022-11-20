@@ -5,7 +5,7 @@ from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
 from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
 
 
-tester = ["A", "T", "C", "G", None, "A"] * 10
+tester = ["G", "A", "T", "C"] * 25
 
 
 class SequenceEditor(QDialog):
@@ -19,5 +19,5 @@ class SequenceEditor(QDialog):
         self.file_input.setLayout(QVBoxLayout())
         self.file_input.layout().addWidget(FileInputSequenceEditor())
 
-        self.setFixedHeight(480)
+        self.setFixedHeight(510)
         self.setFixedWidth(700)
