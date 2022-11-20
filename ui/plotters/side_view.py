@@ -82,7 +82,7 @@ class SideViewPlotter(pg.PlotWidget):
             self.addLine(x=i, pen=grid_pen)
 
         # for i in <number of helical twists of the tallest domain>...
-        for i in range(0, ceil(self._width() / self.nucleic_acid.H) + 1):
+        for i in range(0, ceil(self._height() / self.nucleic_acid.H) + 1):
             self.addLine(y=(i * self.nucleic_acid.H), pen=grid_pen)
 
         # add axis labels
