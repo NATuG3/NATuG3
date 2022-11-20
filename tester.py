@@ -1,8 +1,9 @@
-def main():
-    import sys
-    from PyQt6.QtWidgets import QApplication
-    from ui.dialogs.sequence_editor import SequenceEditor
+import sys
+from PyQt6.QtWidgets import QApplication
+from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
 
+
+def main():
     app = QApplication(sys.argv)
     widget = SequenceEditor()
     widget.show()

@@ -19,6 +19,8 @@ class Strands:
         """
         assert [isinstance(strand, Strand) for strand in strands]
         self.strands = strands
+        for strand in self.strands:
+            strand.parent = self
 
     def __len__(self):
         """Obtain the number of strands this Strands object contains."""

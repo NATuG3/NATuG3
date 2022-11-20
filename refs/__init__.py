@@ -8,6 +8,7 @@ from ._strands import _Strands
 application = _Application()
 
 nucleic_acid = _NucleicAcid()
+
 domains = _Domains()
 
 strands = _Strands()

@@ -126,7 +126,6 @@ class Panel(QWidget):
         new_domains: Domains = Domains(
             self.table.fetch_domains(), self.symmetry.value()
         )
-
         # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)
@@ -148,7 +147,7 @@ class Panel(QWidget):
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
-                QTimer.singleShot(partial(self.update_table.setStyleSheet, "background-color: light grey"))
+                QTimer.singleShot(600, partial(self.update_table.setStyleSheet, "background-color: light grey"))
         else:
             new_domains.subunit.count = self.subunit_count.value()
             refs.domains.current = new_domains

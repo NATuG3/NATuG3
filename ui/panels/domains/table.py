@@ -184,11 +184,12 @@ class Table(QTableWidget):
         self.setVerticalHeaderLabels(self.side_headers)
 
     def fetch_domains(self) -> List[Domain]:
-        """
-        Obtain a list of the currently chosen domains.
+        """Obtain a list of the currently chosen domains.
+
+        This returns a list of Domain objects, NOT a Domains object.
 
         Returns:
-            List(Domain): A list of domain objects based on user input.
+            A list of the domains that populate the domains table.
         """
         domains = []  # output list of domains
         for domain in range(self.rowCount()):

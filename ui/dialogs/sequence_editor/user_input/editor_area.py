@@ -1,7 +1,8 @@
 from functools import partial
+from threading import Thread
 from typing import List, Iterable
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, QTimer, QThreadPool, QRunnable, pyqtSlot
 from PyQt6.QtWidgets import (
     QWidget,
     QLineEdit,
@@ -10,11 +11,11 @@ from PyQt6.QtWidgets import (
     QApplication,
 )
 
-from ui.dialogs.sequence_editor.user_input.entrybox import BaseEntryBox
+from ui.dialogs.sequence_editor.user_input.entry_box import BaseEntryBox
 
 
 class EditorArea(QWidget):
-    updated = pyqtSignal()
+    updated = pyqtSignal(int)
     base_removed = pyqtSignal(int, str)
     base_added = pyqtSignal(int, str)
     selection_changed = pyqtSignal(int)
@@ -23,26 +24,20 @@ class EditorArea(QWidget):
         self,
         parent,
         bases: Iterable | None = None,
-        max_length: int = 1000,
-        fixed_length: bool = True,
     ):
         super().__init__(parent)
-        self.fixed_length = fixed_length
-        self.max_length = max_length
         self.widgets = None
         self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(0)
 
+        self.base_adder_threadpool = QThreadPool()
+
         if bases is None:
-            if self.fixed_length:
-                raise ValueError(
-                    "Cannot create a fixed length sequence when the length is zero."
-                )
             self.widgets: List[BaseEntryBox] = []
         else:
             self.widgets: List[BaseEntryBox] = []
-            for base in bases:
-                self.add_base(base)
+            for index, base in enumerate(bases):
+                Thread(target=lambda: QTimer.singleShot(1, partial(self.add_base, base))).run()
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -123,9 +118,6 @@ class EditorArea(QWidget):
             base: The base to add. If None then a new empty area for the user to add a base is created.
             index: Inserts a base at the index provided. If None then a base is appended to the bottom of the editor.
         """
-        if len(self.bases) == self.max_length:
-            return
-
         if index is None:
             # new index will be one after the end of the bases list
             index = len(self)
@@ -164,12 +156,8 @@ class EditorArea(QWidget):
 
     def base_text_changed(self, new_text: str, index: int):
         if len(new_text) == 0:
-            if self.fixed_length:
-                # clear the base
-                self.widgets[index].base = None
-            else:
-                # remove the base
-                self.remove_base(index=index)
+            # clear the base
+            self.widgets[index].base = None
 
             # make the previous base have focus
             if index == 0:
@@ -177,13 +165,17 @@ class EditorArea(QWidget):
             else:
                 self.widgets[index - 1].setFocus()
 
-            self.updated.emit()
+            self.updated.emit(index)
+
         elif (len(new_text) == 2) and (" " in new_text):
             self.widgets[index].base = new_text.replace(" ", "")
             try:
                 self.widgets[index + 1].setFocus()
             except IndexError:
                 self.widgets[index].setFocus()
+
+            self.updated.emit(index)
+
         elif len(new_text) == 2 and (" " not in new_text):
             # remove the excess text from the old line edit
             self.widgets[index].base = new_text[0]
@@ -191,18 +183,12 @@ class EditorArea(QWidget):
             # create a new base with the excess text
             new_base = new_text[-1]
 
-            if self.fixed_length:
-                try:
-                    self.widgets[index + 1].setFocus()
-                    self.widgets[index].base = new_base
-                except IndexError:
-                    self.widgets[index].setFocus()
-                    self.widgets[index].base = new_base
-            else:
-                # create a new base
-                self.add_base(base=new_base, index=index + 1)
+            # change the focus
+            try:
+                self.widgets[index + 1].setFocus()
+                self.widgets[index].base = new_base
+            except IndexError:
+                self.widgets[index].setFocus()
+                self.widgets[index].base = new_base
 
-                # focus in on the new base
-                new_base.setFocus()
-
-            self.updated.emit()
+            self.updated.emit(index)
