@@ -1,6 +1,7 @@
 import logging
 from contextlib import suppress
 from copy import copy
+from functools import partial
 from math import ceil, dist
 from typing import List, Tuple
 
@@ -26,6 +27,7 @@ class SideViewPlotter(pg.PlotWidget):
     """The refs plot widget for the Plotter"""
 
     points_clicked = pyqtSignal(tuple)
+    strand_clicked = pyqtSignal(Strand)
 
     def __init__(self, strands: Strands, nucleic_acid_profile: NucleicAcidProfile):
         """Initialize plotter instance."""
@@ -174,6 +176,8 @@ class SideViewPlotter(pg.PlotWidget):
                 z_coords,
                 pen=pen,
             )
+            outline.setCurveClickable(True)
+            outline.sigClicked.connect(partial(self.strand_clicked.emit, _strand))
 
             plotted.append(
                 (

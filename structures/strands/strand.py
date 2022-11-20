@@ -39,9 +39,20 @@ class Strand:
             items: list = None,
             color: Tuple[int, int, int] = (0, 0, 0),
             closed: bool | None = False,
+            parent: Type["Strands"] = None
     ):
+        """
+        Initialize the strand object.
+
+        Args:
+            items: All items to place inside the strand. Order sensitive.
+            color: RGB color for the strand. Defaults to black.
+            closed: Whether the strand is closed. Defaults to False.
+            parent: The parent Strands object. Defaults to None.
+        """
         self.color = color
         self.closed = closed
+        self.parent = parent
 
         if items is None:
             self.items = deque([])
@@ -57,6 +68,13 @@ class Strand:
     def __contains__(self, item) -> bool:
         """Determine whether item is in strand."""
         return item in self.items
+
+    @property
+    def index(self):
+        """Obtain the index of this strand with respect to the parent strand. None if parent strand is None."""
+        if self.parent is None:
+            return None
+        return self.parent.strands.index(self)
 
     def sliced(self, start: int, end: int) -> list:
         """Return self.items as a list."""

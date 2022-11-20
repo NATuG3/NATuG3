@@ -1,14 +1,18 @@
 import atexit
 import logging
+from functools import partial
 
-from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
+from PyQt6.QtCore import QTimer
+from PyQt6.QtWidgets import QGroupBox, QVBoxLayout, QScrollArea
 
 import refs
+import settings
 import ui.dialogs.informers
 import ui.plotters
 from constants.modes import *
 from structures.points import NEMid
 from structures.points.nick import Nick
+from ui.panels.sequencing.strand_button import StrandButton
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +30,7 @@ class Panel(QGroupBox):
             refs.strands.current, refs.nucleic_acid.current
         )
         self.plot.points_clicked.connect(self.points_clicked)
+        self.plot.strand_clicked.connect(self.strand_clicked)
         self.layout().addWidget(self.plot)
 
     def refresh(self):
@@ -34,8 +39,17 @@ class Panel(QGroupBox):
         self.plot.nucleic_acid = refs.nucleic_acid.current
         self.plot.refresh()
 
+    def strand_clicked(self, strand):
+        """Slot for when a strand is clicked."""
+        strand_button: StrandButton = refs.constructor.config.panel.tabs.sequencing.strand_buttons[strand.index]
+        scroll_area: QScrollArea = refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
+        strand_button.setStyleSheet(f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}")
+        scroll_area.ensureWidgetVisible(strand_button)
+        QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
+        logger.info(f'Strand #{strand.index}" was clicked.')
+
     def points_clicked(self, located):
-        """Signal for when a point in the plot is clicked."""
+        """slot for when a point in the plot is clicked."""
         if refs.mode.current == INFORMER:
             dialogs = []
 

@@ -147,7 +147,7 @@ class Panel(QWidget):
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
-                QTimer.singleShot(partial(self.update_table.setStyleSheet, "background-color: light grey"))
+                QTimer.singleShot(600, partial(self.update_table.setStyleSheet, "background-color: light grey"))
         else:
             new_domains.subunit.count = self.subunit_count.value()
             refs.domains.current = new_domains
