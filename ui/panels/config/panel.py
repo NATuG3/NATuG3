@@ -14,7 +14,7 @@ import refs.saver.save
 import settings
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
-from ui.panels import domains, nucleic_acid, sequencing
+from ui.panels import domains, nucleic_acid
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -55,12 +55,6 @@ class Panel(QWidget):
         self.tabs.domains = domains.Panel(self)
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
-
-        # set the sequencing tab
-        # store actual widget in the tabs container
-        self.tabs.sequencing = sequencing.Panel(self)
-        self.sequencing_tab.setLayout(QVBoxLayout())
-        self.sequencing_tab.layout().addWidget(self.tabs.sequencing)
 
     def _signals(self):
         """Setup pyqt signals."""
