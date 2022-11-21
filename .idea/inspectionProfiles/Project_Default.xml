@@ -15,17 +15,15 @@
         <list>
           <option value="N801" />
           <option value="N806" />
-          <option value="N802" />
+          <option value="N803" />
         </list>
       </option>
     </inspection_tool>
     <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredIdentifiers">
         <list>
-          <option value="windows.constructor.main.window.top_view" />
           <option value="theta_interior" />
-          <option value="angle_deltas" />
-          <option value="computers.side_view.side_view.Strand" />
+          <option value="constructor.panels.domains.panel.Panel.*" />
         </list>
       </option>
     </inspection_tool>

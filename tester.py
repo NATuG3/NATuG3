@@ -1,5 +1,7 @@
 import sys
+
 from PyQt6.QtWidgets import QApplication
+
 from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
 
 

@@ -15,28 +15,21 @@ from ui.dialogs.sequence_editor.user_input.entry_box import BaseEntryBox
 
 
 class EditorArea(QWidget):
-    """
-    An area for the user to edit a nucleic acid base sequence.
+    updated = pyqtSignal(int)  # when anything is updated
+    selection_changed = pyqtSignal(int)  # when the currently chosen base changes
 
-    Signals:
-        updated (index): When a base is set/unset/changed.
-        base_removed (index, base): When a base is removed.
-        base_added (index, base): When a base is added.
-        selection_changed (index): When the current selection is changed.
-    """
+    base_removed = pyqtSignal(int, str)  # when a base is removed
+    base_added = pyqtSignal(int, str)  # when a new base is added
 
-    updated = pyqtSignal(int)
-    base_removed = pyqtSignal(int, str)
-    base_added = pyqtSignal(int, str)
-    selection_changed = pyqtSignal(int)
+    base_reset = pyqtSignal(int)  # when a nonblank box is changed
+    base_unset = pyqtSignal(int)  # when a nonblank box is made blank
+    base_set = pyqtSignal(int)  # when a blank box is made nonblank
 
-    def __init__(self, parent, bases):
-        """
-        Intitialize the editor area.
-
-        Args:
-            parent: The parent widget.
-        """
+    def __init__(
+        self,
+        parent,
+        bases: Iterable | None = None,
+    ):
         super().__init__(parent)
         self.widgets = None
         self.setLayout(QHBoxLayout(self))
@@ -49,7 +42,9 @@ class EditorArea(QWidget):
         else:
             self.widgets: List[BaseEntryBox] = []
             for index, base in enumerate(bases):
-                Thread(target=lambda: QTimer.singleShot(1, partial(self.add_base, base))).run()
+                Thread(
+                    target=lambda: QTimer.singleShot(1, partial(self.add_base, base))
+                ).run()
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -177,6 +172,7 @@ class EditorArea(QWidget):
             else:
                 self.widgets[index - 1].setFocus()
 
+            self.base_unset(index)
             self.updated.emit(index)
 
         elif (len(new_text) == 2) and (" " in new_text):
@@ -186,9 +182,10 @@ class EditorArea(QWidget):
             except IndexError:
                 self.widgets[index].setFocus()
 
+            self.base_set.emit(index)
             self.updated.emit(index)
 
-        elif len(new_text) == 2 and (" " not in new_text):
+        elif (len(new_text) == 2) and (" " not in new_text):
             # remove the excess text from the old line edit
             self.widgets[index].base = new_text[0]
 
@@ -203,4 +200,6 @@ class EditorArea(QWidget):
                 self.widgets[index].setFocus()
                 self.widgets[index].base = new_base
 
-            self.updated.emit(index)
+            # note that the updated base is the NEXT base over
+            self.base_set.emit(index+1)
+            self.updated.emit(index+1)

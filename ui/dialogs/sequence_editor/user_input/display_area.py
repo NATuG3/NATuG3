@@ -9,14 +9,7 @@ from constants.bases import DNA
 
 
 class DisplayArea(QTextEdit):
-    """
-    An area to display a nucleic acid base sequence.
-
-    Attributes:
-        bases: The bases displayed.
-    """
-
-    space = "<span style='background-color: rgb(220, 220, 220)'>&nbsp;</span>"
+    space = "<span style='background-color: rgb(210, 210, 210)'>&nbsp;</span>"
 
     def __init__(self, parent, bases):
         super().__init__(parent)
@@ -50,7 +43,9 @@ class DisplayArea(QTextEdit):
         html = ""
         for base in self.bases:
             if base in DNA:
-                html += base
+                html += (
+                    f"<span style='background-color: rgb(240, 240, 240)'>{base}</span>"
+                )
             elif base is None:
                 html += self.space
             else:

@@ -1,14 +1,18 @@
-from functools import partial
-from typing import List, Iterable
+from typing import Iterable
 
-from PyQt6.QtCore import Qt, QTimer
-from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget, QApplication
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
 from .display_area import DisplayArea
 from .editor_area import EditorArea
 
 
 class UserInputSequenceEditor(QWidget):
+    updated = pyqtSignal()
+    base_reset: pyqtSignal
+    base_unset: pyqtSignal
+    base_set: pyqtSignal
+
     def __init__(self, bases: Iterable):
         super().__init__()
         self.setWindowTitle("Sequence Editor")
@@ -23,6 +27,13 @@ class UserInputSequenceEditor(QWidget):
         self._editor_area()
         self._signals()
         self._prettify()
+
+        # wrap signals from self.editor_area
+        base_reset = self.editor_area.base_reset
+        base_unset = self.editor_area.base_unset
+        base_set = self.editor_area.base_set
+
+        self.updated.connect(lambda: print(self.bases))
 
     @property
     def bases(self):
@@ -60,7 +71,9 @@ class UserInputSequenceEditor(QWidget):
                 else:
                     scroll_bar.setValue(scroll_bar.value() + widget.width())
 
-            self.bases = self.editor_area.bases
+            if self.bases != self.editor_area.bases:
+                self.bases = self.editor_area.bases
+                self.updated.emit()
 
         def editor_area_selection_changed(index: int):
             self.display_area.blockSignals(True)
