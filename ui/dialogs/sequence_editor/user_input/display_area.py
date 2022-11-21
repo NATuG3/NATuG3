@@ -68,7 +68,9 @@ class DisplayArea(QTextEdit):
         base_to_highlight = html[index]
         if base_to_highlight is None:
             base_to_highlight = "&nbsp;"
-        html[index] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
+        html[
+            index
+        ] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
 
         for index_, base in enumerate(html):
             if (base is None) and (index_ != index):

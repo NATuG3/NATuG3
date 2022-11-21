@@ -47,7 +47,7 @@ class Panel(QDockWidget):
             refs.domains.current, refs.nucleic_acid.current
         )
         self.plot.profile = refs.nucleic_acid.current
-        self.plot.rotation = (self.rotation_slider.value()*360)/99
+        self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()
         self.plot.autoRange()
 

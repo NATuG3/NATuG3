@@ -5,7 +5,9 @@ from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
-    QSizePolicy, QSpinBox, QDoubleSpinBox,
+    QSizePolicy,
+    QSpinBox,
+    QDoubleSpinBox,
 )
 
 import helpers
@@ -91,7 +93,9 @@ class Panel(QWidget):
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
         current_domains = Domains(self.table.fetch_domains(), self.symmetry.value())
-        M: int = sum([domain.theta_interior_multiple for domain in current_domains.domains])
+        M: int = sum(
+            [domain.theta_interior_multiple for domain in current_domains.domains]
+        )
         N: int = current_domains.count
         B: int = refs.nucleic_acid.current.B
         R: int = current_domains.symmetry
@@ -112,9 +116,11 @@ class Panel(QWidget):
         self.M_over_R.setValue(M_over_R)
         # make M_over_R and target_M_over_R box green if it is the target
         if M_over_R == target_M_over_R:
-            style = f"QDoubleSpinBox{{" \
-                    f"background-color: rgb{settings.colors['success']}}}; " \
-                    f"color: rgb(0, 0, 0)}}"
+            style = (
+                f"QDoubleSpinBox{{"
+                f"background-color: rgb{settings.colors['success']}}}; "
+                f"color: rgb(0, 0, 0)}}"
+            )
             self.M_over_R.setStyleSheet(style)
         else:
             style = None
@@ -147,7 +153,12 @@ class Panel(QWidget):
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
-                QTimer.singleShot(600, partial(self.update_table.setStyleSheet, "background-color: light grey"))
+                QTimer.singleShot(
+                    600,
+                    partial(
+                        self.update_table.setStyleSheet, "background-color: light grey"
+                    ),
+                )
         else:
             new_domains.subunit.count = self.subunit_count.value()
             refs.domains.current = new_domains
