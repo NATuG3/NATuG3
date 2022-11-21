@@ -23,7 +23,7 @@ class Toolbar(QToolBar):
             """
         QLineEdit::disabled{
             color: rgb(0, 0, 0); 
-            background:rgb(245, 245, 245);
+            background-color: rgb(245, 245, 245);
         }"""
         )
         program_label.setAlignment(Qt.AlignmentFlag.AlignCenter)

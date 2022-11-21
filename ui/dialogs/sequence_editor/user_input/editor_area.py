@@ -172,7 +172,7 @@ class EditorArea(QWidget):
             else:
                 self.widgets[index - 1].setFocus()
 
-            self.base_unset(index)
+            self.base_unset.emit(index)
             self.updated.emit(index)
 
         elif (len(new_text) == 2) and (" " in new_text):

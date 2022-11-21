@@ -30,9 +30,9 @@ class _NucleicAcid:
 
     def __init__(self):
         self.profiles: Dict[
-            str, Profile
+            str, NucleicAcidProfile
         ] = self.defaults  # by default set profiles to the defaults
-        self.current: Profile = next(
+        self.current: NucleicAcidProfile = next(
             iter(self.defaults.values())
         )  # by default choose the first profiles in defaults
 

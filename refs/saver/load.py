@@ -39,6 +39,8 @@ def worker(filename):
     # refresh graphs
     refs.constructor.top_view.refresh()
     refs.constructor.side_view.refresh()
+    refs.constructor.top_view.plot.autoRange()
+    refs.constructor.side_view.plot.autoRange()
 
     logger.info(f"Loaded save @ {filename}.")
 
