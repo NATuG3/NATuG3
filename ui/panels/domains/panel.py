@@ -118,7 +118,7 @@ class Panel(QWidget):
         if M_over_R == target_M_over_R:
             style = (
                 f"QDoubleSpinBox{{"
-                f"background-color: rgb{settings.colors['success']}}}; "
+                f"background-color: rgb{settings.colors['success']}; "
                 f"color: rgb(0, 0, 0)}}"
             )
             self.M_over_R.setStyleSheet(style)
