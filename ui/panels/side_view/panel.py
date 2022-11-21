@@ -41,9 +41,15 @@ class Panel(QGroupBox):
 
     def strand_clicked(self, strand):
         """Slot for when a strand is clicked."""
-        strand_button: StrandButton = refs.constructor.config.panel.tabs.sequencing.strand_buttons[strand.index]
-        scroll_area: QScrollArea = refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
-        strand_button.setStyleSheet(f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}")
+        strand_button: StrandButton = (
+            refs.constructor.config.panel.tabs.sequencing.strand_buttons[strand.index]
+        )
+        scroll_area: QScrollArea = (
+            refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
+        )
+        strand_button.setStyleSheet(
+            f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}"
+        )
         scroll_area.ensureWidgetVisible(strand_button)
         QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
         logger.info(f'Strand #{strand.index}" was clicked.')

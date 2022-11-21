@@ -37,7 +37,9 @@ class EditorArea(QWidget):
         else:
             self.widgets: List[BaseEntryBox] = []
             for index, base in enumerate(bases):
-                Thread(target=lambda: QTimer.singleShot(1, partial(self.add_base, base))).run()
+                Thread(
+                    target=lambda: QTimer.singleShot(1, partial(self.add_base, base))
+                ).run()
 
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)

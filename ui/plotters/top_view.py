@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass
-from math import dist, cos, radians, sin
-from types import SimpleNamespace
+from math import cos, radians, sin
 
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal
@@ -27,11 +26,11 @@ class TopViewPlotter(pg.PlotWidget):
         rotation: float | None
 
     def __init__(
-        self,
-        worker: TopViewWorker,
-        domains: Domains,
-        domain_radius: int,
-        rotation: float = 0,
+            self,
+            worker: TopViewWorker,
+            domains: Domains,
+            domain_radius: int,
+            rotation: float = 0,
     ):
         """
         Initialize top view plotter instance.

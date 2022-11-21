@@ -1,5 +1,5 @@
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget, QGridLayout, QPushButton, QScrollArea
+from PyQt6.QtWidgets import QWidget, QGridLayout, QScrollArea
 
 import refs
 from ui.panels.sequencing.strand_button import StrandButton

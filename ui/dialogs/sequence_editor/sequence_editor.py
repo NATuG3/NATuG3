@@ -1,9 +1,8 @@
 from PyQt6 import uic
 from PyQt6.QtWidgets import QVBoxLayout, QDialog
 
-from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
 from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
-
+from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
 
 tester = ["G", "A", "G", "C", "T", "A", "A", None] * 5
 
