@@ -15,16 +15,28 @@ from ui.dialogs.sequence_editor.user_input.entry_box import BaseEntryBox
 
 
 class EditorArea(QWidget):
+    """
+    An area for the user to edit a nucleic acid base sequence.
+
+    Signals:
+        updated (index): When a base is set/unset/changed.
+        base_removed (index, base): When a base is removed.
+        base_added (index, base): When a base is added.
+        selection_changed (index): When the current selection is changed.
+    """
+
     updated = pyqtSignal(int)
     base_removed = pyqtSignal(int, str)
     base_added = pyqtSignal(int, str)
     selection_changed = pyqtSignal(int)
 
-    def __init__(
-        self,
-        parent,
-        bases: Iterable | None = None,
-    ):
+    def __init__(self, parent, bases):
+        """
+        Intitialize the editor area.
+
+        Args:
+            parent: The parent widget.
+        """
         super().__init__(parent)
         self.widgets = None
         self.setLayout(QHBoxLayout(self))
