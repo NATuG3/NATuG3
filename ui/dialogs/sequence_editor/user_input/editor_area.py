@@ -15,10 +15,15 @@ from ui.dialogs.sequence_editor.user_input.entry_box import BaseEntryBox
 
 
 class EditorArea(QWidget):
-    updated = pyqtSignal(int)
-    base_removed = pyqtSignal(int, str)
-    base_added = pyqtSignal(int, str)
-    selection_changed = pyqtSignal(int)
+    updated = pyqtSignal(int)  # when anything is updated
+    selection_changed = pyqtSignal(int)  # when the currently chosen base changes
+
+    base_removed = pyqtSignal(int, str)  # when a base is removed
+    base_added = pyqtSignal(int, str)  # when a new base is added
+
+    base_reset = pyqtSignal(int)  # when a nonblank box is changed
+    base_unset = pyqtSignal(int)  # when a nonblank box is made blank
+    base_set = pyqtSignal(int)  # when a blank box is made nonblank
 
     def __init__(
         self,
@@ -167,6 +172,7 @@ class EditorArea(QWidget):
             else:
                 self.widgets[index - 1].setFocus()
 
+            self.base_unset(index)
             self.updated.emit(index)
 
         elif (len(new_text) == 2) and (" " in new_text):
@@ -176,9 +182,10 @@ class EditorArea(QWidget):
             except IndexError:
                 self.widgets[index].setFocus()
 
+            self.base_set.emit(index)
             self.updated.emit(index)
 
-        elif len(new_text) == 2 and (" " not in new_text):
+        elif (len(new_text) == 2) and (" " not in new_text):
             # remove the excess text from the old line edit
             self.widgets[index].base = new_text[0]
 
@@ -193,4 +200,6 @@ class EditorArea(QWidget):
                 self.widgets[index].setFocus()
                 self.widgets[index].base = new_base
 
-            self.updated.emit(index)
+            # note that the updated base is the NEXT base over
+            self.base_set.emit(index+1)
+            self.updated.emit(index+1)

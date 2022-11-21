@@ -9,6 +9,9 @@ from .editor_area import EditorArea
 
 class UserInputSequenceEditor(QWidget):
     updated = pyqtSignal()
+    base_reset: pyqtSignal
+    base_unset: pyqtSignal
+    base_set: pyqtSignal
 
     def __init__(self, bases: Iterable):
         super().__init__()
@@ -24,6 +27,11 @@ class UserInputSequenceEditor(QWidget):
         self._editor_area()
         self._signals()
         self._prettify()
+
+        # wrap signals from self.editor_area
+        base_reset = self.editor_area.base_reset
+        base_unset = self.editor_area.base_unset
+        base_set = self.editor_area.base_set
 
         self.updated.connect(lambda: print(self.bases))
 
