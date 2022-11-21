@@ -7,6 +7,7 @@ from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
 
 def main():
     app = QApplication(sys.argv)
+    app.setStyle("Fusion")
     widget = SequenceEditor()
     widget.show()
     app.exec()

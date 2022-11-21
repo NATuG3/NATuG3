@@ -10,6 +10,8 @@ from constants.bases import DNA
 
 class DisplayArea(QTextEdit):
     space = "<span style='background-color: rgb(210, 210, 210)'>&nbsp;</span>"
+    nonspace = "<span style='background-color: rgb(240, 240, 240)'>{char}</span>"
+    highlighted = "<span style='background-color: rgb(245, 245, 0)'>{char}</span>"
 
     def __init__(self, parent, bases):
         super().__init__(parent)
@@ -43,9 +45,8 @@ class DisplayArea(QTextEdit):
         html = ""
         for base in self.bases:
             if base in DNA:
-                html += (
-                    f"<span style='background-color: rgb(240, 240, 240)'>{base}</span>"
-                )
+                print("base")
+                html += self.nonspace.format(char=base)
             elif base is None:
                 html += self.space
             else:
@@ -59,17 +60,12 @@ class DisplayArea(QTextEdit):
         Args:
             index: Character index to highlight.
         """
-        html = self.bases.copy()
-        base_to_highlight = html[index]
-        if base_to_highlight is None:
-            base_to_highlight = "&nbsp;"
-        html[
-            index
-        ] = f"<span style='background-color: rgb{settings.colors['highlighted']}'>{base_to_highlight}</span>"
-
-        for index_, base in enumerate(html):
-            if (base is None) and (index_ != index):
-                html[index_] = self.space
-        html = "".join(html)
-
+        html = ""
+        for index_, base in enumerate(self.bases):
+            if base is None:
+                html += self.space
+            elif index_ == index:
+                html += self.highlighted.format(char=base)
+            else:
+                html += self.nonspace.format(char=base)
         self.setHtml(html)
