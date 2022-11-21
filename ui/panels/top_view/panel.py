@@ -1,6 +1,7 @@
 from typing import Tuple
 
-from PyQt6.QtWidgets import QDockWidget
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QDockWidget, QSlider, QWidget, QVBoxLayout
 
 import refs
 import ui.plotters
@@ -11,17 +12,33 @@ class Panel(QDockWidget):
     def __init__(self):
         super().__init__()
 
+        # set styles
         self.setObjectName("Top View")
         self.setWindowTitle("Top View of Helices")
         self.setStatusTip("A plot of the top view of all domains")
 
+        # create the main body
+        self.body = QWidget()
+        self.body.setLayout(QVBoxLayout())
+
+        # set up the plot
         self.plot = ui.plotters.TopViewPlotter(
             TopViewWorker(refs.domains.current, refs.nucleic_acid.current),
             refs.domains.current,
             refs.nucleic_acid.current.D,
         )
+        self.plot.point_clicked.connect(self.point_clicked)
+        self.body.layout().addWidget(self.plot)
 
-        self.setWidget(self.plot)
+        # set up rotation slider
+        self.rotation_slider = QSlider(Qt.Orientation.Horizontal, parent=self)
+        self.rotation_slider.valueChanged.connect(self.refresh)
+        self.body.layout().addWidget(self.rotation_slider)
+
+        # set body to be central widget
+        self.setWidget(self.body)
+
+        # perform initial refresh
         self.refresh()
 
     def refresh(self):
@@ -30,8 +47,9 @@ class Panel(QDockWidget):
             refs.domains.current, refs.nucleic_acid.current
         )
         self.plot.profile = refs.nucleic_acid.current
+        self.plot.rotation = (self.rotation_slider.value()*360)/99
         self.plot.refresh()
-        self.plot.point_clicked.connect(self.point_clicked)
+        self.plot.autoRange()
 
     def point_clicked(self, point: Tuple[float, float]):
         """Signal for when a point in the plot is clicked."""
