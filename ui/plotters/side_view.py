@@ -123,7 +123,7 @@ class SideViewPlotter(pg.PlotWidget):
             else:
                 pen = pg.mkPen(color=strand.color, width=9.5, pxMode=False)
 
-            for index, item in enumerate(strand.items):
+            for index, item in enumerate(strand.NEMids):
                 x_coords.append(item.x_coord)
                 z_coords.append(item.z_coord)
 

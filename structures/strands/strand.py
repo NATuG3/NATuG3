@@ -7,7 +7,7 @@ from random import shuffle
 from typing import List, Tuple, Type, Iterable
 
 import settings
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 
 
 def shuffled(iterable):
@@ -24,6 +24,7 @@ class Strand:
     Attributes:
         items: All items contained within the strand (NEMids, Nicks, etc.).
         NEMids: All NEMids contained within the strand.
+        nucleosides: All NEMids contained within the strand.
         color (tuple[int, int, int]): RGB color of strand.
         closed (bool): Whether the strand is closed. Must be manually set.
         empty (bool): Whether the strand is empty.
@@ -33,7 +34,8 @@ class Strand:
         interdomain (bool): Whether this strand spans multiple domains.
     """
 
-    __cached = ("NEMids", "up_strand", "down_strand", "interdomain", "boundaries")
+    __cached = ("up_strand", "down_strand", "interdomain", "boundaries")
+    __supported_types = (NEMid, Nucleoside)
 
     def __init__(
         self,
@@ -55,35 +57,28 @@ class Strand:
         self.closed = closed
         self.parent = parent
 
-        if items is None:
-            self.items = deque([])
-        elif isinstance(items, deque):
-            self.items = items
-        else:
-            self.items = deque(items)
+        self.NEMids = deque()
+        self.nucleosides = deque()
+        if items is not None:
+            for item in items:
+                if isinstance(item, NEMid):
+                    self.NEMids.append(item)
+                elif isinstance(item, Nucleoside):
+                    self.nucleosides.append(item)
+                else:
+                    raise self.UnsupportedTypeError
+
+    class UnsupportedTypeError(TypeError):
+        """An item of an unsupported time is being added to the strand."""
+        pass
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
-        return len(self.items)
+        return len(self.NEMids)
 
     def __contains__(self, item) -> bool:
         """Determine whether item is in strand."""
-        return item in self.items
-
-    def append(self, item) -> None:
-        """Append an item to the strand."""
-        self.items.append(item)
-        self.recompute()
-
-    def append(self, index: int, item) -> None:
-        """Insert an item into the strand at index index."""
-        self.items.insert(index, item)
-        self.recompute()
-
-    def appendleft(self, item) -> None:
-        """Append an item to the left of the strand."""
-        self.items.appendleft(item)
-        self.recompute()
+        return item in self.NEMids
 
     def by_type(self, types: Iterable[Type] | Type, computed=True) -> list:
         """
@@ -99,9 +94,9 @@ class Strand:
             list: All NEMids in the strand.
         """
         if not isinstance(types, Iterable):
-            output = filter(lambda item: type(item) == types, self.items)
+            output = filter(lambda item: type(item) == types, self.NEMids)
         else:
-            output = filter(lambda item: type(item) in types, self.items)
+            output = filter(lambda item: type(item) in types, self.NEMids)
         if computed:
             output = list(output)
         return output
@@ -114,8 +109,8 @@ class Strand:
         return self.parent.strands.index(self)
 
     def sliced(self, start: int, end: int) -> list:
-        """Return self.items as a list."""
-        return list(itertools.islice(self.items, start, end))
+        """Return self.NEMids as a list."""
+        return list(itertools.islice(self.NEMids, start, end))
 
     def recompute(self) -> None:
         """Clear cached methods and reasign juncmates."""
@@ -125,12 +120,12 @@ class Strand:
                 del self.__dict__[cached]
 
         # assign all our items to have us as their parent strand
-        for index, item in enumerate(self.items):
-            self.items[index].strand = self
+        for index, item in enumerate(self.NEMids):
+            self.NEMids[index].strand = self
 
             # assign juncmates
             if isinstance(item, NEMid) and item.junctable:
-                for test_item in self.items:
+                for test_item in self.NEMids:
                     if test_item is item:
                         continue
                     elif (
@@ -152,8 +147,8 @@ class Strand:
         if (self.boundaries[0] + self.size[0] > other.boundaries[0]) or (
             self.boundaries[1] + self.size[1] > other.boundaries[1]
         ):  # if our bottom left corner x coord + our width is greater than their bottom left corner than we overlap
-            for our_item in shuffled(self.items):
-                for their_item in shuffled(other.items):
+            for our_item in shuffled(self.NEMids):
+                for their_item in shuffled(other.NEMids):
                     # for each item in us, for each item in them, check if we are sufficiently close
                     if (
                         dist(our_item.position(), their_item.position())
@@ -168,18 +163,18 @@ class Strand:
     @property
     def empty(self) -> bool:
         """Whether this strand is empty."""
-        return len(self.items) == 0
+        return len(self.NEMids) == 0
 
     @cached_property
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
-        checks = [bool(NEMid_.direction) for NEMid_ in self.by_type(NEMid)]
+        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids]
         return all(checks)
 
     @cached_property
     def down_strand(self) -> bool:
         """Whether the strand is a down strand."""
-        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.by_type(NEMid)]
+        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids]
         return all(checks)
 
     @cached_property
@@ -203,11 +198,11 @@ class Strand:
         Returns:
             Tuple(width, height): The strand size.
         """
-        width = max([item.x_coord for item in self.items]) - min(
-            [item.x_coord for item in self.items]
+        width = max([item.x_coord for item in self.NEMids]) - min(
+            [item.x_coord for item in self.NEMids]
         )
-        height = max([item.z_coord for item in self.items]) - min(
-            [item.z_coord for item in self.items]
+        height = max([item.z_coord for item in self.NEMids]) - min(
+            [item.z_coord for item in self.NEMids]
         )
         return width, height
 
@@ -220,8 +215,8 @@ class Strand:
             Tuple[xMin, xMax, zMin, zMax]: The boundary box of the strand.
         """
         return (
-            min(item.x_coord for item in self.items),
-            max(item.x_coord for item in self.items),
-            min(item.z_coord for item in self.items),
-            max(item.z_coord for item in self.items),
+            min(item.x_coord for item in self.NEMids),
+            max(item.x_coord for item in self.NEMids),
+            min(item.z_coord for item in self.NEMids),
+            max(item.z_coord for item in self.NEMids),
         )

@@ -184,14 +184,14 @@ class SideViewWorker:
 
         # set juncmates
         strands.sort(
-            key=lambda strand: sum([item.x_coord for item in strand.items])
+            key=lambda strand: sum([item.x_coord for item in strand.NEMids])
             / len(strand)
         )
         strands = Strands(strands)
         for index, strand in enumerate(strands.strands):
             if index < len(strands) - 1:
-                for this_strand_item in strand.items:
-                    for next_strand_item in strands.strands[index + 1].items:
+                for this_strand_item in strand.NEMids:
+                    for next_strand_item in strands.strands[index + 1].NEMids:
                         if (
                             dist(
                                 this_strand_item.position(), next_strand_item.position()
