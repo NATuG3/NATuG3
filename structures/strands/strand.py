@@ -10,8 +10,9 @@ import settings
 from structures.points import NEMid
 
 
-def shuffled(array):
-    output = list(array)
+def shuffled(iterable):
+    """Shuffle an iterable and return a copy."""
+    output = list(iterable)
     shuffle(output)
     return output
 
