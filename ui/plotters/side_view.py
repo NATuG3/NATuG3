@@ -32,11 +32,11 @@ class PlotData:
 
     Attributes:
         points: The points.
-        stroke: The strand pen line.
+        strokes: The strand pen line.
         plot_types: The types of strand items plotted.
     """
     points: PlotDataItem | None
-    stroke: PlotDataItem | None
+    strokes: PlotDataItem | None
     plot_types: List[Type] | None
 
 
@@ -82,7 +82,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_types = plot_types
         self.plot_data = PlotData(
             points=None,
-            stroke=None,
+            strokes=None,
             plot_types=self.plot_types
         )
 
@@ -105,8 +105,10 @@ class SideViewPlotter(pg.PlotWidget):
         return self.strands.size[0]
 
     def clear(self):
-        self.removeItem(self.plot_data.stroke)
-        self.removeItem(self.plot_data.points)
+        for stroke in self.plot_data.strokes:
+            self.removeItem(stroke)
+        for points in self.plot_data.points:
+            self.removeItem(points)
 
     def refresh(self):
         self.clear()
@@ -146,7 +148,7 @@ class SideViewPlotter(pg.PlotWidget):
 
     def _plot(self):
         self.plot_data.points = []
-        self.plot_data.stroke = []
+        self.plot_data.strokes = []
         self.plot_data.plot_types = self.plot_types
 
         for strand in self.strands.strands:
@@ -250,15 +252,14 @@ class SideViewPlotter(pg.PlotWidget):
                 )
                 stroke.setCurveClickable(True)
                 stroke.sigClicked.connect(partial(self.strand_clicked.emit, strand))
-                self.plot_data.stroke.append(stroke)
+                self.plot_data.strokes.append(stroke)
 
             finally:
                 del strand.items[-1]
 
-            for stroke, points in zip(self.plot_data.stroke, self.plot_data.points):
+            for stroke, points in zip(self.plot_data.strokes, self.plot_data.points):
                 # plot the outline
                 self.addItem(stroke)
-
                 # plot the points
                 self.addItem(points)
                 # add trigger to points
