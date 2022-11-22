@@ -1,19 +1,31 @@
-from typing import List
+from typing import List, Iterable
 
-from PyQt6.QtCore import pyqtSignal, QMimeData
-from PyQt6.QtGui import QTextCursor, QFont
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QTextEdit
 
-import settings
 from constants.bases import DNA
 
 
 class DisplayArea(QTextEdit):
+    """
+    A sequence display area.
+
+    Attributes:
+        bases: The bases in the editor area.
+    """
+
     space = "<span style='background-color: rgb(210, 210, 210)'>&nbsp;</span>"
     nonspace = "<span style='background-color: rgb(240, 240, 240)'>{char}</span>"
     highlighted = "<span style='background-color: rgb(245, 245, 0)'>{char}</span>"
 
-    def __init__(self, parent, bases):
+    def __init__(self, parent, bases: Iterable[str | None]):
+        """
+        Initialize the display area.
+
+        Args:
+            parent: The parent widget.
+            bases: The bases for the editor area.
+        """
         super().__init__(parent)
         self._bases = bases
 
@@ -45,7 +57,6 @@ class DisplayArea(QTextEdit):
         html = ""
         for base in self.bases:
             if base in DNA:
-                print("base")
                 html += self.nonspace.format(char=base)
             elif base is None:
                 html += self.space
