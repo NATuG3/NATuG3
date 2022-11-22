@@ -27,7 +27,7 @@ class SideViewWorker:
 
     def __init__(self, domains: Domains, profile: NucleicAcidProfile) -> None:
         """
-        Initialize side_view generation class.
+        Worker for computing strands from domains.
         """
         self.domains = domains
         assert isinstance(domains, Domains)
@@ -184,14 +184,14 @@ class SideViewWorker:
 
         # set juncmates
         strands.sort(
-            key=lambda strand: sum([item.x_coord for item in strand.items])
+            key=lambda strand: sum([item.x_coord for item in strand.NEMids])
             / len(strand)
         )
         strands = Strands(strands)
         for index, strand in enumerate(strands.strands):
             if index < len(strands) - 1:
-                for this_strand_item in strand.items:
-                    for next_strand_item in strands.strands[index + 1].items:
+                for this_strand_item in strand.NEMids:
+                    for next_strand_item in strands.strands[index + 1].NEMids:
                         if (
                             dist(
                                 this_strand_item.position(), next_strand_item.position()

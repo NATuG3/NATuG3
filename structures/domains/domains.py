@@ -11,6 +11,10 @@ logger = logging.getLogger(__name__)
 class Domains:
     """
     Container for multiple domains.
+
+    Attributes:
+        subunit: The domains within a single subunit.
+        symmetry: The symmetry type. Also known as "R".
     """
 
     def __init__(self, domains: Iterable, symmetry: int):

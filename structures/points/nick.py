@@ -20,7 +20,7 @@ class Nick:
     @classmethod
     def to_nick(cls, NEMid_):
         """Create a nick in the parent strand of NEMid_."""
-        NEMid_.strand.items[NEMid_.index] = cls(NEMid_)
+        NEMid_.strand.NEMids[NEMid_.index] = cls(NEMid_)
 
     def position(self) -> Tuple[float, float]:
         """
