@@ -13,7 +13,12 @@ It is advised that you [create a virtual environment](https://docs.python.org/3/
 5) python launcher.py
 
 ## Photos of program
-
+![image](https://user-images.githubusercontent.com/108041238/203201243-f633ce8e-94ce-4f30-aa51-4a84f177c3b9.png)
+![image](https://user-images.githubusercontent.com/108041238/203201267-cf6abfd0-7391-436e-85c5-cfb4df532376.png)
+![image](https://user-images.githubusercontent.com/108041238/203201277-b3001b52-3fb9-4737-b3b0-8876089a1de0.png)
+![image](https://user-images.githubusercontent.com/108041238/203203049-df2e7c59-3c79-4f1d-ad81-e98e295e818e.png)
+![image](https://user-images.githubusercontent.com/108041238/203203084-02aba40c-aed9-4629-98e2-2b6a99abb02c.png)
+![image](https://user-images.githubusercontent.com/108041238/203203315-d6f45bb3-d4d2-49ce-83a6-973ba5c0bd25.png)
 
 ## Credits
 
