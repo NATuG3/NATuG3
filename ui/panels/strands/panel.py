@@ -2,7 +2,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QGridLayout, QScrollArea
 
 import refs
-from ui.panels.strands.strand_button import StrandButton
+from ui.panels.strands.buttons import StrandButton
 
 
 class Panel(QWidget):
