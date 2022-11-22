@@ -12,7 +12,7 @@ import ui.plotters
 from constants.modes import *
 from structures.points import NEMid
 from structures.points.nick import Nick
-from ui.panels.strands.strand_button import StrandButton
+from ui.panels.strands.buttons import StrandButton
 
 logger = logging.getLogger(__name__)
 
