@@ -2,13 +2,13 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QGridLayout, QScrollArea
 
 import refs
-from ui.panels.sequencing.strand_button import StrandButton
+from ui.panels.strands.buttons import StrandButton
 
 
 class Panel(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
-        uic.loadUi("ui/panels/sequencing/panel.ui", self)
+        uic.loadUi("ui/panels/strands/panel.ui", self)
 
         self.strand_buttons = []
         self.strands_area = QWidget()

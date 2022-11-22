@@ -27,6 +27,7 @@ class Panel(QDockWidget):
             refs.domains.current,
             refs.nucleic_acid.current.D,
         )
+
         self.plot.point_clicked.connect(self.point_clicked)
         self.body.layout().addWidget(self.plot)
 

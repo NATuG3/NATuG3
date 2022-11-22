@@ -1,9 +1,11 @@
 import logging
 from dataclasses import dataclass
 from math import cos, radians, sin
+from typing import List
 
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal
+from pyqtgraph import PlotDataItem
 
 import helpers
 import settings
@@ -13,17 +15,29 @@ from workers.top_view import TopViewWorker
 logger = logging.getLogger(__name__)
 
 
+@dataclass(slots=True)
+class PlotData:
+    """
+    Currently plotted data.
+
+    Attributes:
+        x_coords: The plotted x coords.
+        y_coords: The plotted z coords.
+        rotation: The rotation of the plot in degrees.
+        numbers: The number labels.
+        domains: The domain circles.
+        stroke: The pen line between domains.
+    """
+    x_coords: List[float] | None
+    y_coords: List[float] | None
+    rotation: float | None
+    numbers: PlotDataItem | None
+    domains: PlotDataItem | None
+    stroke: PlotDataItem | None
+
+
 class TopViewPlotter(pg.PlotWidget):
     point_clicked = pyqtSignal(tuple)
-
-    @dataclass
-    class PlotData:
-        numbers: list | None
-        x_coords: list | None
-        z_coords: list | None
-        domains: list | None
-        stroke: list | None
-        rotation: float | None
 
     def __init__(
             self,
@@ -52,10 +66,10 @@ class TopViewPlotter(pg.PlotWidget):
         self.domains = domains
         self.worker = worker
 
-        self.plot_data = self.PlotData(
+        self.plot_data = PlotData(
             numbers=None,
             x_coords=None,
-            z_coords=None,
+            y_coords=None,
             domains=None,
             stroke=None,
             rotation=self.rotation,
@@ -100,7 +114,7 @@ class TopViewPlotter(pg.PlotWidget):
         """Plot all the data."""
         x_coords, z_coords = self.worker.u_coords, self.worker.v_coords
 
-        # proform rotation if needed
+        # perform rotation if needed
         if self.rotation != 0:
             rotation = radians(self.rotation)
             for index, (x_coord, z_coord) in enumerate(zip(x_coords, z_coords)):
@@ -114,7 +128,7 @@ class TopViewPlotter(pg.PlotWidget):
 
         # store current plot data
         self.plot_data.x_coords = x_coords
-        self.plot_data.z_coords = z_coords
+        self.plot_data.y_coords = z_coords
         self.plot_data.rotation = self.rotation
 
     def _plot_domains(self, x_coords, y_coords):
@@ -130,7 +144,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_stroke(self, x_coords, y_coords):
         """Plot the stroke."""
-        self.plotted_stroke = self.plot(
+        self.plot_data.stroke = self.plot(
             x_coords,
             y_coords,
             pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=7),

@@ -12,7 +12,7 @@ import ui.plotters
 from constants.modes import *
 from structures.points import NEMid
 from structures.points.nick import Nick
-from ui.panels.sequencing.strand_button import StrandButton
+from ui.panels.strands.buttons import StrandButton
 
 logger = logging.getLogger(__name__)
 
@@ -42,10 +42,10 @@ class Panel(QGroupBox):
     def strand_clicked(self, strand):
         """Slot for when a strand is clicked."""
         strand_button: StrandButton = (
-            refs.constructor.config.panel.tabs.sequencing.strand_buttons[strand.index]
+            refs.constructor.config.panel.tabs.strands.strand_buttons[strand.index]
         )
         scroll_area: QScrollArea = (
-            refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
+            refs.constructor.config.panel.tabs.strands.scrollable_strands_area
         )
         strand_button.setStyleSheet(
             f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}"
