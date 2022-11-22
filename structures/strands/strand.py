@@ -4,7 +4,7 @@ from contextlib import suppress
 from functools import cached_property
 from math import dist
 from random import shuffle
-from typing import List, Tuple, Type
+from typing import List, Tuple, Type, Iterable
 
 import settings
 from structures.points import NEMid
@@ -70,6 +70,42 @@ class Strand:
         """Determine whether item is in strand."""
         return item in self.items
 
+    def append(self, item) -> None:
+        """Append an item to the strand."""
+        self.items.append(item)
+        self.recompute()
+
+    def append(self, index: int, item) -> None:
+        """Insert an item into the strand at index index."""
+        self.items.insert(index, item)
+        self.recompute()
+
+    def appendleft(self, item) -> None:
+        """Append an item to the left of the strand."""
+        self.items.appendleft(item)
+        self.recompute()
+
+    def by_type(self, types: Iterable[Type] | Type, computed=True) -> list:
+        """
+        Obtain all items of a certain type in the strand.
+
+        Iterates through all items in the strand and outputs all items with a type in types.
+
+        Args:
+            types: The type or types of items to return
+            computed: Returns a generator object if computed is False.
+
+        Returns:
+            list: All NEMids in the strand.
+        """
+        if not isinstance(types, Iterable):
+            output = filter(lambda item: type(item) == types, self.items)
+        else:
+            output = filter(lambda item: type(item) in types, self.items)
+        if computed:
+            output = list(output)
+        return output
+
     @property
     def index(self):
         """Obtain the index of this strand with respect to the parent strand. None if parent strand is None."""
@@ -82,7 +118,7 @@ class Strand:
         return list(itertools.islice(self.items, start, end))
 
     def recompute(self) -> None:
-        """Clear cached methods."""
+        """Clear cached methods and reasign juncmates."""
         # clear all cache
         for cached in self.__cached:
             with suppress(KeyError):
@@ -129,20 +165,6 @@ class Strand:
             # we were not touching
             return False
 
-    @cached_property
-    def NEMids(self) -> List[NEMid]:
-        """
-        Obtain all NEMids in the strand.
-
-        Returns:
-            list: All NEMids in the strand.
-        """
-        output = []
-        for item in self.items:
-            if isinstance(item, NEMid):
-                output.append(item)
-        return output
-
     @property
     def empty(self) -> bool:
         """Whether this strand is empty."""
@@ -151,13 +173,13 @@ class Strand:
     @cached_property
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
-        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids]
+        checks = [bool(NEMid_.direction) for NEMid_ in self.by_type(NEMid)]
         return all(checks)
 
     @cached_property
     def down_strand(self) -> bool:
         """Whether the strand is a down strand."""
-        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids]
+        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.by_type(NEMid)]
         return all(checks)
 
     @cached_property

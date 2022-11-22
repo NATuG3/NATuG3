@@ -52,7 +52,7 @@ class Panel(QGroupBox):
         )
         scroll_area.ensureWidgetVisible(strand_button)
         QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
-        logger.info(f'Strand #{strand.index}" was clicked.')
+        logger.info(f'Strand #{strand.index} was clicked.')
 
     def points_clicked(self, located):
         """slot for when a point in the plot is clicked."""

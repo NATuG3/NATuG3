@@ -27,7 +27,7 @@ class SideViewWorker:
 
     def __init__(self, domains: Domains, profile: NucleicAcidProfile) -> None:
         """
-        Initialize side_view generation class.
+        Worker for computing strands from domains.
         """
         self.domains = domains
         assert isinstance(domains, Domains)

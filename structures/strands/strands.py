@@ -1,6 +1,6 @@
 import logging
 from math import dist
-from typing import List, Tuple
+from typing import List, Tuple, Iterable
 
 import settings
 from structures.points import NEMid
@@ -10,7 +10,14 @@ logger = logging.getLogger(__name__)
 
 
 class Strands:
-    def __init__(self, strands: List[Strand]) -> None:
+    """
+    A container for multiple strands.
+
+    Attributes:
+        strands: The actual strands.
+    """
+
+    def __init__(self, strands: Iterable[Strand]) -> None:
         """
         Initialize an instance of Strands.
 
@@ -18,7 +25,7 @@ class Strands:
             strands: A list of strands to create a Strands object from.
         """
         assert [isinstance(strand, Strand) for strand in strands]
-        self.strands = strands
+        self.strands = list(strands)
         for strand in self.strands:
             strand.parent = self
 
@@ -31,29 +38,13 @@ class Strands:
         return self.strands.index(item)
 
     def append(self, strand: Strand):
-        """
-        Add a strand.
-
-        Args:
-            strand: The strand to add.
-
-        Raises:
-            TypeError: Strand being appended is not of type Strand.
-        """
+        """Add a strand to the container."""
         if not isinstance(strand, Strand):
             raise TypeError("Cannot add non-strand to strand list.", strand)
         self.strands.append(strand)
 
     def remove(self, strand: Strand):
-        """
-        Remove a strand.
-
-        Args:
-            strand: The strand to remove.
-
-        Raises:
-            ValueError: Strand is not in strands.
-        """
+        """Remove a strand from the container."""
         self.strands.remove(strand)
 
     def recolor(self):

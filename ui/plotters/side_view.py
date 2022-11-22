@@ -98,7 +98,7 @@ class SideViewPlotter(pg.PlotWidget):
             assert isinstance(strand, Strand)
 
             if strand.closed:
-                strand.items.append(strand.items[0])
+                strand.append(strand.items[0])
                 strand.items[-1].pseudo = True
 
             symbols: List[str] = []
