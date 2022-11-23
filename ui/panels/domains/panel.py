@@ -64,12 +64,9 @@ class Panel(QWidget):
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
 
-        # hook update domains button
-        self.update_table.clicked.connect(self.table_refresh)
-
         # updated event linking
-        self.update_table.clicked.connect(self.table_refresh)
         self.update_table.clicked.connect(self.settings_refresh)
+        self.update_table.clicked.connect(self.table_refresh)
         self.update_table.clicked.connect(self.updated.emit)
 
         self.table.cell_widget_updated.connect(self.settings_refresh)
@@ -90,7 +87,7 @@ class Panel(QWidget):
     def settings_refresh(self):
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
-        current_domains = Domains(self.table.fetch_domains(), self.symmetry.value())
+        current_domains = refs.domains.current
         M: int = sum(
             [domain.theta_interior_multiple for domain in current_domains.domains]
         )
@@ -100,18 +97,21 @@ class Panel(QWidget):
         target_M_over_R = (B * (N - 2)) / (2 * R)
         M_over_R = M / R
         self.M.setValue(M)
+
         # remove trailing zeros if target_M_over_R is an int
         if target_M_over_R == round(target_M_over_R):
             self.target_M_over_R.setDecimals(0)
         else:
             self.target_M_over_R.setDecimals(3)
         self.target_M_over_R.setValue(target_M_over_R)
+
         # remove trailing zeros if M_over_R is an int
         if M_over_R == round(M_over_R):
             self.M_over_R.setDecimals(0)
         else:
             self.M_over_R.setDecimals(3)
         self.M_over_R.setValue(M_over_R)
+
         # make M_over_R and target_M_over_R box green if it is the target
         if M_over_R == target_M_over_R:
             style = (
@@ -128,7 +128,7 @@ class Panel(QWidget):
     def table_refresh(self):
         """Refresh panel settings/domain table."""
         new_domains: Domains = Domains(
-            self.table.fetch_domains(), self.symmetry.value()
+            self.table.fetch_domains(), refs.domains.current.symmetry
         )
         # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count
@@ -147,7 +147,7 @@ class Panel(QWidget):
                     "User confirmed that they would like the subunit count reduced."
                 )
                 new_domains.subunit.count = self.subunit_count.value()
-                refs.domains.current = new_domains
+                new_domains.symmetry = self.symmetry.value()
                 self.update_table.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
@@ -159,7 +159,10 @@ class Panel(QWidget):
                 )
         else:
             new_domains.subunit.count = self.subunit_count.value()
-            refs.domains.current = new_domains
+            new_domains.symmetry = self.symmetry.value()
+
+        # update current domains
+        refs.domains.current = new_domains
 
         # refresh table
         self.table.dump_domains(refs.domains.current)
