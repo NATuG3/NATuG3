@@ -83,12 +83,11 @@ class Strand:
 
     def clear_pseudos(self):
         """Removes all pseudo items."""
-        for index, NEMid_ in enumerate(self.NEMids):
-            if NEMid_.pseudo:
-                del self.NEMids[index]
-        for index, nucleoside in enumerate(self.nucleosides):
-            if nucleoside.pseudo:
-                del self.nucleosides[index]
+        def pseudo_check(item):
+            return not item.pseudo
+
+        self.NEMids = deque(filter(pseudo_check, self.NEMids))
+        self.nucleosides = deque(filter(pseudo_check, self.nucleosides))
 
     @property
     def index(self):

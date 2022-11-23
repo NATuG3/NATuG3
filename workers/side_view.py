@@ -138,9 +138,9 @@ class SideViewWorker:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                        angles[strand_direction],
-                        x_coords[strand_direction],
-                        z_coords[strand_direction],
+                    angles[strand_direction],
+                    x_coords[strand_direction],
+                    z_coords[strand_direction],
                 ):
                     # if this NEMid is right on the domain line we can
                     # call it a "junctable" NEMid
@@ -185,7 +185,7 @@ class SideViewWorker:
         # set juncmates
         strands.sort(
             key=lambda strand: sum([item.x_coord for item in strand.NEMids])
-                               / len(strand)
+            / len(strand)
         )
         strands = Strands(strands)
         for index, strand in enumerate(strands.strands):
@@ -193,10 +193,10 @@ class SideViewWorker:
                 for this_strand_item in strand.NEMids:
                     for next_strand_item in strands.strands[index + 1].NEMids:
                         if (
-                                dist(
-                                    this_strand_item.position(), next_strand_item.position()
-                                )
-                                < settings.junction_threshold
+                            dist(
+                                this_strand_item.position(), next_strand_item.position()
+                            )
+                            < settings.junction_threshold
                         ):
                             this_strand_item.juncmate = next_strand_item
                             next_strand_item.juncmate = this_strand_item

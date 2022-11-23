@@ -60,10 +60,10 @@ class SideViewPlotter(pg.PlotWidget):
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
 
     def __init__(
-            self,
-            strands: Strands,
-            nucleic_acid_profile: NucleicAcidProfile,
-            plot_types: List[Type] = (object,),
+        self,
+        strands: Strands,
+        nucleic_acid_profile: NucleicAcidProfile,
+        plot_types: List[Type] = (object,),
     ):
         """
         Initialize plotter instance.
@@ -101,9 +101,11 @@ class SideViewPlotter(pg.PlotWidget):
 
     def refresh(self):
         """Replot plot data."""
+
         def runner():
             self._reset()
             self._plot()
+
         # allow one screen refresh for the mouse to release
         # so that the plot is cleared after the mouse release event happens
         QTimer.singleShot(0, runner)
@@ -239,8 +241,6 @@ class SideViewPlotter(pg.PlotWidget):
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(partial(self.strand_clicked.emit, strand))
             self.plot_data.strokes.append(stroke)
-
-            strand.clear_pseudos()
 
         for stroke, points in zip(self.plot_data.strokes, self.plot_data.points):
             self.addItem(stroke)
