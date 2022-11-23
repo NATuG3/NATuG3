@@ -2,11 +2,12 @@ import logging
 from types import SimpleNamespace
 from typing import Literal, List
 
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import (
     QTableWidget,
     QHeaderView,
-    QAbstractItemView,
+    QAbstractItemView, QWidget,
 )
 
 from constants.directions import *
@@ -37,6 +38,26 @@ class Table(QTableWidget):
 
         # style the widget
         self._style()
+
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """Intercept a keypress to alter tabbing."""
+        if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab, Qt.Key.Key_Down, Qt.Key.Key_Up):
+            row, column = self.currentRow(), self.currentColumn()
+            if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Down):
+                row += 1
+            else:
+                row -= 1
+            self.cellWidget(row, column).editingFinished.emit()
+            self.setTabKeyNavigation(False)
+            self.blockSignals(True)
+            to_focus = self.cellWidget(row, column)
+            if to_focus is not None:
+                self.setCurrentCell(row, column)
+                to_focus.setFocus()
+            self.blockSignals(False)
+            self.setTabKeyNavigation(True)
+        else:
+            super().keyPressEvent(event)
 
     def _headers(self):
         """Configure top headers of widget"""
@@ -125,7 +146,7 @@ class Table(QTableWidget):
 
             # column 4 - initial NEMid count
             row.domain_count = TableIntegerBox(domain.count)
-            row.domain_count.valueChanged.connect(self.cell_widget_updated.emit)
+            row.domain_count.editingFinished.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 4, row.domain_count)
 
             self.side_headers.append(f"#{index + 1}")
