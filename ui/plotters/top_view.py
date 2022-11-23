@@ -32,7 +32,7 @@ class PlotData:
     rotation: pg.PlotDataItem = None
     domains: pg.PlotDataItem = None
     stroke: pg.PlotDataItem = None
-    numbers: pg.PlotDataItem = None
+    numbers: List[pg.PlotDataItem] = None
 
 
 class TopViewPlotter(pg.PlotWidget):
@@ -80,8 +80,8 @@ class TopViewPlotter(pg.PlotWidget):
         self.point_clicked.emit(tuple(point))
 
     def refresh(self):
-        self._plot()
         self._reset()
+        self._plot()
         logger.info("Refreshed top view.")
 
     def _reset(self, plot_data=None):
@@ -90,7 +90,8 @@ class TopViewPlotter(pg.PlotWidget):
             plot_data = self.plot_data
         self.removeItem(plot_data.domains)
         self.removeItem(plot_data.stroke)
-        self.removeItem(plot_data.numbers)
+        for number in plot_data.numbers:
+            self.removeItem(number)
 
     def _prettify(self):
         # set correct range
@@ -126,7 +127,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_domains(self, x_coords, y_coords):
         """Plot the domains."""
-        self.circles = self.plot(
+        self.plot_data.domains = self.plot(
             x_coords,
             y_coords,
             symbol="o",
@@ -137,7 +138,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_stroke(self, x_coords, y_coords):
         """Plot the stroke."""
-        self.plotted_stroke = self.plot(
+        self.plot_data.stroke = self.plot(
             x_coords,
             y_coords,
             pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=7),
@@ -147,7 +148,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_numbers(self, x_coords, y_coords):
         """Plot the numbers."""
-        self.plotted_numbers = []
+        self.plot_data.numbers = []
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
             counter = str(counter)
             symbol_size = self.circle_radius / 3
@@ -164,4 +165,4 @@ class TopViewPlotter(pg.PlotWidget):
                 pen=None,
             )
             text.sigPointsClicked.connect(self._point_clicked)
-            self.plotted_numbers.append(text)
+            self.plot_data.numbers.append(text)
