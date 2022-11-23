@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class Panel(QGroupBox):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
 
         self.setObjectName("Side View")
         self.setLayout(QVBoxLayout())

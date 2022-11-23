@@ -109,16 +109,16 @@ class Panel(QWidget):
         self.T.setToolTip("Turns")
         self.T.setStatusTip("There are B bases per T turns of the helix.")
 
-        self.B.setToolTip = "Bases"
+        self.B.setToolTip("Bases")
         self.B.setStatusTip("There are B bases per T turns of the helix.")
 
-        self.Z_b.setToolTip = "Base height"
-        self.Z_b.setStatusTip = (
+        self.Z_b.setToolTip("Base height")
+        self.Z_b.setStatusTip(
             'The height between two bases on the helix axis. Equal to "(T*H)/B".'
         )
 
-        self.Z_c.setToolTip = "Characteristic Height"
-        self.Z_c.setStatusTip = (
+        self.Z_c.setToolTip("Characteristic Height")
+        self.Z_c.setStatusTip(
             "The height a helix climbs as it rotates through the characteristic angle."
         )
 
@@ -135,7 +135,7 @@ class Panel(QWidget):
             "The smallest angle about the helix axis possible between two NEMids on the same helix."
         )
 
-        self.theta_s.setToolTip = "Switch Angle"
+        self.theta_s.setToolTip("Switch Angle")
         self.theta_s.setStatusTip(
             "The angle about the helix axis between two NEMids on different helices of a double helix."
         )

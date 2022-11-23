@@ -70,7 +70,7 @@ class Window(QMainWindow):
         from ui.panels.config import Dockable
 
         # initialize the config panel
-        self.config = Dockable(refs.nucleic_acid.profiles, refs.domains.current)
+        self.config = Dockable(self, refs.nucleic_acid.profiles, refs.domains.current)
 
         # only allow config to dock left/right
         self.config.setAllowedAreas(
@@ -88,9 +88,9 @@ class Window(QMainWindow):
 
     def _top_view(self):
         """Setup top view plot."""
-        from ui.panels.top_view import Panel
+        from ui.panels.top_view import Dockable
 
-        self.top_view = Panel()
+        self.top_view = Dockable(self)
 
         # set minimum width for top view
         self.top_view.setMinimumWidth(150)
@@ -112,7 +112,7 @@ class Window(QMainWindow):
         """Setup side view plot."""
         from .panels.side_view import Panel
 
-        self.side_view = Panel()
+        self.side_view = Panel(self)
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)
@@ -121,7 +121,7 @@ class Window(QMainWindow):
 
     def _status_bar(self):
         """Setup status bar."""
-        status_bar = self.status_bar = QStatusBar()
+        status_bar = self.status_bar = QStatusBar(self)
         self.setStatusBar(status_bar)
         self.statusBar().setStyleSheet("background-color: rgb(210, 210, 210)")
         logger.info("Created status bar.")
