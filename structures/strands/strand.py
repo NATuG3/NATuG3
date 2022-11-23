@@ -1,6 +1,7 @@
 import itertools
 from collections import deque
 from contextlib import suppress
+from copy import copy
 from functools import cached_property
 from math import dist
 from random import shuffle
@@ -83,12 +84,11 @@ class Strand:
 
     def clear_pseudos(self):
         """Removes all pseudo items."""
-        for index, NEMid_ in enumerate(self.NEMids):
-            if NEMid_.pseudo:
-                del self.NEMids[index]
-        for index, nucleoside in enumerate(self.nucleosides):
-            if nucleoside.pseudo:
-                del self.nucleosides[index]
+        def preserve(item):
+            return not item.pseudo
+
+        self.NEMids = deque(filter(preserve, self.NEMids))
+        self.nucleosides = deque(filter(preserve, self.nucleosides))
 
     @property
     def index(self):

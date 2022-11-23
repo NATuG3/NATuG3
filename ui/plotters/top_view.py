@@ -28,11 +28,11 @@ class PlotData:
     """
 
     x_coords: List[float] = None
-    z_coords: List[float] = None
+    y_coords: List[float] = None
     rotation: pg.PlotDataItem = None
     domains: pg.PlotDataItem = None
     stroke: pg.PlotDataItem = None
-    numbers: pg.PlotDataItem = None
+    numbers: List[pg.PlotDataItem] = None
 
 
 class TopViewPlotter(pg.PlotWidget):
@@ -57,9 +57,6 @@ class TopViewPlotter(pg.PlotWidget):
 
         super().__init__()
 
-        assert isinstance(worker, TopViewWorker)
-        assert isinstance(domains, Domains)
-
         self.circle_radius = domain_radius
         self.rotation = rotation
         self.domains = domains
@@ -81,8 +78,8 @@ class TopViewPlotter(pg.PlotWidget):
         self.point_clicked.emit(tuple(point))
 
     def refresh(self):
-        self._plot()
         self._reset()
+        self._plot()
         logger.info("Refreshed top view.")
 
     def _reset(self, plot_data=None):
@@ -91,7 +88,8 @@ class TopViewPlotter(pg.PlotWidget):
             plot_data = self.plot_data
         self.removeItem(plot_data.domains)
         self.removeItem(plot_data.stroke)
-        self.removeItem(plot_data.numbers)
+        for number in plot_data.numbers:
+            self.removeItem(number)
 
     def _prettify(self):
         # set correct range
@@ -106,28 +104,29 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot(self):
         """Plot all the data."""
-        x_coords, z_coords = self.worker.u_coords, self.worker.v_coords
+        x_coords = self.worker.u_coords
+        y_coords = self.worker.v_coords
 
-        # proform rotation if needed
+        # perform rotation if needed
         if self.rotation != 0:
             rotation = radians(self.rotation)
-            for index, (x_coord, z_coord) in enumerate(zip(x_coords, z_coords)):
+            for index, (x_coord, z_coord) in enumerate(zip(x_coords, y_coords)):
                 x_coords[index] = x_coord * cos(rotation) - z_coord * sin(rotation)
-                z_coords[index] = z_coord * cos(rotation) + x_coord * sin(rotation)
+                y_coords[index] = z_coord * cos(rotation) + x_coord * sin(rotation)
 
         # plot the data
-        self._plot_domains(x_coords, z_coords)
-        self._plot_numbers(x_coords, z_coords)
-        self._plot_stroke(x_coords, z_coords)
+        self._plot_domains(x_coords, y_coords)
+        self._plot_numbers(x_coords, y_coords)
+        self._plot_stroke(x_coords, y_coords)
 
         # store current plot data
-        self.plot_data.x_coords = x_coords
-        self.plot_data.z_coords = z_coords
+        self.plot_data.x_coords = y_coords
+        self.plot_data.y_coords = y_coords
         self.plot_data.rotation = self.rotation
 
     def _plot_domains(self, x_coords, y_coords):
         """Plot the domains."""
-        self.circles = self.plot(
+        self.plot_data.domains = self.plot(
             x_coords,
             y_coords,
             symbol="o",
@@ -138,7 +137,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_stroke(self, x_coords, y_coords):
         """Plot the stroke."""
-        self.plotted_stroke = self.plot(
+        self.plot_data.stroke = self.plot(
             x_coords,
             y_coords,
             pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=7),
@@ -148,7 +147,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_numbers(self, x_coords, y_coords):
         """Plot the numbers."""
-        self.plotted_numbers = []
+        self.plot_data.numbers = []
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
             counter = str(counter)
             symbol_size = self.circle_radius / 3
@@ -165,4 +164,4 @@ class TopViewPlotter(pg.PlotWidget):
                 pen=None,
             )
             text.sigPointsClicked.connect(self._point_clicked)
-            self.plotted_numbers.append(text)
+            self.plot_data.numbers.append(text)
