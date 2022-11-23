@@ -19,4 +19,4 @@ class SequenceEditor(QDialog):
         self.file_input.layout().addWidget(FileInputSequenceEditor())
 
         self.setFixedHeight(510)
-        self.setMinimumWidth(680)
+        self.setMinimumWidth(700)

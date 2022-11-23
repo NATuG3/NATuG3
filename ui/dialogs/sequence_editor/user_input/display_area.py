@@ -16,7 +16,8 @@ class DisplayArea(QTextEdit):
 
     space = "<span style='background-color: rgb(210, 210, 210)'>&nbsp;</span>"
     nonspace = "<span style='background-color: rgb(240, 240, 240)'>{char}</span>"
-    highlighted = "<span style='background-color: rgb(245, 245, 0)'>{char}</span>"
+    highlighted_base = "<span style='background-color: rgb(245, 245, 0)'>{char}</span>"
+    highlighted_space = "<span style='background-color: rgb(222, 222, 5)'>&nbsp;</span>"
 
     def __init__(self, parent, bases: Iterable[str | None]):
         """
@@ -73,10 +74,13 @@ class DisplayArea(QTextEdit):
         """
         html = ""
         for index_, base in enumerate(self.bases):
-            if base is None:
+            if index_ == index:
+                if base is None:
+                    html += self.highlighted_space
+                else:
+                    html += self.highlighted_base.format(char=base)
+            elif base is None:
                 html += self.space
-            elif index_ == index:
-                html += self.highlighted.format(char=base)
             else:
                 html += self.nonspace.format(char=base)
         self.setHtml(html)
