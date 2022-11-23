@@ -2,7 +2,7 @@ from functools import partial
 from threading import Thread
 from typing import List, Iterable
 
-from PyQt6.QtCore import pyqtSignal, QTimer, QThreadPool, QRunnable, pyqtSlot
+from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtWidgets import (
     QWidget,
     QLineEdit,
@@ -38,19 +38,32 @@ class EditorArea(QWidget):
         int, int, arguments=("Previous Index, New Index",)
     )  # when the currently chosen base changes
 
-    base_removed = pyqtSignal(int, str, arguments=("Index", "Base",))  # when a base is removed
-    base_added = pyqtSignal(int, str, arguments=("Index", "Base",))  # when a new base is added
+    base_removed = pyqtSignal(
+        int,
+        str,
+        arguments=(
+            "Index",
+            "Base",
+        ),
+    )  # when a base is removed
+    base_added = pyqtSignal(
+        int,
+        str,
+        arguments=(
+            "Index",
+            "Base",
+        ),
+    )  # when a new base is added
 
     base_reset = pyqtSignal(int, arguments=("Index",))  # when a nonblank box is changed
-    base_unset = pyqtSignal(int, arguments=("Index",))  # when a nonblank box is made blank
-    base_set = pyqtSignal(int, arguments=("Index",))  # when a blank box is made nonblank
+    base_unset = pyqtSignal(
+        int, arguments=("Index",)
+    )  # when a nonblank box is made blank
+    base_set = pyqtSignal(
+        int, arguments=("Index",)
+    )  # when a blank box is made nonblank
 
-    def __init__(
-        self,
-        parent,
-        bases: Iterable[str | None],
-        selected: int = 0
-    ):
+    def __init__(self, parent, bases: Iterable[str | None], selected: int = 0):
         """
         Initialize the editor area.
 

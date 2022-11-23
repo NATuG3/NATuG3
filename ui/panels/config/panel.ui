@@ -1,174 +1,174 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>panel</class>
- <widget class="QWidget" name="panel">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>376</width>
-    <height>535</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
-    <number>2</number>
-   </property>
-   <item>
-    <widget class="QTabWidget" name="tab_area">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="tabPosition">
-      <enum>QTabWidget::East</enum>
-     </property>
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <property name="usesScrollButtons">
-      <bool>true</bool>
-     </property>
-     <property name="documentMode">
-      <bool>false</bool>
-     </property>
-     <property name="movable">
-      <bool>false</bool>
-     </property>
-     <property name="tabBarAutoHide">
-      <bool>false</bool>
-     </property>
-     <widget class="QWidget" name="nucleic_acid_tab">
-      <attribute name="title">
-       <string>Nucleic Acid</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="domains_tab">
-      <attribute name="title">
-       <string>Domains</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="strands_tab">
-      <attribute name="title">
-       <string>Strands</string>
-      </attribute>
-     </widget>
+    <class>panel</class>
+    <widget class="QWidget" name="panel">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>376</width>
+                <height>535</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout">
+            <property name="leftMargin">
+                <number>2</number>
+            </property>
+            <property name="topMargin">
+                <number>2</number>
+            </property>
+            <property name="rightMargin">
+                <number>2</number>
+            </property>
+            <property name="bottomMargin">
+                <number>2</number>
+            </property>
+            <item>
+                <widget class="QTabWidget" name="tab_area">
+                    <property name="maximumSize">
+                        <size>
+                            <width>16777215</width>
+                            <height>16777215</height>
+                        </size>
+                    </property>
+                    <property name="tabPosition">
+                        <enum>QTabWidget::East</enum>
+                    </property>
+                    <property name="tabShape">
+                        <enum>QTabWidget::Rounded</enum>
+                    </property>
+                    <property name="currentIndex">
+                        <number>0</number>
+                    </property>
+                    <property name="usesScrollButtons">
+                        <bool>true</bool>
+                    </property>
+                    <property name="documentMode">
+                        <bool>false</bool>
+                    </property>
+                    <property name="movable">
+                        <bool>false</bool>
+                    </property>
+                    <property name="tabBarAutoHide">
+                        <bool>false</bool>
+                    </property>
+                    <widget class="QWidget" name="nucleic_acid_tab">
+                        <attribute name="title">
+                            <string>Nucleic Acid</string>
+                        </attribute>
+                    </widget>
+                    <widget class="QWidget" name="domains_tab">
+                        <attribute name="title">
+                            <string>Domains</string>
+                        </attribute>
+                    </widget>
+                    <widget class="QWidget" name="strands_tab">
+                        <attribute name="title">
+                            <string>Strands</string>
+                        </attribute>
+                    </widget>
+                </widget>
+            </item>
+            <item>
+                <layout class="QGridLayout" name="gridLayout">
+                    <item row="1" column="0">
+                        <widget class="QPushButton" name="auto_update_top_view">
+                            <property name="maximumSize">
+                                <size>
+                                    <width>16777215</width>
+                                    <height>16777215</height>
+                                </size>
+                            </property>
+                            <property name="text">
+                                <string>Auto Top View</string>
+                            </property>
+                            <property name="checkable">
+                                <bool>true</bool>
+                            </property>
+                            <property name="checked">
+                                <bool>true</bool>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="1" column="1">
+                        <widget class="QPushButton" name="auto_update_side_view">
+                            <property name="maximumSize">
+                                <size>
+                                    <width>16777215</width>
+                                    <height>16777215</height>
+                                </size>
+                            </property>
+                            <property name="text">
+                                <string>Auto Side View</string>
+                            </property>
+                            <property name="checkable">
+                                <bool>true</bool>
+                            </property>
+                            <property name="checked">
+                                <bool>true</bool>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="0" column="0" colspan="2">
+                        <widget class="QPushButton" name="update_graphs">
+                            <property name="minimumSize">
+                                <size>
+                                    <width>0</width>
+                                    <height>0</height>
+                                </size>
+                            </property>
+                            <property name="toolTip">
+                                <string>Update graphs</string>
+                            </property>
+                            <property name="statusTip">
+                                <string>Recompute all plots.</string>
+                            </property>
+                            <property name="text">
+                                <string>Update Graphs</string>
+                            </property>
+                            <property name="shortcut">
+                                <string>Ctrl+U</string>
+                            </property>
+                            <property name="checkable">
+                                <bool>false</bool>
+                            </property>
+                            <property name="checked">
+                                <bool>false</bool>
+                            </property>
+                            <property name="autoRepeat">
+                                <bool>false</bool>
+                            </property>
+                            <property name="autoDefault">
+                                <bool>false</bool>
+                            </property>
+                            <property name="flat">
+                                <bool>false</bool>
+                            </property>
+                        </widget>
+                    </item>
+                    <item row="0" column="3" rowspan="2">
+                        <spacer name="horizontalSpacer">
+                            <property name="orientation">
+                                <enum>Qt::Horizontal</enum>
+                            </property>
+                            <property name="sizeType">
+                                <enum>QSizePolicy::Fixed</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                                <size>
+                                    <width>26</width>
+                                    <height>20</height>
+                                </size>
+                            </property>
+                        </spacer>
+                    </item>
+                </layout>
+            </item>
+        </layout>
     </widget>
-   </item>
-   <item>
-    <layout class="QGridLayout" name="gridLayout">
-     <item row="1" column="0">
-      <widget class="QPushButton" name="auto_update_top_view">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Auto Top View</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QPushButton" name="auto_update_side_view">
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Auto Side View</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0" colspan="2">
-      <widget class="QPushButton" name="update_graphs">
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Update graphs</string>
-       </property>
-       <property name="statusTip">
-        <string>Recompute all plots.</string>
-       </property>
-       <property name="text">
-        <string>Update Graphs</string>
-       </property>
-       <property name="shortcut">
-        <string>Ctrl+U</string>
-       </property>
-       <property name="checkable">
-        <bool>false</bool>
-       </property>
-       <property name="checked">
-        <bool>false</bool>
-       </property>
-       <property name="autoRepeat">
-        <bool>false</bool>
-       </property>
-       <property name="autoDefault">
-        <bool>false</bool>
-       </property>
-       <property name="flat">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="3" rowspan="2">
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>26</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
+    <resources/>
+    <connections/>
 </ui>

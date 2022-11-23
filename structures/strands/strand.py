@@ -4,7 +4,7 @@ from contextlib import suppress
 from functools import cached_property
 from math import dist
 from random import shuffle
-from typing import List, Tuple, Type, Iterable
+from typing import Tuple, Type
 
 import settings
 from structures.points import NEMid, Nucleoside
@@ -38,11 +38,11 @@ class Strand:
     __supported_types = (NEMid, Nucleoside)
 
     def __init__(
-        self,
-        items: list = None,
-        color: Tuple[int, int, int] = (0, 0, 0),
-        closed: bool | None = False,
-        parent: Type["Strands"] = None,
+            self,
+            items: list = None,
+            color: Tuple[int, int, int] = (0, 0, 0),
+            closed: bool | None = False,
+            parent: Type["Strands"] = None,
     ):
         """
         Initialize the strand object.
@@ -70,6 +70,7 @@ class Strand:
 
     class UnsupportedTypeError(TypeError):
         """An item of an unsupported time is being added to the strand."""
+
         pass
 
     def __len__(self) -> int:
@@ -80,26 +81,14 @@ class Strand:
         """Determine whether item is in strand."""
         return item in self.NEMids
 
-    def by_type(self, types: Iterable[Type] | Type, computed=True) -> list:
-        """
-        Obtain all items of a certain type in the strand.
-
-        Iterates through all items in the strand and outputs all items with a type in types.
-
-        Args:
-            types: The type or types of items to return
-            computed: Returns a generator object if computed is False.
-
-        Returns:
-            list: All NEMids in the strand.
-        """
-        if not isinstance(types, Iterable):
-            output = filter(lambda item: type(item) == types, self.NEMids)
-        else:
-            output = filter(lambda item: type(item) in types, self.NEMids)
-        if computed:
-            output = list(output)
-        return output
+    def clear_pseudos(self):
+        """Removes all pseudo items."""
+        for index, NEMid_ in enumerate(self.NEMids):
+            if NEMid_.pseudo:
+                del self.NEMids[index]
+        for index, nucleoside in enumerate(self.nucleosides):
+            if nucleoside.pseudo:
+                del self.nucleosides[index]
 
     @property
     def index(self):
@@ -129,8 +118,8 @@ class Strand:
                     if test_item is item:
                         continue
                     elif (
-                        dist(item.position(), test_item.position())
-                        < settings.junction_threshold
+                            dist(item.position(), test_item.position())
+                            < settings.junction_threshold
                     ):
                         item.juncmate = test_item
                         test_item.juncmate = item
@@ -145,14 +134,14 @@ class Strand:
         """
         # check boundary boxes of the strands before doing heavy touch-check computations
         if (self.boundaries[0] + self.size[0] > other.boundaries[0]) or (
-            self.boundaries[1] + self.size[1] > other.boundaries[1]
+                self.boundaries[1] + self.size[1] > other.boundaries[1]
         ):  # if our bottom left corner x coord + our width is greater than their bottom left corner than we overlap
             for our_item in shuffled(self.NEMids):
                 for their_item in shuffled(other.NEMids):
                     # for each item in us, for each item in them, check if we are sufficiently close
                     if (
-                        dist(our_item.position(), their_item.position())
-                        < touching_distance
+                            dist(our_item.position(), their_item.position())
+                            < touching_distance
                     ):
                         # if we've detected that even a single item touches, we ARE touching
                         return True

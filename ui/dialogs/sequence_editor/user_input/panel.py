@@ -1,4 +1,3 @@
-from functools import partial
 from typing import Iterable
 
 from PyQt6.QtCore import Qt, pyqtSignal

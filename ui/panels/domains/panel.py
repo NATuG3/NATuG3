@@ -6,8 +6,6 @@ from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
-    QSpinBox,
-    QDoubleSpinBox,
 )
 
 import helpers

@@ -1,6 +1,7 @@
 import logging
 from dataclasses import dataclass
 from math import cos, radians, sin
+from typing import List
 
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal
@@ -13,17 +14,29 @@ from workers.top_view import TopViewWorker
 logger = logging.getLogger(__name__)
 
 
+@dataclass(slots=True)
+class PlotData:
+    """
+    Currently plotted data.
+
+    Attributes:
+        numbers: The plotted number symbols.
+        x_coords: X coords of plotted data.
+        z_coords: Z coords of plotted data.
+        domains: The currently plotted domain circles.
+        rotation: The rotation of the plot.
+    """
+
+    x_coords: List[float] = None
+    z_coords: List[float] = None
+    rotation: pg.PlotDataItem = None
+    domains: pg.PlotDataItem = None
+    stroke: pg.PlotDataItem = None
+    numbers: pg.PlotDataItem = None
+
+
 class TopViewPlotter(pg.PlotWidget):
     point_clicked = pyqtSignal(tuple)
-
-    @dataclass
-    class PlotData:
-        numbers: list | None
-        x_coords: list | None
-        z_coords: list | None
-        domains: list | None
-        stroke: list | None
-        rotation: float | None
 
     def __init__(
             self,
@@ -52,14 +65,7 @@ class TopViewPlotter(pg.PlotWidget):
         self.domains = domains
         self.worker = worker
 
-        self.plot_data = self.PlotData(
-            numbers=None,
-            x_coords=None,
-            z_coords=None,
-            domains=None,
-            stroke=None,
-            rotation=self.rotation,
-        )
+        self.plot_data = PlotData()
 
         self.getViewBox().setDefaultPadding(padding=0.18)
         self.disableAutoRange()
@@ -74,16 +80,18 @@ class TopViewPlotter(pg.PlotWidget):
         )
         self.point_clicked.emit(tuple(point))
 
-    def clear(self):
-        self.removeItem(self.plot_data.domains)
-        self.removeItem(self.plot_data.stroke)
-        self.removeItem(self.plot_data.numbers)
-        self.text.clear()
-
     def refresh(self):
-        self.clear()
         self._plot()
+        self._reset()
         logger.info("Refreshed top view.")
+
+    def _reset(self, plot_data=None):
+        """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
+        if plot_data is None:
+            plot_data = self.plot_data
+        self.removeItem(plot_data.domains)
+        self.removeItem(plot_data.stroke)
+        self.removeItem(plot_data.numbers)
 
     def _prettify(self):
         # set correct range
