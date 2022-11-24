@@ -21,6 +21,8 @@ library requirements (step 4). However, the easiest way to get the program runni
 4) pip install -r requirements.txt
 5) python launcher.py
 
+<hr>
+
 ## Photos of program
 
 ![image](https://user-images.githubusercontent.com/108041238/203201243-f633ce8e-94ce-4f30-aa51-4a84f177c3b9.png)

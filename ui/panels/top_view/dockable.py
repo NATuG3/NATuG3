@@ -8,9 +8,9 @@ import ui.plotters
 from workers.top_view import TopViewWorker
 
 
-class Panel(QDockWidget):
-    def __init__(self):
-        super().__init__()
+class Dockable(QDockWidget):
+    def __init__(self, parent):
+        super().__init__(parent)
 
         # set styles
         self.setObjectName("Top View")

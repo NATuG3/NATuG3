@@ -30,12 +30,14 @@ class PlotData:
         strands: The currently plotted strands.
         points: The points.
         strokes: The strand pen line.
+        gridlines: All the grid lines.
         plot_types: The types of strand NEMids plotted.
     """
 
     strands: Strands = None
     points: List[pg.PlotDataItem] = None
     strokes: List[pg.PlotDataItem] = None
+    gridlines: List[pg.PlotDataItem] = None
     plot_types: List[Type] = None
 
 
@@ -60,10 +62,10 @@ class SideViewPlotter(pg.PlotWidget):
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
 
     def __init__(
-            self,
-            strands: Strands,
-            nucleic_acid_profile: NucleicAcidProfile,
-            plot_types: List[Type] = (object,),
+        self,
+        strands: Strands,
+        nucleic_acid_profile: NucleicAcidProfile,
+        plot_types: List[Type] = (object,),
     ):
         """
         Initialize plotter instance.
@@ -101,9 +103,11 @@ class SideViewPlotter(pg.PlotWidget):
 
     def refresh(self):
         """Replot plot data."""
+
         def runner():
             self._reset()
             self._plot()
+
         # allow one screen refresh for the mouse to release
         # so that the plot is cleared after the mouse release event happens
         QTimer.singleShot(0, runner)
@@ -117,6 +121,8 @@ class SideViewPlotter(pg.PlotWidget):
             self.removeItem(stroke)
         for points in plot_data.points:
             self.removeItem(points)
+        for gridline in plot_data.gridlines:
+            self.removeItem(gridline)
 
     def _points_clicked(self, event, points):
         """Called when a point on a strand is clicked."""
@@ -134,16 +140,20 @@ class SideViewPlotter(pg.PlotWidget):
         self.points_clicked.emit(tuple(located))
 
     def _prettify(self):
+        """Add gridlines and style the plot."""
+        # clear preexisting gridlines
+        self.plot_data.gridlines = []
+
         # create pen for custom grid
         grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
 
         # domain index grid
         for i in range(ceil(self.strands.size[0]) + 1):
-            self.addLine(x=i, pen=grid_pen)
+            self.plot_data.gridlines.append(self.addLine(x=i, pen=grid_pen))
 
         # for i in <number of helical twists of the tallest domain>...
         for i in range(0, ceil(self.height / self.nucleic_acid_profile.H) + 1):
-            self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
+            self.plot_data.gridlines.append(self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen))
 
         # add axis labels
         self.setLabel("bottom", text="Helical Domain")
@@ -239,8 +249,6 @@ class SideViewPlotter(pg.PlotWidget):
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(partial(self.strand_clicked.emit, strand))
             self.plot_data.strokes.append(stroke)
-
-            strand.clear_pseudos()
 
         for stroke, points in zip(self.plot_data.strokes, self.plot_data.points):
             self.addItem(stroke)

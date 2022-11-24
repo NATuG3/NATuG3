@@ -1,1 +1,1 @@
-from .panel import Panel
+from .dockable import Dockable

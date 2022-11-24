@@ -21,15 +21,15 @@ class ProfileManager(QGroupBox):
     chosen_changed = pyqtSignal(str)
 
     def __init__(
-            self,
-            parent,
-            extractor: FunctionType,
-            dumper: FunctionType,
-            title="Profile Manager",
-            warning: str | None = None,
-            defaults: Iterable[str] | None = None,
-            default="",
-            profiles: Dict[str, object] = None,
+        self,
+        parent,
+        extractor: FunctionType,
+        dumper: FunctionType,
+        title="Profile Manager",
+        warning: str | None = None,
+        defaults: Iterable[str] | None = None,
+        default="",
+        profiles: Dict[str, object] = None,
     ):
         """
         Initialize the profile manager.

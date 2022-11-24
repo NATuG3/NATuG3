@@ -39,11 +39,11 @@ class TopViewPlotter(pg.PlotWidget):
     point_clicked = pyqtSignal(tuple)
 
     def __init__(
-            self,
-            worker: TopViewWorker,
-            domains: Domains,
-            domain_radius: int,
-            rotation: float = 0,
+        self,
+        worker: TopViewWorker,
+        domains: Domains,
+        domain_radius: int,
+        rotation: float = 0,
     ):
         """
         Initialize top view plotter instance.
@@ -61,7 +61,6 @@ class TopViewPlotter(pg.PlotWidget):
         self.rotation = rotation
         self.domains = domains
         self.worker = worker
-
         self.plot_data = PlotData()
 
         self.getViewBox().setDefaultPadding(padding=0.18)

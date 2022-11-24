@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class Panel(QGroupBox):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, parent):
+        super().__init__(parent)
 
         self.setObjectName("Side View")
         self.setLayout(QVBoxLayout())
@@ -54,12 +54,12 @@ class Panel(QGroupBox):
         QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
         logger.info(f"Strand #{strand.index} was clicked.")
 
-    def points_clicked(self, located):
+    def points_clicked(self, points):
         """slot for when a point in the plot is clicked."""
         if refs.mode.current == INFORMER:
             dialogs = []
 
-            for item in located:
+            for item in points:
                 item.highlighted = True
 
                 if isinstance(item, NEMid):
@@ -72,29 +72,30 @@ class Panel(QGroupBox):
                         )
                     )
 
-            def dialog_complete():
-                for dialog_ in dialogs:
+            def dialog_complete(dialogs_, points_):
+                for dialog_ in dialogs_:
                     dialog_.close()
-                for item_ in located:
-                    item_.highlighted = False
+                for point_ in points_:
+                    point_.highlighted = False
                 self.refresh()
 
+            wrapped_dialog_complete = partial(dialog_complete, dialogs, points)
             for dialog in dialogs:
-                dialog.finished.connect(dialog_complete)
+                dialog.finished.connect(wrapped_dialog_complete)
                 dialog.show()
-            atexit.register(dialog_complete)
+            atexit.register(wrapped_dialog_complete)
 
             self.refresh()
 
         if refs.mode.current == JUNCTER:
             # if exactly two overlapping points are clicked trigger the junction creation process
-            if len(located) == 2:
-                if all([isinstance(item, NEMid) for item in located]):
-                    refs.strands.current.conjunct(located[0], located[1])
+            if len(points) == 2:
+                if all([isinstance(item, NEMid) for item in points]):
+                    refs.strands.current.conjunct(points[0], points[1])
                     self.refresh()
 
         elif refs.mode.current == NICKER:
-            for item in located:
+            for item in points:
                 if refs.mode.current == NICKER:
                     if isinstance(item, NEMid):
                         Nick.to_nick(item)
