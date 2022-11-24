@@ -2,6 +2,7 @@ extension = "nano"
 
 name = "NATuG"
 version = 3.0
+github = "https://github.com/404Wolf/NATuG"
 
 junction_threshold = 0.01
 

@@ -3,6 +3,7 @@ from types import SimpleNamespace
 
 from PyQt6.QtWidgets import QMenu
 
+import settings
 from ui.resources import fetch_icon
 
 
@@ -21,11 +22,7 @@ class Help(QMenu):
         # help -> github -> open github project link
         github = self.actions.github = self.addAction("Github")
         github.setIcon(fetch_icon("logo-github"))
-        github.triggered.connect(
-            lambda: webbrowser.open_new_tab(
-                "https://github.com/404Wolf/dna_nanotube_tools"
-            )
-        )
+        github.triggered.connect(lambda: webbrowser.open_new_tab(settings.github))
 
         # help -> about -> open about statement
         about = self.actions.about = self.addAction("About")

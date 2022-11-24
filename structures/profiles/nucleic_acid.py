@@ -7,16 +7,16 @@ class NucleicAcidProfile:
     A settings profiles.
 
     Attributes:
-        D (float): Diameter of a domain.
-        H (float): Height of a turn.
-        T (float): There are T turns every B bases.
-        B (float): There are B bases every T turns.
-        Z_c (float): Characteristic height.
-        Z_s (float): Switch height.
-        Z_b (float): Base height.
-        theta_b (float): Base angle.
-        theta_c (float): Characteristic angle.
-        theta_s (float): Switch angle.
+        D: Diameter of a domain.
+        H: Height of a turn.
+        T: There are T turns every B bases.
+        B: There are B bases every T turns.
+        Z_c: Characteristic height.
+        Z_s: Switch height.
+        Z_b: Base height.
+        theta_b: Base angle.
+        theta_c: Characteristic angle.
+        theta_s: Switch angle.
     """
 
     D: float = 2.2
@@ -30,12 +30,11 @@ class NucleicAcidProfile:
     theta_s: float = 2.343
 
     def __post_init__(self) -> None:
-        """Runs after init"""
-        # compute Z_b based on T, H, and B
+        """Compute Z_b based on T, H, and B."""
         self.Z_b = (self.T * self.H) / self.B
 
     def __eq__(self, other: object) -> bool:
-        """Returns true if identical profiles is returned"""
+        """Whether our profile is the same as theirs."""
         if isinstance(other, type(self)):
             return vars(self) == vars(other)
         else:

@@ -11,7 +11,9 @@ logger = logging.getLogger(__name__)
 
 
 class Dockable(QDockWidget):
-    def __init__(self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains):
+    def __init__(
+        self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
+    ):
         super().__init__(parent)
 
         # set titles/descriptions

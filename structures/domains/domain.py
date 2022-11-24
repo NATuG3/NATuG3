@@ -57,6 +57,7 @@ class Domain:
             raise ValueError("Invalid helical joint integer", helix_joints)
 
     def __eq__(self, other) -> bool:
+        """Whether us.index == them.index."""
         if not isinstance(other, type(self)):
             return False
         return self.index == other.index

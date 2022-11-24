@@ -47,14 +47,14 @@ class Strands:
         """Remove a strand from the container."""
         self.strands.remove(strand)
 
-    def recolor(self):
+    def recolor(self) -> None:
         """
         Recompute colors for all strands contained within.
         Prevents touching strands from sharing colors.
         """
         for strand in self.strands:
             if strand.interdomain:
-                illegal_colors = []
+                illegal_colors: List[Tuple[int, int, int]] = []
 
                 for potentially_touching in self.strands:
                     if strand.touching(potentially_touching):

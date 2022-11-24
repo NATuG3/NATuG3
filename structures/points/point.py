@@ -26,15 +26,11 @@ class Point:
         self.pseudo: bool = False
 
     def position(self) -> Tuple[float, float]:
-        """
-        Obtain coords of the point as a tuple of form (x, z).
-        """
+        """Obtain coords of the point as a tuple of form (x, z)."""
         return self.x_coord, self.z_coord
 
     def __repr__(self) -> str:
-        """
-        Determine what to print when instance is printed directly.
-        """
+        """Determine what to print when instance is printed directly."""
         return (
             f"NEMid("
             f"pos={tuple(map(lambda i: round(i, 3), self.position()))}), "
@@ -43,6 +39,7 @@ class Point:
         )
 
     def __eq__(self, other):
+        """Whether our position and angle is the same as their position and angle."""
         if not isinstance(other, type(self)):
             return False
         if self.position() == other.position():

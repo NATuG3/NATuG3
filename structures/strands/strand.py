@@ -4,13 +4,13 @@ from contextlib import suppress
 from functools import cached_property
 from math import dist
 from random import shuffle
-from typing import Tuple, Type
+from typing import Tuple, Type, Iterable
 
 import settings
 from structures.points import NEMid, Nucleoside
 
 
-def shuffled(iterable):
+def shuffled(iterable: Iterable) -> list:
     """Shuffle an iterable and return a copy."""
     output = list(iterable)
     shuffle(output)
@@ -38,11 +38,11 @@ class Strand:
     __supported_types = (NEMid, Nucleoside)
 
     def __init__(
-            self,
-            items: list = None,
-            color: Tuple[int, int, int] = (0, 0, 0),
-            closed: bool | None = False,
-            parent: Type["Strands"] = None,
+        self,
+        items: list = None,
+        color: Tuple[int, int, int] = (0, 0, 0),
+        closed: bool | None = False,
+        parent: Type["Strands"] = None,
     ):
         """
         Initialize the strand object.
@@ -83,6 +83,7 @@ class Strand:
 
     def clear_pseudos(self):
         """Removes all pseudo items."""
+
         def pseudo_check(item):
             return not item.pseudo
 
@@ -117,8 +118,8 @@ class Strand:
                     if test_item is item:
                         continue
                     elif (
-                            dist(item.position(), test_item.position())
-                            < settings.junction_threshold
+                        dist(item.position(), test_item.position())
+                        < settings.junction_threshold
                     ):
                         item.juncmate = test_item
                         test_item.juncmate = item
@@ -133,14 +134,14 @@ class Strand:
         """
         # check boundary boxes of the strands before doing heavy touch-check computations
         if (self.boundaries[0] + self.size[0] > other.boundaries[0]) or (
-                self.boundaries[1] + self.size[1] > other.boundaries[1]
+            self.boundaries[1] + self.size[1] > other.boundaries[1]
         ):  # if our bottom left corner x coord + our width is greater than their bottom left corner than we overlap
             for our_item in shuffled(self.NEMids):
                 for their_item in shuffled(other.NEMids):
                     # for each item in us, for each item in them, check if we are sufficiently close
                     if (
-                            dist(our_item.position(), their_item.position())
-                            < touching_distance
+                        dist(our_item.position(), their_item.position())
+                        < touching_distance
                     ):
                         # if we've detected that even a single item touches, we ARE touching
                         return True

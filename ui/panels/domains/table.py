@@ -7,7 +7,8 @@ from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import (
     QTableWidget,
     QHeaderView,
-    QAbstractItemView, QWidget,
+    QAbstractItemView,
+    QWidget,
 )
 
 from constants.directions import *
@@ -41,7 +42,12 @@ class Table(QTableWidget):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """Intercept a keypress to alter tabbing."""
-        if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Backtab, Qt.Key.Key_Down, Qt.Key.Key_Up):
+        if event.key() in (
+            Qt.Key.Key_Tab,
+            Qt.Key.Key_Backtab,
+            Qt.Key.Key_Down,
+            Qt.Key.Key_Up,
+        ):
             row, column = self.currentRow(), self.currentColumn()
             if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Down):
                 row += 1
