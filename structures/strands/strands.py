@@ -240,19 +240,19 @@ class Strands:
             if not new_strand.empty:
                 self.append(new_strand)
 
+        # recompute the new strands
+        [new_strand.recompute() for new_strand in new_strands]
+
         # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
         # then mark NEMid1 as not-a-junction
         for NEMid_ in (NEMid1, NEMid2):
-            if not NEMid_.strand.interdomain:
-                NEMid_.junction = False
-            else:
+            if NEMid_.strand.interdomain:
                 NEMid_.junction = True
+            else:
+                NEMid_.junction = False
 
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
-
-        # recompute the new strands
-        [new_strand.recompute() for new_strand in new_strands]
 
         self.recolor()
 
