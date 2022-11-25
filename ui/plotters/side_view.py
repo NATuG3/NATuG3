@@ -257,23 +257,20 @@ class SideViewPlotter(pg.PlotWidget):
             # round the corners of the outline for aesthetics
             if strand.interdomain:
                 coords = zip(x_coords, z_coords)
-                coords = chaikins_corner_cutting(
-                    coords, offset=0.4, refinements=1
-                )
+                coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
                 coords = list(chaikins_corner_cutting(coords, refinements=1))
-                # coords.append(self.plot_data.strands[])
 
                 connect = []
                 # in case the junction is a left-to-right side of screen junction
                 # do not plot the entire connector line going from the left to the
                 # right of the screen
-                for NEMid_index, (x_coord, z_coord) in enumerate(coords):
+                for NEMid_index, (x_coord, z_coord) in enumerate(coords.copy()):
                     if NEMid_index != len(coords) - 1:
                         # if the distance between this x coord and the next one is large
                         # then add a break in the connector
-                        if abs(x_coord - coords[NEMid_index+1][0]) > 1:
-                            connect.append(0)
+                        if abs(x_coord - coords[NEMid_index + 1][0]) > 1:
                             # do not connect
+                            connect.append(0)
                         else:
                             connect.append(1)
                             # connect
@@ -287,12 +284,7 @@ class SideViewPlotter(pg.PlotWidget):
                 connect = "all"
 
             # plot the outline separately
-            stroke = pg.PlotDataItem(
-                x_coords,
-                z_coords,
-                pen=pen,
-                connect=connect
-            )
+            stroke = pg.PlotDataItem(x_coords, z_coords, pen=pen, connect=connect)
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(partial(self.strand_clicked.emit, strand))
             self.plot_data.plotted_strokes.append(stroke)
