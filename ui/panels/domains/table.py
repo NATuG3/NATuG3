@@ -51,6 +51,7 @@ class Table(QTableWidget):
         ):
             row, column = self.currentRow(), self.currentColumn()
             self.cellWidget(row, column).editingFinished.emit()
+            self.cell_widget_updated.emit()
             if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Down):
                 row += 1
             else:
