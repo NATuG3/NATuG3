@@ -47,6 +47,7 @@ class Actions(QButtonGroup):
 
         def __init__(self):
             super().__init__("Nicker")
+            self.setEnabled(False)
 
     class Hairpinner(Action):
         """Mode for making nicks."""
