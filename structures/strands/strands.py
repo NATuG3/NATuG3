@@ -15,6 +15,8 @@ class Strands:
 
     Attributes:
         strands: The actual strands.
+        up_strands: All up strands.
+        down_strands: All down strands.
     """
 
     def __init__(self, strands: Iterable[Strand]) -> None:
@@ -24,14 +26,27 @@ class Strands:
         Args:
             strands: A list of strands to create a Strands object from.
         """
-        assert [isinstance(strand, Strand) for strand in strands]
         self.strands = list(strands)
-        for strand in self.strands:
-            strand.parent = self
+        self.recompute()
 
     def __len__(self):
         """Obtain the number of strands this Strands object contains."""
         return len(self.strands)
+
+    @property
+    def up_strands(self):
+        return list(filter(lambda strand: strand.down_strand, self.strands))
+
+    @property
+    def down_strands(self):
+        return list(filter(lambda strand: strand.up_strand, self.strands))
+
+    def recompute(self):
+        """Reparent and recompute strands."""
+        # reparent all the strands
+        for strand in self.strands:
+            strand.recompute()
+            strand.parent = self
 
     def index(self, item: object) -> int:
         """Obtain the index of a given strand."""
@@ -89,11 +104,12 @@ class Strands:
             - The order of NEMid1 and NEMid2 is arbitrary.
             - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
         """
-        if dist(NEMid1.position(), NEMid2.position()) > settings.junction_threshold:
+        # ensure that both NEMids are junctable
+        if (not NEMid1.junctable) or (not NEMid2.junctable):
             raise ValueError(
                 "NEMids are not close enough to create a junction.",
-                NEMid1.position(),
-                NEMid2.position(),
+                NEMid1,
+                NEMid2,
             )
 
         # ensure that NEMid1 is the lefter NEMid

@@ -72,7 +72,7 @@ class SideViewWorker:
             Strands object for all strands that the domains can create.
         """
         # the output container for all NEMids
-        NEMids = [([], []) for _ in range(self.domains.count)]
+        strands = [([], []) for _ in range(self.domains.count)]
 
         for index, domain in enumerate(self.domains.domains):
             # how many NEMids to skip over for the up and down strand
@@ -142,68 +142,74 @@ class SideViewWorker:
                     x_coords[strand_direction],
                     z_coords[strand_direction],
                 ):
-                    # if this NEMid is right on the domain line we can
-                    # call it a "junctable" NEMid
-                    if abs(x_coord - round(x_coord)) < settings.junction_threshold:
-                        junctable = True
-                    else:
-                        junctable = False
-
                     # combine all data into NEMid object
                     NEMid_ = NEMid(
-                        x_coord,
-                        z_coord,
-                        angle % 360,
-                        strand_direction,
-                        domain=domain,
-                        junctable=junctable,
+                        x_coord, z_coord, angle % 360, strand_direction, domain=domain
                     )
 
                     # append the current NEMid to the to-be-outputted array
-                    NEMids[index][strand_direction].append(NEMid_)
+                    strands[index][strand_direction].append(NEMid_)
 
                 if strand_direction == DOWN:
-                    NEMids[index][strand_direction].reverse()
+                    strands[index][strand_direction].reverse()
 
         # assign matching NEMids to each other's matching slots
         for index, domain in enumerate(self.domains.domains):
             NEMid1: NEMid
             NEMid2: NEMid
-            for NEMid1, NEMid2 in zip(*NEMids[index]):
+            for NEMid1, NEMid2 in zip(*strands[index]):
                 NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
 
-        strands = []
+        # assign junctability and juncmates
         for index, domain in enumerate(self.domains.domains):
-            for strand_direction in self.strand_directions:
-                strands.append(
+            if index == self.domains.count - 1:
+                next_strands = strands[0]
+            else:
+                next_strands = strands[index + 1]
+
+            this_strands = strands[index]
+            for strand1 in this_strands:
+                for strand2 in next_strands:
+                    # for the next up and down strand check every NEMid in our
+                    # up and down strand to see if any NEMids are close to any
+                    # of the next ones
+                    for NEMid1 in strand1:
+                        for NEMid2 in strand2:
+                            junction = False
+                            # if the two NEMids are very close consider it a junction
+                            if (
+                                dist(NEMid1.position(), NEMid2.position())
+                                < settings.junction_threshold
+                            ):
+                                junction = True
+                            # if the two NEMids are on opposite sides and have a very close
+                            # vertical distance consider it a junction as well
+                            else:
+                                z_dist = abs(NEMid1.z_coord - NEMid2.z_coord)
+                                x_dist = abs(NEMid1.x_coord - NEMid2.x_coord)
+                                opposite_sides = abs(x_dist - self.domains.count) < settings.junction_threshold
+                                matching_heights = z_dist < settings.junction_threshold
+                                if opposite_sides and matching_heights:
+                                    junction = True
+
+                            if junction:
+                                NEMid1.juncmate = NEMid2
+                                NEMid1.junctable = True
+                                NEMid2.juncmate = NEMid1
+                                NEMid2.junctable = True
+
+        converted_strands = []
+        for strand_direction in self.strand_directions:
+            for index, domain in enumerate(self.domains.domains):
+                converted_strands.append(
                     Strand(
-                        NEMids[index][strand_direction],
+                        strands[index][strand_direction],
                         color=settings.colors["strands"]["greys"][strand_direction],
                     )
                 )
 
-        # set juncmates
-        strands.sort(
-            key=lambda strand: sum([item.x_coord for item in strand.NEMids])
-            / len(strand)
-        )
-        strands = Strands(strands)
-        for index, strand in enumerate(strands.strands):
-            if index < len(strands) - 1:
-                for this_strand_item in strand.NEMids:
-                    for next_strand_item in strands.strands[index + 1].NEMids:
-                        if (
-                            dist(
-                                this_strand_item.position(), next_strand_item.position()
-                            )
-                            < settings.junction_threshold
-                        ):
-                            this_strand_item.juncmate = next_strand_item
-                            next_strand_item.juncmate = this_strand_item
-
-        # assign strands to NEMids
-        for strand in strands.strands:
-            strand.recompute()
+        # convert strands from a list to a Strands container
+        strands = Strands(converted_strands)
 
         return strands
 

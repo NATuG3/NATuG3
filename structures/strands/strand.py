@@ -4,7 +4,7 @@ from contextlib import suppress
 from functools import cached_property
 from math import dist
 from random import shuffle
-from typing import Tuple, Type, Iterable
+from typing import Tuple, Type, Iterable, Deque
 
 import settings
 from structures.points import NEMid, Nucleoside
@@ -57,8 +57,8 @@ class Strand:
         self.closed = closed
         self.parent = parent
 
-        self.NEMids = deque()
-        self.nucleosides = deque()
+        self.NEMids: Deque[NEMid] = deque()
+        self.nucleosides: Deque[Nucleoside] = deque()
         if items is not None:
             for item in items:
                 if isinstance(item, NEMid):
@@ -109,20 +109,8 @@ class Strand:
                 del self.__dict__[cached]
 
         # assign all our items to have us as their parent strand
-        for index, item in enumerate(self.NEMids):
+        for index, NEMid_ in enumerate(self.NEMids):
             self.NEMids[index].strand = self
-
-            # assign juncmates
-            if isinstance(item, NEMid) and item.junctable:
-                for test_item in self.NEMids:
-                    if test_item is item:
-                        continue
-                    elif (
-                        dist(item.position(), test_item.position())
-                        < settings.junction_threshold
-                    ):
-                        item.juncmate = test_item
-                        test_item.juncmate = item
 
     def touching(self, other: Type["Strand"], touching_distance=0.2) -> bool:
         """
@@ -132,19 +120,10 @@ class Strand:
             other: The strand potentially touching this one.
             touching_distance: The distance to be considered touching.
         """
-        # check boundary boxes of the strands before doing heavy touch-check computations
-        if (self.boundaries[0] + self.size[0] > other.boundaries[0]) or (
-            self.boundaries[1] + self.size[1] > other.boundaries[1]
-        ):  # if our bottom left corner x coord + our width is greater than their bottom left corner than we overlap
-            for our_item in shuffled(self.NEMids):
-                for their_item in shuffled(other.NEMids):
-                    # for each item in us, for each item in them, check if we are sufficiently close
-                    if (
-                        dist(our_item.position(), their_item.position())
-                        < touching_distance
-                    ):
-                        # if we've detected that even a single item touches, we ARE touching
-                        return True
+        for our_NEMid in shuffled(self.NEMids):
+            for their_NEMid in shuffled(other.NEMids):
+                if our_NEMid.juncmate is their_NEMid:
+                    return True
         else:
             # we were not touching
             return False

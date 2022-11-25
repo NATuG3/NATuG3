@@ -3,8 +3,9 @@ from contextlib import suppress
 from dataclasses import dataclass
 from functools import partial
 from math import ceil, dist
-from typing import List, Type
+from typing import List, Type, Tuple, Dict
 
+import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import (
@@ -14,6 +15,8 @@ from PyQt6.QtGui import (
 import settings
 from constants.directions import *
 from helpers import chaikins_corner_cutting
+from structures.points import NEMid
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
@@ -28,17 +31,19 @@ class PlotData:
 
     Attributes:
         strands: The currently plotted strands.
-        points: The points.
-        strokes: The strand pen line.
-        gridlines: All the grid lines.
-        plot_types: The types of strand NEMids plotted.
+        types: The types of strand NEMids plotted.
+        points: A mapping of positions of plotted_points to point objects.
+        plotted_points: The points.
+        plotted_strokes: The strand pen line.
+        plotted_gridlines: All the grid lines.
     """
 
     strands: Strands = None
-    points: List[pg.PlotDataItem] = None
-    strokes: List[pg.PlotDataItem] = None
-    gridlines: List[pg.PlotDataItem] = None
-    plot_types: List[Type] = None
+    types: List[Type] = None
+    points: Dict[Tuple[float, float], Point] = None
+    plotted_points: List[pg.PlotDataItem] = None
+    plotted_strokes: List[pg.PlotDataItem] = None
+    plotted_gridlines: List[pg.PlotDataItem] = None
 
 
 class SideViewPlotter(pg.PlotWidget):
@@ -117,21 +122,24 @@ class SideViewPlotter(pg.PlotWidget):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
         if plot_data is None:
             plot_data = self.plot_data
-        for stroke in plot_data.strokes:
+        for stroke in plot_data.plotted_strokes:
             self.removeItem(stroke)
-        for points in plot_data.points:
+        for points in plot_data.plotted_points:
             self.removeItem(points)
-        for gridline in plot_data.gridlines:
+        for gridline in plot_data.plotted_gridlines:
             self.removeItem(gridline)
 
     def _points_clicked(self, event, points):
         """Called when a point on a strand is clicked."""
-        position = points[0].pos()
-        located = []
-        for strand in self.strands.strands:
-            for NEMid_ in strand.NEMids:
-                if dist(position, NEMid_.position()) < settings.junction_threshold:
-                    located.append(NEMid_)
+        position = tuple(points[0].pos())
+
+        # use point mapping to detect the clicked points
+        located = [self.plot_data.points[position]]
+        # if the located item is a NEMid with a juncmate append the juncmate too
+        if isinstance(located[0], NEMid) and (located[0].juncmate is not None):
+            located.append(located[0].juncmate)
+
+        # remove all pseduo items
         for item in located:
             with suppress(AttributeError):
                 if item.pseudo:
@@ -140,20 +148,20 @@ class SideViewPlotter(pg.PlotWidget):
         self.points_clicked.emit(tuple(located))
 
     def _prettify(self):
-        """Add gridlines and style the plot."""
-        # clear preexisting gridlines
-        self.plot_data.gridlines = []
+        """Add plotted_gridlines and style the plot."""
+        # clear preexisting plotted_gridlines
+        self.plot_data.plotted_gridlines = []
 
         # create pen for custom grid
         grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
 
         # domain index grid
         for i in range(ceil(self.strands.size[0]) + 1):
-            self.plot_data.gridlines.append(self.addLine(x=i, pen=grid_pen))
+            self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
 
         # for i in <number of helical twists of the tallest domain>...
         for i in range(0, ceil(self.height / self.nucleic_acid_profile.H) + 1):
-            self.plot_data.gridlines.append(
+            self.plot_data.plotted_gridlines.append(
                 self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
             )
 
@@ -163,21 +171,22 @@ class SideViewPlotter(pg.PlotWidget):
 
     def _plot(self):
         self.plot_data.strands = self.strands
-        self.plot_data.plot_types = self.plot_types
-        self.plot_data.points = []
-        self.plot_data.strokes = []
+        self.plot_data.types = self.plot_types
+        self.plot_data.points = dict()
+        self.plot_data.plotted_points = list()
+        self.plot_data.plotted_strokes = list()
 
-        for strand in self.plot_data.strands.strands:
+        for strand_index, strand in enumerate(self.plot_data.strands.strands):
             # use a try finally to ensure that the pseudo NEMid at the end of the strand is removed
             if strand.closed:
                 strand.NEMids.append(strand.NEMids[0])
                 strand.NEMids[-1].pseudo = True
 
-            symbols: List[str] = []
-            symbol_sizes: List[int] = []
-            x_coords: List[float] = []
-            z_coords: List[float] = []
-            brushes = []
+            symbols: List[str] = list()
+            symbol_sizes: List[int] = list()
+            x_coords: List[float] = list()
+            z_coords: List[float] = list()
+            brushes = list()
 
             # create the NEMid brush
             NEMid_brush = pg.mkBrush(color=strand.color)
@@ -197,10 +206,20 @@ class SideViewPlotter(pg.PlotWidget):
             else:
                 pen = pg.mkPen(color=strand.color, width=9.5, pxMode=False)
 
-            for index, NEMid_ in enumerate(strand.NEMids):
+            for NEMid_index, NEMid_ in enumerate(strand.NEMids):
+                # update the point mappings
+                self.plot_data.points[
+                    (
+                        NEMid_.x_coord,
+                        NEMid_.z_coord,
+                    )
+                ] = NEMid_
+
+                # ensure that this NEMid gets plotted
                 x_coords.append(NEMid_.x_coord)
                 z_coords.append(NEMid_.z_coord)
 
+                # determine whether the symbol for the NEMid is an up or down arrow
                 if NEMid_.direction == UP:
                     symbols.append("t1")  # up arrow
                 elif NEMid_.direction == DOWN:
@@ -208,19 +227,21 @@ class SideViewPlotter(pg.PlotWidget):
                 else:
                     raise ValueError("NEMid.direction is not UP or DOWN.", NEMid_)
 
+                # if the NEMid is highlighted then make it larger and yellow
                 if NEMid_.highlighted:
                     symbol_sizes.append(18)
                     brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                 else:
+                    symbol_sizes.append(6)
+                    # if the NEMid is junctable then make it dimmer colored
                     if NEMid_.junctable:
                         brushes.append(dim_brush)
-                        symbol_sizes.append(6)
+                    # otherwise use normal coloring
                     else:
                         brushes.append(NEMid_brush)
-                        symbol_sizes.append(6)
 
             # graph the points separately
-            points = pg.PlotDataItem(
+            plotted_points = pg.PlotDataItem(
                 x_coords,
                 z_coords,
                 symbol=symbols,  # type of symbol (in this case up/down arrow)
@@ -229,30 +250,56 @@ class SideViewPlotter(pg.PlotWidget):
                 symbolBrush=brushes,  # set color of points to current color
                 pen=None,
             )
-            points.sigPointsClicked.connect(self._points_clicked)
-            self.plot_data.points.append(points)
+            plotted_points.sigPointsClicked.connect(self._points_clicked)
+            self.plot_data.plotted_points.append(plotted_points)
 
             # if this strand contains a junction then
             # round the corners of the outline for aesthetics
             if strand.interdomain:
+                coords = zip(x_coords, z_coords)
                 coords = chaikins_corner_cutting(
-                    tuple(zip(x_coords, z_coords)), offset=0.4, refinements=1
+                    coords, offset=0.4, refinements=1
                 )
-                coords = chaikins_corner_cutting(coords, refinements=1)
+                coords = list(chaikins_corner_cutting(coords, refinements=1))
+                # coords.append(self.plot_data.strands[])
+
+                connect = []
+                # in case the junction is a left-to-right side of screen junction
+                # do not plot the entire connector line going from the left to the
+                # right of the screen
+                for NEMid_index, (x_coord, z_coord) in enumerate(coords):
+                    if NEMid_index != len(coords) - 1:
+                        # if the distance between this x coord and the next one is large
+                        # then add a break in the connector
+                        if abs(x_coord - coords[NEMid_index+1][0]) > 1:
+                            connect.append(0)
+                            # do not connect
+                        else:
+                            connect.append(1)
+                            # connect
+                    else:
+                        connect.append(1)
+
+                connect = np.array(connect)
                 x_coords = [coord[0] for coord in coords]
                 z_coords = [coord[1] for coord in coords]
+            else:
+                connect = "all"
 
             # plot the outline separately
             stroke = pg.PlotDataItem(
                 x_coords,
                 z_coords,
                 pen=pen,
+                connect=connect
             )
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(partial(self.strand_clicked.emit, strand))
-            self.plot_data.strokes.append(stroke)
+            self.plot_data.plotted_strokes.append(stroke)
 
-        for stroke, points in zip(self.plot_data.strokes, self.plot_data.points):
+        for stroke, points in zip(
+            self.plot_data.plotted_strokes, self.plot_data.plotted_points
+        ):
             self.addItem(stroke)
             self.addItem(points)
 

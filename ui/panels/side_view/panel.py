@@ -1,6 +1,7 @@
 import atexit
 import logging
 from functools import partial
+from typing import Tuple, List
 
 from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout, QScrollArea
@@ -12,13 +13,14 @@ import ui.plotters
 from constants.modes import *
 from structures.points import NEMid
 from structures.points.nick import Nick
+from structures.strands import Strand
 from ui.panels.strands.buttons import StrandButton
 
 logger = logging.getLogger(__name__)
 
 
 class Panel(QGroupBox):
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         super().__init__(parent)
 
         self.setObjectName("Side View")
@@ -33,13 +35,13 @@ class Panel(QGroupBox):
         self.plot.strand_clicked.connect(self.strand_clicked)
         self.layout().addWidget(self.plot)
 
-    def refresh(self):
+    def refresh(self) -> None:
         """Update the current plot."""
         self.plot.strands = refs.strands.current
         self.plot.nucleic_acid = refs.nucleic_acid.current
         self.plot.refresh()
 
-    def strand_clicked(self, strand):
+    def strand_clicked(self, strand: Strand) -> None:
         """Slot for when a strand is clicked."""
         strand_button: StrandButton = (
             refs.constructor.config.panel.tabs.strands.strand_buttons[strand.index]
@@ -54,7 +56,7 @@ class Panel(QGroupBox):
         QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
         logger.info(f"Strand #{strand.index} was clicked.")
 
-    def points_clicked(self, points):
+    def points_clicked(self, points: List[Tuple[float, float]]) -> None:
         """slot for when a point in the plot is clicked."""
         if refs.mode.current == INFORMER:
             dialogs = []

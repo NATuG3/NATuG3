@@ -99,6 +99,7 @@ def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
 
 def chaikins_corner_cutting(coords, offset=0.25, refinements=5):
     # https://stackoverflow.com/a/47255374
+    coords = tuple(coords)
     coords = np.array(coords)
 
     for i in range(refinements):
