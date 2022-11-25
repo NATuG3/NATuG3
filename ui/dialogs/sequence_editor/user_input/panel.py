@@ -16,6 +16,7 @@ class UserInputSequenceEditor(QWidget):
         super().__init__()
         self.setWindowTitle("Sequence Editor")
         self._bases = list(bases)
+
         if len(self.bases) > 1000:
             raise OverflowError("Too many bases for manual input sequence editor!")
 

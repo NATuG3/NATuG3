@@ -14,25 +14,34 @@ class Domains:
 
     Attributes:
         subunit: The domains within a single subunit.
+        domains: All domains of all subunits.
+        count: The total number of domains. Includes domains from all subunits.
         symmetry: The symmetry type. Also known as "R".
     """
 
-    def __init__(self, domains: Iterable, symmetry: int):
+    def __init__(self, domains: Iterable, symmetry: int) -> None:
+        """
+        Initialize a domains container.
+
+        Args:
+            domains: A list of domains of a single subunit.
+            symmetry: The symmetry type. Also known as "R".
+        """
         assert isinstance(domains, Iterable)
         assert isinstance(symmetry, int)
         self.subunit = Subunit(list(domains))
         self.symmetry = symmetry
 
     @property
-    def domains(self):
+    def domains(self) -> list[Domain]:
         """
-        Obtain a list of all the domains.
+        List of all the domains.
 
         Notes:
             - This returns a copy of each domain.
             - The output is based off of self.subunit.domains.
         """
-        output = []
+        output: List[Domain] = []
         for cycle in range(self.symmetry):
             for domain in self.subunit.domains:
                 output.append(copy(domain))
@@ -41,23 +50,38 @@ class Domains:
         return output
 
     @property
-    def count(self):
-        """Total number of domains"""
+    def count(self) -> int:
+        """Total number of domains."""
         return self.subunit.count * self.symmetry
 
 
 class Subunit:
+    """
+    A domain subunit.
+
+    Attributes:
+        domains: The domains in the subunit.
+        count: The number of domains in the subunit.
+    """
+
     def __init__(self, domains: List[Domain]) -> None:
+        """
+        Create an instance of a subunit container.
+
+        Args:
+            domains: The domains in the subunit.
+        """
         assert isinstance(domains, list)
         self.domains = domains
 
     @property
     def count(self) -> int:
-        """Number of domains per subunit."""
+        """Number of domains in the subunit."""
         return len(self.domains)
 
     @count.setter
     def count(self, new):
+        """Change the number of domains in the subunit."""
         # if the subunit count has decreased then trim off extra domains
         if new < self.count:
             self.domains = self.domains[:new]

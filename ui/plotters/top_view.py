@@ -20,7 +20,7 @@ class PlotData:
     Currently plotted data.
 
     Attributes:
-        numbers: The plotted number symbols.
+        plotted_numbers: The plotted number symbols.
         x_coords: X coords of plotted data.
         z_coords: Z coords of plotted data.
         domains: The currently plotted domain circles.
@@ -30,20 +30,20 @@ class PlotData:
     x_coords: List[float] = None
     y_coords: List[float] = None
     rotation: pg.PlotDataItem = None
-    domains: pg.PlotDataItem = None
-    stroke: pg.PlotDataItem = None
-    numbers: List[pg.PlotDataItem] = None
+    plotted_domains: pg.PlotDataItem = None
+    plotted_stroke: pg.PlotDataItem = None
+    plotted_numbers: List[pg.PlotDataItem] = None
 
 
 class TopViewPlotter(pg.PlotWidget):
     point_clicked = pyqtSignal(tuple)
 
     def __init__(
-            self,
-            worker: TopViewWorker,
-            domains: Domains,
-            domain_radius: int,
-            rotation: float = 0,
+        self,
+        worker: TopViewWorker,
+        domains: Domains,
+        domain_radius: int,
+        rotation: float = 0,
     ):
         """
         Initialize top view plotter instance.
@@ -61,7 +61,6 @@ class TopViewPlotter(pg.PlotWidget):
         self.rotation = rotation
         self.domains = domains
         self.worker = worker
-
         self.plot_data = PlotData()
 
         self.getViewBox().setDefaultPadding(padding=0.18)
@@ -86,9 +85,9 @@ class TopViewPlotter(pg.PlotWidget):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
         if plot_data is None:
             plot_data = self.plot_data
-        self.removeItem(plot_data.domains)
-        self.removeItem(plot_data.stroke)
-        for number in plot_data.numbers:
+        self.removeItem(plot_data.plotted_domains)
+        self.removeItem(plot_data.plotted_stroke)
+        for number in plot_data.plotted_numbers:
             self.removeItem(number)
 
     def _prettify(self):
@@ -126,7 +125,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def _plot_domains(self, x_coords, y_coords):
         """Plot the domains."""
-        self.plot_data.domains = self.plot(
+        self.plot_data.plotted_domains = self.plot(
             x_coords,
             y_coords,
             symbol="o",
@@ -136,8 +135,8 @@ class TopViewPlotter(pg.PlotWidget):
         )
 
     def _plot_stroke(self, x_coords, y_coords):
-        """Plot the stroke."""
-        self.plot_data.stroke = self.plot(
+        """Plot the plotted_stroke."""
+        self.plot_data.plotted_stroke = self.plot(
             x_coords,
             y_coords,
             pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=7),
@@ -146,8 +145,8 @@ class TopViewPlotter(pg.PlotWidget):
         )
 
     def _plot_numbers(self, x_coords, y_coords):
-        """Plot the numbers."""
-        self.plot_data.numbers = []
+        """Plot the plotted_numbers."""
+        self.plot_data.plotted_numbers = []
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
             counter = str(counter)
             symbol_size = self.circle_radius / 3
@@ -158,10 +157,12 @@ class TopViewPlotter(pg.PlotWidget):
                 [position[0]],
                 [position[1]],
                 symbol=helpers.custom_symbol(counter),
-                symbolBrush=pg.mkBrush(color=settings.colors["domains"]["numbers"]),
+                symbolBrush=pg.mkBrush(
+                    color=settings.colors["domains"]["plotted_numbers"]
+                ),
                 symbolSize=symbol_size,
                 pxMode=False,
                 pen=None,
             )
             text.sigPointsClicked.connect(self._point_clicked)
-            self.plot_data.numbers.append(text)
+            self.plot_data.plotted_numbers.append(text)

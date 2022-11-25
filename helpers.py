@@ -31,7 +31,7 @@ def singleton(orig_cls):
     def __new__(cls, *args, **kwargs):
         nonlocal instance  # we are referring to the above instance variable
         if (
-                instance is None
+            instance is None
         ):  # if there is no instance of the class already than create one
             instance = orig_new(cls, *args, **kwargs)
         return instance  # return class instance
@@ -99,6 +99,7 @@ def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
 
 def chaikins_corner_cutting(coords, offset=0.25, refinements=5):
     # https://stackoverflow.com/a/47255374
+    coords = tuple(coords)
     coords = np.array(coords)
 
     for i in range(refinements):

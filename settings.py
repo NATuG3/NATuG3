@@ -2,6 +2,7 @@ extension = "nano"
 
 name = "NATuG"
 version = 3.0
+github = "https://github.com/404Wolf/NATuG"
 
 junction_threshold = 0.01
 
@@ -13,7 +14,7 @@ colors = {
     "domains": {
         "pen": (0, 0, 0, 120),
         "fill": (125, 125, 125),
-        "numbers": (255, 255, 255),
+        "plotted_numbers": (255, 255, 255),
     },
     "strands": {
         "greys": ((195, 195, 195), (70, 70, 70)),

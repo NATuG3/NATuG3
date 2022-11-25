@@ -15,6 +15,8 @@ class Strands:
 
     Attributes:
         strands: The actual strands.
+        up_strands: All up strands.
+        down_strands: All down strands.
     """
 
     def __init__(self, strands: Iterable[Strand]) -> None:
@@ -24,14 +26,27 @@ class Strands:
         Args:
             strands: A list of strands to create a Strands object from.
         """
-        assert [isinstance(strand, Strand) for strand in strands]
         self.strands = list(strands)
-        for strand in self.strands:
-            strand.parent = self
+        self.recompute()
 
     def __len__(self):
         """Obtain the number of strands this Strands object contains."""
         return len(self.strands)
+
+    @property
+    def up_strands(self):
+        return list(filter(lambda strand: strand.down_strand, self.strands))
+
+    @property
+    def down_strands(self):
+        return list(filter(lambda strand: strand.up_strand, self.strands))
+
+    def recompute(self):
+        """Reparent and recompute strands."""
+        # reparent all the strands
+        for strand in self.strands:
+            strand.recompute()
+            strand.parent = self
 
     def index(self, item: object) -> int:
         """Obtain the index of a given strand."""
@@ -47,14 +62,14 @@ class Strands:
         """Remove a strand from the container."""
         self.strands.remove(strand)
 
-    def recolor(self):
+    def recolor(self) -> None:
         """
         Recompute colors for all strands contained within.
         Prevents touching strands from sharing colors.
         """
         for strand in self.strands:
             if strand.interdomain:
-                illegal_colors = []
+                illegal_colors: List[Tuple[int, int, int]] = []
 
                 for potentially_touching in self.strands:
                     if strand.touching(potentially_touching):
@@ -89,11 +104,12 @@ class Strands:
             - The order of NEMid1 and NEMid2 is arbitrary.
             - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
         """
-        if dist(NEMid1.position(), NEMid2.position()) > settings.junction_threshold:
+        # ensure that both NEMids are junctable
+        if (not NEMid1.junctable) or (not NEMid2.junctable):
             raise ValueError(
                 "NEMids are not close enough to create a junction.",
-                NEMid1.position(),
-                NEMid2.position(),
+                NEMid1,
+                NEMid2,
             )
 
         # ensure that NEMid1 is the lefter NEMid
@@ -224,19 +240,19 @@ class Strands:
             if not new_strand.empty:
                 self.append(new_strand)
 
+        # recompute the new strands
+        [new_strand.recompute() for new_strand in new_strands]
+
         # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
         # then mark NEMid1 as not-a-junction
         for NEMid_ in (NEMid1, NEMid2):
-            if not NEMid_.strand.interdomain:
-                NEMid_.junction = False
-            else:
+            if NEMid_.strand.interdomain:
                 NEMid_.junction = True
+            else:
+                NEMid_.junction = False
 
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
-
-        # recompute the new strands
-        [new_strand.recompute() for new_strand in new_strands]
 
         self.recolor()
 

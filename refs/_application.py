@@ -6,9 +6,9 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
 
-QApplication.setHighDpiScaleFactorRoundingPolicy(
-    Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
-)
+# QApplication.setHighDpiScaleFactorRoundingPolicy(
+#     Qt.HighDpiScaleFactorRoundingPolicy.PassThrough
+# )
 if platform.system() == "Windows":
     if int(platform.release()) >= 8:
         ctypes.windll.shcore.SetProcessDpiAwareness(True)

@@ -11,11 +11,13 @@ logger = logging.getLogger(__name__)
 
 
 class Dockable(QDockWidget):
-    def __init__(self, profiles: Dict[str, NucleicAcidProfile], domains: Domains):
-        super().__init__()
+    def __init__(
+        self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
+    ):
+        super().__init__(parent)
 
         # set titles/descriptions
-        self.setObjectName("Config Panel")
+        self.setObjectName("Config Dockable")
         self.setStatusTip("Config panel")
         self.setWindowTitle("Config")
 
