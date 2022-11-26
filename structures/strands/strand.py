@@ -76,9 +76,14 @@ class Strand:
         return item in self.NEMids
 
     def NEMids_to_nucleosides(self) -> Deque[Nucleoside]:
-        """Compute nucleosides from NEMids."""
+        """
+        Compute nucleosides from NEMids.
+
+        Returns:
+            A deque of nucleosides computed from the NEMids of the strand.
+        """
         nucleosides: Deque[Nucleoside] = deque()
-        previous_z_coord = 0
+        previous_z_coord: float
         for NEMid_ in self.NEMids:
             previous_z_coord = NEMid_.z_coord
             z_has_changed = (
@@ -96,7 +101,7 @@ class Strand:
                 nucleosides.append(nucleoside)
         return nucleosides
 
-    def clear_pseudos(self):
+    def clear_pseudos(self) -> None:
         """Removes all pseudo items."""
 
         def pseudo_check(item):

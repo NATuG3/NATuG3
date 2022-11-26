@@ -10,7 +10,7 @@ import refs
 import settings
 import ui.dialogs.informers
 import ui.plotters
-from constants.modes import *
+from constants.toolbar import *
 from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.strands import Strand
@@ -29,7 +29,7 @@ class Panel(QGroupBox):
         self.setStatusTip("A plot of the side view of all domains")
 
         self.plot = ui.plotters.SideViewPlotter(
-            refs.strands.current, refs.nucleic_acid.current
+            refs.strands.current, refs.nucleic_acid.current, refs.plot_mode.current
         )
         self.plot.points_clicked.connect(self.points_clicked)
         self.plot.strand_clicked.connect(self.strand_clicked)
@@ -39,6 +39,7 @@ class Panel(QGroupBox):
         """Update the current plot."""
         self.plot.strands = refs.strands.current
         self.plot.nucleic_acid = refs.nucleic_acid.current
+        self.plot.mode = refs.plot_mode.current
         self.plot.refresh()
 
     def strand_clicked(self, strand: Strand) -> None:

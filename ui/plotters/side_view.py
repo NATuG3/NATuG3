@@ -3,7 +3,7 @@ from contextlib import suppress
 from dataclasses import dataclass
 from functools import partial
 from math import ceil, dist
-from typing import List, Type, Tuple, Dict
+from typing import List, Type, Tuple, Dict, Literal
 
 import numpy as np
 import pyqtgraph as pg
@@ -31,7 +31,7 @@ class PlotData:
 
     Attributes:
         strands: The currently plotted strands.
-        types: The types of strand NEMids plotted.
+        mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
         plotted_strokes: The strand pen line.
@@ -39,7 +39,7 @@ class PlotData:
     """
 
     strands: Strands = None
-    types: List[Type] = None
+    mode: Literal["nucleoside", "NEMid"] = None
     points: Dict[Tuple[float, float], Point] = None
     plotted_points: List[pg.PlotDataItem] = None
     plotted_strokes: List[pg.PlotDataItem] = None
@@ -56,7 +56,7 @@ class SideViewPlotter(pg.PlotWidget):
         plot_data: Currently plotted data.
         width: The width of the plot.
         height: The height of the plot.
-        plot_types: The types of strand NEMids to plot.
+        mode: The plotting toolbar. Either "nucleoside" or "NEMid".
 
     Signals:
         points_clicked(tuple of all points clicked): When plotted points are clicked.
@@ -70,22 +70,22 @@ class SideViewPlotter(pg.PlotWidget):
         self,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
-        plot_types: List[Type] = (object,),
-    ):
+        mode: Literal["nucleoside", "NEMid"],
+    ) -> None:
         """
         Initialize plotter instance.
 
         Args:
             strands: The strands to plot.
             nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the strands to plot.
-            plot_types: A list of the types of strand NEMids to plot. Defaults to all NEMids.
+            mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
         """
         super().__init__()
 
         # store config data
         self.strands = strands
         self.nucleic_acid_profile = nucleic_acid_profile
-        self.plot_types = plot_types
+        self.mode = mode
         self.plot_data = PlotData()
 
         # plot initial data
@@ -171,7 +171,7 @@ class SideViewPlotter(pg.PlotWidget):
 
     def _plot(self):
         self.plot_data.strands = self.strands
-        self.plot_data.types = self.plot_types
+        self.plot_data.mode = self.mode
         self.plot_data.points = dict()
         self.plot_data.plotted_points = list()
         self.plot_data.plotted_strokes = list()
@@ -182,6 +182,7 @@ class SideViewPlotter(pg.PlotWidget):
                 strand.NEMids.append(strand.NEMids[0])
                 strand.NEMids[-1].pseudo = True
 
+            # create containers for plotting data
             symbols: List[str] = list()
             symbol_sizes: List[int] = list()
             x_coords: List[float] = list()
@@ -189,7 +190,7 @@ class SideViewPlotter(pg.PlotWidget):
             brushes = list()
 
             # create the NEMid brush
-            NEMid_brush = pg.mkBrush(color=strand.color)
+            point_brush = pg.mkBrush(color=strand.color)
 
             # set dim brush as a dimmer version of the strand color
             dim_brush = []
@@ -206,39 +207,45 @@ class SideViewPlotter(pg.PlotWidget):
             else:
                 pen = pg.mkPen(color=strand.color, width=9.5, pxMode=False)
 
-            for NEMid_index, NEMid_ in enumerate(strand.NEMids):
+            # iterate on the proper type based on toolbar
+            if self.plot_data.mode == "NEMid":
+                to_plot = strand.NEMids
+            elif self.plot_data.mode == "nucleoside":
+                to_plot = strand.nucleosides
+
+            for point_index, point in enumerate(to_plot):
                 # update the point mappings
                 self.plot_data.points[
                     (
-                        NEMid_.x_coord,
-                        NEMid_.z_coord,
+                        point.x_coord,
+                        point.z_coord,
                     )
-                ] = NEMid_
+                ] = point
 
-                # ensure that this NEMid gets plotted
-                x_coords.append(NEMid_.x_coord)
-                z_coords.append(NEMid_.z_coord)
+                # ensure that this point gets plotted
+                x_coords.append(point.x_coord)
+                z_coords.append(point.z_coord)
 
-                # determine whether the symbol for the NEMid is an up or down arrow
-                if NEMid_.direction == UP:
+                # determine whether the symbol for the point is an up or down arrow
+                if point.direction == UP:
                     symbols.append("t1")  # up arrow
-                elif NEMid_.direction == DOWN:
+                elif point.direction == DOWN:
                     symbols.append("t")  # down arrow
                 else:
-                    raise ValueError("NEMid.direction is not UP or DOWN.", NEMid_)
+                    raise ValueError("Point.direction is not UP or DOWN.", point)
 
-                # if the NEMid is highlighted then make it larger and yellow
-                if NEMid_.highlighted:
+                # if the Point is highlighted then make it larger and yellow
+                if point.highlighted:
                     symbol_sizes.append(18)
                     brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                 else:
                     symbol_sizes.append(6)
-                    # if the NEMid is junctable then make it dimmer colored
-                    if NEMid_.junctable:
+                    # if the Point is junctable then make it dimmer colored
+                    if point.junctable:
                         brushes.append(dim_brush)
                     # otherwise use normal coloring
                     else:
-                        brushes.append(NEMid_brush)
+                        brushes.append(point_brush)
 
             # graph the points separately
             plotted_points = pg.PlotDataItem(
@@ -264,11 +271,11 @@ class SideViewPlotter(pg.PlotWidget):
                 # in case the junction is a left-to-right side of screen junction
                 # do not plot the entire connector line going from the left to the
                 # right of the screen
-                for NEMid_index, (x_coord, z_coord) in enumerate(coords.copy()):
-                    if NEMid_index != len(coords) - 1:
+                for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
+                    if point_index != len(coords) - 1:
                         # if the distance between this x coord and the next one is large
                         # then add a break in the connector
-                        if abs(x_coord - coords[NEMid_index + 1][0]) > 1:
+                        if abs(x_coord - coords[point_index + 1][0]) > 1:
                             # do not connect
                             connect.append(0)
                         else:
