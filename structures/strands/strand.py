@@ -8,6 +8,7 @@ from typing import Tuple, Type, Iterable, Deque
 
 import settings
 from structures.points import NEMid, Nucleoside
+from structures.profiles import NucleicAcidProfile
 
 
 def shuffled(iterable: Iterable) -> list:
@@ -22,33 +23,34 @@ class Strand:
     A strand of items.
 
     Attributes:
-        items: All items contained within the strand (NEMids, Nicks, etc.).
+        nucleic_acid_profile: The nucleic acid settings used.
         NEMids: All NEMids contained within the strand.
         nucleosides: All NEMids contained within the strand.
         color (tuple[int, int, int]): RGB color of strand.
         closed (bool): Whether the strand is closed. Must be manually set.
         empty (bool): Whether the strand is empty.
-        boundaries (tuple[minX, maxX, minY, maxY]): The boundary box of the strand.
         up_strand (bool): Whether all NEMids in this strand are up-NEMids.
         down_strand (bool): Whether all NEMids in this strand are down-NEMids.
         interdomain (bool): Whether this strand spans multiple domains.
     """
 
-    __cached = ("up_strand", "down_strand", "interdomain", "boundaries")
+    __cached = ("up_strand", "down_strand", "interdomain", "nucleosides")
     __supported_types = (NEMid, Nucleoside)
 
     def __init__(
         self,
-        items: list = None,
+        nucleic_acid_profile: NucleicAcidProfile,
+        NEMids: Iterable[NEMid] | None = None,
         color: Tuple[int, int, int] = (0, 0, 0),
-        closed: bool | None = False,
+        closed: bool = False,
         parent: Type["Strands"] = None,
     ):
         """
         Initialize the strand object.
 
         Args:
-            items: All items to place inside the strand. Order sensitive.
+            nucleic_acid_profile: The nucleic acid settings to use.
+            NEMids: All NEMids to place inside the strand. Order sensitive.
             color: RGB color for the strand. Defaults to black.
             closed: Whether the strand is closed. Defaults to False.
             parent: The parent Strands object. Defaults to None.
@@ -56,22 +58,14 @@ class Strand:
         self.color = color
         self.closed = closed
         self.parent = parent
+        self.nucleic_acid_profile = nucleic_acid_profile
 
-        self.NEMids: Deque[NEMid] = deque()
-        self.nucleosides: Deque[Nucleoside] = deque()
-        if items is not None:
-            for item in items:
-                if isinstance(item, NEMid):
-                    self.NEMids.append(item)
-                elif isinstance(item, Nucleoside):
-                    self.nucleosides.append(item)
-                else:
-                    raise self.UnsupportedTypeError
+        if NEMids is None:
+            self.NEMids = deque()
+        else:
+            self.NEMids = deque(NEMids)
 
-    class UnsupportedTypeError(TypeError):
-        """An item of an unsupported time is being added to the strand."""
-
-        pass
+        self.nucleosides = self.NEMids_to_nucleosides()
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
@@ -80,6 +74,27 @@ class Strand:
     def __contains__(self, item) -> bool:
         """Determine whether item is in strand."""
         return item in self.NEMids
+
+    def NEMids_to_nucleosides(self) -> Deque[Nucleoside]:
+        """Compute nucleosides from NEMids."""
+        nucleosides: Deque[Nucleoside] = deque()
+        previous_z_coord = 0
+        for NEMid_ in self.NEMids:
+            previous_z_coord = NEMid_.z_coord
+            z_has_changed = (
+                abs(NEMid_.z_coord - previous_z_coord) < settings.junction_threshold
+            )
+            if not z_has_changed:
+                nucleoside = Nucleoside(
+                    x_coord=NEMid_.x_coord,
+                    z_coord=NEMid_.z_coord + (self.nucleic_acid_profile.Z_b / 2),
+                    angle=NEMid_.angle,
+                    direction=NEMid_.direction,
+                    base=None,
+                    matching=NEMid_.matching,
+                )
+                nucleosides.append(nucleoside)
+        return nucleosides
 
     def clear_pseudos(self):
         """Removes all pseudo items."""
@@ -173,18 +188,3 @@ class Strand:
             [item.z_coord for item in self.NEMids]
         )
         return width, height
-
-    @cached_property
-    def boundaries(self) -> Tuple[float, float, float, float]:
-        """
-        The location of the bounding box of the strand.
-
-        Returns:
-            Tuple[xMin, xMax, zMin, zMax]: The boundary box of the strand.
-        """
-        return (
-            min(item.x_coord for item in self.NEMids),
-            max(item.x_coord for item in self.NEMids),
-            min(item.z_coord for item in self.NEMids),
-            max(item.z_coord for item in self.NEMids),
-        )

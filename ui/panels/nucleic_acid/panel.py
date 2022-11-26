@@ -26,7 +26,7 @@ class Panel(QWidget):
         # set all setting descriptions
         self._setting_descriptions()
 
-        # set up profile manager
+        # set up nucleic_acid_profile manager
         self._profile_manager()
 
         # load defaults
@@ -57,7 +57,7 @@ class Panel(QWidget):
         )
 
     def _profile_manager(self):
-        """Set up profile manager."""
+        """Set up nucleic_acid_profile manager."""
         self.profile_manager = ProfileManager(
             refs.constructor,
             self.fetch_settings,

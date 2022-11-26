@@ -4,6 +4,7 @@ from typing import List, Tuple, Iterable
 
 import settings
 from structures.points import NEMid
+from structures.profiles import NucleicAcidProfile
 from structures.strands.strand import Strand
 
 logger = logging.getLogger(__name__)
@@ -14,18 +15,21 @@ class Strands:
     A container for multiple strands.
 
     Attributes:
+        nucleic_acid_profile: The nucleic acid settings for the strands container.
         strands: The actual strands.
         up_strands: All up strands.
         down_strands: All down strands.
     """
 
-    def __init__(self, strands: Iterable[Strand]) -> None:
+    def __init__(self, nucleic_acid_profile: NucleicAcidProfile, strands: Iterable[Strand]) -> None:
         """
         Initialize an instance of Strands.
 
         Args:
+            nucleic_acid_profile: The nucleic acid settings for the strands container.
             strands: A list of strands to create a Strands object from.
         """
+        self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
         self.recompute()
 
@@ -117,7 +121,7 @@ class Strands:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
         # new strands we are creating
-        new_strands = [Strand(), Strand()]
+        new_strands = [Strand(self.nucleic_acid_profile), Strand(self.nucleic_acid_profile)]
 
         # log basic info for debugging
         logger.debug(f"NEMid1.index={NEMid1.index}; NEMid2.index={NEMid2.index}")

@@ -52,7 +52,7 @@ class SideViewPlotter(pg.PlotWidget):
 
     Attributes:
         strands: The strands to plot.
-        nucleic_acid_profile: The nucleic acid profile of the strands to plot.
+        nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the strands to plot.
         plot_data: Currently plotted data.
         width: The width of the plot.
         height: The height of the plot.
@@ -77,7 +77,7 @@ class SideViewPlotter(pg.PlotWidget):
 
         Args:
             strands: The strands to plot.
-            nucleic_acid_profile: The nucleic acid profile of the strands to plot.
+            nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the strands to plot.
             plot_types: A list of the types of strand NEMids to plot. Defaults to all NEMids.
         """
         super().__init__()
