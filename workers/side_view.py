@@ -25,14 +25,18 @@ class SideViewWorker:
     strand_directions = (UP, DOWN)
     cache_clearers = ("domains", "profiles")
 
-    def __init__(self, domains: Domains, profile: NucleicAcidProfile) -> None:
+    def __init__(
+        self, domains: Domains, nucleic_acid_profile: NucleicAcidProfile
+    ) -> None:
         """
-        Worker for computing strands from domains.
+        Initialize a side view generator object.
+
+        Args:
+            domains: The domains to compute strands for.
+            nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile to use.
         """
         self.domains = domains
-        assert isinstance(domains, Domains)
-        self.profile = profile
-        assert isinstance(profile, NucleicAcidProfile)
+        self.nucleic_acid_profile = nucleic_acid_profile
 
     def __setattr__(self, key, value):
         if key in self.cache_clearers:
@@ -58,8 +62,12 @@ class SideViewWorker:
     def theta_interiors(self):
         theta_interiors = []
         for domain in self.domains.domains:
-            theta_interior = domain.theta_interior_multiple * self.profile.theta_c
-            theta_interior -= domain.theta_switch_multiple * self.profile.theta_s
+            theta_interior = (
+                domain.theta_interior_multiple * self.nucleic_acid_profile.theta_c
+            )
+            theta_interior -= (
+                domain.theta_switch_multiple * self.nucleic_acid_profile.theta_s
+            )
             theta_interiors.append(theta_interior)
         return theta_interiors
 
@@ -86,7 +94,7 @@ class SideViewWorker:
                     else:
                         # revert to the previous z coord
                         # (since the begin-at-up didn't tick)
-                        up_strand_z_coord -= self.profile.Z_b
+                        up_strand_z_coord -= self.nucleic_acid_profile.Z_b
                         # then keep moving the initial down-strand NEMid up
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)
@@ -144,7 +152,12 @@ class SideViewWorker:
                 ):
                     # combine all data into NEMid object
                     NEMid_ = NEMid(
-                        x_coord, z_coord, angle % 360, strand_direction, domain=domain
+                        x_coord=x_coord,
+                        z_coord=z_coord,
+                        angle=angle % 360,
+                        direction=strand_direction,
+                        domain=domain,
+                        strand=None,
                     )
 
                     # append the current NEMid to the to-be-outputted array
@@ -187,7 +200,10 @@ class SideViewWorker:
                             else:
                                 z_dist = abs(NEMid1.z_coord - NEMid2.z_coord)
                                 x_dist = abs(NEMid1.x_coord - NEMid2.x_coord)
-                                opposite_sides = abs(x_dist - self.domains.count) < settings.junction_threshold
+                                opposite_sides = (
+                                    abs(x_dist - self.domains.count)
+                                    < settings.junction_threshold
+                                )
                                 matching_heights = z_dist < settings.junction_threshold
                                 if opposite_sides and matching_heights:
                                     junction = True
@@ -203,13 +219,14 @@ class SideViewWorker:
             for index, domain in enumerate(self.domains.domains):
                 converted_strands.append(
                     Strand(
-                        strands[index][strand_direction],
+                        nucleic_acid_profile=self.nucleic_acid_profile,
+                        NEMids=strands[index][strand_direction],
                         color=settings.colors["strands"]["greys"][strand_direction],
                     )
                 )
 
         # convert strands from a list to a Strands container
-        strands = Strands(converted_strands)
+        strands = Strands(self.nucleic_acid_profile, converted_strands)
 
         return strands
 
@@ -231,18 +248,18 @@ class SideViewWorker:
             # create infinite generators for the zeroed and non zeroed strands
             angles[index][zeroed_strand] = itertools.count(
                 start=0.0,  # zeroed strand starts at 0
-                step=self.profile.theta_b,  # and steps by self.theta_b
+                step=self.nucleic_acid_profile.theta_b,  # and steps by self.theta_b
             )
 
             # calculate the start value of the inverse(zeroed_strand)
             if zeroed_strand == UP:
-                start = 0.0 - self.profile.theta_s
+                start = 0.0 - self.nucleic_acid_profile.theta_s
             else:  # zeroed_strand == DOWN:
-                start = 0.0 + self.profile.theta_s
+                start = 0.0 + self.nucleic_acid_profile.theta_s
 
             angles[index][inverse(zeroed_strand)] = itertools.count(
                 start=start,  # non-zeroed strand starts at 0-self.theta_s
-                step=self.profile.theta_b,  # and steps by self.theta_b
+                step=self.nucleic_acid_profile.theta_b,  # and steps by self.theta_b
             )
 
         for index in range(self.domains.count):
@@ -285,7 +302,10 @@ class SideViewWorker:
                     x_coords[index][strand_direction].append(x_coord)
 
                     # break once self.B x coords have been generated
-                    if len(x_coords[index][strand_direction]) == self.profile.B:
+                    if (
+                        len(x_coords[index][strand_direction])
+                        == self.nucleic_acid_profile.B
+                    ):
                         break
 
                 # there are self.B unique x coords
@@ -313,7 +333,7 @@ class SideViewWorker:
         for index, domain in enumerate(self.domains.domains):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
-                    x_coords[index][strand_direction], 0, self.profile.B
+                    x_coords[index][strand_direction], 0, self.nucleic_acid_profile.B
                 )
                 x_coords[index][strand_direction] = tuple(
                     x_coords[index][strand_direction]
@@ -337,7 +357,9 @@ class SideViewWorker:
                 # z coords, of this domain's left helix joint (zeroed_strand)
                 previous_z_coords = tuple(
                     itertools.islice(
-                        z_coords[index - 1][zeroed_strand], 0, self.profile.B
+                        z_coords[index - 1][zeroed_strand],
+                        0,
+                        self.nucleic_acid_profile.B,
                     )
                 )
 
@@ -355,7 +377,9 @@ class SideViewWorker:
 
             # move the initial Z coord down until it is as close to z=0 as possible
             # this way the graphs don't skew upwards weirdly
-            offset_interval = self.profile.Z_b * self.profile.B
+            offset_interval = (
+                self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
+            )
             while initial_z_coord > 0:
                 initial_z_coord -= offset_interval
             initial_z_coord -= offset_interval
@@ -366,13 +390,13 @@ class SideViewWorker:
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(
-                start=initial_z_coord, step=self.profile.Z_b
+                start=initial_z_coord, step=self.nucleic_acid_profile.Z_b
             )
             # begin at the initial z coord and step by self.Z_b
 
             # helix switch is the change in the z coord of a watson crick base pair
             # as we go from the left helix to the other helix (may not be left/right)
-            helix_switch = self.profile.Z_s
+            helix_switch = self.nucleic_acid_profile.Z_s
             if zeroed_strand == UP:
                 helix_switch *= -1
             # elif zeroed_strand == DOWN:
@@ -380,7 +404,7 @@ class SideViewWorker:
 
             # non-zeroed strand
             z_coords[index][inverse(zeroed_strand)] = itertools.count(
-                start=initial_z_coord + helix_switch, step=self.profile.Z_b
+                start=initial_z_coord + helix_switch, step=self.nucleic_acid_profile.Z_b
             )
             # begin at the (initial z coord - z switch) and step by self.Z_b
 

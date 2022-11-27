@@ -34,7 +34,7 @@ class NucleicAcidProfile:
         self.Z_b = (self.T * self.H) / self.B
 
     def __eq__(self, other: object) -> bool:
-        """Whether our profile is the same as theirs."""
+        """Whether our nucleic_acid_profile is the same as theirs."""
         if isinstance(other, type(self)):
             return vars(self) == vars(other)
         else:

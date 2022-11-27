@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from types import SimpleNamespace
 from typing import Literal, List
 
@@ -49,11 +50,14 @@ class Table(QTableWidget):
             Qt.Key.Key_Up,
         ):
             row, column = self.currentRow(), self.currentColumn()
+            self.cellWidget(row, column).editingFinished.emit()
+            self.cell_widget_updated.emit()
             if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Down):
                 row += 1
             else:
                 row -= 1
-            self.cellWidget(row, column).editingFinished.emit()
+            if row == len(self.rows):
+                row = 0
             self.setTabKeyNavigation(False)
             self.blockSignals(True)
             to_focus = self.cellWidget(row, column)

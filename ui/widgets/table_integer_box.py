@@ -1,4 +1,5 @@
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QWheelEvent
 from PyQt6.QtWidgets import QSpinBox, QStyle, QStyleOptionSpinBox
 
 up_arrow, down_arrow = "↑", "↓"
@@ -27,6 +28,9 @@ class TableIntegerBox(QSpinBox):
             self.setButtonSymbols(QSpinBox.ButtonSymbols.UpDownArrows)
         else:
             self.setButtonSymbols(QSpinBox.ButtonSymbols.NoButtons)
+
+    def wheelEvent(self, event: QWheelEvent) -> None:
+        event.ignore()
 
     def mousePressEvent(self, event):
         # https://stackoverflow.com/a/65226649

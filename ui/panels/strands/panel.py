@@ -12,10 +12,14 @@ class Panel(QWidget):
 
         self.strand_buttons = []
         self.strands_area = QWidget()
-        self._strands()
+        self.reload()
 
-    def _strands(self):
+    def reload(self):
         """Set up the strands area"""
+        for button in self.strand_buttons:
+            button.deleteLater()
+        self.strand_buttons.clear()
+
         self.strands_area: QWidget
         self.strands_area.setLayout(QGridLayout())
         self.strands_area.setContentsMargins(2, 2, 2, 2)
