@@ -122,13 +122,13 @@ class Table(QTableWidget):
             row = SimpleNamespace()
 
             # column 0 - left helical joint
-            row.left_helix_joint = DirectionalButton(self, domain.helix_joints[LEFT])
+            row.left_helix_joint = DirectionalButton(self, domains.domains[index].helix_joints[LEFT])
             row.left_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.left_helix_joint.clicked.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 0, row.left_helix_joint)
 
             # column 1 - right helical joint
-            row.right_helix_joint = DirectionalButton(self, domain.helix_joints[RIGHT])
+            row.right_helix_joint = DirectionalButton(self, domains.domains[index].helix_joints[RIGHT])
             row.right_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.right_helix_joint.clicked.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 1, row.right_helix_joint)

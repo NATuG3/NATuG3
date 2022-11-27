@@ -58,20 +58,26 @@ class Panel(QWidget):
         self.subunit_count.valueChanged.connect(update_total_domain_box)
 
         # when helix joint buttons are clicked refresh the table
-        # so that the switch values (-1, 0, 1) get udpated
+        # so that the switch values (-1, 0, 1) get updated
         self.table.helix_joint_updated.connect(self.table_refresh)
 
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
 
         # updated event linking
+        self.table.cell_widget_updated.connect(self.settings_refresh)
         self.update_table.clicked.connect(self.table_refresh)
         self.update_table.clicked.connect(self.settings_refresh)
         self.update_table.clicked.connect(self.updated.emit)
 
+        self.table.cell_widget_updated.connect(self.settings_refresh)
         self.table.cell_widget_updated.connect(self.table_refresh)
         self.table.cell_widget_updated.connect(self.settings_refresh)
         self.table.cell_widget_updated.connect(self.updated.emit)
+
+        self.table.helix_joint_updated.connect(lambda: self.auto_antiparallel.setChecked(False))
+        self.auto_antiparallel.stateChanged.connect(self.table_refresh)
+        self.auto_antiparallel.stateChanged.connect(self.updated.emit)
 
     def _prettify(self):
         """Set up styles of panel."""
