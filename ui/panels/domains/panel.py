@@ -65,12 +65,12 @@ class Panel(QWidget):
         self.table.dump_domains(refs.domains.current)
 
         # updated event linking
-        self.update_table.clicked.connect(self.settings_refresh)
         self.update_table.clicked.connect(self.table_refresh)
+        self.update_table.clicked.connect(self.settings_refresh)
         self.update_table.clicked.connect(self.updated.emit)
 
-        self.table.cell_widget_updated.connect(self.settings_refresh)
         self.table.cell_widget_updated.connect(self.table_refresh)
+        self.table.cell_widget_updated.connect(self.settings_refresh)
         self.table.cell_widget_updated.connect(self.updated.emit)
 
     def _prettify(self):
@@ -128,7 +128,7 @@ class Panel(QWidget):
     def table_refresh(self):
         """Refresh panel settings/domain table."""
         new_domains: Domains = Domains(
-            self.table.fetch_domains(), refs.domains.current.symmetry
+            self.table.fetch_domains(), refs.domains.current.symmetry, self.auto_antiparallel.isChecked()
         )
         # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count

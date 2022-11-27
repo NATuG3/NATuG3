@@ -2,6 +2,7 @@ import logging
 from copy import copy
 from typing import List, Iterable
 
+from constants.directions import *
 from helpers import inverse
 from structures.domains import Domain
 
@@ -19,7 +20,7 @@ class Domains:
         symmetry: The symmetry type. Also known as "R".
     """
 
-    def __init__(self, domains: Iterable, symmetry: int) -> None:
+    def __init__(self, domains: Iterable, symmetry: int, auto_antiparallel: bool) -> None:
         """
         Initialize a domains container.
 
@@ -27,9 +28,8 @@ class Domains:
             domains: A list of domains of a single subunit.
             symmetry: The symmetry type. Also known as "R".
         """
-        assert isinstance(domains, Iterable)
-        assert isinstance(symmetry, int)
         self.subunit = Subunit(list(domains))
+        self.auto_antiparallel = auto_antiparallel
         self.symmetry = symmetry
 
     @property
@@ -41,12 +41,21 @@ class Domains:
             - This returns a copy of each domain.
             - The output is based off of self.subunit.domains.
         """
+        # compute an output that is symmetry number of copies of a subunit
         output: List[Domain] = []
         for cycle in range(self.symmetry):
             for domain in self.subunit.domains:
                 output.append(copy(domain))
         for index, domain in enumerate(output):
             domain.index = index
+
+        # force antiparallelity if self.autoparallel
+        if self.auto_antiparallel:
+            direction = UP
+            for index, domain in enumerate(output):
+                output[index].helix_joints = [direction, direction]
+                direction = inverse(direction)
+
         return output
 
     @property

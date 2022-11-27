@@ -29,6 +29,7 @@ class _Domains:
             Domain(14, 9, (DOWN, DOWN), 50),
         ),
         1,
+        True
     )
 
     def __init__(self):

@@ -127,6 +127,7 @@ class SideViewPlotter(pg.PlotWidget):
             self.removeItem(points)
         for gridline in plot_data.plotted_gridlines:
             self.removeItem(gridline)
+        self.clear()
 
     def _points_clicked(self, event, points):
         """Called when a point on a strand is clicked."""
