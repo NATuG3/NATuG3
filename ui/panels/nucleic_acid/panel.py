@@ -106,6 +106,9 @@ class Panel(QWidget):
         self.H.setToolTip("Twist Height")
         self.H.setStatusTip("The height of one turn of the helix of a nucleic acid.")
 
+        self.g.setToolTip("Nucleoside-Mate Angle")
+        self.g.setStatusTip("The angle between a nucleoside and its mate on the other helix.")
+
         self.T.setToolTip("Turns")
         self.T.setStatusTip("There are B bases per T turns of the helix.")
 
@@ -125,6 +128,11 @@ class Panel(QWidget):
         self.Z_s.setToolTip("Strand Switch Height")
         self.Z_s.setStatusTip(
             "The vertical height between two NEMids on different helices of the same double helix."
+        )
+
+        self.Z_mate.setToolTip("Nucleoside-Mate Vertical Distance")
+        self.Z_mate.setStatusTip(
+            "The vertical distance between a nucleoside and its mate on the other helix."
         )
 
         self.theta_b.setToolTip("Base Angle")

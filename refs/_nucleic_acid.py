@@ -15,9 +15,10 @@ class _NucleicAcid:
         restored = f"saves/nucleic_acid/restored.{settings.extension}"
 
     defaults = {
-        "B-DNA (MFD)": NucleicAcidProfile(
+        "MFD B-DNA": NucleicAcidProfile(
             D=2.2,
             H=3.549,
+            g=134.8,
             T=2,
             B=21,
             Z_c=0.17,
