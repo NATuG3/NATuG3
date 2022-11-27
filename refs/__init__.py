@@ -1,10 +1,10 @@
 import ui.constructor
 from ._application import _Application
 from ._domains import _Domains
-from ._toolbar import _Toolbar
 from ._nucleic_acid import _NucleicAcid
-from ._strands import _Strands
 from ._plot_mode import _PlotMode
+from ._strands import _Strands
+from ._toolbar import _Toolbar
 
 application = _Application()
 

@@ -41,12 +41,14 @@ class NucleosideInformer(QDialog):
         elif nucleoside.direction == DOWN:
             self.down.setChecked(True)
 
-        style = "QTextEdit{{" \
-                "color: rgb(0, 0, 0); " \
-                "font-size: {font_size}px; " \
-                "text-align: center; " \
-                "background: rgb(255, 255, 255)" \
-                "}};"
+        style = (
+            "QTextEdit{{"
+            "color: rgb(0, 0, 0); "
+            "font-size: {font_size}px; "
+            "text-align: center; "
+            "background: rgb(255, 255, 255)"
+            "}};"
+        )
         if nucleoside.base is None:
             self.base.setStyleSheet(style.format(font_size=10))
             self.base.setText("Unset\nBase")

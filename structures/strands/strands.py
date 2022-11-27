@@ -21,7 +21,9 @@ class Strands:
         down_strands: All down strands.
     """
 
-    def __init__(self, nucleic_acid_profile: NucleicAcidProfile, strands: Iterable[Strand]) -> None:
+    def __init__(
+        self, nucleic_acid_profile: NucleicAcidProfile, strands: Iterable[Strand]
+    ) -> None:
         """
         Initialize an instance of Strands.
 
@@ -121,7 +123,10 @@ class Strands:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
         # new strands we are creating
-        new_strands = [Strand(self.nucleic_acid_profile), Strand(self.nucleic_acid_profile)]
+        new_strands = [
+            Strand(self.nucleic_acid_profile),
+            Strand(self.nucleic_acid_profile),
+        ]
 
         # log basic info for debugging
         logger.debug(f"NEMid1.index={NEMid1.index}; NEMid2.index={NEMid2.index}")

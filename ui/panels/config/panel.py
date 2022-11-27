@@ -110,7 +110,10 @@ class Panel(QWidget):
 
         def tab_changed(index: int):
             """Update the plotting mode based on the currently opened tab."""
-            if index in (NUCLEIC_ACID, DOMAINS,):
+            if index in (
+                NUCLEIC_ACID,
+                DOMAINS,
+            ):
                 # if the plot mode was not already NEMid make it NEMid
                 if refs.plot_mode.current != "NEMid":
                     refs.plot_mode.current = "NEMid"

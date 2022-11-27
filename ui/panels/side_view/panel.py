@@ -45,7 +45,9 @@ class Panel(QGroupBox):
     def strand_clicked(self, strand: Strand) -> None:
         """Slot for when a strand is clicked."""
         strand_button: StrandButton = (
-            refs.constructor.config.panel.tabs.strands.strand_buttons[strand.parent.index(strand)]
+            refs.constructor.config.panel.tabs.strands.strand_buttons[
+                strand.parent.index(strand)
+            ]
         )
         scroll_area: QScrollArea = (
             refs.constructor.config.panel.tabs.strands.scrollable_strands_area

@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Union, TypeVar, Type
+from typing import Union
 
 from constants import bases
 from structures.points.point import Point

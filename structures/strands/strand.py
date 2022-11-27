@@ -105,10 +105,14 @@ class Strand:
             this_z_coord = NEMid_.z_coord
 
             # detect whether we've reached the tip of a peak
-            tipping_point = this_z_coord > previous_z_coord and this_z_coord > next_z_coord
+            tipping_point = (
+                this_z_coord > previous_z_coord and this_z_coord > next_z_coord
+            )
             # detect whether we've reached the bottom of a trough
             if not tipping_point:
-                tipping_point = this_z_coord < previous_z_coord and this_z_coord < next_z_coord
+                tipping_point = (
+                    this_z_coord < previous_z_coord and this_z_coord < next_z_coord
+                )
 
             if not tipping_point:
                 nucleoside = NEMid_.to_nucleoside()
