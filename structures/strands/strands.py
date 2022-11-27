@@ -49,8 +49,8 @@ class Strands:
         """Reparent and recompute strands."""
         # reparent all the strands
         for strand in self.strands:
-            strand.recompute()
             strand.parent = self
+            strand.recompute()
 
     def index(self, item: object) -> int:
         """Obtain the index of a given strand."""
@@ -259,6 +259,7 @@ class Strands:
         NEMid2.juncmate = NEMid1
 
         self.recolor()
+        self.recompute()
 
     @property
     def size(self) -> Tuple[float, float]:

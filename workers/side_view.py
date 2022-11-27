@@ -152,7 +152,12 @@ class SideViewWorker:
                 ):
                     # combine all data into NEMid object
                     NEMid_ = NEMid(
-                        x_coord, z_coord, angle % 360, strand_direction, domain=domain
+                        x_coord=x_coord,
+                        z_coord=z_coord,
+                        angle=angle % 360,
+                        direction=strand_direction,
+                        domain=domain,
+                        strand=None,
                     )
 
                     # append the current NEMid to the to-be-outputted array

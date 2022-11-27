@@ -7,7 +7,7 @@ from constants.toolbar import *
 class _Toolbar:
     def __init__(self):
         self.actions: QButtonGroup = refs.constructor.toolbar.actions
-        self.actions.buttons[1].setChecked(True)
+        self.actions.buttons[INFORMER].setChecked(True)
 
     @property
     def current(self) -> str:
@@ -27,4 +27,4 @@ class _Toolbar:
         Args:
             id_: The id of the toolbar to change to.
         """
-        self.actions.setId(id_)
+        self.actions.buttons[id_].click()

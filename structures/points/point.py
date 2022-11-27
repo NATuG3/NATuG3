@@ -1,29 +1,49 @@
 from dataclasses import dataclass
-from typing import Tuple, Literal
+from typing import Tuple, Literal, Type
 
 from constants.directions import *
+from structures.domains import Domain
 
 
-@dataclass
+@dataclass(kw_only=True)
 class Point:
     """
     NEMid object.
 
     Attributes:
-        x_coord (float): The x coord of the NEMid.
-        z_coord (float): The z coord of the NEMid.
-        angle (float): Angle from this domain and next domains' line of tangency going counterclockwise.
-        direction (Literal[UP, DOWN]): The direction of the helix at this NEMid.
+        x_coord: The x coord of the NEMid.
+        z_coord: The z coord of the NEMid.
+        angle: Angle from this domain and next domains' line of tangency going counterclockwise.
+        direction: The direction of the helix at this NEMid.
+        strand: The strand that this NEMid belongs to.
+        domain: The domain this NEMid belongs to.
+        matching: NEMid in same domain on other direction's helix across from this one.
     """
 
-    x_coord: float
-    z_coord: float
-    angle: float
-    direction: Literal[UP, DOWN]
+    x_coord: float = None
+    z_coord: float = None
+    angle: float = None
+    direction: Literal[UP, DOWN] = None
+    strand: Type["Strand"] = None
+    domain: Domain = None
+    matching: Type["Point"] = None
 
     def __post_init__(self):
         self.highlighted: bool = False
         self.pseudo: bool = False
+
+    @property
+    def index(self):
+        """
+        Obtain the index of this domain in its respective parent strand.
+
+        Notes:
+            If self.strand is None then this returns None.
+        """
+        if self.strand is None:
+            return None
+        else:
+            return self.strand.index(self)
 
     def position(self) -> Tuple[float, float]:
         """Obtain coords of the point as a tuple of form (x, z)."""

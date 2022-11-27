@@ -14,6 +14,7 @@ import refs
 import refs.saver.save
 import settings
 from constants.tabs import *
+from constants.toolbar import *
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
 from ui.panels import domains, nucleic_acid, strands
@@ -110,13 +111,24 @@ class Panel(QWidget):
         def tab_changed(index: int):
             """Update the plotting mode based on the currently opened tab."""
             if index in (NUCLEIC_ACID, DOMAINS,):
+                # if the plot mode was not already NEMid make it NEMid
                 if refs.plot_mode.current != "NEMid":
                     refs.plot_mode.current = "NEMid"
                     refs.constructor.side_view.refresh()
+                refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
+                refs.toolbar.actions.buttons[NICKER].setEnabled(True)
+                refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(True)
+                refs.toolbar.actions.buttons[JUNCTER].setEnabled(True)
             elif index in (STRANDS,):
+                # if the plot mode was not already nucleoside make it nucleoside
                 if refs.plot_mode.current != "nucleoside":
                     refs.plot_mode.current = "nucleoside"
                     refs.constructor.side_view.refresh()
+                refs.toolbar.current = INFORMER
+                refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
+                refs.toolbar.actions.buttons[NICKER].setEnabled(False)
+                refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(False)
+                refs.toolbar.actions.buttons[JUNCTER].setEnabled(False)
 
         self.tab_area.currentChanged.connect(tab_changed)
 

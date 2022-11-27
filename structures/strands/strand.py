@@ -2,7 +2,7 @@ import itertools
 from collections import deque
 from contextlib import suppress
 from functools import cached_property
-from math import dist
+from math import dist, inf
 from random import shuffle
 from typing import Tuple, Type, Iterable, Deque
 
@@ -75,6 +75,18 @@ class Strand:
         """Determine whether item is in strand."""
         return item in self.NEMids
 
+    def index(self, item) -> int | None:
+        """Determine the index of an item."""
+        try:
+            if isinstance(item, NEMid):
+                return self.NEMids.index(item)
+            elif isinstance(item, Nucleoside):
+                return self.nucleosides.index(item)
+            else:
+                raise IndexError()
+        except IndexError:
+            return None
+
     def NEMids_to_nucleosides(self) -> Deque[Nucleoside]:
         """
         Compute nucleosides from NEMids.
@@ -83,21 +95,24 @@ class Strand:
             A deque of nucleosides computed from the NEMids of the strand.
         """
         nucleosides: Deque[Nucleoside] = deque()
-        previous_z_coord: float
-        for NEMid_ in self.NEMids:
-            previous_z_coord = NEMid_.z_coord
-            z_has_changed = (
-                abs(NEMid_.z_coord - previous_z_coord) < settings.junction_threshold
-            )
-            if not z_has_changed:
-                nucleoside = Nucleoside(
-                    x_coord=NEMid_.x_coord,
-                    z_coord=NEMid_.z_coord + (self.nucleic_acid_profile.Z_b / 2),
-                    angle=NEMid_.angle,
-                    direction=NEMid_.direction,
-                    base=None,
-                    matching=NEMid_.matching,
-                )
+        previous_z_coord = 0
+        next_z_coord = 0
+        for index, NEMid_ in enumerate(self.NEMids):
+            if index > 0:
+                previous_z_coord = self.NEMids[index - 1].z_coord
+            if index != len(self.NEMids) - 1:
+                next_z_coord = self.NEMids[index + 1].z_coord
+            this_z_coord = NEMid_.z_coord
+
+            # detect whether we've reached the tip of a peak
+            tipping_point = this_z_coord > previous_z_coord and this_z_coord > next_z_coord
+            # detect whether we've reached the bottom of a trough
+            if not tipping_point:
+                tipping_point = this_z_coord < previous_z_coord and this_z_coord < next_z_coord
+
+            if not tipping_point:
+                nucleoside = NEMid_.to_nucleoside()
+                nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
                 nucleosides.append(nucleoside)
         return nucleosides
 
@@ -110,27 +125,25 @@ class Strand:
         self.NEMids = deque(filter(pseudo_check, self.NEMids))
         self.nucleosides = deque(filter(pseudo_check, self.nucleosides))
 
-    @property
-    def index(self):
-        """Obtain the index of this strand with respect to the parent strand. None if parent strand is None."""
-        if self.parent is None:
-            return None
-        return self.parent.strands.index(self)
-
     def sliced(self, start: int, end: int) -> list:
         """Return self.NEMids as a list."""
         return list(itertools.islice(self.NEMids, start, end))
 
     def recompute(self) -> None:
-        """Clear cached methods and reasign juncmates."""
+        """Clear cached methods, and reassign juncmates, and recompute nucleosides."""
         # clear all cache
         for cached in self.__cached:
             with suppress(KeyError):
                 del self.__dict__[cached]
 
+        # recompute nucleosides
+        self.nucleosides = self.NEMids_to_nucleosides()
+
         # assign all our items to have us as their parent strand
         for index, NEMid_ in enumerate(self.NEMids):
             self.NEMids[index].strand = self
+        for index, nucleoside in enumerate(self.nucleosides):
+            self.nucleosides[index].strand = self
 
     def touching(self, other: Type["Strand"], touching_distance=0.2) -> bool:
         """
@@ -193,3 +206,10 @@ class Strand:
             [item.z_coord for item in self.NEMids]
         )
         return width, height
+
+    def __repr__(self):
+        return (
+            f"Strand(NEMid-count={len(self.NEMids)}, "
+            f"nucleoside-count={len(self.nucleosides)}, "
+            f"size=({round(self.size[0], 4)}, {round(self.size[1], 4)}))"
+        )

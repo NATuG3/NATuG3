@@ -1,5 +1,6 @@
 import logging
 from contextlib import suppress
+from copy import copy
 from dataclasses import dataclass
 from functools import partial
 from math import ceil, dist
@@ -180,7 +181,9 @@ class SideViewPlotter(pg.PlotWidget):
             # use a try finally to ensure that the pseudo NEMid at the end of the strand is removed
             if strand.closed:
                 strand.NEMids.append(strand.NEMids[0])
+                strand.nucleosides.append(strand.nucleosides[0])
                 strand.NEMids[-1].pseudo = True
+                strand.nucleosides[-1].pseudo = True
 
             # create containers for plotting data
             symbols: List[str] = list()
@@ -241,7 +244,7 @@ class SideViewPlotter(pg.PlotWidget):
                 else:
                     symbol_sizes.append(6)
                     # if the Point is junctable then make it dimmer colored
-                    if point.junctable:
+                    if isinstance(point, NEMid) and point.junctable:
                         brushes.append(dim_brush)
                     # otherwise use normal coloring
                     else:
@@ -293,7 +296,11 @@ class SideViewPlotter(pg.PlotWidget):
             # plot the outline separately
             stroke = pg.PlotDataItem(x_coords, z_coords, pen=pen, connect=connect)
             stroke.setCurveClickable(True)
-            stroke.sigClicked.connect(partial(self.strand_clicked.emit, strand))
+            stroke.sigClicked.connect(
+                lambda plot_data_item, mouse_event, to_emit=strand: self.strand_clicked.emit(
+                    to_emit
+                )
+            )
             self.plot_data.plotted_strokes.append(stroke)
 
         for stroke, points in zip(
