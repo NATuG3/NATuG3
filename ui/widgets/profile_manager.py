@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class ProfileManager(QGroupBox):
-    """A profile managing widget."""
+    """A nucleic_acid_profile managing widget."""
 
     profile_loaded = pyqtSignal(str, object)
     profile_deleted = pyqtSignal(str)
@@ -21,31 +21,31 @@ class ProfileManager(QGroupBox):
     chosen_changed = pyqtSignal(str)
 
     def __init__(
-        self,
-        parent,
-        extractor: FunctionType,
-        dumper: FunctionType,
-        title="Profile Manager",
-        warning: str | None = None,
-        defaults: Iterable[str] | None = None,
-        default="",
-        profiles: Dict[str, object] = None,
+            self,
+            parent,
+            extractor: FunctionType,
+            dumper: FunctionType,
+            title="Profile Manager",
+            warning: str | None = None,
+            defaults: Iterable[str] | None = None,
+            default="",
+            profiles: Dict[str, object] = None,
     ):
         """
-        Initialize the profile manager.
+        Initialize the nucleic_acid_profile manager.
 
         Args:
             parent: The parent QObject.
             extractor: The worker called to extract data for new profiles.
-            dumper: The worker called to dump data for a loaded profile.
-            title: The title of the group box containing the profile manager. Shows up above manager.
-            warning: Warning shown when user attempts to load a profile.
+            dumper: The worker called to dump data for a loaded nucleic_acid_profile.
+            title: The title of the group box containing the nucleic_acid_profile manager. Shows up above manager.
+            warning: Warning shown when user attempts to load a nucleic_acid_profile.
             defaults: Profile names that are defaults. User cannot delete default profiles.
-            default: The profile that is chosen by default.
+            default: The nucleic_acid_profile that is chosen by default.
             profiles: All possible profiles.
 
         Notes:
-            When a profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
+            When a nucleic_acid_profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
         """
         super().__init__(title, parent)
         uic.loadUi("ui/widgets/profile_manager.ui", self)
@@ -66,7 +66,7 @@ class ProfileManager(QGroupBox):
         else:
             self.profiles = profiles
 
-        # add profile options to profile chooser
+        # add nucleic_acid_profile options to nucleic_acid_profile chooser
         for profile in self.profiles.keys():
             self.profile_chooser.addItem(profile)
 
@@ -76,18 +76,18 @@ class ProfileManager(QGroupBox):
         self.update()
 
     def listed(self):
-        """Obtain list of all profiles in profile chooser's list."""
+        """Obtain list of all profiles in nucleic_acid_profile chooser's list."""
         profiles = []
         for profile_index in range(self.profile_chooser.count()):
             profiles.append(self.profile_chooser.itemText(profile_index))
         return profiles
 
     def profile_index(self, name: str):
-        """Obtain the index of a given profile in the profile chooser."""
+        """Obtain the index of a given nucleic_acid_profile in the nucleic_acid_profile chooser."""
         return self.listed().index(name)
 
     def current_text(self):
-        """Obtain current profile chooser text."""
+        """Obtain current nucleic_acid_profile chooser text."""
         return self.profile_chooser.currentText()
 
     def approve(self) -> bool:
@@ -144,7 +144,7 @@ class ProfileManager(QGroupBox):
         # emit signal
         self.profile_saved.emit(name, self.profiles[name])
 
-        logger.info(f'Saved new profile "{name}"')
+        logger.info(f'Saved new nucleic_acid_profile "{name}"')
 
     def delete(self, name: str):
         if not self.approve():
@@ -180,7 +180,7 @@ class ProfileManager(QGroupBox):
         # clear profiles chooser to make placeholder text visable
         self.profile_chooser.setCurrentText("")
 
-        # change current profile
+        # change current nucleic_acid_profile
         self.current = self.profiles[name]
 
         # emit signal

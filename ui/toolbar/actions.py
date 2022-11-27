@@ -1,6 +1,6 @@
 from PyQt6.QtWidgets import QPushButton, QButtonGroup, QAbstractButton
 
-from constants.modes import *
+from constants.toolbar import *
 
 
 class Action(QPushButton):
@@ -13,44 +13,52 @@ class Action(QPushButton):
 class Actions(QButtonGroup):
     def __init__(self):
         super().__init__()
-        self.buttons = []
+        self.buttons = {}
         self.setExclusive(True)
         self._add_buttons()
 
     def _add_buttons(self):
         """Add all toolbar buttons to the toolbar."""
-        # note that the first button will be checked automatically
-        self.addButton(self.Informer(), INFORMER)
-        self.addButton(self.Juncter(), JUNCTER)
-        self.addButton(self.Nicker(), NICKER)
-        self.addButton(self.Hairpinner(), HAIRPINNER)
+        self.add_button(self.Informer(), INFORMER)  # first button checked automatically
+        self.add_button(self.Juncter(), JUNCTER)
+        self.add_button(self.Nicker(), NICKER)
+        self.add_button(self.Hairpinner(), HAIRPINNER)
 
-    def addButton(self, button: QAbstractButton, id: int) -> None:
-        """Before calling the inherited addButton store the new button in self.buttons."""
-        self.buttons.append(button)
-        super().addButton(button, id)
+    def add_button(self, button: QAbstractButton, id_: int) -> None:
+        """
+        Before calling the inherited addButton store the new button in self.buttons.
+
+        Args:
+            button: The button to add.
+            id_: The id of the button to add. User set.
+        """
+        self.buttons[id_] = button
+        super().addButton(button, id_)
 
     class Informer(Action):
         """Mode for obtaining information on the clicked item."""
 
         def __init__(self):
             super().__init__("Informer")
+            self.setObjectName("Informer")
 
     class Juncter(Action):
         """Mode for making junctions."""
 
         def __init__(self):
             super().__init__("Juncter")
+            self.setObjectName("Juncter")
 
     class Nicker(Action):
         """Mode for making nicks."""
 
         def __init__(self):
             super().__init__("Nicker")
-            self.setEnabled(False)
+            self.setObjectName("Nicker")
 
     class Hairpinner(Action):
         """Mode for making nicks."""
 
         def __init__(self):
             super().__init__("Hairpinner")
+            self.setObjectName("Hairpinner")

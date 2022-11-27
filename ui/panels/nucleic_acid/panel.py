@@ -26,7 +26,7 @@ class Panel(QWidget):
         # set all setting descriptions
         self._setting_descriptions()
 
-        # set up profile manager
+        # set up nucleic_acid_profile manager
         self._profile_manager()
 
         # load defaults
@@ -39,16 +39,16 @@ class Panel(QWidget):
 
     def _signals(self):
         for input in (
-            self.D,
-            self.H,
-            self.T,
-            self.B,
-            self.Z_b,
-            self.Z_c,
-            self.Z_s,
-            self.theta_b,
-            self.theta_c,
-            self.theta_s,
+                self.D,
+                self.H,
+                self.T,
+                self.B,
+                self.Z_b,
+                self.Z_c,
+                self.Z_s,
+                self.theta_b,
+                self.theta_c,
+                self.theta_s,
         ):
             input.valueChanged.connect(lambda: self.updated.emit(self.fetch_settings()))
 
@@ -57,7 +57,7 @@ class Panel(QWidget):
         )
 
     def _profile_manager(self):
-        """Set up profile manager."""
+        """Set up nucleic_acid_profile manager."""
         self.profile_manager = ProfileManager(
             refs.constructor,
             self.fetch_settings,

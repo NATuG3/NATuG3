@@ -10,7 +10,7 @@ class Toolbar(QToolBar):
         super().__init__(parent)
 
         self.actions = Actions()
-        for button in self.actions.buttons:
+        for button in self.actions.buttons.values():
             self.addWidget(button)
 
         spacer = QWidget()

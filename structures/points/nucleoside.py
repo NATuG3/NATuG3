@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Union, TypeVar
+from typing import Union
 
 from constants import bases
 from structures.points.point import Point
@@ -12,13 +12,25 @@ class Nucleoside(Point):
     Nucleoside object.
 
     Attributes:
-        matching (NEMid): NEMid in same domain on other direction's helix across from this one.
-        base (Union["A", "T", "G", "C", "U"]): The base of the nucleoside.
-        complement (Union["A", "T", "G", "C", "U"]): The complementary base of the nucleoside.
+        base: The base of the nucleoside.
+        complement: The complementary base of the nucleoside.
     """
 
-    base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType]
-    matching: TypeVar = None
+    base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType] = None
+
+    def to_NEMid(self):
+        """Convert the nucleoside to NEMid type."""
+        from structures.points import NEMid
+
+        return NEMid(
+            x_coord=self.x_coord,
+            z_coord=self.z_coord,
+            angle=self.angle,
+            direction=self.direction,
+            strand=self.strand,
+            domain=self.domain,
+            matching=self.matching,
+        )
 
     @property
     def complement(self) -> str:
