@@ -42,6 +42,7 @@ class Panel(QWidget):
                 self.D,
                 self.H,
                 self.T,
+                self.g,
                 self.B,
                 self.Z_b,
                 self.Z_c,
@@ -76,6 +77,7 @@ class Panel(QWidget):
         """Saves current settings to profiles with name in text edit input box."""
         self.D.setValue(profile.D)
         self.H.setValue(profile.H)
+        self.g.setValue(profile.g)
         self.T.setValue(profile.T)
         self.B.setValue(profile.B)
         self.Z_c.setValue(profile.Z_c)
@@ -90,6 +92,7 @@ class Panel(QWidget):
         return NucleicAcidProfile(
             D=self.D.value(),
             H=self.H.value(),
+            g=self.g.value(),
             T=self.T.value(),
             B=self.B.value(),
             Z_c=self.Z_c.value(),

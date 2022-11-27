@@ -98,9 +98,14 @@ class SideViewWorker:
                         # then keep moving the initial down-strand NEMid up
                         # until it is within .094 nm of the up-strand's initial NEMid
                         # (determined above)
+                        cycle = 0
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
-                            if abs(up_strand_z_coord - down_strand_z_coord) > 0.094:
+                            cycle += 1
+                            if abs(up_strand_z_coord - down_strand_z_coord) > self.nucleic_acid_profile.Z_mate:
                                 begin_at[DOWN] += 1
+                                if cycle == 10000:
+                                    begin_at[DOWN] = 0
+                                    raise StopIteration
                             else:
                                 # break out of nested loop
                                 raise StopIteration

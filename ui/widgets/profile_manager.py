@@ -124,6 +124,7 @@ class ProfileManager(QGroupBox):
 
         # other signals
         self.profile_chooser.currentTextChanged.connect(self.update)
+        self.profile_chooser.currentIndexChanged.connect(self.update)
 
     def save(self, name: str):
         if self.save_profile_button.toolTip() == "Overwrite Profile":
@@ -161,7 +162,7 @@ class ProfileManager(QGroupBox):
         # so now empty the profiles chooser's box
         self.profile_chooser.setCurrentText("")
 
-        # clear profiles chooser to make placeholder text visable
+        # clear profiles chooser to make placeholder text visible
         self.profile_chooser.setCurrentText("")
 
         # emit signal
@@ -191,6 +192,7 @@ class ProfileManager(QGroupBox):
         logger.info(f'Loaded profiles named "{name}"')
 
     def update(self):
+        """Update the profile manager's buttons based on new inputs."""
         # the currently chosen/inputted profiles name
         chosen_profile_name = self.current_text()
 

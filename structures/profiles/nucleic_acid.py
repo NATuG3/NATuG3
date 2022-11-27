@@ -43,6 +43,27 @@ class NucleicAcidProfile:
     def __eq__(self, other: object) -> bool:
         """Whether our nucleic_acid_profile is the same as theirs."""
         if isinstance(other, type(self)):
-            return vars(self) == vars(other)
+            if self.D != other.D:
+                return False
+            elif self.H != other.H:
+                return False
+            elif self.g != other.g:
+                return False
+            elif self.T != other.T:
+                return False
+            elif self.B != other.B:
+                return False
+            elif self.Z_c != other.Z_c:
+                return False
+            elif self.Z_s != other.Z_s:
+                return False
+            elif self.theta_b != other.theta_b:
+                return False
+            elif self.theta_c != other.theta_c:
+                return False
+            elif self.theta_s != other.theta_s:
+                return False
+            else:
+                return True
         else:
             return False
