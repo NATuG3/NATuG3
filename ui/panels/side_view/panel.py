@@ -114,13 +114,14 @@ class Panel(QGroupBox):
                     self.refresh()
 
         elif refs.toolbar.current == NICKER:
-            for item in points:
-                if refs.toolbar.current == NICKER:
-                    if isinstance(item, NEMid):
-                        Nick.to_nick(item)
-                    elif isinstance(item, Nick):
-                        strand = item.prior.strand
-                        strand.items[strand.items.index(item)] = item.prior
-            self.refresh()
+            raise NotImplementedError("Nicker is not yet implemented")
+            # for item in points:
+            #     if refs.toolbar.current == NICKER:
+            #         if isinstance(item, NEMid):
+            #             Nick.to_nick(item)
+            #         elif isinstance(item, Nick):
+            #             strand = item.prior.strand
+            #             strand.items[strand.items.index(item)] = item.prior
+            # self.refresh()
 
         refs.constructor.config.panel.tabs.strands.reload()
