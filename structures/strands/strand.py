@@ -4,7 +4,7 @@ from contextlib import suppress
 from functools import cached_property
 from math import dist, inf
 from random import shuffle
-from typing import Tuple, Type, Iterable, Deque
+from typing import Tuple, Type, Iterable, Deque, List
 
 import settings
 from structures.points import NEMid, Nucleoside
@@ -26,12 +26,16 @@ class Strand:
         nucleic_acid_profile: The nucleic acid settings used.
         NEMids: All NEMids contained within the strand.
         nucleosides: All NEMids contained within the strand.
-        color (tuple[int, int, int]): RGB color of strand.
-        closed (bool): Whether the strand is closed. Must be manually set.
-        empty (bool): Whether the strand is empty.
-        up_strand (bool): Whether all NEMids in this strand are up-NEMids.
-        down_strand (bool): Whether all NEMids in this strand are down-NEMids.
-        interdomain (bool): Whether this strand spans multiple domains.
+        sequence: The sequence of the strand. Equivalent to [i.base for i in self.nucleosides].
+        color: RGB color of strand.
+        auto_color: Whether to automatically set the strand color.
+        auto_thickness: Whether to automatically set the strand thickness.
+        closed: Whether the strand is closed. Must be manually set.
+        empty: Whether the strand is empty.
+        up_strand: Whether all NEMids in this strand are up-NEMids.
+        down_strand: Whether all NEMids in this strand are down-NEMids.
+        interdomain: Whether this strand spans multiple domains.
+        highlighted: Whether the strand is highlighted.
     """
 
     __cached = ("up_strand", "down_strand", "interdomain", "nucleosides")
@@ -42,7 +46,10 @@ class Strand:
         nucleic_acid_profile: NucleicAcidProfile,
         NEMids: Iterable[NEMid] | None = None,
         color: Tuple[int, int, int] = (0, 0, 0),
+        auto_color: bool = True,
+        thickness: int = None,
         closed: bool = False,
+        highlighted: bool = False,
         parent: Type["Strands"] = None,
     ):
         """
@@ -52,11 +59,17 @@ class Strand:
             nucleic_acid_profile: The nucleic acid settings to use.
             NEMids: All NEMids to place inside the strand. Order sensitive.
             color: RGB color for the strand. Defaults to black.
+            auto_color: Whether to automatically set the strand color.
+            thickness: Thickness of strand.
             closed: Whether the strand is closed. Defaults to False.
+            highlighted: Whether the strand is highlighted.
             parent: The parent Strands object. Defaults to None.
         """
         self.color = color
+        self.auto_color = auto_color
+        self._thickness = thickness
         self.closed = closed
+        self.highlighted = highlighted
         self.parent = parent
         self.nucleic_acid_profile = nucleic_acid_profile
 
@@ -67,6 +80,20 @@ class Strand:
 
         self.nucleosides = self.NEMids_to_nucleosides()
 
+    @property
+    def thickness(self):
+        if self._thickness is None:
+            if self.interdomain:
+                return 9.5
+            else:
+                return 2
+        else:
+            return self._thickness
+
+    @thickness.setter
+    def thickness(self, new_thickness):
+        self._thickness = new_thickness
+
     def __len__(self) -> int:
         """Obtain number of items in strand."""
         return len(self.NEMids)
@@ -74,6 +101,19 @@ class Strand:
     def __contains__(self, item) -> bool:
         """Determine whether item is in strand."""
         return item in self.NEMids
+
+    @property
+    def sequence(self):
+        return [nucleoside.base for nucleoside in self.nucleosides]
+
+    @sequence.setter
+    def sequence(self, new_sequence: List[str]):
+        if len(new_sequence) == len(self.nucleosides):
+            for index, base in enumerate(new_sequence):
+                self.nucleosides[index].base = base
+        else:
+            raise ValueError(f"Length of the new sequence ({len(new_sequence)}) must" +
+                             "match number of nucleosides in strand ({len(self)})")
 
     def index(self, item) -> int | None:
         """Determine the index of an item."""
@@ -94,30 +134,16 @@ class Strand:
         Returns:
             A deque of nucleosides computed from the NEMids of the strand.
         """
-        nucleosides: Deque[Nucleoside] = deque()
-        previous_z_coord = 0
-        next_z_coord = 0
-        for index, NEMid_ in enumerate(self.NEMids):
-            if index > 0:
-                previous_z_coord = self.NEMids[index - 1].z_coord
-            if index != len(self.NEMids) - 1:
-                next_z_coord = self.NEMids[index + 1].z_coord
-            this_z_coord = NEMid_.z_coord
+        nucleosides = deque()
 
-            # detect whether we've reached the tip of a peak
-            tipping_point = (
-                this_z_coord > previous_z_coord and this_z_coord > next_z_coord
-            )
-            # detect whether we've reached the bottom of a trough
-            if not tipping_point:
-                tipping_point = (
-                    this_z_coord < previous_z_coord and this_z_coord < next_z_coord
-                )
-
-            if not tipping_point:
+        if not self.closed:
+            for index, NEMid_ in enumerate(self.NEMids):
                 nucleoside = NEMid_.to_nucleoside()
                 nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
                 nucleosides.append(nucleoside)
+        elif self.closed:
+            nucleosides.append(self.NEMids[0].to_nucleoside())
+
         return nucleosides
 
     def clear_pseudos(self) -> None:

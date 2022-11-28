@@ -2,14 +2,24 @@ import sys
 
 from PyQt6.QtWidgets import QApplication
 
-from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
+from structures.points import NEMid
+from structures.profiles import NucleicAcidProfile
+from structures.strands import Strand
+from ui.dialogs.strand_config.strand_config import StrandConfig
 
 
 def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-    widget = SequenceEditor()
+
+    nucleic_acid_profile = NucleicAcidProfile()
+    NEMids = [NEMid(1, 2), NEMid(2, 3), NEMid(3, 4)]
+    strand = Strand(nucleic_acid_profile)
+    strand.sequence = list("ATATATAGGGGCCCC")
+
+    widget = StrandConfig(None, strand)
     widget.show()
+
     app.exec()
     sys.exit(app)
 
