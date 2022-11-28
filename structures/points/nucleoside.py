@@ -6,7 +6,7 @@ from constants import bases
 from structures.points.point import Point
 
 
-@dataclass(slots=True)
+@dataclass
 class Nucleoside(Point):
     """
     Nucleoside object.

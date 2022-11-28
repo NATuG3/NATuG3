@@ -1,6 +1,6 @@
 import logging
 from contextlib import suppress
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import ceil
 from typing import List, Tuple, Dict, Literal
 
@@ -23,7 +23,7 @@ from structures.strands.strand import Strand
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, kw_only=True)
 class PlotData:
     """
     Currently plotted data.
@@ -37,12 +37,12 @@ class PlotData:
         plotted_gridlines: All the grid lines.
     """
 
-    strands: Strands = None
-    mode: Literal["nucleoside", "NEMid"] = None
-    points: Dict[Tuple[float, float], Point] = None
+    strands: Strands = field(default_factory=list)
+    mode: Literal["nucleoside", "NEMid"] = "NEMid"
+    points: Dict[Tuple[float, float], Point] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = None
-    plotted_strokes: List[pg.PlotDataItem] = None
-    plotted_gridlines: List[pg.PlotDataItem] = None
+    plotted_strokes: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
 
 
 class SideViewPlotter(pg.PlotWidget):
