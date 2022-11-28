@@ -74,26 +74,27 @@ class Strands:
         Prevents touching strands from sharing colors.
         """
         for strand in self.strands:
-            if strand.interdomain:
-                illegal_colors: List[Tuple[int, int, int]] = []
+            if strand.auto_color:
+                if strand.interdomain:
+                    illegal_colors: List[Tuple[int, int, int]] = []
 
-                for potentially_touching in self.strands:
-                    if strand.touching(potentially_touching):
-                        illegal_colors.append(potentially_touching.color)
+                    for potentially_touching in self.strands:
+                        if strand.touching(potentially_touching):
+                            illegal_colors.append(potentially_touching.color)
 
-                for color in settings.colors["strands"]["colors"]:
-                    if color not in illegal_colors:
-                        strand.color = color
-                        break
-            else:
-                if strand.up_strand:
-                    strand.color = settings.colors["strands"]["greys"][1]
-                elif strand.down_strand:
-                    strand.color = settings.colors["strands"]["greys"][0]
+                    for color in settings.colors["strands"]["colors"]:
+                        if color not in illegal_colors:
+                            strand.color = color
+                            break
                 else:
-                    raise ValueError(
-                        "Strand should all be up/down if it is single-domain."
-                    )
+                    if strand.up_strand:
+                        strand.color = settings.colors["strands"]["greys"][1]
+                    elif strand.down_strand:
+                        strand.color = settings.colors["strands"]["greys"][0]
+                    else:
+                        raise ValueError(
+                            "Strand should all be up/down if it is single-domain."
+                        )
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """

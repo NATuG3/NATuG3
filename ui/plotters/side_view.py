@@ -202,11 +202,8 @@ class SideViewPlotter(pg.PlotWidget):
                 dim_brush.append(pigment)
             dim_brush = pg.mkBrush(color=dim_brush)
 
-            # if it is an interdomain strand make the stroke thicker
-            if not strand.interdomain:
-                pen = pg.mkPen(color=strand.color, width=2, pxMode=False)
-            else:
-                pen = pg.mkPen(color=strand.color, width=9.5, pxMode=False)
+            # create a penline based on the strand's thickness and color
+            pen = pg.mkPen(color=strand.color, width=strand.thickness, pxMode=False)
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
@@ -237,16 +234,20 @@ class SideViewPlotter(pg.PlotWidget):
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
-                    symbol_sizes.append(18)
+                    symbol_size = 18
                     brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                 else:
-                    symbol_sizes.append(6)
+                    symbol_size = 6
                     # if the Point is junctable then make it dimmer colored
                     if isinstance(point, NEMid) and point.junctable:
                         brushes.append(dim_brush)
                     # otherwise use normal coloring
                     else:
                         brushes.append(point_brush)
+
+                if strand.highlighted:
+                    symbol_size += 5
+                symbol_sizes.append(int(symbol_size))
 
             # graph the points separately
             plotted_points = pg.PlotDataItem(
