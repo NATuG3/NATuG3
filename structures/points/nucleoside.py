@@ -34,7 +34,8 @@ class Nucleoside(Point):
 
     @property
     def complement(self) -> str:
-        "Return the complement of this base"
+        """Return the complement of this base"""
+
         complements = {
             "A": "T",
             "T": "A",

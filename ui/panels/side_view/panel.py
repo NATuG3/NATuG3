@@ -68,6 +68,10 @@ class Panel(QGroupBox):
 
     def points_clicked(self, points: List[Tuple[float, float]]) -> None:
         """slot for when a point in the plot is clicked."""
+        # TEMP CODE
+        # for point in points:
+        #     point.matching.highlighted = True
+
         if refs.toolbar.current == INFORMER:
             dialogs = []
 

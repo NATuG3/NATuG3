@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type
+from typing import Type, Tuple
 
 from structures.points.point import Point
 
@@ -19,19 +19,29 @@ class NEMid(Point):
     junction: bool = False
     junctable: bool = False
 
-    def to_nucleoside(self):
+    def to_nucleoside(self) -> Tuple[Type["Nucleoside"], Type["Nucleoside"]]:
         """Convert the nucleoside to NEMid type."""
         from structures.points import Nucleoside
 
-        return Nucleoside(
+        new_matching = Nucleoside(
+            x_coord=self.matching.x_coord,
+            z_coord=self.matching.z_coord,
+            angle=self.matching.angle,
+            direction=self.matching.direction,
+            strand=self.matching.strand,
+            domain=self.matching.domain,
+        )
+
+        new_self = Nucleoside(
             x_coord=self.x_coord,
             z_coord=self.z_coord,
             angle=self.angle,
             direction=self.direction,
             strand=self.strand,
             domain=self.domain,
-            matching=self.matching,
         )
+
+        return new_self, new_matching
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
