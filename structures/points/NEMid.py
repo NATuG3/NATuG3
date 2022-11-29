@@ -19,11 +19,11 @@ class NEMid(Point):
     junction: bool = False
     junctable: bool = False
 
-    def to_nucleoside(self) -> Tuple[Type["Nucleoside"], Type["Nucleoside"]]:
+    def to_nucleoside(self):
         """Convert the nucleoside to NEMid type."""
         from structures.points import Nucleoside
 
-        new_matching = Nucleoside(
+        return Nucleoside(
             x_coord=self.matching.x_coord,
             z_coord=self.matching.z_coord,
             angle=self.matching.angle,
@@ -31,17 +31,6 @@ class NEMid(Point):
             strand=self.matching.strand,
             domain=self.matching.domain,
         )
-
-        new_self = Nucleoside(
-            x_coord=self.x_coord,
-            z_coord=self.z_coord,
-            angle=self.angle,
-            direction=self.direction,
-            strand=self.strand,
-            domain=self.domain,
-        )
-
-        return new_self, new_matching
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
