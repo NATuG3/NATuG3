@@ -170,7 +170,7 @@ class SideViewWorker:
         for index, domain in enumerate(self.domains.domains):
             NEMid1: NEMid
             NEMid2: NEMid
-            for NEMid1, NEMid2 in zip(*strands[index]):
+            for NEMid1, NEMid2 in zip(strands[index][0], reversed(strands[index][1])):
                 NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
 
         # assign junctability and juncmates
