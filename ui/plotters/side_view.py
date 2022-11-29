@@ -66,10 +66,10 @@ class SideViewPlotter(pg.PlotWidget):
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
 
     def __init__(
-            self,
-            strands: Strands,
-            nucleic_acid_profile: NucleicAcidProfile,
-            mode: Literal["nucleoside", "NEMid"],
+        self,
+        strands: Strands,
+        nucleic_acid_profile: NucleicAcidProfile,
+        mode: Literal["nucleoside", "NEMid"],
     ) -> None:
         """
         Initialize plotter instance.
@@ -303,7 +303,7 @@ class SideViewPlotter(pg.PlotWidget):
             self.plot_data.plotted_strokes.append(stroke)
 
         for stroke, points in zip(
-                self.plot_data.plotted_strokes, self.plot_data.plotted_points
+            self.plot_data.plotted_strokes, self.plot_data.plotted_points
         ):
             self.addItem(stroke)
             self.addItem(points)

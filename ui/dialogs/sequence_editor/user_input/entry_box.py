@@ -95,9 +95,9 @@ class BaseArea(QLineEdit):
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         if event.key not in (
-                QKeySequence.StandardKey.Paste,
-                QKeySequence.StandardKey.Copy,
-                QKeySequence.StandardKey.CUT,
+            QKeySequence.StandardKey.Paste,
+            QKeySequence.StandardKey.Copy,
+            QKeySequence.StandardKey.CUT,
         ):
             return super().keyPressEvent(event)
 
@@ -134,7 +134,7 @@ class Validator(QValidator):
         super().__init__(parent)
 
     def validate(
-            self, to_validate: str, index: int
+        self, to_validate: str, index: int
     ) -> Tuple["QValidator.State", str, int]:
         # force uppercase
         to_validate = to_validate.upper()

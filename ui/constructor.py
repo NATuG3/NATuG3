@@ -160,8 +160,8 @@ class Window(QMainWindow):
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
             # if the domains tab of the config panel is visible:
             if (
-                    self.config.panel.tabs.domains.isVisible()
-                    or self.config.panel.tabs.strands.isVisible()
+                self.config.panel.tabs.domains.isVisible()
+                or self.config.panel.tabs.strands.isVisible()
             ):
                 # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
