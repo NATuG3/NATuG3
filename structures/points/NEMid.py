@@ -20,16 +20,20 @@ class NEMid(Point):
     junctable: bool = False
 
     def to_nucleoside(self):
-        """Convert the nucleoside to NEMid type."""
+        """
+        Convert the nucleoside to NEMid type.
+
+        Loses all attributes that point to other Points.
+        """
         from structures.points import Nucleoside
 
         return Nucleoside(
-            x_coord=self.matching.x_coord,
-            z_coord=self.matching.z_coord,
-            angle=self.matching.angle,
-            direction=self.matching.direction,
-            strand=self.matching.strand,
-            domain=self.matching.domain,
+            x_coord=self.x_coord,
+            z_coord=self.z_coord,
+            angle=self.angle,
+            direction=self.direction,
+            strand=self.strand,
+            domain=self.domain,
         )
 
     def __repr__(self) -> str:

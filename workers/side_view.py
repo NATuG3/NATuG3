@@ -10,6 +10,7 @@ from constants.directions import *
 from helpers import inverse
 from structures.domains import Domains
 from structures.points import NEMid
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.strand import Strand
 from structures.strands.strands import Strands
@@ -160,18 +161,23 @@ class SideViewWorker:
                         strand=None,
                     )
 
-                    # append the current NEMid to the to-be-outputted array
+                    # create a nucleoside object from the NEMid
+                    nucleoside = NEMid_.to_nucleoside()
+                    nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+
+                    # append the current NEMid and nucleoside to the to-be-outputted array
                     strands[index][strand_direction].append(NEMid_)
+                    strands[index][strand_direction].append(nucleoside)
 
                 if strand_direction == DOWN:
                     strands[index][strand_direction].reverse()
 
         # assign matching NEMids to each other's matching slots
         for index, domain in enumerate(self.domains.domains):
-            NEMid1: NEMid
-            NEMid2: NEMid
-            for NEMid1, NEMid2 in zip(strands[index][0], reversed(strands[index][1])):
-                NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
+            item1: Point
+            item2: Point
+            for item1, item2 in zip(strands[index][0], reversed(strands[index][1])):
+                item1.matching, item2.matching = item2, item2
 
         # assign junctability and juncmates
         for index, domain in enumerate(self.domains.domains):
