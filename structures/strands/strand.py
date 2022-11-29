@@ -111,6 +111,7 @@ class Strand:
         if len(new_sequence) == len(self.nucleosides):
             for index, base in enumerate(new_sequence):
                 self.nucleosides[index].base = base
+                self.nucleosides[index].matching.base = self.nucleosides[index].complement
         else:
             raise ValueError(f"Length of the new sequence ({len(new_sequence)}) must" +
                              "match number of nucleosides in strand ({len(self)})")

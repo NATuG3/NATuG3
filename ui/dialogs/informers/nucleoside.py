@@ -29,7 +29,7 @@ class NucleosideInformer(QDialog):
         else:  # not item.strand.closed
             openness = "open"
         self.strand.setText(
-            f"item #{nucleoside.index + 1} in {openness} strand #{strand_index}"
+            f"item #{nucleoside.index + 1} in {openness} strand #{strand_index + 1}"
         )
 
         self.original_domain.setText(

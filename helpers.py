@@ -84,7 +84,7 @@ def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
 
 
 @cache
-def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
+def custom_symbol(symbol: str, font: QFont = QFont("San Serif"), flip=True):
     """Create custom symbol with font for pyqtgraph."""
     # https://stackoverflow.com/a/70789822
     pg_symbol = QPainterPath()
@@ -92,7 +92,10 @@ def custom_symbol(symbol: str, font: QFont = QFont("San Serif")):
     br = pg_symbol.boundingRect()
     scale = min(1.0 / br.width(), 1.0 / br.height())
     tr = QTransform()
-    tr.scale(scale, -scale)
+    if flip:
+        tr.scale(scale, -scale)
+    else:
+        tr.scale(scale, scale)
     tr.translate(-br.x() - br.width() / 2.0, -br.y() - br.height() / 2.0)
     return tr.map(pg_symbol)
 

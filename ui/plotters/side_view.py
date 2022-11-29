@@ -1,6 +1,6 @@
 import logging
 from contextlib import suppress
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import ceil
 from typing import List, Tuple, Dict, Literal
 
@@ -13,8 +13,8 @@ from PyQt6.QtGui import (
 
 import settings
 from constants.directions import *
-from helpers import chaikins_corner_cutting
-from structures.points import NEMid
+from helpers import chaikins_corner_cutting, custom_symbol
+from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
@@ -33,16 +33,18 @@ class PlotData:
         mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
+        plotted_labels: All plotted text labels.
         plotted_strokes: The strand pen line.
         plotted_gridlines: All the grid lines.
     """
 
     strands: Strands = None
-    mode: Literal["nucleoside", "NEMid"] = None
-    points: Dict[Tuple[float, float], Point] = None
-    plotted_points: List[pg.PlotDataItem] = None
-    plotted_strokes: List[pg.PlotDataItem] = None
-    plotted_gridlines: List[pg.PlotDataItem] = None
+    mode: Literal["nucleoside", "NEMid"] = "NEMid"
+    points: Dict[Tuple[float, float], Point] = field(default_factory=dict)
+    plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_labels: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_strokes: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
 
 
 class SideViewPlotter(pg.PlotWidget):
@@ -70,6 +72,7 @@ class SideViewPlotter(pg.PlotWidget):
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
         mode: Literal["nucleoside", "NEMid"],
+        bases: bool = False,
     ) -> None:
         """
         Initialize plotter instance.
@@ -125,6 +128,8 @@ class SideViewPlotter(pg.PlotWidget):
             self.removeItem(stroke)
         for points in plot_data.plotted_points:
             self.removeItem(points)
+        for labels in plot_data.plotted_labels:
+            self.removeItem(labels)
         for gridline in plot_data.plotted_gridlines:
             self.removeItem(gridline)
 
@@ -171,9 +176,10 @@ class SideViewPlotter(pg.PlotWidget):
     def _plot(self):
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
-        self.plot_data.points = dict()
-        self.plot_data.plotted_points = list()
-        self.plot_data.plotted_strokes = list()
+        self.plot_data.points.clear()
+        self.plot_data.plotted_labels.clear()
+        self.plot_data.plotted_points.clear()
+        self.plot_data.plotted_strokes.clear()
 
         for strand_index, strand in enumerate(self.plot_data.strands.strands):
             # use a try finally to ensure that the pseudo NEMid at the end of the strand is removed
@@ -186,14 +192,15 @@ class SideViewPlotter(pg.PlotWidget):
             # create containers for plotting data
             symbols: List[str] = list()
             symbol_sizes: List[int] = list()
+            symbol_brushes = list()
+            symbol_pens = list()
             x_coords: List[float] = list()
             z_coords: List[float] = list()
-            brushes = list()
 
-            # create the NEMid brush
+            # create the point brush
             point_brush = pg.mkBrush(color=strand.color)
 
-            # set dim brush as a dimmer version of the strand color
+            # set dim and dark brush as a dimmer version of the strand color
             dim_brush = []
             for pigment in strand.color:
                 pigment += 230
@@ -201,6 +208,10 @@ class SideViewPlotter(pg.PlotWidget):
                     pigment = 255
                 dim_brush.append(pigment)
             dim_brush = pg.mkBrush(color=dim_brush)
+
+            # create a black pen and a dark pen
+            black_pen = pg.mkPen(color=(0, 0, 0,), width=.5)
+            dark_pen = pg.mkPen(color=(35, 35, 35,), width=.38)
 
             # create a penline based on the strand's thickness and color
             pen = pg.mkPen(color=strand.color, width=strand.thickness, pxMode=False)
@@ -225,25 +236,34 @@ class SideViewPlotter(pg.PlotWidget):
                 z_coords.append(point.z_coord)
 
                 # determine whether the symbol for the point is an up or down arrow
-                if point.direction == UP:
-                    symbols.append("t1")  # up arrow
-                elif point.direction == DOWN:
-                    symbols.append("t")  # down arrow
-                else:
-                    raise ValueError("Point.direction is not UP or DOWN.", point)
+                if self.plot_data.mode == "nucleoside" and point.base is not None:
+                    symbol = custom_symbol(point.base, flip=False)
+                    symbols.append(symbol)
+                    symbol_pens.append(black_pen)
+                elif self.plot_data.mode == "NEMid" or point.base is None:
+                    if point.direction == UP:
+                        symbols.append("t1")  # up arrow
+                    elif point.direction == DOWN:
+                        symbols.append("t")  # down arrow
+                    else:
+                        raise ValueError("Point.direction is not UP or DOWN.", point)
+                    symbol_pens.append(dark_pen)
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
                     symbol_size = 18
-                    brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
+                    symbol_brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
                 else:
-                    symbol_size = 6
+                    if isinstance(point, Nucleoside) and point.base is not None:
+                        symbol_size = 7
+                    else:
+                        symbol_size = 6
                     # if the Point is junctable then make it dimmer colored
                     if isinstance(point, NEMid) and point.junctable:
-                        brushes.append(dim_brush)
+                        symbol_brushes.append(dim_brush)
                     # otherwise use normal coloring
                     else:
-                        brushes.append(point_brush)
+                        symbol_brushes.append(point_brush)
 
                 if strand.highlighted:
                     symbol_size += 5
@@ -256,7 +276,8 @@ class SideViewPlotter(pg.PlotWidget):
                 symbol=symbols,  # type of symbol (in this case up/down arrow)
                 symbolSize=symbol_sizes,  # size of arrows in px
                 pxMode=True,  # means that symbol size is in px and non-dynamic
-                symbolBrush=brushes,  # set color of points to current color
+                symbolBrush=symbol_brushes,  # set color of points to current color
+                symbolPen=symbol_pens,  # for the outlines of points
                 pen=None,
             )
             plotted_points.sigPointsClicked.connect(self._points_clicked)
@@ -307,5 +328,8 @@ class SideViewPlotter(pg.PlotWidget):
         ):
             self.addItem(stroke)
             self.addItem(points)
+
+        for label in self.plot_data.plotted_labels:
+            self.addItem(label)
 
         self._prettify()

@@ -13,14 +13,18 @@ from ui.dialogs.sequence_editor.user_input.display_area import SequenceDisplayAr
 class StrandConfig(QDialog):
     updated = pyqtSignal()
 
+    max_thickness = 50
+
     def __init__(self, parent, strand: Strand):
         super().__init__(parent)
         uic.loadUi("ui/dialogs/strand_config/strand_config.ui", self)
 
         self.strand = strand
+        self.setWindowTitle(f"Strand #{self.strand.parent.index(self.strand)+1} Config")
         self._sequencing()
         self._color_selector()
         self._thickness_selector()
+        self._strand_params()
 
         self.strand.highlighted = True
 
@@ -30,6 +34,20 @@ class StrandConfig(QDialog):
     def when_finished(self) -> None:
         self.strand.highlighted = False
         self.updated.emit()
+
+    def _strand_params(self):
+        """Setup parameters based on strand parameters."""
+        self.NEMids_in_strand.setValue(len(self.strand.NEMids))
+        self.nucleosides_in_strand.setValue(len(self.strand.NEMids))
+        self.closed.setChecked(self.strand.closed)
+        self.empty.setChecked(self.strand.empty)
+
+        if self.strand.thickness > self.max_thickness:
+            thickness = 99
+        else:
+            thickness = (self.strand.thickness)*99/self.max_thickness
+        thickness = round(thickness)
+        self.thickness.setValue(thickness)
 
     def _sequencing(self):
         """Set up the sequencing area."""
@@ -44,6 +62,7 @@ class StrandConfig(QDialog):
                 self.parent(), self.strand.sequence
             )
             self.sequencing_display.bases = self.strand.sequence
+            self.updated.emit()
 
         self.sequence_editor.clicked.connect(sequencing_editor_clicked)
 
@@ -59,7 +78,7 @@ class StrandConfig(QDialog):
                 QBrush(QColor(*self.strand.color))
             )
 
-        # strand color cound change for many reasons other than them using the color selector
+        # strand color could change for many reasons other than them using the color selector
         # so for ease we will just automatically update the preview box every .1 seconds with
         # the current strand color (this is an unideal solution, but it works perfectly fine)
         update_color_preview()
@@ -92,7 +111,7 @@ class StrandConfig(QDialog):
 
     def _thickness_selector(self):
         def chosen_thickness():
-            return (self.thickness.value()*50)/99
+            return (self.thickness.value()*self.max_thickness)/99
 
         def thickness_changed():
             """Worker for when the thickness slider is changed."""
