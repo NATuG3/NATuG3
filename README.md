@@ -30,4 +30,5 @@ library requirements (step 4). However, the easiest way to get the program runni
 
 ## Credits
 
-Icons from https://ionic.io/ionicons
+Icons from https://ionic.io/ionicons <br>
+Color Picker Widget from https://github.com/nlfmt/pyqt-colorpicker

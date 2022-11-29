@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QTextEdit
 from constants.bases import DNA
 
 
-class DisplayArea(QTextEdit):
+class SequenceDisplayArea(QTextEdit):
     """
     A sequence display area.
 
@@ -14,6 +14,7 @@ class DisplayArea(QTextEdit):
         bases: The bases in the editor area.
     """
 
+    count = "<span style='font-style: italic; font-family: Ariel; color: rgb(180, 180, 180)'>&#8202;({count})</span>"
     space = "<span style='background-color: rgb(210, 210, 210)'>&nbsp;</span>"
     nonspace = "<span style='background-color: rgb(240, 240, 240)'>{char}</span>"
     highlighted_base = "<span style='background-color: rgb(245, 245, 0)'>{char}</span>"
@@ -43,6 +44,10 @@ class DisplayArea(QTextEdit):
 
         self.refresh()
 
+    def __len__(self) -> int:
+        """Obtain number of bases in the window."""
+        return len(self.bases)
+
     @property
     def bases(self):
         """Obtain the current bases."""
@@ -63,6 +68,7 @@ class DisplayArea(QTextEdit):
                 html += self.space
             else:
                 raise ValueError(f"Base {base} is not a valid base.")
+        html += self.count.format(count=len(self))
         self.setHtml(html)
 
     def highlight(self, index):
@@ -83,4 +89,5 @@ class DisplayArea(QTextEdit):
                 html += self.space
             else:
                 html += self.nonspace.format(char=base)
+        html += self.count.format(count=len(self))
         self.setHtml(html)

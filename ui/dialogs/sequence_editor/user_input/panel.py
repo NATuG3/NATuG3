@@ -3,8 +3,8 @@ from typing import Iterable
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
-from .display_area import DisplayArea
-from .editor_area import EditorArea
+from .display_area import SequenceDisplayArea
+from .editor_area import SequenceEditorArea
 
 
 class UserInputSequenceEditor(QWidget):
@@ -61,9 +61,10 @@ class UserInputSequenceEditor(QWidget):
                 self.bases = self.editor_area.bases
 
         def editor_area_shifted_right(index: int = 0):
-            widget = self.editor_area.widgets[index]
-            scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
-            scroll_bar.setValue(scroll_bar.value() + widget.width())
+            if index != len(self.editor_area):
+                widget = self.editor_area.widgets[index]
+                scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
+                scroll_bar.setValue(scroll_bar.value() + widget.width())
 
         def editor_area_shifted_left(index: int = 0):
             widget = self.editor_area.widgets[index]
@@ -88,7 +89,7 @@ class UserInputSequenceEditor(QWidget):
 
     def _editor_area(self):
         """Create the base editor area."""
-        self.editor_area = EditorArea(self, self.bases)
+        self.editor_area = SequenceEditorArea(self, self.bases)
 
         self.scrollable_editor_area = QScrollArea()
         self.scrollable_editor_area.setWidget(self.editor_area)
@@ -108,5 +109,5 @@ class UserInputSequenceEditor(QWidget):
 
     def _display_area(self):
         """Create the sequence viewer area."""
-        self.display_area = DisplayArea(self, self.bases)
+        self.display_area = SequenceDisplayArea(self, self.bases)
         self.layout().addWidget(self.display_area)

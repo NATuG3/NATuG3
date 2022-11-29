@@ -10,6 +10,7 @@ from constants.directions import *
 from helpers import inverse
 from structures.domains import Domains
 from structures.points import NEMid
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.strand import Strand
 from structures.strands.strands import Strands
@@ -26,7 +27,7 @@ class SideViewWorker:
     cache_clearers = ("domains", "profiles")
 
     def __init__(
-            self, domains: Domains, nucleic_acid_profile: NucleicAcidProfile
+        self, domains: Domains, nucleic_acid_profile: NucleicAcidProfile
     ) -> None:
         """
         Initialize a side view generator object.
@@ -63,10 +64,10 @@ class SideViewWorker:
         theta_interiors = []
         for domain in self.domains.domains:
             theta_interior = (
-                    domain.theta_interior_multiple * self.nucleic_acid_profile.theta_c
+                domain.theta_interior_multiple * self.nucleic_acid_profile.theta_c
             )
             theta_interior -= (
-                    domain.theta_switch_multiple * self.nucleic_acid_profile.theta_s
+                domain.theta_switch_multiple * self.nucleic_acid_profile.theta_s
             )
             theta_interiors.append(theta_interior)
         return theta_interiors
@@ -151,9 +152,9 @@ class SideViewWorker:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                        angles[strand_direction],
-                        x_coords[strand_direction],
-                        z_coords[strand_direction],
+                    angles[strand_direction],
+                    x_coords[strand_direction],
+                    z_coords[strand_direction],
                 ):
                     # combine all data into NEMid object
                     NEMid_ = NEMid(
@@ -165,18 +166,23 @@ class SideViewWorker:
                         strand=None,
                     )
 
-                    # append the current NEMid to the to-be-outputted array
+                    # create a nucleoside object from the NEMid
+                    nucleoside = NEMid_.to_nucleoside()
+                    nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+
+                    # append the current NEMid and nucleoside to the to-be-outputted array
                     strands[index][strand_direction].append(NEMid_)
+                    strands[index][strand_direction].append(nucleoside)
 
                 if strand_direction == DOWN:
                     strands[index][strand_direction].reverse()
 
         # assign matching NEMids to each other's matching slots
         for index, domain in enumerate(self.domains.domains):
-            NEMid1: NEMid
-            NEMid2: NEMid
-            for NEMid1, NEMid2 in zip(*strands[index]):
-                NEMid1.matching, NEMid2.matching = NEMid2, NEMid1
+            item1: Point
+            item2: Point
+            for item1, item2 in zip(strands[index][0], reversed(strands[index][1])):
+                item1.matching, item2.matching = item2, item2
 
         # assign junctability and juncmates
         for index, domain in enumerate(self.domains.domains):
@@ -196,8 +202,8 @@ class SideViewWorker:
                             junction = False
                             # if the two NEMids are very close consider it a junction
                             if (
-                                    dist(NEMid1.position(), NEMid2.position())
-                                    < settings.junction_threshold
+                                dist(NEMid1.position(), NEMid2.position())
+                                < settings.junction_threshold
                             ):
                                 junction = True
                             # if the two NEMids are on opposite sides and have a very close
@@ -206,8 +212,8 @@ class SideViewWorker:
                                 z_dist = abs(NEMid1.z_coord - NEMid2.z_coord)
                                 x_dist = abs(NEMid1.x_coord - NEMid2.x_coord)
                                 opposite_sides = (
-                                        abs(x_dist - self.domains.count)
-                                        < settings.junction_threshold
+                                    abs(x_dist - self.domains.count)
+                                    < settings.junction_threshold
                                 )
                                 matching_heights = z_dist < settings.junction_threshold
                                 if opposite_sides and matching_heights:
@@ -224,8 +230,8 @@ class SideViewWorker:
             for index, domain in enumerate(self.domains.domains):
                 converted_strands.append(
                     Strand(
-                        nucleic_acid_profile=self.nucleic_acid_profile,
-                        NEMids=strands[index][strand_direction],
+                        self.nucleic_acid_profile,
+                        strands[index][strand_direction],
                         color=settings.colors["strands"]["greys"][strand_direction],
                     )
                 )
@@ -308,8 +314,8 @@ class SideViewWorker:
 
                     # break once self.B x coords have been generated
                     if (
-                            len(x_coords[index][strand_direction])
-                            == self.nucleic_acid_profile.B
+                        len(x_coords[index][strand_direction])
+                        == self.nucleic_acid_profile.B
                     ):
                         break
 
@@ -383,7 +389,7 @@ class SideViewWorker:
             # move the initial Z coord down until it is as close to z=0 as possible
             # this way the graphs don't skew upwards weirdly
             offset_interval = (
-                    self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
+                self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
             )
             while initial_z_coord > 0:
                 initial_z_coord -= offset_interval
