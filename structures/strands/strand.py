@@ -147,7 +147,7 @@ class Strand:
         if len(new_sequence) == len(self.nucleosides()):
             for index, base in enumerate(new_sequence):
                 self.nucleosides()[index].base = base
-                self.nucleosides()[index].matching.base = self.nucleosides()[index].complement
+                self.nucleosides()[index].matching.base = self.nucleosides[index].complement
         else:
             raise ValueError(f"Length of the new sequence ({len(new_sequence)}) must" +
                              "match number of nucleosides in strand ({len(self)})")
@@ -195,8 +195,8 @@ class Strand:
             other: The strand potentially touching this one.
             touching_distance: The distance to be considered touching.
         """
-        for our_item in shuffled(self.items):
-            for their_item in shuffled(other.items):
+        for our_item in shuffled(self.NEMids()):
+            for their_item in shuffled(other.NEMids()):
                 if our_item.juncmate is their_item:
                     return True
         else:
