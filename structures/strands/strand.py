@@ -1,13 +1,14 @@
 import itertools
 from collections import deque
 from contextlib import suppress
+from dataclasses import dataclass, field
 from functools import cached_property
-from math import dist, inf
 from random import shuffle
-from typing import Tuple, Type, Iterable, Deque, List
+from typing import Tuple, Type, Iterable, Deque, List, ClassVar
 
-import settings
+
 from structures.points import NEMid, Nucleoside
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 
 
@@ -18,15 +19,14 @@ def shuffled(iterable: Iterable) -> list:
     return output
 
 
+@dataclass
 class Strand:
     """
     A strand of items.
 
     Attributes:
         nucleic_acid_profile: The nucleic acid settings used.
-        NEMids: All NEMids contained within the strand.
-        nucleosides: All NEMids contained within the strand.
-        sequence: The sequence of the strand. Equivalent to [i.base for i in self.nucleosides].
+        sequence: The sequence of the strand.
         color: RGB color of strand.
         auto_color: Whether to automatically set the strand color.
         auto_thickness: Whether to automatically set the strand thickness.
@@ -38,50 +38,28 @@ class Strand:
         highlighted: Whether the strand is highlighted.
     """
 
-    __cached = ("up_strand", "down_strand", "interdomain", "nucleosides")
-    __supported_types = (NEMid, Nucleoside)
+    nucleic_acid_profile: field(default=NucleicAcidProfile, repr=False)
+    items: Deque[Point] = field(default_factory=deque, repr=False)
+    color: Tuple[int, int, int] = (0, 0, 0)
+    auto_color: bool = True
+    closed: bool = False
+    highlighted: bool = False
+    parent: Type["Strands"] = None
 
-    def __init__(
-        self,
-        nucleic_acid_profile: NucleicAcidProfile,
-        NEMids: Iterable[NEMid] | None = None,
-        color: Tuple[int, int, int] = (0, 0, 0),
-        auto_color: bool = True,
-        thickness: int = None,
-        closed: bool = False,
-        highlighted: bool = False,
-        parent: Type["Strands"] = None,
-    ):
-        """
-        Initialize the strand object.
+    __cached: ClassVar[Tuple[str]] = ("up_strand", "down_strand", "interdomain", "nucleosides")
+    __supported_types: ClassVar[tuple[Type]] = (NEMid, Nucleoside)
 
-        Args:
-            nucleic_acid_profile: The nucleic acid settings to use.
-            NEMids: All NEMids to place inside the strand. Order sensitive.
-            color: RGB color for the strand. Defaults to black.
-            auto_color: Whether to automatically set the strand color.
-            thickness: Thickness of strand.
-            closed: Whether the strand is closed. Defaults to False.
-            highlighted: Whether the strand is highlighted.
-            parent: The parent Strands object. Defaults to None.
-        """
-        self.color = color
-        self.auto_color = auto_color
-        self._thickness = thickness
-        self.closed = closed
-        self.highlighted = highlighted
-        self.parent = parent
-        self.nucleic_acid_profile = nucleic_acid_profile
-
-        if NEMids is None:
-            self.NEMids = deque()
-        else:
-            self.NEMids = deque(NEMids)
-
-        self.nucleosides = self.NEMids_to_nucleosides()
+    def __post_init__(self):
+        self._thickness: ClassVar[int] = None
+        self._NEMids: ClassVar[Tuple[NEMid] | None] = None
+        self._nucleosides: ClassVar[Tuple[Nucleoside] | None] = None
 
     @property
     def thickness(self):
+        """
+        Automatically determine thickness if thickness is None.
+        Otherwise, output the set thickness.
+        """
         if self._thickness is None:
             if self.interdomain:
                 return 9.5
@@ -92,15 +70,73 @@ class Strand:
 
     @thickness.setter
     def thickness(self, new_thickness):
+        """Change the currently set thickness."""
         self._thickness = new_thickness
+
+    def append(self, item: Point):
+        """Add an item to the right of the strand."""
+        self.items.append(item)
+        self.NEMids.cache_clear()
+        self.nucleosides.cache_clear()
+
+    def appendleft(self, item: Point):
+        """Add an item to the left of the strand."""
+        self.items.appendleft(item)
+        self._NEMids = None
+        self._nucleosides = None
+
+    def extend(self, item: Iterable[Point]):
+        """Extend our items to the right with an iterable's items."""
+        self.items.extend(item)
+        self._NEMids = None
+        self._nucleosides = None
+
+    def extendleft(self, item: Iterable[Point]):
+        """Extend our items to the left with an iterable's items."""
+        self.items.extendleft(item)
+        self._NEMids = None
+        self._nucleosides = None
+
+    def NEMids(self):
+        """
+        Obtain all NEMids in the strand, only.
+
+        Works by recursively checking the type of items in self.items.
+
+        Args:
+            listed: Returns the items listed if true. Otherwise, returns generator.
+
+        Returns:
+            List of all nucleosides in strand.items.
+        """
+        if self._NEMids is None:
+            self._NEMids = tuple(filter(lambda item: isinstance(item, NEMid), self.items))
+            return self._NEMids
+        else:
+            return self._NEMids
+
+    def nucleosides(self):
+        """
+        Obtain all nucleosides in the strand, only.
+
+        Works by recursively checking the type of items in self.items.
+
+        Returns:
+            List of all nucleosides in strand.items.
+        """
+        if self._nucleosides is None:
+            self._nucleosides = tuple(filter(lambda item: isinstance(item, Nucleoside), self.items))
+            return self._nucleosides
+        else:
+            return self._nucleosides
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
-        return len(self.NEMids)
+        return len(self.items)
 
     def __contains__(self, item) -> bool:
         """Determine whether item is in strand."""
-        return item in self.NEMids
+        return item in self.items
 
     @property
     def sequence(self):
@@ -120,7 +156,7 @@ class Strand:
         """Determine the index of an item."""
         try:
             if isinstance(item, NEMid):
-                return self.NEMids.index(item)
+                return self.items.index(item)
             elif isinstance(item, Nucleoside):
                 return self.nucleosides.index(item)
             else:
@@ -128,37 +164,17 @@ class Strand:
         except IndexError:
             return None
 
-    def NEMids_to_nucleosides(self) -> Deque[Nucleoside]:
-        """
-        Compute nucleosides from NEMids.
-
-        Returns:
-            A deque of nucleosides computed from the NEMids of the strand.
-        """
-        nucleosides = deque()
-
-        if not self.closed:
-            for index, NEMid_ in enumerate(self.NEMids):
-                nucleoside = NEMid_.to_nucleoside()
-                nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
-                nucleosides.append(nucleoside)
-        elif self.closed:
-            nucleosides.append(self.NEMids[0].to_nucleoside())
-
-        return nucleosides
-
     def clear_pseudos(self) -> None:
         """Removes all pseudo items."""
 
         def pseudo_check(item):
             return not item.pseudo
 
-        self.NEMids = deque(filter(pseudo_check, self.NEMids))
-        self.nucleosides = deque(filter(pseudo_check, self.nucleosides))
+        self.items = deque(filter(pseudo_check, self.items))
 
     def sliced(self, start: int, end: int) -> list:
         """Return self.NEMids as a list."""
-        return list(itertools.islice(self.NEMids, start, end))
+        return list(itertools.islice(self.items, start, end))
 
     def recompute(self) -> None:
         """Clear cached methods, and reassign juncmates, and recompute nucleosides."""
@@ -167,14 +183,9 @@ class Strand:
             with suppress(KeyError):
                 del self.__dict__[cached]
 
-        # recompute nucleosides
-        self.nucleosides = self.NEMids_to_nucleosides()
-
         # assign all our items to have us as their parent strand
-        for index, NEMid_ in enumerate(self.NEMids):
-            self.NEMids[index].strand = self
-        for index, nucleoside in enumerate(self.nucleosides):
-            self.nucleosides[index].strand = self
+        for index, item in enumerate(self.items):
+            self.items[index].strand = self
 
     def touching(self, other: Type["Strand"], touching_distance=0.2) -> bool:
         """
@@ -184,9 +195,9 @@ class Strand:
             other: The strand potentially touching this one.
             touching_distance: The distance to be considered touching.
         """
-        for our_NEMid in shuffled(self.NEMids):
-            for their_NEMid in shuffled(other.NEMids):
-                if our_NEMid.juncmate is their_NEMid:
+        for our_item in shuffled(self.items):
+            for their_item in shuffled(other.items):
+                if our_item.juncmate is their_item:
                     return True
         else:
             # we were not touching
@@ -195,24 +206,24 @@ class Strand:
     @property
     def empty(self) -> bool:
         """Whether this strand is empty."""
-        return len(self.NEMids) == 0
+        return len(self.items) == 0
 
     @cached_property
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
-        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids]
+        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids()]
         return all(checks)
 
     @cached_property
     def down_strand(self) -> bool:
         """Whether the strand is a down strand."""
-        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids]
+        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids()]
         return all(checks)
 
     @cached_property
     def interdomain(self) -> bool:
         """Whether all the NEMids in this strand belong to the same domain."""
-        domains = [NEMid_.domain for NEMid_ in self.NEMids]
+        domains = [NEMid_.domain for NEMid_ in self.NEMids()]
 
         if len(domains) == 0:
             return False
@@ -230,17 +241,10 @@ class Strand:
         Returns:
             Tuple(width, height): The strand size.
         """
-        width = max([item.x_coord for item in self.NEMids]) - min(
-            [item.x_coord for item in self.NEMids]
+        width = max([item.x_coord for item in self.items]) - min(
+            [item.x_coord for item in self.items]
         )
-        height = max([item.z_coord for item in self.NEMids]) - min(
-            [item.z_coord for item in self.NEMids]
+        height = max([item.z_coord for item in self.items]) - min(
+            [item.z_coord for item in self.items]
         )
         return width, height
-
-    def __repr__(self):
-        return (
-            f"Strand(NEMid-count={len(self.NEMids)}, "
-            f"nucleoside-count={len(self.nucleosides)}, "
-            f"size=({round(self.size[0], 4)}, {round(self.size[1], 4)}))"
-        )

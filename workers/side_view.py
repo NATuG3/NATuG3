@@ -219,8 +219,8 @@ class SideViewWorker:
             for index, domain in enumerate(self.domains.domains):
                 converted_strands.append(
                     Strand(
-                        nucleic_acid_profile=self.nucleic_acid_profile,
-                        NEMids=strands[index][strand_direction],
+                        self.nucleic_acid_profile,
+                        strands[index][strand_direction],
                         color=settings.colors["strands"]["greys"][strand_direction],
                     )
                 )

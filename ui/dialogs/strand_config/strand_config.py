@@ -37,8 +37,8 @@ class StrandConfig(QDialog):
 
     def _strand_params(self):
         """Setup parameters based on strand parameters."""
-        self.NEMids_in_strand.setValue(len(self.strand.NEMids))
-        self.nucleosides_in_strand.setValue(len(self.strand.NEMids))
+        self.NEMids_in_strand.setValue(len(self.strand.NEMids()))
+        self.nucleosides_in_strand.setValue(len(self.strand.NEMids()))
         self.closed.setChecked(self.strand.closed)
         self.empty.setChecked(self.strand.empty)
 

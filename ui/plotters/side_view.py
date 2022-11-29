@@ -184,10 +184,8 @@ class SideViewPlotter(pg.PlotWidget):
         for strand_index, strand in enumerate(self.plot_data.strands.strands):
             # use a try finally to ensure that the pseudo NEMid at the end of the strand is removed
             if strand.closed:
-                strand.NEMids.append(strand.NEMids[0])
-                strand.nucleosides.append(strand.nucleosides[0])
-                strand.NEMids[-1].pseudo = True
-                strand.nucleosides[-1].pseudo = True
+                strand.items.append(strand.items[0])
+                strand.items[-1].pseudo = True
 
             # create containers for plotting data
             symbols: List[str] = list()
@@ -200,27 +198,17 @@ class SideViewPlotter(pg.PlotWidget):
             # create the point brush
             point_brush = pg.mkBrush(color=strand.color)
 
-            # set dim and dark brush as a dimmer version of the strand color
-            dim_brush = []
-            for pigment in strand.color:
-                pigment += 230
-                if pigment > 255:
-                    pigment = 255
-                dim_brush.append(pigment)
-            dim_brush = pg.mkBrush(color=dim_brush)
-
-            # create a black pen and a dark pen
+            # create various brushes
+            dim_brush = pg.mkBrush(color=(240, 240, 240,))
             black_pen = pg.mkPen(color=(0, 0, 0,), width=.5)
             dark_pen = pg.mkPen(color=(35, 35, 35,), width=.38)
-
-            # create a penline based on the strand's thickness and color
-            pen = pg.mkPen(color=strand.color, width=strand.thickness, pxMode=False)
+            strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
-                to_plot = strand.NEMids
+                to_plot = strand.NEMids()
             elif self.plot_data.mode == "nucleoside":
-                to_plot = strand.nucleosides
+                to_plot = strand.nucleosides()
 
             for point_index, point in enumerate(to_plot):
                 # update the point mappings
@@ -314,7 +302,7 @@ class SideViewPlotter(pg.PlotWidget):
                 connect = "all"
 
             # plot the outline separately
-            stroke = pg.PlotDataItem(x_coords, z_coords, pen=pen, connect=connect)
+            stroke = pg.PlotDataItem(x_coords, z_coords, pen=strand_pen, connect=connect)
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(
                 lambda plot_data_item, mouse_event, to_emit=strand: self.strand_clicked.emit(
