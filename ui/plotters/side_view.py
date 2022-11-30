@@ -143,12 +143,6 @@ class SideViewPlotter(pg.PlotWidget):
         if isinstance(located[0], NEMid) and (located[0].juncmate is not None):
             located.append(located[0].juncmate)
 
-        # remove all pseduo items
-        for item in located:
-            with suppress(AttributeError):
-                if item.pseudo:
-                    located.remove(item)
-
         self.points_clicked.emit(tuple(located))
 
     def _prettify(self):
@@ -182,11 +176,6 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.plotted_strokes.clear()
 
         for strand_index, strand in enumerate(self.plot_data.strands.strands):
-            # use a try finally to ensure that the pseudo NEMid at the end of the strand is removed
-            if strand.closed:
-                strand.items.append(strand.items[0])
-                strand.items[-1].pseudo = True
-
             # create containers for plotting data
             symbols: List[str] = list()
             symbol_sizes: List[int] = list()
@@ -317,6 +306,9 @@ class SideViewPlotter(pg.PlotWidget):
                     else:
                         connect.append(1)
 
+                if strand.closed:
+                    connect.append(1)
+
                 connect = np.array(connect)
                 x_coords = [coord[0] for coord in coords]
                 z_coords = [coord[1] for coord in coords]
@@ -324,6 +316,9 @@ class SideViewPlotter(pg.PlotWidget):
                 connect = "all"
 
             # plot the outline separately
+            if strand.closed:
+                x_coords.append(x_coords[0])
+                z_coords.append(z_coords[0])
             stroke = pg.PlotDataItem(
                 x_coords, z_coords, pen=strand_pen, connect=connect
             )

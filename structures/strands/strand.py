@@ -172,14 +172,6 @@ class Strand:
         except IndexError:
             return None
 
-    def clear_pseudos(self) -> None:
-        """Removes all pseudo items."""
-
-        def pseudo_check(item):
-            return not item.pseudo
-
-        self.items = deque(filter(pseudo_check, self.items))
-
     def sliced(self, start: int, end: int) -> list:
         """Return self.NEMids as a list."""
         return list(itertools.islice(self.items, start, end))

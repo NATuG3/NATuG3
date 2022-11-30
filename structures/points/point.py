@@ -21,7 +21,6 @@ class Point:
         domain: The domain this NEMid belongs to.
         matching: NEMid in same domain on other direction's helix across from this one.
         highlighted: Whether the NEMid is highlighted.
-        pseudo: Pseudo elements are ignored during plotting.
     """
 
     # positional attributes
@@ -37,7 +36,6 @@ class Point:
 
     # plotting attributes
     highlighted: bool = False
-    pseudo: bool = False
 
     @property
     def index(self):
