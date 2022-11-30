@@ -15,7 +15,7 @@ from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.strands import Strand
 from ui.dialogs.strand_config.strand_config import StrandConfig
-from ui.panels.strands.buttons import StrandButton
+from ui.panels.sequencing.buttons import StrandButton
 
 logger = logging.getLogger(__name__)
 
@@ -46,12 +46,12 @@ class Panel(QGroupBox):
     def strand_clicked(self, strand: Strand) -> None:
         """Slot for when a strand is clicked."""
         strand_button: StrandButton = (
-            refs.constructor.config.panel.tabs.strands.strand_buttons[
+            refs.constructor.config.panel.tabs.sequencing.strand_buttons[
                 strand.parent.index(strand)
             ]
         )
         scroll_area: QScrollArea = (
-            refs.constructor.config.panel.tabs.strands.scrollable_strands_area
+            refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
         )
         strand_button.setStyleSheet(
             f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}"
@@ -126,13 +126,5 @@ class Panel(QGroupBox):
 
         elif refs.toolbar.current == NICKER:
             raise NotImplementedError("Nicker is not yet implemented")
-            # for item in points:
-            #     if refs.toolbar.current == NICKER:
-            #         if isinstance(item, NEMid):
-            #             Nick.to_nick(item)
-            #         elif isinstance(item, Nick):
-            #             strand = item.prior.strand
-            #             strand.items[strand.items.index(item)] = item.prior
-            # self.refresh()
 
-        refs.constructor.config.panel.tabs.strands.reload()
+        refs.constructor.config.panel.tabs.sequencing.reload()

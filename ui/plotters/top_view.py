@@ -1,5 +1,5 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import cos, radians, sin
 from typing import List
 
@@ -14,7 +14,7 @@ from workers.top_view import TopViewWorker
 logger = logging.getLogger(__name__)
 
 
-@dataclass(slots=True)
+@dataclass(slots=True, kw_only=True)
 class PlotData:
     """
     Currently plotted data.
@@ -27,9 +27,9 @@ class PlotData:
         rotation: The rotation of the plot.
     """
 
-    x_coords: List[float] = None
-    y_coords: List[float] = None
-    rotation: pg.PlotDataItem = None
+    x_coords: List[float] = field(default_factory=list)
+    y_coords: List[float] = field(default_factory=list)
+    rotation: pg.PlotDataItem = 0
     plotted_domains: pg.PlotDataItem = None
     plotted_stroke: pg.PlotDataItem = None
     plotted_numbers: List[pg.PlotDataItem] = None

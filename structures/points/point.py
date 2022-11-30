@@ -5,10 +5,12 @@ from constants.directions import *
 from structures.domains import Domain
 
 
-@dataclass(kw_only=True)
+@dataclass(kw_only=True, slots=True)
 class Point:
     """
-    NEMid object.
+    A point object.
+
+    Point objects represent parts of/things on helices.
 
     Attributes:
         x_coord: The x coord of the NEMid.
@@ -18,19 +20,22 @@ class Point:
         strand: The strand that this NEMid belongs to.
         domain: The domain this NEMid belongs to.
         matching: NEMid in same domain on other direction's helix across from this one.
+        highlighted: Whether the NEMid is highlighted.
     """
 
+    # positional attributes
     x_coord: float = None
     z_coord: float = None
     angle: float = None
+
+    # nucleic acid attributes
     direction: Literal[UP, DOWN] = None
     strand: Type["Strand"] = None
     domain: Domain = None
     matching: Type["Point"] = None
 
-    def __post_init__(self):
-        self.highlighted: bool = False
-        self.pseudo: bool = False
+    # plotting attributes
+    highlighted: bool = False
 
     @property
     def index(self):

@@ -62,6 +62,15 @@ def confirm(parent, title, msg):
         return False
 
 
+def warning(parent, title, msg):
+    QMessageBox.critical(
+        parent,
+        title,
+        msg,
+        QMessageBox.StandardButton.Ok,
+    )
+
+
 def reverse_hidenness(potentially_hidden_item):
     """Reverse the hiddenness of a widget"""
     if potentially_hidden_item.isHidden():

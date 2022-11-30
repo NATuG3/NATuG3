@@ -4,7 +4,7 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QDialog, QWidget
 
-from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
+from ui.dialogs.sequence_editor.bulk_input.panel import BulkInputSequenceEditor
 from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
 
 
@@ -16,15 +16,15 @@ class SequenceEditor(QDialog):
         super().__init__(parent)
         uic.loadUi("ui/dialogs/sequence_editor/sequence_editor.ui", self)
 
-        self.sequence = sequence
+        self.bases = sequence
 
-        self.manual_input = UserInputSequenceEditor(sequence)
+        self.manual_input = UserInputSequenceEditor(self, sequence)
         self.manual_input_tab.setLayout(QVBoxLayout())
         self.manual_input_tab.layout().addWidget(self.manual_input)
 
-        self.file_input = QWidget()
-        self.file_input_tab.setLayout(QVBoxLayout())
-        self.file_input_tab.layout().addWidget(self.file_input)
+        self.bulk_input = BulkInputSequenceEditor(self, sequence)
+        self.bulk_input_tab.setLayout(QVBoxLayout())
+        self.bulk_input_tab.layout().addWidget(self.bulk_input)
 
         self._prettify()
         self._signals()
@@ -35,12 +35,12 @@ class SequenceEditor(QDialog):
         def load_sequence_clicked():
             # update the sequence
             if self.manual_input_tab.isVisible():
-                self.sequence = self.manual_input.bases
-            elif self.file_input_tab.isVisible():
-                raise NotImplementedError("File input tab is not yet implemented.")
+                self.bases = self.manual_input.bases
+            elif self.bulk_input_tab.isVisible():
+                self.bases = self.bulk_input.bases
 
             # emit sequence updated signal
-            self.sequence_chosen.emit(self.sequence)
+            self.sequence_chosen.emit(self.bases)
 
         self.load_sequence.clicked.connect(load_sequence_clicked)
 
@@ -59,4 +59,4 @@ class SequenceEditor(QDialog):
         if sequence_editor.exec():
             pass
         else:
-            return sequence_editor.sequence
+            return sequence_editor.bases

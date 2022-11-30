@@ -6,7 +6,7 @@ from constants import bases
 from structures.points.point import Point
 
 
-@dataclass(slots=True)
+@dataclass
 class Nucleoside(Point):
     """
     Nucleoside object.
@@ -44,6 +44,7 @@ class Nucleoside(Point):
             "T": "A",
             "C": "G",
             "G": "C",
+            None: None,
         }
         return complements[self.base]
 

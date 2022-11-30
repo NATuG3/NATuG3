@@ -33,7 +33,7 @@ class SideViewWorker:
         Initialize a side view generator object.
 
         Args:
-            domains: The domains to compute strands for.
+            domains: The domains to compute sequencing for.
             nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile to use.
         """
         self.domains = domains
@@ -78,7 +78,7 @@ class SideViewWorker:
         Compute all NEMid data.
 
         Returns:
-            Strands object for all strands that the domains can create.
+            Strands object for all sequencing that the domains can create.
         """
         # the output container for all NEMids
         strands = [([], []) for _ in range(self.domains.count)]
@@ -102,7 +102,10 @@ class SideViewWorker:
                         cycle = 0
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
                             cycle += 1
-                            if abs(up_strand_z_coord - down_strand_z_coord) > self.nucleic_acid_profile.Z_mate:
+                            if (
+                                abs(up_strand_z_coord - down_strand_z_coord)
+                                > self.nucleic_acid_profile.Z_mate
+                            ):
                                 begin_at[DOWN] += 1
                                 if cycle == 10000:
                                     begin_at[DOWN] = 0
@@ -232,11 +235,11 @@ class SideViewWorker:
                     Strand(
                         self.nucleic_acid_profile,
                         strands[index][strand_direction],
-                        color=settings.colors["strands"]["greys"][strand_direction],
+                        color=settings.colors["sequencing"]["greys"][strand_direction],
                     )
                 )
 
-        # convert strands from a list to a Strands container
+        # convert sequencing from a list to a Strands container
         strands = Strands(self.nucleic_acid_profile, converted_strands)
 
         return strands
@@ -256,7 +259,7 @@ class SideViewWorker:
             # look at left current domain helix joint
             zeroed_strand = domain.helix_joints[LEFT]
 
-            # create infinite generators for the zeroed and non zeroed strands
+            # create infinite generators for the zeroed and non zeroed sequencing
             angles[index][zeroed_strand] = itertools.count(
                 start=0.0,  # zeroed strand starts at 0
                 step=self.nucleic_acid_profile.theta_b,  # and steps by self.theta_b

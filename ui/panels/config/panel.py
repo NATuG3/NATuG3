@@ -17,7 +17,7 @@ from constants.tabs import *
 from constants.toolbar import *
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
-from ui.panels import domains, nucleic_acid, strands
+from ui.panels import domains, nucleic_acid, sequencing
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ class Panel(QWidget):
         self.tabs = SimpleNamespace(
             nucleic_acid=nucleic_acid.Panel(self, self.profiles),
             domains=domains.Panel(self),
-            strands=strands.Panel(self),
+            sequencing=sequencing.Panel(self),
         )
 
         # set the nucleic acid tab
@@ -59,9 +59,9 @@ class Panel(QWidget):
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.tabs.domains)
 
-        # set the strands tab
-        self.strands_tab.setLayout(QVBoxLayout())
-        self.strands_tab.layout().addWidget(self.tabs.strands)
+        # set the sequencing tab
+        self.sequencing_tab.setLayout(QVBoxLayout())
+        self.sequencing_tab.layout().addWidget(self.tabs.sequencing)
 
     def _signals(self):
         """Setup signals."""
@@ -69,7 +69,7 @@ class Panel(QWidget):
         def warn_and_refresh(top_view, side_view):
             """Warn user if there are changes that will be lost and then update plots."""
             global dialog
-            # determine if there are any strands that the user has made
+            # determine if there are any sequencing that the user has made
             # (if there are not then we do not need to warn the user)
             for strand in refs.strands.current.strands:
                 if strand.interdomain:

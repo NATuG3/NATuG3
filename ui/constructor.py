@@ -161,7 +161,7 @@ class Window(QMainWindow):
             # if the domains tab of the config panel is visible:
             if (
                 self.config.panel.tabs.domains.isVisible()
-                or self.config.panel.tabs.strands.isVisible()
+                or self.config.panel.tabs.sequencing.isVisible()
             ):
                 # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
                 # to be that of the domain tab's width
