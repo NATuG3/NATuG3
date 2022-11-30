@@ -155,12 +155,7 @@ class Strand:
     def index(self, item) -> int | None:
         """Determine the index of an item."""
         try:
-            if isinstance(item, NEMid):
-                return self.items.index(item)
-            elif isinstance(item, Nucleoside):
-                return self.nucleosides.index(item)
-            else:
-                raise IndexError()
+            return self.items.index(item)
         except IndexError:
             return None
 

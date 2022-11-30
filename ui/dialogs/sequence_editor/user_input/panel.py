@@ -4,7 +4,7 @@ from typing import Iterable
 from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
-from .display_area import SequenceDisplayArea
+from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 from .editor_area import SequenceEditorArea
 
 
@@ -13,8 +13,8 @@ class UserInputSequenceEditor(QWidget):
     base_unset: pyqtSignal
     base_set: pyqtSignal
 
-    def __init__(self, bases: Iterable):
-        super().__init__()
+    def __init__(self, parent, bases: Iterable):
+        super().__init__(parent)
         self.setWindowTitle("Sequence Editor")
         self._bases = list(bases)
 

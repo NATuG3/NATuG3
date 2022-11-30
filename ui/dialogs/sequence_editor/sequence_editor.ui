@@ -30,9 +30,9 @@
        <string>Manual Input</string>
       </attribute>
      </widget>
-     <widget class="QWidget" name="file_input_tab">
+     <widget class="QWidget" name="bulk_input_tab">
       <attribute name="title">
-       <string>File Input</string>
+       <string>Bulk Input</string>
       </attribute>
      </widget>
     </widget>

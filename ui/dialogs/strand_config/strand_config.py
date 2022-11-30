@@ -2,12 +2,12 @@ import atexit
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
-from PyQt6.QtGui import QBrush, QColor, QCloseEvent
+from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import QDialog, QColorDialog, QGraphicsScene
 
-from structures.strands import Strand, strand
+from structures.strands import Strand
 from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
-from ui.dialogs.sequence_editor.user_input.display_area import SequenceDisplayArea
+from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 
 
 class StrandConfig(QDialog):
@@ -53,15 +53,15 @@ class StrandConfig(QDialog):
         """Set up the sequencing area."""
 
         # add the sequencing display area
-        self.sequencing_display = SequenceDisplayArea(None, self.strand.sequence)
-        self.sequencing_area.layout().insertWidget(0, self.sequencing_display)
+        self.sequence_display = SequenceDisplayArea(None, self.strand.sequence)
+        self.sequencing_area.layout().insertWidget(0, self.sequence_display)
 
         def sequencing_editor_clicked():
             """Worker for when 'sequence editor' is clicked."""
             self.strand.sequence = SequenceEditor.fetch_sequence(
                 self.parent(), self.strand.sequence
             )
-            self.sequencing_display.bases = self.strand.sequence
+            self.sequence_display.bases = self.strand.sequence
             self.updated.emit()
 
         self.sequence_editor.clicked.connect(sequencing_editor_clicked)
