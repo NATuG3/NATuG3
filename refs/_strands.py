@@ -9,7 +9,7 @@ from workers.side_view import SideViewWorker
 
 
 class _Strands:
-    filename = "saves/strands/restored.nano"
+    filename = "saves/sequencing/restored.nano"
 
     def __init__(self, strands: Union[NoneType, Strands] = None):
         if strands is None:
@@ -20,7 +20,7 @@ class _Strands:
         atexit.register(self.dump)
 
     def load(self):
-        """Dump the current strands into a file."""
+        """Dump the current sequencing into a file."""
         try:
             with open(self.filename, "rb") as file:
                 self.current = pickle.load(file)
@@ -28,7 +28,7 @@ class _Strands:
             self.recompute()
 
     def dump(self):
-        """Dump the current strands into a file."""
+        """Dump the current sequencing into a file."""
         with open(self.filename, "wb") as file:
             pickle.dump(self.current, file)
 

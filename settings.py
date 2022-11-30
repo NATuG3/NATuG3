@@ -16,7 +16,7 @@ colors = {
         "fill": (125, 125, 125),
         "plotted_numbers": (255, 255, 255),
     },
-    "strands": {
+    "sequencing": {
         "greys": ((195, 195, 195), (70, 70, 70)),
         "colors": (
             (200, 0, 0),

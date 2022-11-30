@@ -29,7 +29,7 @@ class PlotData:
     Currently plotted data.
 
     Attributes:
-        strands: The currently plotted strands.
+        strands: The currently plotted sequencing.
         mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
@@ -49,11 +49,11 @@ class PlotData:
 
 class SideViewPlotter(pg.PlotWidget):
     """
-    Side view strands plot widget.
+    Side view sequencing plot widget.
 
     Attributes:
-        strands: The strands to plot.
-        nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the strands to plot.
+        strands: The sequencing to plot.
+        nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the sequencing to plot.
         plot_data: Currently plotted data.
         width: The width of the plot.
         height: The height of the plot.
@@ -77,8 +77,8 @@ class SideViewPlotter(pg.PlotWidget):
         Initialize plotter instance.
 
         Args:
-            strands: The strands to plot.
-            nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the strands to plot.
+            strands: The sequencing to plot.
+            nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the sequencing to plot.
             mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
         """
         super().__init__()

@@ -2,20 +2,20 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QGridLayout, QScrollArea
 
 import refs
-from ui.panels.strands.buttons import StrandButton
+from ui.panels.sequencing.buttons import StrandButton
 
 
 class Panel(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
-        uic.loadUi("ui/panels/strands/panel.ui", self)
+        uic.loadUi("ui/panels/sequencing/panel.ui", self)
 
         self.strand_buttons = []
         self.strands_area = QWidget()
         self.reload()
 
     def reload(self):
-        """Set up the strands area"""
+        """Set up the sequencing area"""
         for button in self.strand_buttons:
             button.deleteLater()
         self.strand_buttons.clear()

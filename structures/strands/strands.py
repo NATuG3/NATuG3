@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 class Strands:
     """
-    A container for multiple strands.
+    A container for multiple sequencing.
 
     Attributes:
-        nucleic_acid_profile: The nucleic acid settings for the strands container.
-        strands: The actual strands.
-        up_strands: All up strands.
-        down_strands: All down strands.
+        nucleic_acid_profile: The nucleic acid settings for the sequencing container.
+        strands: The actual sequencing.
+        up_strands: All up sequencing.
+        down_strands: All down sequencing.
     """
 
     def __init__(
@@ -28,15 +28,15 @@ class Strands:
         Initialize an instance of Strands.
 
         Args:
-            nucleic_acid_profile: The nucleic acid settings for the strands container.
-            strands: A list of strands to create a Strands object from.
+            nucleic_acid_profile: The nucleic acid settings for the sequencing container.
+            strands: A list of sequencing to create a Strands object from.
         """
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
         self.recompute()
 
     def __len__(self):
-        """Obtain the number of strands this Strands object contains."""
+        """Obtain the number of sequencing this Strands object contains."""
         return len(self.strands)
 
     @property
@@ -48,8 +48,8 @@ class Strands:
         return list(filter(lambda strand: strand.up_strand, self.strands))
 
     def recompute(self):
-        """Reparent and recompute strands."""
-        # reparent all the strands
+        """Reparent and recompute sequencing."""
+        # reparent all the sequencing
         for strand in self.strands:
             strand.parent = self
             strand.recompute()
@@ -70,8 +70,8 @@ class Strands:
 
     def recolor(self) -> None:
         """
-        Recompute colors for all strands contained within.
-        Prevents touching strands from sharing colors.
+        Recompute colors for all sequencing contained within.
+        Prevents touching sequencing from sharing colors.
         """
         for strand in self.strands:
             if strand.auto_color:
@@ -82,15 +82,15 @@ class Strands:
                         if strand.touching(potentially_touching):
                             illegal_colors.append(potentially_touching.color)
 
-                    for color in settings.colors["strands"]["colors"]:
+                    for color in settings.colors["sequencing"]["colors"]:
                         if color not in illegal_colors:
                             strand.color = color
                             break
                 else:
                     if strand.up_strand:
-                        strand.color = settings.colors["strands"]["greys"][1]
+                        strand.color = settings.colors["sequencing"]["greys"][1]
                     elif strand.down_strand:
-                        strand.color = settings.colors["strands"]["greys"][0]
+                        strand.color = settings.colors["sequencing"]["greys"][0]
                     else:
                         raise ValueError(
                             "Strand should all be up/down if it is single-domain."
@@ -123,7 +123,7 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        # new strands we are creating
+        # new sequencing we are creating
         new_strands = [
             Strand(self.nucleic_acid_profile),
             Strand(self.nucleic_acid_profile),
@@ -182,7 +182,7 @@ class Strands:
                 new_strands[1].closed = False
 
         elif NEMid1.strand is not NEMid2.strand:
-            # remove the old strands
+            # remove the old sequencing
             self.remove(NEMid1.strand)
             self.remove(NEMid2.strand)
 
@@ -216,9 +216,9 @@ class Strands:
                 new_strands[0].closed = False
                 new_strands[1].closed = None
 
-            # if both of the NEMids have closed strands
+            # if both of the NEMids have closed sequencing
             elif NEMid1.strand.closed and NEMid2.strand.closed:
-                # alternate strands that starts and ends at the junction site
+                # alternate sequencing that starts and ends at the junction site
                 for NEMid_ in (NEMid1, NEMid2):
                     NEMid_.strand.items.rotate(len(NEMid_.strand) - 1 - NEMid_.index)
 
@@ -230,7 +230,7 @@ class Strands:
                 new_strands[0].closed = True
                 new_strands[1].closed = None
 
-            # if neither of the NEMids have closed strands
+            # if neither of the NEMids have closed sequencing
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
                 new_strands[0].items.extend(NEMid1.strand.sliced(0, NEMid1.index))
@@ -245,12 +245,12 @@ class Strands:
                 new_strands[0].closed = False
                 new_strands[1].closed = False
 
-        # recompute data for strands and append strands to master list
+        # recompute data for sequencing and append sequencing to master list
         for new_strand in new_strands:
             if not new_strand.empty:
                 self.append(new_strand)
 
-        # recompute the new strands
+        # recompute the new sequencing
         [new_strand.recompute() for new_strand in new_strands]
 
         # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
@@ -270,7 +270,7 @@ class Strands:
     @property
     def size(self) -> Tuple[float, float]:
         """
-        Obtain the size of all strands when laid out.
+        Obtain the size of all sequencing when laid out.
 
         Returns:
             tuple(width, height)
