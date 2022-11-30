@@ -9,7 +9,7 @@ from structures.strands import Strands
 
 class NEMidInformer(QDialog):
     def __init__(
-            self, parent, NEMid_: NEMid, all_strands: Strands, all_domains: Domains
+        self, parent, NEMid_: NEMid, all_strands: Strands, all_domains: Domains
     ):
         super().__init__(parent)
         assert isinstance(all_strands, Strands)
@@ -29,7 +29,7 @@ class NEMidInformer(QDialog):
         else:  # not item.strand.closed
             openness = "open"
         self.strand.setText(
-            f"item #{NEMid_.index + 1} in {openness} strand #{strand_index}"
+            f"item #{NEMid_.index + 1} in {openness} strand #{strand_index + 1}"
         )
 
         self.original_domain.setText(

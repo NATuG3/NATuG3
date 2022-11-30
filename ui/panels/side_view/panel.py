@@ -14,6 +14,7 @@ from constants.toolbar import *
 from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.strands import Strand
+from ui.dialogs.strand_config.strand_config import StrandConfig
 from ui.panels.strands.buttons import StrandButton
 
 logger = logging.getLogger(__name__)
@@ -57,10 +58,20 @@ class Panel(QGroupBox):
         )
         scroll_area.ensureWidgetVisible(strand_button)
         QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
+
+        dialog = StrandConfig(self.parent(), strand=strand)
+        dialog.updated.connect(self.refresh)
+        dialog.show()
+        self.refresh()
+
         logger.info(f"Strand #{strand.parent.index(strand)} was clicked.")
 
     def points_clicked(self, points: List[Tuple[float, float]]) -> None:
         """slot for when a point in the plot is clicked."""
+        # TEMP CODE
+        # for point in points:
+        #     point.matching.highlighted = True
+
         if refs.toolbar.current == INFORMER:
             dialogs = []
 

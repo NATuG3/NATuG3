@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 from ui.dialogs.sequence_editor.user_input.entry_box import BaseEntryBox
 
 
-class EditorArea(QWidget):
+class SequenceEditorArea(QWidget):
     """
     A sequence editor area.
 

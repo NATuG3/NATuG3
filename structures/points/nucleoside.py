@@ -19,7 +19,11 @@ class Nucleoside(Point):
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType] = None
 
     def to_NEMid(self):
-        """Convert the nucleoside to NEMid type."""
+        """
+        Convert the nucleoside to NEMid type.
+
+        Loses all attributes that point to other Points.
+        """
         from structures.points import NEMid
 
         return NEMid(
@@ -29,12 +33,12 @@ class Nucleoside(Point):
             direction=self.direction,
             strand=self.strand,
             domain=self.domain,
-            matching=self.matching,
         )
 
     @property
     def complement(self) -> str:
-        "Return the complement of this base"
+        """Return the complement of this base"""
+
         complements = {
             "A": "T",
             "T": "A",
