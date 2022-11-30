@@ -216,7 +216,7 @@ class SideViewPlotter(pg.PlotWidget):
             # if the strand color is dark
             if sum(strand.color) < (255*3)/2:
                 # a light symbol pen
-                symbol_pen = pg.mkPen(color=(220, 220, 200,), width=0.5,)
+                symbol_pen = pg.mkPen(color=(255, 255, 255,), width=0.65,)
             else:
                 # otherwise create a dark one
                 symbol_pen = pg.mkPen(color=(0, 0, 0,), width=0.5,)
