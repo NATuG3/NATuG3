@@ -23,6 +23,7 @@ class Point:
         highlighted: Whether the NEMid is highlighted.
         pseudo: Pseudo elements are ignored during plotting.
     """
+
     # positional attributes
     x_coord: float = None
     z_coord: float = None

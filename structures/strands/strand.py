@@ -46,7 +46,12 @@ class Strand:
     highlighted: bool = False
     parent: Type["Strands"] = None
 
-    __cached: ClassVar[Tuple[str]] = ("up_strand", "down_strand", "interdomain", "nucleosides")
+    __cached: ClassVar[Tuple[str]] = (
+        "up_strand",
+        "down_strand",
+        "interdomain",
+        "nucleosides",
+    )
     __supported_types: ClassVar[tuple[Type]] = (NEMid, Nucleoside)
 
     def __post_init__(self):
@@ -110,7 +115,9 @@ class Strand:
             List of all nucleosides in strand.items.
         """
         if self._NEMids is None:
-            self._NEMids = tuple(filter(lambda item: isinstance(item, NEMid), self.items))
+            self._NEMids = tuple(
+                filter(lambda item: isinstance(item, NEMid), self.items)
+            )
             return self._NEMids
         else:
             return self._NEMids
@@ -125,7 +132,9 @@ class Strand:
             List of all nucleosides in strand.items.
         """
         if self._nucleosides is None:
-            self._nucleosides = tuple(filter(lambda item: isinstance(item, Nucleoside), self.items))
+            self._nucleosides = tuple(
+                filter(lambda item: isinstance(item, Nucleoside), self.items)
+            )
             return self._nucleosides
         else:
             return self._nucleosides
@@ -147,10 +156,14 @@ class Strand:
         if len(new_sequence) == len(self.nucleosides()):
             for index, base in enumerate(new_sequence):
                 self.nucleosides()[index].base = base
-                self.nucleosides()[index].matching.base = self.nucleosides()[index].complement
+                self.nucleosides()[index].matching.base = self.nucleosides()[
+                    index
+                ].complement
         else:
-            raise ValueError(f"Length of the new sequence ({len(new_sequence)}) must" +
-                             "match number of nucleosides in strand ({len(self)})")
+            raise ValueError(
+                f"Length of the new sequence ({len(new_sequence)}) must"
+                + "match number of nucleosides in strand ({len(self)})"
+            )
 
     def index(self, item) -> int | None:
         """Determine the index of an item."""

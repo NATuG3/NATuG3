@@ -20,7 +20,9 @@ class Domains:
         symmetry: The symmetry type. Also known as "R".
     """
 
-    def __init__(self, domains: Iterable, symmetry: int, auto_antiparallel: bool) -> None:
+    def __init__(
+        self, domains: Iterable, symmetry: int, auto_antiparallel: bool
+    ) -> None:
         """
         Initialize a domains container.
 

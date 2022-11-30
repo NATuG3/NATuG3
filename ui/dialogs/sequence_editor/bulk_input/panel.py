@@ -33,7 +33,9 @@ class BulkInputSequenceEditor(QWidget):
     def _from_file(self):
         def from_file_clicked():
             # obtain filepath from user
-            filepath = QFileDialog.getOpenFileName(self, "Choose File Location", filter="*.txt")[0]
+            filepath = QFileDialog.getOpenFileName(
+                self, "Choose File Location", filter="*.txt"
+            )[0]
             # open and load file
             with open(filepath) as file:
                 file_bases = file.read()
@@ -44,12 +46,14 @@ class BulkInputSequenceEditor(QWidget):
             # (or if it does get confirmation of user)
             if len(file_bases) > len(self.bases):
                 difference = len(file_bases) - len(self.bases)
-                confirmed = helpers.confirm(self.parent(),
-                                "Sequence Overload",
-                                f"The chosen file contains {difference} more bases than the strand allows for.\n"
-                                "If you proceed the inputted bases will be truncated to the strand length.\n\n"
-                                "Would you like to proceed?")
-                file_bases = file_bases[:len(self.bases)]
+                confirmed = helpers.confirm(
+                    self.parent(),
+                    "Sequence Overload",
+                    f"The chosen file contains {difference} more bases than the strand allows for.\n"
+                    "If you proceed the inputted bases will be truncated to the strand length.\n\n"
+                    "Would you like to proceed?",
+                )
+                file_bases = file_bases[: len(self.bases)]
             else:
                 # if the amount of bases in the file is reasonable proceed as normal
                 confirmed = True
@@ -60,10 +64,12 @@ class BulkInputSequenceEditor(QWidget):
                 for file_base in file_bases:
                     if file_base.upper() not in DNA:
                         # if any base is of the wrong type then cancel the operation
-                        helpers.warning(self.parent(),
-                                        "Invalid bases",
-                                        "This file contains invalid base characters!\n"
-                                        f"The file must only consist of {str(DNA)}.")
+                        helpers.warning(
+                            self.parent(),
+                            "Invalid bases",
+                            "This file contains invalid base characters!\n"
+                            f"The file must only consist of {str(DNA)}.",
+                        )
                         return
                     else:
                         bases.append(file_base.upper())

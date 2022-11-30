@@ -102,7 +102,10 @@ class SideViewWorker:
                         cycle = 0
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
                             cycle += 1
-                            if abs(up_strand_z_coord - down_strand_z_coord) > self.nucleic_acid_profile.Z_mate:
+                            if (
+                                abs(up_strand_z_coord - down_strand_z_coord)
+                                > self.nucleic_acid_profile.Z_mate
+                            ):
                                 begin_at[DOWN] += 1
                                 if cycle == 10000:
                                     begin_at[DOWN] = 0

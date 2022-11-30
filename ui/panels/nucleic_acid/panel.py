@@ -39,17 +39,17 @@ class Panel(QWidget):
 
     def _signals(self):
         for input in (
-                self.D,
-                self.H,
-                self.T,
-                self.g,
-                self.B,
-                self.Z_b,
-                self.Z_c,
-                self.Z_s,
-                self.theta_b,
-                self.theta_c,
-                self.theta_s,
+            self.D,
+            self.H,
+            self.T,
+            self.g,
+            self.B,
+            self.Z_b,
+            self.Z_c,
+            self.Z_s,
+            self.theta_b,
+            self.theta_c,
+            self.theta_s,
         ):
             input.valueChanged.connect(lambda: self.updated.emit(self.fetch_settings()))
 
@@ -110,7 +110,9 @@ class Panel(QWidget):
         self.H.setStatusTip("The height of one turn of the helix of a nucleic acid.")
 
         self.g.setToolTip("Nucleoside-Mate Angle")
-        self.g.setStatusTip("The angle between a nucleoside and its mate on the other helix.")
+        self.g.setStatusTip(
+            "The angle between a nucleoside and its mate on the other helix."
+        )
 
         self.T.setToolTip("Turns")
         self.T.setStatusTip("There are B bases per T turns of the helix.")

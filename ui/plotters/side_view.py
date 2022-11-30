@@ -71,7 +71,7 @@ class SideViewPlotter(pg.PlotWidget):
         self,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
-        mode: Literal["nucleoside", "NEMid"]
+        mode: Literal["nucleoside", "NEMid"],
     ) -> None:
         """
         Initialize plotter instance.
@@ -199,9 +199,29 @@ class SideViewPlotter(pg.PlotWidget):
             point_brush = pg.mkBrush(color=strand.color)
 
             # create various brushes
-            dim_brush = pg.mkBrush(color=(240, 240, 240,))
-            black_pen = pg.mkPen(color=(0, 0, 0,), width=.5)
-            dark_pen = pg.mkPen(color=(35, 35, 35,), width=.38)
+            dim_brush = pg.mkBrush(
+                color=(
+                    240,
+                    240,
+                    240,
+                )
+            )
+            black_pen = pg.mkPen(
+                color=(
+                    0,
+                    0,
+                    0,
+                ),
+                width=0.5,
+            )
+            dark_pen = pg.mkPen(
+                color=(
+                    35,
+                    35,
+                    35,
+                ),
+                width=0.38,
+            )
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # iterate on the proper type based on toolbar
@@ -240,7 +260,9 @@ class SideViewPlotter(pg.PlotWidget):
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
                     symbol_size = 18
-                    symbol_brushes.append(pg.mkBrush(color=settings.colors["highlighted"]))
+                    symbol_brushes.append(
+                        pg.mkBrush(color=settings.colors["highlighted"])
+                    )
                 else:
                     if isinstance(point, Nucleoside) and point.base is not None:
                         symbol_size = 7
@@ -302,7 +324,9 @@ class SideViewPlotter(pg.PlotWidget):
                 connect = "all"
 
             # plot the outline separately
-            stroke = pg.PlotDataItem(x_coords, z_coords, pen=strand_pen, connect=connect)
+            stroke = pg.PlotDataItem(
+                x_coords, z_coords, pen=strand_pen, connect=connect
+            )
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(
                 lambda plot_data_item, mouse_event, to_emit=strand: self.strand_clicked.emit(

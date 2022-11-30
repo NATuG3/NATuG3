@@ -45,7 +45,7 @@ class StrandConfig(QDialog):
         if self.strand.thickness > self.max_thickness:
             thickness = 99
         else:
-            thickness = (self.strand.thickness)*99/self.max_thickness
+            thickness = (self.strand.thickness) * 99 / self.max_thickness
         thickness = round(thickness)
         self.thickness.setValue(thickness)
 
@@ -111,7 +111,7 @@ class StrandConfig(QDialog):
 
     def _thickness_selector(self):
         def chosen_thickness():
-            return (self.thickness.value()*self.max_thickness)/99
+            return (self.thickness.value() * self.max_thickness) / 99
 
         def thickness_changed():
             """Worker for when the thickness slider is changed."""
