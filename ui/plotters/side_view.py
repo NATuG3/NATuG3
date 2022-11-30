@@ -213,6 +213,14 @@ class SideViewPlotter(pg.PlotWidget):
             )
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
+            # if the strand color is dark
+            if sum(strand.color) < (255*3)/2:
+                # a light symbol pen
+                symbol_pen = pg.mkPen(color=(220, 220, 200,), width=0.5,)
+            else:
+                # otherwise create a dark one
+                symbol_pen = pg.mkPen(color=(0, 0, 0,), width=0.5,)
+
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
                 to_plot = strand.NEMids()
@@ -236,7 +244,6 @@ class SideViewPlotter(pg.PlotWidget):
                 if self.plot_data.mode == "nucleoside" and point.base is not None:
                     symbol = custom_symbol(point.base, flip=False)
                     symbols.append(symbol)
-                    symbol_pens.append(black_pen)
                 elif self.plot_data.mode == "NEMid" or point.base is None:
                     if point.direction == UP:
                         symbols.append("t1")  # up arrow
@@ -244,7 +251,7 @@ class SideViewPlotter(pg.PlotWidget):
                         symbols.append("t")  # down arrow
                     else:
                         raise ValueError("Point.direction is not UP or DOWN.", point)
-                    symbol_pens.append(dark_pen)
+                symbol_pens.append(symbol_pen)
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
