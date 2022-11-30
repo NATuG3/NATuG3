@@ -44,6 +44,7 @@ class Nucleoside(Point):
             "T": "A",
             "C": "G",
             "G": "C",
+            None: None,
         }
         return complements[self.base]
 

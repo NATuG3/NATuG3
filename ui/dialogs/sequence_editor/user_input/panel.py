@@ -1,6 +1,7 @@
+from contextlib import suppress
 from typing import Iterable
 
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer
 from PyQt6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
 from .display_area import SequenceDisplayArea
@@ -60,30 +61,20 @@ class UserInputSequenceEditor(QWidget):
             if self.bases != self.editor_area.bases:
                 self.bases = self.editor_area.bases
 
-        def editor_area_shifted_right(index: int = 0):
-            if index != len(self.editor_area):
+        def editor_area_shifted(index: int = 0):
+            with suppress(IndexError):
                 widget = self.editor_area.widgets[index]
-                scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
-                scroll_bar.setValue(scroll_bar.value() + widget.width())
-
-        def editor_area_shifted_left(index: int = 0):
-            widget = self.editor_area.widgets[index]
-            scroll_bar = self.scrollable_editor_area.horizontalScrollBar()
-            scroll_bar.setValue(scroll_bar.value() - widget.width())
+                runner = lambda: self.scrollable_editor_area.ensureWidgetVisible(widget)
+                QTimer.singleShot(0, runner)
 
         def editor_area_selection_changed(previous_index: int, new_index: int):
             self.display_area.blockSignals(True)
             self.display_area.highlight(new_index)
             self.display_area.blockSignals(False)
-            # shift the editor area
-            if new_index > previous_index:
-                editor_area_shifted_right()
-            else:
-                editor_area_shifted_left()
 
-        self.editor_area.base_set.connect(editor_area_shifted_right)
-        self.editor_area.base_reset.connect(editor_area_shifted_right)
-        self.editor_area.base_unset.connect(editor_area_shifted_left)
+        self.editor_area.base_set.connect(editor_area_shifted)
+        self.editor_area.base_reset.connect(editor_area_shifted)
+        self.editor_area.base_unset.connect(editor_area_shifted)
         self.editor_area.updated.connect(editor_area_updated)
         self.editor_area.selection_changed.connect(editor_area_selection_changed)
 

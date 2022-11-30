@@ -71,8 +71,7 @@ class SideViewPlotter(pg.PlotWidget):
         self,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
-        mode: Literal["nucleoside", "NEMid"],
-        bases: bool = False,
+        mode: Literal["nucleoside", "NEMid"]
     ) -> None:
         """
         Initialize plotter instance.

@@ -4,7 +4,6 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QVBoxLayout, QDialog, QWidget
 
-from ui.dialogs.sequence_editor.file_input.panel import FileInputSequenceEditor
 from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
 
 
