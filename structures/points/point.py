@@ -12,14 +12,14 @@ class Point:
     Point objects represent parts of/things on helices.
 
     Attributes:
-        x_coord: The x coord of the NEMid.
-        z_coord: The z coord of the NEMid.
+        x_coord: The x coord of the point.
+        z_coord: The z coord of the point.
         angle: Angle from this domain and next domains' line of tangency going counterclockwise.
-        direction: The direction of the helix at this NEMid.
-        strand: The strand that this NEMid belongs to.
-        domain: The domain this NEMid belongs to.
-        matching: NEMid in same domain on other direction's helix across from this one.
-        highlighted: Whether the NEMid is highlighted.
+        direction: The direction of the helix at this point.
+        strand: The strand that this point belongs to.
+        domain: The domain this point belongs to.
+        matching: Point in same domain on other direction's helix across from this one.
+        highlighted: Whether the point is highlighted.
     """
 
     # positional attributes

@@ -9,7 +9,7 @@ from PyQt6.QtCore import pyqtSignal
 import helpers
 import settings
 from structures.domains import Domains
-from workers.top_view import TopViewWorker
+from structures.domains.workers.top_view import TopViewWorker
 
 logger = logging.getLogger(__name__)
 

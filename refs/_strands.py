@@ -1,7 +1,5 @@
 import atexit
 import pickle
-from types import NoneType
-from typing import Union
 
 import refs
 from structures.strands.strands import Strands

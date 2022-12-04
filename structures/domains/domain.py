@@ -1,7 +1,6 @@
 from constants.directions import *
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
-from structures.domains.domains.domains import Domains
 
 
 class Domain:
@@ -9,7 +8,7 @@ class Domain:
     A singular domain object.
 
     Attributes:
-        parent: The parent domains container object. If this is None then index becomes None too.
+        parent: The parent workers container object. If this is None then index becomes None too.
         index: The index of this domain in its parent.
         left_helix_joint: The left helix joint's upwardness or downwardness.
             "Left" indicates that the left side of this domain will be lined up to
@@ -19,11 +18,11 @@ class Domain:
             the left helix joint of the next domain. Uses the constant 0 for up and 1 for down.
         up_strand (Strand): The up strand of the domain. This is an unparented strand object.
         down_strand (Strand): The down strand of the domain. This is an unparented strand object.
-        theta_m_multiple: Angle between this and the next domains' line of tangency. Multiple of theta_c.
+        theta_m_multiple: Angle between this and the next workers' line of tangency. Multiple of theta_c.
             This is the angle between i,i+1's line of tangency and i+1,i+2's line of tangency
             where i is the index of this domain.
             This is the theta_m_multiple times the characteristic angle.
-        theta_m: Angle between this and the next domains' line of tangency. In degrees.
+        theta_m: Angle between this and the next workers' line of tangency. In degrees.
             This is the angle between i,i+1's line of tangency and i+1,i+2's line of tangency
             where i is the index of this domain.
             This is the theta_m_multiple times the characteristic angle.
@@ -42,14 +41,14 @@ class Domain:
         left_helix_joint_direction: int,
         right_helix_joint_direction: int,
         count: int,
-        parent: Domains = None,
+        parent: "Domains" = None,
     ):
         """
         Initialize a Domain object.
 
         Args:
             nucleic_acid_profile: The nucleic acid settings profile
-            theta_m_multiple: Angle between this and the next domains' lines of tangency. Multiple of theta c.
+            theta_m_multiple: Angle between this and the next workers' lines of tangency. Multiple of theta c.
             left_helix_joint_direction: The left helix joint's direction.
             right_helix_joint_direction: The right helix joint's direction.
             count: Number of initial NEMids/strand to generate.
@@ -57,7 +56,6 @@ class Domain:
         """
         # store the parent subunit
         self.parent = parent
-        assert isinstance(self.parent, Domains) or self.parent is None
 
         # store the nucleic acid settings
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -105,7 +103,7 @@ class Domain:
         # then update parent
         if key != "parent" and self.parent is not None:
             # if there is a parent make sure to clear its strands cache
-            # so that the strands of all domains can be recomputed
+            # so that the strands of all workers can be recomputed
             if self.parent is not None:
                 self.parent.domains.cache_clear()
                 self.parent.subunits.cache_clear()
@@ -113,7 +111,7 @@ class Domain:
     @property
     def index(self) -> int | None:
         """
-        The index of the domain in its parent domains container.
+        The index of the domain in its parent workers container.
 
         Returns:
             int: The index of the domain.
