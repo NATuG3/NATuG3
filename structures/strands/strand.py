@@ -171,7 +171,7 @@ class Strand:
         except IndexError:
             return None
 
-    def sliced(self, start: int, end: int) -> list:
+    def sliced(self, start: int | None, end: int | None) -> list:
         """Return self.NEMids as a list."""
         return list(itertools.islice(self.items, start, end))
 

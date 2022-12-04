@@ -18,6 +18,13 @@ class Strands:
         strands: The actual sequencing.
         up_strands: All up sequencing.
         down_strands: All down sequencing.
+
+    Methods:
+        conjunct()
+        up_strands(), down_strands()
+        recompute(), recolor()
+        append()
+        remove()
     """
 
     def __init__(
@@ -109,6 +116,7 @@ class Strands:
         Notes:
             - The order of NEMid1 and NEMid2 is arbitrary.
             - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
+            - NEMid.matching may be changed based on whether the strand is closed or not.
         """
         # ensure that both NEMids are junctable
         if (not NEMid1.junctable) or (not NEMid2.junctable):
@@ -260,6 +268,7 @@ class Strands:
             else:
                 NEMid_.junction = False
 
+        # assign the new juncmates
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
