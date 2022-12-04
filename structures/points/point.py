@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Tuple
 
+from helpers import inverse
+
 
 @dataclass(kw_only=True, slots=True)
 class Point:
@@ -31,10 +33,31 @@ class Point:
     direction: int = None
     strand: Strand = None
     domain: Domain = None
-    matching: Point = None
 
     # plotting attributes
     highlighted: bool = False
+
+    def matching(self) -> Point | None:
+        """
+        Obtain the matching point.
+
+        Returns:
+            Point: The matching point.
+            None: There is no matching point.
+        """
+        if self.strand is None or self.strand.closed:
+            return None
+        else:
+            # the parent of a Domain is a Subunit
+            # the parent of a Subunit is a Domains
+            domains: "Domains" = self.domain.parent.parent
+
+            # the other strand in the same domain as this point
+            # all_domains -> index of this domain -> opposite direction
+            other_strand = domains.domains()[self.index][inverse(self.direction)]
+
+            # obtain the matching point
+            return reversed(other_strand)[self.index]
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Domain) -> float:
