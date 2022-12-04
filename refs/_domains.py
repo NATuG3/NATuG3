@@ -28,10 +28,8 @@ class _Domains:
     )
 
     def __init__(self):
-        self.current: Domains = self.default
-        print(self.current)
-
         self.load()
+        self.current = self.default
         atexit.register(self.dump)
 
     def load(self):

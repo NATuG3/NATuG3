@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 from constants.directions import *
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
+from structures.domains.domains.domains import Domains
 
 
 class Domain:
@@ -57,7 +56,8 @@ class Domain:
             parent (Subunit): The parent subunit. Defaults to None.
         """
         # store the parent subunit
-        super().__setattr__("parent", parent)
+        self.parent = parent
+        assert isinstance(self.parent, Domains) or self.parent is None
 
         # store the nucleic acid settings
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -99,22 +99,29 @@ class Domain:
             return self.parent.strands()[self.index][RIGHT]
 
     def __setattr__(self, key, value):
-        # if there is a parent make sure to clear its strands cache
-        # so that the strands of all domains can be recomputed
-        if self.parent is not None:
-            self.parent.strands.clear_cache()
-        # then proceed as normal
+        """Set the attribute and update the parent if necessary."""
+        # set the attribute
         super().__setattr__(key, value)
+        # then update parent
+        if key != "parent" and self.parent is not None:
+            # if there is a parent make sure to clear its strands cache
+            # so that the strands of all domains can be recomputed
+            if self.parent is not None:
+                self.parent.domains.cache_clear()
+                self.parent.subunits.cache_clear()
 
     @property
-    def index(self) -> int:
+    def index(self) -> int | None:
         """
         The index of the domain in its parent domains container.
 
         Returns:
             int: The index of the domain.
         """
-        return self.parent.domains().index(self)
+        if self.parent is None:
+            return None
+        else:
+            return self.parent.domains().index(self)
 
     @property
     def theta_s_multiple(self) -> int:
@@ -147,20 +154,3 @@ class Domain:
     def theta_m(self) -> float:
         """Obtain the theta interior angle."""
         return self.theta_interior_multiple * self.nucleic_acid_profile.theta_c
-
-    def __eq__(self, other) -> bool:
-        """Whether us.index == them.index."""
-        if not isinstance(other, type(self)):
-            return False
-        return self.index == other.index
-
-    def __repr__(self) -> str:
-        return (
-            f"domain("
-            f"index={self.index}, "
-            f"Θ_interior_multiple={self.theta_interior_multiple}, "
-            f"helix_joints=(left={self.left_helix_joint}, "
-            f"right={self.right_helix_joint}), "
-            f"Θ_switch_multiple={self.theta_s_multiple}"
-            f")"
-        )

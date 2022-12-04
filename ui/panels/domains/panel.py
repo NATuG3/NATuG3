@@ -97,7 +97,7 @@ class Panel(QWidget):
         # https://github.com/404Wolf/NATuG3/issues/4
         current_domains = refs.domains.current
         M: int = sum(
-            [domain.theta_interior_multiple for domain in current_domains.domains]
+            [domain.theta_interior_multiple for domain in current_domains.domains()]
         )
         N: int = current_domains.count
         B: int = refs.nucleic_acid.current.B
@@ -136,6 +136,7 @@ class Panel(QWidget):
     def table_refresh(self):
         """Refresh panel settings/domain table."""
         new_domains: Domains = Domains(
+            refs.nucleic_acid.current,
             self.table.fetch_domains(),
             refs.domains.current.symmetry,
             self.auto_antiparallel.isChecked(),

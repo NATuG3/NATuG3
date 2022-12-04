@@ -37,8 +37,8 @@ class DomainStrandWorker:
             domains: The domains to compute sequencing for.
             nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile to use.
         """
-        self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
+        self.domains = domains
 
     @cache
     def compute(self) -> Strands:
@@ -51,7 +51,7 @@ class DomainStrandWorker:
         # the output container for all NEMids
         strands = [([], []) for _ in range(self.domains.count)]
 
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # how many NEMids to skip over for the up and down strand
             begin_at = [0, 0]
 
@@ -153,14 +153,14 @@ class DomainStrandWorker:
                     strands[index][strand_direction].reverse()
 
         # assign matching NEMids to each other's matching slots
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             item1: Point
             item2: Point
             for item1, item2 in zip(strands[index][0], reversed(strands[index][1])):
                 item1.matching, item2.matching = item2, item2
 
         # assign junctability and juncmates
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             if index == self.domains.count - 1:
                 next_strands = strands[0]
             else:
@@ -216,7 +216,7 @@ class DomainStrandWorker:
 
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # look at left current domain helix joint
             zeroed_strand = domain.left_helix_joint
 
@@ -254,7 +254,7 @@ class DomainStrandWorker:
         x_coords = [[[], []] for _ in range(self.domains.count)]
 
         # make a copy of the angles iterator for use in generating x coords
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # since every T NEMids the x coords repeat we only need to generate x coords for the first T NEMids
             for strand_direction in self.strand_directions:  # (UP, DOWN)
                 for counter, angle in enumerate(angles[index][strand_direction]):
@@ -294,7 +294,7 @@ class DomainStrandWorker:
         z_coords = [[None, None] for _ in range(self.domains.count)]
 
         # creating a sample of x coords
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
                     x_coords[index][strand_direction], 0, self.nucleic_acid_profile.B
@@ -303,10 +303,10 @@ class DomainStrandWorker:
                     x_coords[index][strand_direction]
                 )
 
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # look at the right joint of the previous domain
             # for calculating the initial z coord
-            zeroed_strand = self.domains.domains[index - 1].right_helix_joint
+            zeroed_strand = self.domains.domains()[index - 1].right_helix_joint
 
             # step 1: find the initial z cord for the current domain
             if index == 0:

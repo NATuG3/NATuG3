@@ -33,6 +33,7 @@ class Subunit:
         """
         self.template = template
         self.domains = domains
+        assert isinstance(domains, Iterable)
 
     def __setattr__(self, key, value):
         """
@@ -86,6 +87,9 @@ class Subunit:
                 The number of domains changes based off the difference between this
                 and the previous count.
         """
+        # we couldn't import domains before because it was partially initialized
+        # but we can now (and we will need it if the count increases to make new domains)
+        from structures.domains import Domain
         # if the subunit count has decreased then trim off extra domains
         if new < self.count:
             self.domains = self.domains[:new]

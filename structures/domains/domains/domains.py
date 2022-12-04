@@ -22,9 +22,7 @@ class Domains:
         nucleic_acid_profile: The nucleic acid configuration.
         subunit: The domains within a single subunit.
             This is a template subunit. Note that subunits can be mutated.
-        subunits: All subunits. Only the first one can be written to.
         symmetry: The symmetry type. Also known as "R".
-        strands: All the strands of all the domains.
         count: The total number of domains. Includes domains from all subunits.
         antiparallel: Whether the domains are forced to have alternating upness/downness.
 
@@ -58,10 +56,25 @@ class Domains:
 
         # self.subunit is the template subunit
         # meaning that all other subunits are based off of this one
-        self.subunit = Subunit(domains, template=True)
+        assert isinstance(domains, Iterable)
+        self._subunit = Subunit(domains, template=True)
 
         # create a worker object for computing strands for domains
-        self.worker = DomainStrandWorker(self.nucleic_acid_profile, self.domains)
+        self.worker = DomainStrandWorker(self.nucleic_acid_profile, self)
+
+    @property
+    def subunit(self) -> Subunit:
+        """Obtain the current template subunit."""
+        return self._subunit
+
+    @subunit.setter
+    def subunit(self, new_subunit) -> None:
+        """Replace the current template subunit."""
+        self._subunit = new_subunit
+        for domain in self._subunit:
+            domain.parent = self._subunit
+        self.domains.cache_clear()
+        self.subunits.cache_clear()
 
     @property
     def count(self) -> int:
@@ -73,6 +86,7 @@ class Domains:
         """
         return len(self.domains())
 
+    @cache
     def subunits(self) -> List[Subunit]:
         """
         Obtain all subunits of the Domains object.
@@ -81,15 +95,23 @@ class Domains:
             List[Subunit]: Copies of the template subunit for all subunits except the first one.
             The first subunit in the returned list is a direct reference to the template subunit.
         """
-        subunits = []
+        output = []
         for cycle in range(self.symmetry):
             # for all subunits after the first one make deep copies of the subunit.
             if cycle == 0:
-                subunits.append(self.subunit)
+                output.append(self.subunit)
             else:
-                subunits.append(self.subunit.copy())
-        return subunits
+                copied = self.subunit.copy()
+                copied.template = False
+                output.append(copied)
 
+        # apply ourself as the parent to all the subunits being returned
+        for subunit in output:
+            subunit.parent = self
+
+        return output
+
+    @cache
     def domains(self) -> List["Domain"]:
         """
         Obtain a list of all domains from all subunits.
@@ -97,24 +119,26 @@ class Domains:
         Returns:
             A list of all domains from all subunits.
         """
-        domains = []
+        output = []
         for subunit in self.subunits():
-            domains.extend(subunit.domains)
+            output.extend(subunit.domains)
 
         # if the domains instance is set to antiparallel then make the directions
         # of the domains alternate.
         if self.antiparallel:
+            # alternate from where we left off
+            # (which is the very right end of the subunit domains)
             direction = self.subunit.domains[-1].right_helix_joint
-            for domain in domains:
+            for domain in output:
                 domain.left_helix_joint = direction
                 domain.right_helix_joint = direction
                 direction = inverse(direction)
 
         # apply ourself as the parent for each domain
-        for domain in domains:
+        for domain in output:
             domain.parent = self
 
-        return domains
+        return output
 
     @cache
     def strands(self) -> Strands:
@@ -128,37 +152,20 @@ class Domains:
         Returns:
             A list of all strands from all domains.
         """
-        strands = DomainStrandWorker(self.nucleic_acid_profile, self.domains)
-
+        computed = self.worker.compute()
         converted_strands = []
         for strand_direction in (
             UP,
             DOWN,
         ):
-            for index, domain in enumerate(strands.domains.domains()):
+            for index, domain in enumerate(self.domains()):
                 converted_strands.append(
                     Strand(
                         self.nucleic_acid_profile,
-                        strands[index][strand_direction],
+                        computed[index][strand_direction],
                         color=settings.colors["sequencing"]["greys"][strand_direction],
                     )
                 )
-
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, converted_strands)
 
-    def __repr__(self) -> str:
-        """
-        Obtain a string representation of the Domains object.
-
-        Returns:
-            A string representation of the Domains object.
-        """
-        return (
-            f"Domains("
-            f"template_subunit={self.subunit},"
-            f"domain_count={self.count},"
-            f"antiparallel={self.antiparallel},"
-            f"symmetry={self.symmetry}"
-            f")"
-        )
