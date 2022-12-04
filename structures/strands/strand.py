@@ -154,10 +154,12 @@ class Strand:
     def sequence(self, new_sequence: List[str]):
         if len(new_sequence) == len(self.nucleosides()):
             for index, base in enumerate(new_sequence):
+                # update the base for the nucleoside
                 self.nucleosides()[index].base = base
-                # self.nucleosides()[index].matching.base = self.nucleosides()[
-                #     index
-                # ].complement
+
+                # assign the complementary base to the matching nucleoside
+                complement = self.nucleosides()[index].complement
+                self.nucleosides()[index].matching().base = complement
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
