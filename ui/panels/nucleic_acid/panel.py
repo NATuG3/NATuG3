@@ -83,6 +83,7 @@ class Panel(QWidget):
         self.Z_c.setValue(profile.Z_c)
         self.Z_s.setValue(profile.Z_s)
         self.Z_b.setValue(profile.Z_b)
+        self.Z_mate.setValue(profile.Z_mate)
         self.theta_b.setValue(profile.theta_b)
         self.theta_c.setValue(profile.theta_c)
         self.theta_s.setValue(profile.theta_s)

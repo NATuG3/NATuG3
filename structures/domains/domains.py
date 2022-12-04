@@ -107,7 +107,7 @@ class Subunit:
                     Domain(
                         i,
                         previous_domain.theta_interior_multiple,
-                        [inverse(previous_domain.helix_joints[1])] * 2,
+                        [inverse(previous_domain.right_helix_joint_direction)] * 2,
                         previous_domain.count,
                     )
                 )
