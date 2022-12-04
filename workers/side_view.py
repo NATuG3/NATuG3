@@ -142,7 +142,9 @@ class SideViewWorker:
 
                     # create a nucleoside object from the NEMid
                     nucleoside = NEMid_.to_nucleoside()
+                    nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
                     nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+                    nucleoside.x_coord = Point.x_coord_from_angle(nucleoside.angle, nucleoside.domain)
 
                     # append the current NEMid and nucleoside to the to-be-outputted array
                     strands[index][strand_direction].append(NEMid_)
