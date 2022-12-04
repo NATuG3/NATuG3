@@ -2,12 +2,12 @@ import logging
 from types import SimpleNamespace
 from typing import Literal, List
 
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import pyqtSignal, Qt, QEvent
 from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import (
     QTableWidget,
     QHeaderView,
-    QAbstractItemView,
+    QAbstractItemView, QApplication,
 )
 
 from constants.directions import *
@@ -62,6 +62,13 @@ class Table(QTableWidget):
             if to_focus is not None:
                 self.setCurrentCell(row, column)
                 to_focus.setFocus()
+                for i in range(6):
+                    event = QKeyEvent(
+                        QEvent.Type.KeyPress,
+                        Qt.Key.Key_Right,
+                        Qt.KeyboardModifier.NoModifier
+                    )
+                    QApplication.postEvent(to_focus, event)
             self.blockSignals(False)
             self.setTabKeyNavigation(True)
         else:

@@ -228,6 +228,9 @@ class SideViewWorker:
                                 NEMid2.juncmate = NEMid1
                                 NEMid2.junctable = True
 
+        # store the computed strands in self.domains
+        self.domains.strands = strands
+
         converted_strands = []
         for strand_direction in self.strand_directions:
             for index, domain in enumerate(self.domains.domains):
