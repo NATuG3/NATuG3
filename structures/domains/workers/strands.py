@@ -2,7 +2,7 @@ import itertools
 import logging
 from functools import cache
 from math import dist
-from typing import List, Tuple, Type
+from typing import List, Tuple
 
 import settings
 from constants.directions import *
@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 class DomainStrandWorker:
     """
     Class for generating data needed for a side view graph of helices.
-    This is used by the Domains structure to compute strands for its child domains.
+    This is used by the Domains structure to compute strands for its child workers.
 
     Methods:
         compute()
     """
 
     strand_directions = (UP, DOWN)
-    cache_clearers = ("domains", "profiles")
+    cache_clearers = ("workers", "profiles")
 
     def __init__(
         self, nucleic_acid_profile: NucleicAcidProfile, domains: "Domains"
@@ -34,7 +34,7 @@ class DomainStrandWorker:
         Initialize a side view generator object.
 
         Args:
-            domains: The domains to compute sequencing for.
+            domains: The workers to compute sequencing for.
             nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile to use.
         """
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -46,7 +46,7 @@ class DomainStrandWorker:
         Compute all NEMid data.
 
         Returns:
-            Strands object for all sequencing that the domains can create.
+            Strands object for all sequencing that the workers can create.
         """
         # the output container for all NEMids
         strands = [([], []) for _ in range(self.domains.count)]
@@ -152,13 +152,6 @@ class DomainStrandWorker:
                 if strand_direction == DOWN:
                     strands[index][strand_direction].reverse()
 
-        # assign matching NEMids to each other's matching slots
-        for index, domain in enumerate(self.domains.domains()):
-            item1: Point
-            item2: Point
-            for item1, item2 in zip(strands[index][0], reversed(strands[index][1])):
-                item1.matching, item2.matching = item2, item2
-
         # assign junctability and juncmates
         for index, domain in enumerate(self.domains.domains()):
             if index == self.domains.count - 1:
@@ -200,7 +193,7 @@ class DomainStrandWorker:
                                 NEMid2.juncmate = NEMid1
                                 NEMid2.junctable = True
 
-        # store the computed strands in self.domains
+        # store the computed strands in self.workers
         self.domains.strands = strands
 
         return strands
@@ -248,7 +241,7 @@ class DomainStrandWorker:
         Create a generator of X coords of NEMids for the side view plot.
 
         Returns:
-            DomainsContainerType: A domains container with innermost entries of generators.
+            DomainsContainerType: A workers container with innermost entries of generators.
         """
         angles = self._angles()
         x_coords = [[[], []] for _ in range(self.domains.count)]
@@ -288,7 +281,7 @@ class DomainStrandWorker:
         Create a generator of Z coords of NEMids for the side view plot.
 
         Returns:
-            DomainsContainerType: A domains container with innermost entries of generators.
+            DomainsContainerType: A workers container with innermost entries of generators.
         """
         x_coords = [list(domain) for domain in self._x_coords()]
         z_coords = [[None, None] for _ in range(self.domains.count)]
@@ -380,7 +373,7 @@ class DomainStrandWorker:
     @cache
     def __repr__(self) -> str:
         output = "side_view("
-        blacklist = "domains"
+        blacklist = "workers"
         for attr, value in vars(self).items():
             if attr not in blacklist:
                 if isinstance(value, float):

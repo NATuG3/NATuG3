@@ -1,13 +1,13 @@
 import logging
-from copy import deepcopy
 from functools import cache
-from typing import List, Iterable, Type
+from typing import List, Iterable
 
 import settings
 from constants.directions import DOWN, UP
 from helpers import inverse
-from structures.domains.domains.worker import DomainStrandWorker
 from structures.domains.subunit import Subunit
+from structures.domains.workers.strands import DomainStrandWorker
+from structures.domains.workers.top_view import TopViewWorker
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand, Strands
 
@@ -16,20 +16,20 @@ logger = logging.getLogger(__name__)
 
 class Domains:
     """
-    Container for multiple domains.
+    Container for multiple workers.
 
     Attributes:
         nucleic_acid_profile: The nucleic acid configuration.
-        subunit: The domains within a single subunit.
+        subunit: The workers within a single subunit.
             This is a template subunit. Note that subunits can be mutated.
         symmetry: The symmetry type. Also known as "R".
-        count: The total number of domains. Includes domains from all subunits.
-        antiparallel: Whether the domains are forced to have alternating upness/downness.
+        count: The total number of workers. Includes workers from all subunits.
+        antiparallel: Whether the workers are forced to have alternating upness/downness.
 
     Methods:
         strands()
         top_view()
-        domains()
+        workers()
         subunits()
     """
 
@@ -45,9 +45,9 @@ class Domains:
 
         Args:
             nucleic_acid_profile: The nucleic acid configuration.
-            domains: All the domains for the template subunit.
+            domains: All the workers for the template subunit.
             symmetry: The symmetry type. Also known as "R".
-            antiparallel: Whether the domains are forced to have alternating upness/downness.
+            antiparallel: Whether the workers are forced to have alternating upness/downness.
         """
         # store various settings
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -59,7 +59,7 @@ class Domains:
         assert isinstance(domains, Iterable)
         self._subunit = Subunit(domains, template=True)
 
-        # create a worker object for computing strands for domains
+        # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self.nucleic_acid_profile, self)
 
     @property
@@ -79,10 +79,10 @@ class Domains:
     @property
     def count(self) -> int:
         """
-        The number of domains in the Domains object.
+        The number of workers in the Domains object.
 
         Returns:
-            The number of domains in the Domains object.
+            The number of workers in the Domains object.
         """
         return len(self.domains())
 
@@ -114,20 +114,20 @@ class Domains:
     @cache
     def domains(self) -> List["Domain"]:
         """
-        Obtain a list of all domains from all subunits.
+        Obtain a list of all workers from all subunits.
 
         Returns:
-            A list of all domains from all subunits.
+            A list of all workers from all subunits.
         """
         output = []
         for subunit in self.subunits():
             output.extend(subunit.domains)
 
-        # if the domains instance is set to antiparallel then make the directions
-        # of the domains alternate.
+        # if the workers instance is set to antiparallel then make the directions
+        # of the workers alternate.
         if self.antiparallel:
             # alternate from where we left off
-            # (which is the very right end of the subunit domains)
+            # (which is the very right end of the subunit workers)
             direction = self.subunit.domains[-1].right_helix_joint
             for domain in output:
                 domain.left_helix_joint = direction
@@ -143,14 +143,14 @@ class Domains:
     @cache
     def strands(self) -> Strands:
         """
-        Obtain a list of all strands from all domains.
+        Obtain a list of all strands from all workers.
 
         Notes:
-            - The strands returned are references to the strands in the domains. This means
-                that if the outputted strands are modified then the domains' strands will be modified too.
+            - The strands returned are references to the strands in the workers. This means
+                that if the outputted strands are modified then the workers' strands will be modified too.
 
         Returns:
-            A list of all strands from all domains.
+            A list of all strands from all workers.
         """
         computed = self.worker.compute()
         converted_strands = []
@@ -168,4 +168,13 @@ class Domains:
                 )
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, converted_strands)
+
+    def top_view(self) -> TopViewWorker:
+        """
+        Obtain a TopViewWorker object of all the domains.
+
+        Returns:
+            A TopViewWorker object.
+        """
+        return TopViewWorker(self)
 
