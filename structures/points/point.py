@@ -1,8 +1,7 @@
 from __future__ import annotations
-from dataclasses import dataclass
-from typing import Tuple, Literal, Type
 
-from constants.directions import *
+from dataclasses import dataclass
+from typing import Tuple
 
 
 @dataclass(kw_only=True, slots=True)
@@ -29,10 +28,10 @@ class Point:
     angle: float = None
 
     # nucleic acid attributes
-    direction: Literal[UP, DOWN] = None
-    strand: Type["Strand"] = None
+    direction: int = None
+    strand: Strand = None
     domain: Domain = None
-    matching: Type["Point"] = None
+    matching: Point = None
 
     # plotting attributes
     highlighted: bool = False

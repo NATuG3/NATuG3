@@ -1,6 +1,5 @@
 import logging
 from functools import wraps, cache
-from typing import Literal
 
 import numpy as np
 from PyQt6.QtGui import QFont, QPainterPath, QTransform
@@ -79,12 +78,12 @@ def reverse_hidenness(potentially_hidden_item):
         potentially_hidden_item.hide()
 
 
-def inverse(integer: Literal[0, 1]) -> Literal[1, 0]:
+def inverse(integer: int) -> int:
     """
     Returns int(not bool(integer)).
 
     Args:
-        integer (Literal[0, 1]): Either 0 or 1.
+        integer: Either 0 or 1.
 
     Returns:
         int: 0 or 1.

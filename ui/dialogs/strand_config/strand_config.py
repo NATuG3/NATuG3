@@ -6,8 +6,8 @@ from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import QDialog, QColorDialog, QGraphicsScene
 
 from structures.strands import Strand
-from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
 from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
+from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
 
 
 class StrandConfig(QDialog):
@@ -20,7 +20,9 @@ class StrandConfig(QDialog):
         uic.loadUi("ui/dialogs/strand_config/strand_config.ui", self)
 
         self.strand = strand
-        self.setWindowTitle(f"Strand #{self.strand.parent.index(self.strand)+1} Config")
+        self.setWindowTitle(
+            f"Strand #{self.strand.parent.index(self.strand) + 1} Config"
+        )
         self._sequencing()
         self._color_selector()
         self._thickness_selector()

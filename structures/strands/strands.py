@@ -1,5 +1,4 @@
 import logging
-from math import dist
 from typing import List, Tuple, Iterable
 
 import settings

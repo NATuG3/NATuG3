@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QDialog
 
 from constants.directions import *
 from structures.domains import Domains
-from structures.points import NEMid, Nucleoside
+from structures.points import Nucleoside
 from structures.strands import Strands
 
 

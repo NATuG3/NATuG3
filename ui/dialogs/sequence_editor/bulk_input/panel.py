@@ -1,13 +1,10 @@
 import random
-from itertools import repeat
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog
 
 import helpers
 from constants.bases import DNA
-from helpers import bases_only
-from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 
 
 class BulkInputSequenceEditor(QWidget):

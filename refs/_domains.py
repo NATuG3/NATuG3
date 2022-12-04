@@ -13,28 +13,23 @@ logger = logging.getLogger(__name__)
 class _Domains:
     filename: str = f"saves/domains/restored.{settings.extension}"
     default: Domains = Domains(
+        refs.nucleic_acid.current,
         (
-            Domain(refs.nucleic_acid.current,0, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,1, 9, DOWN, DOWN, 50),
-            Domain(refs.nucleic_acid.current,2, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,3, 9, DOWN, DOWN, 50),
-            Domain(refs.nucleic_acid.current,4, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,5, 9, DOWN, DOWN, 50),
-            Domain(refs.nucleic_acid.current,6, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,7, 9, DOWN, DOWN, 50),
-            Domain(refs.nucleic_acid.current,8, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,9, 9, DOWN, DOWN, 50),
-            Domain(refs.nucleic_acid.current,10, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,12, 9, DOWN, DOWN, 50),
-            Domain(refs.nucleic_acid.current,13, 9, UP, UP, 50),
-            Domain(refs.nucleic_acid.current,14, 9, DOWN, DOWN, 50),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 50),
+            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 50),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 50),
+            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 50),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 50),
+            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 50),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 50),
         ),
-        1,
+        2,
         True,
     )
 
     def __init__(self):
         self.current: Domains = self.default
+        print(self.current)
 
         self.load()
         atexit.register(self.dump)

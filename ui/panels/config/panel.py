@@ -1,6 +1,5 @@
 import logging
 import os
-from collections import namedtuple
 from contextlib import suppress
 from datetime import datetime
 from types import SimpleNamespace
@@ -8,7 +7,7 @@ from typing import List, Dict
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDialog, QTabWidget
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDialog
 
 import refs
 import refs.saver.save

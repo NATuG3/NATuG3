@@ -1,5 +1,4 @@
 import logging
-from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
 from typing import List, Tuple, Dict, Literal
@@ -214,12 +213,26 @@ class SideViewPlotter(pg.PlotWidget):
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # if the strand color is dark
-            if sum(strand.color) < (255*3)/2:
+            if sum(strand.color) < (255 * 3) / 2:
                 # a light symbol pen
-                symbol_pen = pg.mkPen(color=(255, 255, 255,), width=0.65,)
+                symbol_pen = pg.mkPen(
+                    color=(
+                        255,
+                        255,
+                        255,
+                    ),
+                    width=0.65,
+                )
             else:
                 # otherwise create a dark one
-                symbol_pen = pg.mkPen(color=(0, 0, 0,), width=0.5,)
+                symbol_pen = pg.mkPen(
+                    color=(
+                        0,
+                        0,
+                        0,
+                    ),
+                    width=0.5,
+                )
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":

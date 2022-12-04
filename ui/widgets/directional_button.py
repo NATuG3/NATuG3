@@ -1,5 +1,3 @@
-from typing import Literal
-
 from PyQt6.QtWidgets import QPushButton
 
 from constants.directions import *
@@ -9,7 +7,7 @@ up_arrow, down_arrow = "↑", "↓"
 
 
 class DirectionalButton(QPushButton):
-    def __init__(self, parent, state: Literal[UP, DOWN]):
+    def __init__(self, parent, state: int):
         super().__init__(parent)
 
         self.state = state

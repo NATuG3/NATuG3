@@ -1,29 +1,26 @@
 import itertools
 import logging
-from contextlib import suppress
-from functools import cached_property, cache
+from functools import cache
 from math import dist
-from typing import List, Tuple
+from typing import List, Tuple, Type
 
 import settings
 from constants.directions import *
 from helpers import inverse
-from structures.domains import Domains
 from structures.points import NEMid
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
-from structures.strands.strand import Strand
 from structures.strands.strands import Strands
 
 logger = logging.getLogger(__name__)
 
 
-class SideViewWorker:
+class DomainStrandWorker:
     """
     Class for generating data needed for a side view graph of helices.
+    This is used by the Domains structure to compute strands for its child domains.
 
     Methods:
-        angle_to_x_coord()
         compute()
     """
 
@@ -31,7 +28,7 @@ class SideViewWorker:
     cache_clearers = ("domains", "profiles")
 
     def __init__(
-        self, domains: Domains, nucleic_acid_profile: NucleicAcidProfile
+        self, nucleic_acid_profile: NucleicAcidProfile, domains: "Domains"
     ) -> None:
         """
         Initialize a side view generator object.
@@ -144,7 +141,9 @@ class SideViewWorker:
                     nucleoside = NEMid_.to_nucleoside()
                     nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
                     nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
-                    nucleoside.x_coord = Point.x_coord_from_angle(nucleoside.angle, nucleoside.domain)
+                    nucleoside.x_coord = Point.x_coord_from_angle(
+                        nucleoside.angle, nucleoside.domain
+                    )
 
                     # append the current NEMid and nucleoside to the to-be-outputted array
                     strands[index][strand_direction].append(NEMid_)
@@ -204,20 +203,6 @@ class SideViewWorker:
         # store the computed strands in self.domains
         self.domains.strands = strands
 
-        converted_strands = []
-        for strand_direction in self.strand_directions:
-            for index, domain in enumerate(self.domains.domains):
-                converted_strands.append(
-                    Strand(
-                        self.nucleic_acid_profile,
-                        strands[index][strand_direction],
-                        color=settings.colors["sequencing"]["greys"][strand_direction],
-                    )
-                )
-
-        # convert sequencing from a list to a Strands container
-        strands = Strands(self.nucleic_acid_profile, converted_strands)
-
         return strands
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
@@ -233,7 +218,7 @@ class SideViewWorker:
         # domain_index is the index of the current domain
         for index, domain in enumerate(self.domains.domains):
             # look at left current domain helix joint
-            zeroed_strand = domain.left_helix_joint_direction
+            zeroed_strand = domain.left_helix_joint
 
             # create infinite generators for the zeroed and non zeroed sequencing
             angles[index][zeroed_strand] = itertools.count(
@@ -321,7 +306,7 @@ class SideViewWorker:
         for index, domain in enumerate(self.domains.domains):
             # look at the right joint of the previous domain
             # for calculating the initial z coord
-            zeroed_strand = self.domains.domains[index - 1].right_helix_joint_direction
+            zeroed_strand = self.domains.domains[index - 1].right_helix_joint
 
             # step 1: find the initial z cord for the current domain
             if index == 0:
@@ -365,7 +350,7 @@ class SideViewWorker:
 
             # look at the left joint of the current domain
             # for calculating additional z coords
-            zeroed_strand = domain.left_helix_joint_direction
+            zeroed_strand = domain.left_helix_joint
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(

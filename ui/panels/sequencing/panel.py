@@ -39,7 +39,9 @@ class Panel(QWidget):
 
         for index, strand in enumerate(refs.strands.current.strands):
             strand_button = StrandButton(strand)
-            strand_button.clicked.connect(lambda event, s=strand: strand_button_clicked(strand=s))
+            strand_button.clicked.connect(
+                lambda event, s=strand: strand_button_clicked(strand=s)
+            )
 
             self.strands_area.layout().addWidget(strand_button)
             self.strand_buttons.append(strand_button)

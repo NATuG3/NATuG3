@@ -4,8 +4,8 @@ from types import NoneType
 from typing import Union
 
 import refs
+from structures.domains.domains.worker import DomainStrandWorker
 from structures.strands.strands import Strands
-from workers.side_view import SideViewWorker
 
 
 class _Strands:
@@ -33,7 +33,7 @@ class _Strands:
             pickle.dump(self.current, file)
 
     def recompute(self) -> Strands:
-        self.current: Strands = SideViewWorker(
+        self.current: Strands = DomainStrandWorker(
             refs.domains.current, refs.nucleic_acid.current
         ).compute()
         return self.current

@@ -6,7 +6,6 @@ from functools import cached_property
 from random import shuffle
 from typing import Tuple, Type, Iterable, Deque, List, ClassVar
 
-
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -44,7 +43,7 @@ class Strand:
     auto_color: bool = True
     closed: bool = False
     highlighted: bool = False
-    parent: Type["Strands"] = None
+    parent: "Strands" = None
 
     __cached: ClassVar[Tuple[str]] = (
         "up_strand",
@@ -187,13 +186,12 @@ class Strand:
         for index, item in enumerate(self.items):
             self.items[index].strand = self
 
-    def touching(self, other: Type["Strand"], touching_distance=0.2) -> bool:
+    def touching(self, other: "Strand") -> bool:
         """
         Check whether this strand is touching a different strand.
 
         Args:
             other: The strand potentially touching this one.
-            touching_distance: The distance to be considered touching.
         """
         for our_item in shuffled(self.NEMids()):
             for their_item in shuffled(other.NEMids()):
