@@ -17,6 +17,7 @@ class Domains:
     Attributes:
         subunit: The domains within a single subunit.
         domains: All domains of all subunits.
+        strands: All the strands of all the domains.
         count: The total number of domains. Includes domains from all subunits.
         symmetry: The symmetry type. Also known as "R".
     """
@@ -34,6 +35,7 @@ class Domains:
         self.subunit = Subunit(list(domains))
         self.antiparallel = antiparallel
         self.symmetry = symmetry
+        self.strands = None
 
     @property
     def domains(self) -> list[Domain]:

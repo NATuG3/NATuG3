@@ -1,6 +1,7 @@
 from copy import deepcopy
 from typing import List
 
+from helpers import inverse
 from structures.domains import Domain
 
 
