@@ -28,7 +28,7 @@ class Panel(QWidget):
         uic.loadUi("ui/panels/domains/panel.ui", self)
 
         # create domains editor table and append it to the bottom of the domains panel
-        self.table = Table(self)
+        self.table = Table(self, refs.nucleic_acid.current)
         self.layout().addWidget(self.table)
 
         # set initial values of domain table config widgets

@@ -1,60 +1,92 @@
 from typing import Tuple, Literal
 
 from constants.directions import *
+from structures.profiles import NucleicAcidProfile
+from structures.strands import Strand
 
 
 class Domain:
     """
     Domain storage object.
-
     Attributes:
-        index (int): THe index of the domain.
-        theta_interior (int): Angle between domain #i/#i+1's & #i+1/i+2's tangency lines. Multiple of theta_c.
-        theta_switch_multiple (int): Strand switch angle per domain transition. Multiple of theta_s.
-        helix_joints (tuple): The upwardness/downwardness of the left and right helix joint.
+        index: The index of the domain.
+        left_helix_joint_direction: The left helix joint's upwardness or downwardness.
+        right_helix_joint_direction: The right helix joint's upwardness or downwardness.
+        up_strand: The up strand of the domain.
+        down_strand: The down strand of the domain.
+        theta_m_multiple: Angle between this and the next domains' line of tangency. Multiple of theta_c.
+        theta_m: Angle between this and the next domains' line of tangency.
+        theta_s_multiple: The switch from upness to downness (or lack thereof) of the helix joints.
+        theta_s: The switch angle for the transition between an up and down strand (or 0 if there is none).
+        helix_joints: The upwardness/downwardness of the left and right helix joint.
+        nucleic_acid_profile: the nucleic acid configuration for the domain.
     """
 
     def __init__(
         self,
-        index,
-        theta_interior_multiple: int,
-        helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]],
+        nucleic_acid_profile: NucleicAcidProfile,
+        index: int,
+        theta_m_multiple: int,
+        left_helix_joint_direction: int,
+        right_helix_joint_direction: int,
         count: int,
     ):
         """
-        Create domains dataclass.
-
+        Initialize a Domain object.
         Args:
-            index (int): THe index of the domain.
-            theta_interior_multiple:
-                Angle between domain #i/#i+1's and #i+1/i+2's lines of tangency.
-                Multiple of characteristic angle.
-            helix_joints (tuple): (left_joint, right_joint) where left/right_joint are constants.directions.UP/DOWN.
-            count (int): Number of initial NEMids/strand to generate.
+            nucleic_acid_profile: The nucleic acid settings profile
+            index: The index of the domain.
+            theta_m_multiple: Angle between this and the next domains' lines of tangency. Multiple of theta c.
+            left_helix_joint_direction: The left helix joint's direction.
+            right_helix_joint_direction: The right helix joint's direction.
+            count: Number of initial NEMids/strand to generate.
         """
+        # store the nucleic acid settings
+        self.nucleic_acid_profile = nucleic_acid_profile
+
         # multiple of the characteristic angle (theta_c) for the interior angle
         self.index = index
-        self.theta_interior_multiple: int = theta_interior_multiple
+        self.theta_interior_multiple: int = theta_m_multiple
 
-        # (left_joint, right_joint) where "left/right_joint" are constants.directions.UP/DOWN
-        self.helix_joints: Tuple[Literal[UP, DOWN], Literal[UP, DOWN]] = helix_joints
+        # the helical joints
+        self.left_helix_joint_direction = left_helix_joint_direction
+        self.right_helix_joint_direction = right_helix_joint_direction
 
         # store the number of initial NEMids/strand to generate
         self.count = count
 
-        # (-1) up to down; (0) both up/down; (1) down to up
-        # this does not need to be defined if theta_switch_multiple is defined
-        helix_joints = tuple(helix_joints)  # ensure helix_joints is a tuple
+        # create containers to store the domain's containers
+        self.left_strand = Strand(self.nucleic_acid_profile)
+        self.right_strand = Strand(self.nucleic_acid_profile)
+
+    @property
+    def theta_s_multiple(self) -> Literal[-1, 0, 1]:
+        """
+        Obtain the theta switch multiple. This is either -1, 0, or 1.
+        Based on the left and right helical joints, this outputs:
+        (-1) for up to down; (0) for both up/down; (1) for down to up
+        """
+        helix_joints = (self.left_helix_joint_direction, self.right_helix_joint_direction,)
         if helix_joints == (UP, DOWN):
-            self.theta_switch_multiple = -1
+            return -1
         elif helix_joints == (UP, UP):
-            self.theta_switch_multiple = 0
+            return 0
         elif helix_joints == (DOWN, DOWN):
-            self.theta_switch_multiple = 0
+            return 0
         elif helix_joints == (DOWN, UP):
-            self.theta_switch_multiple = 1
+            return 1
         else:
             raise ValueError("Invalid helical joint integer", helix_joints)
+
+    @property
+    def theta_s(self) -> float:
+        """Obtain the theta switch angle."""
+        return self.theta_s_multiple * self.nucleic_acid_profile.theta_s
+
+    @property
+    def theta_m(self) -> float:
+        """Obtain the theta interior angle."""
+        return self.theta_interior_multiple * self.nucleic_acid_profile.theta_c
 
     def __eq__(self, other) -> bool:
         """Whether us.index == them.index."""
@@ -67,8 +99,8 @@ class Domain:
             f"domain("
             f"index={self.index}, "
             f"Θ_interior_multiple={self.theta_interior_multiple}, "
-            f"helix_joints=(left={self.helix_joints[LEFT]}, "
-            f"right={self.helix_joints[RIGHT]}), "
-            f"Θ_switch_multiple={self.theta_switch_multiple}"
+            f"helix_joints=(left={self.left_helix_joint_direction}, "
+            f"right={self.right_helix_joint_direction}), "
+            f"Θ_switch_multiple={self.theta_s_multiple}"
             f")"
         )

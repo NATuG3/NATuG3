@@ -42,7 +42,7 @@ class TopViewWorker:
         for index, domain in enumerate(self.domains):
             # locate strand switch angle for the previous domain.
             theta_s: float = (
-                self.domains[index - 1].theta_switch_multiple * self.profile.theta_s
+                self.domains[index - 1].theta_s_multiple * self.profile.theta_s
             )
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (

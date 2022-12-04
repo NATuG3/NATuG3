@@ -1,8 +1,8 @@
+from __future__ import annotations
 from dataclasses import dataclass
 from typing import Tuple, Literal, Type
 
 from constants.directions import *
-from structures.domains import Domain
 
 
 @dataclass(kw_only=True, slots=True)
@@ -36,6 +36,33 @@ class Point:
 
     # plotting attributes
     highlighted: bool = False
+
+    @staticmethod
+    def x_coord_from_angle(angle: float, domain: Domain) -> float:
+        """
+        Compute a new x coord based on the angle and domain of this Point.
+
+        Args:
+            angle: The angle of the point to compute an x coord for.
+            domain: The domain of the point having its x angle computed.
+
+        Returns:
+            The x coord.
+        """
+        theta_interior: float = domain.theta_m
+        theta_exterior: float = 360 - theta_interior
+
+        if angle < theta_exterior:
+            x_coord = angle / theta_exterior
+        else:
+            x_coord = (360 - angle) / theta_interior
+
+        # domain 0 lies between [0, 1] on the x axis
+        # domain 1 lies between [1, 2] on the x axis
+        # ect...
+        x_coord += domain.index
+
+        return x_coord
 
     @property
     def index(self):

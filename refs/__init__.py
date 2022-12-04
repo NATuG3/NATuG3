@@ -1,21 +1,27 @@
-import ui.constructor
 from ._application import _Application
-from ._domains import _Domains
-from ._nucleic_acid import _NucleicAcid
-from ._plot_mode import _PlotMode
-from ._strands import _Strands
-from ._toolbar import _Toolbar
 
 application = _Application()
 
+from ._plot_mode import _PlotMode
+
 plot_mode = _PlotMode()
+
+from ._nucleic_acid import _NucleicAcid
 
 nucleic_acid = _NucleicAcid()
 
+from ._domains import _Domains
+
 domains = _Domains()
+
+from ._strands import _Strands
 
 strands = _Strands()
 
+import ui.constructor
+
 constructor = ui.constructor.Window()
+
+from ._toolbar import _Toolbar
 
 toolbar = _Toolbar()

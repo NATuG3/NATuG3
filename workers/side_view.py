@@ -21,6 +21,10 @@ logger = logging.getLogger(__name__)
 class SideViewWorker:
     """
     Class for generating data needed for a side view graph of helices.
+
+    Methods:
+        angle_to_x_coord()
+        compute()
     """
 
     strand_directions = (UP, DOWN)
@@ -38,39 +42,6 @@ class SideViewWorker:
         """
         self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
-
-    def __setattr__(self, key, value):
-        if key in self.cache_clearers:
-            self.clear_cache()
-        super().__setattr__(key, value)
-
-    def clear_cache(self):
-        with suppress(KeyError):
-            del self.__dict__["theta_exteriors"]
-        with suppress(KeyError):
-            del self.__dict__["theta_interiors"]
-        self.compute.cache_clear()
-        self.__repr__.cache_clear()
-
-    @cached_property
-    def theta_exteriors(self):
-        theta_exteriors = []
-        for theta_interior in self.theta_interiors:
-            theta_exteriors.append(360 - theta_interior)
-        return theta_exteriors
-
-    @cached_property
-    def theta_interiors(self):
-        theta_interiors = []
-        for domain in self.domains.domains:
-            theta_interior = (
-                domain.theta_interior_multiple * self.nucleic_acid_profile.theta_c
-            )
-            theta_interior -= (
-                domain.theta_switch_multiple * self.nucleic_acid_profile.theta_s
-            )
-            theta_interiors.append(theta_interior)
-        return theta_interiors
 
     @cache
     def compute(self) -> Strands:
@@ -260,7 +231,7 @@ class SideViewWorker:
         # domain_index is the index of the current domain
         for index, domain in enumerate(self.domains.domains):
             # look at left current domain helix joint
-            zeroed_strand = domain.helix_joints[LEFT]
+            zeroed_strand = domain.left_helix_joint_direction
 
             # create infinite generators for the zeroed and non zeroed sequencing
             angles[index][zeroed_strand] = itertools.count(
@@ -302,18 +273,7 @@ class SideViewWorker:
                 for counter, angle in enumerate(angles[index][strand_direction]):
                     angle %= 360
 
-                    theta_interior = self.theta_interiors[index]
-                    theta_exterior = self.theta_exteriors[index]
-
-                    if angle < self.theta_exteriors[index]:
-                        x_coord = angle / theta_exterior
-                    else:
-                        x_coord = (360 - angle) / theta_interior
-
-                    # domain 0 lies between [0, 1] on the x axis
-                    # domain 1 lies between [1, 2] on the x axis
-                    # ext...
-                    x_coord += index
+                    x_coord = Point.x_coord_from_angle(angle, domain)
 
                     # store the new x_coord in the container object and continue
                     x_coords[index][strand_direction].append(x_coord)
@@ -359,7 +319,7 @@ class SideViewWorker:
         for index, domain in enumerate(self.domains.domains):
             # look at the right joint of the previous domain
             # for calculating the initial z coord
-            zeroed_strand = self.domains.domains[index - 1].helix_joints[RIGHT]
+            zeroed_strand = self.domains.domains[index - 1].right_helix_joint_direction
 
             # step 1: find the initial z cord for the current domain
             if index == 0:
@@ -403,7 +363,7 @@ class SideViewWorker:
 
             # look at the left joint of the current domain
             # for calculating additional z coords
-            zeroed_strand = domain.helix_joints[LEFT]
+            zeroed_strand = domain.left_helix_joint_direction
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(

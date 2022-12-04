@@ -12,6 +12,7 @@ from PyQt6.QtWidgets import (
 
 from constants.directions import *
 from structures.domains import Domain, Domains
+from structures.profiles import NucleicAcidProfile
 from ui.widgets import DirectionalButton, TableIntegerBox
 
 logger = logging.getLogger(__name__)
@@ -23,8 +24,11 @@ class Table(QTableWidget):
     helix_joint_updated = pyqtSignal()
     cell_widget_updated = pyqtSignal()
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, nucleic_acid_profile: NucleicAcidProfile) -> None:
         super().__init__(parent)
+        # store the nucleic acid profile
+        self.nucleic_acid_profile = nucleic_acid_profile
+
         # header storage areas
         self.side_headers = []
         self.top_headers = []
@@ -130,7 +134,7 @@ class Table(QTableWidget):
 
             # column 0 - left helical joint
             row.left_helix_joint = DirectionalButton(
-                self, domains.domains[index].helix_joints[LEFT]
+                self, domains.domains[index].left_helix_joint_direction
             )
             row.left_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.left_helix_joint.clicked.connect(self.cell_widget_updated.emit)
@@ -138,18 +142,18 @@ class Table(QTableWidget):
 
             # column 1 - right helical joint
             row.right_helix_joint = DirectionalButton(
-                self, domains.domains[index].helix_joints[RIGHT]
+                self, domains.domains[index].right_helix_joint_direction
             )
             row.right_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.right_helix_joint.clicked.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 1, row.right_helix_joint)
 
             # column 2 - theta switch multiple
-            row.theta_switch_multiple = TableIntegerBox(
-                domain.theta_switch_multiple, minimum=-1
+            row.theta_s_multiple = TableIntegerBox(
+                domain.theta_s_multiple, minimum=-1
             )
-            row.theta_switch_multiple.setEnabled(False)
-            self.setCellWidget(index, 2, row.theta_switch_multiple)
+            row.theta_s_multiple.setEnabled(False)
+            self.setCellWidget(index, 2, row.theta_s_multiple)
 
             # column 3 - theta interior multiple
             row.theta_interior_multiple = TableIntegerBox(
@@ -247,9 +251,11 @@ class Table(QTableWidget):
             count: int = self.cellWidget(domain, 4).value()
 
             domain = Domain(
+                self.nucleic_acid_profile,
                 domain,
                 theta_interior_multiple,
-                (left_helical_joint, right_helical_joint),
+                left_helical_joint,
+                right_helical_joint,
                 count,
             )
 
