@@ -81,7 +81,7 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return self.parent.strands()[self.index][RIGHT]
+            return self.parent.parent.points()[self.index][RIGHT]
 
     @property
     def right_strand(self) -> Strand | None:
@@ -94,7 +94,7 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return self.parent.strands()[self.index][RIGHT]
+            return self.parent.parent.points()[self.index][RIGHT]
 
     def __setattr__(self, key, value):
         """Set the attribute and update the parent if necessary."""
@@ -105,8 +105,8 @@ class Domain:
             # if there is a parent make sure to clear its strands cache
             # so that the strands of all workers can be recomputed
             if self.parent is not None:
-                self.parent.domains.cache_clear()
-                self.parent.subunits.cache_clear()
+                self.parent.parent.domains.cache_clear()
+                self.parent.parent.subunits.cache_clear()
 
     @property
     def index(self) -> int | None:
@@ -119,7 +119,7 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return self.parent.domains().index(self)
+            return self.parent.parent.domains().index(self)
 
     @property
     def theta_s_multiple(self) -> int:

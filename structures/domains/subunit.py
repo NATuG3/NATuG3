@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import deepcopy, copy
 from copy import deepcopy
 from typing import Iterable
 
@@ -17,10 +17,15 @@ class Subunit:
         domains: The workers in the subunit.
         count: The number of workers in the subunit.
         template: Whether this is a template subunit.
+        parent: The parent Domains object.
+
+    Methods:
+        append()
+        remove()
     """
 
     def __init__(
-        self, domains: Iterable["Domain"], template: bool = False
+        self, domains: Iterable["Domain"], template: bool = False, parent: "Domains" = None
     ) -> None:
         """
         Create an instance of a subunit container.
@@ -30,10 +35,37 @@ class Subunit:
             template: Whether this subunit is a template subunit. Defaults to False.
                 If this is not a template subunit then the subunit becomes immutable.
                 In other words, only template subunits can be modified.
+            parent: The parent Domains object.
         """
         self.template = template
+        self.parent = parent
         self.domains = domains
+
+        # assign the parent of all the domains to us
+        for domain in self.domains:
+            domain.parent = self
+
         assert isinstance(domains, Iterable)
+
+    def append(self, domain: "Domain") -> None:
+        """
+        Append a worker to the subunit and parent it.
+
+        Args:
+            domain: The worker to append to the subunit.
+        """
+        self.domains.append(domain)
+        domain.parent = self
+
+    def remove(self, domain: "Domain") -> None:
+        """
+        Remove a worker from the subunit.
+
+        Args:
+            domain: The worker to remove from the subunit.
+        """
+        self.domains.remove(domain)
+        domain.parent = None
 
     def __setattr__(self, key, value):
         """
@@ -63,9 +95,13 @@ class Subunit:
         Obtain a copy of a subunit object.
 
         Returns:
-            A brand new subunit object with brand new domain objects.
+            A brand-new subunit object with brand-new domain objects.
         """
-        return Subunit(deepcopy(self.domains), self.template)
+        return Subunit(
+            [copy(domain) for domain in self.domains],
+            template=self.template,
+            parent=self.parent
+        )
 
     @property
     def count(self) -> int:

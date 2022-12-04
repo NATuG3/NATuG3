@@ -1,6 +1,6 @@
 import logging
 from functools import cache
-from typing import List, Iterable
+from typing import List, Iterable, Tuple
 
 import settings
 from constants.directions import DOWN, UP
@@ -8,6 +8,7 @@ from helpers import inverse
 from structures.domains.subunit import Subunit
 from structures.domains.workers.strands import DomainStrandWorker
 from structures.domains.workers.top_view import TopViewWorker
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand, Strands
 
@@ -57,10 +58,11 @@ class Domains:
         # self.subunit is the template subunit
         # meaning that all other subunits are based off of this one
         assert isinstance(domains, Iterable)
-        self._subunit = Subunit(domains, template=True)
+        self._subunit = Subunit(domains, template=True, parent=self)
 
         # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self.nucleic_acid_profile, self)
+        self._points = None
 
     @property
     def subunit(self) -> Subunit:
@@ -105,10 +107,6 @@ class Domains:
                 copied.template = False
                 output.append(copied)
 
-        # apply ourself as the parent to all the subunits being returned
-        for subunit in output:
-            subunit.parent = self
-
         return output
 
     @cache
@@ -134,11 +132,11 @@ class Domains:
                 domain.right_helix_joint = direction
                 direction = inverse(direction)
 
-        # apply ourself as the parent for each domain
-        for domain in output:
-            domain.parent = self
-
         return output
+
+    def points(self) -> List[Tuple[List[Point], List[Point]]]:
+        """All the points in all the domains before they are turned into Strand objects."""
+        return self._points
 
     @cache
     def strands(self) -> Strands:
@@ -152,7 +150,8 @@ class Domains:
         Returns:
             A list of all strands from all workers.
         """
-        computed = self.worker.compute()
+        self._points = self.worker.compute()
+
         converted_strands = []
         for strand_direction in (
             UP,
@@ -162,7 +161,7 @@ class Domains:
                 converted_strands.append(
                     Strand(
                         self.nucleic_acid_profile,
-                        computed[index][strand_direction],
+                        self._points[index][strand_direction],
                         color=settings.colors["sequencing"]["greys"][strand_direction],
                     )
                 )

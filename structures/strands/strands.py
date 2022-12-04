@@ -41,6 +41,16 @@ class Strands:
         self.strands = list(strands)
         self.recompute()
 
+    def __contains__(self, item):
+        """Check if a strand or point is contained within this container."""
+        if item in self.strands:
+            return True
+        else:
+            for strand in self.strands:
+                for item_ in strand:
+                    if item_ is item:
+                        return True
+
     def __len__(self):
         """Obtain the number of sequencing this Strands object contains."""
         return len(self.strands)

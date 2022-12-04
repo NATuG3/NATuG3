@@ -1,7 +1,5 @@
-from __future__ import annotations
-
 from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Type
 
 from helpers import inverse
 
@@ -31,13 +29,13 @@ class Point:
 
     # nucleic acid attributes
     direction: int = None
-    strand: Strand = None
-    domain: Domain = None
+    strand: Type["Strand"] = None
+    domain: Type["Domain"] = None
 
     # plotting attributes
     highlighted: bool = False
 
-    def matching(self) -> Point | None:
+    def matching(self) -> Type["Point"] | None:
         """
         Obtain the matching point.
 
@@ -48,19 +46,24 @@ class Point:
         if self.strand is None or self.strand.closed:
             return None
         else:
+            # obtain our domain's index in respect to the entire Domains object
+            domain_index = self.domain.index
+
             # the parent of a Domain is a Subunit
             # the parent of a Subunit is a Domains
-            domains: "Domains" = self.domain.parent.parent
+            # Domains.points() returns all points in the structure
+            # [#0(up-strand, down_strand), #1(up-strand, down_strand), ...]
+            points: Type["Strands"] = self.domain.parent.parent.points()
 
             # the other strand in the same domain as this point
             # all_domains -> index of this domain -> opposite direction
-            other_strand = domains.domains()[self.index][inverse(self.direction)]
+            other_strand = points[domain_index][inverse(self.direction)]
 
             # obtain the matching point
-            return reversed(other_strand)[self.index]
+            return tuple(reversed(other_strand))[self.index]
 
     @staticmethod
-    def x_coord_from_angle(angle: float, domain: Domain) -> float:
+    def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
         """
         Compute a new x coord based on the angle and domain of this Point.
 
