@@ -153,7 +153,7 @@ class SideViewPlotter(pg.PlotWidget):
         grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
 
         # domain index grid
-        for i in range(ceil(self.strands.size[0]) + 1):
+        for i in range(ceil(self.strands.size[0])):
             self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
 
         # for i in <number of helical twists of the tallest domain>...
