@@ -159,8 +159,8 @@ class Strand:
                 self.nucleosides()[index].base = base
 
                 # assign the complementary base to the matching nucleoside
-                complement = self.nucleosides()[index].complement
-                self.nucleosides()[index].matching().base = complement
+                # complement = self.nucleosides()[index].complement
+                # self.nucleosides()[index].matching().base = complement
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
