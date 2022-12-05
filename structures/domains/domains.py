@@ -19,6 +19,12 @@ class Domains:
     """
     Container for multiple workers.
 
+    This is the parent of a Subunit, and the grandparent of a Domain.
+
+    The Domains container automatically keeps track of a template subunit (created with domains
+    passed through the init), and then automatically creates copies of that subunit and the
+    domains in it when the .domains() method is called.
+
     Attributes:
         nucleic_acid_profile: The nucleic acid configuration.
         subunit: The workers within a single subunit.
@@ -66,12 +72,22 @@ class Domains:
 
     @property
     def subunit(self) -> Subunit:
-        """Obtain the current template subunit."""
+        """
+        Obtain the current template subunit.
+
+        Returns:
+            The current template subunit.
+        """
         return self._subunit
 
     @subunit.setter
     def subunit(self, new_subunit) -> None:
-        """Replace the current template subunit."""
+        """
+        Replace the current template subunit.
+
+        Args:
+            new_subunit: The new template subunit.
+        """
         self._subunit = new_subunit
         for domain in self._subunit:
             domain.parent = self._subunit
@@ -135,7 +151,20 @@ class Domains:
         return output
 
     def points(self) -> List[Tuple[List[Point], List[Point]]]:
-        """All the points in all the domains before they are turned into Strand objects."""
+        """
+        All the points in all the domains before they are turned into Strand objects.
+
+        Returns:
+            A list of tuples of points.
+
+            The formatting of the points is a large list. Within that list lies a tuple for each domain.
+            Within each tuple lies two lists. The first represents the up strand of that domain, and the
+            second represents the down strand.
+
+            This can be represented as:
+            "AllDomains(Domain#0(up-strand, down-strand), Domain#1(up-strand, down-strand), ...)"
+            Where up-strands and down-strands are lists of Point objects.
+        """
         if self._points is None:
             self._points = self.worker.compute()
         return self._points
@@ -145,20 +174,29 @@ class Domains:
         """
         Obtain a list of all strands from all workers.
 
-        Notes:
-            - The strands returned are references to the strands in the workers. This means
-                that if the outputted strands are modified then the workers' strands will be modified too.
+        This is equivalent to utilizing the .points() method, and then placing all of those points into new Strand
+        objects, and then calling Strands() on that list.
+
+        This method automatically determines strand color based off of interdomain-ness, and uses the currently
+        set nucleic acid profile for the strand's nucleic acid profile.
 
         Returns:
             A list of all strands from all workers.
+
+        Notes:
+            - This is a cached method. That means that if you modify the returned strands, and then call this method
+                again, the same (modified) strands will be returned. To circumvent this, call
+                Domains.strands.cache_clear().
         """
         self._points = self.worker.compute()
 
+        # Creating a list of strands, and then converting that list into a Strands object.
         converted_strands = []
         for strand_direction in (
             UP,
             DOWN,
         ):
+            # Creating a strand for each domain.
             for index, domain in enumerate(self.domains()):
                 converted_strands.append(
                     Strand(
@@ -172,9 +210,14 @@ class Domains:
 
     def top_view(self) -> TopViewWorker:
         """
-        Obtain a TopViewWorker object of all the domains.
+        Obtain a TopViewWorker object of all the domains. The top view worker object (which is located at
+        structures/domains/workers/top_view-TopViewWorker()). This object contains various properties relavent
+        to a top view plot, including coordinates, angle deltas, and more.
 
         Returns:
             A TopViewWorker object.
+
+        Notes:
+            This function is not cached; however, top view computation is a fairly inexpensive process.
         """
         return TopViewWorker(self)

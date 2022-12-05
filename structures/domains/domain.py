@@ -75,18 +75,28 @@ class Domain:
         """
         The left strand of the domain.
 
+        The grandparent's .points() method is used to obtain the strand. Note that the grandparent
+        of a Domain object is the parent of the parent. The parent of a Domains object is a Subunit object,
+        and the parent of a Subunit object is a Domains object. It is the Domains object that has a .points()
+        method.
+
         Returns:
             The left strand of the domain or None if the domain doesn't have a parent.
         """
-        if self.parent is None:
+        if self.parent is None or self.parent.parent:
             return None
         else:
-            return self.parent.parent.points()[self.index][RIGHT]
+            return Strand(self.parent.parent.points()[self.index][RIGHT])
 
     @property
     def right_strand(self) -> Strand | None:
         """
         The right strand of the domain.
+
+        The grandparent's .points() method is used to obtain the strand. Note that the grandparent
+        of a Domain object is the parent of the parent. The parent of a Domains object is a Subunit object,
+        and the parent of a Subunit object is a Domains object. It is the Domains object that has a .points()
+        method.
 
         Returns:
             The right strand of the domain or None if the domain doesn't have a parent.
@@ -94,7 +104,7 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return self.parent.parent.points()[self.index][RIGHT]
+            return Strand(self.parent.parent.points()[self.index][RIGHT])
 
     def __setattr__(self, key, value):
         """Set the attribute and update the parent if necessary."""
@@ -111,7 +121,10 @@ class Domain:
     @property
     def index(self) -> int | None:
         """
-        The index of the domain in its parent workers container.
+        The index of the domai.
+
+        This is in with respect to all other domains in the Domains container. If there is no grandparent Domains
+        container, None is returned.
 
         Returns:
             int: The index of the domain.
@@ -130,6 +143,8 @@ class Domain:
         Obtain the theta switch multiple. This is either -1, 0, or 1.
         Based on the left and right helical joints, this outputs:
         (-1) for up to down; (0) for both up/down; (1) for down to up
+
+        This is very computationally inexpensive, so it is a property. (self.theta_s_multiple)
         """
         helix_joints = (
             self.left_helix_joint,
@@ -148,10 +163,18 @@ class Domain:
 
     @property
     def theta_s(self) -> float:
-        """Obtain the theta switch angle."""
+        """
+        Obtain the theta switch angle.
+
+        This is equivalent to self.theta_s_multiple * self.theta_c.
+        """
         return self.theta_s_multiple * self.nucleic_acid_profile.theta_s
 
     @property
     def theta_m(self) -> float:
-        """Obtain the theta interior angle."""
+        """
+        Obtain the theta interior angle.
+
+        This is equivalent to self.theta_interior_multiple * self.theta_c.
+        """
         return self.theta_interior_multiple * self.nucleic_acid_profile.theta_c

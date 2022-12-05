@@ -17,7 +17,12 @@ class Save:
 
     @classmethod
     def from_file(cls, filename):
-        """Load a save from a file."""
+        """
+        Load a save from a file.
+
+        Args:
+            filename (str): The name of the file to load from.
+        """
 
         with open(filename, "rb") as load_file:
             package = pickle.load(load_file)

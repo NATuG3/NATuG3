@@ -25,17 +25,25 @@ class Strand:
 
     Attributes:
         nucleic_acid_profile: The nucleic acid settings used.
-        sequence: The sequence of the strand.
+        sequence (list): The sequence of the strand.
+            This is a list of all the bases of all the nucleosides in the strand.
         color: RGB color of strand.
         auto_color: Whether to automatically set the strand color.
+            Changing this only changes the color of the strand when the parent Strands
+            object's recolor() method is called.
         auto_thickness: Whether to automatically set the strand thickness.
         closed: Whether the strand is closed. Must be manually set.
-        empty: Whether the strand is empty.
+        empty: Whether the strand is empty. This is equivalent to len(self) == 0.
         up_strand: Whether all NEMids in this strand are up-NEMids.
+            Recursively checks all items in the strand.
         down_strand: Whether all NEMids in this strand are down-NEMids.
+            Recursively checks all items in the strand
         interdomain: Whether this strand spans multiple domains.
-        highlighted: Whether the strand is highlighted.
-        name: The user-set name of the strand.
+            Recursively checks all items in the strand to see if any items have unique domains
+            from the other items.
+        highlighted (bool): Whether the strand is highlighted. This is merely a boolean, and the
+            actual highlighting is done by the plotter.
+        name: The user-set name of the strand. This appears when exporting, and is used as a title.
     """
 
     nucleic_acid_profile: field(default=NucleicAcidProfile, repr=False)
@@ -62,8 +70,8 @@ class Strand:
     @property
     def thickness(self) -> float:
         """
-        Automatically determine thickness if thickness is None.
-        Otherwise, output the set thickness.
+        Obtain an automatically determined thickness if thickness is None.
+        Otherwise, output the user set thickness.
         """
         if self._thickness is None:
             if self.interdomain:
@@ -75,41 +83,61 @@ class Strand:
 
     @thickness.setter
     def thickness(self, new_thickness) -> None:
-        """Change the currently set thickness."""
+        """
+        Change the currently set thickness.
+
+        If the new thickness is None then the thickness will be automatically determined.
+
+        Args:
+            new_thickness: The new thickness to set. Can be None to have auto set.
+        """
         self._thickness = new_thickness
 
-    def append(self, item: Point):
+    def append(self, item: Point) -> None:
         """Add an item to the right of the strand."""
         self.items.append(item)
         self.NEMids.cache_clear()
         self.nucleosides.cache_clear()
 
     def appendleft(self, item: Point):
-        """Add an item to the left of the strand."""
+        """
+        Add an item to the left of the strand.
+
+        Args:
+            item: The item to add.
+        """
         self.items.appendleft(item)
         self._NEMids = None
         self._nucleosides = None
 
-    def extend(self, item: Iterable[Point]):
-        """Extend our items to the right with an iterable's items."""
+    def extend(self, item: Iterable[Point]) -> None:
+        """
+        Extend our items to the right with an iterable's items.
+
+        Args:
+            item: The iterable to extend with.
+        """
         self.items.extend(item)
         self._NEMids = None
         self._nucleosides = None
 
-    def extendleft(self, item: Iterable[Point]):
-        """Extend our items to the left with an iterable's items."""
+    def extendleft(self, item: Iterable[Point]) -> None:
+        """
+        Extend our items to the left with an iterable's items.
+
+        Args:
+            item: The iterable to extend with.
+        """
         self.items.extendleft(item)
         self._NEMids = None
         self._nucleosides = None
 
-    def NEMids(self):
+    def NEMids(self) -> List[NEMid]:
         """
         Obtain all NEMids in the strand, only.
 
-        Works by recursively checking the type of items in self.items.
-
-        Args:
-            listed: Returns the items listed if true. Otherwise, returns generator.
+        Works by recursively checking the type of items in self.items,
+        but the method is cached.
 
         Returns:
             List of all nucleosides in strand.items.

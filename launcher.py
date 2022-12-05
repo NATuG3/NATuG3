@@ -16,6 +16,11 @@ logging.getLogger("PyQt6").setLevel(logging.WARNING)
 def main():
     """Main runner for program."""
 
+    # set up logging
+    logging.basicConfig(
+        level=logging.DEBUG,
+    )
+
     if RESET:
         with suppress(FileNotFoundError):
             os.remove("saves/nucleic_acid/profiles.nano")
@@ -23,6 +28,7 @@ def main():
             os.remove("saves/domains/restored.nano")
             os.remove("saves/sequencing/restored.nano")
 
+    # create needed files
     with suppress(FileExistsError):
         os.mkdir(f"{os.getcwd()}\\saves\\nucleic_acid")
         os.mkdir(f"{os.getcwd()}\\saves\\domains")
@@ -30,16 +36,12 @@ def main():
 
     import pyqtgraph as pg
 
+    # set up pyqtgraph
     pg.setConfigOptions(
         useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
     )
 
     import refs
-
-    # set log level
-    logging.basicConfig(
-        level=logging.DEBUG,
-    )
 
     logger.debug(f"Booting @ {time()}")
 

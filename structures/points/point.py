@@ -39,6 +39,11 @@ class Point:
         """
         Obtain the matching point.
 
+        The matching point is computed on-the-fly based off of the parent domain's other
+        helix for the domain of this point.
+
+        If the point lacks a domain or a strand, None is returned because matching cannot be determined.
+
         Returns:
             Point: The matching point.
             None: There is no matching point.
@@ -67,6 +72,8 @@ class Point:
         """
         Compute a new x coord based on the angle and domain of this Point.
 
+        This is a utility function, and doesn't apply to a specific instance of Point.
+
         Args:
             angle: The angle of the point to compute an x coord for.
             domain: The domain of the point having its x angle computed.
@@ -94,6 +101,10 @@ class Point:
         """
         Obtain the index of this domain in its respective parent strand.
 
+        Returns:
+            int: The index of this domain in its respective parent strand.
+            None: This point has no parent strand.
+
         Notes:
             If self.strand is None then this returns None.
         """
@@ -103,11 +114,15 @@ class Point:
             return self.strand.index(self)
 
     def position(self) -> Tuple[float, float]:
-        """Obtain coords of the point as a tuple of form (x, z)."""
+        """
+        Obtain coords of the point as a tuple of form (x, z).
+
+        This function merely changes the formatting of the x and z coords to be a zipped tuple.
+        """
         return self.x_coord, self.z_coord
 
     def __repr__(self) -> str:
-        """Determine what to print when instance is printed directly."""
+        """A string representation of the point."""
         return (
             f"NEMid("
             f"pos={tuple(map(lambda i: round(i, 3), self.position()))}), "
@@ -115,8 +130,12 @@ class Point:
             f"matched={self.matched}"
         )
 
-    def __eq__(self, other):
-        """Whether our position and angle is the same as their position and angle."""
+    def __eq__(self, other) -> bool:
+        """
+        Whether our position and angle is the same as their position and angle.
+
+        If the type of other is not the same as us, this just returns False.
+        """
         if not isinstance(other, type(self)):
             return False
         if self.position() == other.position():

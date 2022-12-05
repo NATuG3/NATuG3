@@ -7,16 +7,19 @@ from structures.profiles import NucleicAcidProfile
 
 class Subunit:
     """
-    A domain subunit. Contains all the workers for a given subunit.
+    A domain subunit. Contains all the domains for a given subunit.
+
+    The parent of a Subunit is a Domains object. There is thorough integration with the parenting
+    of subunits, domains, domain.
 
     Notes:
         - If this is a template subunit then it is frozen and immutable.
-        - If the subunit.count is increased/decreased then subunit.workers changes too.
+        - If the subunit.count is increased/decreased then subunit.domains changes too.
 
     Attributes:
         nucleic_acid_profile: The nucleic acid configuration.
-        domains: The workers in the subunit.
-        count: The number of workers in the subunit.
+        domains: The domains in the subunit.
+        count: The number of domains in the subunit.
         template: Whether this is a template subunit.
         parent: The parent Domains object.
 
@@ -37,7 +40,7 @@ class Subunit:
 
         Args:
             nucleic_acid_profile: The nucleic acid configuration.
-            domains: The workers in the subunit.
+            domains: The domains in the subunit.
             template: Whether this subunit is a template subunit. Defaults to False.
                 If this is not a template subunit then the subunit becomes immutable.
                 In other words, only template subunits can be modified.
@@ -59,7 +62,10 @@ class Subunit:
         Append a worker to the subunit and parent it.
 
         Args:
-            domain: The worker to append to the subunit.
+            domain: The domain to append to the subunit.
+
+        Notes:
+            The domain will have its parent set to this subunit.
         """
         self.domains.append(domain)
         domain.parent = self
@@ -69,7 +75,10 @@ class Subunit:
         Remove a worker from the subunit.
 
         Args:
-            domain: The worker to remove from the subunit.
+            domain: The domain to remove from the subunit.
+
+        Notes:
+            The domain will have its parent reset to None.
         """
         self.domains.remove(domain)
         domain.parent = None
@@ -78,15 +87,23 @@ class Subunit:
         """
         Prevent users from mutating a non-template subunit.
 
-        If the template property is changed then modify whether the workers are stored
-        in a list or tuple based on whether this is a template subunit or not.
+        If the template property is changed then modify whether the domains are stored
+        in a list or tuple based on whether this is a template subunit or not. I.E. if this is not a template
+        subunit, the array of domains will become immutable.
+
+        Args:
+            key: The attribute to set.
+            value: The value to set the attribute to.
+
+        Raises:
+            ValueError: If the subunit is not a template subunit and the user is trying to mutate it.
         """
         if key == "template":
             try:
                 if value:  # if this is a template subunit
-                    super().__setattr__("workers", tuple(self.domains))
+                    super().__setattr__("domains", tuple(self.domains))
                 else:  # if this is no longer a template subunit
-                    super().__setattr__("workers", list(self.domains))
+                    super().__setattr__("domains", list(self.domains))
             except AttributeError:
                 super().__setattr__(key, value)
         else:
@@ -102,7 +119,7 @@ class Subunit:
         Obtain a copy of a subunit object.
 
         Returns:
-            A brand-new subunit object with brand-new domain objects.
+            A brand-new subunit object with brand-new domain objects (which are identical copies).
         """
         return Subunit(
             self.nucleic_acid_profile,
@@ -113,37 +130,42 @@ class Subunit:
 
     @property
     def count(self) -> int:
-        """Obtain the number of workers in the subunit."""
+        """
+        Obtain the number of domains in the subunit.
+
+        Returns:
+            The number of domains in the subunit.
+        """
         return len(self.domains)
 
     @count.setter
     def count(self, new) -> None:
         """
-        Change the number of workers in the subunit.
+        Change the number of domains in the subunit.
 
-        * When the count is increased new workers are added with alternating helix joints but
+        * When the count is increased new domains are added with alternating helix joints but
         with the same settings. Looks at the right helix joint of the last domain to begin the
         oscillation of parallel-ness.
-        * When the count is decreased workers are trimmed off of the end of the subunit.
+        * When the count is decreased domains are trimmed off of the end of the subunit.
 
         Args:
             new: The new count for the subunit.
-                The number of workers changes based off the difference between this
+                The number of domains changes based off the difference between this
                 and the previous count.
         """
-        # we couldn't import workers before because it was partially initialized
-        # but we can now (and we will need it if the count increases to make new workers)
+        # we couldn't import domains before because it was partially initialized
+        # but we can now (and we will need it if the count increases to make new domains)
         from structures.domains import Domain
 
-        # if the subunit count has decreased then trim off extra workers
+        # if the subunit count has decreased then trim off extra domains
         if new < self.count:
             self.domains = self.domains[:new]
-        # if the subunit count has increased then add placeholder workers based on last domain in domain list
+        # if the subunit count has increased then add placeholder domains based on last domain in domain list
         else:
             i = 0
             while self.count < new:
                 previous_domain = self.domains[-1]
-                # the new template workers will be of altering strand directions with assumed
+                # the new template domains will be of altering strand directions with assumed
                 # strand switches of 0
                 self.domains.append(
                     Domain(
