@@ -1,5 +1,6 @@
 import logging
 import pickle
+from showinfm import show_in_file_manager
 
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
@@ -14,22 +15,25 @@ def runner(parent):
     # create file selector for save
     selector = FileSelector(parent)
 
-    # run worker(filename) after file has been chosen
+    # run worker(filepath) after file has been chosen
     selector.accepted.connect(lambda: worker(selector.selectedFiles()[0]))
 
 
-def worker(filename):
-    """Runs after filename has been chosen."""
+def worker(filepath):
+    """Runs after filepath has been chosen."""
 
     # obtain save package
     package = structures.misc.Save()
 
-    # dump save object to filename
-    with open(filename, "wb") as file:
+    # dump save object to filepath
+    with open(filepath, "wb") as file:
         pickle.dump(package, file)
 
     # log the save
-    logger.info(f"Created save @ {filename}.")
+    logger.info(f"Created save @ {filepath}.")
+
+    # open the saved path in file explorer
+    show_in_file_manager(filepath)
 
 
 class FileSelector(QFileDialog):

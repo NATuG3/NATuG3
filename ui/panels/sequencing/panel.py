@@ -34,7 +34,7 @@ class Panel(QWidget):
         filetype_updated()
         # create a font for the filepath
         font = QFont()
-        font.setStretch(75)
+        font.setStretch(95)
         # apply the font to the filepath
         self.filepath.setFont(font)
 
@@ -42,7 +42,7 @@ class Panel(QWidget):
         def change_filepath_clicked(event):
             """Worker for when the change filepath button is clicked."""
             filetype = self.filetype.currentText().replace(".", "")
-            filepath = QFileDialog.getSaveFileName(filter=f"*.{filetype}")[0]
+            filepath = QFileDialog.getSavefilepath(filter=f"*.{filetype}")[0]
             self.filepath.setText(filepath)
             super(QLineEdit, self.filepath).mouseReleaseEvent(event)
 
@@ -51,9 +51,9 @@ class Panel(QWidget):
         # hook the generate sequences button click event
         def export_sequences_clicked():
             """Worker for when the export sequences button is clicked."""
-            filename = self.filepath.text()
+            filepath = self.filepath.text()[:self.filepath.text().find(".")]
             mode = self.filetype.currentText().replace(".", "")
-            refs.strands.current.export(filename, mode)
+            refs.strands.current.export(filepath, mode)
 
         self.export_sequences.clicked.connect(export_sequences_clicked)
 

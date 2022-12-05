@@ -16,11 +16,11 @@ def runner(parent):
     selector.accepted.connect(lambda: worker(selector.selectedFiles()[0]))
 
 
-def worker(filename):
-    """Runs after filename has been chosen."""
+def worker(filepath):
+    """Runs after filepath has been chosen."""
 
-    # load save package from chosen filename
-    package = Save.from_file(filename)
+    # load save package from chosen filepath
+    package = Save.from_file(filepath)
 
     # update the current domains array
     assert isinstance(refs.domains.current, Domains)
@@ -42,7 +42,7 @@ def worker(filename):
     refs.constructor.top_view.plot.autoRange()
     refs.constructor.side_view.plot.autoRange()
 
-    logger.info(f"Loaded save @ {filename}.")
+    logger.info(f"Loaded save @ {filepath}.")
 
 
 class FileSelector(QFileDialog):

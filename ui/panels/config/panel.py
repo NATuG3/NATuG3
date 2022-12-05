@@ -147,7 +147,7 @@ class RefreshConfirmer(QDialog):
         # create a timestamp
         timestamp = datetime.now().strftime("%m-%d-%Y")
         counter: List[int] = [0]
-        # check to see if there are other saves with the default filename from today
+        # check to see if there are other saves with the default filepath from today
         for filename in os.listdir(f"{os.getcwd()}/saves"):
             if timestamp in filename:
                 with suppress(ValueError):
@@ -164,7 +164,7 @@ class RefreshConfirmer(QDialog):
             f"{os.getcwd()}\\saves\\{timestamp}_{counter}.{settings.extension}"
         )
 
-        # create default filename
+        # create default filepath
         self.location.setText(
             f"NATuG\\saves\\{timestamp}_{counter}.{settings.extension}"
         )

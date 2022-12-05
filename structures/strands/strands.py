@@ -1,7 +1,10 @@
 import logging
+from functools import partial
 from typing import List, Tuple, Iterable, Literal
 import pandas as pd
+from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
+from showinfm import show_in_file_manager
 
 import settings
 from structures.points import NEMid
@@ -33,10 +36,10 @@ class Strands:
     """
 
     def __init__(
-        self,
-        nucleic_acid_profile: NucleicAcidProfile,
-        strands: Iterable[Strand],
-        name: str = "Strands",
+            self,
+            nucleic_acid_profile: NucleicAcidProfile,
+            strands: Iterable[Strand],
+            name: str = "Strands",
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -65,37 +68,42 @@ class Strands:
         """Obtain the number of sequencing this Strands object contains."""
         return len(self.strands)
 
-    def export(self, filepath: str, mode: Literal["xlsx"]) -> None:
+    def export(self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True) -> None:
         """
         Export all sequences to a file.
 
         Args:
             filepath: The filepath to export to. Do not include the file suffix.
             mode: The mode to export in.
+            open_in_file_explorer: Whether to open the file location in file after exporting.
         """
-        dataset = []
-        for index, strand in enumerate(self.strands):
-            name = f"Strand # {index}"
-            sequence = "".join(map(str, strand.sequence)).replace("None", "")
-            color = utils.rgb_to_hex(strand.color)
-            dataset.append(
-                (
-                    name,
-                    sequence,
-                    color,
-                )
-            )
-
-        sequences = pd.DataFrame(
-            dataset, columns=["Name", "Sequence (3' to 5')", "Color"]
-        )
+        if "." in filepath:
+            raise ValueError("Filepath includes a suffix. Do not include suffixes in filepaths.")
+        filepath = f"{filepath}.{mode}"
 
         if mode == "xlsx":
-            # we will handle this ourselves
-            filepath = filepath.replace(".xlsx", "")
+            # create a pandas dataset for exporting to the spreadsheet
+            dataset = []
+            for index, strand in enumerate(self.strands):
+                # the three columns of the spreadsheet are name, sequence, and color
+                name = f"Strand # {index}"
+                sequence = "".join(map(str, strand.sequence)).replace("None", "")
+                color = utils.rgb_to_hex(strand.color)
+                dataset.append(
+                    (
+                        name,
+                        sequence,
+                        color,
+                    )
+                )
+
+            # compile the dataset into pd.DataFrame
+            sequences = pd.DataFrame(
+                dataset, columns=["Name", "Sequence (3' to 5')", "Color"]
+            )
 
             # create an excel writer object
-            writer = ExcelWriter(f"{filepath}.xlsx", engine="openpyxl")
+            writer = ExcelWriter(filepath, engine="openpyxl")
 
             # export the dataframe to an excel sheet
             sequences.to_excel(writer, sheet_name=self.name)
@@ -109,9 +117,17 @@ class Strands:
 
             # Save the workbook
             workbook = writer.book
-            workbook.save(f"{filepath}.xlsx")
+            workbook.save(filepath)
+
+            # log
+            logger.info("Exported sequences as excel @ {filepath}")
         else:
+            # raise an error if the mode is invalid
             raise ValueError("Invalid export mode.", mode)
+
+        if open_in_file_explorer:
+            QTimer.singleShot(500, partial(show_in_file_manager, filepath))
+            logger.info(f"Opened export @ {filepath} in file explorer.")
 
     @property
     def up_strands(self):
