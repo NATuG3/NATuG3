@@ -193,9 +193,6 @@ class DomainStrandWorker:
                                 NEMid2.juncmate = NEMid1
                                 NEMid2.junctable = True
 
-        # store the computed strands in self.workers
-        self.domains.strands = strands
-
         return strands
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:

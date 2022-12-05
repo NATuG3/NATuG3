@@ -136,6 +136,8 @@ class Domains:
 
     def points(self) -> List[Tuple[List[Point], List[Point]]]:
         """All the points in all the domains before they are turned into Strand objects."""
+        if self._points is None:
+            self._points = self.worker.compute()
         return self._points
 
     @cache

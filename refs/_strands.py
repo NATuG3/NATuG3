@@ -9,6 +9,7 @@ class _Strands:
     filename = "saves/sequencing/restored.nano"
 
     def __init__(self):
+        self.current = None
         self.load()
         atexit.register(self.dump)
         assert isinstance(self.current, Strands)
@@ -27,5 +28,6 @@ class _Strands:
             pickle.dump(self.current, file)
 
     def recompute(self) -> Strands:
+        refs.domains.current.strands.cache_clear()
         self.current = refs.domains.current.strands()
         return self.current
