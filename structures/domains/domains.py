@@ -176,4 +176,3 @@ class Domains:
             A TopViewWorker object.
         """
         return TopViewWorker(self)
-

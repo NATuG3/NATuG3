@@ -186,20 +186,29 @@ class SideViewPlotter(pg.PlotWidget):
             z_coords: List[float] = list()
 
             # create various brushes
-            point_brush = pg.mkBrush(color=utils.dim_color(strand.color, .9))
-            bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, .2))
+            point_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.9))
+            bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, 0.2))
 
             # create various pens
-            black_pen = pg.mkPen(color=([0] * 3), width=0.5,)
+            black_pen = pg.mkPen(
+                color=([0] * 3),
+                width=0.5,
+            )
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # if the strand color is dark
             if sum(strand.color) < (255 * 3) / 2:
                 # a light symbol pen
-                symbol_pen = pg.mkPen(color=[200] * 3, width=0.65,)
+                symbol_pen = pg.mkPen(
+                    color=[200] * 3,
+                    width=0.65,
+                )
             else:
                 # otherwise create a dark one
-                symbol_pen = pg.mkPen(color=[0] * 3, width=0.5,)
+                symbol_pen = pg.mkPen(
+                    color=[0] * 3,
+                    width=0.5,
+                )
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":

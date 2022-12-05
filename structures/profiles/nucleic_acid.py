@@ -38,7 +38,7 @@ class NucleicAcidProfile:
 
     @property
     def Z_mate(self):
-        return .094
+        return 0.094
 
     def __eq__(self, other: object) -> bool:
         """Whether our nucleic_acid_profile is the same as theirs."""

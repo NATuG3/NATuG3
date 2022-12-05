@@ -121,7 +121,7 @@ class Domain:
         else:
             try:
                 return self.parent.parent.domains().index(self)
-            except IndexError:
+            except IndexError or ValueError:
                 return None
 
     @property
