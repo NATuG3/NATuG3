@@ -28,6 +28,7 @@ class NucleicAcidProfile:
     B: int = 21
     Z_c: float = 0.17
     Z_s: float = 1.26
+    Z_mate: float = 0.094
     theta_b: float = 34.29
     theta_c: float = 17.1428
     theta_s: float = 2.343
@@ -35,10 +36,6 @@ class NucleicAcidProfile:
     @property
     def Z_b(self):
         return (self.T * self.H) / self.B
-
-    @property
-    def Z_mate(self):
-        return 0.094
 
     def __eq__(self, other: object) -> bool:
         """Whether our nucleic_acid_profile is the same as theirs."""
