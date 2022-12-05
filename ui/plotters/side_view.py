@@ -18,6 +18,8 @@ from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
+from ui.plotters import utils
+from ui.plotters.utils import dim_color
 
 logger = logging.getLogger(__name__)
 
@@ -183,56 +185,21 @@ class SideViewPlotter(pg.PlotWidget):
             x_coords: List[float] = list()
             z_coords: List[float] = list()
 
-            # create the point brush
-            point_brush = pg.mkBrush(color=strand.color)
-
             # create various brushes
-            dim_brush = pg.mkBrush(
-                color=(
-                    240,
-                    240,
-                    240,
-                )
-            )
-            black_pen = pg.mkPen(
-                color=(
-                    0,
-                    0,
-                    0,
-                ),
-                width=0.5,
-            )
-            dark_pen = pg.mkPen(
-                color=(
-                    35,
-                    35,
-                    35,
-                ),
-                width=0.38,
-            )
-            strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
+            point_brush = pg.mkBrush(color=utils.dim_color(strand.color, .9))
+            bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, .2))
+
+            # create various pens
+            black_pen = pg.mkPen(color=([0] * 3), width=0.5,)
+            strand_pen = pg.mkPen(color=strand.color, width=1.5)
 
             # if the strand color is dark
             if sum(strand.color) < (255 * 3) / 2:
                 # a light symbol pen
-                symbol_pen = pg.mkPen(
-                    color=(
-                        255,
-                        255,
-                        255,
-                    ),
-                    width=0.65,
-                )
+                symbol_pen = pg.mkPen(color=[200] * 3, width=0.65,)
             else:
                 # otherwise create a dark one
-                symbol_pen = pg.mkPen(
-                    color=(
-                        0,
-                        0,
-                        0,
-                    ),
-                    width=0.5,
-                )
+                symbol_pen = pg.mkPen(color=[0] * 3, width=0.5,)
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
@@ -279,7 +246,7 @@ class SideViewPlotter(pg.PlotWidget):
                         symbol_size = 6
                     # if the Point is junctable then make it dimmer colored
                     if isinstance(point, NEMid) and point.junctable:
-                        symbol_brushes.append(dim_brush)
+                        symbol_brushes.append(bright_brush)
                     # otherwise use normal coloring
                     else:
                         symbol_brushes.append(point_brush)
