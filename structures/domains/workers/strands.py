@@ -1,47 +1,44 @@
 import itertools
 import logging
-from contextlib import suppress
-from functools import cached_property, cache
+from functools import cache
 from math import dist
 from typing import List, Tuple
 
 import settings
 from constants.directions import *
 from helpers import inverse
-from structures.domains import Domains
 from structures.points import NEMid
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
-from structures.strands.strand import Strand
 from structures.strands.strands import Strands
 
 logger = logging.getLogger(__name__)
 
 
-class SideViewWorker:
+class DomainStrandWorker:
     """
     Class for generating data needed for a side view graph of helices.
+    This is used by the Domains structure to compute strands for its child workers.
 
     Methods:
-        angle_to_x_coord()
         compute()
     """
 
     strand_directions = (UP, DOWN)
-    cache_clearers = ("domains", "profiles")
+    cache_clearers = ("workers", "profiles")
 
     def __init__(
-        self, domains: Domains, nucleic_acid_profile: NucleicAcidProfile
+        self, nucleic_acid_profile: NucleicAcidProfile, domains: "Domains"
     ) -> None:
         """
         Initialize a side view generator object.
 
         Args:
-            domains: The domains to compute sequencing for.
+            domains: The workers to compute sequencing for.
             nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile to use.
         """
-        self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
+        self.domains = domains
 
     @cache
     def compute(self) -> Strands:
@@ -49,12 +46,12 @@ class SideViewWorker:
         Compute all NEMid data.
 
         Returns:
-            Strands object for all sequencing that the domains can create.
+            Strands object for all sequencing that the workers can create.
         """
         # the output container for all NEMids
         strands = [([], []) for _ in range(self.domains.count)]
 
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # how many NEMids to skip over for the up and down strand
             begin_at = [0, 0]
 
@@ -142,7 +139,11 @@ class SideViewWorker:
 
                     # create a nucleoside object from the NEMid
                     nucleoside = NEMid_.to_nucleoside()
+                    nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
                     nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+                    nucleoside.x_coord = Point.x_coord_from_angle(
+                        nucleoside.angle, nucleoside.domain
+                    )
 
                     # append the current NEMid and nucleoside to the to-be-outputted array
                     strands[index][strand_direction].append(NEMid_)
@@ -151,15 +152,8 @@ class SideViewWorker:
                 if strand_direction == DOWN:
                     strands[index][strand_direction].reverse()
 
-        # assign matching NEMids to each other's matching slots
-        for index, domain in enumerate(self.domains.domains):
-            item1: Point
-            item2: Point
-            for item1, item2 in zip(strands[index][0], reversed(strands[index][1])):
-                item1.matching, item2.matching = item2, item2
-
         # assign junctability and juncmates
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             if index == self.domains.count - 1:
                 next_strands = strands[0]
             else:
@@ -199,19 +193,8 @@ class SideViewWorker:
                                 NEMid2.juncmate = NEMid1
                                 NEMid2.junctable = True
 
-        converted_strands = []
-        for strand_direction in self.strand_directions:
-            for index, domain in enumerate(self.domains.domains):
-                converted_strands.append(
-                    Strand(
-                        self.nucleic_acid_profile,
-                        strands[index][strand_direction],
-                        color=settings.colors["sequencing"]["greys"][strand_direction],
-                    )
-                )
-
-        # convert sequencing from a list to a Strands container
-        strands = Strands(self.nucleic_acid_profile, converted_strands)
+        # store the computed strands in self.workers
+        self.domains.strands = strands
 
         return strands
 
@@ -226,9 +209,9 @@ class SideViewWorker:
 
         # generate count# of NEMid angles on a domain-by-domain basis
         # domain_index is the index of the current domain
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # look at left current domain helix joint
-            zeroed_strand = domain.left_helix_joint_direction
+            zeroed_strand = domain.left_helix_joint
 
             # create infinite generators for the zeroed and non zeroed sequencing
             angles[index][zeroed_strand] = itertools.count(
@@ -258,13 +241,13 @@ class SideViewWorker:
         Create a generator of X coords of NEMids for the side view plot.
 
         Returns:
-            DomainsContainerType: A domains container with innermost entries of generators.
+            DomainsContainerType: A workers container with innermost entries of generators.
         """
         angles = self._angles()
         x_coords = [[[], []] for _ in range(self.domains.count)]
 
         # make a copy of the angles iterator for use in generating x coords
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # since every T NEMids the x coords repeat we only need to generate x coords for the first T NEMids
             for strand_direction in self.strand_directions:  # (UP, DOWN)
                 for counter, angle in enumerate(angles[index][strand_direction]):
@@ -298,13 +281,13 @@ class SideViewWorker:
         Create a generator of Z coords of NEMids for the side view plot.
 
         Returns:
-            DomainsContainerType: A domains container with innermost entries of generators.
+            DomainsContainerType: A workers container with innermost entries of generators.
         """
         x_coords = [list(domain) for domain in self._x_coords()]
         z_coords = [[None, None] for _ in range(self.domains.count)]
 
         # creating a sample of x coords
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             for strand_direction in self.strand_directions:
                 x_coords[index][strand_direction] = itertools.islice(
                     x_coords[index][strand_direction], 0, self.nucleic_acid_profile.B
@@ -313,10 +296,10 @@ class SideViewWorker:
                     x_coords[index][strand_direction]
                 )
 
-        for index, domain in enumerate(self.domains.domains):
+        for index, domain in enumerate(self.domains.domains()):
             # look at the right joint of the previous domain
             # for calculating the initial z coord
-            zeroed_strand = self.domains.domains[index - 1].right_helix_joint_direction
+            zeroed_strand = self.domains.domains()[index - 1].right_helix_joint
 
             # step 1: find the initial z cord for the current domain
             if index == 0:
@@ -360,7 +343,7 @@ class SideViewWorker:
 
             # look at the left joint of the current domain
             # for calculating additional z coords
-            zeroed_strand = domain.left_helix_joint_direction
+            zeroed_strand = domain.left_helix_joint
 
             # zeroed strand
             z_coords[index][zeroed_strand] = itertools.count(
@@ -390,7 +373,7 @@ class SideViewWorker:
     @cache
     def __repr__(self) -> str:
         output = "side_view("
-        blacklist = "domains"
+        blacklist = "workers"
         for attr, value in vars(self).items():
             if attr not in blacklist:
                 if isinstance(value, float):

@@ -1,16 +1,16 @@
 import logging
 from types import SimpleNamespace
-from typing import Literal, List
+from typing import List
 
 from PyQt6.QtCore import pyqtSignal, Qt, QEvent
 from PyQt6.QtGui import QKeyEvent
 from PyQt6.QtWidgets import (
     QTableWidget,
     QHeaderView,
-    QAbstractItemView, QApplication,
+    QAbstractItemView,
+    QApplication,
 )
 
-from constants.directions import *
 from structures.domains import Domain, Domains
 from structures.profiles import NucleicAcidProfile
 from ui.widgets import DirectionalButton, TableIntegerBox
@@ -70,7 +70,7 @@ class Table(QTableWidget):
                     event = QKeyEvent(
                         QEvent.Type.KeyPress,
                         Qt.Key.Key_Right,
-                        Qt.KeyboardModifier.NoModifier
+                        Qt.KeyboardModifier.NoModifier,
                     )
                     QApplication.postEvent(to_focus, event)
             self.blockSignals(False)
@@ -134,7 +134,7 @@ class Table(QTableWidget):
 
             # column 0 - left helical joint
             row.left_helix_joint = DirectionalButton(
-                self, domains.domains[index].left_helix_joint_direction
+                self, domains.domains()[index].left_helix_joint
             )
             row.left_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.left_helix_joint.clicked.connect(self.cell_widget_updated.emit)
@@ -142,16 +142,14 @@ class Table(QTableWidget):
 
             # column 1 - right helical joint
             row.right_helix_joint = DirectionalButton(
-                self, domains.domains[index].right_helix_joint_direction
+                self, domains.domains()[index].right_helix_joint
             )
             row.right_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.right_helix_joint.clicked.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 1, row.right_helix_joint)
 
             # column 2 - theta switch multiple
-            row.theta_s_multiple = TableIntegerBox(
-                domain.theta_s_multiple, minimum=-1
-            )
+            row.theta_s_multiple = TableIntegerBox(domain.theta_s_multiple, minimum=-1)
             row.theta_s_multiple.setEnabled(False)
             self.setCellWidget(index, 2, row.theta_s_multiple)
 
@@ -234,31 +232,30 @@ class Table(QTableWidget):
             A list of the domains that populate the domains table.
         """
         domains = []  # output list of domains
-        for domain in range(self.rowCount()):
+        for domain_index in range(self.rowCount()):
             # column 0 - left helical joint
-            left_helical_joint: Literal[UP, DOWN] = self.cellWidget(domain, 0).state
+            left_helical_joint: int = self.cellWidget(domain_index, 0).state
 
             # column 1 - right helical joint
-            right_helical_joint: Literal[UP, DOWN] = self.cellWidget(domain, 1).state
+            right_helical_joint: int = self.cellWidget(domain_index, 1).state
 
             # column 2 - theta switch multiple
             # not needed since it can be calculated from left and right helical joints
 
             # column 3 - theta interior multiple
-            theta_interior_multiple: int = self.cellWidget(domain, 3).value()
+            theta_interior_multiple: int = self.cellWidget(domain_index, 3).value()
 
             # column 4 - initial NEMid count
-            count: int = self.cellWidget(domain, 4).value()
+            count: int = self.cellWidget(domain_index, 4).value()
 
-            domain = Domain(
+            domain_index = Domain(
                 self.nucleic_acid_profile,
-                domain,
                 theta_interior_multiple,
                 left_helical_joint,
                 right_helical_joint,
                 count,
             )
 
-            domains.append(domain)
+            domains.append(domain_index)
 
         return domains

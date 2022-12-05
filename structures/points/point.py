@@ -1,8 +1,7 @@
-from __future__ import annotations
 from dataclasses import dataclass
-from typing import Tuple, Literal, Type
+from typing import Tuple, Type
 
-from constants.directions import *
+from helpers import inverse
 
 
 @dataclass(kw_only=True, slots=True)
@@ -13,14 +12,14 @@ class Point:
     Point objects represent parts of/things on helices.
 
     Attributes:
-        x_coord: The x coord of the NEMid.
-        z_coord: The z coord of the NEMid.
+        x_coord: The x coord of the point.
+        z_coord: The z coord of the point.
         angle: Angle from this domain and next domains' line of tangency going counterclockwise.
-        direction: The direction of the helix at this NEMid.
-        strand: The strand that this NEMid belongs to.
-        domain: The domain this NEMid belongs to.
-        matching: NEMid in same domain on other direction's helix across from this one.
-        highlighted: Whether the NEMid is highlighted.
+        direction: The direction of the helix at this point.
+        strand: The strand that this point belongs to.
+        domain: The domain this point belongs to.
+        matching: Point in same domain on other direction's helix across from this one.
+        highlighted: Whether the point is highlighted.
     """
 
     # positional attributes
@@ -29,16 +28,42 @@ class Point:
     angle: float = None
 
     # nucleic acid attributes
-    direction: Literal[UP, DOWN] = None
+    direction: int = None
     strand: Type["Strand"] = None
-    domain: Domain = None
-    matching: Type["Point"] = None
+    domain: Type["Domain"] = None
 
     # plotting attributes
     highlighted: bool = False
 
+    def matching(self) -> Type["Point"] | None:
+        """
+        Obtain the matching point.
+
+        Returns:
+            Point: The matching point.
+            None: There is no matching point.
+        """
+        if self.strand is None or self.strand.closed:
+            return None
+        else:
+            # obtain our domain's index in respect to the entire Domains object
+            domain_index = self.domain.index
+
+            # the parent of a Domain is a Subunit
+            # the parent of a Subunit is a Domains
+            # Domains.points() returns all points in the structure
+            # [#0(up-strand, down_strand), #1(up-strand, down_strand), ...]
+            points: Type["Strands"] = self.domain.parent.parent.points()
+
+            # the other strand in the same domain as this point
+            # all_domains -> index of this domain -> opposite direction
+            other_strand = points[domain_index][inverse(self.direction)]
+
+            # obtain the matching point
+            return tuple(reversed(other_strand))[self.index]
+
     @staticmethod
-    def x_coord_from_angle(angle: float, domain: Domain) -> float:
+    def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
         """
         Compute a new x coord based on the angle and domain of this Point.
 

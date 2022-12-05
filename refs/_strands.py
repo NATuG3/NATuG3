@@ -1,23 +1,17 @@
 import atexit
 import pickle
-from types import NoneType
-from typing import Union
 
 import refs
 from structures.strands.strands import Strands
-from workers.side_view import SideViewWorker
 
 
 class _Strands:
     filename = "saves/sequencing/restored.nano"
 
-    def __init__(self, strands: Union[NoneType, Strands] = None):
-        if strands is None:
-            self.load()
-        else:
-            self.current: Strands = strands
-
+    def __init__(self):
+        self.load()
         atexit.register(self.dump)
+        assert isinstance(self.current, Strands)
 
     def load(self):
         """Dump the current sequencing into a file."""
@@ -33,7 +27,5 @@ class _Strands:
             pickle.dump(self.current, file)
 
     def recompute(self) -> Strands:
-        self.current: Strands = SideViewWorker(
-            refs.domains.current, refs.nucleic_acid.current
-        ).compute()
+        self.current = refs.domains.current.strands()
         return self.current

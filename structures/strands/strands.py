@@ -1,10 +1,12 @@
 import logging
-from math import dist
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Literal
+import pandas as pd
+from pandas import ExcelWriter
 
 import settings
 from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
+from structures.strands import utils
 from structures.strands.strand import Strand
 
 logger = logging.getLogger(__name__)
@@ -19,10 +21,22 @@ class Strands:
         strands: The actual sequencing.
         up_strands: All up sequencing.
         down_strands: All down sequencing.
+        name: The name of the strands object. Used when exporting the strands object.
+
+    Methods:
+        conjunct()
+        up_strands(), down_strands()
+        recompute(), recolor()
+        append()
+        remove()
+        export()
     """
 
     def __init__(
-        self, nucleic_acid_profile: NucleicAcidProfile, strands: Iterable[Strand]
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        strands: Iterable[Strand],
+        name: str = "Strands",
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -30,14 +44,74 @@ class Strands:
         Args:
             nucleic_acid_profile: The nucleic acid settings for the sequencing container.
             strands: A list of sequencing to create a Strands object from.
+            name: The name of the strands object. Used when exporting the strands object.
         """
+        self.name = name
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
         self.recompute()
 
+    def __contains__(self, item):
+        """Check if a strand or point is contained within this container."""
+        if item in self.strands:
+            return True
+        else:
+            for strand in self.strands:
+                for item_ in strand:
+                    if item_ is item:
+                        return True
+
     def __len__(self):
         """Obtain the number of sequencing this Strands object contains."""
         return len(self.strands)
+
+    def export(self, filepath: str, mode: Literal["xlsx"]) -> None:
+        """
+        Export all sequences to a file.
+
+        Args:
+            filepath: The filepath to export to. Do not include the file suffix.
+            mode: The mode to export in.
+        """
+        dataset = []
+        for index, strand in enumerate(self.strands):
+            name = f"Strand # {index}"
+            sequence = "".join(map(str, strand.sequence)).replace("None", "")
+            color = utils.rgb_to_hex(strand.color)
+            dataset.append(
+                (
+                    name,
+                    sequence,
+                    color,
+                )
+            )
+
+        sequences = pd.DataFrame(
+            dataset, columns=["Name", "Sequence (3' to 5')", "Color"]
+        )
+
+        if mode == "xlsx":
+            # we will handle this ourselves
+            filepath = filepath.replace(".xlsx", "")
+
+            # create an excel writer object
+            writer = ExcelWriter(f"{filepath}.xlsx", engine="openpyxl")
+
+            # export the dataframe to an excel sheet
+            sequences.to_excel(writer, sheet_name=self.name)
+
+            # adjust the widths of the various columns
+            worksheet = writer.sheets[self.name]
+            worksheet.column_dimensions["A"].width = 10
+            worksheet.column_dimensions["B"].width = 20
+            worksheet.column_dimensions["C"].width = 40
+            worksheet.column_dimensions["D"].width = 14
+
+            # Save the workbook
+            workbook = writer.book
+            workbook.save(f"{filepath}.xlsx")
+        else:
+            raise ValueError("Invalid export mode.", mode)
 
     @property
     def up_strands(self):
@@ -110,6 +184,7 @@ class Strands:
         Notes:
             - The order of NEMid1 and NEMid2 is arbitrary.
             - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
+            - NEMid.matching may be changed based on whether the strand is closed or not.
         """
         # ensure that both NEMids are junctable
         if (not NEMid1.junctable) or (not NEMid2.junctable):
@@ -261,6 +336,7 @@ class Strands:
             else:
                 NEMid_.junction = False
 
+        # assign the new juncmates
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 

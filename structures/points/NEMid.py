@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, Tuple
+from typing import Type
 
 from structures.points.point import Point
 

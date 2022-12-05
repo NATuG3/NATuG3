@@ -1,5 +1,4 @@
 import logging
-from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
 from typing import List, Tuple, Dict, Literal
@@ -19,6 +18,8 @@ from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
+from ui.plotters import utils
+from ui.plotters.utils import dim_color
 
 logger = logging.getLogger(__name__)
 
@@ -154,7 +155,7 @@ class SideViewPlotter(pg.PlotWidget):
         grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
 
         # domain index grid
-        for i in range(ceil(self.strands.size[0]) + 1):
+        for i in range(ceil(self.strands.size[0])):
             self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
 
         # for i in <number of helical twists of the tallest domain>...
@@ -184,34 +185,30 @@ class SideViewPlotter(pg.PlotWidget):
             x_coords: List[float] = list()
             z_coords: List[float] = list()
 
-            # create the point brush
-            point_brush = pg.mkBrush(color=strand.color)
-
             # create various brushes
-            dim_brush = pg.mkBrush(
-                color=(
-                    240,
-                    240,
-                    240,
-                )
-            )
+            point_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.9))
+            bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, 0.2))
+
+            # create various pens
             black_pen = pg.mkPen(
-                color=(
-                    0,
-                    0,
-                    0,
-                ),
+                color=([0] * 3),
                 width=0.5,
             )
-            dark_pen = pg.mkPen(
-                color=(
-                    35,
-                    35,
-                    35,
-                ),
-                width=0.38,
-            )
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
+
+            # if the strand color is dark
+            if sum(strand.color) < (255 * 3) / 2:
+                # a light symbol pen
+                symbol_pen = pg.mkPen(
+                    color=[200] * 3,
+                    width=0.65,
+                )
+            else:
+                # otherwise create a dark one
+                symbol_pen = pg.mkPen(
+                    color=[0] * 3,
+                    width=0.5,
+                )
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
@@ -236,7 +233,6 @@ class SideViewPlotter(pg.PlotWidget):
                 if self.plot_data.mode == "nucleoside" and point.base is not None:
                     symbol = custom_symbol(point.base, flip=False)
                     symbols.append(symbol)
-                    symbol_pens.append(black_pen)
                 elif self.plot_data.mode == "NEMid" or point.base is None:
                     if point.direction == UP:
                         symbols.append("t1")  # up arrow
@@ -244,7 +240,7 @@ class SideViewPlotter(pg.PlotWidget):
                         symbols.append("t")  # down arrow
                     else:
                         raise ValueError("Point.direction is not UP or DOWN.", point)
-                    symbol_pens.append(dark_pen)
+                symbol_pens.append(symbol_pen)
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
@@ -259,7 +255,7 @@ class SideViewPlotter(pg.PlotWidget):
                         symbol_size = 6
                     # if the Point is junctable then make it dimmer colored
                     if isinstance(point, NEMid) and point.junctable:
-                        symbol_brushes.append(dim_brush)
+                        symbol_brushes.append(bright_brush)
                     # otherwise use normal coloring
                     else:
                         symbol_brushes.append(point_brush)

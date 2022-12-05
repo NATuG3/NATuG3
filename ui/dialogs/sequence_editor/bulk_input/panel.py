@@ -1,13 +1,10 @@
 import random
-from itertools import repeat
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog
 
 import helpers
 from constants.bases import DNA
-from helpers import bases_only
-from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 
 
 class BulkInputSequenceEditor(QWidget):
@@ -49,9 +46,8 @@ class BulkInputSequenceEditor(QWidget):
                 confirmed = helpers.confirm(
                     self.parent(),
                     "Sequence Overload",
-                    f"The chosen file contains {difference} more bases than the strand allows for.\n"
-                    "If you proceed the inputted bases will be truncated to the strand length.\n\n"
-                    "Would you like to proceed?",
+                    f"The chosen file contains {difference} more bases than the strand allows for. If you proceed the "
+                    f"inputted bases will be truncated to the strand length. \n\n Would you like to proceed?",
                 )
                 file_bases = file_bases[: len(self.bases)]
             else:

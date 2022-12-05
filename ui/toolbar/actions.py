@@ -19,7 +19,7 @@ class Actions(QButtonGroup):
 
     def _add_buttons(self):
         """Add all toolbar buttons to the toolbar."""
-        self.add_button(self.Informer(), INFORMER)  # first button checked automatically
+        self.add_button(self.Informer(), INFORMER)
         self.add_button(self.Juncter(), JUNCTER)
         self.add_button(self.Nicker(), NICKER)
         self.add_button(self.Hairpinner(), HAIRPINNER)

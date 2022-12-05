@@ -1,114 +1,178 @@
 import logging
-from copy import copy
-from typing import List, Iterable
+from functools import cache
+from typing import List, Iterable, Tuple
 
-from constants.directions import *
+import settings
+from constants.directions import DOWN, UP
 from helpers import inverse
-from structures.domains import Domain
+from structures.domains.subunit import Subunit
+from structures.domains.workers.strands import DomainStrandWorker
+from structures.domains.workers.top_view import TopViewWorker
+from structures.points.point import Point
+from structures.profiles import NucleicAcidProfile
+from structures.strands import Strand, Strands
 
 logger = logging.getLogger(__name__)
 
 
 class Domains:
     """
-    Container for multiple domains.
+    Container for multiple workers.
 
     Attributes:
-        subunit: The domains within a single subunit.
-        domains: All domains of all subunits.
-        count: The total number of domains. Includes domains from all subunits.
+        nucleic_acid_profile: The nucleic acid configuration.
+        subunit: The workers within a single subunit.
+            This is a template subunit. Note that subunits can be mutated.
         symmetry: The symmetry type. Also known as "R".
+        count: The total number of workers. Includes workers from all subunits.
+        antiparallel: Whether the workers are forced to have alternating upness/downness.
+
+    Methods:
+        strands()
+        top_view()
+        workers()
+        subunits()
     """
 
     def __init__(
-        self, domains: Iterable, symmetry: int, auto_antiparallel: bool
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        domains: Iterable["Domain"],
+        symmetry: int,
+        antiparallel: bool = False,
     ) -> None:
         """
-        Initialize a domains container.
+        Initialize a Domains object.
 
         Args:
-            domains: A list of domains of a single subunit.
+            nucleic_acid_profile: The nucleic acid configuration.
+            domains: All the workers for the template subunit.
             symmetry: The symmetry type. Also known as "R".
+            antiparallel: Whether the workers are forced to have alternating upness/downness.
         """
-        self.subunit = Subunit(list(domains))
-        self.auto_antiparallel = auto_antiparallel
+        # store various settings
+        self.nucleic_acid_profile = nucleic_acid_profile
         self.symmetry = symmetry
+        self.antiparallel = antiparallel
+
+        # self.subunit is the template subunit
+        # meaning that all other subunits are based off of this one
+        assert isinstance(domains, Iterable)
+        self._subunit = Subunit(self.nucleic_acid_profile, domains, template=True, parent=self)
+
+        # create a worker object for computing strands for workers
+        self.worker = DomainStrandWorker(self.nucleic_acid_profile, self)
+        self._points = None
 
     @property
-    def domains(self) -> list[Domain]:
-        """
-        List of all the domains.
+    def subunit(self) -> Subunit:
+        """Obtain the current template subunit."""
+        return self._subunit
 
-        Notes:
-            - This returns a copy of each domain.
-            - The output is based off of self.subunit.domains.
+    @subunit.setter
+    def subunit(self, new_subunit) -> None:
+        """Replace the current template subunit."""
+        self._subunit = new_subunit
+        for domain in self._subunit:
+            domain.parent = self._subunit
+        self.domains.cache_clear()
+        self.subunits.cache_clear()
+
+    @property
+    def count(self) -> int:
         """
-        # compute an output that is symmetry number of copies of a subunit
-        output: List[Domain] = []
+        The number of workers in the Domains object.
+
+        Returns:
+            The number of workers in the Domains object.
+        """
+        return len(self.domains())
+
+    @cache
+    def subunits(self) -> List[Subunit]:
+        """
+        Obtain all subunits of the Domains object.
+
+        Returns:
+            List[Subunit]: Copies of the template subunit for all subunits except the first one.
+            The first subunit in the returned list is a direct reference to the template subunit.
+        """
+        output = []
         for cycle in range(self.symmetry):
-            for domain in self.subunit.domains:
-                output.append(copy(domain))
-        for index, domain in enumerate(output):
-            domain.index = index
+            # for all subunits after the first one make deep copies of the subunit.
+            if cycle == 0:
+                output.append(self.subunit)
+            else:
+                copied = self.subunit.copy()
+                copied.template = False
+                output.append(copied)
 
-        # force antiparallelity if self.autoparallel
-        if self.auto_antiparallel:
-            direction = UP
-            for index, domain in enumerate(output):
-                output[index].helix_joints = [direction, direction]
+        return output
+
+    @cache
+    def domains(self) -> List["Domain"]:
+        """
+        Obtain a list of all workers from all subunits.
+
+        Returns:
+            A list of all workers from all subunits.
+        """
+        output = []
+        for subunit in self.subunits():
+            output.extend(subunit.domains)
+
+        # if the workers instance is set to antiparallel then make the directions
+        # of the workers alternate.
+        if self.antiparallel:
+            # alternate from where we left off
+            # (which is the very right end of the subunit workers)
+            direction = self.subunit.domains[-1].right_helix_joint
+            for domain in output:
+                domain.left_helix_joint = direction
+                domain.right_helix_joint = direction
                 direction = inverse(direction)
 
         return output
 
-    @property
-    def count(self) -> int:
-        """Total number of domains."""
-        return self.subunit.count * self.symmetry
+    def points(self) -> List[Tuple[List[Point], List[Point]]]:
+        """All the points in all the domains before they are turned into Strand objects."""
+        return self._points
 
-
-class Subunit:
-    """
-    A domain subunit.
-
-    Attributes:
-        domains: The domains in the subunit.
-        count: The number of domains in the subunit.
-    """
-
-    def __init__(self, domains: List[Domain]) -> None:
+    @cache
+    def strands(self) -> Strands:
         """
-        Create an instance of a subunit container.
+        Obtain a list of all strands from all workers.
 
-        Args:
-            domains: The domains in the subunit.
+        Notes:
+            - The strands returned are references to the strands in the workers. This means
+                that if the outputted strands are modified then the workers' strands will be modified too.
+
+        Returns:
+            A list of all strands from all workers.
         """
-        assert isinstance(domains, list)
-        self.domains = domains
+        self._points = self.worker.compute()
 
-    @property
-    def count(self) -> int:
-        """Number of domains in the subunit."""
-        return len(self.domains)
-
-    @count.setter
-    def count(self, new):
-        """Change the number of domains in the subunit."""
-        # if the subunit count has decreased then trim off extra domains
-        if new < self.count:
-            self.domains = self.domains[:new]
-        # if the subunit count has increased then add placeholder domains based on last domain in domain list
-        else:
-            i = 0
-            while self.count < new:
-                previous_domain = self.domains[-1]
-                # the new template domains will be of altering strand directions with assumed
-                # strand switches of 0
-                self.domains.append(
-                    Domain(
-                        i,
-                        previous_domain.theta_interior_multiple,
-                        [inverse(previous_domain.right_helix_joint_direction)] * 2,
-                        previous_domain.count,
+        converted_strands = []
+        for strand_direction in (
+            UP,
+            DOWN,
+        ):
+            for index, domain in enumerate(self.domains()):
+                converted_strands.append(
+                    Strand(
+                        self.nucleic_acid_profile,
+                        self._points[index][strand_direction],
+                        color=settings.colors["sequencing"]["greys"][strand_direction],
                     )
                 )
-                i += 1
+        # convert sequencing from a list to a Strands container
+        return Strands(self.nucleic_acid_profile, converted_strands)
+
+    def top_view(self) -> TopViewWorker:
+        """
+        Obtain a TopViewWorker object of all the domains.
+
+        Returns:
+            A TopViewWorker object.
+        """
+        return TopViewWorker(self)

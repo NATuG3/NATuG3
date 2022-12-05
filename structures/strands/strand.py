@@ -6,7 +6,6 @@ from functools import cached_property
 from random import shuffle
 from typing import Tuple, Type, Iterable, Deque, List, ClassVar
 
-
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -36,6 +35,7 @@ class Strand:
         down_strand: Whether all NEMids in this strand are down-NEMids.
         interdomain: Whether this strand spans multiple domains.
         highlighted: Whether the strand is highlighted.
+        name: The user-set name of the strand.
     """
 
     nucleic_acid_profile: field(default=NucleicAcidProfile, repr=False)
@@ -44,7 +44,7 @@ class Strand:
     auto_color: bool = True
     closed: bool = False
     highlighted: bool = False
-    parent: Type["Strands"] = None
+    parent: "Strands" = None
 
     __cached: ClassVar[Tuple[str]] = (
         "up_strand",
@@ -60,7 +60,7 @@ class Strand:
         self._nucleosides: ClassVar[Tuple[Nucleoside] | None] = None
 
     @property
-    def thickness(self):
+    def thickness(self) -> float:
         """
         Automatically determine thickness if thickness is None.
         Otherwise, output the set thickness.
@@ -74,7 +74,7 @@ class Strand:
             return self._thickness
 
     @thickness.setter
-    def thickness(self, new_thickness):
+    def thickness(self, new_thickness) -> None:
         """Change the currently set thickness."""
         self._thickness = new_thickness
 
@@ -155,10 +155,12 @@ class Strand:
     def sequence(self, new_sequence: List[str]):
         if len(new_sequence) == len(self.nucleosides()):
             for index, base in enumerate(new_sequence):
+                # update the base for the nucleoside
                 self.nucleosides()[index].base = base
-                self.nucleosides()[index].matching.base = self.nucleosides()[
-                    index
-                ].complement
+
+                # assign the complementary base to the matching nucleoside
+                # complement = self.nucleosides()[index].complement
+                # self.nucleosides()[index].matching().base = complement
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
@@ -172,7 +174,7 @@ class Strand:
         except IndexError:
             return None
 
-    def sliced(self, start: int, end: int) -> list:
+    def sliced(self, start: int | None, end: int | None) -> list:
         """Return self.NEMids as a list."""
         return list(itertools.islice(self.items, start, end))
 
@@ -187,13 +189,12 @@ class Strand:
         for index, item in enumerate(self.items):
             self.items[index].strand = self
 
-    def touching(self, other: Type["Strand"], touching_distance=0.2) -> bool:
+    def touching(self, other: "Strand") -> bool:
         """
         Check whether this strand is touching a different strand.
 
         Args:
             other: The strand potentially touching this one.
-            touching_distance: The distance to be considered touching.
         """
         for our_item in shuffled(self.NEMids()):
             for their_item in shuffled(other.NEMids()):

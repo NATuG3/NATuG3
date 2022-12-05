@@ -5,7 +5,6 @@ from PyQt6.QtWidgets import QDockWidget, QSlider, QWidget, QVBoxLayout
 
 import refs
 import ui.plotters
-from workers.top_view import TopViewWorker
 
 
 class Dockable(QDockWidget):
@@ -23,7 +22,7 @@ class Dockable(QDockWidget):
 
         # set up the plot
         self.plot = ui.plotters.TopViewPlotter(
-            TopViewWorker(refs.domains.current, refs.nucleic_acid.current),
+            refs.domains.current.top_view(),
             refs.domains.current,
             refs.nucleic_acid.current.D,
         )
@@ -44,9 +43,7 @@ class Dockable(QDockWidget):
 
     def refresh(self):
         """Update the current plot."""
-        self.plot.worker = TopViewWorker(
-            refs.domains.current, refs.nucleic_acid.current
-        )
+        self.plot.worker = refs.domains.current.top_view()
         self.plot.profile = refs.nucleic_acid.current
         self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()

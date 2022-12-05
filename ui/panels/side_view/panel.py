@@ -12,7 +12,6 @@ import ui.dialogs.informers
 import ui.plotters
 from constants.toolbar import *
 from structures.points import NEMid, Nucleoside
-from structures.points.nick import Nick
 from structures.strands import Strand
 from ui.dialogs.strand_config.strand_config import StrandConfig
 from ui.panels.sequencing.buttons import StrandButton
