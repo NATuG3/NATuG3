@@ -98,6 +98,7 @@ class Panel(QWidget):
             B=self.B.value(),
             Z_c=self.Z_c.value(),
             Z_s=self.Z_s.value(),
+            Z_mate = self.Z_mate.value(),
             theta_b=self.theta_b.value(),
             theta_c=self.theta_c.value(),
             theta_s=self.theta_s.value(),

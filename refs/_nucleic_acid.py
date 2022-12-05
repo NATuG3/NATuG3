@@ -23,6 +23,7 @@ class _NucleicAcid:
             B=21,
             Z_c=0.17,
             Z_s=1.26,
+            Z_mate=0.094,
             theta_b=34.29,
             theta_c=17.1428,
             theta_s=2.343,
