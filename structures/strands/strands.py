@@ -33,7 +33,10 @@ class Strands:
     """
 
     def __init__(
-            self, nucleic_acid_profile: NucleicAcidProfile, strands: Iterable[Strand], name: str = "Strands"
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        strands: Iterable[Strand],
+        name: str = "Strands",
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -75,11 +78,16 @@ class Strands:
             name = f"Strand # {index}"
             sequence = "".join(map(str, strand.sequence)).replace("None", "")
             color = utils.rgb_to_hex(strand.color)
-            dataset.append((name, sequence, color,))
+            dataset.append(
+                (
+                    name,
+                    sequence,
+                    color,
+                )
+            )
 
         sequences = pd.DataFrame(
-            dataset,
-            columns=["Name", "Sequence (3' to 5')", "Color"]
+            dataset, columns=["Name", "Sequence (3' to 5')", "Color"]
         )
 
         if mode == "xlsx":

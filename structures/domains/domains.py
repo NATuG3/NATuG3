@@ -58,7 +58,7 @@ class Domains:
         # self.subunit is the template subunit
         # meaning that all other subunits are based off of this one
         assert isinstance(domains, Iterable)
-        self._subunit = Subunit(domains, template=True, parent=self)
+        self._subunit = Subunit(self.nucleic_acid_profile, domains, template=True, parent=self)
 
         # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self.nucleic_acid_profile, self)

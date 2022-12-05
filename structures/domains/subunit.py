@@ -3,6 +3,7 @@ from copy import deepcopy
 from typing import Iterable
 
 from helpers import inverse
+from structures.profiles import NucleicAcidProfile
 
 
 class Subunit:
@@ -14,6 +15,7 @@ class Subunit:
         - If the subunit.count is increased/decreased then subunit.workers changes too.
 
     Attributes:
+        nucleic_acid_profile: The nucleic acid configuration.
         domains: The workers in the subunit.
         count: The number of workers in the subunit.
         template: Whether this is a template subunit.
@@ -25,19 +27,25 @@ class Subunit:
     """
 
     def __init__(
-        self, domains: Iterable["Domain"], template: bool = False, parent: "Domains" = None
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        domains: Iterable["Domain"],
+        template: bool = False,
+        parent: "Domains" = None,
     ) -> None:
         """
         Create an instance of a subunit container.
 
         Args:
+            nucleic_acid_profile: The nucleic acid configuration.
             domains: The workers in the subunit.
             template: Whether this subunit is a template subunit. Defaults to False.
                 If this is not a template subunit then the subunit becomes immutable.
                 In other words, only template subunits can be modified.
             parent: The parent Domains object.
         """
-        self.template = template
+        self.template = template  # must be the first property set
+        self.nucleic_acid_profile = nucleic_acid_profile
         self.parent = parent
         self.domains = domains
 
@@ -98,9 +106,10 @@ class Subunit:
             A brand-new subunit object with brand-new domain objects.
         """
         return Subunit(
+            self.nucleic_acid_profile,
             [copy(domain) for domain in self.domains],
             template=self.template,
-            parent=self.parent
+            parent=self.parent,
         )
 
     @property
@@ -126,6 +135,7 @@ class Subunit:
         # we couldn't import workers before because it was partially initialized
         # but we can now (and we will need it if the count increases to make new workers)
         from structures.domains import Domain
+
         # if the subunit count has decreased then trim off extra workers
         if new < self.count:
             self.domains = self.domains[:new]
@@ -138,10 +148,12 @@ class Subunit:
                 # strand switches of 0
                 self.domains.append(
                     Domain(
-                        i,
+                        self.nucleic_acid_profile,
                         previous_domain.theta_interior_multiple,
-                        [inverse(previous_domain.right_helix_joint)] * 2,
+                        inverse(previous_domain.right_helix_joint),
+                        inverse(previous_domain.right_helix_joint),
                         previous_domain.count,
+                        parent=self
                     )
                 )
                 i += 1

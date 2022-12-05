@@ -122,7 +122,7 @@ class Domain:
             try:
                 return self.parent.parent.domains().index(self)
             except IndexError or ValueError:
-                return None
+                raise NotImplementedError("This is a known bug that is currently being worked on.")
 
     @property
     def theta_s_multiple(self) -> int:
