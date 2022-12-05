@@ -35,6 +35,7 @@ class Strand:
         down_strand: Whether all NEMids in this strand are down-NEMids.
         interdomain: Whether this strand spans multiple domains.
         highlighted: Whether the strand is highlighted.
+        name: The user-set name of the strand.
     """
 
     nucleic_acid_profile: field(default=NucleicAcidProfile, repr=False)
@@ -59,7 +60,7 @@ class Strand:
         self._nucleosides: ClassVar[Tuple[Nucleoside] | None] = None
 
     @property
-    def thickness(self):
+    def thickness(self) -> float:
         """
         Automatically determine thickness if thickness is None.
         Otherwise, output the set thickness.
@@ -73,7 +74,7 @@ class Strand:
             return self._thickness
 
     @thickness.setter
-    def thickness(self, new_thickness):
+    def thickness(self, new_thickness) -> None:
         """Change the currently set thickness."""
         self._thickness = new_thickness
 
