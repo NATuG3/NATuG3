@@ -7,7 +7,7 @@ from constants.toolbar import *
 class _Toolbar:
     def __init__(self):
         self.actions: QButtonGroup = refs.constructor.toolbar.actions
-        self.actions.buttons[INFORMER].setChecked(True)
+        self.actions.buttons[JUNCTER].setChecked(True)
 
     @property
     def current(self) -> str:

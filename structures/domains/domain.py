@@ -119,7 +119,10 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return self.parent.parent.domains().index(self)
+            try:
+                return self.parent.parent.domains().index(self)
+            except IndexError:
+                return None
 
     @property
     def theta_s_multiple(self) -> int:

@@ -191,7 +191,7 @@ class SideViewPlotter(pg.PlotWidget):
 
             # create various pens
             black_pen = pg.mkPen(color=([0] * 3), width=0.5,)
-            strand_pen = pg.mkPen(color=strand.color, width=1.5)
+            strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # if the strand color is dark
             if sum(strand.color) < (255 * 3) / 2:
