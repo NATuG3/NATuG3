@@ -32,11 +32,6 @@ class Panel(QWidget):
 
         # set the initial filepath
         filetype_updated()
-        # create a font for the filepath
-        font = QFont()
-        font.setStretch(95)
-        # apply the font to the filepath
-        self.filepath.setFont(font)
 
         # hook the filepath changed click event
         def change_filepath_clicked(event):

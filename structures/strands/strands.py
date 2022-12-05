@@ -86,7 +86,7 @@ class Strands:
             dataset = []
             for index, strand in enumerate(self.strands):
                 # the three columns of the spreadsheet are name, sequence, and color
-                name = f"Strand # {index}"
+                name = f"Strand #{index}"
                 sequence = "".join(map(str, strand.sequence)).replace("None", "")
                 color = utils.rgb_to_hex(strand.color)
                 dataset.append(
@@ -99,21 +99,21 @@ class Strands:
 
             # compile the dataset into pd.DataFrame
             sequences = pd.DataFrame(
-                dataset, columns=["Name", "Sequence (3' to 5')", "Color"]
+                dataset, columns=["Name", "Sequence (5' to 3')", "Color"]
             )
 
-            # create an excel writer object
+            # create an Excel writer object
             writer = ExcelWriter(filepath, engine="openpyxl")
 
-            # export the dataframe to an excel sheet
-            sequences.to_excel(writer, sheet_name=self.name)
+            # export the dataframe to an Excel sheet
+            sequences.to_excel(writer, sheet_name=self.name, index=False)
 
             # adjust the widths of the various columns
             worksheet = writer.sheets[self.name]
-            worksheet.column_dimensions["A"].width = 10
-            worksheet.column_dimensions["B"].width = 20
-            worksheet.column_dimensions["C"].width = 40
-            worksheet.column_dimensions["D"].width = 14
+            worksheet.column_dimensions["A"].width = 15
+            worksheet.column_dimensions["B"].width = 50
+            worksheet.column_dimensions["C"].width = 15
+            worksheet.column_dimensions["D"].width = 15
 
             # Save the workbook
             workbook = writer.book

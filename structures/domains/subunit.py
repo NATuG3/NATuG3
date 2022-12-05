@@ -1,5 +1,4 @@
-from copy import deepcopy, copy
-from copy import deepcopy
+from copy import copy
 from typing import Iterable
 
 from helpers import inverse
