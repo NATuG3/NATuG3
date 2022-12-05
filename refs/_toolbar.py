@@ -12,7 +12,7 @@ class _Toolbar:
     @property
     def current(self) -> str:
         """
-        The current toolbar toolbar.
+        The current toolbar.
 
         Notes:
             See constants.modes for meanings of the various IDs.
@@ -22,7 +22,7 @@ class _Toolbar:
     @current.setter
     def current(self, id_: int):
         """
-        Change the current toolbar toolbar.
+        Change the current toolbar.
 
         Args:
             id_: The id of the toolbar to change to.
