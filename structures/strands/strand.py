@@ -284,7 +284,7 @@ class Strand:
             return False
         checker = domains[0]
         for domain in domains:
-            if domain != checker:
+            if domain is not checker:
                 return True
         return False
 

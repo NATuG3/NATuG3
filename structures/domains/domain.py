@@ -121,7 +121,7 @@ class Domain:
     @property
     def index(self) -> int | None:
         """
-        The index of the domai.
+        The index of the domain.
 
         This is in with respect to all other domains in the Domains container. If there is no grandparent Domains
         container, None is returned.
@@ -129,7 +129,7 @@ class Domain:
         Returns:
             int: The index of the domain.
         """
-        if self.parent is None:
+        if self.parent is None or self.parent.parent is None:
             return None
         else:
             try:

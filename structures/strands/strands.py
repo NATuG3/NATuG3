@@ -221,6 +221,9 @@ class Strands:
         ]
 
         # log basic info for debugging
+        logger.debug(
+            f"NEMid1.strand {str(NEMid1.strand is NEMid2.strand).replace('True', 'is').replace('False', 'is not')}"
+            f" NEMid2.strand")
         logger.debug(f"NEMid1.index={NEMid1.index}; NEMid2.index={NEMid2.index}")
         logger.debug(
             f"NEMid1.closed={NEMid1.strand.closed}; NEMid2.closed={NEMid2.strand.closed}"
@@ -238,8 +241,9 @@ class Strands:
             if strand.closed:
                 # crawl from the beginning of the strand to the junction site
                 new_strands[0].items.extend(strand.sliced(0, NEMid1.index))
-                # ensure that the last NEMid is the lefter NEMid of the junction site
-                new_strands[0].items.append(NEMid1)
+                # skip over all NEMids between NEMid 1's and NEMid 2's index
+                # and crawl from NEMid 2 to the end of the strand
+                new_strands[0].items.extend(strand.sliced(NEMid2.index, None))
                 # append all other NEMids to the other new strand
                 new_strands[1].items.extend(
                     [NEMid_ for NEMid_ in strand.items if NEMid_ not in new_strands[0]]
