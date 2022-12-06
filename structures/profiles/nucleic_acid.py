@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 
-@dataclass(slots=True, kw_only=True)
+@dataclass(kw_only=True)
 class NucleicAcidProfile:
     """
     A container for all geometrical parameters for a nucleic acid.
