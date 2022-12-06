@@ -41,9 +41,20 @@ class Strand:
         interdomain: Whether this strand spans multiple domains.
             Recursively checks all items in the strand to see if any items have unique domains
             from the other items.
+        cross_screen: Whether this strand wraps across the screen.
         highlighted (bool): Whether the strand is highlighted. This is merely a boolean, and the
             actual highlighting is done by the plotter.
         name: The user-set name of the strand. This appears when exporting, and is used as a title.
+
+    Methods:
+        append(item): Add an item to the right of the strand.
+        appendleft(item): Add an item to the left of the strand.
+        extend(items): Extend our items to the right with an iterable's items.
+        extendleft(items): Extend our items to the left with an iterable's items.
+        NEMids(): Obtain all NEMids in the strand, only.
+        nucleosides(): Obtain all nucleosides in the strand, only.
+        index(item): Determine the index of an item.
+        sliced(from, to): Return self.NEMids as a list.
     """
 
     nucleic_acid_profile: field(default=NucleicAcidProfile, repr=False)
@@ -54,18 +65,17 @@ class Strand:
     highlighted: bool = False
     parent: "Strands" = None
 
+    _thickness: ClassVar[int] = None
+    _NEMids: ClassVar[Tuple[NEMid] | None] = None
+    _nucleosides: ClassVar[Tuple[Nucleoside] | None] = None
+
     __cached: ClassVar[Tuple[str]] = (
         "up_strand",
         "down_strand",
         "interdomain",
+        "cross_screen",
         "nucleosides",
     )
-    __supported_types: ClassVar[tuple[Type]] = (NEMid, Nucleoside)
-
-    def __post_init__(self):
-        self._thickness: ClassVar[int] = None
-        self._NEMids: ClassVar[Tuple[NEMid] | None] = None
-        self._nucleosides: ClassVar[Tuple[Nucleoside] | None] = None
 
     @property
     def thickness(self) -> float:
@@ -248,6 +258,22 @@ class Strand:
         """Whether the strand is a down strand."""
         checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids()]
         return all(checks)
+
+    @cached_property
+    def cross_screen(self) -> bool:
+        """
+        Whether the strand wraps across the screen.
+
+        This is determined by checking to see if any active junctions are cross screen.
+
+        Returns:
+            True if the strand wraps across the screen, False otherwise.
+        """
+        junctions = filter(lambda NEMid_: NEMid_.junction, self.NEMids())
+        for junction in junctions:
+            if abs(junction.x_coord - junction.juncmate.x_coord) > 1:
+                return True
+        return False
 
     @cached_property
     def interdomain(self) -> bool:

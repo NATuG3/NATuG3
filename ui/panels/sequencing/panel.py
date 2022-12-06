@@ -53,7 +53,7 @@ class Panel(QWidget):
         self.export_sequences.clicked.connect(export_sequences_clicked)
 
     def reload(self):
-        """Set up the sequencing area"""
+        """Set up the sequencing area."""
         for button in self.strand_buttons:
             button.deleteLater()
         self.strand_buttons.clear()

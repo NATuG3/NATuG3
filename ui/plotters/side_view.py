@@ -290,18 +290,24 @@ class SideViewPlotter(pg.PlotWidget):
                 # do not plot the entire connector line going from the left to the
                 # right of the screen
                 for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
+                    # if the distance between this x coord and the next one is large then add a break in the connector.
+                    # Note that the "next x coord" to check against is typically the next on in the array, except
+                    # when we reach the end of the list, in which case it becomes the first one.
                     if point_index != len(coords) - 1:
-                        # if the distance between this x coord and the next one is large
-                        # then add a break in the connector
-                        if abs(x_coord - coords[point_index + 1][0]) > 1:
-                            # do not connect
-                            connect.append(0)
-                        else:
-                            connect.append(1)
-                            # connect
+                        next_x_coord = coords[point_index + 1][0]
                     else:
+                        next_x_coord = coords[0][0]
+
+                    # if the distance between this x coord and the next one is large then don't add a connection.
+                    # otherwise add a connection.
+                    if abs(x_coord - next_x_coord) > 1:
+                        # do not connect
+                        connect.append(0)
+                    else:
+                        # connect
                         connect.append(1)
 
+                # closed strands will have one extra item in the end so that they appear connected
                 if strand.closed:
                     connect.append(1)
 
