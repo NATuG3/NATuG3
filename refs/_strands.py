@@ -7,6 +7,7 @@ from structures.strands.strands import Strands
 
 class _Strands:
     filename = "saves/sequencing/restored.nano"
+    current: Strands
 
     def __init__(self):
         self.current = None

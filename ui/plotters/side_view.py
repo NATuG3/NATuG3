@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
 from typing import List, Tuple, Dict, Literal
@@ -159,10 +160,11 @@ class SideViewPlotter(pg.PlotWidget):
             self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
 
         # for i in <number of helical twists of the tallest domain>...
-        for i in range(0, ceil(self.height / self.nucleic_acid_profile.H) + 1):
-            self.plot_data.plotted_gridlines.append(
-                self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
-            )
+        with suppress(ZeroDivisionError):
+            for i in range(0, ceil(self.height / self.nucleic_acid_profile.H) + 1):
+                self.plot_data.plotted_gridlines.append(
+                    self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
+                )
 
         # add axis labels
         self.setLabel("bottom", text="Helical Domain")

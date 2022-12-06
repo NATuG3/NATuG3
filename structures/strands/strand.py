@@ -57,8 +57,8 @@ class Strand:
         sliced(from, to): Return self.NEMids as a list.
     """
 
-    nucleic_acid_profile: field(default=NucleicAcidProfile, repr=False)
-    items: Deque[Point] = field(default_factory=deque, repr=False)
+    nucleic_acid_profile: NucleicAcidProfile
+    items: Deque[Point]
     color: Tuple[int, int, int] = (0, 0, 0)
     auto_color: bool = True
     closed: bool = False
