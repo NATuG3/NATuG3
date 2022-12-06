@@ -38,6 +38,13 @@ class Panel(QWidget):
         logger.debug("Loaded nucleic acid settings tab of config panel.")
 
     def _signals(self):
+        def on_input_updated():
+            """Worker for when a widget is changed."""
+            settings = self.fetch_settings()
+            for attr, value in settings.__dict__.items():
+                setattr(refs.nucleic_acid.current, attr, value)
+            self.updated.emit(settings)
+
         for input in (
             self.D,
             self.H,
@@ -47,20 +54,17 @@ class Panel(QWidget):
             self.Z_b,
             self.Z_c,
             self.Z_s,
+            self.Z_mate,
             self.theta_b,
             self.theta_c,
             self.theta_s,
         ):
-            input.valueChanged.connect(lambda: self.updated.emit(self.fetch_settings()))
-
-        self.updated.connect(
-            lambda: setattr(refs.nucleic_acid, "current", self.fetch_settings())
-        )
+            input.valueChanged.connect(on_input_updated)
 
     def _profile_manager(self):
         """Set up nucleic_acid_profile manager."""
         self.profile_manager = ProfileManager(
-            refs.constructor,
+            self,
             self.fetch_settings,
             self.dump_settings,
             profiles=refs.nucleic_acid.profiles,
@@ -98,7 +102,7 @@ class Panel(QWidget):
             B=self.B.value(),
             Z_c=self.Z_c.value(),
             Z_s=self.Z_s.value(),
-            Z_mate = self.Z_mate.value(),
+            Z_mate=self.Z_mate.value(),
             theta_b=self.theta_b.value(),
             theta_c=self.theta_c.value(),
             theta_s=self.theta_s.value(),
