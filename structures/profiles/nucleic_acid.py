@@ -38,29 +38,15 @@ class NucleicAcidProfile:
         return (self.T * self.H) / self.B
 
     def __eq__(self, other: object) -> bool:
-        """Whether our nucleic_acid_profile is the same as theirs."""
-        if isinstance(other, type(self)):
-            if self.D != other.D:
-                return False
-            elif self.H != other.H:
-                return False
-            elif self.g != other.g:
-                return False
-            elif self.T != other.T:
-                return False
-            elif self.B != other.B:
-                return False
-            elif self.Z_c != other.Z_c:
-                return False
-            elif self.Z_s != other.Z_s:
-                return False
-            elif self.theta_b != other.theta_b:
-                return False
-            elif self.theta_c != other.theta_c:
-                return False
-            elif self.theta_s != other.theta_s:
-                return False
-            else:
-                return True
-        else:
+        """
+        Whether our nucleic_acid_profile is the same as theirs.
+
+        Checks all of our attributes against theirs.
+        """
+        if not isinstance(other, NucleicAcidProfile):
             return False
+
+        return all(
+            getattr(self, attr) == getattr(other, attr)
+            for attr in self.__dataclass_fields__
+        )

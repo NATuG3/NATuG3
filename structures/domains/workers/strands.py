@@ -7,7 +7,7 @@ from typing import List, Tuple
 import settings
 from constants.directions import *
 from helpers import inverse
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.strands import Strands
@@ -28,20 +28,18 @@ class DomainStrandWorker:
     cache_clearers = ("workers", "profiles")
 
     def __init__(
-            self, nucleic_acid_profile: NucleicAcidProfile, domains: "Domains"
+            self, domains: "Domains"
     ) -> None:
         """
         Initialize a side view generator object.
 
         Args:
             domains: The workers to compute sequencing for.
-            nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile to use.
         """
-        self.nucleic_acid_profile = nucleic_acid_profile
+        self.nucleic_acid_profile = domains.nucleic_acid_profile
         self.domains = domains
 
-    @cache
-    def compute(self) -> Strands:
+    def compute(self) -> List[Tuple[List[NEMid | Nucleoside], List[NEMid | Nucleoside]]]:
         """
         Compute all NEMid data.
 

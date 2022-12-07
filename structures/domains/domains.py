@@ -67,7 +67,7 @@ class Domains:
         self._subunit = Subunit(self.nucleic_acid_profile, domains, template=True, parent=self)
 
         # create a worker object for computing strands for workers
-        self.worker = DomainStrandWorker(self.nucleic_acid_profile, self)
+        self.worker = DomainStrandWorker(self)
         self._points = None
 
     @property

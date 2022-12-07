@@ -42,7 +42,9 @@ class Panel(QWidget):
             """Worker for when a widget is changed."""
             settings = self.fetch_settings()
             for attr, value in settings.__dict__.items():
-                setattr(refs.nucleic_acid.current, attr, value)
+                if getattr(settings, attr) != getattr(refs.nucleic_acid.current, attr):
+                    logger.info(f"Set nucleic acid settings {attr} to {getattr(settings, attr)}.")
+                    setattr(refs.nucleic_acid.current, attr, value)
             self.updated.emit(settings)
 
         for input in (
