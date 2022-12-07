@@ -117,8 +117,6 @@ class Strand:
             item: The item to add.
         """
         self.items.appendleft(item)
-        self._NEMids = None
-        self._nucleosides = None
 
     def extend(self, item: Iterable[Point]) -> None:
         """
@@ -128,8 +126,6 @@ class Strand:
             item: The iterable to extend with.
         """
         self.items.extend(item)
-        self._NEMids = None
-        self._nucleosides = None
 
     def extendleft(self, item: Iterable[Point]) -> None:
         """
@@ -139,26 +135,17 @@ class Strand:
             item: The iterable to extend with.
         """
         self.items.extendleft(item)
-        self._NEMids = None
-        self._nucleosides = None
 
     def NEMids(self) -> List[NEMid]:
         """
         Obtain all NEMids in the strand, only.
 
-        Works by recursively checking the type of items in self.items,
-        but the method is cached.
+        Works by recursively checking the type of items in self.items.
 
         Returns:
             List of all nucleosides in strand.items.
         """
-        if self._NEMids is None:
-            self._NEMids = tuple(
-                filter(lambda item: isinstance(item, NEMid), self.items)
-            )
-            return self._NEMids
-        else:
-            return self._NEMids
+        return tuple(filter(lambda item: isinstance(item, NEMid), self.items))
 
     def nucleosides(self):
         """
@@ -169,13 +156,7 @@ class Strand:
         Returns:
             List of all nucleosides in strand.items.
         """
-        if self._nucleosides is None:
-            self._nucleosides = tuple(
-                filter(lambda item: isinstance(item, Nucleoside), self.items)
-            )
-            return self._nucleosides
-        else:
-            return self._nucleosides
+        return tuple(filter(lambda item: isinstance(item, Nucleoside), self.items))
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
