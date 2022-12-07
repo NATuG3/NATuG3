@@ -77,7 +77,6 @@ class Domains:
         self.domains.cache_clear()
         self.subunits.cache_clear()
         self.points.cache_clear()
-        self.top_view.cache_clear()
         logger.info("Cleared the cache of a Domains object.")
 
     @property
@@ -233,7 +232,6 @@ class Domains:
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, converted_strands)
 
-    @cache
     def top_view(self) -> TopViewWorker:
         """
         Obtain a TopViewWorker object of all the domains. The top view worker object (which is located at
