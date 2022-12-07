@@ -81,7 +81,6 @@ class ProfileManager(QGroupBox):
         self._prettify()
         self._signals()
         self.update()
-        print(profiles)
 
     def listed(self) -> list[str]:
         """Obtain list of all profiles in nucleic_acid_profile chooser's list."""
