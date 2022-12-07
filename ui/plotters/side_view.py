@@ -167,8 +167,8 @@ class SideViewPlotter(pg.PlotWidget):
                 )
 
         # add axis labels
-        self.setLabel("bottom", text="Helical Domain")
-        self.setLabel("left", text="Helical Twists", units="nanometers")
+        self.setLabel("bottom", text="x", units="nanometers", unitPrefix="nm")
+        self.setLabel("left", text="z", units="nanometers", unitPrefix="nm")
 
     def _plot(self):
         self.plot_data.strands = self.strands
