@@ -244,10 +244,8 @@ class Strands:
                 # skip over all NEMids between NEMid 1's and NEMid 2's index
                 # and crawl from NEMid 2 to the end of the strand
                 new_strands[0].items.extend(strand.sliced(NEMid2.index, None))
-                # append all other NEMids to the other new strand
-                new_strands[1].items.extend(
-                    [NEMid_ for NEMid_ in strand.items if NEMid_ not in new_strands[0]]
-                )
+                # crawl from one junction site to the other for the other strand
+                new_strands[1].items.extend(strand.sliced(NEMid1.index, NEMid2.index))
 
                 new_strands[0].closed = True
                 new_strands[1].closed = True
