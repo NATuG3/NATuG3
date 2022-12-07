@@ -58,7 +58,7 @@ class Strand:
     """
 
     nucleic_acid_profile: NucleicAcidProfile
-    items: Deque[Point]
+    items: Deque[Point] = field(default_factory=deque)
     color: Tuple[int, int, int] = (0, 0, 0)
     auto_color: bool = True
     closed: bool = False
