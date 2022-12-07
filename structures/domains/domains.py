@@ -70,6 +70,16 @@ class Domains:
         self.worker = DomainStrandWorker(self)
         self._points = None
 
+    def clear_cache(self):
+        """
+        Clear the cache of all cached methods.
+        """
+        self.domains.cache_clear()
+        self.subunits.cache_clear()
+        self.points.cache_clear()
+        self.top_view.cache_clear()
+        logger.info("Cleared the cache of a Domains object.")
+
     @property
     def subunit(self) -> Subunit:
         """
@@ -88,11 +98,11 @@ class Domains:
         Args:
             new_subunit: The new template subunit.
         """
+        logger.info(f"Replacing the template subunit with {new_subunit}.")
         self._subunit = new_subunit
         for domain in self._subunit:
             domain.parent = self._subunit
-        self.domains.cache_clear()
-        self.subunits.cache_clear()
+        self.clear_cache()
 
     @property
     def count(self) -> int:
@@ -112,6 +122,9 @@ class Domains:
         Returns:
             List[Subunit]: Copies of the template subunit for all subunits except the first one.
             The first subunit in the returned list is a direct reference to the template subunit.
+
+        Notes:
+            This is a cached method. The cache is cleared when self.subunit is changed.
         """
         output = []
         for cycle in range(self.symmetry):
@@ -122,7 +135,7 @@ class Domains:
                 copied = self.subunit.copy()
                 copied.template = False
                 output.append(copied)
-
+        logger.debug(f"Fetched {len(output)} subunits.")
         return output
 
     @cache
@@ -132,6 +145,9 @@ class Domains:
 
         Returns:
             A list of all workers from all subunits.
+
+        Notes:
+            This is a cached method. The cache is cleared when the subunit is changed.
         """
         output = []
         for subunit in self.subunits():
@@ -148,8 +164,14 @@ class Domains:
                 domain.right_helix_joint = direction
                 direction = inverse(direction)
 
+        # set the proper indexes for all of the domains
+        for index, domain in enumerate(output):
+            output[index].index = index
+
+        logger.debug(f"Fetched {len(output)} domains.")
         return output
 
+    @cache
     def points(self) -> List[Tuple[List[Point], List[Point]]]:
         """
         All the points in all the domains before they are turned into Strand objects.
@@ -164,9 +186,13 @@ class Domains:
             This can be represented as:
             "AllDomains(Domain#0(up-strand, down-strand), Domain#1(up-strand, down-strand), ...)"
             Where up-strands and down-strands are lists of Point objects.
+
+        Notes:
+            This is a cached method. The cache is cleared when the subunit is changed.
         """
         if self._points is None:
             self._points = self.worker.compute()
+        logger.debug("Fetched points for domain")
         return self._points
 
     @cache
@@ -184,9 +210,7 @@ class Domains:
             A list of all strands from all workers.
 
         Notes:
-            - This is a cached method. That means that if you modify the returned strands, and then call this method
-                again, the same (modified) strands will be returned. To circumvent this, call
-                Domains.strands.cache_clear().
+            This is a cached method. The cache is cleared when the subunit is changed.
         """
         self._points = self.worker.compute()
 
@@ -205,9 +229,11 @@ class Domains:
                         color=settings.colors["sequencing"]["greys"][strand_direction],
                     )
                 )
+        logger.debug(f"Fetched {len(converted_strands)} strands.")
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, converted_strands)
 
+    @cache
     def top_view(self) -> TopViewWorker:
         """
         Obtain a TopViewWorker object of all the domains. The top view worker object (which is located at
@@ -220,4 +246,5 @@ class Domains:
         Notes:
             This function is not cached; however, top view computation is a fairly inexpensive process.
         """
+        logger.debug("Fetched a TopViewWorker object.")
         return TopViewWorker(self)
