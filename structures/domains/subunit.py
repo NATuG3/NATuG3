@@ -100,6 +100,8 @@ class Subunit:
         """
         if key == "template":
             try:
+                # force self.domains to be a tuple or list based off of whether this is a template
+                # subunit or not. Non template subunits should be fully immutable.
                 if value:  # if this is a template subunit
                     super().__setattr__("domains", tuple(self.domains))
                 else:  # if this is no longer a template subunit
@@ -107,9 +109,12 @@ class Subunit:
             except AttributeError:
                 super().__setattr__(key, value)
         else:
-            if (
-                self.template
-            ):  # if this is the template subunit then set the attr as normal
+            if self.template:
+                # if this is the template subunit then set the attr as normal
+                # but then also reset the parent's cache if the parent of this instance isn't None
+                if self.parent is not None:
+                    self.parent.clear_cache()
+                # then set the attr as normal
                 super().__setattr__(key, value)
             else:  # but if it isn't a template subunit then raise an error
                 raise ValueError("Nontemplate Subunits cannot be modified.")
