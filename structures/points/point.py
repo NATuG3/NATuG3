@@ -1,7 +1,12 @@
+import logging
 from dataclasses import dataclass
 from typing import Tuple, Type
 
+from constants.directions import DOWN, UP
 from helpers import inverse
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True, slots=True)
@@ -51,21 +56,26 @@ class Point:
         if self.strand is None or self.strand.closed:
             return None
         else:
-            # obtain our domain's index in respect to the entire Domains object
+            # create an easy reference to the entire domains list
+            domains = self.domain.parent.parent
+
+            # obtain the index of the domain that this point belongs to
             domain_index = self.domain.index
 
-            # the parent of a Domain is a Subunit
-            # the parent of a Subunit is a Domains
-            # Domains.points() returns all points in the structure
-            # [#0(up-strand, down_strand), #1(up-strand, down_strand), ...]
-            points: Type["Strands"] = self.domain.parent.parent.points()
+            # obtain a points array in the formate of
+            # [domain#0[up-strand, down-strand], domain#1[up-strand, down-strand], ...]
+            domain_points = domains.points()
 
-            # the other strand in the same domain as this point
-            # all_domains -> index of this domain -> opposite direction
-            other_strand = points[domain_index][inverse(self.direction)]
+            # fetch the other strand of the same helix as this point
+            if self.strand.up_strand:
+                other_strand = domain_points[domain_index][DOWN]
+            else:
+                other_strand = domain_points[domain_index][UP]
 
-            # obtain the matching point
-            return tuple(reversed(other_strand))[self.index]
+            # since the other strand is a different helix, we must reverse it to find the matching point
+            reversed_other_strand = tuple(reversed(other_strand))
+
+            return reversed_other_strand[self.index]
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
