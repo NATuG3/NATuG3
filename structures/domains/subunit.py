@@ -47,8 +47,8 @@ class Subunit:
             parent: The parent Domains object.
         """
         self.template = template  # must be the first property set
-        self.nucleic_acid_profile = nucleic_acid_profile
         self.parent = parent
+        self.nucleic_acid_profile = nucleic_acid_profile
         self.domains = domains
 
         # assign the parent of all the domains to us
@@ -112,7 +112,7 @@ class Subunit:
             if self.template:
                 # if this is the template subunit then set the attr as normal
                 # but then also reset the parent's cache if the parent of this instance isn't None
-                if self.parent is not None:
+                if key != "parent" and self.parent is not None:
                     self.parent.clear_cache()
                 # then set the attr as normal
                 super().__setattr__(key, value)
