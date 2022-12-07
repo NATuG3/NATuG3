@@ -42,6 +42,7 @@ class Domain:
         right_helix_joint_direction: int,
         count: int,
         parent: "Domains" = None,
+        index: int = None,
     ):
         """
         Initialize a Domain object.
@@ -53,6 +54,7 @@ class Domain:
             right_helix_joint_direction: The right helix joint's direction.
             count: Number of initial NEMids/strand to generate.
             parent (Subunit): The parent subunit. Defaults to None.
+            index (int): The index of this domain in its parent. Defaults to None.
         """
         # store the parent subunit
         self.parent = parent
@@ -69,6 +71,9 @@ class Domain:
 
         # store the number of initial NEMids/strand to generate
         self.count = count
+
+        # set the index of the domain
+        self.index = index
 
     @property
     def left_strand(self) -> Strand | None:
@@ -117,25 +122,6 @@ class Domain:
             if self.parent is not None:
                 self.parent.parent.domains.cache_clear()
                 self.parent.parent.subunits.cache_clear()
-
-    @property
-    def index(self) -> int | None:
-        """
-        The index of the domain.
-
-        This is in with respect to all other domains in the Domains container. If there is no grandparent Domains
-        container, None is returned.
-
-        Returns:
-            int: The index of the domain.
-        """
-        if self.parent is None or self.parent.parent is None:
-            return None
-        else:
-            try:
-                return self.parent.parent.domains().index(self)
-            except IndexError or ValueError:
-                raise NotImplementedError("This is a known bug that is currently being worked on.")
 
     @property
     def theta_s_multiple(self) -> int:
