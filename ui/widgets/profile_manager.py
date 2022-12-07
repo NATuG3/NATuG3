@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from types import FunctionType
 from typing import Iterable, Dict
 
@@ -15,6 +16,7 @@ logger = logging.getLogger(__name__)
 class ProfileManager(QGroupBox):
     """A nucleic_acid_profile managing widget."""
 
+    updated = pyqtSignal()
     profile_loaded = pyqtSignal(str, object)
     profile_deleted = pyqtSignal(str)
     profile_saved = pyqtSignal(str, object)
@@ -42,7 +44,7 @@ class ProfileManager(QGroupBox):
             warning: Warning shown when user attempts to load a nucleic_acid_profile.
             defaults: Profile names that are defaults. User cannot delete default profiles.
             default: The nucleic_acid_profile that is chosen by default.
-            profiles: All possible profiles.
+            profiles: The profiles in the profile manager.
 
         Notes:
             When a nucleic_acid_profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
@@ -66,6 +68,11 @@ class ProfileManager(QGroupBox):
         else:
             self.profiles = profiles
 
+        # clone all profiles in the array
+        # so that we don't accidentally mutate the originals
+        for name, profile in self.profiles.items():
+            self.profiles[name] = copy(profile)
+
         # add nucleic_acid_profile options to nucleic_acid_profile chooser
         for profile in self.profiles.keys():
             self.profile_chooser.addItem(profile)
@@ -74,8 +81,9 @@ class ProfileManager(QGroupBox):
         self._prettify()
         self._signals()
         self.update()
+        print(profiles)
 
-    def listed(self):
+    def listed(self) -> list[str]:
         """Obtain list of all profiles in nucleic_acid_profile chooser's list."""
         profiles = []
         for profile_index in range(self.profile_chooser.count()):
@@ -86,18 +94,18 @@ class ProfileManager(QGroupBox):
         """Obtain the index of a given nucleic_acid_profile in the nucleic_acid_profile chooser."""
         return self.listed().index(name)
 
-    def current_text(self):
+    def current_text(self) -> str:
         """Obtain current nucleic_acid_profile chooser text."""
         return self.profile_chooser.currentText()
 
     def approve(self) -> bool:
         """Present the user with a popup stating self.warning. If user approves request, return True."""
         if self.warning is not None:
-            if not helpers.confirm(self.warning):
+            if not helpers.confirm(self.parent(), "Profile Manager Warning", self.warning):
                 return False
         return True
 
-    def _prettify(self):
+    def _prettify(self) -> None:
         # prettify profiles buttons
         self.load_profile_button.setIcon(fetch_icon("download-outline"))
         self.save_profile_button.setIcon(fetch_icon("save-outline"))
@@ -110,23 +118,28 @@ class ProfileManager(QGroupBox):
         if self.default is not None:
             self.profile_chooser.setCurrentText(self.default)
 
-    def _signals(self):
+    def _signals(self) -> None:
         # hook main buttons
         self.save_profile_button.clicked.connect(lambda: self.save(self.current_text()))
-        self.delete_profile_button.clicked.connect(
-            lambda: self.delete(self.current_text())
-        )
+        self.delete_profile_button.clicked.connect(lambda: self.delete(self.current_text()))
         self.load_profile_button.clicked.connect(lambda: self.load(self.current_text()))
 
         # some buttons need to be locked right after they're clicked
         self.save_profile_button.clicked.connect(self.update)
+        self.delete_profile_button.clicked.connect(self.update)
         self.load_profile_button.clicked.connect(self.update)
 
         # other signals
         self.profile_chooser.currentTextChanged.connect(self.update)
         self.profile_chooser.currentIndexChanged.connect(self.update)
 
-    def save(self, name: str):
+        # hook all signals to the updated signal
+        self.profile_loaded.connect(self.updated.emit)
+        self.profile_deleted.connect(self.updated.emit)
+        self.profile_saved.connect(self.updated.emit)
+        self.chosen_changed.connect(self.updated.emit)
+
+    def save(self, name: str) -> None:
         if self.save_profile_button.toolTip() == "Overwrite Profile":
             if not self.approve():
                 return
@@ -142,12 +155,15 @@ class ProfileManager(QGroupBox):
             # add the new profiles to the profiles chooser
             self.profile_chooser.addItem(name)
 
+        # change current nucleic_acid_profile
+        self.current = name
+
         # emit signal
         self.profile_saved.emit(name, self.profiles[name])
 
         logger.info(f'Saved new nucleic_acid_profile "{name}"')
 
-    def delete(self, name: str):
+    def delete(self, name: str) -> None:
         if not self.approve():
             return
 
@@ -165,16 +181,18 @@ class ProfileManager(QGroupBox):
         # clear profiles chooser to make placeholder text visible
         self.profile_chooser.setCurrentText("")
 
+        # change current nucleic_acid_profile
+        self.current = self.default
+
         # emit signal
         self.profile_deleted.emit(name)
 
         # log that the profiles was deleted
         logger.info(f'Deleted profiles named "{name}"')
 
-    def load(self, name: str):
+    def load(self, name: str) -> None:
         if not self.approve():
             return
-
         # dump settings of profiles chooser's text
         self.dumper(self.profiles[name])
 
@@ -182,7 +200,7 @@ class ProfileManager(QGroupBox):
         self.profile_chooser.setCurrentText("")
 
         # change current nucleic_acid_profile
-        self.current = self.profiles[name]
+        self.current = name
 
         # emit signal
         self.profile_loaded.emit(name, self.profiles[name])
@@ -191,7 +209,7 @@ class ProfileManager(QGroupBox):
         logger.debug(f"Settings that were loaded: {self.profiles[name]}")
         logger.info(f'Loaded profiles named "{name}"')
 
-    def update(self):
+    def update(self) -> None:
         """Update the profile manager's buttons based on new inputs."""
         # the currently chosen/inputted profiles name
         chosen_profile_name = self.current_text()
@@ -199,7 +217,7 @@ class ProfileManager(QGroupBox):
         # if the chosen profiles name is in the saved profiles list:
         if chosen_profile_name in self.profiles:
             # if the chosen profiles name's settings match the current input box values
-            if self.current == self.extractor():
+            if self.profiles.get(self.current) == self.extractor():
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
                     f'Current settings match saved settings of profiles named "{chosen_profile_name}."'

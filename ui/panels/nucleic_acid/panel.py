@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from typing import Dict
 
 from PyQt6 import uic
@@ -41,10 +42,7 @@ class Panel(QWidget):
         def on_input_updated():
             """Worker for when a widget is changed."""
             settings = self.fetch_settings()
-            for attr, value in settings.__dict__.items():
-                if getattr(settings, attr) != getattr(refs.nucleic_acid.current, attr):
-                    logger.info(f"Set nucleic acid settings {attr} to {getattr(settings, attr)}.")
-                    setattr(refs.nucleic_acid.current, attr, value)
+            refs.nucleic_acid.current.update(settings)
             self.updated.emit(settings)
 
         for input in (
@@ -69,15 +67,22 @@ class Panel(QWidget):
             self,
             self.fetch_settings,
             self.dump_settings,
-            profiles=refs.nucleic_acid.profiles,
+            profiles=copy(refs.nucleic_acid.profiles),
             defaults=refs.nucleic_acid.defaults,
         )
-        self.profile_manager.profile_loaded.connect(self.updated.emit)
-        self.profile_manager.profile_saved.connect(
-            lambda: setattr(
-                refs.nucleic_acid, "profiles", self.profile_manager.profiles
-            )
-        )
+
+        def profile_updated():
+            """Slot for when a profile is loaded/saved."""
+            name = self.profile_manager.current
+            if len(name) > 0:
+                profile = self.profile_manager.profiles[name]
+                refs.nucleic_acid.current.update(profile)
+                self.updated.emit(profile)
+
+        # connect signals
+        self.profile_manager.updated.connect(profile_updated)
+
+        # add the profile manager to layout
         self.layout().insertWidget(0, self.profile_manager)
 
     def dump_settings(self, profile: NucleicAcidProfile) -> None:

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Type
 
 
 @dataclass(kw_only=True)
@@ -34,8 +35,20 @@ class NucleicAcidProfile:
     theta_s: float = 2.343
 
     @property
-    def Z_b(self):
+    def Z_b(self) -> float:
+        """The base height."""
         return (self.T * self.H) / self.B
+
+    def update(self, profile: Type["NucleicAcidProfile"]) -> None:
+        """
+        Update our nucleic_acid_profile with theirs.
+
+        Updates all of our attributes with the attributes of the given profile.
+
+        This is useful for updating profiles in-place.
+        """
+        for attr in self.__dataclass_fields__:
+            setattr(self, attr, getattr(profile, attr))
 
     def __eq__(self, other: object) -> bool:
         """
