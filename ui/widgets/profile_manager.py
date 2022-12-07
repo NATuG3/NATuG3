@@ -199,7 +199,7 @@ class ProfileManager(QGroupBox):
         # if the chosen profiles name is in the saved profiles list:
         if chosen_profile_name in self.profiles:
             # if the chosen profiles name's settings match the current input box values
-            if self.profiles[chosen_profile_name] == self.extractor():
+            if self.current == self.extractor():
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
                     f'Current settings match saved settings of profiles named "{chosen_profile_name}."'

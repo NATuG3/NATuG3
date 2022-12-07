@@ -72,6 +72,7 @@ class Panel(QWidget):
             profiles=refs.nucleic_acid.profiles,
             defaults=refs.nucleic_acid.defaults,
         )
+        self.profile_manager.profile_loaded.connect(self.updated.emit)
         self.profile_manager.profile_saved.connect(
             lambda: setattr(
                 refs.nucleic_acid, "profiles", self.profile_manager.profiles
