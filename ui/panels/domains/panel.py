@@ -119,8 +119,6 @@ class Panel(QWidget):
                 )
                 refs.domains.current.update(domains)
                 self._setup()
-                self.settings_refresh()
-                self.table_refresh()
                 refs.constructor.side_view.refresh()
                 refs.constructor.top_view.refresh()
                 logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)

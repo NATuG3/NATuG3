@@ -203,7 +203,6 @@ class Domains:
             antiparallel=antiparallel,
         )
 
-        print(domains)
         return domains
 
     def clear_cache(self):
