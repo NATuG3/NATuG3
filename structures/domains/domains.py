@@ -180,7 +180,7 @@ class Domains:
         m = [int(m) for m in data["m"].to_list()]
         count = [int(count) for count in data["Count"].to_list()]
         symmetry = int(data["Symmetry"].to_list()[0])
-        antiparallel = True if data["Symmetry"].to_list()[0] == "True" else False
+        antiparallel = True if data["Antiparallel"].to_list()[0].lower() == "true" else False
 
         # create a list of domains
         domains = []
@@ -289,9 +289,8 @@ class Domains:
         # if the workers instance is set to antiparallel then make the directions
         # of the workers alternate.
         if self.antiparallel:
-            # alternate from where we left off
-            # (which is the very right end of the subunit workers)
-            direction = self.subunit.domains[-1].right_helix_joint
+            # begin with UP
+            direction = UP
             for domain in output:
                 domain.left_helix_joint = direction
                 domain.right_helix_joint = direction

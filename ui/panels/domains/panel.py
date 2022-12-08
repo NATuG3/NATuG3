@@ -118,9 +118,7 @@ class Panel(QWidget):
                     nucleic_acid_profile=refs.nucleic_acid.current
                 )
                 refs.domains.current.update(domains)
-                self._setup()
-                refs.constructor.side_view.refresh()
-                refs.constructor.top_view.refresh()
+                refs.constructor.config.panel.update_graphs.click()
                 logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
 
         self.load_domains_button.clicked.connect(load_domains)
