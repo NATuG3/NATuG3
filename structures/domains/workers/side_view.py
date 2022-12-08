@@ -129,7 +129,7 @@ class DomainStrandWorker:
                     NEMid_ = NEMid(
                         x_coord=x_coord,
                         z_coord=z_coord,
-                        angle=angle % 360,
+                        angle=angle,
                         direction=strand_direction,
                         domain=domain,
                         strand=None,
@@ -137,8 +137,14 @@ class DomainStrandWorker:
 
                     # create a nucleoside object from the NEMid
                     nucleoside = NEMid_.to_nucleoside()
+
+                    # rotate the nucloeside half a base rotation
                     nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
+
+                    # add half a base height to the nucleoside's z coord
                     nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+
+                    # recompute the nucleoside's x coord
                     nucleoside.x_coord = Point.x_coord_from_angle(
                         nucleoside.angle, nucleoside.domain
                     )

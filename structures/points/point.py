@@ -40,6 +40,20 @@ class Point:
     # plotting attributes
     highlighted: bool = False
 
+    def __post_init__(self):
+        """
+        Post-init function.
+
+        1) Modulos the angle to be between 0 and 360 degrees.
+        2) Ensures that the direction is either UP or DOWN.
+        """
+        # modulos the angle to be between 0 and 360 degrees
+        self.angle %= 360
+
+        # ensures that the direction is either UP or DOWN
+        if self.direction not in (UP, DOWN):
+            raise ValueError("Direction must be UP or DOWN.")
+
     def matching(self) -> Type["Point"] | None:
         """
         Obtain the matching point.
@@ -91,6 +105,9 @@ class Point:
         Returns:
             The x coord.
         """
+        # modulo the angle between 0 and 360
+        angle %= 360
+
         theta_interior: float = domain.theta_m
         theta_exterior: float = 360 - theta_interior
 
@@ -103,6 +120,8 @@ class Point:
         # domain 1 lies between [1, 2] on the x axis
         # ect...
         x_coord += domain.index
+        if x_coord < 0:
+            print(angle, domain)
 
         return x_coord
 

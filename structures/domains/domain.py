@@ -164,3 +164,15 @@ class Domain:
         This is equivalent to self.theta_interior_multiple * self.theta_c.
         """
         return self.theta_interior_multiple * self.nucleic_acid_profile.theta_c
+
+    def __repr__(self):
+        """Return a string representation of the Domain object."""
+        return f"Domain(" \
+               f"{self.nucleic_acid_profile}, " \
+               f"{self.theta_interior_multiple}, " \
+               f"{self.left_helix_joint}, " \
+               f"{self.right_helix_joint}, " \
+               f"{self.count}, " \
+               f"{self.parent}, " \
+               f"{self.index}" \
+               f")"
