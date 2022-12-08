@@ -14,7 +14,7 @@ class _Domains:
     filename: str = f"saves/domains/restored.{settings.extension}"
     default: Domains = Domains(
         refs.nucleic_acid.current,
-        (
+        [
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
             Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
@@ -22,7 +22,14 @@ class _Domains:
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
             Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
-        ),
+            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
+            Domain(refs.nucleic_acid.current, 9, DOWN, UP, 60),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
+            Domain(refs.nucleic_acid.current, 9, DOWN, UP, 60),
+            Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
+            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
+        ],
         2,
         True,
     )
