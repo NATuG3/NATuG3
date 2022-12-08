@@ -30,7 +30,7 @@ class _Domains:
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
             Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
         ],
-        2,
+        1,
         True,
     )
 

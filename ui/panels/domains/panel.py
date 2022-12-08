@@ -139,6 +139,8 @@ class Panel(QWidget):
         self.config.setSizePolicy(config_size_policy)
 
     def settings_refresh(self):
+        logger.info("Refreshing domains settings.")
+
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
         current_domains = refs.domains.current
@@ -181,6 +183,8 @@ class Panel(QWidget):
 
     def table_refresh(self):
         """Refresh panel settings/domain table."""
+        logger.info("Refreshing domains table.")
+
         new_domains: Domains = Domains(
             refs.nucleic_acid.current,
             self.table.fetch_domains(),
