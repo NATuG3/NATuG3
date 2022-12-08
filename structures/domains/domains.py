@@ -85,8 +85,11 @@ class Domains:
             - count (number of points in the domain)
 
         Args:
-            mode: The file type to export to.
+            mode: The file type to export to. Must be in ("csv").
             filepath: The filepath to export to.
+
+        Raises:
+            ValueError: If the mode is not an allowed mode.
         """
         # extract all the data to references
         domains = self.domains()
@@ -101,23 +104,35 @@ class Domains:
             columns=["left_helix_joint", "right_helix_joint", "s", "m", "count"],
             data=[left_helix_joints, right_helix_joints, s, m, count],
         )
-        data.to_csv(filepath, index=False)
+
+        # based on the mode chosen by the user, export the data to a file
+        if mode == "csv":
+            data.to_csv(filepath, index=False)
+        else:  # if the mode is not one that is allowed, raise an error
+            raise ValueError(f"Invalid mode: {mode}")
 
     @classmethod
     def from_file(cls, mode: Literal["csv"], filepath: str, nucleic_acid_profile: NucleicAcidProfile):
         """
-        Import domains from a csv.
+        Import domains from a csv. Must be a csv in the format of self.to_file().
 
         Args:
-            mode: The type of file being imported.
+            mode: The type of file being imported. Must be in ("csv").
             filepath: The filepath to import from.
             nucleic_acid_profile: The nucleic acid configuration.
 
         Returns:
             A Domains object.
+
+        Raises:
+            ValueError: If the mode is not an allowed mode.
         """
-        # read the csv file
-        data = pd.read_csv(filepath)
+        # read the file based on the mode
+        if mode == "csv":
+            data = pd.read_csv(filepath)
+        # if the mode is not one that is allowed, raise an error
+        else:
+            raise ValueError(f"Invalid mode: {mode}")
 
         # extract the data
         left_helix_joints = data["left_helix_joint"].to_list()
