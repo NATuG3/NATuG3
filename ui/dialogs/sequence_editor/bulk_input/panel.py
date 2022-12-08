@@ -1,3 +1,4 @@
+import os
 import random
 
 from PyQt6 import uic
@@ -31,7 +32,10 @@ class BulkInputSequenceEditor(QWidget):
         def from_file_clicked():
             # obtain filepath from user
             filepath = QFileDialog.getOpenFileName(
-                self, "Choose File Location", filter="*.txt"
+                self,
+                "Choose File Location",
+                directory=f"{os.getcwd()}\\saves\\sequencing\\presets\\",
+                filter="*.txt",
             )[0]
             # open and load file
             with open(filepath) as file:

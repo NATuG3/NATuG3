@@ -37,9 +37,16 @@ class Panel(QWidget):
         def change_filepath_clicked(event):
             """Worker for when the change filepath button is clicked."""
             filetype = self.filetype.currentText().replace(".", "")
-            filepath = QFileDialog.getSavefileName(filter=f"*.{filetype}")[0]
-            self.filepath.setText(filepath)
-            super(QLineEdit, self.filepath).mouseReleaseEvent(event)
+            # by default open up the file explorer in the presets folder
+            filepath = QFileDialog.getSaveFileName(
+                self.parent(),
+                "Sequence Export Location Chooser",
+                f"{os.getcwd()}\\saves\\sequencing\\presets\\",
+                filter=f"*.{filetype}"
+            )[0]
+            if filepath is not None:
+                self.filepath.setText(filepath)
+                super(QLineEdit, self.filepath).mouseReleaseEvent(event)
 
         self.filepath.mouseReleaseEvent = change_filepath_clicked
 
