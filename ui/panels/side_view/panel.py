@@ -38,7 +38,6 @@ class Panel(QGroupBox):
     def refresh(self) -> None:
         """Update the current plot."""
         self.plot.strands = refs.strands.current
-        self.plot.nucleic_acid = refs.nucleic_acid.current
         self.plot.mode = refs.plot_mode.current
         self.plot.refresh()
 

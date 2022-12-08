@@ -35,8 +35,8 @@ class _Domains:
     )
 
     def __init__(self):
+        self.current = None
         self.load()
-        self.current = self.default
         atexit.register(self.dump)
 
     def load(self):
@@ -45,6 +45,7 @@ class _Domains:
                 self.current = pickle.load(filename)
             logger.info("Restored previous domain editor state.")
         except FileNotFoundError:
+            self.current = self.default
             logger.warning(
                 "Previous domain editor state save file not found. Defaults restored."
             )

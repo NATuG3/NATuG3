@@ -44,7 +44,6 @@ class Dockable(QDockWidget):
     def refresh(self):
         """Update the current plot."""
         self.plot.worker = refs.domains.current.top_view()
-        self.plot.profile = refs.nucleic_acid.current
         self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()
         self.plot.autoRange()
