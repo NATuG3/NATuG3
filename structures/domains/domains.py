@@ -87,6 +87,9 @@ class Domains:
 
         Raises:
             ValueError: If the domains object is not a Domains object.
+
+        Notes:
+            - This method clears the cache.
         """
         if not isinstance(domains, Domains):
             raise ValueError("Domains object must be a Domains object.")
@@ -95,6 +98,8 @@ class Domains:
         self.symmetry = domains.symmetry
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
+
+        self.clear_cache()
 
     def to_file(self, mode: Literal["csv"], filepath: str) -> None:
         """
