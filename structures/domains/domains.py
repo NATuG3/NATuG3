@@ -77,7 +77,6 @@ class Domains:
         self.domains.cache_clear()
         self.subunits.cache_clear()
         self.points.cache_clear()
-        logger.info("Cleared the cache of a Domains object.")
 
     @property
     def subunit(self) -> Subunit:
