@@ -68,9 +68,14 @@ class Strands:
         """Obtain the number of sequencing this Strands object contains."""
         return len(self.strands)
 
-    def export(self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True) -> None:
+    def to_file(self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True) -> None:
         """
         Export all sequences to a file.
+
+        Data exported includes the following for each strand:
+            - Strand name
+            - Sequence
+            - Sequence color
 
         Args:
             filepath: The filepath to export to. Do not include the file suffix.
