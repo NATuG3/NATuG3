@@ -6,7 +6,7 @@ import settings
 from constants.directions import DOWN, UP
 from helpers import inverse
 from structures.domains.subunit import Subunit
-from structures.domains.workers.strands import DomainStrandWorker
+from structures.domains.workers.side_view import DomainStrandWorker
 from structures.domains.workers.top_view import TopViewWorker
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
