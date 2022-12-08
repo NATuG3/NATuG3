@@ -1,10 +1,13 @@
 import logging
 from functools import cache
-from typing import List, Iterable, Tuple
+from typing import List, Iterable, Tuple, Literal
+
+import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
 from helpers import inverse
+from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.domains.workers.side_view import DomainStrandWorker
 from structures.domains.workers.top_view import TopViewWorker
@@ -69,6 +72,79 @@ class Domains:
         # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self)
         self._points = None
+
+    def to_file(self, mode: Literal["csv"], filepath: str) -> None:
+        """
+        Export all the current domains as a csv.
+
+        Creates a csv file from self.domains() with the following columns:
+            - left_helix_joint (if 0 then "UP" if 1 then "DOWN")
+            - right_helix_joint (if 0 then "UP" if 1 then "DOWN")
+            - s (which is based off left and right helix joints)
+            - m (interior angle multiple)
+            - count (number of points in the domain)
+
+        Args:
+            mode: The file type to export to.
+            filepath: The filepath to export to.
+        """
+        # extract all the data to references
+        domains = self.domains()
+        left_helix_joints = [domain.left_helix_joint for domain in domains]
+        right_helix_joints = [domain.right_helix_joint for domain in domains]
+        s = [domain.s for domain in domains]
+        m = [domain.m for domain in domains]
+        count = [domain.count for domain in domains]
+
+        # create a pandas dataframe with the columns above
+        data = pd.DataFrame(
+            columns=["left_helix_joint", "right_helix_joint", "s", "m", "count"],
+            data=[left_helix_joints, right_helix_joints, s, m, count],
+        )
+        data.to_csv(filepath, index=False)
+
+    @classmethod
+    def from_file(cls, mode: Literal["csv"], filepath: str, nucleic_acid_profile: NucleicAcidProfile):
+        """
+        Import domains from a csv.
+
+        Args:
+            mode: The type of file being imported.
+            filepath: The filepath to import from.
+            nucleic_acid_profile: The nucleic acid configuration.
+
+        Returns:
+            A Domains object.
+        """
+        # read the csv file
+        data = pd.read_csv(filepath)
+
+        # extract the data
+        left_helix_joints = data["left_helix_joint"].to_list()
+        right_helix_joints = data["right_helix_joint"].to_list()
+        m = data["m"].to_list()
+        count = data["count"].to_list()
+
+        # create a list of domains
+        domains = []
+        for i in range(len(left_helix_joints)):
+            domains.append(
+                Domain(
+                    nucleic_acid_profile,
+                    left_helix_joint_direction=left_helix_joints[i],
+                    right_helix_joint_direction=right_helix_joints[i],
+                    theta_m_multiple=m[i],
+                    count=count[i],
+                )
+            )
+
+        # create a Domains object
+        return cls(
+            nucleic_acid_profile=settings.nucleic_acid_profile,
+            domains=domains,
+            symmetry=settings.symmetry,
+            antiparallel=settings.antiparallel,
+        )
 
     def clear_cache(self):
         """

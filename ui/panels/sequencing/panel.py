@@ -48,7 +48,7 @@ class Panel(QWidget):
             """Worker for when the export sequences button is clicked."""
             filepath = self.filepath.text()[:self.filepath.text().find(".")]
             mode = self.filetype.currentText().replace(".", "")
-            refs.strands.current.export(filepath, mode)
+            refs.strands.current.to_file(filepath, mode)
 
         self.export_sequences.clicked.connect(export_sequences_clicked)
 
