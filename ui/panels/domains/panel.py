@@ -121,16 +121,18 @@ class Panel(QWidget):
                 filter="*csv",
             )[0]
             if len(filepath) > 0:
-                domains = Domains.from_file(
-                    mode="csv",
-                    filepath=filepath.replace(".csv", ""),
-                    nucleic_acid_profile=refs.nucleic_acid.current
-                )
-                refs.domains.current.update(domains)
-                self._setup()
-                QApplication.processEvents()
-                refs.constructor.config.panel.update_graphs.click()
-                logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
+                def loader():
+                    domains = Domains.from_file(
+                        mode="csv",
+                        filepath=filepath.replace(".csv", ""),
+                        nucleic_acid_profile=refs.nucleic_acid.current
+                    )
+                    refs.domains.current.update(domains)
+                    self._setup()
+                    QApplication.processEvents()
+                    refs.constructor.config.panel.update_graphs.click()
+                    logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
+                self.updated.emit(loader)
 
         self.load_domains_button.clicked.connect(load_domains)
 
