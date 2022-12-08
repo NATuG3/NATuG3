@@ -1,5 +1,6 @@
 import logging
 from copy import copy
+from functools import partial
 from typing import Dict
 
 from PyQt6 import uic
@@ -14,9 +15,14 @@ logger = logging.getLogger(__name__)
 
 
 class Panel(QWidget):
-    """Nucleic Acid Config Tab."""
+    """
+    Nucleic Acid Config Tab.
 
-    updated = pyqtSignal(NucleicAcidProfile)
+    Signals:
+        updated: Emitted when a setting is changed. Sends a function to be called.
+    """
+
+    updated = pyqtSignal(object)
 
     def __init__(self, parent, profiles: Dict[str, NucleicAcidProfile]) -> None:
         super().__init__(parent)
@@ -41,9 +47,7 @@ class Panel(QWidget):
     def _signals(self):
         def on_input_updated():
             """Worker for when a widget is changed."""
-            settings = self.fetch_settings()
-            refs.nucleic_acid.current.update(settings)
-            self.updated.emit(settings)
+            self.updated.emit(partial(refs.nucleic_acid.current.update, self.fetch_settings()))
 
         for input in (
             self.D,
@@ -76,8 +80,7 @@ class Panel(QWidget):
             name = self.profile_manager.current
             if len(name) > 0:
                 profile = self.profile_manager.profiles[name]
-                refs.nucleic_acid.current.update(profile)
-                self.updated.emit(profile)
+                self.updated.emit(partial(refs.nucleic_acid.current.update, profile))
 
         # connect signals
         self.profile_manager.updated.connect(profile_updated)

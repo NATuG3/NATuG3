@@ -20,9 +20,15 @@ logger = logging.getLogger(__name__)
 
 
 class Panel(QWidget):
-    """Nucleic Acid Config Tab."""
+    """
+    Nucleic Acid Config Tab.
 
-    updated = pyqtSignal()
+    Signals:
+        updated: Emitted when the panel is updated. Emits a function which would do the proper updating. No updating is
+            actually done in this class, rather it is someone else's job to call that function.
+    """
+
+    updated = pyqtSignal(object)
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
@@ -67,28 +73,31 @@ class Panel(QWidget):
 
         # when helix joint buttons are clicked refresh the table
         # so that the switch values (-1, 0, 1) get updated
-        self.table.helix_joint_updated.connect(self.table_refresh)
+        self.table.helix_joint_updated.connect(partial(self.updated.emit, self.table_refresh))
 
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
 
         # table update event hooking
         # when the force table update button is clicked
-        self.update_table_button.clicked.connect(self.table_refresh)
-        self.update_table_button.clicked.connect(self.settings_refresh)
-        self.update_table_button.clicked.connect(self.updated.emit)
+        def updated_worker():
+            self.table_refresh()
+            self.settings_refresh()
+        self.update_table_button.clicked.connect(partial(self.updated.emit, updated_worker))
+
+        def updated_table_item():
+            self.settings_refresh()
+            self.table_refresh()
+            self.settings_refresh()
         # when the table itself is updated
-        self.table.cell_widget_updated.connect(self.settings_refresh)
-        self.table.cell_widget_updated.connect(self.table_refresh)
-        self.table.cell_widget_updated.connect(self.settings_refresh)
-        self.table.cell_widget_updated.connect(self.updated.emit)
+        self.table.cell_widget_updated.connect(partial(self.updated.emit, updated_table_item))
+
         # reset the checked button when a helix joint is updated
         # because the user has opted out
         self.table.helix_joint_updated.connect(
             lambda: self.auto_antiparallel.setChecked(False)
         )
-        self.auto_antiparallel.stateChanged.connect(self.table_refresh)
-        self.auto_antiparallel.stateChanged.connect(self.updated.emit)
+        self.auto_antiparallel.stateChanged.connect(partial(self.updated.emit, self.table_refresh))
 
         def save_domains():
             """Save domains to file."""

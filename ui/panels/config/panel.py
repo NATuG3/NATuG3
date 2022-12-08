@@ -65,7 +65,7 @@ class Panel(QWidget):
     def _signals(self):
         """Setup signals."""
 
-        def warn_and_refresh(top_view, side_view):
+        def warn_and_refresh(top_view, side_view, function):
             """Warn user if there are changes that will be lost and then update plots."""
             global dialog
             # determine if there are any sequencing that the user has made
@@ -73,7 +73,7 @@ class Panel(QWidget):
             for strand in refs.strands.current.strands:
                 if strand.interdomain:
                     if (dialog is None) or (not dialog.isVisible()):
-                        dialog = RefreshConfirmer(refs.constructor)
+                        dialog = RefreshConfirmer(refs.constructor, function)
                         dialog.show()
                     elif (dialog is not None) and dialog.isVisible():
                         logger.info(
@@ -82,6 +82,7 @@ class Panel(QWidget):
                         )
                     return
 
+            function()
             if side_view:
                 refs.strands.recompute()
                 refs.constructor.side_view.refresh()
@@ -90,22 +91,16 @@ class Panel(QWidget):
 
         self.update_graphs.clicked.connect(lambda: warn_and_refresh(True, True))
 
-        def auto_plot_updater():
-            """Automatically update plots if auto-updating is enabled."""
-            if not self.auto_updating_plots:
-                self.auto_updating_plots = True
+        def tab_updated(function):
+            """Worker for when a tab is updated and wants to call a function"""
+            warn_and_refresh(
+                self.auto_update_top_view.isChecked(),
+                self.auto_update_side_view.isChecked(),
+                function
+            )
 
-                def perform_update():
-                    warn_and_refresh(
-                        self.auto_update_top_view.isChecked(),
-                        self.auto_update_side_view.isChecked(),
-                    )
-                    self.auto_updating_plots = False
-
-                QTimer.singleShot(200, perform_update)
-
-        self.tabs.domains.updated.connect(auto_plot_updater)
-        self.tabs.nucleic_acid.updated.connect(auto_plot_updater)
+        self.tabs.domains.updated.connect(tab_updated)
+        self.tabs.nucleic_acid.updated.connect(tab_updated)
 
         def tab_changed(index: int):
             """Update the plotting mode based on the currently opened tab."""
@@ -136,9 +131,17 @@ class Panel(QWidget):
 
 
 class RefreshConfirmer(QDialog):
-    def __init__(self, parent):
+    def __init__(self, parent, function):
+        """
+        Initialize the refresh confirmer dialog.
+
+        Args:
+            parent: The parent widget.
+            function: A function to be called if a non-cancel button is pressed.
+        """
         super().__init__(parent)
         uic.loadUi("ui/panels/config/refresh_confirmer.ui", self)
+        self.function = function
         self._prettify()
         self._fileselector()
         self._buttons()
@@ -185,12 +188,14 @@ class RefreshConfirmer(QDialog):
         self.cancel.clicked.connect(self.close)
 
         # close popup button
+        self.refresh.clicked.connect(self.function)
         self.refresh.clicked.connect(self.close)
         self.refresh.clicked.connect(refs.strands.recompute)
         self.refresh.clicked.connect(refs.constructor.side_view.refresh)
         self.refresh.clicked.connect(refs.constructor.top_view.refresh)
 
         # save and refresh button
+        self.save_and_refresh.clicked.connect(self.function)
         self.save_and_refresh.clicked.connect(self.close)
         self.save_and_refresh.clicked.connect(
             lambda: refs.saver.save.worker(self.default_path)
