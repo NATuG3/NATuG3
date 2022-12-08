@@ -39,6 +39,10 @@ class Panel(QWidget):
         self._signals()
         self._prettify()
 
+        # run an initial refresh
+        self.table_refresh()
+        self.settings_refresh()
+
         logger.info("Loaded domains tab of config panel.")
 
     def _setup(self):
@@ -47,8 +51,6 @@ class Panel(QWidget):
         self.symmetry.setValue(refs.domains.current.symmetry)
         self.total_count.setValue(refs.domains.current.count)
         self.table.dump_domains(refs.domains.current)
-        self.table_refresh()
-        self.settings_refresh()
 
     def _signals(self):
         """Set up panel signals."""
@@ -120,7 +122,6 @@ class Panel(QWidget):
                 QApplication.processEvents()
                 refs.constructor.config.panel.update_graphs.click()
                 logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
-                self.updated.emit()
 
         self.load_domains_button.clicked.connect(load_domains)
 
