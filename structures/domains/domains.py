@@ -41,6 +41,9 @@ class Domains:
         top_view()
         workers()
         subunits()
+
+    Todo:
+        - Add a method to update the Domains class in place.
     """
 
     def __init__(
@@ -83,31 +86,45 @@ class Domains:
             - s (which is based off left and right helix joints)
             - m (interior angle multiple)
             - count (number of points in the domain)
+            - symmetry (the symmetry type)
+            - antiparallel (whether the domains are antiparallel)
 
         Args:
             mode: The file type to export to. Must be in ("csv").
             filepath: The filepath to export to.
 
         Raises:
-            ValueError: If the mode is not an allowed mode.
+            ValueError: If the mode is not an allowed mode or if the filepath contains an extension.
         """
+        if "." in filepath:
+            raise ValueError("Filepath cannot contain an extension.")
+
         # extract all the data to references
         domains = self.domains()
         left_helix_joints = [domain.left_helix_joint for domain in domains]
         right_helix_joints = [domain.right_helix_joint for domain in domains]
-        s = [domain.s for domain in domains]
-        m = [domain.m for domain in domains]
+        s = [domain.theta_s_multiple for domain in domains]
+        m = [domain.theta_interior_multiple for domain in domains]
+        symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
+        antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
         count = [domain.count for domain in domains]
 
         # create a pandas dataframe with the columns above
         data = pd.DataFrame(
-            columns=["left_helix_joint", "right_helix_joint", "s", "m", "count"],
-            data=[left_helix_joints, right_helix_joints, s, m, count],
+            {
+                "s": s,
+                "m": m,
+                "Left Helix Joints": left_helix_joints,
+                "Right Helix Joints": right_helix_joints,
+                "Count": count,
+                "Symmetry": symmetry,
+                "Antiparallel": antiparallel
+            },
         )
 
         # based on the mode chosen by the user, export the data to a file
         if mode == "csv":
-            data.to_csv(filepath, index=False)
+            data.to_csv(f"{filepath}.csv", index=False)
         else:  # if the mode is not one that is allowed, raise an error
             raise ValueError(f"Invalid mode: {mode}")
 
@@ -125,20 +142,25 @@ class Domains:
             A Domains object.
 
         Raises:
-            ValueError: If the mode is not an allowed mode.
+            ValueError: If the mode is not an allowed mode or if filepath contains an extension.
         """
+        if "." in filepath:
+            raise ValueError("Filepath cannot contain an extension.")
+
         # read the file based on the mode
         if mode == "csv":
-            data = pd.read_csv(filepath)
+            data = pd.read_csv(f"{filepath}.csv")
         # if the mode is not one that is allowed, raise an error
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
         # extract the data
-        left_helix_joints = data["left_helix_joint"].to_list()
-        right_helix_joints = data["right_helix_joint"].to_list()
-        m = data["m"].to_list()
-        count = data["count"].to_list()
+        left_helix_joints = [UP if direction == "UP" else DOWN for direction in data["Left Helix Joints"].to_list()]
+        right_helix_joints = [UP if direction == "UP" else DOWN for direction in data["Right Helix Joints"].to_list()]
+        m = [int(m) for m in data["m"].to_list()]
+        count = [int(count) for count in data["Count"].to_list()]
+        symmetry = True if data["Symmetry"].to_list()[0] == "True" else False
+        antiparallel = int(data["Antiparallel"].to_list()[0])
 
         # create a list of domains
         domains = []
@@ -155,10 +177,10 @@ class Domains:
 
         # create a Domains object
         return cls(
-            nucleic_acid_profile=settings.nucleic_acid_profile,
+            nucleic_acid_profile=nucleic_acid_profile,
             domains=domains,
-            symmetry=settings.symmetry,
-            antiparallel=settings.antiparallel,
+            symmetry=symmetry,
+            antiparallel=antiparallel,
         )
 
     def clear_cache(self):
@@ -336,3 +358,11 @@ class Domains:
         """
         logger.debug("Fetched a TopViewWorker object.")
         return TopViewWorker(self)
+
+    def __repr__(self) -> str:
+        """
+        String representation of the Domains object.
+
+        Returns the template subunit, symmetry, and antiparallel status.
+        """
+        return f"Domains(subunit={self.subunit}, symmetry={self.symmetry}, antiparallel={self.antiparallel})"

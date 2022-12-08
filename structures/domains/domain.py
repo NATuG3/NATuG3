@@ -168,11 +168,9 @@ class Domain:
     def __repr__(self):
         """Return a string representation of the Domain object."""
         return f"Domain(" \
-               f"{self.nucleic_acid_profile}, " \
-               f"{self.theta_interior_multiple}, " \
-               f"{self.left_helix_joint}, " \
-               f"{self.right_helix_joint}, " \
-               f"{self.count}, " \
-               f"{self.parent}, " \
-               f"{self.index}" \
+               f"m={self.theta_interior_multiple}, " \
+               f"left_joint={self.left_helix_joint}, " \
+               f"right_joint={self.right_helix_joint}, " \
+               f"count={self.count}, " \
+               f"index={self.index}" \
                f")"
