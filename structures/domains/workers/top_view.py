@@ -1,5 +1,8 @@
 import math
 from typing import List
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class TopViewWorker:
@@ -65,6 +68,8 @@ class TopViewWorker:
             self.v_coords.append(
                 self.v_coords[-1] + self.nucleic_acid_profile.D * math.sin(angle_delta)
             )
+
+        logger.debug("Performed top view computation.")
 
     def __repr__(self) -> str:
         """Return a string representation of the TopViewWorker object."""
