@@ -1,6 +1,6 @@
 import logging
 from functools import cache
-from typing import List, Iterable, Tuple, Literal
+from typing import List, Iterable, Tuple, Literal, Type
 
 import pandas as pd
 
@@ -49,7 +49,7 @@ class Domains:
     def __init__(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
-        domains: Iterable["Domain"],
+        domains: List["Domain"],
         symmetry: int,
         antiparallel: bool = False,
     ) -> None:
@@ -76,6 +76,26 @@ class Domains:
         self.worker = DomainStrandWorker(self)
         self._points = None
 
+    def update(self, domains: Type["Domains"]) -> None:
+        """
+        Update the domains object in place.
+
+        Sets all of our attributes with the attributes of a different domains object.
+
+        Args:
+            domains: The domains object to update with.
+
+        Raises:
+            ValueError: If the domains object is not a Domains object.
+        """
+        if not isinstance(domains, Domains):
+            raise ValueError("Domains object must be a Domains object.")
+
+        self.nucleic_acid_profile = domains.nucleic_acid_profile
+        self.symmetry = domains.symmetry
+        self.antiparallel = domains.antiparallel
+        self.subunit = domains.subunit
+
     def to_file(self, mode: Literal["csv"], filepath: str) -> None:
         """
         Export all the current domains as a csv.
@@ -100,9 +120,9 @@ class Domains:
             raise ValueError("Filepath cannot contain an extension.")
 
         # extract all the data to references
-        domains = self.domains()
-        left_helix_joints = [domain.left_helix_joint for domain in domains]
-        right_helix_joints = [domain.right_helix_joint for domain in domains]
+        domains = self.subunit.domains
+        left_helix_joints = ["UP" if domain.left_helix_joint == UP else "DOWN" for domain in domains]
+        right_helix_joints = ["UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains]
         s = [domain.theta_s_multiple for domain in domains]
         m = [domain.theta_interior_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
@@ -159,8 +179,8 @@ class Domains:
         right_helix_joints = [UP if direction == "UP" else DOWN for direction in data["Right Helix Joints"].to_list()]
         m = [int(m) for m in data["m"].to_list()]
         count = [int(count) for count in data["Count"].to_list()]
-        symmetry = True if data["Symmetry"].to_list()[0] == "True" else False
-        antiparallel = int(data["Antiparallel"].to_list()[0])
+        symmetry = int(data["Symmetry"].to_list()[0])
+        antiparallel = True if data["Symmetry"].to_list()[0] == "True" else False
 
         # create a list of domains
         domains = []
@@ -176,12 +196,15 @@ class Domains:
             )
 
         # create a Domains object
-        return cls(
+        domains = cls(
             nucleic_acid_profile=nucleic_acid_profile,
             domains=domains,
             symmetry=symmetry,
             antiparallel=antiparallel,
         )
+
+        print(domains)
+        return domains
 
     def clear_cache(self):
         """
@@ -211,7 +234,7 @@ class Domains:
         """
         logger.info(f"Replacing the template subunit with {new_subunit}.")
         self._subunit = new_subunit
-        for domain in self._subunit:
+        for domain in self._subunit.domains:
             domain.parent = self._subunit
         self.clear_cache()
 

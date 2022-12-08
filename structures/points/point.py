@@ -120,8 +120,6 @@ class Point:
         # domain 1 lies between [1, 2] on the x axis
         # ect...
         x_coord += domain.index
-        if x_coord < 0:
-            print(angle, domain)
 
         return x_coord
 

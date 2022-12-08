@@ -1,11 +1,12 @@
 import logging
+import os
 from functools import partial
 
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
-    QSizePolicy,
+    QSizePolicy, QFileDialog,
 )
 
 import helpers
@@ -31,10 +32,8 @@ class Panel(QWidget):
         self.table = Table(self, refs.nucleic_acid.current)
         self.layout().addWidget(self.table)
 
-        # set initial values of domain table config widgets
-        self.subunit_count.setValue(refs.domains.current.subunit.count)
-        self.symmetry.setValue(refs.domains.current.symmetry)
-        self.total_count.setValue(refs.domains.current.count)
+        # set initial values
+        self._setup()
 
         # run setup functions
         self._signals()
@@ -46,14 +45,23 @@ class Panel(QWidget):
 
         logger.info("Loaded domains tab of config panel.")
 
+    def _setup(self):
+        """Fill boxes and table with the current values."""
+        self.subunit_count.setValue(refs.domains.current.subunit.count)
+        self.symmetry.setValue(refs.domains.current.symmetry)
+        self.total_count.setValue(refs.domains.current.count)
+        self.table.dump_domains(refs.domains.current)
+
     def _signals(self):
         """Set up panel signals."""
 
         def update_total_domain_box():
+            """Update the total domain count box."""
             self.total_count.setValue(
                 self.symmetry.value() * self.subunit_count.value()
             )
 
+        # when domain panel settings are updated call the above worker
         self.symmetry.valueChanged.connect(update_total_domain_box)
         self.subunit_count.valueChanged.connect(update_total_domain_box)
 
@@ -64,27 +72,67 @@ class Panel(QWidget):
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
 
-        # updated event linking
-        self.table.cell_widget_updated.connect(self.settings_refresh)
-        self.update_table.clicked.connect(self.table_refresh)
-        self.update_table.clicked.connect(self.settings_refresh)
-        self.update_table.clicked.connect(self.updated.emit)
-
+        # table update event hooking
+        # when the force table update button is clicked
+        self.update_table_button.clicked.connect(self.table_refresh)
+        self.update_table_button.clicked.connect(self.settings_refresh)
+        self.update_table_button.clicked.connect(self.updated.emit)
+        # when the table itself is updated
         self.table.cell_widget_updated.connect(self.settings_refresh)
         self.table.cell_widget_updated.connect(self.table_refresh)
         self.table.cell_widget_updated.connect(self.settings_refresh)
         self.table.cell_widget_updated.connect(self.updated.emit)
-
+        # reset the checked button when a helix joint is updated
+        # because the user has opted out
         self.table.helix_joint_updated.connect(
             lambda: self.auto_antiparallel.setChecked(False)
         )
         self.auto_antiparallel.stateChanged.connect(self.table_refresh)
         self.auto_antiparallel.stateChanged.connect(self.updated.emit)
 
+        def save_domains():
+            """Save domains to file."""
+            filepath = QFileDialog.getSaveFileName(
+                parent=self,
+                caption="Domains Save File Location Chooser",
+                filter="*csv",
+            )[0]
+            if len(filepath) > 0:
+                logger.info(f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}")
+                refs.domains.current.to_file(mode="csv", filepath=filepath.replace(".csv", ""))
+
+        self.save_domains_button.clicked.connect(save_domains)
+
+        def load_domains():
+            """Load domains from file."""
+            filepath = QFileDialog.getOpenFileName(
+                parent=self,
+                caption="Domains Import File Location Chooser",
+                directory=f"{os.getcwd()}\\saves\\domains\\presets",
+                filter="*csv",
+            )[0]
+            if len(filepath) > 0:
+                domains = Domains.from_file(
+                    mode="csv",
+                    filepath=filepath.replace(".csv", ""),
+                    nucleic_acid_profile=refs.nucleic_acid.current
+                )
+                refs.domains.current.update(domains)
+                self._setup()
+                self.settings_refresh()
+                self.table_refresh()
+                refs.constructor.side_view.refresh()
+                refs.constructor.top_view.refresh()
+                logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
+
+        self.load_domains_button.clicked.connect(load_domains)
+
     def _prettify(self):
         """Set up styles of panel."""
-        # set reload table widget
-        self.update_table.setIcon(fetch_icon("checkmark-outline"))
+        # set panel widget buttons
+        self.update_table_button.setIcon(fetch_icon("checkmark-outline"))
+        self.load_domains_button.setIcon(fetch_icon("download-outline"))
+        self.save_domains_button.setIcon(fetch_icon("save-outline"))
 
         # set scaling settings for config and table
         config_size_policy = QSizePolicy()
@@ -159,13 +207,13 @@ class Panel(QWidget):
                 )
                 new_domains.subunit.count = self.subunit_count.value()
                 new_domains.symmetry = self.symmetry.value()
-                self.update_table.setStyleSheet(
+                self.update_table_button.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
                 QTimer.singleShot(
                     600,
                     partial(
-                        self.update_table.setStyleSheet, "background-color: light grey"
+                        self.update_table_button.setStyleSheet, "background-color: light grey"
                     ),
                 )
         else:

@@ -44,7 +44,7 @@ class Panel(QWidget):
                 f"{os.getcwd()}\\saves\\sequencing\\presets\\",
                 filter=f"*.{filetype}"
             )[0]
-            if filepath is not None:
+            if len(filepath) > 0:
                 self.filepath.setText(filepath)
                 super(QLineEdit, self.filepath).mouseReleaseEvent(event)
 

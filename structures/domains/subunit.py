@@ -1,5 +1,5 @@
 from copy import copy
-from typing import Iterable
+from typing import Iterable, List
 
 from helpers import inverse
 from structures.profiles import NucleicAcidProfile
@@ -31,7 +31,7 @@ class Subunit:
     def __init__(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
-        domains: Iterable["Domain"],
+        domains: List["Domain"],
         template: bool = False,
         parent: "Domains" = None,
     ) -> None:
@@ -183,3 +183,12 @@ class Subunit:
                     )
                 )
                 i += 1
+
+    def __repr__(self) -> str:
+        """
+        Obtain a string representation of the subunit.
+
+        Returns:
+            A string representation of the subunit.
+        """
+        return f"Subunit({self.domains})"
