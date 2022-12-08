@@ -6,7 +6,7 @@ from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
-    QSizePolicy, QFileDialog,
+    QSizePolicy, QFileDialog, QApplication,
 )
 
 import helpers
@@ -119,6 +119,7 @@ class Panel(QWidget):
                 )
                 refs.domains.current.update(domains)
                 self._setup()
+                QApplication.processEvents()
                 refs.constructor.config.panel.update_graphs.click()
                 logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
 
