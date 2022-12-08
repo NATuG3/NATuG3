@@ -59,7 +59,7 @@ class Panel(QWidget):
             self.theta_c,
             self.theta_s,
         ):
-            input.valueChanged.connect(on_input_updated)
+            input.editingFinished.connect(on_input_updated)
 
     def _profile_manager(self):
         """Set up nucleic_acid_profile manager."""
