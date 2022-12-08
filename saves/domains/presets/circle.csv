@@ -1,8 +1,15 @@
 s,m,Left Helix Joints,Right Helix Joints,Count,Symmetry,Antiparallel
-0,9,UP,UP,60,2.0,True
+0,9,UP,UP,60,1.0,True
 0,9,DOWN,DOWN,60,,
 0,9,UP,UP,60,,
 0,9,DOWN,DOWN,60,,
 0,9,UP,UP,60,,
 0,9,DOWN,DOWN,60,,
 0,9,UP,UP,60,,
+0,9,DOWN,DOWN,60,,
+0,9,UP,UP,60,,
+0,9,DOWN,DOWN,60,,
+0,9,UP,UP,60,,
+0,9,DOWN,DOWN,60,,
+0,9,UP,UP,60,,
+0,9,DOWN,DOWN,60,,

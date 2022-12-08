@@ -180,7 +180,7 @@ class Domains:
         m = [int(m) for m in data["m"].to_list()]
         count = [int(count) for count in data["Count"].to_list()]
         symmetry = int(data["Symmetry"].to_list()[0])
-        antiparallel = True if data["Antiparallel"].to_list()[0].lower() == "true" else False
+        antiparallel = data["Antiparallel"].to_list()[0]
 
         # create a list of domains
         domains = []
