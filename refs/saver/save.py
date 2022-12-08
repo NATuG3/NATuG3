@@ -1,11 +1,12 @@
 import logging
 import pickle
-from showinfm import show_in_file_manager
+import subprocess
 
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
 import structures
+from helpers import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ def worker(filepath):
     logger.info(f"Created save @ {filepath}.")
 
     # open the saved path in file explorer
-    show_in_file_manager(filepath)
+    show_in_file_explorer(filepath)
 
 
 class FileSelector(QFileDialog):

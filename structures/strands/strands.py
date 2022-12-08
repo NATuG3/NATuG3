@@ -1,12 +1,13 @@
 import logging
+import subprocess
 from functools import partial
 from typing import List, Tuple, Iterable, Literal
 import pandas as pd
 from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
-from showinfm import show_in_file_manager
 
 import settings
+from helpers import show_in_file_explorer
 from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
@@ -131,7 +132,7 @@ class Strands:
             raise ValueError("Invalid export mode.", mode)
 
         if open_in_file_explorer:
-            QTimer.singleShot(500, partial(show_in_file_manager, filepath))
+            QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
             logger.info(f"Opened export @ {filepath} in file explorer.")
 
     @property

@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from functools import wraps, cache
 
 import numpy as np
@@ -8,6 +9,12 @@ from PyQt6.QtWidgets import QMessageBox
 import constants
 
 logger = logging.getLogger(__name__)
+
+
+def show_in_file_explorer(filepath):
+    """Open the filepath in the file explorer."""
+    logger.info(f"Opening \"{filepath}\" in file explorer.")
+    subprocess.Popen(f"explorer /select, \"{filepath}\"")
 
 
 def bases_only(blended: str):

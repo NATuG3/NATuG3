@@ -89,7 +89,9 @@ class Panel(QWidget):
             if top_view:
                 refs.constructor.top_view.refresh()
 
-        self.update_graphs.clicked.connect(lambda: warn_and_refresh(True, True))
+        self.update_graphs.clicked.connect(
+            lambda: warn_and_refresh(True, True, lambda: logger.info("Updating graphs..."))
+        )
 
         def tab_updated(function):
             """Worker for when a tab is updated and wants to call a function"""
