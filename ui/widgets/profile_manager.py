@@ -82,6 +82,8 @@ class ProfileManager(QGroupBox):
         self._signals()
         self.update()
 
+        logger.debug("Profile Manager initialized.")
+
     def listed(self) -> list[str]:
         """Obtain list of all profiles in nucleic_acid_profile chooser's list."""
         profiles = []
@@ -136,6 +138,8 @@ class ProfileManager(QGroupBox):
         self.profile_loaded.connect(self.updated.emit)
         self.profile_deleted.connect(self.updated.emit)
         self.profile_saved.connect(self.updated.emit)
+
+        logger.debug("Profile Manager signals hooked.")
 
     def save(self, name: str) -> None:
         if self.save_profile_button.toolTip() == "Overwrite Profile":
