@@ -102,7 +102,9 @@ class ProfileManager(QGroupBox):
     def approve(self) -> bool:
         """Present the user with a popup stating self.warning. If user approves request, return True."""
         if self.warning is not None:
-            if not helpers.confirm(self.parent(), "Profile Manager Warning", self.warning):
+            if not helpers.confirm(
+                self.parent(), "Profile Manager Warning", self.warning
+            ):
                 return False
         return True
 
@@ -122,7 +124,9 @@ class ProfileManager(QGroupBox):
     def _signals(self) -> None:
         # hook main buttons
         self.save_profile_button.clicked.connect(lambda: self.save(self.current_text()))
-        self.delete_profile_button.clicked.connect(lambda: self.delete(self.current_text()))
+        self.delete_profile_button.clicked.connect(
+            lambda: self.delete(self.current_text())
+        )
         self.load_profile_button.clicked.connect(lambda: self.load(self.current_text()))
 
         # some buttons need to be locked right after they're clicked
@@ -223,7 +227,7 @@ class ProfileManager(QGroupBox):
                 logger.debug(
                     "Current profiles settings match the input box values\nprevious: %s; inputted: %s",
                     self.profiles.get(self.current),
-                    self.extractor()
+                    self.extractor(),
                 )
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
@@ -245,7 +249,7 @@ class ProfileManager(QGroupBox):
                 logger.debug(
                     "Current profiles settings do not match the input box values\nprevious: %s; inputted: %s",
                     self.profiles.get(self.current),
-                    self.extractor()
+                    self.extractor(),
                 )
                 self.load_profile_button.setEnabled(True)
                 self.load_profile_button.setStatusTip(
@@ -265,8 +269,10 @@ class ProfileManager(QGroupBox):
 
             # no matter what, do not let the user alter default profiles
             if chosen_profile_name in self.defaults:
-                logger.debug("Current profiles is a default profile. "
-                             "Disabling save and delete buttons and enabling load button.")
+                logger.debug(
+                    "Current profiles is a default profile. "
+                    "Disabling save and delete buttons and enabling load button."
+                )
                 self.load_profile_button.setEnabled(True)
                 self.load_profile_button.setStatusTip(
                     f'Load back the settings of "{chosen_profile_name}."'

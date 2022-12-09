@@ -1,7 +1,7 @@
 import logging
-import subprocess
 from functools import partial
 from typing import List, Tuple, Iterable, Literal
+
 import pandas as pd
 from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
@@ -37,10 +37,10 @@ class Strands:
     """
 
     def __init__(
-            self,
-            nucleic_acid_profile: NucleicAcidProfile,
-            strands: Iterable[Strand],
-            name: str = "Strands",
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        strands: Iterable[Strand],
+        name: str = "Strands",
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -69,7 +69,9 @@ class Strands:
         """Obtain the number of sequencing this Strands object contains."""
         return len(self.strands)
 
-    def to_file(self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True) -> None:
+    def to_file(
+        self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True
+    ) -> None:
         """
         Export all sequences to a file.
 
@@ -84,7 +86,9 @@ class Strands:
             open_in_file_explorer: Whether to open the file location in file after exporting.
         """
         if "." in filepath:
-            raise ValueError("Filepath includes a suffix. Do not include suffixes in filepaths.")
+            raise ValueError(
+                "Filepath includes a suffix. Do not include suffixes in filepaths."
+            )
         filepath = f"{filepath}.{mode}"
 
         if mode == "xlsx":
@@ -229,7 +233,8 @@ class Strands:
         # log basic info for debugging
         logger.debug(
             f"NEMid1.strand {str(NEMid1.strand is NEMid2.strand).replace('True', 'is').replace('False', 'is not')}"
-            f" NEMid2.strand")
+            f" NEMid2.strand"
+        )
         logger.debug(f"NEMid1.index={NEMid1.index}; NEMid2.index={NEMid2.index}")
         logger.debug(
             f"NEMid1.closed={NEMid1.strand.closed}; NEMid2.closed={NEMid2.strand.closed}"

@@ -6,7 +6,9 @@ from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtWidgets import (
     QWidget,
-    QSizePolicy, QFileDialog, QApplication,
+    QSizePolicy,
+    QFileDialog,
+    QApplication,
 )
 
 import helpers
@@ -73,7 +75,9 @@ class Panel(QWidget):
 
         # when helix joint buttons are clicked refresh the table
         # so that the switch values (-1, 0, 1) get updated
-        self.table.helix_joint_updated.connect(partial(self.updated.emit, self.table_refresh))
+        self.table.helix_joint_updated.connect(
+            partial(self.updated.emit, self.table_refresh)
+        )
 
         # dump the initial domains
         self.table.dump_domains(refs.domains.current)
@@ -83,21 +87,29 @@ class Panel(QWidget):
         def updated_worker():
             self.table_refresh()
             self.settings_refresh()
-        self.update_table_button.clicked.connect(partial(self.updated.emit, updated_worker))
+
+        self.update_table_button.clicked.connect(
+            partial(self.updated.emit, updated_worker)
+        )
 
         def updated_table_item():
             self.settings_refresh()
             self.table_refresh()
             self.settings_refresh()
+
         # when the table itself is updated
-        self.table.cell_widget_updated.connect(partial(self.updated.emit, updated_table_item))
+        self.table.cell_widget_updated.connect(
+            partial(self.updated.emit, updated_table_item)
+        )
 
         # reset the checked button when a helix joint is updated
         # because the user has opted out
         self.table.helix_joint_updated.connect(
             lambda: self.auto_antiparallel.setChecked(False)
         )
-        self.auto_antiparallel.stateChanged.connect(partial(self.updated.emit, self.table_refresh))
+        self.auto_antiparallel.stateChanged.connect(
+            partial(self.updated.emit, self.table_refresh)
+        )
 
         def save_domains():
             """Save domains to file."""
@@ -107,8 +119,12 @@ class Panel(QWidget):
                 filter="*csv",
             )[0]
             if len(filepath) > 0:
-                logger.info(f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}")
-                refs.domains.current.to_file(mode="csv", filepath=filepath.replace(".csv", ""))
+                logger.info(
+                    f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}"
+                )
+                refs.domains.current.to_file(
+                    mode="csv", filepath=filepath.replace(".csv", "")
+                )
 
         self.save_domains_button.clicked.connect(save_domains)
 
@@ -121,17 +137,22 @@ class Panel(QWidget):
                 filter="*csv",
             )[0]
             if len(filepath) > 0:
+
                 def loader():
                     domains = Domains.from_file(
                         mode="csv",
                         filepath=filepath.replace(".csv", ""),
-                        nucleic_acid_profile=refs.nucleic_acid.current
+                        nucleic_acid_profile=refs.nucleic_acid.current,
                     )
                     refs.domains.current.update(domains)
                     self._setup()
                     QApplication.processEvents()
                     refs.constructor.config.panel.update_graphs.click()
-                    logger.info("Importing domains from file.\nNew domains: %s", refs.domains.current)
+                    logger.info(
+                        "Importing domains from file.\nNew domains: %s",
+                        refs.domains.current,
+                    )
+
                 self.updated.emit(loader)
 
         self.load_domains_button.clicked.connect(load_domains)
@@ -226,7 +247,8 @@ class Panel(QWidget):
                 QTimer.singleShot(
                     600,
                     partial(
-                        self.update_table_button.setStyleSheet, "background-color: light grey"
+                        self.update_table_button.setStyleSheet,
+                        "background-color: light grey",
                     ),
                 )
         else:

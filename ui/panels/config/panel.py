@@ -6,7 +6,6 @@ from types import SimpleNamespace
 from typing import List, Dict
 
 from PyQt6 import uic
-from PyQt6.QtCore import QTimer
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QDialog
 
 import refs
@@ -90,7 +89,9 @@ class Panel(QWidget):
                 refs.constructor.top_view.refresh()
 
         self.update_graphs.clicked.connect(
-            lambda: warn_and_refresh(True, True, lambda: logger.info("Updating graphs..."))
+            lambda: warn_and_refresh(
+                True, True, lambda: logger.info("Updating graphs...")
+            )
         )
 
         def tab_updated(function):
@@ -98,7 +99,7 @@ class Panel(QWidget):
             warn_and_refresh(
                 self.auto_update_top_view.isChecked(),
                 self.auto_update_side_view.isChecked(),
-                function
+                function,
             )
 
         self.tabs.domains.updated.connect(tab_updated)

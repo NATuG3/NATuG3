@@ -1,6 +1,5 @@
 import logging
 import pickle
-import subprocess
 
 from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog

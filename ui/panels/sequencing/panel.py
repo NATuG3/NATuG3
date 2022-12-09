@@ -1,11 +1,10 @@
 import os
 
 from PyQt6 import uic
-from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QWidget, QGridLayout, QScrollArea, QFileDialog, QLineEdit
 
 import refs
-from structures.strands import Strand, Strands
+from structures.strands import Strand
 from ui.dialogs.strand_config.strand_config import StrandConfig
 from ui.panels.sequencing.buttons import StrandButton
 
@@ -42,7 +41,7 @@ class Panel(QWidget):
                 self.parent(),
                 "Sequence Export Location Chooser",
                 f"{os.getcwd()}\\saves\\sequencing\\presets\\",
-                filter=f"*.{filetype}"
+                filter=f"*.{filetype}",
             )[0]
             if len(filepath) > 0:
                 self.filepath.setText(filepath)
@@ -53,7 +52,7 @@ class Panel(QWidget):
         # hook the generate sequences button click event
         def export_sequences_clicked():
             """Worker for when the export sequences button is clicked."""
-            filepath = self.filepath.text()[:self.filepath.text().find(".")]
+            filepath = self.filepath.text()[: self.filepath.text().find(".")]
             mode = self.filetype.currentText().replace(".", "")
             refs.strands.current.to_file(filepath, mode)
 

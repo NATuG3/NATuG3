@@ -179,7 +179,7 @@ class Subunit:
                         inverse(previous_domain.right_helix_joint),
                         inverse(previous_domain.right_helix_joint),
                         previous_domain.count,
-                        parent=self
+                        parent=self,
                     )
                 )
                 i += 1

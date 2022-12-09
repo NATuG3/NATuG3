@@ -1,132 +1,132 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
-  <property name="geometry">
-   <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>345</width>
-    <height>404</height>
-   </rect>
-  </property>
-  <property name="windowTitle">
-   <string>Form</string>
-  </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <property name="leftMargin">
-    <number>2</number>
-   </property>
-   <property name="topMargin">
-    <number>2</number>
-   </property>
-   <property name="rightMargin">
-    <number>2</number>
-   </property>
-   <property name="bottomMargin">
-    <number>2</number>
-   </property>
-   <item row="1" column="0">
-    <widget class="QGroupBox" name="strands_group_box">
-     <property name="maximumSize">
-      <size>
-       <width>16777215</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="title">
-      <string>Strands</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <widget class="QGroupBox" name="groupBox">
-        <property name="title">
-         <string>Configuration</string>
+    <class>Form</class>
+    <widget class="QWidget" name="Form">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>345</width>
+                <height>404</height>
+            </rect>
         </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="1" column="0">
-          <layout class="QGridLayout" name="gridLayout_3">
-           <item row="1" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Filetype</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1" colspan="2">
-            <widget class="QComboBox" name="filetype">
-             <property name="statusTip">
-              <string>The type of file to export as</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>.xlsx</string>
-              </property>
-             </item>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="3">
-            <widget class="QLineEdit" name="filepath">
-             <property name="statusTip">
-              <string>The location to save the export file to</string>
-             </property>
-             <property name="styleSheet">
-              <string notr="true"/>
-             </property>
-             <property name="text">
-              <string>/save.xlsx</string>
-             </property>
-             <property name="readOnly">
-              <bool>true</bool>
-             </property>
-             <property name="clearButtonEnabled">
-              <bool>false</bool>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
+        <property name="windowTitle">
+            <string>Form</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout">
+            <property name="leftMargin">
+                <number>2</number>
+            </property>
+            <property name="topMargin">
+                <number>2</number>
+            </property>
+            <property name="rightMargin">
+                <number>2</number>
+            </property>
+            <property name="bottomMargin">
+                <number>2</number>
+            </property>
+            <item row="1" column="0">
+                <widget class="QGroupBox" name="strands_group_box">
+                    <property name="maximumSize">
+                        <size>
+                            <width>16777215</width>
+                            <height>16777215</height>
+                        </size>
+                    </property>
+                    <property name="title">
+                        <string>Strands</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_2">
+                        <item>
+                            <widget class="QGroupBox" name="groupBox">
+                                <property name="title">
+                                    <string>Configuration</string>
+                                </property>
+                                <layout class="QGridLayout" name="gridLayout_2">
+                                    <item row="1" column="0">
+                                        <layout class="QGridLayout" name="gridLayout_3">
+                                            <item row="1" column="0">
+                                                <widget class="QLabel" name="label_2">
+                                                    <property name="text">
+                                                        <string>Filetype</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item row="1" column="1" colspan="2">
+                                                <widget class="QComboBox" name="filetype">
+                                                    <property name="statusTip">
+                                                        <string>The type of file to export as</string>
+                                                    </property>
+                                                    <item>
+                                                        <property name="text">
+                                                            <string>.xlsx</string>
+                                                        </property>
+                                                    </item>
+                                                </widget>
+                                            </item>
+                                            <item row="0" column="0" colspan="3">
+                                                <widget class="QLineEdit" name="filepath">
+                                                    <property name="statusTip">
+                                                        <string>The location to save the export file to</string>
+                                                    </property>
+                                                    <property name="styleSheet">
+                                                        <string notr="true"/>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string>/save.xlsx</string>
+                                                    </property>
+                                                    <property name="readOnly">
+                                                        <bool>true</bool>
+                                                    </property>
+                                                    <property name="clearButtonEnabled">
+                                                        <bool>false</bool>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                </layout>
+                            </widget>
+                        </item>
+                        <item>
+                            <widget class="QScrollArea" name="scrollable_strands_area">
+                                <property name="maximumSize">
+                                    <size>
+                                        <width>16777215</width>
+                                        <height>16777215</height>
+                                    </size>
+                                </property>
+                                <property name="sizeAdjustPolicy">
+                                    <enum>QAbstractScrollArea::AdjustToContents</enum>
+                                </property>
+                                <property name="widgetResizable">
+                                    <bool>true</bool>
+                                </property>
+                                <widget class="QWidget" name="scrollAreaWidgetContents">
+                                    <property name="geometry">
+                                        <rect>
+                                            <x>0</x>
+                                            <y>0</y>
+                                            <width>323</width>
+                                            <height>270</height>
+                                        </rect>
+                                    </property>
+                                </widget>
+                            </widget>
+                        </item>
+                    </layout>
+                </widget>
+            </item>
+            <item row="2" column="0">
+                <widget class="QPushButton" name="export_sequences">
+                    <property name="text">
+                        <string>Export Sequences</string>
+                    </property>
+                </widget>
+            </item>
         </layout>
-       </widget>
-      </item>
-      <item>
-       <widget class="QScrollArea" name="scrollable_strands_area">
-        <property name="maximumSize">
-         <size>
-          <width>16777215</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="sizeAdjustPolicy">
-         <enum>QAbstractScrollArea::AdjustToContents</enum>
-        </property>
-        <property name="widgetResizable">
-         <bool>true</bool>
-        </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>323</width>
-           <height>270</height>
-          </rect>
-         </property>
-        </widget>
-       </widget>
-      </item>
-     </layout>
     </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="export_sequences">
-     <property name="text">
-      <string>Export Sequences</string>
-     </property>
-    </widget>
-   </item>
-  </layout>
- </widget>
- <resources/>
- <connections/>
+    <resources/>
+    <connections/>
 </ui>

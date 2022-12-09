@@ -47,7 +47,9 @@ class Panel(QWidget):
     def _signals(self):
         def on_input_updated():
             """Worker for when a widget is changed."""
-            self.updated.emit(partial(refs.nucleic_acid.current.update, self.fetch_settings()))
+            self.updated.emit(
+                partial(refs.nucleic_acid.current.update, self.fetch_settings())
+            )
 
         for input in (
             self.D,

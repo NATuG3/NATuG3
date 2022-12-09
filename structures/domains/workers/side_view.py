@@ -1,6 +1,5 @@
 import itertools
 import logging
-from functools import cache
 from math import dist
 from typing import List, Tuple
 
@@ -9,8 +8,6 @@ from constants.directions import *
 from helpers import inverse
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
-from structures.profiles import NucleicAcidProfile
-from structures.strands.strands import Strands
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +17,10 @@ class DomainStrandWorker:
     Class for generating data needed for a side view graph of helices.
     This is used by the Domains structure to compute strands for its child workers.
 
+    Attributes:
+        domains: The domains to compute strands for.
+        nucleic_acid_profile: The nucleic acid profile to use for computing strands.
+
     Methods:
         compute()
     """
@@ -27,9 +28,7 @@ class DomainStrandWorker:
     strand_directions = (UP, DOWN)
     cache_clearers = ("workers", "profiles")
 
-    def __init__(
-            self, domains: "Domains"
-    ) -> None:
+    def __init__(self, domains: "Domains") -> None:
         """
         Initialize a side view generator object.
 
@@ -39,7 +38,9 @@ class DomainStrandWorker:
         self.nucleic_acid_profile = domains.nucleic_acid_profile
         self.domains = domains
 
-    def compute(self) -> List[Tuple[List[NEMid | Nucleoside], List[NEMid | Nucleoside]]]:
+    def compute(
+        self,
+    ) -> List[Tuple[List[NEMid | Nucleoside], List[NEMid | Nucleoside]]]:
         """
         Compute all NEMid data.
 
@@ -69,11 +70,15 @@ class DomainStrandWorker:
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
                             cycle += 1
                             if (
-                                    abs(up_strand_z_coord - down_strand_z_coord)
-                                    > self.nucleic_acid_profile.Z_mate
+                                abs(up_strand_z_coord - down_strand_z_coord)
+                                > self.nucleic_acid_profile.Z_mate
                             ):
                                 begin_at[DOWN] += 1
                                 if cycle == 10000:
+                                    logger.warning(
+                                        "Cycle limit reached for lining up NEMids. "
+                                        "This means a bad Z_mate was likely passed."
+                                    )
                                     begin_at[DOWN] = 0
                                     raise StopIteration
                             else:
@@ -121,9 +126,9 @@ class DomainStrandWorker:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                        angles[strand_direction],
-                        x_coords[strand_direction],
-                        z_coords[strand_direction],
+                    angles[strand_direction],
+                    x_coords[strand_direction],
+                    z_coords[strand_direction],
                 ):
                     # combine all data into NEMid object
                     NEMid_ = NEMid(
@@ -174,8 +179,8 @@ class DomainStrandWorker:
                             junction = False
                             # if the two NEMids are very close consider it a junction
                             if (
-                                    dist(NEMid1.position(), NEMid2.position())
-                                    < settings.junction_threshold
+                                dist(NEMid1.position(), NEMid2.position())
+                                < settings.junction_threshold
                             ):
                                 junction = True
                             # if the two NEMids are on opposite sides and have a very close
@@ -184,8 +189,8 @@ class DomainStrandWorker:
                                 z_dist = abs(NEMid1.z_coord - NEMid2.z_coord)
                                 x_dist = abs(NEMid1.x_coord - NEMid2.x_coord)
                                 opposite_sides = (
-                                        abs(x_dist - self.domains.count)
-                                        < settings.junction_threshold
+                                    abs(x_dist - self.domains.count)
+                                    < settings.junction_threshold
                                 )
                                 matching_heights = z_dist < settings.junction_threshold
                                 if opposite_sides and matching_heights:
@@ -196,6 +201,8 @@ class DomainStrandWorker:
                                 NEMid1.junctable = True
                                 NEMid2.juncmate = NEMid1
                                 NEMid2.junctable = True
+
+        logger.debug("Created strands object from domains. Strands: %s", strands)
 
         return strands
 
@@ -235,6 +242,8 @@ class DomainStrandWorker:
             # tuplify the angles index
             angles[index] = tuple(angles[index])
 
+        logger.debug("Created angles object from domains. Angles: %s", angles)
+
         return angles
 
     def _x_coords(self) -> List[Tuple[itertools.cycle, itertools.cycle]]:
@@ -261,8 +270,8 @@ class DomainStrandWorker:
 
                     # break once self.B x coords have been generated
                     if (
-                            len(x_coords[index][strand_direction])
-                            == self.nucleic_acid_profile.B
+                        len(x_coords[index][strand_direction])
+                        == self.nucleic_acid_profile.B
                     ):
                         break
 
@@ -274,6 +283,8 @@ class DomainStrandWorker:
 
             # tuplify the index
             x_coords[index] = tuple(x_coords[index])
+
+        logger.debug("Created x_coords object from domains. X coords: %s", x_coords)
 
         return x_coords
 
@@ -336,7 +347,7 @@ class DomainStrandWorker:
             # move the initial Z coord down until it is as close to z=0 as possible
             # this way the graphs don't skew upwards weirdly
             offset_interval = (
-                    self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
+                self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
             )
             while initial_z_coord > 0:
                 initial_z_coord -= offset_interval
@@ -369,20 +380,22 @@ class DomainStrandWorker:
             # tuplify the index
             z_coords[index] = tuple(z_coords[index])
 
+        logger.debug("Created z_coords object from domains. Z coords: %s", z_coords)
+
         return z_coords
 
-    @cache
     def __repr__(self) -> str:
-        output = "side_view("
-        blacklist = "workers"
-        for attr, value in vars(self).items():
-            if attr not in blacklist:
-                if isinstance(value, float):
-                    value = round(value, 4)
-                output += f"{attr}={value}, "
-        output = output[:-2]
-        output += ")"
-        return output
+        """
+        Return a string representation of the side view worker.
+
+        Includes:
+            - the domains
+            - the nucleic acid profile
+
+        Returns:
+            str: A string representation of the side view worker.
+        """
+        return f"SideViewWorker(domains={self.domains}, nucleic_acid_profile={self.nucleic_acid_profile})"
 
     def __len__(self):
         return self.domains.domains.count

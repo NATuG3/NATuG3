@@ -1,5 +1,5 @@
-import ui.plotters
 import ui.dialogs.informers
+import ui.plotters
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 
