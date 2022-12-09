@@ -136,7 +136,6 @@ class ProfileManager(QGroupBox):
         self.profile_loaded.connect(self.updated.emit)
         self.profile_deleted.connect(self.updated.emit)
         self.profile_saved.connect(self.updated.emit)
-        self.chosen_changed.connect(self.updated.emit)
 
     def save(self, name: str) -> None:
         if self.save_profile_button.toolTip() == "Overwrite Profile":
@@ -217,6 +216,11 @@ class ProfileManager(QGroupBox):
         if chosen_profile_name in self.profiles:
             # if the chosen profiles name's settings match the current input box values
             if self.profiles.get(self.current) == self.extractor():
+                logger.debug(
+                    "Current profiles settings match the input box values\nprevious: %s; inputted: %s",
+                    self.profiles.get(self.current),
+                    self.extractor()
+                )
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
                     f'Current settings match saved settings of profiles named "{chosen_profile_name}."'
@@ -234,6 +238,11 @@ class ProfileManager(QGroupBox):
                 )
             # if the chosen profiles name is not in
             else:
+                logger.debug(
+                    "Current profiles settings do not match the input box values\nprevious: %s; inputted: %s",
+                    self.profiles.get(self.current),
+                    self.extractor()
+                )
                 self.load_profile_button.setEnabled(True)
                 self.load_profile_button.setStatusTip(
                     f'Load back the settings of "{chosen_profile_name}."'
@@ -252,15 +261,22 @@ class ProfileManager(QGroupBox):
 
             # no matter what, do not let the user alter default profiles
             if chosen_profile_name in self.defaults:
+                logger.debug("Current profiles is a default profile. "
+                             "Disabling save and delete buttons and enabling load button.")
+                self.load_profile_button.setEnabled(True)
+                self.load_profile_button.setStatusTip(
+                    f'Load back the settings of "{chosen_profile_name}."'
+                )
+
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default profiles.'
+                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default profile.'
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
-                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default profiles.'
+                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default profile.'
                 )
 
         # the chosen profiles name is a brand-new profiles name (that has not already been saved)
