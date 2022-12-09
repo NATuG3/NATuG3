@@ -20,7 +20,6 @@ from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
 from ui.plotters import utils
-from ui.plotters.utils import dim_color
 
 logger = logging.getLogger(__name__)
 

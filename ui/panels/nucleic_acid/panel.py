@@ -47,7 +47,9 @@ class Panel(QWidget):
     def _signals(self):
         def on_input_updated():
             """Worker for when a widget is changed."""
-            self.updated.emit(partial(refs.nucleic_acid.current.update, self.fetch_settings()))
+            self.updated.emit(
+                partial(refs.nucleic_acid.current.update, self.fetch_settings())
+            )
 
         for input in (
             self.D,
@@ -77,13 +79,14 @@ class Panel(QWidget):
 
         def profile_updated():
             """Slot for when a profile is loaded/saved."""
+            refs.nucleic_acid.profiles = self.profile_manager.profiles
             name = self.profile_manager.current
             if len(name) > 0:
                 profile = self.profile_manager.profiles[name]
                 self.updated.emit(partial(refs.nucleic_acid.current.update, profile))
 
         # connect signals
-        self.profile_manager.updated.connect(profile_updated)
+        self.profile_manager.profile_loaded.connect(profile_updated)
 
         # add the profile manager to layout
         self.layout().insertWidget(0, self.profile_manager)

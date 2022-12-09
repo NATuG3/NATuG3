@@ -4,7 +4,7 @@ from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
 from random import shuffle
-from typing import Tuple, Type, Iterable, Deque, List, ClassVar
+from typing import Tuple, Iterable, Deque, List, ClassVar
 
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point

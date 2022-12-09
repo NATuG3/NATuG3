@@ -70,7 +70,9 @@ class Domains:
         # self.subunit is the template subunit
         # meaning that all other subunits are based off of this one
         assert isinstance(domains, Iterable)
-        self._subunit = Subunit(self.nucleic_acid_profile, domains, template=True, parent=self)
+        self._subunit = Subunit(
+            self.nucleic_acid_profile, domains, template=True, parent=self
+        )
 
         # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self)
@@ -126,8 +128,12 @@ class Domains:
 
         # extract all the data to references
         domains = self.subunit.domains
-        left_helix_joints = ["UP" if domain.left_helix_joint == UP else "DOWN" for domain in domains]
-        right_helix_joints = ["UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains]
+        left_helix_joints = [
+            "UP" if domain.left_helix_joint == UP else "DOWN" for domain in domains
+        ]
+        right_helix_joints = [
+            "UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains
+        ]
         s = [domain.theta_s_multiple for domain in domains]
         m = [domain.theta_interior_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
@@ -143,7 +149,7 @@ class Domains:
                 "Right Helix Joints": right_helix_joints,
                 "Count": count,
                 "Symmetry": symmetry,
-                "Antiparallel": antiparallel
+                "Antiparallel": antiparallel,
             },
         )
 
@@ -154,7 +160,12 @@ class Domains:
             raise ValueError(f"Invalid mode: {mode}")
 
     @classmethod
-    def from_file(cls, mode: Literal["csv"], filepath: str, nucleic_acid_profile: NucleicAcidProfile):
+    def from_file(
+        cls,
+        mode: Literal["csv"],
+        filepath: str,
+        nucleic_acid_profile: NucleicAcidProfile,
+    ):
         """
         Import domains from a csv. Must be a csv in the format of self.to_file().
 
@@ -180,8 +191,14 @@ class Domains:
             raise ValueError(f"Invalid mode: {mode}")
 
         # extract the data
-        left_helix_joints = [UP if direction == "UP" else DOWN for direction in data["Left Helix Joints"].to_list()]
-        right_helix_joints = [UP if direction == "UP" else DOWN for direction in data["Right Helix Joints"].to_list()]
+        left_helix_joints = [
+            UP if direction == "UP" else DOWN
+            for direction in data["Left Helix Joints"].to_list()
+        ]
+        right_helix_joints = [
+            UP if direction == "UP" else DOWN
+            for direction in data["Right Helix Joints"].to_list()
+        ]
         m = [int(m) for m in data["m"].to_list()]
         count = [int(count) for count in data["Count"].to_list()]
         symmetry = int(data["Symmetry"].to_list()[0])

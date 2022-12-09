@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from typing import Tuple, Type
 
 from constants.directions import DOWN, UP
-from helpers import inverse
-
 
 logger = logging.getLogger(__name__)
 
