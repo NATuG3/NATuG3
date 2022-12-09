@@ -160,14 +160,14 @@ class SideViewPlotter(pg.PlotWidget):
 
         # for i in <number of helical twists of the tallest domain>...
         with suppress(ZeroDivisionError):
-            for i in range(0, ceil(self.height / self.nucleic_acid_profile.H) + 1):
+            for i in range(0, ceil(self.height / self.nucleic_acid_profile.H)):
                 self.plot_data.plotted_gridlines.append(
                     self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
                 )
 
         # add axis labels
-        self.setLabel("bottom", text="x", units="nanometers", unitPrefix="nm")
-        self.setLabel("left", text="z", units="nanometers", unitPrefix="nm")
+        self.setLabel("bottom", text="x", units="Helical Diameters")
+        self.setLabel("left", text="z", units="Nanometers")
 
     def _plot(self):
         self.plot_data.strands = self.strands
