@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 class Strands:
     """
-    A container for multiple sequencing.
+    A container for multiple strands.
 
     Attributes:
         nucleic_acid_profile: The nucleic acid settings for the sequencing container.
