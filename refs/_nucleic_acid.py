@@ -59,8 +59,7 @@ class _NucleicAcid:
             logger.warning("Saved profiles file not found. Defaults restored.")
 
         # log that profiles were loaded
-        logger.debug("Loaded profiles.")
-        logger.debug(self.profiles)
+        logger.debug("Loaded profiles. Profiles: %s", self.profiles)
 
     def dump(self) -> None:
         """Dump persisting attributes of this module to a file"""

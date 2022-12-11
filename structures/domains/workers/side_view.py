@@ -202,8 +202,6 @@ class DomainStrandWorker:
                                 NEMid2.juncmate = NEMid1
                                 NEMid2.junctable = True
 
-        logger.debug("Created strands object from domains. Strands: %s", strands)
-
         return strands
 
     def _angles(self) -> List[Tuple[itertools.count, itertools.count]]:
@@ -241,8 +239,6 @@ class DomainStrandWorker:
         for index in range(self.domains.count):
             # tuplify the angles index
             angles[index] = tuple(angles[index])
-
-        logger.debug("Created angles object from domains. Angles: %s", angles)
 
         return angles
 
@@ -283,8 +279,6 @@ class DomainStrandWorker:
 
             # tuplify the index
             x_coords[index] = tuple(x_coords[index])
-
-        logger.debug("Created x_coords object from domains. X coords: %s", x_coords)
 
         return x_coords
 
@@ -379,8 +373,6 @@ class DomainStrandWorker:
 
             # tuplify the index
             z_coords[index] = tuple(z_coords[index])
-
-        logger.debug("Created z_coords object from domains. Z coords: %s", z_coords)
 
         return z_coords
 

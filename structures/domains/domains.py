@@ -41,15 +41,12 @@ class Domains:
         top_view()
         workers()
         subunits()
-
-    Todo:
-        - Add a method to update the Domains class in place.
     """
 
     def __init__(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
-        domains: List["Domain"],
+        domains: List[Domain],
         symmetry: int,
         antiparallel: bool = False,
     ) -> None:
@@ -230,6 +227,9 @@ class Domains:
     def clear_cache(self):
         """
         Clear the cache of all cached methods.
+
+        Methods are cached because there is no need to recompute certain methods if the template subunit has
+        not changed.
         """
         self.domains.cache_clear()
         self.subunits.cache_clear()
@@ -252,6 +252,9 @@ class Domains:
 
         Args:
             new_subunit: The new template subunit.
+
+        Notes:
+            This method clears the cache of all cached methods.
         """
         logger.info(f"Replacing the template subunit with {new_subunit}.")
         self._subunit = new_subunit
