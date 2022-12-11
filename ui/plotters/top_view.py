@@ -156,7 +156,7 @@ class TopViewPlotter(pg.PlotWidget):
             text = self.plot(
                 [position[0]],
                 [position[1]],
-                symbol=helpers.custom_symbol(counter),
+                symbol=utils.custom_symbol(counter),
                 symbolBrush=pg.mkBrush(
                     color=settings.colors["domains"]["plotted_numbers"]
                 ),
