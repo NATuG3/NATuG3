@@ -3,7 +3,7 @@ from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
-from random import shuffle, random
+import random
 from typing import Tuple, Iterable, Deque, List, ClassVar
 
 from constants.bases import DNA
@@ -15,7 +15,7 @@ from structures.profiles import NucleicAcidProfile
 def shuffled(iterable: Iterable) -> list:
     """Shuffle an iterable and return a copy."""
     output = list(iterable)
-    shuffle(output)
+    random.shuffle(output)
     return output
 
 

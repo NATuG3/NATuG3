@@ -19,6 +19,7 @@ class Panel(QWidget):
         self.strand_buttons = []
 
         self._configuration()
+        self._tools()
 
     def _tools(self):
         """Set up the tools group box."""
@@ -27,16 +28,19 @@ class Panel(QWidget):
             """Worker for when the run bulk operation button is clicked."""
             scope = self.scope.currentText()
             operation = self.operation.currentText()
+            refresh = refs.constructor.side_view.plot.refresh
 
             if operation == "Randomize":
                 logger.debug("Performing randomization bulk operation.")
                 if scope == "All Bases":
                     for strand in refs.strands.current.strands:
                         strand.randomize_sequence(overwrite=True)
+                    refresh()
                     logger.info("Randomized all bases in all strands.")
                 elif scope == "Unset Bases":
                     for strand in refs.strands.current.strands:
                         strand.randomize_sequence(overwrite=False)
+                    refresh()
                     logger.info("Randomized all unset bases in all strands.")
 
         self.run_bulk_operation.clicked.connect(run_bulk_operation_clicked)
