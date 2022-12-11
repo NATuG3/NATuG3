@@ -13,13 +13,13 @@ from PyQt6.QtGui import (
 
 import settings
 from constants.directions import *
-from utils import chaikins_corner_cutting, custom_symbol
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
 from ui.plotters import utils
+from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +189,8 @@ class SideViewPlotter(pg.PlotWidget):
             # create various brushes
             point_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.9))
             bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, 0.2))
+            dim_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.1))
+            highlight_brush = pg.mkBrush(color=settings.colors["highlighted"])
 
             # create various pens
             black_pen = pg.mkPen(
@@ -200,13 +202,13 @@ class SideViewPlotter(pg.PlotWidget):
             # if the strand color is dark
             if sum(strand.color) < (255 * 3) / 2:
                 # a light symbol pen
-                symbol_pen = pg.mkPen(
+                point_pen = pg.mkPen(
                     color=[200] * 3,
                     width=0.65,
                 )
             else:
                 # otherwise create a dark one
-                symbol_pen = pg.mkPen(
+                point_pen = pg.mkPen(
                     color=[0] * 3,
                     width=0.5,
                 )
@@ -217,8 +219,10 @@ class SideViewPlotter(pg.PlotWidget):
             elif self.plot_data.mode == "nucleoside":
                 to_plot = strand.nucleosides()
 
+            # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # update the point mappings
+                # update the point mappings (this is a dict that allows us to easily traverse between
+                # a coord and a Point)
                 self.plot_data.points[
                     (
                         point.x_coord,
@@ -226,41 +230,59 @@ class SideViewPlotter(pg.PlotWidget):
                     )
                 ] = point
 
-                # ensure that this point gets plotted
+                # assign the coords of the point
                 x_coords.append(point.x_coord)
                 z_coords.append(point.z_coord)
 
-                # determine whether the symbol for the point is an up or down arrow
-                if self.plot_data.mode == "nucleoside" and point.base is not None:
-                    symbol = custom_symbol(point.base, flip=False)
-                    symbols.append(symbol)
-                elif self.plot_data.mode == "NEMid" or point.base is None:
-                    if point.direction == UP:
-                        symbols.append("t1")  # up arrow
-                    elif point.direction == DOWN:
-                        symbols.append("t")  # down arrow
+                # determine the symbol for the point
+                if isinstance(point, Nucleoside) and point.base is not None:
+                    # if the point is a nucleoside and the nucleoside has a base assigned to it
+                    # then make the symbol that base, rotated based on the direction of the nucleoside
+                    if point.direction is UP:
+                        symbols.append(
+                            custom_symbol(point.base, flip=False, rotation=-90)
+                        )
                     else:
-                        raise ValueError("Point.direction is not UP or DOWN.", point)
-                symbol_pens.append(symbol_pen)
+                        symbols.append(
+                            custom_symbol(point.base, flip=False, rotation=90)
+                        )
+                else:
+                    # otherwise we will make the point symbol a simple arrow indicating its direction
+                    if point.direction == UP:
+                        symbols.append("t1")  # up arrow for an upwards point
+                    else:  # point.direction == DOWN
+                        symbols.append("t")  # down arrow for a downwards point
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
                     symbol_size = 18
-                    symbol_brushes.append(
-                        pg.mkBrush(color=settings.colors["highlighted"])
-                    )
+                    symbol_brushes.append(highlight_brush)
+                # if it isn't highlighted then determine the properties of it based off of the type of the point
                 else:
-                    if isinstance(point, Nucleoside) and point.base is not None:
-                        symbol_size = 7
-                    else:
-                        symbol_size = 6
-                    # if the Point is junctable then make it dimmer colored
-                    if isinstance(point, NEMid) and point.junctable:
-                        symbol_brushes.append(bright_brush)
-                    # otherwise use normal coloring
-                    else:
-                        symbol_brushes.append(point_brush)
+                    if isinstance(point, Nucleoside):
+                        if point.base is None:
+                            # baseless nucleosides are normally colored
+                            symbol_brushes.append(point_brush)
+                            symbol_pens.append(point_pen)
+                            symbol_size = 7
+                        else:
+                            # based nucleosides are dimly colored
+                            symbol_brushes.append(dim_brush)
+                            symbol_pens.append(None)
+                            symbol_size = 8
+                    if isinstance(point, NEMid):
+                        if point.junctable:
+                            # junctable NEMids are dimmly colored
+                            symbol_brushes.append(bright_brush)
+                            symbol_pens.append(point_pen)
+                            symbol_size = 6
+                        else:
+                            # non-junctable NEMids are normally colored
+                            symbol_brushes.append(point_brush)
+                            symbol_pens.append(point_pen)
+                            symbol_size = 6
 
+                # if the strand is highlighted boost the size of the symbol brush
                 if strand.highlighted:
                     symbol_size += 5
                 symbol_sizes.append(int(symbol_size))

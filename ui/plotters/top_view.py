@@ -10,6 +10,7 @@ import utils
 import settings
 from structures.domains import Domains
 from structures.domains.workers.top_view import TopViewWorker
+from ui import plotters
 
 logger = logging.getLogger(__name__)
 
@@ -156,7 +157,7 @@ class TopViewPlotter(pg.PlotWidget):
             text = self.plot(
                 [position[0]],
                 [position[1]],
-                symbol=utils.custom_symbol(counter),
+                symbol=plotters.utils.custom_symbol(counter),
                 symbolBrush=pg.mkBrush(
                     color=settings.colors["domains"]["plotted_numbers"]
                 ),
