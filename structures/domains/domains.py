@@ -70,6 +70,8 @@ class Domains:
         self._subunit = Subunit(
             self.nucleic_acid_profile, domains, template=True, parent=self
         )
+        for domain in self.subunit.domains:
+            assert domain.parent is self.subunit
 
         # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self)
@@ -93,11 +95,18 @@ class Domains:
         if not isinstance(domains, Domains):
             raise ValueError("Domains object must be a Domains object.")
 
+        # set parents
+        for domain in domains.subunit.domains:
+            domain.parent = self.subunit
+        domains.subunit.parent = self
+
+        # set attributes
         self.nucleic_acid_profile = domains.nucleic_acid_profile
         self.symmetry = domains.symmetry
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
+        # clear cache
         self.clear_cache()
 
     def to_file(self, mode: Literal["csv"], filepath: str) -> None:
