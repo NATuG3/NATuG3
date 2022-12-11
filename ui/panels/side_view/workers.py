@@ -1,55 +1,126 @@
+import atexit
+import logging
+from functools import partial
+from typing import List, Callable
+
 import ui.dialogs.informers
 import ui.plotters
+from structures.domains import Domains
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
+from structures.strands import Strands
+
+logger = logging.getLogger(__name__)
 
 
-class SidePointsClickedWorker:
+def juncter(points: List[Point], strands: Strands) -> None:
     """
-    The worker class for when a point is clicked on the side view plot.
+    Create a junction.
 
-    Attributes:
-        points: The points that were clicked.
-        plot: The plot containing the points.
+    Args:
+        points: The points that the junction is being created for.
+        strands: A reference to all the strands currently plotted.
+
+    Notes:
+        If more or less than two points or passed, or if either point is not a NEMid, the function does nothing.
+    """
+    if len(points) == 2:
+        if all([isinstance(item, NEMid) for item in points]):
+            strands.conjunct(points[0], points[1])
+        else:
+            raise TypeError(
+                "Both points must be NEMids to create a junction. Types passed: %s and %s. Ignoring request.",
+                type(points[0]),
+                type(points[1]),
+            )
+    else:
+        logger.debug(
+            "Two points needed to create a junction; however, %s were passed. Ignoring request.",
+            len(points),
+        )
+    logger.info("Juncter mode was run.")
+
+
+def informer(parent, points: List[Point], strands: Strands, domains: Domains, refresh: Callable) -> None:
+    """
+    Create an informer for a clicked point and its juncmate (if applicable).
+
+    Args:
+        parent: The parent widget. This is what all dialogs will be parented to.
+        points: The points that the informer is being created for.
+        strands: A reference to all the strands currently plotted.
+        domains: A reference to all the domains currently plotted.
+        refresh: Function called to refresh plot after informer mode is run. This is necessary because the informer
+            mode may not change the plot, so simply always refreshing the plot is a inefficient.
+
+    Notes:
+        If a point that is not a Nucleoside or NEMid is passed then the function does nothing.
     """
 
-    def __init__(self, plot: ui.plotters.SideViewPlotter, points: list[Point]):
-        self.plot = plot
-        self.points = points
+    # create a container for the dialog objects
+    dialogs = []
 
-    def informer(self):
-        """Run the informer mode."""
-
-        # create a container for the dialog objects
-        dialogs = []
-
-        for point in self.points:
-            # if a NEMid was clicked create a NEMidInformer object
-            if isinstance(point, NEMid):
-                dialogs.append(
-                    ui.dialogs.informers.NEMidInformer(
-                        self.parent(),
-                        point,
-                        self.strands,
-                        self.domains,
-                    )
+    for point in points:
+        # if a NEMid was clicked create a NEMidInformer object
+        if isinstance(point, NEMid):
+            dialogs.append(
+                ui.dialogs.informers.NEMidInformer(
+                    parent,
+                    point,
+                    strands,
+                    domains,
                 )
-                # highlight the point that was clicked
-                point.highlighted = True
+            )
+            # highlight the point that was clicked
+            point.highlighted = True
 
-            # if a Nucleoside was clicked create a NucleosideInformer objcet
-            elif isinstance(point, Nucleoside):
-                dialogs.append(
-                    ui.dialogs.informers.NucleosideInformer(
-                        self.parent(),
-                        point,
-                        self.strands,
-                        self.domains,
-                    )
+        # if a Nucleoside was clicked create a NucleosideInformer objcet
+        elif isinstance(point, Nucleoside):
+            dialogs.append(
+                ui.dialogs.informers.NucleosideInformer(
+                    parent,
+                    point,
+                    strands,
+                    domains,
                 )
-                # highlight the point that was clicked
-                point.highlighted = True
+            )
+            # highlight the point that was clicked
+            point.highlighted = True
 
-        # if any dialogs were created then that means that points were highlighted
-        # so we refresh the plot
-        self.refresh()
+        # if an unsupported type of point is clicked raise an error
+        else:
+            logger.info("Unsupported point type passed to informer. Point type: %s", type(point))
+
+    def dialog_complete(dialogs_, points_):
+        """Worker function to be called when all dialogs are closed."""
+        for dialog_ in dialogs_:
+            dialog_.close()
+        for point_ in points_:
+            point_.highlighted = False
+
+    if len(dialogs) > 0:
+        # connect the completed events for all the dialogs
+        wrapped_dialog_complete = partial(dialog_complete, dialogs, points)
+        for dialog in dialogs:
+            dialog.finished.connect(wrapped_dialog_complete)
+            dialog.show()
+
+        # refresh upon last dialog being closed
+        dialogs[-1].finished.connect(refresh)
+
+        # refresh the plot
+        refresh()
+
+    logger.info("Informer mode was run.")
+
+
+def nicker(points: List[Point], strands: Strands) -> None:
+    """
+    Create a nick in a strand.
+
+    Args:
+        points: The points that the nick is being created for.
+        strands: A reference to all the strands currently plotted.
+    """
+    raise NotImplementedError("Nicker is not yet implemented")
+    # logger.info("Nicker mode was run.")

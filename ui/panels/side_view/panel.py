@@ -1,6 +1,7 @@
 import atexit
 import logging
 from functools import partial
+from threading import Thread
 from typing import Tuple, List
 
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
@@ -9,9 +10,10 @@ import refs
 import ui.dialogs.informers
 import ui.plotters
 from constants.toolbar import *
-from structures.points import NEMid, Nucleoside
+from structures.points.point import Point
 from structures.strands import Strand
 from ui.dialogs.strand_config.strand_config import StrandConfig
+from ui.panels.side_view import workers
 
 logger = logging.getLogger(__name__)
 
@@ -48,55 +50,24 @@ class Panel(QGroupBox):
 
         logger.info(f"Strand #{strand.parent.index(strand)} was clicked.")
 
-    def points_clicked(self, points: List[Tuple[float, float]]) -> None:
-        """slot for when a point in the plot is clicked."""
+    def points_clicked(self, points: List[Point]) -> None:
+        """
+        Slot for when a point in the plot is clicked.
+
+        Utilizes a worker thread to handle the point click.
+        """
+        strands = refs.strands.current
+        domains = refs.domains.current
+        parent = self
+        refresh = refs.constructor.side_view.plot.refresh
+
+        worker = partial(logger.info, "Point was clicked but no worker handled the click")
         if refs.toolbar.current == INFORMER:
-            dialogs = []
-
-            for item in points:
-                if isinstance(item, NEMid):
-                    dialogs.append(
-                        ui.dialogs.informers.NEMidInformer(
-                            self.parent(),
-                            item,
-                            refs.strands.current,
-                            refs.domains.current,
-                        )
-                    )
-                elif isinstance(item, Nucleoside):
-                    dialogs.append(
-                        ui.dialogs.informers.NucleosideInformer(
-                            self.parent(),
-                            item,
-                            refs.strands.current,
-                            refs.domains.current,
-                        )
-                    )
-                else:
-                    item.highlighted = False
-
-            def dialog_complete(dialogs_, points_):
-                for dialog_ in dialogs_:
-                    dialog_.close()
-                for point_ in points_:
-                    point_.highlighted = False
-                self.refresh()
-
-            if len(dialogs) > 0:
-                wrapped_dialog_complete = partial(dialog_complete, dialogs, points)
-                for dialog in dialogs:
-                    dialog.finished.connect(wrapped_dialog_complete)
-                    dialog.show()
-                atexit.register(wrapped_dialog_complete)
-
-                self.refresh()
-
-        if refs.toolbar.current == JUNCTER:
-            # if exactly two overlapping points are clicked trigger the junction creation process
-            if len(points) == 2:
-                if all([isinstance(item, NEMid) for item in points]):
-                    refs.strands.current.conjunct(points[0], points[1])
-                    self.refresh()
-
+            worker = partial(workers.informer, parent, points, strands, domains, refresh)
+        elif refs.toolbar.current == JUNCTER:
+            worker = partial(workers.juncter, points, strands)
         elif refs.toolbar.current == NICKER:
-            raise NotImplementedError("Nicker is not yet implemented")
+            worker = partial(workers.nicker, points, strands)
+        worker()
+        # thread = Thread(target=worker)
+        # thread.run()

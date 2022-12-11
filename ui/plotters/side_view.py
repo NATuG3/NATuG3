@@ -255,8 +255,9 @@ class SideViewPlotter(pg.PlotWidget):
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
-                    symbol_size = 18
                     symbol_brushes.append(highlight_brush)
+                    symbol_pens.append(point_pen)
+                    symbol_size = 18
                 # if it isn't highlighted then determine the properties of it based off of the type of the point
                 else:
                     if isinstance(point, Nucleoside):
@@ -281,11 +282,13 @@ class SideViewPlotter(pg.PlotWidget):
                             symbol_brushes.append(point_brush)
                             symbol_pens.append(point_pen)
                             symbol_size = 6
+                    else:
+                        raise TypeError("Point is not a Nucleoside or NEMid.")
 
                 # if the strand is highlighted boost the size of the symbol brush
                 if strand.highlighted:
                     symbol_size += 5
-                symbol_sizes.append(int(symbol_size))
+                symbol_sizes.append(symbol_size)
 
             # graph the points separately
             plotted_points = pg.PlotDataItem(
