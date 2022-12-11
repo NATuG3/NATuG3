@@ -1,4 +1,4 @@
-# NATuG3
+# NATuG
 
 ### A program designed to streamline the nucleic acid nanotube design process.
 
