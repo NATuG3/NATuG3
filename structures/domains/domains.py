@@ -6,7 +6,7 @@ import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
-from helpers import inverse
+from utils import inverse
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.domains.workers.side_view import DomainStrandWorker

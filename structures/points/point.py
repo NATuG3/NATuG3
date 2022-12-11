@@ -1,8 +1,9 @@
 import logging
 from dataclasses import dataclass
-from typing import Tuple, Type
+from typing import Tuple, Type, Deque
 
 from constants.directions import DOWN, UP
+from utils import inverse
 
 logger = logging.getLogger(__name__)
 
@@ -65,29 +66,31 @@ class Point:
             Point: The matching point.
             None: There is no matching point.
         """
-        if self.strand is None or self.strand.closed:
+        # our domain's parent is a subunit; our domain's subunit's parent is a Domains object
+        # we need access to this Domains object in order to locate the matching point
+        if self.domain is None or self.domain.parent is None or self.domain.parent.parent is None:
             return None
         else:
-            # create an easy reference to the entire domains list
+            # create a reference to the Domains object
             domains = self.domain.parent.parent
 
-            # obtain the index of the domain that this point belongs to
-            domain_index = self.domain.index
+            # obtain the helix that we are contained in
+            our_helix: Deque[Point] = domains.points()[self.domain.index][self.direction]
+            # determine our index in our helix
+            our_index = our_helix.index(self)
 
-            # obtain a points array in the formate of
-            # [domain#0[up-strand, down-strand], domain#1[up-strand, down-strand], ...]
-            domain_points = domains.points()
+            # obtain the other helix of our domain
+            other_helix: Deque[Point] = domains.points()[self.domain.index][inverse(self.direction)]
+            # since the other strand in our domain is going in the other direction, we reverse the other helix
+            other_helix: Tuple[Point] = tuple(reversed(other_helix))
 
-            # fetch the other strand of the same helix as this point
-            if self.strand.up_strand:
-                other_strand = domain_points[domain_index][DOWN]
-            else:
-                other_strand = domain_points[domain_index][UP]
+            # obtain the matching point
+            matching: Point = other_helix[our_index]
 
-            # since the other strand is a different helix, we must reverse it to find the matching point
-            reversed_other_strand = tuple(reversed(other_strand))
+            # ensure that the matching item is of the same type as us
+            assert isinstance(matching, type(self))
 
-            return reversed_other_strand[self.index]
+            return matching
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
