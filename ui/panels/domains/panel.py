@@ -136,7 +136,6 @@ class Panel(QWidget):
                 filter="*csv",
             )[0]
             if len(filepath) > 0:
-
                 def loader():
                     domains = Domains.from_file(
                         mode="csv",

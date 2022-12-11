@@ -29,11 +29,11 @@ class Subunit:
     """
 
     def __init__(
-        self,
-        nucleic_acid_profile: NucleicAcidProfile,
-        domains: List["Domain"],
-        template: bool = False,
-        parent: "Domains" = None,
+            self,
+            nucleic_acid_profile: NucleicAcidProfile,
+            domains: List["Domain"],
+            template: bool = False,
+            parent: "Domains" = None,
     ) -> None:
         """
         Create an instance of a subunit container.

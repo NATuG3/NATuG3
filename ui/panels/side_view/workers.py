@@ -1,4 +1,3 @@
-import atexit
 import logging
 from functools import partial
 from typing import List, Callable
@@ -45,7 +44,9 @@ def juncter(points: List[NEMid], strands: Strands, refresh: Callable) -> None:
     logger.info("Juncter mode was run.")
 
 
-def informer(parent, points: List[Point], strands: Strands, domains: Domains, refresh: Callable) -> None:
+def informer(
+        parent, points: List[Point], strands: Strands, domains: Domains, refresh: Callable
+) -> None:
     """
     Create an informer for a clicked point and its juncmate (if applicable).
 
@@ -93,7 +94,9 @@ def informer(parent, points: List[Point], strands: Strands, domains: Domains, re
 
         # if an unsupported type of point is clicked raise an error
         else:
-            logger.info("Unsupported point type passed to informer. Point type: %s", type(point))
+            logger.info(
+                "Unsupported point type passed to informer. Point type: %s", type(point)
+            )
 
     def dialog_complete(dialogs_, points_):
         """Worker function to be called when all dialogs are closed."""

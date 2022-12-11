@@ -39,7 +39,7 @@ class DomainStrandWorker:
         self.domains = domains
 
     def compute(
-        self,
+            self,
     ) -> List[Tuple[List[NEMid | Nucleoside], List[NEMid | Nucleoside]]]:
         """
         Compute all NEMid data.
@@ -70,8 +70,8 @@ class DomainStrandWorker:
                         for down_strand_z_coord in self._z_coords()[index][DOWN]:
                             cycle += 1
                             if (
-                                abs(up_strand_z_coord - down_strand_z_coord)
-                                > self.nucleic_acid_profile.Z_mate
+                                    abs(up_strand_z_coord - down_strand_z_coord)
+                                    > self.nucleic_acid_profile.Z_mate
                             ):
                                 begin_at[DOWN] += 1
                                 if cycle == 10000:
@@ -126,9 +126,9 @@ class DomainStrandWorker:
             # create NEMid objects for final return DomainContainer
             for strand_direction in self.strand_directions:
                 for angle, x_coord, z_coord in zip(
-                    angles[strand_direction],
-                    x_coords[strand_direction],
-                    z_coords[strand_direction],
+                        angles[strand_direction],
+                        x_coords[strand_direction],
+                        z_coords[strand_direction],
                 ):
                     # combine all data into NEMid object
                     NEMid_ = NEMid(
@@ -179,8 +179,8 @@ class DomainStrandWorker:
                             junction = False
                             # if the two NEMids are very close consider it a junction
                             if (
-                                dist(NEMid1.position(), NEMid2.position())
-                                < settings.junction_threshold
+                                    dist(NEMid1.position(), NEMid2.position())
+                                    < settings.junction_threshold
                             ):
                                 junction = True
                             # if the two NEMids are on opposite sides and have a very close
@@ -189,8 +189,8 @@ class DomainStrandWorker:
                                 z_dist = abs(NEMid1.z_coord - NEMid2.z_coord)
                                 x_dist = abs(NEMid1.x_coord - NEMid2.x_coord)
                                 opposite_sides = (
-                                    abs(x_dist - self.domains.count)
-                                    < settings.junction_threshold
+                                        abs(x_dist - self.domains.count)
+                                        < settings.junction_threshold
                                 )
                                 matching_heights = z_dist < settings.junction_threshold
                                 if opposite_sides and matching_heights:
@@ -266,8 +266,8 @@ class DomainStrandWorker:
 
                     # break once self.B x coords have been generated
                     if (
-                        len(x_coords[index][strand_direction])
-                        == self.nucleic_acid_profile.B
+                            len(x_coords[index][strand_direction])
+                            == self.nucleic_acid_profile.B
                     ):
                         break
 
@@ -341,7 +341,7 @@ class DomainStrandWorker:
             # move the initial Z coord down until it is as close to z=0 as possible
             # this way the graphs don't skew upwards weirdly
             offset_interval = (
-                self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
+                    self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
             )
             while initial_z_coord > 0:
                 initial_z_coord -= offset_interval

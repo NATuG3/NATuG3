@@ -69,10 +69,10 @@ class Point:
         # our domain's parent is a subunit; our domain's subunit's parent is a Domains object
         # we need access to this Domains object in order to locate the matching point
         if (
-            self.strand.closed
-            or self.domain is None
-            or self.domain.parent is None
-            or self.domain.parent.parent is None
+                self.strand.closed
+                or self.domain is None
+                or self.domain.parent is None
+                or self.domain.parent.parent is None
         ):
             return None
         else:

@@ -1,8 +1,7 @@
-import atexit
 import logging
 from functools import partial
 from threading import Thread
-from typing import Tuple, List
+from typing import List
 
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
@@ -61,9 +60,13 @@ class Panel(QGroupBox):
         parent = self
         refresh = refs.constructor.side_view.plot.refresh
 
-        worker = partial(logger.info, "Point was clicked but no worker handled the click")
+        worker = partial(
+            logger.info, "Point was clicked but no worker handled the click"
+        )
         if refs.toolbar.current == INFORMER:
-            worker = partial(workers.informer, parent, points, strands, domains, refresh)
+            worker = partial(
+                workers.informer, parent, points, strands, domains, refresh
+            )
         elif refs.toolbar.current == JUNCTER:
             worker = partial(workers.juncter, points, strands, refresh)
         elif refs.toolbar.current == NICKER:

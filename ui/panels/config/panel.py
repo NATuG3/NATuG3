@@ -26,7 +26,7 @@ class Panel(QWidget):
     """Config panel."""
 
     def __init__(
-        self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
+            self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
     ) -> None:
         super().__init__(parent)
         self.auto_updating_plots = False
@@ -108,8 +108,8 @@ class Panel(QWidget):
         def tab_changed(index: int):
             """Update the plotting mode based on the currently opened tab."""
             if index in (
-                NUCLEIC_ACID,
-                DOMAINS,
+                    NUCLEIC_ACID,
+                    DOMAINS,
             ):
                 # if the plot mode was not already NEMid make it NEMid
                 if refs.plot_mode.current != "NEMid":
@@ -160,7 +160,7 @@ class RefreshConfirmer(QDialog):
                     # if we find a save that contains a timestamp, see if it has a # at the end of it
                     # and if it does than append that number to the counter list
                     counter.append(
-                        int(filename[filename.find("_") + 1 :].replace(".nano", ""))
+                        int(filename[filename.find("_") + 1:].replace(".nano", ""))
                     )
         # let counter be the highest counter in the list of counters found
         counter: int = max(counter) + 1

@@ -35,14 +35,14 @@ class Domain:
     """
 
     def __init__(
-        self,
-        nucleic_acid_profile: NucleicAcidProfile,
-        theta_m_multiple: int,
-        left_helix_joint_direction: int,
-        right_helix_joint_direction: int,
-        count: int,
-        parent: "Domains" = None,
-        index: int = None,
+            self,
+            nucleic_acid_profile: NucleicAcidProfile,
+            theta_m_multiple: int,
+            left_helix_joint_direction: int,
+            right_helix_joint_direction: int,
+            count: int,
+            parent: "Domains" = None,
+            index: int = None,
     ):
         """
         Initialize a Domain object.

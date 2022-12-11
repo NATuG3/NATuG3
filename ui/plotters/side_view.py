@@ -69,10 +69,10 @@ class SideViewPlotter(pg.PlotWidget):
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
 
     def __init__(
-        self,
-        strands: Strands,
-        nucleic_acid_profile: NucleicAcidProfile,
-        mode: Literal["nucleoside", "NEMid"],
+            self,
+            strands: Strands,
+            nucleic_acid_profile: NucleicAcidProfile,
+            mode: Literal["nucleoside", "NEMid"],
     ) -> None:
         """
         Initialize plotter instance.
@@ -193,7 +193,7 @@ class SideViewPlotter(pg.PlotWidget):
             highlight_brush = pg.mkBrush(color=settings.colors["highlighted"])
 
             # create various pens
-            dark_pen = pg.mkPen(color=utils.dim_color(strand.color, 0.5), width=.3)
+            dark_pen = pg.mkPen(color=utils.dim_color(strand.color, 0.5), width=0.3)
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # if the strand color is dark
@@ -280,7 +280,9 @@ class SideViewPlotter(pg.PlotWidget):
                             symbol_pens.append(point_pen)
                             symbol_size = 6
                     else:
-                        raise TypeError(f"Point is not a Nucleoside or NEMid. Point Type: {type(point)}")
+                        raise TypeError(
+                            f"Point is not a Nucleoside or NEMid. Point Type: {type(point)}"
+                        )
 
                 # if the strand is highlighted boost the size of the symbol brush
                 if strand.highlighted:
@@ -356,7 +358,7 @@ class SideViewPlotter(pg.PlotWidget):
             self.plot_data.plotted_strokes.append(stroke)
 
         for stroke, points in zip(
-            self.plot_data.plotted_strokes, self.plot_data.plotted_points
+                self.plot_data.plotted_strokes, self.plot_data.plotted_points
         ):
             self.addItem(stroke)
             self.addItem(points)

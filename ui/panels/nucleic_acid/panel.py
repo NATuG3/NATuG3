@@ -52,18 +52,18 @@ class Panel(QWidget):
             )
 
         for input in (
-            self.D,
-            self.H,
-            self.T,
-            self.g,
-            self.B,
-            self.Z_b,
-            self.Z_c,
-            self.Z_s,
-            self.Z_mate,
-            self.theta_b,
-            self.theta_c,
-            self.theta_s,
+                self.D,
+                self.H,
+                self.T,
+                self.g,
+                self.B,
+                self.Z_b,
+                self.Z_c,
+                self.Z_s,
+                self.Z_mate,
+                self.theta_b,
+                self.theta_c,
+                self.theta_s,
         ):
             input.editingFinished.connect(on_input_updated)
 

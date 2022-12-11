@@ -1,11 +1,10 @@
-import os
 import logging
+import os
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog, QLineEdit
 
 import refs
-
 
 logger = logging.getLogger(__name__)
 

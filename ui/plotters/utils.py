@@ -29,11 +29,11 @@ def brighten_color(color: Iterable[int], factor: float):
 
 @cache
 def custom_symbol(
-    symbol: str,
-    font: QFont = QFont("San Serif"),
-    flip=True,
-    rotation: float = 0,
-    scale: Tuple[float, float] | float = 1,
+        symbol: str,
+        font: QFont = QFont("San Serif"),
+        flip=True,
+        rotation: float = 0,
+        scale: Tuple[float, float] | float = 1,
 ) -> QPainterPath:
     """
     Create custom symbol with font for pyqtgraph.
@@ -73,7 +73,7 @@ def custom_symbol(
 
 
 def chaikins_corner_cutting(
-    coords: List[Tuple[float, float]], offset=0.25, refinements=5
+        coords: List[Tuple[float, float]], offset=0.25, refinements=5
 ):
     """
     Chaikin's corner cutting algorithm.
