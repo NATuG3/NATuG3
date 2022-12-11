@@ -28,23 +28,53 @@ def brighten_color(color: Iterable[int], factor: float):
 
 
 @cache
-def custom_symbol(symbol: str, font: QFont = QFont("San Serif"), flip=True):
-    """Create custom symbol with font for pyqtgraph."""
-    # https://stackoverflow.com/a/70789822
+def custom_symbol(
+    symbol: str,
+    font: QFont = QFont("San Serif"),
+    flip=True,
+    rotation: float = 0,
+    scale: Tuple[float, float] | float = 0,
+) -> QPainterPath:
+    """
+    Create custom symbol with font for pyqtgraph.
+
+    Args:
+        symbol: The symbol to create.
+        font: The font to use.
+        flip: Whether to flip the symbol.
+        rotation: The rotation of the symbol.
+        scale: The scale of the symbol.
+
+    Returns:
+        The symbol.
+
+    Notes:
+        This is a cached method, since symbols don't change.
+        This method is from https://stackoverflow.com/a/70789822.
+    """
+    scale = (scale, scale) if isinstance(scale, float) else scale
+
     pg_symbol = QPainterPath()
     pg_symbol.addText(0, 0, font, symbol)
     br = pg_symbol.boundingRect()
-    scale = min(1.0 / br.width(), 1.0 / br.height())
+    initial_scale = min(1.0 / br.width(), 1.0 / br.height())
     tr = QTransform()
     if flip:
-        tr.scale(scale, -scale)
+        tr.scale(initial_scale, -initial_scale)
     else:
-        tr.scale(scale, scale)
+        tr.scale(initial_scale, initial_scale)
+
+    # apply requested transformations
+    tr.scale(scale, scale)
+    tr.rotate(rotation)
     tr.translate(-br.x() - br.width() / 2.0, -br.y() - br.height() / 2.0)
+
     return tr.map(pg_symbol)
 
 
-def chaikins_corner_cutting(coords: List[Tuple[float, float]], offset=0.25, refinements=5):
+def chaikins_corner_cutting(
+    coords: List[Tuple[float, float]], offset=0.25, refinements=5
+):
     """
     Chaikin's corner cutting algorithm.
 
