@@ -13,13 +13,16 @@ from structures.strands import Strands
 logger = logging.getLogger(__name__)
 
 
-def juncter(points: List[Point], strands: Strands) -> None:
+def juncter(points: List[NEMid], strands: Strands, refresh: Callable) -> None:
     """
     Create a junction.
 
     Args:
         points: The points that the junction is being created for.
         strands: A reference to all the strands currently plotted.
+        refresh: Function called to refresh plot after juncter mode is run. This function does not always create
+            junctions (for instance, if only one point is passed), so the function only calls refresh if a junction
+            is created.
 
     Notes:
         If more or less than two points or passed, or if either point is not a NEMid, the function does nothing.
@@ -27,6 +30,7 @@ def juncter(points: List[Point], strands: Strands) -> None:
     if len(points) == 2:
         if all([isinstance(item, NEMid) for item in points]):
             strands.conjunct(points[0], points[1])
+            refresh()
         else:
             raise TypeError(
                 "Both points must be NEMids to create a junction. Types passed: %s and %s. Ignoring request.",
@@ -101,9 +105,20 @@ def informer(parent, points: List[Point], strands: Strands, domains: Domains, re
     if len(dialogs) > 0:
         # connect the completed events for all the dialogs
         wrapped_dialog_complete = partial(dialog_complete, dialogs, points)
+
+        # so that the dialogs aren't all on top of one another we will shift each one 5 pixels down and to the right
+        # from the previous one for each dialog (so that the user can see that there are multiple dialogs)
+        shift = 0
         for dialog in dialogs:
+            # connect the completed event
             dialog.finished.connect(wrapped_dialog_complete)
+
+            # show the dialog
             dialog.show()
+
+            # shift the dialog
+            dialog.move(dialog.x() + shift, dialog.y() + shift)
+            shift += 10
 
         # refresh upon last dialog being closed
         dialogs[-1].finished.connect(refresh)
