@@ -8,6 +8,7 @@ import refs
 
 class Panel(QWidget):
     """Panel for sequencing."""
+
     def __init__(self, parent):
         super().__init__(parent)
         uic.loadUi("ui/panels/sequencing/panel.ui", self)

@@ -348,9 +348,11 @@ class Domains:
             This is a cached method. The cache is cleared when the subunit is changed.
         """
         if self._points is None:
+            logger.debug("Recomputing points.")
             self._points = self.worker.compute()
-        logger.debug("Fetched points for domain")
-        return self._points
+        else:
+            logger.debug("Using cached points.")
+            return self._points
 
     @cache
     def strands(self) -> Strands:
