@@ -56,18 +56,3 @@ class Nucleoside(Point):
             f"base={str(self.base).replace('None', 'unset')}"
             f")"
         )
-
-    def __eq__(self, other):
-        """
-        Determine equality based on whether the nucleoside base of the other instance matches ours.
-        """
-        # if it isn't the same type then it cannot be equal
-        if not isinstance(other, type(self)):
-            return None
-        try:
-            # if it is the same type and the bases match return true
-            if self.base == other.base:
-                return True
-        # if the .base attribute was missing return false
-        except AttributeError:
-            return False
