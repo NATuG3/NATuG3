@@ -4,7 +4,9 @@ import random
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog
 
+import utils
 from constants.bases import DNA
+from structures.strands import Strand
 
 
 class BulkInputSequenceEditor(QWidget):
@@ -46,7 +48,7 @@ class BulkInputSequenceEditor(QWidget):
             # (or if it does get confirmation of user)
             if len(file_bases) > len(self.bases):
                 difference = len(file_bases) - len(self.bases)
-                confirmed = helpers.confirm(
+                confirmed = utils.confirm(
                     self.parent(),
                     "Sequence Overload",
                     f"The chosen file contains {difference} more bases than the strand allows for. If you proceed the "
@@ -63,7 +65,7 @@ class BulkInputSequenceEditor(QWidget):
                 for file_base in file_bases:
                     if file_base.upper() not in DNA:
                         # if any base is of the wrong type then cancel the operation
-                        helpers.warning(
+                        utils.warning(
                             self.parent(),
                             "Invalid bases",
                             "This file contains invalid base characters!\n"
@@ -80,7 +82,7 @@ class BulkInputSequenceEditor(QWidget):
 
     def _randomize_sequence(self):
         def randomize_sequence_clicked():
-            self.bases = [random.choice(DNA) for _ in range(len(self.bases))]
+            self.bases = Strand.random_sequence(len(self.bases))
 
         self.randomize_sequence.clicked.connect(randomize_sequence_clicked)
 

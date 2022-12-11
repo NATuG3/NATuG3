@@ -3,9 +3,10 @@ from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
-from random import shuffle
+from random import shuffle, random
 from typing import Tuple, Iterable, Deque, List, ClassVar
 
+from constants.bases import DNA
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -186,6 +187,33 @@ class Strand:
                 f"Length of the new sequence ({len(new_sequence)}) must"
                 + "match number of nucleosides in strand ({len(self)})"
             )
+
+    def randomize_sequence(self, overwrite: bool = False):
+        """
+        Randomize the sequence of the strand.
+
+        Uses self.random_sequence() to compute the random sequence
+
+        Args:
+            overwrite: Whether to overwrite the current sequence or not. If overwrite is False then all unset
+                nucleosides (ones which are None) will be set to a random nucleoside.
+        """
+        for nucleoside in self.nucleosides():
+            if overwrite or nucleoside.base is None:
+                nucleoside.base = random.choice(DNA)
+
+    @staticmethod
+    def random_sequence(length: int) -> List[str]:
+        """
+        Generate a random sequence of bases.
+
+        Args:
+            length: The length of the sequence to generate.
+
+        Returns:
+            A list of bases.
+        """
+        return [random.choice(DNA) for _ in range(length)]
 
     def index(self, item) -> int | None:
         """Determine the index of an item."""

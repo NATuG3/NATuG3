@@ -1,9 +1,13 @@
 import os
+import logging
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog, QLineEdit
 
 import refs
+
+
+logger = logging.getLogger(__name__)
 
 
 class Panel(QWidget):
@@ -16,6 +20,27 @@ class Panel(QWidget):
         self.strand_buttons = []
 
         self._configuration()
+
+    def _tools(self):
+        """Set up the tools group box."""
+
+        def run_bulk_operation_clicked():
+            """Worker for when the run bulk operation button is clicked."""
+            scope = self.scope.currentText()
+            operation = self.operation.currentText()
+
+            if operation == "Randomize":
+                logger.debug("Performing randomization bulk operation.")
+                if scope == "All Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.randomize_sequence(overwrite=True)
+                    logger.info("Randomized all bases in all strands.")
+                elif scope == "Unset Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.randomize_sequence(overwrite=False)
+                    logger.info("Randomized all unset bases in all strands.")
+
+        self.run_bulk_operation.clicked.connect(run_bulk_operation_clicked)
 
     def _configuration(self):
         """Set up the configuration group box."""

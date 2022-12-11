@@ -140,7 +140,6 @@ class Domains:
         right_helix_joints = [
             "UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains
         ]
-        s = [domain.theta_s_multiple for domain in domains]
         m = [domain.theta_interior_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
@@ -149,7 +148,6 @@ class Domains:
         # create a pandas dataframe with the columns above
         data = pd.DataFrame(
             {
-                "s": s,
                 "m": m,
                 "Left Helix Joints": left_helix_joints,
                 "Right Helix Joints": right_helix_joints,
