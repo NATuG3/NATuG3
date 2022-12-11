@@ -5,7 +5,7 @@ from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
 import structures
-from helpers import show_in_file_explorer
+from utils import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
 

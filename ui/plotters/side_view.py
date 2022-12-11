@@ -13,7 +13,7 @@ from PyQt6.QtGui import (
 
 import settings
 from constants.directions import *
-from helpers import chaikins_corner_cutting, custom_symbol
+from utils import chaikins_corner_cutting, custom_symbol
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile

@@ -7,7 +7,7 @@ from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
 
 import settings
-from helpers import show_in_file_explorer
+from utils import show_in_file_explorer
 from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils

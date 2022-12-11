@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Iterable, List
 
-from helpers import inverse
+from utils import inverse
 from structures.profiles import NucleicAcidProfile
 
 

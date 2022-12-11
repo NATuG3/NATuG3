@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 import settings
 from constants.directions import *
-from helpers import inverse
+from utils import inverse
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 
