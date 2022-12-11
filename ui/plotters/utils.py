@@ -33,7 +33,7 @@ def custom_symbol(
     font: QFont = QFont("San Serif"),
     flip=True,
     rotation: float = 0,
-    scale: Tuple[float, float] | float = 0,
+    scale: Tuple[float, float] | float = 1,
 ) -> QPainterPath:
     """
     Create custom symbol with font for pyqtgraph.
