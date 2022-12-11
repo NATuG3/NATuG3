@@ -77,7 +77,6 @@ class Panel(QGroupBox):
                     )
                 else:
                     item.highlighted = False
-                    to_refresh = False
 
             def dialog_complete(dialogs_, points_):
                 for dialog_ in dialogs_:
@@ -86,7 +85,7 @@ class Panel(QGroupBox):
                     point_.highlighted = False
                 self.refresh()
 
-            if to_refresh:
+            if len(dialogs) > 0:
                 wrapped_dialog_complete = partial(dialog_complete, dialogs, points)
                 for dialog in dialogs:
                     dialog.finished.connect(wrapped_dialog_complete)
