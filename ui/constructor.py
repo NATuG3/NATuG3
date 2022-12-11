@@ -149,23 +149,20 @@ class Window(QMainWindow):
         else:
             self.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
 
-        self.config.tab_area: QTabWidget
         # config resizing...
-        # if config is floating make the max size very large
+        # if config is floating make the max size very large and make the tab area go on top
         if self.config.isFloating():
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.North)
             self.config.setMaximumWidth(600)
-        # otherwise check the current tab of the config panel
+        # otherwise check the current tab of the config panel and adjust accordingly
+        # and make the tab area go on the right
         else:
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
-            # if the domains tab of the config panel is visible:
-            if (
+            if self.config.panel.tabs.sequencing.isVisible():
+                self.config.setFixedWidth(350)
+            elif (
                 self.config.panel.tabs.domains.isVisible()
-                or self.config.panel.tabs.sequencing.isVisible()
             ):
-                # set the maximum width of config to be 3/8ths of the screen, and the minimum possible size
-                # to be that of the domain tab's width
                 self.config.setFixedWidth(300)
-            # if the nucleic acid tab of the config panel is visible:
             elif self.config.panel.tabs.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

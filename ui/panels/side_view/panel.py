@@ -44,20 +44,6 @@ class Panel(QGroupBox):
 
     def strand_clicked(self, strand: Strand) -> None:
         """Slot for when a strand is clicked."""
-        strand_button: StrandButton = (
-            refs.constructor.config.panel.tabs.sequencing.strand_buttons[
-                strand.parent.index(strand)
-            ]
-        )
-        scroll_area: QScrollArea = (
-            refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
-        )
-        strand_button.setStyleSheet(
-            f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}"
-        )
-        scroll_area.ensureWidgetVisible(strand_button)
-        QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
-
         dialog = StrandConfig(self.parent(), strand=strand)
         dialog.updated.connect(self.refresh)
         dialog.show()
@@ -67,17 +53,10 @@ class Panel(QGroupBox):
 
     def points_clicked(self, points: List[Tuple[float, float]]) -> None:
         """slot for when a point in the plot is clicked."""
-        # TEMP CODE
-        # for point in points:
-        #     point.matching.highlighted = True
-
         if refs.toolbar.current == INFORMER:
             dialogs = []
 
             for item in points:
-                item.highlighted: bool = True
-                to_refresh: bool = True
-
                 if isinstance(item, NEMid):
                     dialogs.append(
                         ui.dialogs.informers.NEMidInformer(
@@ -125,5 +104,3 @@ class Panel(QGroupBox):
 
         elif refs.toolbar.current == NICKER:
             raise NotImplementedError("Nicker is not yet implemented")
-
-        refs.constructor.config.panel.tabs.sequencing.reload()
