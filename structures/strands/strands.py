@@ -37,10 +37,10 @@ class Strands:
     """
 
     def __init__(
-            self,
-            nucleic_acid_profile: NucleicAcidProfile,
-            strands: Iterable[Strand],
-            name: str = "Strands",
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        strands: Iterable[Strand],
+        name: str = "Strands",
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -70,7 +70,7 @@ class Strands:
         return len(self.strands)
 
     def to_file(
-            self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True
+        self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True
     ) -> None:
         """
         Export all sequences to a file.

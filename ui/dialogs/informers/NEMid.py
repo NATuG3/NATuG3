@@ -9,7 +9,7 @@ from structures.strands import Strands
 
 class NEMidInformer(QDialog):
     def __init__(
-            self, parent, NEMid_: NEMid, all_strands: Strands, all_domains: Domains
+        self, parent, NEMid_: NEMid, all_strands: Strands, all_domains: Domains
     ):
         super().__init__(parent)
         assert isinstance(all_strands, Strands)

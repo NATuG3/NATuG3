@@ -45,7 +45,7 @@ def juncter(points: List[NEMid], strands: Strands, refresh: Callable) -> None:
 
 
 def informer(
-        parent, points: List[Point], strands: Strands, domains: Domains, refresh: Callable
+    parent, points: List[Point], strands: Strands, domains: Domains, refresh: Callable
 ) -> None:
     """
     Create an informer for a clicked point and its juncmate (if applicable).

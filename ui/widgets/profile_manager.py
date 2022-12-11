@@ -21,15 +21,15 @@ class ProfileManager(QGroupBox):
     chosen_changed = pyqtSignal(str)
 
     def __init__(
-            self,
-            parent,
-            extractor: Callable,
-            dumper: Callable,
-            title="Profile Manager",
-            warning: str | None = None,
-            defaults: Iterable[str] | None = None,
-            default="",
-            profiles: Dict[str, object] = None,
+        self,
+        parent,
+        extractor: Callable,
+        dumper: Callable,
+        title="Profile Manager",
+        warning: str | None = None,
+        defaults: Iterable[str] | None = None,
+        default="",
+        profiles: Dict[str, object] = None,
     ):
         """
         Initialize the nucleic_acid_profile manager.
@@ -101,7 +101,7 @@ class ProfileManager(QGroupBox):
         """Present the user with a popup stating self.warning. If user approves request, return True."""
         if self.warning is not None:
             if not helpers.confirm(
-                    self.parent(), "Profile Manager Warning", self.warning
+                self.parent(), "Profile Manager Warning", self.warning
             ):
                 return False
         return True

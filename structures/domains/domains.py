@@ -44,11 +44,11 @@ class Domains:
     """
 
     def __init__(
-            self,
-            nucleic_acid_profile: NucleicAcidProfile,
-            domains: List[Domain],
-            symmetry: int,
-            antiparallel: bool = False,
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        domains: List[Domain],
+        symmetry: int,
+        antiparallel: bool = False,
     ) -> None:
         """
         Initialize a Domains object.
@@ -165,10 +165,10 @@ class Domains:
 
     @classmethod
     def from_file(
-            cls,
-            mode: Literal["csv"],
-            filepath: str,
-            nucleic_acid_profile: NucleicAcidProfile,
+        cls,
+        mode: Literal["csv"],
+        filepath: str,
+        nucleic_acid_profile: NucleicAcidProfile,
     ):
         """
         Import domains from a csv. Must be a csv in the format of self.to_file().
@@ -383,8 +383,8 @@ class Domains:
         # Creating a list of strands, and then converting that list into a Strands object.
         converted_strands = []
         for strand_direction in (
-                UP,
-                DOWN,
+            UP,
+            DOWN,
         ):
             # Creating a strand for each domain.
             for index, domain in enumerate(self.domains()):

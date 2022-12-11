@@ -1,9 +1,9 @@
 import itertools
+import random
 from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
-import random
 from typing import Tuple, Iterable, Deque, List, ClassVar
 
 from constants.bases import DNA
