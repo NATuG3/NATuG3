@@ -271,7 +271,7 @@ class SideViewPlotter(pg.PlotWidget):
                             symbol_brushes.append(dim_brush)
                             symbol_pens.append(black_pen)
                             symbol_size = 9
-                    if isinstance(point, NEMid):
+                    elif isinstance(point, NEMid):
                         if point.junctable:
                             # junctable NEMids are dimmly colored
                             symbol_brushes.append(bright_brush)
@@ -283,7 +283,7 @@ class SideViewPlotter(pg.PlotWidget):
                             symbol_pens.append(point_pen)
                             symbol_size = 6
                     else:
-                        raise TypeError("Point is not a Nucleoside or NEMid.")
+                        raise TypeError(f"Point is not a Nucleoside or NEMid. Point Type: {type(point)}")
 
                 # if the strand is highlighted boost the size of the symbol brush
                 if strand.highlighted:
