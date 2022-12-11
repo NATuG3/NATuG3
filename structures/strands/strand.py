@@ -6,7 +6,6 @@ from functools import cached_property
 from random import shuffle
 from typing import Tuple, Iterable, Deque, List, ClassVar
 
-from constants.bases import DNA, COMPLEMENTS
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile

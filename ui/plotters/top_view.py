@@ -6,8 +6,8 @@ from typing import List
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal
 
-import utils
 import settings
+import utils
 from structures.domains import Domains
 from structures.domains.workers.top_view import TopViewWorker
 from ui import plotters

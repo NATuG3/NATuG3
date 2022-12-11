@@ -7,7 +7,6 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QGroupBox
 
-import utils
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)

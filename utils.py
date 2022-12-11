@@ -1,9 +1,7 @@
 import logging
 import subprocess
-from functools import wraps, cache
+from functools import wraps
 
-import numpy as np
-from PyQt6.QtGui import QFont, QPainterPath, QTransform
 from PyQt6.QtWidgets import QMessageBox
 
 import constants

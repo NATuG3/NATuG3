@@ -1,8 +1,8 @@
 from copy import copy
 from typing import Iterable, List
 
-from utils import inverse
 from structures.profiles import NucleicAcidProfile
+from utils import inverse
 
 
 class Subunit:

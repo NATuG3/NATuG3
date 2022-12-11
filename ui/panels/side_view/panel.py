@@ -3,18 +3,15 @@ import logging
 from functools import partial
 from typing import Tuple, List
 
-from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QGroupBox, QVBoxLayout, QScrollArea
+from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
 import refs
-import settings
 import ui.dialogs.informers
 import ui.plotters
 from constants.toolbar import *
 from structures.points import NEMid, Nucleoside
 from structures.strands import Strand
 from ui.dialogs.strand_config.strand_config import StrandConfig
-from ui.panels.sequencing.buttons import StrandButton
 
 logger = logging.getLogger(__name__)
 

@@ -4,7 +4,6 @@ import random
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog
 
-import utils
 from constants.bases import DNA
 
 

@@ -7,11 +7,11 @@ from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
 
 import settings
-from utils import show_in_file_explorer
 from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
 from structures.strands.strand import Strand
+from utils import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
 

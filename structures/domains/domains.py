@@ -6,7 +6,6 @@ import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
-from utils import inverse
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.domains.workers.side_view import DomainStrandWorker
@@ -14,6 +13,7 @@ from structures.domains.workers.top_view import TopViewWorker
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand, Strands
+from utils import inverse
 
 logger = logging.getLogger(__name__)
 
