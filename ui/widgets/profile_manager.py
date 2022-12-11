@@ -1,7 +1,7 @@
 import logging
 from copy import copy
 from types import FunctionType
-from typing import Iterable, Dict
+from typing import Iterable, Dict, Callable
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
@@ -24,8 +24,8 @@ class ProfileManager(QGroupBox):
     def __init__(
         self,
         parent,
-        extractor: FunctionType,
-        dumper: FunctionType,
+        extractor: Callable,
+        dumper: Callable,
         title="Profile Manager",
         warning: str | None = None,
         defaults: Iterable[str] | None = None,
