@@ -387,6 +387,17 @@ class Domains:
                     )
                 )
         logger.debug(f"Fetched {len(converted_strands)} strands.")
+
+        # ensure that the zeroth domain's up strand's first point is in the proper outputted strand
+        assert self._points[0][0][0] in converted_strands[0]
+
+        # ensure that the points are properly parented
+        # check to see if the zeroth domain's up strand's first point's great-grandparent is us
+        # Point.domain -> Domain
+        # Domain.subunit -> Subunit
+        # Subunit.domains -> Domains (should be us)
+        assert self._points[0][0][0].domain.parent.parent is self
+
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, converted_strands)
 
