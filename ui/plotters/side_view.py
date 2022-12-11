@@ -189,14 +189,11 @@ class SideViewPlotter(pg.PlotWidget):
             # create various brushes
             point_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.9))
             bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, 0.2))
-            dim_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.1))
+            dim_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.3))
             highlight_brush = pg.mkBrush(color=settings.colors["highlighted"])
 
             # create various pens
-            black_pen = pg.mkPen(
-                color=([0] * 3),
-                width=0.5,
-            )
+            dark_pen = pg.mkPen(color=utils.dim_color(strand.color, 0.5), width=.3)
             strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
 
             # if the strand color is dark
@@ -269,7 +266,7 @@ class SideViewPlotter(pg.PlotWidget):
                         else:
                             # based nucleosides are dimly colored
                             symbol_brushes.append(dim_brush)
-                            symbol_pens.append(black_pen)
+                            symbol_pens.append(dark_pen)
                             symbol_size = 9
                     elif isinstance(point, NEMid):
                         if point.junctable:
