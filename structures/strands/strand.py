@@ -56,6 +56,8 @@ class Strand:
         nucleosides(): Obtain all nucleosides in the strand, only.
         index(item): Determine the index of an item.
         sliced(from, to): Return self.NEMids as a list.
+        clear_sequence(): Clear the sequence of the strand.
+        randomize_sequence(overwrite): Randomize the sequence of the strand.
     """
 
     nucleic_acid_profile: NucleicAcidProfile
@@ -188,7 +190,20 @@ class Strand:
                 + "match number of nucleosides in strand ({len(self)})"
             )
 
-    def randomize_sequence(self, overwrite: bool = False):
+    @staticmethod
+    def random_sequence(length: int) -> List[str]:
+        """
+        Generate a random sequence of bases.
+
+        Args:
+            length: The length of the sequence to generate.
+
+        Returns:
+            A list of bases.
+        """
+        return [random.choice(DNA) for _ in range(length)]
+
+    def randomize_sequence(self, overwrite: bool = False) -> None:
         """
         Randomize the sequence of the strand.
 
@@ -202,18 +217,17 @@ class Strand:
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
 
-    @staticmethod
-    def random_sequence(length: int) -> List[str]:
+    def clear_sequence(self, overwrite: bool = False) -> None:
         """
-        Generate a random sequence of bases.
+        Clear the sequence of the strand.
 
         Args:
-            length: The length of the sequence to generate.
-
-        Returns:
-            A list of bases.
+            overwrite: Whether to overwrite the current sequence or not. If overwrite is True then all set nucleosides
+                that are set (are not None) will be made None.
         """
-        return [random.choice(DNA) for _ in range(length)]
+        for nucleoside in self.nucleosides():
+            if overwrite or nucleoside.base is not None:
+                nucleoside.base = None
 
     def index(self, item) -> int | None:
         """Determine the index of an item."""

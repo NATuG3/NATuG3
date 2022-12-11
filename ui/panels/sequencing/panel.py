@@ -42,6 +42,18 @@ class Panel(QWidget):
                         strand.randomize_sequence(overwrite=False)
                     refresh()
                     logger.info("Randomized all unset bases in all strands.")
+            elif operation == "Clear":
+                logger.debug("Performing clear bulk operation.")
+                if scope == "All Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.clear_sequence()
+                    refresh()
+                    logger.info("Cleared all bases in all strands.")
+                elif scope == "Unset Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.clear_sequence(overwrite=False)
+                    refresh()
+                    logger.info("Cleared all unset bases in all strands.")
 
         self.run_bulk_operation.clicked.connect(run_bulk_operation_clicked)
 

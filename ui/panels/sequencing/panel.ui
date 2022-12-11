@@ -151,6 +151,11 @@
              <string>Randomize</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </item>
           </widget>
          </item>
         </layout>
