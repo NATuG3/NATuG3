@@ -6,6 +6,7 @@ from functools import cached_property
 from random import shuffle
 from typing import Tuple, Iterable, Deque, List, ClassVar
 
+from constants.bases import DNA, COMPLEMENTS
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -174,14 +175,9 @@ class Strand:
     def sequence(self, new_sequence: List[str]):
         if len(new_sequence) == len(self.nucleosides()):
             for index, base in enumerate(new_sequence):
-                # update the base for the nucleoside
+                # update the base for the nucleoside and its complement
                 self.nucleosides()[index].base = base
-
-                # assign the complementary base to the matching nucleoside
-                maching_nucleoside = self.nucleosides()[index].matching()
-                complement_base = self.nucleosides()[index].complement
-
-                maching_nucleoside.base = complement_base
+                self.nucleosides()[index].matching().base = COMPLEMENTS[base]
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"

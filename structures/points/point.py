@@ -68,27 +68,37 @@ class Point:
         """
         # our domain's parent is a subunit; our domain's subunit's parent is a Domains object
         # we need access to this Domains object in order to locate the matching point
-        if self.domain is None or self.domain.parent is None or self.domain.parent.parent is None:
+        if (
+            self.strand.closed
+            or self.domain is None
+            or self.domain.parent is None
+            or self.domain.parent.parent is None
+        ):
             return None
         else:
             # create a reference to the Domains object
             domains = self.domain.parent.parent
 
             # obtain the helix that we are contained in
-            our_helix: Deque[Point] = domains.points()[self.domain.index][self.direction]
+            our_helix: Deque[Point] = domains.points()[self.domain.index][
+                self.direction
+            ]
             # determine our index in our helix
             our_index = our_helix.index(self)
 
             # obtain the other helix of our domain
-            other_helix: Deque[Point] = domains.points()[self.domain.index][inverse(self.direction)]
+            other_helix: Deque[Point] = domains.points()[self.domain.index][
+                inverse(self.direction)
+            ]
             # since the other strand in our domain is going in the other direction, we reverse the other helix
             other_helix: Tuple[Point] = tuple(reversed(other_helix))
 
             # obtain the matching point
             matching: Point = other_helix[our_index]
 
-            # ensure that the matching item is of the same type as us
             assert isinstance(matching, type(self))
+            assert other_helix is not our_helix
+            assert matching not in our_helix
 
             return matching
 
