@@ -268,8 +268,8 @@ class SideViewPlotter(pg.PlotWidget):
                         else:
                             # based nucleosides are dimly colored
                             symbol_brushes.append(dim_brush)
-                            symbol_pens.append(None)
-                            symbol_size = 8
+                            symbol_pens.append(black_pen)
+                            symbol_size = 9
                     if isinstance(point, NEMid):
                         if point.junctable:
                             # junctable NEMids are dimmly colored
