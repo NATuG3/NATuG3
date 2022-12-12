@@ -20,6 +20,7 @@ class Menubar(QMenuBar):
             - Github
             - About
     """
+
     def __init__(self, parent):
         """
         Initialize the file menu bar.
@@ -33,6 +34,7 @@ class Menubar(QMenuBar):
     def _add_menus(self):
         """Add the menus to the menu bar."""
         from ui.menubar import File, View, Help
+
         # add menus
         self.addMenu(File(self))
         self.addMenu(View(self))

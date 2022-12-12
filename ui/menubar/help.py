@@ -15,6 +15,7 @@ class Help(QMenu):
         - Github: Open the github project link.
         - About: Obtain information about NATuG.
     """
+
     def __init__(self, parent):
         """
         Initialize the help section of the menu bar.

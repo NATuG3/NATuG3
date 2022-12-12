@@ -88,7 +88,11 @@ class Dockable(QDockWidget):
                 the x and y coords are floats.
         """
         # ensure that the point passed is of the proper form
-        assert len(point) == 2 and isinstance(point[0], float) and isinstance(point[1], float)
+        assert (
+            len(point) == 2
+            and isinstance(point[0], float)
+            and isinstance(point[1], float)
+        )
 
         # create the new active x-range for the plot
         range = self.plot.worker.u_coords.index(point[0])
