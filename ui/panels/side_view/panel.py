@@ -99,5 +99,7 @@ class Panel(QGroupBox):
             worker = partial(workers.juncter, points, strands, refresh)
         elif refs.toolbar.current == NICKER:
             worker = partial(workers.nicker, points, strands)
+        elif refs.toolbar.current == HIGHLIGHTER:
+            worker = partial(workers.highlighter, points, refresh)
         thread = Thread(target=worker)
         thread.run()

@@ -8,6 +8,7 @@ from structures.domains import Domains
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.strands import Strands
+from utils import inverse
 
 logger = logging.getLogger(__name__)
 
@@ -142,3 +143,15 @@ def nicker(points: List[Point], strands: Strands) -> None:
     """
     raise NotImplementedError("Nicker is not yet implemented")
     # logger.info("Nicker mode was run.")
+
+def highlighter(points: List[Point], refresh: Callable):
+    """
+    Highlight/un-highlight a series of points based on their current highlighted state.
+
+    Args:
+        points: The points to highlight.
+        refresh: Function called to refresh plot after highlighter mode is run.
+    """
+    for point in points:
+        point.highlighted = inverse(point.highlighted)
+    refresh()

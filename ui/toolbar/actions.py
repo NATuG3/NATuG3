@@ -35,6 +35,7 @@ class Actions(QButtonGroup):
         self.add_button(self.Juncter(), JUNCTER)
         self.add_button(self.Nicker(), NICKER)
         self.add_button(self.Hairpinner(), HAIRPINNER)
+        self.add_button(self.Highlighter(), HIGHLIGHTER)
 
     def add_button(self, button: QAbstractButton, id_: int) -> None:
         """
@@ -74,3 +75,10 @@ class Actions(QButtonGroup):
         def __init__(self):
             super().__init__("Hairpinner")
             self.setObjectName("Hairpinner")
+
+    class Highlighter(Action):
+        """Mode for highlighting items."""
+
+        def __init__(self):
+            super().__init__("Highlighter")
+            self.setObjectName("Highlighter")
