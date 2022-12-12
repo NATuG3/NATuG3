@@ -240,7 +240,6 @@ class Domains:
         """
         self.domains.cache_clear()
         self.subunits.cache_clear()
-        self.points.cache_clear()
 
     @property
     def subunit(self) -> Subunit:
@@ -335,7 +334,6 @@ class Domains:
         logger.debug(f"Fetched {len(output)} domains.")
         return output
 
-    @cache
     def points(self) -> List[Tuple[List[Point], List[Point]]]:
         """
         All the points in all the domains before they are turned into Strand objects.
@@ -390,8 +388,8 @@ class Domains:
             for index, domain in enumerate(self.domains()):
                 converted_strands.append(
                     Strand(
-                        self.nucleic_acid_profile,
-                        self._points[index][strand_direction],
+                        nucleic_acid_profile=self.nucleic_acid_profile,
+                        items=self._points[index][strand_direction],
                         color=settings.colors["sequencing"]["greys"][strand_direction],
                     )
                 )

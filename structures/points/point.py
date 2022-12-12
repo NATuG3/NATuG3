@@ -167,16 +167,3 @@ class Point:
             f"angle={round(self.angle, 3)}°,"
             f"matched={self.matched}"
         )
-
-    def __eq__(self, other) -> bool:
-        """
-        Whether our position and angle is the same as their position and angle.
-
-        If the type of other is not the same as us, this just returns False.
-        """
-        if not isinstance(other, type(self)):
-            return False
-        if self.position() == other.position():
-            if self.angle == other.angle:
-                return True
-        return False

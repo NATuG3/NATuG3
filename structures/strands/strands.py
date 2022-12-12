@@ -168,12 +168,17 @@ class Strands:
         """Remove a strand from the container."""
         self.strands.remove(strand)
 
-    def recolor(self) -> None:
+    def restyle(self) -> None:
         """
         Recompute colors for all sequencing contained within.
         Prevents touching sequencing from sharing colors.
         """
         for strand in self.strands:
+            if strand.auto_thickness:
+                if strand.interdomain:
+                    strand.thickness = 9.5
+                else:
+                    strand.thickness = 2
             if strand.auto_color:
                 if strand.interdomain:
                     illegal_colors: List[Tuple[int, int, int]] = []
@@ -369,7 +374,7 @@ class Strands:
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
-        self.recolor()
+        self.restyle()
         self.recompute()
 
     @property

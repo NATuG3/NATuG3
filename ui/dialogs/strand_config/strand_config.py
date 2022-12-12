@@ -124,12 +124,12 @@ class StrandConfig(QDialog):
         self.thickness.valueChanged.connect(thickness_changed)
 
         # update the thickness based on the current strand's thickness
-        self.auto_thickness.setChecked(bool(self.strand.thickness))
+        self.auto_thickness.setChecked(self.strand.auto_thickness)
 
         def auto_thickness_checked(checked):
             """Worker for when the auto thickness checkbox is checked."""
             if checked:
-                self.strand.thickness = None
+                self.strand.auto_thickness = True
                 self.thickness.blockSignals(True)
                 self.thickness.setValue(0)
                 self.thickness.blockSignals(False)

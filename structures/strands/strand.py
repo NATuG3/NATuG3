@@ -25,14 +25,17 @@ class Strand:
     A strand of items.
 
     Attributes:
+        name: The user-set name of the strand. This appears when exporting, and is used as a title.
+        color: The RGB color of the strand. This is a tuple of 3 integers, each between 0 and 255.
+        auto_color: A flag to determine whether a Strands parent should automatically color this strand when its
+            restyle() method is called.
+        thickness: The thickness of the strand. This is an integer representing the number of pixels wide the strand.
+        auto_thickness: A flag to determine whether a Strands parent should automatically set the thickness of this
+            strand when its restyle() method is called.
+        items: The items in the strand. This is a deque of Points.
         nucleic_acid_profile: The nucleic acid settings used.
         sequence (list): The sequence of the strand.
             This is a list of all the bases of all the nucleosides in the strand.
-        color: RGB color of strand.
-        auto_color: Whether to automatically set the strand color.
-            Changing this only changes the color of the strand when the parent Strands
-            object's recolor() method is called.
-        auto_thickness: Whether to automatically set the strand thickness.
         closed: Whether the strand is closed. Must be manually set.
         empty: Whether the strand is empty. This is equivalent to len(self) == 0.
         up_strand: Whether all NEMids in this strand are up-NEMids.
@@ -43,9 +46,6 @@ class Strand:
             Recursively checks all items in the strand to see if any items have unique domains
             from the other items.
         cross_screen: Whether this strand wraps across the screen.
-        highlighted (bool): Whether the strand is highlighted. This is merely a boolean, and the
-            actual highlighting is done by the plotter.
-        name: The user-set name of the strand. This appears when exporting, and is used as a title.
 
     Methods:
         append(item): Add an item to the right of the strand.
@@ -56,21 +56,22 @@ class Strand:
         nucleosides(): Obtain all nucleosides in the strand, only.
         index(item): Determine the index of an item.
         sliced(from, to): Return self.NEMids as a list.
-        clear_sequence(): Clear the sequence of the strand.
+        clear_sequence(overwrite): Clear the sequence of the strand.
         randomize_sequence(overwrite): Randomize the sequence of the strand.
     """
 
-    nucleic_acid_profile: NucleicAcidProfile
-    items: Deque[Point] = field(default_factory=deque)
-    color: Tuple[int, int, int] = (0, 0, 0)
-    auto_color: bool = True
-    closed: bool = False
-    highlighted: bool = False
+    name: str = "Strand"
     parent: "Strands" = None
 
-    _thickness: ClassVar[int] = None
-    _NEMids: ClassVar[Tuple[NEMid] | None] = None
-    _nucleosides: ClassVar[Tuple[Nucleoside] | None] = None
+    nucleic_acid_profile: NucleicAcidProfile = field(default_factory=NucleicAcidProfile)
+    items: Deque[Point] = field(default_factory=deque)
+    closed: bool = False
+
+    color: Tuple[int, int, int] = (0, 0, 0,)
+    auto_color: bool = True
+    thickness: int = 2
+    auto_thickness: bool = True
+    highlighted: bool = False
 
     __cached: ClassVar[Tuple[str]] = (
         "up_strand",
@@ -79,32 +80,6 @@ class Strand:
         "cross_screen",
         "nucleosides",
     )
-
-    @property
-    def thickness(self) -> float:
-        """
-        Obtain an automatically determined thickness if thickness is None.
-        Otherwise, output the user set thickness.
-        """
-        if self._thickness is None:
-            if self.interdomain:
-                return 9.5
-            else:
-                return 2
-        else:
-            return self._thickness
-
-    @thickness.setter
-    def thickness(self, new_thickness) -> None:
-        """
-        Change the currently set thickness.
-
-        If the new thickness is None then the thickness will be automatically determined.
-
-        Args:
-            new_thickness: The new thickness to set. Can be None to have auto set.
-        """
-        self._thickness = new_thickness
 
     def append(self, item: Point) -> None:
         """Add an item to the right of the strand."""
