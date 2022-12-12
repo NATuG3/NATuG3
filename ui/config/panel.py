@@ -15,7 +15,7 @@ from constants.tabs import *
 from constants.toolbar import *
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
-from ui.panels import domains, nucleic_acid, sequencing
+from ui.config.tabs import domains, nucleic_acid, sequencing
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class Panel(QWidget):
         self.auto_updating_plots = False
         self.profiles = profiles
         self.domains = domains
-        uic.loadUi("ui/panels/config/panel.ui", self)
+        uic.loadUi("ui/config/panel.ui", self)
         self.update_graphs.setIcon(fetch_icon("reload-outline"))
 
         self._tabs()
@@ -143,7 +143,7 @@ class RefreshConfirmer(QDialog):
             function: A function to be called if a non-cancel button is pressed.
         """
         super().__init__(parent)
-        uic.loadUi("ui/panels/config/refresh_confirmer.ui", self)
+        uic.loadUi("ui/config/refresh_confirmer.ui", self)
         self.function = function
         self._prettify()
         self._fileselector()

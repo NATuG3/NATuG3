@@ -14,7 +14,7 @@ class Panel(QWidget):
 
     def __init__(self, parent):
         super().__init__(parent)
-        uic.loadUi("ui/panels/sequencing/panel.ui", self)
+        uic.loadUi("ui/config/tabs/sequencing/panel.ui", self)
 
         self.strand_buttons = []
 

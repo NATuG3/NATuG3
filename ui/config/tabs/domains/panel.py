@@ -14,7 +14,7 @@ from PyQt6.QtWidgets import (
 import refs
 import settings
 from structures.domains import Domains
-from ui.panels.domains.table import Table
+from ui.config.tabs.domains.table import Table
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ class Panel(QWidget):
 
     def __init__(self, parent) -> None:
         super().__init__(parent)
-        uic.loadUi("ui/panels/domains/panel.ui", self)
+        uic.loadUi("ui/config/tabs/domains/panel.ui", self)
 
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self, refs.nucleic_acid.current)

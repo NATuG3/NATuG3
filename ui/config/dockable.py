@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QDockWidget
 
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
-from ui.panels.config.panel import Panel
+from ui.config.panel import Panel
 
 logger = logging.getLogger(__name__)
 

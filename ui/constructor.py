@@ -67,7 +67,7 @@ class Window(QMainWindow):
         """Setup config panel."""
 
         # import the needed panel
-        from ui.panels.config import Dockable
+        from ui.config import Dockable
 
         # initialize the config panel
         self.config = Dockable(self, refs.nucleic_acid.profiles, refs.domains.current)

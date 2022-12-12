@@ -28,7 +28,7 @@ class Panel(QWidget):
         super().__init__(parent)
         self.profiles: Dict[str, NucleicAcidProfile] = profiles
 
-        uic.loadUi("ui/panels/nucleic_acid/panel.ui", self)
+        uic.loadUi("ui/config/tabs/nucleic_acid/panel.ui", self)
 
         # set all setting descriptions
         self._setting_descriptions()
