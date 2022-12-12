@@ -170,6 +170,11 @@ class SideViewPlotter(pg.PlotWidget):
         self.setLabel("left", text="z", units="Nanometers")
 
     def _plot(self):
+        """
+        Plot the side view.
+
+        All plotted data gets saved in the current plot_data.
+        """
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
         self.plot_data.points.clear()

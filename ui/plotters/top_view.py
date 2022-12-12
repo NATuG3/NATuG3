@@ -37,6 +37,19 @@ class PlotData:
 
 
 class TopViewPlotter(pg.PlotWidget):
+    """
+    The plotter for plotting a top view of domains.
+
+    Attributes:
+        circle_radius: Radius of the plotted circles.
+        rotation: Rotation of the plot. In degrees.
+        domains: Domains to plot.
+        worker: The top view coordinate generator object.
+        plot_data: Currently plotted data.
+
+    Signals:
+        point_clicked(a tuple of the points that were clicked): Emitted when a point is clicked.
+    """
     point_clicked = pyqtSignal(tuple)
 
     def __init__(
@@ -70,7 +83,8 @@ class TopViewPlotter(pg.PlotWidget):
         self._plot()
         self._prettify()
 
-    def _point_clicked(self, event, points):
+    def _point_clicked(self, event, points: List[pg.ScatterPlotItem]):
+        """Slot for when points are clicked."""
         point = points[0].pos()
         assert self.worker.u_coords.index(point[0]) == self.worker.v_coords.index(
             point[1]
@@ -78,6 +92,7 @@ class TopViewPlotter(pg.PlotWidget):
         self.point_clicked.emit(tuple(point))
 
     def refresh(self):
+        """Refresh the plot."""
         self._reset()
         self._plot()
         logger.info("Refreshed top view.")
@@ -103,7 +118,11 @@ class TopViewPlotter(pg.PlotWidget):
         self.getViewBox().setAspectLocked(lock=True, ratio=1)
 
     def _plot(self):
-        """Plot all the data."""
+        """
+        Plot all the data.
+
+        All the plotted data is stored in self.plot_data.
+        """
         x_coords = self.worker.u_coords
         y_coords = self.worker.v_coords
 
@@ -124,8 +143,16 @@ class TopViewPlotter(pg.PlotWidget):
         self.plot_data.y_coords = y_coords
         self.plot_data.rotation = self.rotation
 
-    def _plot_domains(self, x_coords, y_coords):
-        """Plot the domains."""
+    def _plot_domains(self, x_coords: List[float], y_coords: List[float]) -> None:
+        """
+        Plot the domains.
+
+        This plots the domains and stores them in self.plot_data.
+
+        Args:
+            x_coords: X coords of the domains.
+            y_coords: Y coords of the domains.
+        """
         self.plot_data.plotted_domains = self.plot(
             x_coords,
             y_coords,
@@ -135,8 +162,16 @@ class TopViewPlotter(pg.PlotWidget):
             pxMode=False,
         )
 
-    def _plot_stroke(self, x_coords, y_coords):
-        """Plot the plotted_stroke."""
+    def _plot_stroke(self, x_coords: List[float], y_coords: List[float]) -> None:
+        """
+        Plot the stroke connecting the domain circles.
+
+        This plots the stroke and stores it in self.plot_data.
+
+        Args:
+            x_coords: X coords of the plotted_stroke.
+            y_coords: Y coords of the plotted_stroke.
+        """
         self.plot_data.plotted_stroke = self.plot(
             x_coords,
             y_coords,
@@ -145,8 +180,12 @@ class TopViewPlotter(pg.PlotWidget):
             pxMode=False,
         )
 
-    def _plot_numbers(self, x_coords, y_coords):
-        """Plot the plotted_numbers."""
+    def _plot_numbers(self, x_coords: List[float], y_coords: List[float]) -> None:
+        """
+        Plot the number labels for the plot.
+
+        This plots the labels, sets up signals for when the user clicks them, and updates the plot data.
+        """
         self.plot_data.plotted_numbers = []
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
             counter = str(counter)
