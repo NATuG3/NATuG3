@@ -33,25 +33,21 @@ class SequencingPanel(QWidget):
             if operation == "Randomize":
                 logger.debug("Performing randomization bulk operation.")
                 if scope == "All Bases":
-                    for strand in refs.strands.current.strands:
-                        strand.randomize_sequence(overwrite=True)
+                    refs.strands.current.randomize_sequences(True)
                     refresh()
                     logger.info("Randomized all bases in all strands.")
                 elif scope == "Unset Bases":
-                    for strand in refs.strands.current.strands:
-                        strand.randomize_sequence(overwrite=False)
+                    refs.strands.current.randomize_sequences(False)
                     refresh()
                     logger.info("Randomized all unset bases in all strands.")
             elif operation == "Clear":
                 logger.debug("Performing clear bulk operation.")
                 if scope == "All Bases":
-                    for strand in refs.strands.current.strands:
-                        strand.clear_sequence()
+                    refs.strands.current.clear_sequences(True)
                     refresh()
                     logger.info("Cleared all bases in all strands.")
                 elif scope == "Unset Bases":
-                    for strand in refs.strands.current.strands:
-                        strand.clear_sequence(overwrite=False)
+                    refs.strands.current.clear_sequences(False)
                     refresh()
                     logger.info("Cleared all unset bases in all strands.")
 

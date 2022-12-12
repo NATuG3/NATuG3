@@ -28,6 +28,8 @@ class Strands:
         name: The name of the strands object. Used when exporting the strands object.
 
     Methods:
+        randomize_sequences(overwrite)
+        clear_sequences(ovewrite)
         conjunct()
         up_strands(), down_strands()
         recompute(), recolor()
@@ -138,6 +140,26 @@ class Strands:
         if open_in_file_explorer:
             QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
             logger.info(f"Opened export @ {filepath} in file explorer.")
+
+    def randomize_sequences(self, overwrite: bool = False):
+        """
+        Randomize the sequences for all strands.
+
+        Args:
+            overwrite: Whether to overwrite existing sequences.
+        """
+        for strand in self.strands:
+            strand.randomize_sequence(overwrite)
+
+    def clear_sequences(self, overwrite: bool = False):
+        """
+        Clear the sequences for all strands.
+
+        Args:
+            overwrite: Whether to overwrite existing sequences.
+        """
+        for strand in self.strands:
+            strand.clear_sequence(overwrite)
 
     @property
     def up_strands(self):
