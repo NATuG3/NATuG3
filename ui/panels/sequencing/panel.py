@@ -1,24 +1,61 @@
+import logging
 import os
 
 from PyQt6 import uic
-from PyQt6.QtWidgets import QWidget, QGridLayout, QScrollArea, QFileDialog, QLineEdit
+from PyQt6.QtWidgets import QWidget, QFileDialog, QLineEdit
 
 import refs
-from structures.strands import Strand
-from ui.dialogs.strand_config.strand_config import StrandConfig
-from ui.panels.sequencing.buttons import StrandButton
+
+logger = logging.getLogger(__name__)
 
 
 class Panel(QWidget):
+    """Panel for sequencing."""
+
     def __init__(self, parent):
         super().__init__(parent)
         uic.loadUi("ui/panels/sequencing/panel.ui", self)
 
         self.strand_buttons = []
-        self.strands_area = QWidget()
-        self.reload()
 
         self._configuration()
+        self._tools()
+
+    def _tools(self):
+        """Set up the tools group box."""
+
+        def run_bulk_operation_clicked():
+            """Worker for when the run bulk operation button is clicked."""
+            scope = self.scope.currentText()
+            operation = self.operation.currentText()
+            refresh = refs.constructor.side_view.plot.refresh
+
+            if operation == "Randomize":
+                logger.debug("Performing randomization bulk operation.")
+                if scope == "All Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.randomize_sequence(overwrite=True)
+                    refresh()
+                    logger.info("Randomized all bases in all strands.")
+                elif scope == "Unset Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.randomize_sequence(overwrite=False)
+                    refresh()
+                    logger.info("Randomized all unset bases in all strands.")
+            elif operation == "Clear":
+                logger.debug("Performing clear bulk operation.")
+                if scope == "All Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.clear_sequence()
+                    refresh()
+                    logger.info("Cleared all bases in all strands.")
+                elif scope == "Unset Bases":
+                    for strand in refs.strands.current.strands:
+                        strand.clear_sequence(overwrite=False)
+                    refresh()
+                    logger.info("Cleared all unset bases in all strands.")
+
+        self.run_bulk_operation.clicked.connect(run_bulk_operation_clicked)
 
     def _configuration(self):
         """Set up the configuration group box."""
@@ -57,33 +94,3 @@ class Panel(QWidget):
             refs.strands.current.to_file(filepath, mode)
 
         self.export_sequences.clicked.connect(export_sequences_clicked)
-
-    def reload(self):
-        """Set up the sequencing area."""
-        for button in self.strand_buttons:
-            button.deleteLater()
-        self.strand_buttons.clear()
-
-        self.strands_area: QWidget
-        self.strands_area.setLayout(QGridLayout())
-        self.strands_area.setContentsMargins(2, 2, 2, 2)
-
-        self.scrollable_strands_area: QScrollArea
-        self.scrollable_strands_area.setContentsMargins(1, 1, 1, 1)
-        self.scrollable_strands_area.setWidgetResizable(True)
-        self.scrollable_strands_area.setWidget(self.strands_area)
-
-        def strand_button_clicked(strand: Strand):
-            dialog = StrandConfig(self.parent(), strand)
-            dialog.show()
-            dialog.updated.connect(refs.constructor.side_view.plot.refresh)
-            refs.constructor.side_view.plot.refresh()
-
-        for index, strand in enumerate(refs.strands.current.strands):
-            strand_button = StrandButton(strand)
-            strand_button.clicked.connect(
-                lambda event, s=strand: strand_button_clicked(strand=s)
-            )
-
-            self.strands_area.layout().addWidget(strand_button)
-            self.strand_buttons.append(strand_button)

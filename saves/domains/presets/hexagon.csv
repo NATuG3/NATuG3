@@ -1,7 +1,7 @@
-s,m,Left Helix Joints,Right Helix Joints,Count,Symmetry,Antiparallel
-0,7,DOWN,DOWN,60,1.0,True
-0,7,UP,UP,60,,
-0,7,DOWN,DOWN,60,,
-0,7,UP,UP,60,,
-0,7,DOWN,DOWN,60,,
-0,7,UP,UP,60,,
+m,Left Helix Joints,Right Helix Joints,Count,Symmetry,Antiparallel
+7,,,60,1,True
+7,,,60,,
+7,,,60,,
+7,,,60,,
+7,,,60,,
+7,,,60,,

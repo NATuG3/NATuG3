@@ -7,18 +7,18 @@ from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
 
 import settings
-from helpers import show_in_file_explorer
 from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
 from structures.strands.strand import Strand
+from utils import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
 
 
 class Strands:
     """
-    A container for multiple sequencing.
+    A container for multiple strands.
 
     Attributes:
         nucleic_acid_profile: The nucleic acid settings for the sequencing container.

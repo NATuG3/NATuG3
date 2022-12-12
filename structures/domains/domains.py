@@ -6,7 +6,6 @@ import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
-from helpers import inverse
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.domains.workers.side_view import DomainStrandWorker
@@ -14,6 +13,7 @@ from structures.domains.workers.top_view import TopViewWorker
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand, Strands
+from utils import inverse
 
 logger = logging.getLogger(__name__)
 
@@ -41,15 +41,12 @@ class Domains:
         top_view()
         workers()
         subunits()
-
-    Todo:
-        - Add a method to update the Domains class in place.
     """
 
     def __init__(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
-        domains: List["Domain"],
+        domains: List[Domain],
         symmetry: int,
         antiparallel: bool = False,
     ) -> None:
@@ -73,6 +70,8 @@ class Domains:
         self._subunit = Subunit(
             self.nucleic_acid_profile, domains, template=True, parent=self
         )
+        for domain in self.subunit.domains:
+            assert domain.parent is self.subunit
 
         # create a worker object for computing strands for workers
         self.worker = DomainStrandWorker(self)
@@ -96,11 +95,18 @@ class Domains:
         if not isinstance(domains, Domains):
             raise ValueError("Domains object must be a Domains object.")
 
+        # set parents
+        for domain in domains.subunit.domains:
+            domain.parent = self.subunit
+        domains.subunit.parent = self
+
+        # set attributes
         self.nucleic_acid_profile = domains.nucleic_acid_profile
         self.symmetry = domains.symmetry
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
+        # clear cache
         self.clear_cache()
 
     def to_file(self, mode: Literal["csv"], filepath: str) -> None:
@@ -134,7 +140,6 @@ class Domains:
         right_helix_joints = [
             "UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains
         ]
-        s = [domain.theta_s_multiple for domain in domains]
         m = [domain.theta_interior_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
@@ -143,7 +148,6 @@ class Domains:
         # create a pandas dataframe with the columns above
         data = pd.DataFrame(
             {
-                "s": s,
                 "m": m,
                 "Left Helix Joints": left_helix_joints,
                 "Right Helix Joints": right_helix_joints,
@@ -230,6 +234,9 @@ class Domains:
     def clear_cache(self):
         """
         Clear the cache of all cached methods.
+
+        Methods are cached because there is no need to recompute certain methods if the template subunit has
+        not changed.
         """
         self.domains.cache_clear()
         self.subunits.cache_clear()
@@ -252,6 +259,9 @@ class Domains:
 
         Args:
             new_subunit: The new template subunit.
+
+        Notes:
+            This method clears the cache of all cached methods.
         """
         logger.info(f"Replacing the template subunit with {new_subunit}.")
         self._subunit = new_subunit
@@ -345,9 +355,11 @@ class Domains:
             This is a cached method. The cache is cleared when the subunit is changed.
         """
         if self._points is None:
+            logger.debug("Recomputing points.")
             self._points = self.worker.compute()
-        logger.debug("Fetched points for domain")
-        return self._points
+        else:
+            logger.debug("Using cached points.")
+            return self._points
 
     @cache
     def strands(self) -> Strands:
@@ -384,6 +396,17 @@ class Domains:
                     )
                 )
         logger.debug(f"Fetched {len(converted_strands)} strands.")
+
+        # ensure that the zeroth domain's up strand's first point is in the proper outputted strand
+        assert self._points[0][0][0] in converted_strands[0]
+
+        # ensure that the points are properly parented
+        # check to see if the zeroth domain's up strand's first point's great-grandparent is us
+        # Point.domain -> Domain
+        # Domain.subunit -> Subunit
+        # Subunit.domains -> Domains (should be us)
+        assert self._points[0][0][0].domain.parent.parent is self
+
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, converted_strands)
 

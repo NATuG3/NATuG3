@@ -1,11 +1,12 @@
 import itertools
+import random
 from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
-from random import shuffle
 from typing import Tuple, Iterable, Deque, List, ClassVar
 
+from constants.bases import DNA
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -14,7 +15,7 @@ from structures.profiles import NucleicAcidProfile
 def shuffled(iterable: Iterable) -> list:
     """Shuffle an iterable and return a copy."""
     output = list(iterable)
-    shuffle(output)
+    random.shuffle(output)
     return output
 
 
@@ -55,6 +56,8 @@ class Strand:
         nucleosides(): Obtain all nucleosides in the strand, only.
         index(item): Determine the index of an item.
         sliced(from, to): Return self.NEMids as a list.
+        clear_sequence(): Clear the sequence of the strand.
+        randomize_sequence(overwrite): Randomize the sequence of the strand.
     """
 
     nucleic_acid_profile: NucleicAcidProfile
@@ -172,21 +175,61 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        if len(new_sequence) == len(self.nucleosides()):
+        nucleosides = self.nucleosides()
+        if len(new_sequence) == len(nucleosides):
             for index, base in enumerate(new_sequence):
-                # update the base for the nucleoside
-                self.nucleosides()[index].base = base
+                our_nucleoside = nucleosides[index]
+                our_nucleoside.base = base
 
-                # assign the complementary base to the matching nucleoside
-                maching_nucleoside = self.nucleosides()[index].matching()
-                complement_base = self.nucleosides()[index].complement
-
-                maching_nucleoside.base = complement_base
+                matching_nucleoside = our_nucleoside.matching()
+                if matching_nucleoside is not None:
+                    matching_nucleoside.base = our_nucleoside.complement
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
                 + "match number of nucleosides in strand ({len(self)})"
             )
+
+    @staticmethod
+    def random_sequence(length: int) -> List[str]:
+        """
+        Generate a random sequence of bases.
+
+        Args:
+            length: The length of the sequence to generate.
+
+        Returns:
+            A list of bases.
+        """
+        return [random.choice(DNA) for _ in range(length)]
+
+    def randomize_sequence(self, overwrite: bool = False) -> None:
+        """
+        Randomize the sequence of the strand.
+
+        Uses self.random_sequence() to compute the random sequence
+
+        Args:
+            overwrite: Whether to overwrite the current sequence or not. If overwrite is False then all unset
+                nucleosides (ones which are None) will be set to a random nucleoside. If overwrite is True then all
+                nucleosides will be set to a random nucleoside.
+        """
+        for nucleoside in self.nucleosides():
+            if overwrite or nucleoside.base is None:
+                nucleoside.base = random.choice(DNA)
+                nucleoside.matching().base = nucleoside.complement
+
+    def clear_sequence(self, overwrite: bool = False) -> None:
+        """
+        Clear the sequence of the strand.
+
+        Args:
+            overwrite: Whether to overwrite the current sequence or not. If overwrite is True then all set nucleosides
+                that are set (are not None) will be made None.
+        """
+        for nucleoside in self.nucleosides():
+            if overwrite or nucleoside.base is not None:
+                nucleoside.base = None
 
     def index(self, item) -> int | None:
         """Determine the index of an item."""

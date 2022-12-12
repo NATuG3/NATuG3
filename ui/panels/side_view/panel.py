@@ -1,20 +1,18 @@
-import atexit
 import logging
 from functools import partial
-from typing import Tuple, List
+from threading import Thread
+from typing import List
 
-from PyQt6.QtCore import QTimer
-from PyQt6.QtWidgets import QGroupBox, QVBoxLayout, QScrollArea
+from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
 import refs
-import settings
 import ui.dialogs.informers
 import ui.plotters
 from constants.toolbar import *
-from structures.points import NEMid, Nucleoside
+from structures.points.point import Point
 from structures.strands import Strand
 from ui.dialogs.strand_config.strand_config import StrandConfig
-from ui.panels.sequencing.buttons import StrandButton
+from ui.panels.side_view import workers
 
 logger = logging.getLogger(__name__)
 
@@ -44,20 +42,6 @@ class Panel(QGroupBox):
 
     def strand_clicked(self, strand: Strand) -> None:
         """Slot for when a strand is clicked."""
-        strand_button: StrandButton = (
-            refs.constructor.config.panel.tabs.sequencing.strand_buttons[
-                strand.parent.index(strand)
-            ]
-        )
-        scroll_area: QScrollArea = (
-            refs.constructor.config.panel.tabs.sequencing.scrollable_strands_area
-        )
-        strand_button.setStyleSheet(
-            f"QPushButton{{background-color: rgb{settings.colors['highlighted']}}}"
-        )
-        scroll_area.ensureWidgetVisible(strand_button)
-        QTimer.singleShot(1000, partial(strand_button.setStyleSheet, None))
-
         dialog = StrandConfig(self.parent(), strand=strand)
         dialog.updated.connect(self.refresh)
         dialog.show()
@@ -65,65 +49,27 @@ class Panel(QGroupBox):
 
         logger.info(f"Strand #{strand.parent.index(strand)} was clicked.")
 
-    def points_clicked(self, points: List[Tuple[float, float]]) -> None:
-        """slot for when a point in the plot is clicked."""
-        # TEMP CODE
-        # for point in points:
-        #     point.matching.highlighted = True
+    def points_clicked(self, points: List[Point]) -> None:
+        """
+        Slot for when a point in the plot is clicked.
 
+        Utilizes a worker thread to handle the point click.
+        """
+        strands = refs.strands.current
+        domains = refs.domains.current
+        parent = self
+        refresh = refs.constructor.side_view.plot.refresh
+
+        worker = partial(
+            logger.info, "Point was clicked but no worker handled the click"
+        )
         if refs.toolbar.current == INFORMER:
-            dialogs = []
-
-            for item in points:
-                item.highlighted: bool = True
-                to_refresh: bool = True
-
-                if isinstance(item, NEMid):
-                    dialogs.append(
-                        ui.dialogs.informers.NEMidInformer(
-                            self.parent(),
-                            item,
-                            refs.strands.current,
-                            refs.domains.current,
-                        )
-                    )
-                elif isinstance(item, Nucleoside):
-                    dialogs.append(
-                        ui.dialogs.informers.NucleosideInformer(
-                            self.parent(),
-                            item,
-                            refs.strands.current,
-                            refs.domains.current,
-                        )
-                    )
-                else:
-                    item.highlighted = False
-                    to_refresh = False
-
-            def dialog_complete(dialogs_, points_):
-                for dialog_ in dialogs_:
-                    dialog_.close()
-                for point_ in points_:
-                    point_.highlighted = False
-                self.refresh()
-
-            if to_refresh:
-                wrapped_dialog_complete = partial(dialog_complete, dialogs, points)
-                for dialog in dialogs:
-                    dialog.finished.connect(wrapped_dialog_complete)
-                    dialog.show()
-                atexit.register(wrapped_dialog_complete)
-
-                self.refresh()
-
-        if refs.toolbar.current == JUNCTER:
-            # if exactly two overlapping points are clicked trigger the junction creation process
-            if len(points) == 2:
-                if all([isinstance(item, NEMid) for item in points]):
-                    refs.strands.current.conjunct(points[0], points[1])
-                    self.refresh()
-
+            worker = partial(
+                workers.informer, parent, points, strands, domains, refresh
+            )
+        elif refs.toolbar.current == JUNCTER:
+            worker = partial(workers.juncter, points, strands, refresh)
         elif refs.toolbar.current == NICKER:
-            raise NotImplementedError("Nicker is not yet implemented")
-
-        refs.constructor.config.panel.tabs.sequencing.reload()
+            worker = partial(workers.nicker, points, strands)
+        thread = Thread(target=worker)
+        thread.run()

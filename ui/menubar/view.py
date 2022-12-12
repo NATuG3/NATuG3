@@ -2,7 +2,6 @@ from types import SimpleNamespace
 
 from PyQt6.QtWidgets import QMenu
 
-import helpers
 import refs
 import refs.saver
 from ui.resources import fetch_icon

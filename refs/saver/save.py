@@ -5,21 +5,25 @@ from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
 import structures
-from helpers import show_in_file_explorer
+import utils
 
 logger = logging.getLogger(__name__)
 
 
-def runner(parent):
+def runner(parent, show_in_file_explorer=True):
     """Initiate save process flow."""
     # create file selector for save
     selector = FileSelector(parent)
 
     # run worker(filepath) after file has been chosen
-    selector.accepted.connect(lambda: worker(selector.selectedFiles()[0]))
+    selector.accepted.connect(
+        lambda: worker(
+            selector.selectedFiles()[0], show_in_file_explorer=show_in_file_explorer
+        )
+    )
 
 
-def worker(filepath):
+def worker(filepath, show_in_file_explorer=True):
     """Runs after filepath has been chosen."""
 
     # obtain save package
@@ -33,7 +37,8 @@ def worker(filepath):
     logger.info(f"Created save @ {filepath}.")
 
     # open the saved path in file explorer
-    show_in_file_explorer(filepath)
+    if show_in_file_explorer:
+        utils.show_in_file_explorer(filepath)
 
 
 class FileSelector(QFileDialog):

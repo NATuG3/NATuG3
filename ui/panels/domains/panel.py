@@ -11,7 +11,6 @@ from PyQt6.QtWidgets import (
     QApplication,
 )
 
-import helpers
 import refs
 import settings
 from structures.domains import Domains
