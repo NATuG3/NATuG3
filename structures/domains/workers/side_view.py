@@ -19,7 +19,7 @@ class DomainStrandWorker:
 
     Attributes:
         domains: The domains to compute strands for.
-        nucleic_acid_profile: The nucleic acid profile to use for computing strands.
+        nucleic_acid_profile: The nucleic acid nucleic_acid_profile to use for computing strands.
 
     Methods:
         compute()
@@ -382,7 +382,7 @@ class DomainStrandWorker:
 
         Includes:
             - the domains
-            - the nucleic acid profile
+            - the nucleic acid nucleic_acid_profile
 
         Returns:
             str: A string representation of the side view worker.

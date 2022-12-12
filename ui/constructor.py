@@ -130,7 +130,7 @@ class Window(QMainWindow):
         """Setup menu bar."""
         from .menubar import Menubar
 
-        self.menu_bar = Menubar()
+        self.menu_bar = Menubar(self)
         self.setMenuBar(self.menu_bar)
 
         logger.info("Created menu bar.")

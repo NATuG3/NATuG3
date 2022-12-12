@@ -8,7 +8,27 @@ import ui.plotters
 
 
 class Dockable(QDockWidget):
+    """
+    The top view panel.
+
+    This panel contains a TopViewPlotter with the current domains being plotted and contains a useful refresh() method
+    to update the plot with the most recent domains().
+
+    Attributes:
+        body (QWidget): The central body of the dockable. This is where all the widgets live.
+        plot (TopViewPlotter): The top view plot.
+
+    Methods:
+        refresh()
+    """
+
     def __init__(self, parent):
+        """
+        Initialize the TopView dockable area.
+
+        Args:
+            parent: The parent widget in which the top view dockable area is contained. Can be None.
+        """
         super().__init__(parent)
 
         # set styles
@@ -42,15 +62,34 @@ class Dockable(QDockWidget):
         self.refresh()
 
     def refresh(self):
-        """Update the current plot."""
+        """
+        Update the current plot.
+
+        This updates the plot with the current domains, nucleic acid settings, and rotation.
+        """
         self.plot.worker = refs.domains.current.top_view()
-        self.plot.profile = refs.nucleic_acid.current
+        self.plot.nucleic_acid_profile = refs.nucleic_acid.current
         self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()
         self.plot.autoRange()
 
     def point_clicked(self, point: Tuple[float, float]):
-        """Signal for when a point in the plot is clicked."""
+        """
+        Signal for when a point in the plot is clicked.
+
+        This method either zooms the side view in on the domain that was clicked, or restores the autofocus of the plot
+        if the domain is already zoomed in on.
+
+        This method requires the top view plot to be computed, since it handles the point click by indexing the clicked
+        points against the points that are plotted.
+
+        Args:
+            point: The coordinates of the point that was clicked. This should take the form of (x-coord, y-coord) where
+                the x and y coords are floats.
+        """
+        # ensure that the point passed is of the proper form
+        assert len(point) == 2 and isinstance(point[0], float) and isinstance(point[1], float)
+
         # create the new active x-range for the plot
         range = self.plot.worker.u_coords.index(point[0])
         range = range - 1, range + 2
@@ -58,6 +97,7 @@ class Dockable(QDockWidget):
         # store the previous range of the ui
         previous = refs.constructor.side_view.plot.visibleRange()
 
+        # zoom in on the proper area of the plot
         refs.constructor.side_view.plot.setXRange(*range)
         refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size[1] + 1)
 

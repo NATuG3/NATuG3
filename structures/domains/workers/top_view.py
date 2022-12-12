@@ -11,7 +11,7 @@ class TopViewWorker:
 
     Attributes:
         domains: All inputted workers.
-        nucleic_acid_profile: The nucleic acid profile used for top view computations.
+        nucleic_acid_profile: The nucleic acid nucleic_acid_profile used for top view computations.
         u_coords: All u coords.
         v_coords: All v coords.
         angle_deltas: All angle changes from NEMid-to-NEMid

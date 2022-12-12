@@ -1,5 +1,4 @@
 import webbrowser
-from types import SimpleNamespace
 
 from PyQt6.QtWidgets import QMenu
 
@@ -8,22 +7,40 @@ from ui.resources import fetch_icon
 
 
 class Help(QMenu):
+    """
+    The help section of the menu bar.
+
+    This is a submenu of the menu bar that contains the following actions:
+        - Manual: Open the manual pdf.
+        - Github: Open the github project link.
+        - About: Obtain information about NATuG.
+    """
     def __init__(self, parent):
+        """
+        Initialize the help section of the menu bar.
+
+        Args:
+            parent: The parent of the help section of the menu bar.
+        """
         super().__init__("&Help", parent)
 
-        # container for actions
-        self.actions = SimpleNamespace()
+        self._about()
+        self._manual()
+        self._github()
 
-        # help -> manual -> open manual pdf
-        manual = self.actions.manual = self.addAction("Manual")
-        manual.setIcon(fetch_icon("book-outline"))
-        manual.setShortcut("ctrl+h")
+    def _manual(self):
+        """Open NATuG's manual."""
+        self.manual = self.addAction("Manual")
+        self.manual.setIcon(fetch_icon("book-outline"))
+        self.manual.setShortcut("ctrl+h")
 
-        # help -> github -> open github project link
-        github = self.actions.github = self.addAction("Github")
-        github.setIcon(fetch_icon("logo-github"))
-        github.triggered.connect(lambda: webbrowser.open_new_tab(settings.github))
+    def _github(self):
+        """Open the project's GitHub page."""
+        self.github = self.addAction("Github")
+        self.github.setIcon(fetch_icon("logo-github"))
+        self.github.triggered.connect(lambda: webbrowser.open_new_tab(settings.github))
 
-        # help -> about -> open about statement
-        about = self.actions.about = self.addAction("About")
-        about.setIcon(fetch_icon("information-outline"))
+    def _about(self):
+        """Get information about NATuG."""
+        self.about = self.addAction("About")
+        self.about.setIcon(fetch_icon("information-outline"))

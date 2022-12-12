@@ -45,7 +45,7 @@ class NucleicAcidProfile:
         """
         Update our nucleic_acid_profile with theirs.
 
-        Updates all of our attributes with the attributes of the given profile.
+        Updates all of our attributes with the attributes of the given nucleic_acid_profile.
 
         This is useful for updating profiles in-place.
         """
@@ -54,10 +54,10 @@ class NucleicAcidProfile:
 
     def to_file(self, mode: Literal["json"], filepath: str) -> None:
         """
-        Write the nucleic acid profile to a file.
+        Write the nucleic acid nucleic_acid_profile to a file.
 
         Args:
-            mode: The type of file to save the nucleic acid profile to.
+            mode: The type of file to save the nucleic acid nucleic_acid_profile to.
             filepath: The path to the file to write to.
         """
         with open(filepath, "w") as file:

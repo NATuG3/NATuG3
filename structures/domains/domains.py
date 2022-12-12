@@ -370,7 +370,7 @@ class Domains:
         objects, and then calling Strands() on that list.
 
         This method automatically determines strand color based off of interdomain-ness, and uses the currently
-        set nucleic acid profile for the strand's nucleic acid profile.
+        set nucleic acid nucleic_acid_profile for the strand's nucleic acid nucleic_acid_profile.
 
         Returns:
             A list of all strands from all workers.

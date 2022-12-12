@@ -1,5 +1,3 @@
-from types import SimpleNamespace
-
 from PyQt6.QtWidgets import QMenu
 
 import refs
@@ -8,22 +6,35 @@ from ui.resources import fetch_icon
 
 
 class File(QMenu):
+    """
+    The file section of the menu bar.
+
+    This is a submenu of the menu bar that contains the following actions:
+        - Open
+        - Save
+    """
+
     def __init__(self, parent):
+        """
+        Initialize the file section of the menu bar.
+
+        Args:
+            parent: The parent of the file section of the menu bar.
+        """
         super().__init__("&File", parent)
 
-        # container for actions
-        self.actions = SimpleNamespace()
-
-        # file -> open
+    def _open(self):
+        """Open a save of a state of the program. This loads strands, domains, and nucleic acid settings."""
         open_ = self.actions.open = self.addAction("Open")
         open_.setIcon(fetch_icon("open-outline"))
         open_.setShortcut("ctrl+o")
         open_.setStatusTip("Open saved stage from file")
-        open_.triggered.connect(lambda: refs.saver.load.runner(parent))
+        open_.triggered.connect(lambda: refs.saver.load.runner(self.parent()))
 
-        # file -> save
+    def _save(self):
+        """Save the current state of the program. This saves strands, domains, and nucleic acid settings."""
         save = self.actions.save = self.addAction("Save")
         save.setIcon(fetch_icon("save-outline"))
         save.setShortcut("ctrl+s")
         save.setStatusTip("Save current stage top file")
-        save.triggered.connect(lambda: refs.saver.save.runner(parent))
+        save.triggered.connect(lambda: refs.saver.save.runner(self.parent()))

@@ -78,7 +78,7 @@ class Panel(QWidget):
         )
 
         def profile_updated():
-            """Slot for when a profile is loaded/saved."""
+            """Slot for when a nucleic_acid_profile is loaded/saved."""
             refs.nucleic_acid.profiles = self.profile_manager.profiles
             name = self.profile_manager.current
             if len(name) > 0:
@@ -88,7 +88,7 @@ class Panel(QWidget):
         # connect signals
         self.profile_manager.profile_loaded.connect(profile_updated)
 
-        # add the profile manager to layout
+        # add the nucleic_acid_profile manager to layout
         self.layout().insertWidget(0, self.profile_manager)
 
     def dump_settings(self, profile: NucleicAcidProfile) -> None:

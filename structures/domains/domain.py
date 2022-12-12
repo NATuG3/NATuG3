@@ -48,7 +48,7 @@ class Domain:
         Initialize a Domain object.
 
         Args:
-            nucleic_acid_profile: The nucleic acid settings profile
+            nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile
             theta_m_multiple: Angle between this and the next workers' lines of tangency. Multiple of theta c.
             left_helix_joint_direction: The left helix joint's direction.
             right_helix_joint_direction: The right helix joint's direction.

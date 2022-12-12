@@ -18,7 +18,20 @@ logger = logging.getLogger(__name__)
 
 
 class Panel(QGroupBox):
+    """
+    The side view panel.
+
+    This panel contains a SideViewPlotter with the current strands being plotted and contains a useful refresh()
+    method to automatically update the plot with the most current strands.
+    """
+
     def __init__(self, parent) -> None:
+        """
+        Initialize the SideView panel.
+
+        Args:
+            parent: The parent widget in which the side view panel is contained. Can be None.
+        """
         super().__init__(parent)
 
         self.setObjectName("Side View")
@@ -34,14 +47,26 @@ class Panel(QGroupBox):
         self.layout().addWidget(self.plot)
 
     def refresh(self) -> None:
-        """Update the current plot."""
+        """
+        Update the current plot.
+
+        This will update the current plot with the most recent strands, domains, nucleic acid, and plot mode. Then
+        the plot will be refreshed.
+        """
         self.plot.strands = refs.strands.current
         self.plot.nucleic_acid = refs.nucleic_acid.current
         self.plot.mode = refs.plot_mode.current
         self.plot.refresh()
 
     def strand_clicked(self, strand: Strand) -> None:
-        """Slot for when a strand is clicked."""
+        """
+        Slot for when a strand is clicked.
+
+        Creates a StrandConfig dialog for the strand that was clicked.
+
+        Args:
+            strand: The strand that was clicked.
+        """
         dialog = StrandConfig(self.parent(), strand=strand)
         dialog.updated.connect(self.refresh)
         dialog.show()
@@ -54,6 +79,9 @@ class Panel(QGroupBox):
         Slot for when a point in the plot is clicked.
 
         Utilizes a worker thread to handle the point click.
+
+        Args:
+            points: The points that were clicked.
         """
         strands = refs.strands.current
         domains = refs.domains.current

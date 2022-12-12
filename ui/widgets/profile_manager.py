@@ -42,7 +42,7 @@ class ProfileManager(QGroupBox):
             warning: Warning shown when user attempts to load a nucleic_acid_profile.
             defaults: Profile names that are defaults. User cannot delete default profiles.
             default: The nucleic_acid_profile that is chosen by default.
-            profiles: The profiles in the profile manager.
+            profiles: The profiles in the nucleic_acid_profile manager.
 
         Notes:
             When a nucleic_acid_profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
@@ -214,7 +214,7 @@ class ProfileManager(QGroupBox):
         logger.info(f'Loaded profiles named "{name}"')
 
     def update(self) -> None:
-        """Update the profile manager's buttons based on new inputs."""
+        """Update the nucleic_acid_profile manager's buttons based on new inputs."""
         # the currently chosen/inputted profiles name
         chosen_profile_name = self.current_text()
 
@@ -268,7 +268,7 @@ class ProfileManager(QGroupBox):
             # no matter what, do not let the user alter default profiles
             if chosen_profile_name in self.defaults:
                 logger.debug(
-                    "Current profiles is a default profile. "
+                    "Current profiles is a default nucleic_acid_profile. "
                     "Disabling save and delete buttons and enabling load button."
                 )
                 self.load_profile_button.setEnabled(True)
@@ -279,12 +279,12 @@ class ProfileManager(QGroupBox):
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default profile.'
+                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default nucleic_acid_profile.'
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
-                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default profile.'
+                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default nucleic_acid_profile.'
                 )
 
         # the chosen profiles name is a brand-new profiles name (that has not already been saved)

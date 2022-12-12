@@ -26,7 +26,7 @@ class Table(QTableWidget):
 
     def __init__(self, parent, nucleic_acid_profile: NucleicAcidProfile) -> None:
         super().__init__(parent)
-        # store the nucleic acid profile
+        # store the nucleic acid nucleic_acid_profile
         self.nucleic_acid_profile = nucleic_acid_profile
 
         # header storage areas
