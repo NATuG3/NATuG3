@@ -12,7 +12,18 @@ logger = logging.getLogger(__name__)
 
 
 class ProfileManager(QGroupBox):
-    """A nucleic_acid_profile managing widget."""
+    """
+    A profile managing widget.
+
+    This allows for easy management of settings profiles, and automates loading/saving/deleting of profiles.
+    Profiles are stored in a dict under string names, and functions for loading/saving are customizable.
+
+    Signals:
+        profile_loaded: Emitted when a profile is loaded.
+        profile_saved: Emitted when a profile is saved.
+        profile_deleted: Emitted when a profile is deleted.
+        updated: Emitted when any of the above signals are emitted.
+    """
 
     updated = pyqtSignal()
     profile_loaded = pyqtSignal(str, object)
@@ -32,20 +43,20 @@ class ProfileManager(QGroupBox):
         profiles: Dict[str, object] = None,
     ):
         """
-        Initialize the nucleic_acid_profile manager.
+        Initialize the profile manager.
 
         Args:
             parent: The parent QObject.
             extractor: The worker called to extract data for new profiles.
-            dumper: The worker called to dump data for a loaded nucleic_acid_profile.
-            title: The title of the group box containing the nucleic_acid_profile manager. Shows up above manager.
-            warning: Warning shown when user attempts to load a nucleic_acid_profile.
+            dumper: The worker called to dump data for a loaded profile.
+            title: The title of the group box containing the profile manager. Shows up above manager.
+            warning: Warning shown when user attempts to load a profile.
             defaults: Profile names that are defaults. User cannot delete default profiles.
-            default: The nucleic_acid_profile that is chosen by default.
-            profiles: The profiles in the nucleic_acid_profile manager.
+            default: The profile that is chosen by default.
+            profiles: The profiles in the profile manager.
 
         Notes:
-            When a nucleic_acid_profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
+            When a profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
         """
         super().__init__(title, parent)
         uic.loadUi("ui/widgets/profile_manager.ui", self)
@@ -71,7 +82,7 @@ class ProfileManager(QGroupBox):
         for name, profile in self.profiles.items():
             self.profiles[name] = copy(profile)
 
-        # add nucleic_acid_profile options to nucleic_acid_profile chooser
+        # add profile options to profile chooser
         for profile in self.profiles.keys():
             self.profile_chooser.addItem(profile)
 
@@ -83,18 +94,18 @@ class ProfileManager(QGroupBox):
         logger.debug("Profile Manager initialized.")
 
     def listed(self) -> list[str]:
-        """Obtain list of all profiles in nucleic_acid_profile chooser's list."""
+        """Obtain list of all profiles in profile chooser's list."""
         profiles = []
         for profile_index in range(self.profile_chooser.count()):
             profiles.append(self.profile_chooser.itemText(profile_index))
         return profiles
 
     def profile_index(self, name: str):
-        """Obtain the index of a given nucleic_acid_profile in the nucleic_acid_profile chooser."""
+        """Obtain the index of a given profile in the profile chooser."""
         return self.listed().index(name)
 
     def current_text(self) -> str:
-        """Obtain current nucleic_acid_profile chooser text."""
+        """Obtain current profile chooser text."""
         return self.profile_chooser.currentText()
 
     def approve(self) -> bool:
@@ -159,13 +170,13 @@ class ProfileManager(QGroupBox):
             # add the new profiles to the profiles chooser
             self.profile_chooser.addItem(name)
 
-        # change current nucleic_acid_profile
+        # change current profile
         self.current = name
 
         # emit signal
         self.profile_saved.emit(name, self.profiles[name])
 
-        logger.info(f'Saved new nucleic_acid_profile "{name}"')
+        logger.info(f'Saved new profile "{name}"')
 
     def delete(self, name: str) -> None:
         if not self.approve():
@@ -185,7 +196,7 @@ class ProfileManager(QGroupBox):
         # clear profiles chooser to make placeholder text visible
         self.profile_chooser.setCurrentText("")
 
-        # change current nucleic_acid_profile
+        # change current profile
         self.current = self.default
 
         # emit signal
@@ -203,7 +214,7 @@ class ProfileManager(QGroupBox):
         # clear profiles chooser to make placeholder text visable
         self.profile_chooser.setCurrentText("")
 
-        # change current nucleic_acid_profile
+        # change current profile
         self.current = name
 
         # emit signal
@@ -214,7 +225,7 @@ class ProfileManager(QGroupBox):
         logger.info(f'Loaded profiles named "{name}"')
 
     def update(self) -> None:
-        """Update the nucleic_acid_profile manager's buttons based on new inputs."""
+        """Update the profile manager's buttons based on new inputs."""
         # the currently chosen/inputted profiles name
         chosen_profile_name = self.current_text()
 
@@ -268,7 +279,7 @@ class ProfileManager(QGroupBox):
             # no matter what, do not let the user alter default profiles
             if chosen_profile_name in self.defaults:
                 logger.debug(
-                    "Current profiles is a default nucleic_acid_profile. "
+                    "Current profiles is a default profile. "
                     "Disabling save and delete buttons and enabling load button."
                 )
                 self.load_profile_button.setEnabled(True)
@@ -279,12 +290,12 @@ class ProfileManager(QGroupBox):
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default nucleic_acid_profile.'
+                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default profile.'
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
-                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default nucleic_acid_profile.'
+                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default profile.'
                 )
 
         # the chosen profiles name is a brand-new profiles name (that has not already been saved)

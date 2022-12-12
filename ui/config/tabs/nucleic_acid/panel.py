@@ -14,7 +14,7 @@ from ui.widgets.profile_manager import ProfileManager
 logger = logging.getLogger(__name__)
 
 
-class Panel(QWidget):
+class NucleicAcidPanel(QWidget):
     """
     Nucleic Acid Config Tab.
 

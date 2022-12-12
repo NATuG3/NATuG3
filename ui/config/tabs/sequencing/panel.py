@@ -9,8 +9,8 @@ import refs
 logger = logging.getLogger(__name__)
 
 
-class Panel(QWidget):
-    """Panel for sequencing."""
+class SequencingPanel(QWidget):
+    """DomainsPanel for sequencing."""
 
     def __init__(self, parent):
         super().__init__(parent)

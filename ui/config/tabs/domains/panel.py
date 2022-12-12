@@ -20,7 +20,7 @@ from ui.resources import fetch_icon
 logger = logging.getLogger(__name__)
 
 
-class Panel(QWidget):
+class DomainsPanel(QWidget):
     """
     Nucleic Acid Config Tab.
 

@@ -6,7 +6,13 @@ up_arrow, down_arrow = "↑", "↓"
 
 
 class TableIntegerBox(QSpinBox):
-    """Spin box for use in QTableWidgets."""
+    """
+    Spin box for use in QTableWidgets.
+
+    This spin box is modified to:
+        - ignore mouse wheel events
+        - emit signals when the up/down buttons are clicked
+    """
 
     up_button_clicked = pyqtSignal()
     down_button_clicked = pyqtSignal()

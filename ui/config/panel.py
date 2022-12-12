@@ -23,7 +23,16 @@ dialog = None
 
 
 class Panel(QWidget):
-    """Config panel."""
+    """
+    The main config panel.
+
+    This panel is for (almost) all user inputs.
+
+    Attributes:
+        nucleic_acid (NucleicAcidPanel): The nucleic acid tab.
+        domains (DomainsPanel): The domains tab.
+        sequencing (SequencingPanel): The sequencing tab.
+    """
 
     def __init__(
         self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
@@ -40,26 +49,22 @@ class Panel(QWidget):
 
     def _tabs(self):
         """Set up all tabs for config panel."""
-        logger.debug("Building config panel...")
-
-        # initalize the container with the proper panels
-        self.tabs = SimpleNamespace(
-            nucleic_acid=nucleic_acid.Panel(self, self.profiles),
-            domains=domains.Panel(self),
-            sequencing=sequencing.Panel(self),
-        )
+        # create the tab bodies and store them as attributes
+        self.nucleic_acid = nucleic_acid.NucleicAcidPanel(self, self.profiles)
+        self.domains = domains.DomainsPanel(self)
+        self.sequencing = sequencing.SequencingPanel(self)
 
         # set the nucleic acid tab
         self.nucleic_acid_tab.setLayout(QVBoxLayout())
-        self.nucleic_acid_tab.layout().addWidget(self.tabs.nucleic_acid)
+        self.nucleic_acid_tab.layout().addWidget(self.nucleic_acid)
 
         # set the domains tab
         self.domains_tab.setLayout(QVBoxLayout())
-        self.domains_tab.layout().addWidget(self.tabs.domains)
+        self.domains_tab.layout().addWidget(self.domains)
 
         # set the sequencing tab
         self.sequencing_tab.setLayout(QVBoxLayout())
-        self.sequencing_tab.layout().addWidget(self.tabs.sequencing)
+        self.sequencing_tab.layout().addWidget(self.sequencing)
 
     def _signals(self):
         """Setup signals."""
@@ -102,8 +107,8 @@ class Panel(QWidget):
                 function,
             )
 
-        self.tabs.domains.updated.connect(tab_updated)
-        self.tabs.nucleic_acid.updated.connect(tab_updated)
+        self.domains.updated.connect(tab_updated)
+        self.nucleic_acid.updated.connect(tab_updated)
 
         def tab_changed(index: int):
             """Update the plotting mode based on the currently opened tab."""
@@ -134,6 +139,15 @@ class Panel(QWidget):
 
 
 class RefreshConfirmer(QDialog):
+    """
+    A dialog that warns the user that they will lose any changes they have made if they continue, and gives them the
+    option to either save their changes or continue without saving or abort.
+
+    Attributes:
+        function: Function to execute if the user confirms that they would like to proceed (whether with or without
+            saving).
+    """
+
     def __init__(self, parent, function):
         """
         Initialize the refresh confirmer dialog.
@@ -150,6 +164,7 @@ class RefreshConfirmer(QDialog):
         self._buttons()
 
     def _fileselector(self):
+        """Set up the file selector."""
         # create a timestamp
         timestamp = datetime.now().strftime("%m-%d-%Y")
         counter: List[int] = [0]
@@ -176,11 +191,12 @@ class RefreshConfirmer(QDialog):
         )
 
     def _prettify(self):
-        # set default sizes
+        """Set the styles of the dialog."""
         self.setFixedWidth(340)
         self.setFixedHeight(200)
 
     def _buttons(self):
+        """Set up and hook signals for the buttons of the refresh confirmer dialog."""
         # change location button
         self.change_location.clicked.connect(self.close)
         self.change_location.clicked.connect(

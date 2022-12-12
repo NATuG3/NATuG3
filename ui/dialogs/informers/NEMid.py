@@ -8,9 +8,20 @@ from structures.strands import Strands
 
 
 class NEMidInformer(QDialog):
+    """A QDialog to display information about a NEMid."""
+
     def __init__(
         self, parent, NEMid_: NEMid, all_strands: Strands, all_domains: Domains
     ):
+        """
+        Initialize the NEMidInformer.
+
+        Args:
+            parent: The parent widget for the dialog.
+            NEMid_: The NEMid to display information about.
+            all_strands: The strands that contain the NEMid.
+            all_domains: The domains that contain the NEMid.
+        """
         super().__init__(parent)
         assert isinstance(all_strands, Strands)
         assert isinstance(all_domains, Domains)

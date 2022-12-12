@@ -158,9 +158,9 @@ class Window(QMainWindow):
         # and make the tab area go on the right
         else:
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
-            if self.config.panel.tabs.sequencing.isVisible():
+            if self.config.panel.sequencing.isVisible():
                 self.config.setFixedWidth(280)
-            elif self.config.panel.tabs.domains.isVisible():
+            elif self.config.panel.domains.isVisible():
                 self.config.setFixedWidth(300)
-            elif self.config.panel.tabs.nucleic_acid.isVisible():
+            elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

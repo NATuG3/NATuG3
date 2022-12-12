@@ -28,13 +28,13 @@ def worker(filepath):
     refs.strands.current = package.strands
 
     # update all domains settings/dump domains
-    refs.constructor.config.panel.tabs.domains.subunit_count.setValue(
+    refs.constructor.config.panel.domains.subunit_count.setValue(
         refs.domains.current.subunit.count
     )
-    refs.constructor.config.panel.tabs.domains.symmetry.setValue(
+    refs.constructor.config.panel.domains.symmetry.setValue(
         refs.domains.current.symmetry
     )
-    refs.constructor.config.panel.tabs.domains.table.dump_domains(refs.domains.current)
+    refs.constructor.config.panel.domains.table.dump_domains(refs.domains.current)
 
     # refresh graphs
     refs.constructor.top_view.refresh()

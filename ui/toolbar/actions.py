@@ -4,6 +4,11 @@ from constants.toolbar import *
 
 
 class Action(QPushButton):
+    """
+    A singular action parent class for the toolbar.
+
+    Actions are modified QPushButtons that are checkable (toggleable), and have a fixed width.
+    """
     def __init__(self, title):
         super().__init__(title)
         self.setCheckable(True)
@@ -11,7 +16,14 @@ class Action(QPushButton):
 
 
 class Actions(QButtonGroup):
+    """
+    Set up all the actions for the toolbar.
+
+    Actions are mutually exclusive; only one can be active at a time.
+    """
+
     def __init__(self):
+        """Initialize the QButtonGroup."""
         super().__init__()
         self.buttons = {}
         self.setExclusive(True)

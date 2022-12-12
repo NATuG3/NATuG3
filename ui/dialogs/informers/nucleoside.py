@@ -8,9 +8,20 @@ from structures.strands import Strands
 
 
 class NucleosideInformer(QDialog):
+    """A QDialog to display information about a Nucleoside."""
+
     def __init__(
         self, parent, nucleoside: Nucleoside, all_strands: Strands, all_domains: Domains
     ):
+        """
+        Initialize the NucleosideInformer.
+
+        Args:
+            parent: The parent widget for the dialog.
+            nucleoside: The Nucleoside to display information about.
+            all_strands: The strands that contain the Nucleoside.
+            all_domains: The domains that contain the Nucleoside.
+        """
         super().__init__(parent)
         assert isinstance(all_strands, Strands)
         assert isinstance(all_domains, Domains)
