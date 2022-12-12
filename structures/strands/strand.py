@@ -181,7 +181,7 @@ class Strand:
                 our_nucleoside = nucleosides[index]
                 our_nucleoside.base = base
 
-                matching_nucleoside = nucleosides[index].matching()
+                matching_nucleoside = our_nucleoside.matching()
                 if matching_nucleoside is not None:
                     matching_nucleoside.base = our_nucleoside.complement
         else:
@@ -211,11 +211,13 @@ class Strand:
 
         Args:
             overwrite: Whether to overwrite the current sequence or not. If overwrite is False then all unset
-                nucleosides (ones which are None) will be set to a random nucleoside.
+                nucleosides (ones which are None) will be set to a random nucleoside. If overwrite is True then all
+                nucleosides will be set to a random nucleoside.
         """
         for nucleoside in self.nucleosides():
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
+                nucleoside.matching().base = nucleoside.complement
 
     def clear_sequence(self, overwrite: bool = False) -> None:
         """

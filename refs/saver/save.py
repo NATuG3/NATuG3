@@ -5,6 +5,7 @@ from PyQt6.QtCore import QDir
 from PyQt6.QtWidgets import QFileDialog
 
 import structures
+import utils
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,8 @@ def worker(filepath, show_in_file_explorer=True):
     logger.info(f"Created save @ {filepath}.")
 
     # open the saved path in file explorer
-    show_in_file_explorer(filepath)
+    if show_in_file_explorer:
+        utils.show_in_file_explorer(filepath)
 
 
 class FileSelector(QFileDialog):
