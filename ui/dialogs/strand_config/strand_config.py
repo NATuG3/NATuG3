@@ -112,13 +112,19 @@ class StrandConfig(QDialog):
         self.auto_color.stateChanged.connect(auto_color_checked)
 
     def _thickness_selector(self):
-        def chosen_thickness():
-            return (self.thickness.value() * self.max_thickness) / 99
+        """Set up the thickness selector."""
+        def slider_to_thickness():
+            """Map the thickness slider to the strand thickness."""
+            return int((self.thickness.value() * self.max_thickness) / 99)
+
+        def thickness_to_slider():
+            """Map the strand thickness to the thickness slider."""
+            return int((self.strand.thickness * 99) / self.max_thickness)
 
         def thickness_changed():
             """Worker for when the thickness slider is changed."""
             self.auto_thickness.setChecked(False)
-            self.strand.thickness = chosen_thickness()
+            self.strand.thickness = slider_to_thickness()
             self.updated.emit()
 
         self.thickness.valueChanged.connect(thickness_changed)
@@ -130,11 +136,16 @@ class StrandConfig(QDialog):
             """Worker for when the auto thickness checkbox is checked."""
             if checked:
                 self.strand.auto_thickness = True
-                self.thickness.blockSignals(True)
-                self.thickness.setValue(0)
-                self.thickness.blockSignals(False)
             else:
-                self.strand.thickness = chosen_thickness()
+                self.strand.thickness = slider_to_thickness()
             self.updated.emit()
 
         self.auto_thickness.stateChanged.connect(auto_thickness_checked)
+
+        def auto_thickness_updater():
+            self.thickness.blockSignals(True)
+            self.thickness.setValue(thickness_to_slider())
+            self.thickness.blockSignals(False)
+        update_thickness_looper = QTimer(self)
+        update_thickness_looper.timeout.connect(auto_thickness_updater)
+        update_thickness_looper.start(100)
