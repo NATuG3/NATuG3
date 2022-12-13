@@ -3,6 +3,8 @@ import os
 from contextlib import suppress
 from time import time
 
+import settings
+
 # whether to delete restoration files
 RESET = False
 
@@ -38,7 +40,7 @@ def main():
 
     # set up pyqtgraph
     pg.setConfigOptions(
-        useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
+        useOpenGL=True, antialias=False, background=pg.mkColor(*settings.colors["background"])
     )
 
     import refs

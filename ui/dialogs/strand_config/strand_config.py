@@ -48,6 +48,7 @@ class StrandConfig(QDialog):
             thickness = 99
         else:
             thickness = (self.strand.thickness) * 99 / self.max_thickness
+
         thickness = round(thickness)
         self.thickness.setValue(thickness)
 
@@ -146,6 +147,7 @@ class StrandConfig(QDialog):
             self.thickness.blockSignals(True)
             self.thickness.setValue(thickness_to_slider())
             self.thickness.blockSignals(False)
+
         update_thickness_looper = QTimer(self)
         update_thickness_looper.timeout.connect(auto_thickness_updater)
         update_thickness_looper.start(100)

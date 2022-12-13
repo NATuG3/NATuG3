@@ -8,6 +8,7 @@ junction_threshold = 0.01
 
 colors = {
     "grid_lines": (220, 220, 220),
+    "background": (255, 255, 255),
     "nicks": (255, 0, 0),
     "highlighted": (245, 245, 0),
     "success": (212, 229, 208),
