@@ -2,7 +2,6 @@ import logging
 import os
 from contextlib import suppress
 from datetime import datetime
-from types import SimpleNamespace
 from typing import List, Dict
 
 from PyQt6 import uic
