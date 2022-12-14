@@ -61,7 +61,20 @@ class NucleicAcidProfile:
             filepath: The path to the file to write to.
         """
         with open(filepath, "w") as file:
-            json.dump(dataclasses.asdict(self), file)
+            json.dump(dataclasses.asdict(self), file, indent=3)
+
+    @classmethod
+    def from_file(cls, mode: Literal["json"], filepath: str) -> "NucleicAcidProfile":
+        """
+        Load a NucleicAcidProfile from a file.
+
+        Args:
+            mode: The type of file to load the nucleic acid nucleic_acid_profile from.
+            filepath: The path to the file to read from.
+        """
+        if mode == "json":
+            with open(filepath, "r") as file:
+                return cls(**json.load(file))
 
     def __eq__(self, other: object) -> bool:
         """

@@ -1,18 +1,27 @@
 import atexit
 import logging
-import pickle
-from typing import Dict
+import os
 
-import settings
 from structures.profiles import NucleicAcidProfile
 
 logger = logging.getLogger(__name__)
 
 
 class _NucleicAcid:
+    """
+    Manager for the application's nucleic acid settings.
+
+    Attributes:
+        current: The current nucleic acid profile.
+        profiles: The nucleic acid profiles.
+
+    Methods:
+        load: Load the nucleic acid profiles from files.
+        dump: Dump the nucleic acid profiles into files.
+    """
     class filenames:
-        profiles = f"saves/nucleic_acid/profiles.{settings.extension}"
-        restored = f"saves/nucleic_acid/restored.{settings.extension}"
+        profiles = f"saves/nucleic_acid"
+        restored = f"saves/nucleic_acid/restored.json"
 
     defaults = {
         "MFD B-DNA": NucleicAcidProfile(
@@ -31,30 +40,46 @@ class _NucleicAcid:
     }
 
     def __init__(self):
-        self.profiles: Dict[
-            str, NucleicAcidProfile
-        ] = self.defaults  # by default set profiles to the defaults
-        self.current: NucleicAcidProfile = next(
-            iter(self.defaults.values())
-        )  # by default choose the first profiles in defaults
+        """Initialize the nucleic acid module."""
+        # by default set profiles to the defaults
+        self.profiles = self.defaults
 
+        # by default choose B type DNA as the profile
+        self.current: NucleicAcidProfile = self.profiles["MFD B-DNA"]
+
+        # load profiles from files
         self.load()
+
+        # dump profiles to files on exit
         atexit.register(self.dump)
 
     def load(self) -> None:
+        """
+        Load saved profiles and restored state from files.
+
+        Each profile is loaded from a separate file in the profiles directory. The names of the files are the
+        names of the profiles where underscores are replaced with spaces (dumping is the reverse of this).
+        """
+        # load all profiles from individual files in the profiles directory
+        for name in filter(
+            lambda filename: filename.endswith(".json"),
+            os.listdir(self.filenames.profiles),
+        ):
+            # load the profile from the file (we make sure to replace underscores with spaces and ".json" with "")
+            self.profiles[name.replace("_", " ").replace(".json", "")] = NucleicAcidProfile.from_file(
+                "json", f"{self.filenames.profiles}/{name}"
+            )
+            logger.info(
+                f'Loaded "%s" from "%s"', name, f"{self.filenames.profiles}/{name}.json"
+            )
+
+        # attempt to load the restored state from the restored file
         try:
-            # load all profiles
-            with open(self.filenames.profiles, "rb") as file:
-                self.profiles = pickle.load(file)
-                assert isinstance(self.profiles, dict)
-
-            # load restored settings
-            with open(self.filenames.restored, "rb") as file:
-                self.current = pickle.load(file)
-                assert isinstance(self.current, NucleicAcidProfile)
-
-            logger.debug("Saved profiles file loaded.")
-        # if unable to locate nucleic acid settings file then
+            self.current = NucleicAcidProfile.from_file(
+                "json", self.filenames.restored
+            )
+        # if unable to locate nucleic acid settings file then make no changes and announce that
+        # the default settings will be used
         except FileNotFoundError:
             logger.warning("Saved profiles file not found. Defaults restored.")
 
@@ -62,30 +87,21 @@ class _NucleicAcid:
         logger.debug("Loaded profiles. Profiles: %s", self.profiles)
 
     def dump(self) -> None:
-        """Dump persisting attributes of this module to a file"""
-        with open(self.filenames.profiles, "wb") as file:
-            assert isinstance(self.profiles, dict)
+        """
+        Dump profiles and the current state to files.
 
-            # perform data validation before save
-            for name, profile in self.profiles.items():
-                if not isinstance(profile, NucleicAcidProfile):
-                    logger.critical(
-                        "Data validation for nucleic_acid profiles dump failed."
-                    )
-                    raise TypeError(
-                        f'profiles named "{name}" is not a profiles', profile
-                    )
+        Each profile is dumped to a separate file in the profiles directory. The names of the files are the
+        names of the profiles where spaces are replaced with underscores (loading is the reverse of this).
+        """
+        # dump all profiles into individual files
+        for name, profile in self.profiles.items():
+            name = name.replace(" ", "_")
+            profile.to_file("json", f"{self.filenames.profiles}/{name}.json")
+            logger.info(
+                f'Dumped "%s" into "%s"', name, f"{self.filenames.profiles}/{name}.json"
+            )
 
-            pickle.dump(self.profiles, file)
-            logger.info(f'Dumped all profiles into "{file}"')
-
-        # dump current settings
+        # dump current settings into a separate "restored" file
         with open(self.filenames.restored, "wb") as settings_file:
-            # perform data validation before save
-            if not isinstance(self.current, NucleicAcidProfile):
-                logger.critical(
-                    "Data validation for nucleic_acid current profiles dump failed."
-                )
-                raise TypeError("current is not a profiles", profile)
-            pickle.dump(self.current, settings_file)
+            self.current.to_file("json", settings_file.name)
             logger.info(f'Dumped current nucleic_acid settings into "{settings_file}"')
