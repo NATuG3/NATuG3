@@ -11,7 +11,19 @@ logger = logging.getLogger(__name__)
 
 
 class _Domains:
+    """
+    Manager for the application's domains.
+
+    Attributes:
+        current: The current domains.
+
+    Methods:
+        load: Load the domains from a file.
+        dump: Dump the domains into a file.
+        recompute: Recompute the domains.
+    """
     filename: str = f"saves/domains/restored.{settings.extension}"
+
     default: Domains = Domains(
         refs.nucleic_acid.current,
         [
@@ -22,15 +34,8 @@ class _Domains:
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
             Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
             Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
-            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
-            Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
-            Domain(refs.nucleic_acid.current, 9, DOWN, UP, 60),
-            Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
-            Domain(refs.nucleic_acid.current, 9, DOWN, UP, 60),
-            Domain(refs.nucleic_acid.current, 9, UP, UP, 60),
-            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, 60),
         ],
-        1,
+        2,
         True,
     )
 

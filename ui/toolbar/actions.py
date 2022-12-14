@@ -9,6 +9,7 @@ class Action(QPushButton):
 
     Actions are modified QPushButtons that are checkable (toggleable), and have a fixed width.
     """
+
     def __init__(self, title):
         super().__init__(title)
         self.setCheckable(True)

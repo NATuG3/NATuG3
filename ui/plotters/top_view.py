@@ -50,6 +50,7 @@ class TopViewPlotter(pg.PlotWidget):
     Signals:
         point_clicked(a tuple of the points that were clicked): Emitted when a point is clicked.
     """
+
     point_clicked = pyqtSignal(tuple)
 
     def __init__(

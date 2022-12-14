@@ -5,6 +5,15 @@ from constants.toolbar import *
 
 
 class _Toolbar:
+    """
+    Manager for the toolbar.
+
+    Attributes:
+        actions (QButtonGroup): The toolbar's actions.
+
+    Notes:
+        - self.actions.buttons[constant-for-an-action] returns the action's button widget.
+    """
     def __init__(self):
         self.actions: QButtonGroup = refs.constructor.toolbar.actions
         self.actions.buttons[JUNCTER].setChecked(True)

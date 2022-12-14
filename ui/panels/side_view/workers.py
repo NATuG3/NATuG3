@@ -144,6 +144,7 @@ def nicker(points: List[Point], strands: Strands) -> None:
     raise NotImplementedError("Nicker is not yet implemented")
     # logger.info("Nicker mode was run.")
 
+
 def highlighter(points: List[Point], refresh: Callable):
     """
     Highlight/un-highlight a series of points based on their current highlighted state.

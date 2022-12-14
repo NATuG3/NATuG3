@@ -36,6 +36,7 @@ class DirectionalButton(QPushButton):
                 self.state = UP
             # set the arrow accordingly
             self.text_updater()
+
         self.clicked.connect(on_click)
 
     def text_updater(self):

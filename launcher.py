@@ -40,7 +40,9 @@ def main():
 
     # set up pyqtgraph
     pg.setConfigOptions(
-        useOpenGL=True, antialias=False, background=pg.mkColor(*settings.colors["background"])
+        useOpenGL=True,
+        antialias=False,
+        background=pg.mkColor(*settings.colors["background"]),
     )
 
     import refs

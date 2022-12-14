@@ -114,6 +114,7 @@ class StrandConfig(QDialog):
 
     def _thickness_selector(self):
         """Set up the thickness selector."""
+
         def slider_to_thickness():
             """Map the thickness slider to the strand thickness."""
             return int((self.thickness.value() * self.max_thickness) / 99)

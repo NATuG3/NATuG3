@@ -161,6 +161,11 @@ class RefreshConfirmer(QDialog):
         self._prettify()
         self._fileselector()
         self._buttons()
+        self.finished.connect(self._finished)
+
+    def _finished(self):
+        """Runs when the dialog closes."""
+        refs.constructor.side_view.setFocus()
 
     def _fileselector(self):
         """Set up the file selector."""
