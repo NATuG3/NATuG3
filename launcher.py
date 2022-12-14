@@ -3,8 +3,6 @@ import os
 from contextlib import suppress
 from time import time
 
-import settings
-
 # whether to delete restoration files
 RESET = False
 
@@ -25,21 +23,22 @@ def main():
 
     if RESET:
         with suppress(FileNotFoundError):
-            os.remove("saves\\domains\\restored.nano")
-            os.remove("saves\\sequencing\\restored.nano")
+            os.remove("saves/nucleic_acid/profiles.nano")
+            os.remove("saves/nucleic_acid/restored.nano")
+            os.remove("saves/domains/restored.nano")
+            os.remove("saves/sequencing/restored.nano")
 
     # create needed files
     with suppress(FileExistsError):
-        os.mkdir(f"{os.getcwd()}\\saves\\domains")
-        os.mkdir(f"{os.getcwd()}\\saves\\sequencing")
+        os.mkdir(f"{os.getcwd()}/saves/nucleic_acid")
+        os.mkdir(f"{os.getcwd()}/saves/domains")
+        os.mkdir(f"{os.getcwd()}/saves/sequencing")
 
     import pyqtgraph as pg
 
     # set up pyqtgraph
     pg.setConfigOptions(
-        useOpenGL=True,
-        antialias=False,
-        background=pg.mkColor(*settings.colors["background"]),
+        useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
     )
 
     import refs
