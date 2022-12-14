@@ -156,37 +156,39 @@ class DomainStrandWorker:
                 # if the domain is going from down to up then
                 # decrease the z coord of the other NEMid
                 if domain.theta_s_multiple == 1:
+                    other_NEMid.z_coord += self.nucleic_acid_profile.Z_mate
                     other_NEMid.angle -= self.nucleic_acid_profile.g
                 # otherwise increase the z coord of the other NEMid
                 else:  # theta_s_multiple
+                    other_NEMid.z_coord -= self.nucleic_acid_profile.Z_mate
                     other_NEMid.angle += self.nucleic_acid_profile.g
 
                 # based on the new angle, compute the new x coord
-                other_NEMid.x_coord = Point.x_coord_from_angle(other_NEMid, domain)
-
-                # increase or decrease the z coord of the other NEMid
-                other_NEMid.z_coord
-
-                # create a nucleoside object from the NEMid
-                nucleoside = left_NEMid.to_nucleoside()
-
-                # rotate the nucloeside half a base rotation
-                nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
-
-                # add half a base height to the nucleoside's z coord
-                nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+                other_NEMid.x_coord = Point.x_coord_from_angle(other_NEMid.angle, domain)
+                #
+                # # create a nucleoside object from the NEMid
+                # nucleoside = left_NEMid.to_nucleoside()
+                #
+                # # rotate the nucloeside half a base rotation
+                # nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
+                #
+                # # add half a base height to the nucleoside's z coord
+                # nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
 
                 # recompute the nucleoside's x coord
-                nucleoside.x_coord = Point.x_coord_from_angle(
-                    nucleoside.angle, nucleoside.domain
-                )
+                # nucleoside.x_coord = Point.x_coord_from_angle(
+                #     nucleoside.angle, nucleoside.domain
+                # )
 
                 # append the current NEMid and nucleoside to the to-be-outputted array
-                strands[index][strand_direction].append(left_NEMid)
-                strands[index][strand_direction].append(nucleoside)
+                strands[index][zeroed_strand].append(left_NEMid)
+                strands[index][inverse(zeroed_strand)].append(other_NEMid)
+                # strands[index][strand_direction].append(nucleoside)
 
-            if strand_direction == DOWN:
-                strands[index][strand_direction].reverse()
+            if zeroed_strand == DOWN:
+                strands[index][zeroed_strand].reverse()
+            if inverse(zeroed_strand) == DOWN:
+                strands[index][inverse(zeroed_strand)].reverse()
 
         # assign junctability and juncmates
         for index, domain in enumerate(self.domains.domains()):
