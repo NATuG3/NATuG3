@@ -115,14 +115,14 @@ class DomainsPanel(QWidget):
             filepath = QFileDialog.getSaveFileName(
                 parent=self,
                 caption="Domains Save File Location Chooser",
-                filter="*csv",
+                filter="*.csv",
             )[0]
             if len(filepath) > 0:
                 logger.info(
                     f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}"
                 )
                 refs.domains.current.to_file(
-                    mode="csv", filepath=filepath.replace(".csv", "")
+                    filepath=filepath
                 )
 
         self.save_domains_button.clicked.connect(save_domains)
@@ -133,14 +133,13 @@ class DomainsPanel(QWidget):
                 parent=self,
                 caption="Domains Import File Location Chooser",
                 directory=f"{os.getcwd()}\\saves\\domains\\presets",
-                filter="*csv",
+                filter="*.csv",
             )[0]
             if len(filepath) > 0:
 
                 def loader():
                     domains = Domains.from_file(
-                        mode="csv",
-                        filepath=filepath.replace(".csv", ""),
+                        filepath=filepath,
                         nucleic_acid_profile=refs.nucleic_acid.current,
                     )
                     refs.domains.current.update(domains)

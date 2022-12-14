@@ -109,7 +109,7 @@ class Domains:
         # clear cache
         self.clear_cache()
 
-    def to_file(self, mode: Literal["csv"], filepath: str) -> None:
+    def to_file(self, filepath: str) -> None:
         """
         Export all the current domains as a csv.
 
@@ -123,15 +123,15 @@ class Domains:
             - antiparallel (whether the domains are antiparallel)
 
         Args:
-            mode: The file type to export to. Must be in ("csv").
             filepath: The filepath to export to.
 
         Raises:
             ValueError: If the mode is not an allowed mode or if the filepath contains an extension.
-        """
-        if "." in filepath:
-            raise ValueError("Filepath cannot contain an extension.")
 
+        Notes:
+            - Filetype is determined by the extension.
+            - Supported filetypes: csv
+        """
         # extract all the data to references
         domains = self.subunit.domains
         left_helix_joints = [
@@ -158,15 +158,14 @@ class Domains:
         )
 
         # based on the mode chosen by the user, export the data to a file
-        if mode == "csv":
-            data.to_csv(f"{filepath}.csv", index=False)
+        if filepath.endswith("csv"):
+            data.to_csv(filepath, index=False)
         else:  # if the mode is not one that is allowed, raise an error
-            raise ValueError(f"Invalid mode: {mode}")
+            raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")
 
     @classmethod
     def from_file(
         cls,
-        mode: Literal["csv"],
         filepath: str,
         nucleic_acid_profile: NucleicAcidProfile,
     ):
@@ -174,7 +173,6 @@ class Domains:
         Import domains from a csv. Must be a csv in the format of self.to_file().
 
         Args:
-            mode: The type of file being imported. Must be in ("csv").
             filepath: The filepath to import from.
             nucleic_acid_profile: The nucleic acid configuration.
 
@@ -183,16 +181,16 @@ class Domains:
 
         Raises:
             ValueError: If the mode is not an allowed mode or if filepath contains an extension.
-        """
-        if "." in filepath:
-            raise ValueError("Filepath cannot contain an extension.")
 
+        Notes:
+            - Filetype is determined by the extension.
+        """
         # read the file based on the mode
-        if mode == "csv":
-            data = pd.read_csv(f"{filepath}.csv")
+        if filepath.endswith("csv"):
+            data = pd.read_csv(filepath)
         # if the mode is not one that is allowed, raise an error
         else:
-            raise ValueError(f"Invalid mode: {mode}")
+            raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")
 
         # extract the data
         left_helix_joints = [
