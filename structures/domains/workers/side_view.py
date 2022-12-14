@@ -1,7 +1,7 @@
 import itertools
 import logging
 from math import dist
-from typing import List, Tuple
+from typing import List, Tuple, Literal
 
 import settings
 from constants.directions import *
@@ -123,43 +123,70 @@ class DomainStrandWorker:
                     )
                 )
 
-            # create NEMid objects for final return DomainContainer
-            for strand_direction in self.strand_directions:
-                for angle, x_coord, z_coord in zip(
-                    angles[strand_direction],
-                    x_coords[strand_direction],
-                    z_coords[strand_direction],
-                ):
-                    # combine all data into NEMid object
-                    NEMid_ = NEMid(
-                        x_coord=x_coord,
-                        z_coord=z_coord,
-                        angle=angle,
-                        direction=strand_direction,
-                        domain=domain,
-                        strand=None,
-                    )
+            # the zeroed strand is the strand that begins at z=0 for the first domain's left strand, or
+            # is the strand of a different domain that is shifted up or down in multiples of Z_b*B of that
+            # for other domains. It is either UP or DOWN (where UP and DOWN are constants that are either 0 or
+            # 1, respectively).
+            zeroed_strand = domain.left_helix_joint
 
-                    # create a nucleoside object from the NEMid
-                    nucleoside = NEMid_.to_nucleoside()
+            # create NEMid objects by zipping together the angles, x coords, and z coords
+            for angle, x_coord, z_coord in zip(
+                angles[zeroed_strand],
+                x_coords[zeroed_strand],
+                z_coords[zeroed_strand],
+            ):
+                # The left NEMid is the one with the information from the zipping
+                left_NEMid = NEMid(
+                    x_coord=x_coord,
+                    z_coord=z_coord,
+                    angle=angle,
+                    direction=zeroed_strand,
+                    domain=domain,
+                    strand=None,
+                )
+                # The other NEMid is the same as the first NEMid but with slightly modified data
+                other_NEMid = NEMid(
+                    x_coord=x_coord,
+                    z_coord=z_coord,
+                    angle=angle,
+                    direction=zeroed_strand,
+                    domain=domain,
+                    strand=None,
+                )
+                # if the domain is going from down to up then
+                # decrease the z coord of the other NEMid
+                if domain.theta_s_multiple == 1:
+                    other_NEMid.angle -= self.nucleic_acid_profile.g
+                # otherwise increase the z coord of the other NEMid
+                else:  # theta_s_multiple
+                    other_NEMid.angle += self.nucleic_acid_profile.g
 
-                    # rotate the nucloeside half a base rotation
-                    nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
+                # based on the new angle, compute the new x coord
+                other_NEMid.x_coord = Point.x_coord_from_angle(other_NEMid, domain)
 
-                    # add half a base height to the nucleoside's z coord
-                    nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+                # increase or decrease the z coord of the other NEMid
+                other_NEMid.z_coord
 
-                    # recompute the nucleoside's x coord
-                    nucleoside.x_coord = Point.x_coord_from_angle(
-                        nucleoside.angle, nucleoside.domain
-                    )
+                # create a nucleoside object from the NEMid
+                nucleoside = left_NEMid.to_nucleoside()
 
-                    # append the current NEMid and nucleoside to the to-be-outputted array
-                    strands[index][strand_direction].append(NEMid_)
-                    strands[index][strand_direction].append(nucleoside)
+                # rotate the nucloeside half a base rotation
+                nucleoside.angle += self.nucleic_acid_profile.theta_b / 2
 
-                if strand_direction == DOWN:
-                    strands[index][strand_direction].reverse()
+                # add half a base height to the nucleoside's z coord
+                nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2
+
+                # recompute the nucleoside's x coord
+                nucleoside.x_coord = Point.x_coord_from_angle(
+                    nucleoside.angle, nucleoside.domain
+                )
+
+                # append the current NEMid and nucleoside to the to-be-outputted array
+                strands[index][strand_direction].append(left_NEMid)
+                strands[index][strand_direction].append(nucleoside)
+
+            if strand_direction == DOWN:
+                strands[index][strand_direction].reverse()
 
         # assign junctability and juncmates
         for index, domain in enumerate(self.domains.domains()):
