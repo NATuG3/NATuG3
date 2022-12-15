@@ -1,4 +1,8 @@
+import itertools
+from typing import List
+
 from constants.directions import *
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
 
@@ -10,12 +14,6 @@ class Domain:
     Attributes:
         parent: The parent workers container object. If this is None then index becomes None too.
         index: The index of this domain in its parent.
-        left_helix_joint: The left helix joint's upwardness or downwardness.
-            "Left" indicates that the left side of this domain will be lined up to
-            the right helix joint of the previous domain. Uses the constant 0 for up and 1 for down.
-        right_helix_joint: The right helix joint's upwardness or downwardness.
-            "right" indicates that the right side of this domain will be lined up to
-            the left helix joint of the next domain. Uses the constant 0 for up and 1 for down.
         up_strand (Strand): The up strand of the domain. This is an unparented strand object.
         down_strand (Strand): The down strand of the domain. This is an unparented strand object.
         theta_m_multiple: Angle between this and the next workers' line of tangency. Multiple of theta_c.
@@ -31,15 +29,28 @@ class Domain:
         theta_s: The switch angle for the transition between an up and down strand (or 0 if there is none).
             This is the theta_s_multiple times the characteristic angle.
         nucleic_acid_profile: the nucleic acid configuration for the domain.
-        count: Number of initial NEMids/strand to generate.
+        left_helix_joint: The left helix joint's upwardness or downwardness.
+            "Left" indicates that the left side of this domain will be lined up to
+            the right helix joint of the previous domain. Uses the constant 0 for up and 1 for down.
+        right_helix_joint: The right helix joint's upwardness or downwardness.
+            "right" indicates that the right side of this domain will be lined up to
+            the left helix joint of the next domain. Uses the constant 0 for up and 1 for down.
+        left_helix_count: Number of initial NEMids/strand to generate. This is a list of bottom-count, body-count,
+            and top-count. The number of NEMids in the domains' is determined by count[1], and then count[0] NEMids are
+            added to the bottom strand and count[2] NEMids are added to the top of the strand.
+        right_helix_count: Number of initial NEMids/strand to generate for the left helix. This is a list of
+            bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
+            and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the strand.
     """
 
     def __init__(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
         theta_m_multiple: int,
-        left_helix_joint_direction: int,
-        right_helix_joint_direction: int,
+        left_helix_joint: int,
+        right_helix_joint: int,
+        left_helix_count: List[int, int, int],
+        right_helix_count: List[int, int, int],
         count: int,
         parent: "Domains" = None,
         index: int = None,
@@ -66,14 +77,56 @@ class Domain:
         self.theta_interior_multiple: int = theta_m_multiple
 
         # the helical joints
-        self.left_helix_joint = left_helix_joint_direction
-        self.right_helix_joint = right_helix_joint_direction
+        self.left_helix_joint = left_helix_joint
+        self.right_helix_joint = right_helix_joint
+        assert self.left_helix_joint in [0, 1]
+        assert self.right_helix_joint in [0, 1]
+
+        # the number of NEMids to generate for the left and right helices
+        self.left_helix_count = left_helix_count
+        self.right_helix_count = right_helix_count
+        assert len(self.left_helix_count) == 3
+        assert len(self.right_helix_count) == 3
 
         # store the number of initial NEMids/strand to generate
         self.count = count
 
         # set the index of the domain
         self.index = index
+
+    def angles(self, start=0):
+        """
+        Obtain the angles of the NEMids of the Domain.
+
+        Yields:
+            The angle of each NEMid in the domain.
+        """
+        angle = start
+        while True:
+            angle += self.nucleic_acid_profile.theta_b
+            yield angle
+
+    def x_coords(self):
+        """
+        Obtain the x coords of the NEMids of the Domain.
+
+        Yields:
+            The x coords of each NEMid in the domain.
+        """
+        for angle in self.angles():
+            yield Point.x_coord_from_angle(angle, self)
+
+    def z_coords(self, start=0):
+        """
+        Obtain the z coords of the NEMids of the Domain.
+
+        Yields:
+            The z coords of each NEMid in the domain.
+        """
+        z_coord = start
+        while True:
+            z_coord += self.nucleic_acid_profile.Z_b
+            yield z_coord
 
     @property
     def left_strand(self) -> Strand | None:
