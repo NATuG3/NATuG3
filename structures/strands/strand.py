@@ -4,9 +4,11 @@ from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
-from typing import Tuple, Iterable, Deque, List, ClassVar
+from typing import Tuple, Iterable, Deque, List, ClassVar, Literal
 
 from constants.bases import DNA
+from constants.directions import RIGHT, LEFT, UP
+from structures.domains import Domain
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -84,6 +86,98 @@ class Strand:
         "cross_screen",
         "nucleosides",
     )
+
+    def generate_NEMids(
+        self, count: int, domain: Domain | None, direction: Literal[0, 1] = RIGHT
+    ) -> None:
+        """
+        Generate additional NEMids and Nucleosides for the strand.
+
+        This creates new NEMid and Nucleoside objects which are inserted into and parented to this strand.
+
+        Args:
+            count: The number of additional NEMids to generate. Nucleosides are generated automatically, this is
+                specifically an integer number of NEMids.
+            domain: The domain to use for x coord generation in the NEMid generation process. If this is None the
+                domain of the right most NEMid is used by default.
+            direction: The direction to generate the NEMids in. This is either RIGHT or LEFT. If LEFT NEMids are
+                generated and left-appended to the left of the strand; if RIGHT NEMids are generated and appended to the
+                right side of the strand.
+
+        Notes:
+            Items are appended directly to the left or right side of the strand, and are not returned. The strand
+            object is updated in place.
+        """
+        # Compute variables dependent on direction.
+        # Edge_NEMid == rightmost or leftmost NEMid based off of the direction that we're generating NEMids in.
+        # Modifier == whether we are increasing or decreasing angles/z-coords as we progress. Takes the form of -1 or 1
+        # so that we can multiply it by the changes.
+        if direction == RIGHT:
+            edge_NEMid = self.NEMids()[-1]
+            modifier = 1
+        elif direction == LEFT:
+            edge_NEMid = self.NEMids()[0]
+            modifier = -1
+        else:
+            raise ValueError(f"Invalid direction: %s", direction)
+
+        # If they do not pass a Domain object, use the domain of the right most NEMid
+        domain = domain if domain is not None else edge_NEMid.domain
+
+        # Create a generator for angles. The angle generator begins at the angle of the item rightmost in the list,
+        # and yields angles increasing by theta_b. We slice the angle generator so that it stops yielding after count
+        # number of NEMids have been generated. As it yields, we apply a modulo operation to the angle to ensure that
+        # angles do not exceed 360 degrees.
+        angle_generator = itertools.count(
+            edge_NEMid.angle, self.nucleic_acid_profile.theta_b*modifier
+        )
+        angle_generator = itertools.islice(angle_generator, count)
+        angle_generator = map(lambda angle_: angle_ % 360, angle_generator)
+
+        # Create a generator for x coordinates. The x coordinates are generated based off of the angles, so this uses
+        # the above angle generator and mapping the Point.x_coord_from_angle() method onto it to transform the angles
+        # into x coordinates.
+        x_coord_generator = map(
+            lambda angle_: Point.x_coord_from_angle(angle_, domain), angle_generator
+        )
+        x_coord_generator = itertools.islice(x_coord_generator, count)
+
+        # Create a generator for z coordinates. The z coordinate generator begins at the last z coordinate in the
+        # strand and yields z coordinates increasing by Z_b. We slice the z coordinate generator so that it stops
+        # yielding after count number of NEMids have been generated.
+        z_coord_generator = itertools.count(
+            edge_NEMid.z_coord, self.nucleic_acid_profile.Z_b*modifier
+        )
+        z_coord_generator = itertools.islice(z_coord_generator, count)
+
+        # Iterate over the various generators and create NEMids and Nucleosides. Then append them to the strand.
+        for angle, x_coord, z_coord in zip(
+            angle_generator, x_coord_generator, z_coord_generator
+        ):
+            # Create a NEMid object with the data from the generators.
+            NEMid_ = NEMid(
+                angle=angle,
+                x_coord=x_coord,
+                z_coord=z_coord,
+            )
+
+            # Create a Nucleoside object from the NEMid object's data.
+            nucleoside = NEMid.to_nucleoside()
+
+            # If we are generating upwards boost the nucleoside up/down to be the next item in the strand.
+            nucleoside.angle += self.nucleic_acid_profile.theta_b / 2 * modifier
+            nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2 * modifier
+            nucleoside.x_coord = Point.x_coord_from_angle(nucleoside.angle, nucleoside.domain)
+
+            # append the new NEMid and nucleoside to the right/left side of the strand based off of the direction.
+            if direction == RIGHT:
+                # right append
+                self.append(NEMid_)
+                self.append(nucleoside)
+            else:
+                # left append
+                self.appendleft(NEMid_)
+                self.appendleft(nucleoside)
 
     def append(self, item: Point) -> None:
         """Add an item to the right of the strand."""
