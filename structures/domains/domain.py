@@ -1,5 +1,5 @@
 import itertools
-from typing import List
+from typing import List, Tuple
 
 from constants.directions import *
 from structures.points.point import Point
@@ -50,9 +50,8 @@ class Domain:
         theta_m_multiple: int,
         left_helix_joint: int,
         right_helix_joint: int,
-        left_helix_count: List[int, int, int],
-        other_helix_count: List[int, int, int],
-        count: int,
+        left_helix_count: Tuple[int, int, int],
+        other_helix_count: Tuple[int, int, int],
         parent: "Domains" = None,
         index: int = None,
     ):
@@ -75,7 +74,6 @@ class Domain:
                 bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
                 and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the
                 strand.
-            count: Number of initial NEMids/strand to generate.
             parent (Subunit): The parent subunit. Defaults to None.
             index (int): The index of this domain in its parent. Defaults to None.
         """
@@ -99,9 +97,6 @@ class Domain:
         self.right_helix_count = other_helix_count
         assert len(self.left_helix_count) == 3
         assert len(self.right_helix_count) == 3
-
-        # store the number of initial NEMids/strand to generate
-        self.count = count
 
         # set the index of the domain
         self.index = index
