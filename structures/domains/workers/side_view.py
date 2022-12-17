@@ -132,6 +132,7 @@ class DomainStrandWorker:
                 )
                 strands[domain.index][zeroed_strand].append(nucleoside)
 
+        print(strands)
         return strands
 
     def __repr__(self) -> str:
