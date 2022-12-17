@@ -212,8 +212,8 @@ class Domains:
             domains.append(
                 Domain(
                     nucleic_acid_profile,
-                    left_helix_joint_direction=left_helix_joints[i],
-                    right_helix_joint_direction=right_helix_joints[i],
+                    left_helix_joint=left_helix_joints[i],
+                    right_helix_joint=right_helix_joints[i],
                     theta_m_multiple=m[i],
                     count=count[i],
                 )
@@ -378,13 +378,13 @@ class Domains:
 
         # Creating a list of strands, and then converting that list into a Strands object.
         listed_strands = []
-        for domain in self.domains:
+        for domain in self.domains():
             for direction in (UP, DOWN,):
                 listed_strands.append(self._points[domain.index][direction])
         logger.debug(f"Fetched {len(listed_strands)} strands.")
 
         # ensure that the zeroth domain's up strand's first point is in the proper outputted strand
-        assert self._points[0][0][0] in converted_strands[0]
+        assert self._points[0][0][0] in listed_strands[0]
 
         # ensure that the points are properly parented
         # check to see if the zeroth domain's up strand's first point's great-grandparent is us
@@ -393,8 +393,12 @@ class Domains:
         # Subunit.domains -> Domains (should be us)
         assert self._points[0][0][0].domain.parent.parent is self
 
+        # convert all items in listed_strands to Strand objects
+        for index, strand in enumerate(listed_strands):
+            listed_strands[index] = Strand(strand, color=settings.colors["sequencing"]["greys"][index % 2])
+
         # convert sequencing from a list to a Strands container
-        return Strands(self.nucleic_acid_profile, converted_strands)
+        return Strands(self.nucleic_acid_profile, listed_strands)
 
     def top_view(self) -> TopViewWorker:
         """

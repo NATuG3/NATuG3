@@ -7,8 +7,7 @@ from functools import cached_property
 from typing import Tuple, Iterable, Deque, List, ClassVar, Literal
 
 from constants.bases import DNA
-from constants.directions import RIGHT, LEFT, UP
-from structures.domains import Domain
+from constants.directions import *
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -108,7 +107,7 @@ class Strand:
             item.x_coord += distance
 
     def generate_NEMids(
-        self, count: int, domain: Domain | None, direction: Literal[0, 1] = RIGHT
+        self, count: int, domain: "Domain", direction: Literal[0, 1] = RIGHT
     ) -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.

@@ -81,7 +81,7 @@ class Table(QTableWidget):
     def _headers(self):
         """Configure top headers of widget"""
         # store headers (these do not change)
-        self.top_headers = ("left", "right", "s", "m", "count")
+        self.top_headers = ("left", "right", "s", "m", "left count", "other count")
         # create a column for each header
         self.setColumnCount(len(self.top_headers))
         # apply the headers
@@ -165,10 +165,15 @@ class Table(QTableWidget):
             )
             self.setCellWidget(index, 3, row.theta_interior_multiple)
 
-            # column 4 - initial NEMid count
-            row.domain_count = TableIntegerBox(domain.count)
-            row.domain_count.editingFinished.connect(self.cell_widget_updated.emit)
-            self.setCellWidget(index, 4, row.domain_count)
+            # column 4 - initial NEMid count for the left helix
+            row.left_helix_count = TableIntegerBox(domain.left_helix_count[1])
+            row.left_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
+            self.setCellWidget(index, 4, row.left_helix_count)
+
+            # column 5 - initial NEMid count for the other helix
+            row.other_helix_count = TableIntegerBox(domain.other_helix_count[1])
+            row.other_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
+            self.setCellWidget(index, 5, row.other_helix_count)
 
             self.side_headers.append(f"#{index + 1}")
 
@@ -246,14 +251,18 @@ class Table(QTableWidget):
             theta_interior_multiple: int = self.cellWidget(domain_index, 3).value()
 
             # column 4 - initial NEMid count
-            count: int = self.cellWidget(domain_index, 4).value()
+            left_helix_count: int = self.cellWidget(domain_index, 4).value()
+
+            # column 4 - initial NEMid count
+            other_helix_count: int = self.cellWidget(domain_index, 5).value()
 
             domain_index = Domain(
                 self.nucleic_acid_profile,
                 theta_interior_multiple,
                 left_helical_joint,
                 right_helical_joint,
-                count,
+                (0, left_helix_count, 0,),
+                (0, other_helix_count, 0,),
             )
 
             domains.append(domain_index)

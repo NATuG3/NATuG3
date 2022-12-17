@@ -38,7 +38,7 @@ class Domain:
         left_helix_count: Number of initial NEMids/strand to generate. This is a list of bottom-count, body-count,
             and top-count. The number of NEMids in the domains' is determined by count[1], and then count[0] NEMids are
             added to the bottom strand and count[2] NEMids are added to the top of the strand.
-        right_helix_count: Number of initial NEMids/strand to generate for the non-left helix. This is a list of
+        other_helix_count: Number of initial NEMids/strand to generate for the non-left helix. This is a list of
             bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
             and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the
             strand.
@@ -94,9 +94,9 @@ class Domain:
 
         # the number of NEMids to generate for the left and right helices
         self.left_helix_count = left_helix_count
-        self.right_helix_count = other_helix_count
+        self.other_helix_count = other_helix_count
         assert len(self.left_helix_count) == 3
-        assert len(self.right_helix_count) == 3
+        assert len(self.other_helix_count) == 3
 
         # set the index of the domain
         self.index = index
@@ -232,7 +232,8 @@ class Domain:
             f"m={self.theta_interior_multiple}, "
             f"left_joint={self.left_helix_joint}, "
             f"right_joint={self.right_helix_joint}, "
-            f"count={self.count}, "
+            f"left_count={self.left_helix_count}, "
+            f"other_count={self.other_helix_count}, "
             f"index={self.index}"
             f")"
         )
