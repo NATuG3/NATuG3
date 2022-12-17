@@ -87,6 +87,26 @@ class Strand:
         "nucleosides",
     )
 
+    def vertical_shift(self, distance: float) -> None:
+        """
+        Shift the Z coord of all items in the strand by a certain amount.
+
+        Args:
+            distance: The amount to shift by. This is in nanometres.
+        """
+        for item in self.items:
+            item.z_coord += distance
+
+    def horizontal_shift(self, distance: float) -> None:
+        """
+        Shift the X coord of all items in the strand by a certain amount.
+
+        Args:
+            distance: The amount to shift by. This is in nanometres.
+        """
+        for item in self.items:
+            item.x_coord += distance
+
     def generate_NEMids(
         self, count: int, domain: Domain | None, direction: Literal[0, 1] = RIGHT
     ) -> None:
