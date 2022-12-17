@@ -64,15 +64,11 @@ class Strand:
     name: str = "Strand"
     parent: "Strands" = None
 
-    nucleic_acid_profile: NucleicAcidProfile = field(default_factory=NucleicAcidProfile)
+    nucleic_acid_profile: NucleicAcidProfile = field(default_factory=NucleicAcidProfile, repr=False)
     items: Deque[Point] = field(default_factory=deque)
     closed: bool = False
 
-    color: Tuple[int, int, int] = (
-        0,
-        0,
-        0,
-    )
+    color: Tuple[int, int, int] = (0, 0, 0,)
     auto_color: bool = True
     thickness: int = 2
     auto_thickness: bool = True
