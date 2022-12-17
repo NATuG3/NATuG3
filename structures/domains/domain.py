@@ -38,9 +38,10 @@ class Domain:
         left_helix_count: Number of initial NEMids/strand to generate. This is a list of bottom-count, body-count,
             and top-count. The number of NEMids in the domains' is determined by count[1], and then count[0] NEMids are
             added to the bottom strand and count[2] NEMids are added to the top of the strand.
-        right_helix_count: Number of initial NEMids/strand to generate for the left helix. This is a list of
+        right_helix_count: Number of initial NEMids/strand to generate for the non-left helix. This is a list of
             bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
-            and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the strand.
+            and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the
+            strand.
     """
 
     def __init__(
@@ -50,7 +51,7 @@ class Domain:
         left_helix_joint: int,
         right_helix_joint: int,
         left_helix_count: List[int, int, int],
-        right_helix_count: List[int, int, int],
+        other_helix_count: List[int, int, int],
         count: int,
         parent: "Domains" = None,
         index: int = None,
@@ -61,8 +62,19 @@ class Domain:
         Args:
             nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile
             theta_m_multiple: Angle between this and the next workers' lines of tangency. Multiple of theta c.
-            left_helix_joint_direction: The left helix joint's direction.
-            right_helix_joint_direction: The right helix joint's direction.
+            left_helix_joint: The left helix joint's upwardness or downwardness.
+                "Left" indicates that the left side of this domain will be lined up to
+                the right helix joint of the previous domain. Uses the constant 0 for up and 1 for down.
+            right_helix_joint: The right helix joint's upwardness or downwardness.
+                "right" indicates that the right side of this domain will be lined up to
+                the left helix joint of the next domain. Uses the constant 0 for up and 1 for down.
+            left_helix_count: Number of initial NEMids/strand to generate. This is a list of bottom-count, body-count,
+                and top-count. The number of NEMids in the domains' is determined by count[1], and then count[0] NEMids are
+                added to the bottom strand and count[2] NEMids are added to the top of the strand.
+            other_helix_count: Number of initial NEMids/strand to generate for the non-left helix. This is a list of
+                bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
+                and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the
+                strand.
             count: Number of initial NEMids/strand to generate.
             parent (Subunit): The parent subunit. Defaults to None.
             index (int): The index of this domain in its parent. Defaults to None.
@@ -84,7 +96,7 @@ class Domain:
 
         # the number of NEMids to generate for the left and right helices
         self.left_helix_count = left_helix_count
-        self.right_helix_count = right_helix_count
+        self.right_helix_count = other_helix_count
         assert len(self.left_helix_count) == 3
         assert len(self.right_helix_count) == 3
 
