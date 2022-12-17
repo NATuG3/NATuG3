@@ -84,55 +84,60 @@ class DomainStrandWorker:
                 # domain's strand. "np.argmax(arr)" returns the index of the greatest element in an array.
                 initial_z_coord = z_coords[-1][np.argmax(x_coords[-1])]
 
-            # Generate all the angles. We begin at x=0 and step by theta_b for domain.left_helix_count[1] times.
-            current_angles = np.arange(
-                0,
-                count,
-                self.nucleic_acid_profile.theta_b
+            # Generate all the angles. We begin at x=0 and step by theta_b/2 for domain.left_helix_count[1] times.
+            # Note that we are generating the data for NEMids and Nucleosides, which is why we step by half a theta_b.
+            zeroed_strand_angles = np.arange(
+                0,  # when to start generating angles
+                self.nucleic_acid_profile.theta_b*count,  # when to stop generating angles
+                self.nucleic_acid_profile.theta_b/2
             )
-            angles.append(current_angles)
+            angles.append(zeroed_strand_angles)
 
             # Generate all the x coords. X coords are generated based off of the angles, so we will use map
             # Point.x_coord_from_angle onto a copy of current_angles.
-            current_x_coords = np.array([Point.x_coord_from_angle(angle, domain) for angle in current_angles])
-            x_coords.append(current_x_coords)
+            zeroed_strand_x_coords = np.array([Point.x_coord_from_angle(angle, domain) for angle in zeroed_strand_angles])
+            x_coords.append(zeroed_strand_x_coords)
 
-            # Generate all the z coords. We begin at z=0 and step by Z_b for domain.left_helix_count[1] times.
-            current_z_coords = np.arange(
-                initial_z_coord,
-                count,
-                self.nucleic_acid_profile.Z_b,
+            # Generate all the z coords. We begin at z=0 and step by Z_b/2 for domain.left_helix_count[1] times. Note
+            # that we are generating the data for NEMids and Nucleosides, which is why we step by half a Z_b.
+            zeroed_strand_z_coords = np.arange(
+                initial_z_coord,  # when to start generating z coords
+                self.nucleic_acid_profile.theta_b*count,  # when to stop generating z coords
+                self.nucleic_acid_profile.Z_b/2,
             )
-            z_coords.append(current_z_coords)
+            z_coords.append(zeroed_strand_z_coords)
+
+            # Now, using various attributes of the nucleic acid profile, we can easily compute the other_strand (the
+            # strand that does not make a connection with the previous domain).
+            # other_strand_angles = zeroed_strand_angles + self.nucleic_acid_profile.g/2
+            # other_strand_x_coords = np.array([Point.x_coord_from_angle(angle, domain) for angle in other_strand_angles])
+            # other_strand_z_coords = zeroed_strand_z_coords + self.nucleic_acid_profile.Z_mate/2
 
             # Build the list of NEMid and Nucleosides objects to append to the strands container.
-            for x_coord, z_coord, angle in zip(current_x_coords, current_z_coords, current_angles):
-                # Create a NEMid object and append it to the strands container.
-                NEMid_ = NEMid(
-                    x_coord=x_coord,
-                    z_coord=z_coord,
-                    angle=angle,
-                    direction=zeroed_strand,
-                    domain=domain,
-                )
-                strands[domain.index][zeroed_strand].append(NEMid_)
+            for counter, (x_coord, z_coord, angle) in enumerate(
+                zip(zeroed_strand_x_coords, zeroed_strand_z_coords, zeroed_strand_angles)
+            ):
+                if counter % 2 == 0:
+                    # Create a NEMid object for both the zeroed and other strand for the strands container.
+                    zeroed_strand_NEMid = NEMid(
+                        x_coord=x_coord,
+                        z_coord=z_coord,
+                        angle=angle,
+                        direction=zeroed_strand,
+                        domain=domain,
+                    )
+                    strands[domain.index][zeroed_strand].append(zeroed_strand_NEMid)
+                else:
+                    # Create a Nucleoside object for both the zeroed and other strand for the strands container.
+                    zeroed_strand_nucleoside = Nucleoside(
+                        x_coord=x_coord,
+                        z_coord=z_coord,
+                        angle=angle,
+                        direction=zeroed_strand,
+                        domain=domain,
+                    )
+                    strands[domain.index][zeroed_strand].append(zeroed_strand_nucleoside)
 
-                # Recompute the x coord and z coord for the nucleoside that comes after the NEMid.
-                z_coord += self.nucleic_acid_profile.Z_b
-                angle += self.nucleic_acid_profile.theta_b
-                x_coord = Point.x_coord_from_angle(angle, domain)
-
-                # Create a Nucleoside object and append it to the strands container.
-                nucleoside = Nucleoside(
-                    x_coord=x_coord,
-                    z_coord=z_coord,
-                    angle=angle,
-                    direction=zeroed_strand,
-                    domain=domain,
-                )
-                strands[domain.index][zeroed_strand].append(nucleoside)
-
-        print(strands)
         return strands
 
     def __repr__(self) -> str:

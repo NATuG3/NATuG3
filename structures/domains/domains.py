@@ -395,7 +395,7 @@ class Domains:
 
         # convert all items in listed_strands to Strand objects
         for index, strand in enumerate(listed_strands):
-            listed_strands[index] = Strand(strand, color=settings.colors["sequencing"]["greys"][index % 2])
+            listed_strands[index] = Strand(items=strand, color=settings.colors["sequencing"]["greys"][index % 2])
 
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, listed_strands)

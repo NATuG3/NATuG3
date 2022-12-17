@@ -45,11 +45,16 @@ class Point:
 
         1) Modulos the angle to be between 0 and 360 degrees.
         2) Ensures that the direction is either UP or DOWN.
+        3) Computes the x coord from the angle if the x coord is not provided.
         """
-        # modulos the angle to be between 0 and 360 degrees
+        # Modulo the angle to be between 0 and 360 degrees
         self.angle %= 360
 
-        # ensures that the direction is either UP or DOWN
+        # Compute the x coord from the angle if the x coord is not provided
+        if self.x_coord is None and self.angle is not None and self.domain is not None:
+            self.x_coord = self.x_coord_from_angle(self.angle, self.domain)
+
+        # Ensure that the direction is either UP or DOWN
         if self.direction not in (UP, DOWN):
             raise ValueError("Direction must be UP or DOWN.")
 

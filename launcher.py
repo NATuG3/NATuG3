@@ -22,11 +22,14 @@ def main():
     )
 
     if RESET:
-        with suppress(FileNotFoundError):
-            os.remove("saves/nucleic_acid/profiles.nano")
-            os.remove("saves/nucleic_acid/restored.nano")
-            os.remove("saves/domains/restored.nano")
-            os.remove("saves/sequencing/restored.nano")
+        for filepath in (
+            f"saves/nucleic_acid/profiles.nano",
+            f"saves/nucleic_acid/restored.nano",
+            f"saves/domains/restored.nano",
+            f"saves/sequencing/restored.nano",
+        ):
+            with suppress(FileNotFoundError):
+                os.remove(filepath)
 
     # create needed files
     with suppress(FileExistsError):
