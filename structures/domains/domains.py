@@ -377,21 +377,11 @@ class Domains:
         self._points = self.worker.compute()
 
         # Creating a list of strands, and then converting that list into a Strands object.
-        converted_strands = []
-        for strand_direction in (
-            UP,
-            DOWN,
-        ):
-            # Creating a strand for each domain.
-            for index, domain in enumerate(self.domains()):
-                converted_strands.append(
-                    Strand(
-                        nucleic_acid_profile=self.nucleic_acid_profile,
-                        items=self._points[index][strand_direction],
-                        color=settings.colors["sequencing"]["greys"][strand_direction],
-                    )
-                )
-        logger.debug(f"Fetched {len(converted_strands)} strands.")
+        listed_strands = []
+        for domain in self.domains:
+            for direction in (UP, DOWN,):
+                listed_strands.append(self._points[domain.index][direction])
+        logger.debug(f"Fetched {len(listed_strands)} strands.")
 
         # ensure that the zeroth domain's up strand's first point is in the proper outputted strand
         assert self._points[0][0][0] in converted_strands[0]
