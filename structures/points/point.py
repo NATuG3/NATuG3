@@ -55,7 +55,7 @@ class Point:
             self.x_coord = self.x_coord_from_angle(self.angle, self.domain)
 
         # Ensure that the direction is either UP or DOWN
-        if self.direction not in (UP, DOWN):
+        if self.direction not in (UP, DOWN, None):
             raise ValueError("Direction must be UP or DOWN.")
 
     def matching(self) -> Type["Point"] | None:
