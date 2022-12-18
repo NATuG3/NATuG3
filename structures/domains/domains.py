@@ -207,8 +207,8 @@ class Domains:
             for direction in data["Right Helix Joints"].to_list()
         ]
         m = [int(m) for m in data["m"].to_list()]
-        left_helix_count = [tuple(map(float, count.split(";"))) for count in data["Left Helix Count"].to_list()]
-        other_helix_count = [tuple(map(float, count.split(";"))) for count in data["Other Helix Count"].to_list()]
+        left_helix_count = [tuple(map(int, count.split(";"))) for count in data["Left Helix Count"].to_list()]
+        other_helix_count = [tuple(map(int, count.split(";"))) for count in data["Other Helix Count"].to_list()]
         symmetry = int(data["Symmetry"].to_list()[0])
         antiparallel = data["Antiparallel"].to_list()[0]
 
