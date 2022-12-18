@@ -9,6 +9,7 @@ import numpy as np
 
 import settings
 from constants.directions import *
+from structures.domains import Domain
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.strands import Strand, Strands
@@ -75,9 +76,12 @@ class DomainStrandWorker:
         Z_b = self.nucleic_acid_profile.Z_b
         B = self.nucleic_acid_profile.B
 
+        # Obtain the domains needed
+        domains: List[Domain] = self.domains.domains()
+
         # Each domain has a left_helix_count and a other_helix_count. The left_helix_count is a list with three
         # integers. The second integer in left_helix_count represents the number of NEMids to initially generate.
-        for domain in self.domains.domains():
+        for domain in domains:
             # The "zeroed_strand" is the strand that makes connects to the previous domain. It is either UP or DOWN.
             # This strand is lined up so that it is able to touch the previous domain's right_helix_joint strand
             # (right_helix_joint is a direction of either UP or DOWN representing a helix of the previous domain).
@@ -97,7 +101,7 @@ class DomainStrandWorker:
                 # domain's strand. "np.argmax(arr)" returns the index of the greatest element in an array.
                 initial_z_coord = all_zeroed_strand_z_coords[-1][np.argmax(all_zeroed_strand_x_coords[-1])]
                 # Shift down the initial z coord. We can shift it down in increments of Z_b * B, which we will call the
-                # "decrease_interval"
+                # "decrease_interval" (the interval at which the z coord decreases).
                 decrease_interval = Z_b * B
                 initial_z_coord -= np.ceil(initial_z_coord/decrease_interval) * decrease_interval
 
@@ -184,10 +188,30 @@ class DomainStrandWorker:
                 zeroed_strand_NEMid_count[2], domain, direction=UP,
             )
 
+            # Assign the domain and direction to all the NEMids and Nucleosides in the strands.
             for direction, helix in enumerate(strands[domain.index]):
                 for point in helix.items:
                     point.domain = domain
                     point.direction = direction
+
+            # Now we assign junctability. We look at each NEMid in the current domain.index's zeroed strand and see if
+            # it is close to any NEMids in the previous domain.index's zeroed strand. If it is, we assign the NEMids
+            # NEMid.juncmates to each other and their .junctable attribute to True.
+            # if domain.index > 0:
+            #     # Obtain the zeroed strand of the previous domain.
+            #     previous_zeroed_strand = strands[domain.index - 1][domains[domain.index-1].left_helix_joint]
+            #     current_zeroed_strand = strands[domain.index][zeroed_strand_direction]
+            #
+            #     # Iterate over each NEMid in the current zeroed strand.
+            #     for NEMid1 in current_zeroed_strand.NEMids():
+            #         # Iterate over each NEMid in the previous zeroed strand.
+            #         for NEMid2 in previous_zeroed_strand.NEMids():
+            #             # If the NEMids are close enough to each other, assign them to each other's .juncmates
+            #             if dist(NEMid1.position(), NEMid2.position()) < settings.junction_threshold:
+            #                 NEMid1.juncmate = NEMid2
+            #                 NEMid2.juncmate = NEMid1
+            #                 NEMid1.junctable = True
+            #                 NEMid2.junctable = True
 
         # Now that everything has been generated, we can assemble it into one large Strands object.
         listed_strands = []

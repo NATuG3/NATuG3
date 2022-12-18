@@ -31,6 +31,7 @@ class Strands:
         randomize_sequences(overwrite)
         clear_sequences(ovewrite)
         conjunct()
+        assign_junctability()
         up_strands(), down_strands()
         recompute(), recolor()
         append()
