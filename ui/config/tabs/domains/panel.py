@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 
 import refs
 import settings
+import utils
 from structures.domains import Domains
 from ui.config.tabs.domains.table import Table
 from ui.resources import fetch_icon
@@ -146,10 +147,6 @@ class DomainsPanel(QWidget):
                     self._setup()
                     QApplication.processEvents()
                     refs.constructor.config.panel.update_graphs.click()
-                    logger.info(
-                        "Importing domains from file.\nNew domains: %s",
-                        refs.domains.current,
-                    )
 
                 self.updated.emit(loader)
 
@@ -226,7 +223,7 @@ class DomainsPanel(QWidget):
         # (if that is what they are attempting to do)
         if self.subunit_count.value() < refs.domains.current.subunit.count:
             # helpers.confirm will return a bool
-            confirmation: bool = helpers.confirm(
+            confirmation: bool = utils.confirm(
                 self.parent(),
                 "Subunit Count Reduction",
                 f"The prospective subunit count ({self.subunit_count.value()}) is lower than the number of domains in "

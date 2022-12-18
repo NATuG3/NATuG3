@@ -74,7 +74,8 @@ class DomainStrandWorker:
             # The "zeroed_strand" is the strand that makes connects to the previous domain. It is either UP or DOWN.
             # This strand is lined up so that it is able to touch the previous domain's right_helix_joint strand
             # (right_helix_joint is a direction of either UP or DOWN representing a helix of the previous domain).
-            zeroed_strand = domain.left_helix_joint
+            zeroed_strand_direction = domain.left_helix_joint
+            other_strand_direction = inverse(zeroed_strand_direction)
             count = domain.left_helix_count[1]
             if domain.index == 0:
                 # The first domain is a special case. The z coord of the first NEMid of the first domain is 0.
@@ -109,9 +110,9 @@ class DomainStrandWorker:
 
             # Now, using various attributes of the nucleic acid profile, we can easily compute the other_strand (the
             # strand that does not make a connection with the previous domain).
-            # other_strand_angles = zeroed_strand_angles + self.nucleic_acid_profile.g/2
-            # other_strand_x_coords = np.array([Point.x_coord_from_angle(angle, domain) for angle in other_strand_angles])
-            # other_strand_z_coords = zeroed_strand_z_coords + self.nucleic_acid_profile.Z_mate/2
+            other_strand_angles = zeroed_strand_angles + self.nucleic_acid_profile.g
+            other_strand_x_coords = np.array([Point.x_coord_from_angle(angle, domain) for angle in other_strand_angles])
+            other_strand_z_coords = zeroed_strand_z_coords + self.nucleic_acid_profile.Z_mate
 
             # Build the list of NEMid and Nucleosides objects to append to the strands container.
             for counter, (x_coord, z_coord, angle) in enumerate(
@@ -123,22 +124,39 @@ class DomainStrandWorker:
                         x_coord=x_coord,
                         z_coord=z_coord,
                         angle=angle,
-                        direction=zeroed_strand,
+                        direction=zeroed_strand_direction,
                         domain=domain,
                     )
-                    strands[domain.index][zeroed_strand].append(zeroed_strand_NEMid)
+                    other_strand_NEMid = NEMid(
+                        x_coord=other_strand_x_coords[counter],
+                        z_coord=other_strand_z_coords[counter],
+                        angle=other_strand_angles[counter],
+                        direction=other_strand_direction,
+                        domain=domain,
+                    )
+                    strands[domain.index][zeroed_strand_direction].append(zeroed_strand_NEMid)
+                    strands[domain.index][other_strand_direction].append(other_strand_NEMid)
                 else:
                     # Create a Nucleoside object for both the zeroed and other strand for the strands container.
                     zeroed_strand_nucleoside = Nucleoside(
                         x_coord=x_coord,
                         z_coord=z_coord,
                         angle=angle,
-                        direction=zeroed_strand,
+                        direction=zeroed_strand_direction,
                         domain=domain,
                     )
-                    strands[domain.index][zeroed_strand].append(zeroed_strand_nucleoside)
+                    other_strand_nucleoside = Nucleoside(
+                        x_coord=other_strand_x_coords[counter],
+                        z_coord=other_strand_z_coords[counter],
+                        angle=other_strand_angles[counter],
+                        direction=other_strand_direction,
+                        domain=domain,
+                    )
+                    strands[domain.index][zeroed_strand_direction].append(zeroed_strand_nucleoside)
+                    strands[domain.index][other_strand_direction].append(other_strand_nucleoside)
 
         return strands
+
 
     def __repr__(self) -> str:
         """

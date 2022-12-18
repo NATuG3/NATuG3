@@ -114,13 +114,16 @@ class Domains:
         Export all the current domains as a csv.
 
         Creates a csv file from self.domains() with the following columns:
-            - left_helix_joint (if 0 then "UP" if 1 then "DOWN")
-            - right_helix_joint (if 0 then "UP" if 1 then "DOWN")
-            - s (which is based off left and right helix joints)
-            - m (interior angle multiple)
-            - count (number of points in the domain)
-            - symmetry (the symmetry type)
-            - antiparallel (whether the domains are antiparallel)
+            Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
+            Right Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
+            Left Helix Count ("int:int:int"): The number of NEMids to add to the bottom of the left helix, followed by
+                the number of NEMids to compute initially for the left helix, followed by the number of NEMids to add to
+                the top of the left helix.
+            Other Helix Count ("int:int:int"): Same as above but for the other helix.
+            s: Which is based off left and right helix joints
+            m: Interior angle multiple
+            Symmetry (int): The symmetry type
+            Antiparallel ("true" or "false"): Whether the domains are antiparallel
 
         Args:
             filepath: The filepath to export to.
@@ -143,7 +146,8 @@ class Domains:
         m = [domain.theta_interior_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
-        count = [domain.count for domain in domains]
+        left_helix_count = [";".join(map(str, domain.left_helix_count)) for domain in domains]
+        other_helix_count = [";".join(map(str, domain.other_helix_count)) for domain in domains]
 
         # create a pandas dataframe with the columns above
         data = pd.DataFrame(
@@ -151,7 +155,8 @@ class Domains:
                 "m": m,
                 "Left Helix Joints": left_helix_joints,
                 "Right Helix Joints": right_helix_joints,
-                "Count": count,
+                "Left Helix Count": left_helix_count,
+                "Other Helix Count": other_helix_count,
                 "Symmetry": symmetry,
                 "Antiparallel": antiparallel,
             },
@@ -179,9 +184,6 @@ class Domains:
         Returns:
             A Domains object.
 
-        Raises:
-            ValueError: If the mode is not an allowed mode or if filepath contains an extension.
-
         Notes:
             - Filetype is determined by the extension.
         """
@@ -202,7 +204,8 @@ class Domains:
             for direction in data["Right Helix Joints"].to_list()
         ]
         m = [int(m) for m in data["m"].to_list()]
-        count = [int(count) for count in data["Count"].to_list()]
+        left_helix_count = [tuple(map(float, count.split(";"))) for count in data["Left Helix Count"].to_list()]
+        other_helix_count = [tuple(map(float, count.split(";"))) for count in data["Other Helix Count"].to_list()]
         symmetry = int(data["Symmetry"].to_list()[0])
         antiparallel = data["Antiparallel"].to_list()[0]
 
@@ -211,11 +214,12 @@ class Domains:
         for i in range(len(left_helix_joints)):
             domains.append(
                 Domain(
-                    nucleic_acid_profile,
+                    nucleic_acid_profile=nucleic_acid_profile,
+                    theta_m_multiple=m[i],
                     left_helix_joint=left_helix_joints[i],
                     right_helix_joint=right_helix_joints[i],
-                    theta_m_multiple=m[i],
-                    count=count[i],
+                    left_helix_count=left_helix_count[i],
+                    other_helix_count=other_helix_count[i],
                 )
             )
 
@@ -379,7 +383,10 @@ class Domains:
         # Creating a list of strands, and then converting that list into a Strands object.
         listed_strands = []
         for domain in self.domains():
-            for direction in (UP, DOWN,):
+            for direction in (
+                UP,
+                DOWN,
+            ):
                 listed_strands.append(self._points[domain.index][direction])
         logger.debug(f"Fetched {len(listed_strands)} strands.")
 
@@ -395,7 +402,9 @@ class Domains:
 
         # convert all items in listed_strands to Strand objects
         for index, strand in enumerate(listed_strands):
-            listed_strands[index] = Strand(items=strand, color=settings.colors["sequencing"]["greys"][index % 2])
+            listed_strands[index] = Strand(
+                items=strand, color=settings.colors["sequencing"]["greys"][index % 2]
+            )
 
         # convert sequencing from a list to a Strands container
         return Strands(self.nucleic_acid_profile, listed_strands)

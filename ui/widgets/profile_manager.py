@@ -6,6 +6,7 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QGroupBox
 
+import utils
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -111,7 +112,7 @@ class ProfileManager(QGroupBox):
     def approve(self) -> bool:
         """Present the user with a popup stating self.warning. If user approves request, return True."""
         if self.warning is not None:
-            if not helpers.confirm(
+            if not utils.confirm(
                 self.parent(), "Profile Manager Warning", self.warning
             ):
                 return False
