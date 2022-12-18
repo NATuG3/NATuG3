@@ -177,12 +177,12 @@ class Strand:
             )
 
             # Create a Nucleoside object from the NEMid object's data.
-            nucleoside = NEMid.to_nucleoside()
+            nucleoside = NEMid_.to_nucleoside()
 
             # If we are generating upwards boost the nucleoside up/down to be the next item in the strand.
             nucleoside.angle += self.nucleic_acid_profile.theta_b / 2 * modifier
             nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2 * modifier
-            nucleoside.x_coord = Point.x_coord_from_angle(nucleoside.angle, nucleoside.domain)
+            nucleoside.x_coord = Point.x_coord_from_angle(nucleoside.angle, domain)
 
             # append the new NEMid and nucleoside to the right/left side of the strand based off of the direction.
             if direction == RIGHT:
@@ -196,9 +196,8 @@ class Strand:
 
     def append(self, item: Point) -> None:
         """Add an item to the right of the strand."""
+        item.parent = self
         self.items.append(item)
-        self.NEMids.cache_clear()
-        self.nucleosides.cache_clear()
 
     def appendleft(self, item: Point):
         """
@@ -207,6 +206,7 @@ class Strand:
         Args:
             item: The item to add.
         """
+        item.parent = self
         self.items.appendleft(item)
 
     def extend(self, item: Iterable[Point]) -> None:
