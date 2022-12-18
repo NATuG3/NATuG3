@@ -171,18 +171,6 @@ class Domain:
         else:
             return Strand(self.parent.parent.points()[self.index][RIGHT])
 
-    def __setattr__(self, key, value):
-        """Set the attribute and update the parent if necessary."""
-        # set the attribute
-        super().__setattr__(key, value)
-        # then update parent
-        if key != "parent" and self.parent is not None:
-            # if there is a parent make sure to clear its strands cache
-            # so that the strands of all workers can be recomputed
-            if self.parent is not None:
-                self.parent.parent.domains.cache_clear()
-                self.parent.parent.subunits.cache_clear()
-
     @property
     def theta_s_multiple(self) -> int:
         """

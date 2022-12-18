@@ -1,3 +1,4 @@
+from contextlib import suppress
 from copy import copy
 from typing import Iterable, List
 
@@ -47,9 +48,9 @@ class Subunit:
             parent: The parent Domains object.
         """
         self.template = template  # must be the first property set
+        self.domains = domains
         self.parent = parent
         self.nucleic_acid_profile = nucleic_acid_profile
-        self.domains = domains
 
         # assign the parent of all the domains to us
         for domain in self.domains:
@@ -82,42 +83,6 @@ class Subunit:
         """
         self.domains.remove(domain)
         domain.parent = None
-
-    def __setattr__(self, key, value):
-        """
-        Prevent users from mutating a non-template subunit.
-
-        If the template property is changed then modify whether the domains are stored
-        in a list or tuple based on whether this is a template subunit or not. I.E. if this is not a template
-        subunit, the array of domains will become immutable.
-
-        Args:
-            key: The attribute to set.
-            value: The value to set the attribute to.
-
-        Raises:
-            ValueError: If the subunit is not a template subunit and the user is trying to mutate it.
-        """
-        if key == "template":
-            try:
-                # force self.domains to be a tuple or list based off of whether this is a template
-                # subunit or not. Non template subunits should be fully immutable.
-                if value:  # if this is a template subunit
-                    super().__setattr__("domains", tuple(self.domains))
-                else:  # if this is no longer a template subunit
-                    super().__setattr__("domains", list(self.domains))
-            except AttributeError:
-                super().__setattr__(key, value)
-        else:
-            if self.template:
-                # if this is the template subunit then set the attr as normal
-                # but then also reset the parent's cache if the parent of this instance isn't None
-                if key != "parent" and self.parent is not None:
-                    self.parent.clear_cache()
-                # then set the attr as normal
-                super().__setattr__(key, value)
-            else:  # but if it isn't a template subunit then raise an error
-                raise ValueError("Nontemplate Subunits cannot be modified.")
 
     def copy(self) -> "Subunit":
         """
