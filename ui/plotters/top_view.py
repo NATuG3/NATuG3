@@ -9,7 +9,6 @@ from PyQt6.QtCore import pyqtSignal
 import settings
 import utils
 from structures.domains import Domains
-from structures.domains.workers.top_view import TopViewWorker
 from ui import plotters
 
 logger = logging.getLogger(__name__)
@@ -55,7 +54,6 @@ class TopViewPlotter(pg.PlotWidget):
 
     def __init__(
         self,
-        worker: TopViewWorker,
         domains: Domains,
         domain_radius: int,
         rotation: float = 0,
@@ -75,7 +73,6 @@ class TopViewPlotter(pg.PlotWidget):
         self.circle_radius = domain_radius
         self.rotation = rotation
         self.domains = domains
-        self.worker = worker
         self.plot_data = PlotData()
 
         self.getViewBox().setDefaultPadding(padding=0.18)
@@ -124,8 +121,9 @@ class TopViewPlotter(pg.PlotWidget):
 
         All the plotted data is stored in self.plot_data.
         """
-        x_coords = self.worker.u_coords
-        y_coords = self.worker.v_coords
+        coords = self.domains.top_view()
+        x_coords = [coord[0] for coord in coords]
+        y_coords = [coord[1] for coord in coords]
 
         # perform rotation if needed
         if self.rotation != 0:

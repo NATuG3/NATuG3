@@ -11,8 +11,6 @@ import settings
 from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
-from structures.domains.workers.side_view import DomainStrandWorker
-from structures.domains.workers.top_view import TopViewWorker
 from structures.points import Nucleoside, NEMid
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -24,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 class Domains:
     """
-    Container for multiple workers.
+    Container for multiple domains.
 
     This is the parent of a Subunit, and the grandparent of a Domain.
 
@@ -34,17 +32,20 @@ class Domains:
 
     Attributes:
         nucleic_acid_profile: The nucleic acid configuration.
-        subunit: The workers within a single subunit.
+        subunit: The domains within a single subunit.
             This is a template subunit. Note that subunits can be mutated.
         symmetry: The symmetry type. Also known as "R".
-        count: The total number of workers. Includes workers from all subunits.
-        antiparallel: Whether the workers are forced to have alternating upness/downness.
+        count: The total number of domains. Includes domains from all subunits.
+        antiparallel: Whether the domains are forced to have alternating upness/downness.
 
     Methods:
         strands()
         top_view()
-        workers()
+        domains()
         subunits()
+        update()
+        to_file()
+        from_file()
     """
 
     def __init__(
@@ -59,9 +60,9 @@ class Domains:
 
         Args:
             nucleic_acid_profile: The nucleic acid configuration.
-            domains: All the workers for the template subunit.
+            domains: All the domains for the template subunit.
             symmetry: The symmetry type. Also known as "R".
-            antiparallel: Whether the workers are forced to have alternating upness/downness.
+            antiparallel: Whether the domains are forced to have alternating upness/downness.
         """
         # store various settings
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -76,10 +77,6 @@ class Domains:
         )
         for domain in self.subunit.domains:
             assert domain.parent is self.subunit
-
-        # create a worker object for computing strands for workers
-        self.worker = DomainStrandWorker(self)
-        self._points = None
 
     def update(self, domains: Type["Domains"]) -> None:
         """
@@ -109,12 +106,6 @@ class Domains:
         self.symmetry = domains.symmetry
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
-
-        # create a worker
-        self.worker = DomainStrandWorker(self)
-
-        # clear cache
-        self.clear_cache()
 
     def to_file(self, filepath: str) -> None:
         """
@@ -252,19 +243,21 @@ class Domains:
 
     def top_view(self) -> List[Tuple[float, float]]:
         """
-        Get the top view of the domains.
+        Create a set of coordinates that represent the top view of all the domains.
 
         Returns:
             A list of tuples containing the x and y coordinates of the domains.
 
         Notes:
-            - The first element in the list is the leftmost domain.
+            - The first element in the list is domain #0.
         """
+        start_time = time()
+
         domains = self.domains()
 
-        theta_deltas = []
-        u_coords = []
-        v_coords = []
+        theta_deltas = [0.]
+        u_coords = [0.]
+        v_coords = [0.]
 
         # Create references for various nucleic acid settings. This is done to make the code more readable.
         theta_s = self.nucleic_acid_profile.theta_s
@@ -297,7 +290,7 @@ class Domains:
             # append the v cord of the domain to "self.v_coords"
             v_coords.append(v_coords[-1] + D * math.sin(angle_delta))
 
-        logger.debug("Performed top view computation.")
+        logger.info("Performed top view computation in %s seconds.", round((time() - start_time), 4))
 
         return list(zip(u_coords, v_coords))
 
@@ -326,15 +319,14 @@ class Domains:
         self._subunit = new_subunit
         for domain in self._subunit.domains:
             domain.parent = self._subunit
-        self.clear_cache()
 
     @property
     def count(self) -> int:
         """
-        The number of workers in the Domains object.
+        The number of domains in the Domains object.
 
         Returns:
-            The number of workers in the Domains object.
+            The number of domains in the Domains object.
         """
         return len(self.domains())
 
@@ -362,10 +354,10 @@ class Domains:
 
     def domains(self) -> List["Domain"]:
         """
-        Obtain a list of all workers from all subunits.
+        Obtain a list of all domains from all subunits.
 
         Returns:
-            A list of all workers from all subunits.
+            A list of all domains from all subunits.
 
         Notes:
             This is a cached method. The cache is cleared when the subunit is changed.
@@ -374,8 +366,8 @@ class Domains:
         for subunit in self.subunits():
             output.extend(subunit.domains)
 
-        # if the workers instance is set to antiparallel then make the directions
-        # of the workers alternate.
+        # if the domains instance is set to antiparallel then make the directions
+        # of the domains alternate.
         if self.antiparallel:
             # begin with UP
             direction = UP
@@ -397,7 +389,7 @@ class Domains:
         Creates and lines up strands for junctions.
 
         Returns:
-            A list of all strands from all workers.
+            A list of all strands from all domains.
 
         Notes:
             This is a cached method. The cache is cleared when the subunit is changed.
@@ -468,7 +460,7 @@ class Domains:
 
                 # Let "shifts" be the number of excess NEMids at the bottom of the data point arrays. We will start
                 # generating everything at Z_b/theta_b * shifts, and end at what the normal end index would be + shifts.
-                shifts = abs(int(np.floor_divide(initial_z_coord, Z_b)))
+                shifts = int(np.floor_divide(abs(initial_z_coord), Z_b))
 
                 # Boost the initial z coord based off of the shifts.
                 initial_z_coord += shifts * Z_b
@@ -604,21 +596,6 @@ class Domains:
         )
 
         return Strands(self.nucleic_acid_profile, listed_strands)
-
-    def top_view(self) -> TopViewWorker:
-        """
-        Obtain a TopViewWorker object of all the domains. The top view worker object (which is located at
-        structures/domains/workers/top_view-TopViewWorker()). This object contains various properties relavent
-        to a top view plot, including coordinates, angle deltas, and more.
-
-        Returns:
-            A TopViewWorker object.
-
-        Notes:
-            This function is not cached; however, top view computation is a fairly inexpensive process.
-        """
-        logger.debug("Fetched a TopViewWorker object.")
-        return TopViewWorker(self)
 
     def __repr__(self) -> str:
         """

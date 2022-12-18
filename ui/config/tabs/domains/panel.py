@@ -251,7 +251,7 @@ class DomainsPanel(QWidget):
             new_domains.symmetry = self.symmetry.value()
 
         # update current domains
-        refs.domains.current = new_domains
+        refs.domains.current.update(new_domains)
 
         # refresh table
         self.table.dump_domains(refs.domains.current)

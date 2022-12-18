@@ -57,6 +57,5 @@ class _Strands:
         Notes:
             This is a very expensive operation.
         """
-        refs.domains.current.strands.cache_clear()
         self.current = refs.domains.current.strands()
         return self.current
