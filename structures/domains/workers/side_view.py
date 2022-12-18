@@ -11,7 +11,7 @@ import settings
 from constants.directions import *
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
-from structures.strands import Strand
+from structures.strands import Strand, Strands
 from utils import inverse
 
 logger = logging.getLogger(__name__)
@@ -43,14 +43,12 @@ class DomainStrandWorker:
         self.nucleic_acid_profile = domains.nucleic_acid_profile
         self.domains = domains
 
-    def compute(
-        self,
-    ) -> List[Tuple[List[NEMid | Nucleoside], List[NEMid | Nucleoside]]]:
+    def compute(self) -> Strands:
         """
-        Compute all NEMid data.
+        Compute Strands with all NEMids and Nucleosides.
 
         Returns:
-            Strands object for all sequencing that the workers can create.
+            A Strands object with all the strands, computed based off of the domain's data.
         """
         # Store the time so that we can output the duration
         start_time = time.time()
@@ -64,8 +62,8 @@ class DomainStrandWorker:
         # Create an empty container for the strands of the up and down strand of each domain. The structure here is
         # a list of tuples, where each tuple is a pair of strands (one for the up strand and one for the down strand).
         # Each strand is a list of NEMid and Nucleoside objects.
-        strands: List[Tuple[List[NEMid | Nucleoside], List[NEMid | Nucleoside]]]
-        strands = [([], [],) for domain in self.domains.domains()]
+        strands: List[Tuple[Strand, Strand]]
+        strands = [(Strand(), Strand(),) for domain in self.domains.domains()]
 
         # Create containers for the z coords and angles that we are about to compute.
         all_zeroed_strand_z_coords: List[np.ndarray] = []
@@ -85,14 +83,8 @@ class DomainStrandWorker:
             # (right_helix_joint is a direction of either UP or DOWN representing a helix of the previous domain).
             zeroed_strand_direction = domain.left_helix_joint
             other_strand_direction = inverse(zeroed_strand_direction)
-            zeroed_strand_count = domain.left_helix_count
-            other_strand_count = domain.other_helix_count
-
-            # "greater_count" is equivalent to [max(count[0]), max(count[1]), max(count[2])]. This is used for the
-            # initial generation. We generate more data points than we need, and then trim afterwards. This may sound
-            # wasteful, but because the other_helix is generated based on the left_helix, if we need to generate more
-            # data points for the other_helix we also are forced to generate more data points for the left_helix.
-            count = zeroed_strand_count[1]
+            zeroed_strand_NEMid_count = domain.left_helix_count
+            other_strand_NEMid_count = domain.other_helix_count
 
             if domain.index == 0:
                 # The first domain is a special case. The z coord of the first NEMid of the first domain is 0.
@@ -122,8 +114,8 @@ class DomainStrandWorker:
             # Compute the final Z coord and angle to generate. Note that numpy.arange() does not include the final
             # value, so we add 1 to the final value. Also note that we boost based off of count[1]--the number of
             # additional NEMids the user wishes to generate at the top of the strand.
-            final_angle = initial_angle + ((count + 1) * theta_b)
-            final_z_coord = initial_z_coord + ((count + 1) * Z_b)
+            final_angle = initial_angle + ((zeroed_strand_NEMid_count[1] + 1) * theta_b)
+            final_z_coord = initial_z_coord + ((zeroed_strand_NEMid_count[1] + 1) * Z_b)
 
             # Generate all the angles. We begin at x=0 and step by theta_b/2 for domain.left_helix_count[1] times.
             # Note that we are generating the data for NEMids and Nucleosides, which is why we step by half a theta_b.
@@ -182,12 +174,30 @@ class DomainStrandWorker:
                     other_strand_nucleoside = Nucleoside(x_coord=x_coord, z_coord=z_coord, angle=angle)
                     strands[domain.index][other_strand_direction].append(other_strand_nucleoside)
 
-            # Assign domains and directions to all the points.
-            for strand_pair in strands:
-                for direction, helix in enumerate(strand_pair):
-                    for point in helix:
-                        point.domain = domain
-                        point.direction = direction
+            # Now that we have computed all of the base NEMids we can compute the extra lower and uppper NEMids.
+            # The additional NEMids to place on top for each strand are count[2] and the additional NEMids to place
+            # on the bottom are count[0]. Recall that count[1] is the number of NEMids to generate initially.
+            strands[domain.index][zeroed_strand_direction].generate_NEMids(
+                zeroed_strand_NEMid_count[0], domain, direction=DOWN,
+            )
+            strands[domain.index][zeroed_strand_direction].generate_NEMids(
+                zeroed_strand_NEMid_count[2], domain, direction=UP,
+            )
+
+            for direction, helix in enumerate(strands[domain.index]):
+                for point in helix.items:
+                    point.domain = domain
+                    point.direction = direction
+
+        # Now that everything has been generated, we can assemble it into one large Strands object.
+        listed_strands = []
+        for up_strand, down_strand in strands:
+            listed_strands.append(up_strand)
+            listed_strands.append(down_strand)
+
+        # Recolor the strands
+        for index, strand in enumerate(listed_strands):
+            strand.color = settings.colors["sequencing"]["greys"][index % 2]
 
         # Log the amount of time it took to generate the strands.
         logger.info(
@@ -195,7 +205,7 @@ class DomainStrandWorker:
             round((time.time() - start_time), 4)
         )
 
-        return strands
+        return Strands(self.nucleic_acid_profile, listed_strands)
 
     def __repr__(self) -> str:
         """

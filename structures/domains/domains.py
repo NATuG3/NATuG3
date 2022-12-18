@@ -106,6 +106,9 @@ class Domains:
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
+        # create a worker
+        self.worker = DomainStrandWorker(self)
+
         # clear cache
         self.clear_cache()
 
@@ -264,7 +267,7 @@ class Domains:
         Notes:
             This method clears the cache of all cached methods.
         """
-        logger.info(f"Replacing the template subunit with {new_subunit}.")
+        logger.info(f"Replacing the template subunit.")
         self._subunit = new_subunit
         for domain in self._subunit.domains:
             domain.parent = self._subunit
@@ -329,48 +332,17 @@ class Domains:
                 domain.right_helix_joint = direction
                 direction = inverse(direction)
 
-        # set the proper indexes for all of the domains
+        # set the proper indexes for all the domains
         for index, domain in enumerate(output):
             output[index].index = index
 
         logger.debug(f"Fetched {len(output)} domains.")
         return output
 
-    def points(self) -> List[Tuple[List[Point], List[Point]]]:
-        """
-        All the points in all the domains before they are turned into Strand objects.
-
-        Returns:
-            A list of tuples of points.
-
-            The formatting of the points is a large list. Within that list lies a tuple for each domain.
-            Within each tuple lies two lists. The first represents the up strand of that domain, and the
-            second represents the down strand.
-
-            This can be represented as:
-            "AllDomains(Domain#0(up-strand, down-strand), Domain#1(up-strand, down-strand), ...)"
-            Where up-strands and down-strands are lists of Point objects.
-
-        Notes:
-            This is a cached method. The cache is cleared when the subunit is changed.
-        """
-        if self._points is None:
-            logger.debug("Recomputing points.")
-            self._points = self.worker.compute()
-        else:
-            logger.debug("Using cached points.")
-            return self._points
-
     @cache
     def strands(self) -> Strands:
         """
-        Obtain a list of all strands from all workers.
-
-        This is equivalent to utilizing the .points() method, and then placing all of those points into new Strand
-        objects, and then calling Strands() on that list.
-
-        This method automatically determines strand color based off of interdomain-ness, and uses the currently
-        set nucleic acid nucleic_acid_profile for the strand's nucleic acid nucleic_acid_profile.
+        Obtain a list of all strands computed based off of the current state of the domains.
 
         Returns:
             A list of all strands from all workers.
@@ -378,36 +350,7 @@ class Domains:
         Notes:
             This is a cached method. The cache is cleared when the subunit is changed.
         """
-        self._points = self.worker.compute()
-
-        # Creating a list of strands, and then converting that list into a Strands object.
-        listed_strands = []
-        for domain in self.domains():
-            for direction in (
-                UP,
-                DOWN,
-            ):
-                listed_strands.append(self._points[domain.index][direction])
-        logger.debug(f"Fetched {len(listed_strands)} strands.")
-
-        # ensure that the zeroth domain's up strand's first point is in the proper outputted strand
-        assert self._points[0][0][0] in listed_strands[0]
-
-        # ensure that the points are properly parented
-        # check to see if the zeroth domain's up strand's first point's great-grandparent is us
-        # Point.domain -> Domain
-        # Domain.subunit -> Subunit
-        # Subunit.domains -> Domains (should be us)
-        assert self._points[0][0][0].domain.parent.parent is self
-
-        # convert all items in listed_strands to Strand objects
-        for index, strand in enumerate(listed_strands):
-            listed_strands[index] = Strand(
-                items=strand, color=settings.colors["sequencing"]["greys"][index % 2]
-            )
-
-        # convert sequencing from a list to a Strands container
-        return Strands(self.nucleic_acid_profile, listed_strands)
+        return self.worker.compute()
 
     def top_view(self) -> TopViewWorker:
         """
