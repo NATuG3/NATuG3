@@ -47,7 +47,8 @@ class TopViewPlotter(pg.PlotWidget):
         plot_data: Currently plotted data.
 
     Signals:
-        point_clicked(a tuple of the points that were clicked): Emitted when a point is clicked.
+        point_clicked(a tuple of the points that were clicked): Emitted when a point
+            is clicked.
     """
 
     point_clicked = pyqtSignal(tuple)
@@ -183,7 +184,8 @@ class TopViewPlotter(pg.PlotWidget):
         """
         Plot the number labels for the plot.
 
-        This plots the labels, sets up signals for when the user clicks them, and updates the plot data.
+        This plots the labels, sets up signals for when the user clicks them,
+        and updates the plot data.
         """
         self.plot_data.plotted_numbers = []
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):

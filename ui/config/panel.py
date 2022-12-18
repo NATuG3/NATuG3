@@ -139,12 +139,13 @@ class Panel(QWidget):
 
 class RefreshConfirmer(QDialog):
     """
-    A dialog that warns the user that they will lose any changes they have made if they continue, and gives them the
-    option to either save their changes or continue without saving or abort.
+    A dialog that warns the user that they will lose any changes they have made if
+    they continue, and gives them the option to either save their changes or continue
+    without saving or abort.
 
     Attributes:
-        function: Function to execute if the user confirms that they would like to proceed (whether with or without
-            saving).
+        function: Function to execute if the user confirms that they would like to
+            proceed (whether with or without saving).
     """
 
     def __init__(self, parent, function):
@@ -176,8 +177,9 @@ class RefreshConfirmer(QDialog):
         for filename in os.listdir(f"{os.getcwd()}/saves"):
             if timestamp in filename:
                 with suppress(ValueError):
-                    # if we find a save that contains a timestamp, see if it has a # at the end of it
-                    # and if it does than append that number to the counter list
+                    # if we find a save that contains a timestamp, see if it has a #
+                    # at the end of it and if it does than append that number to the
+                    # counter list
                     counter.append(
                         int(filename[filename.find("_") + 1 :].replace(".nano", ""))
                     )

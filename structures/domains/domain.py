@@ -12,36 +12,47 @@ class Domain:
     A singular domain object.
 
     Attributes:
-        parent: The parent workers container object. If this is None then index becomes None too.
+        parent: The parent workers container object. If this is None then index becomes
+            None too.
         index: The index of this domain in its parent.
-        up_strand (Strand): The up strand of the domain. This is an unparented strand object.
-        down_strand (Strand): The down strand of the domain. This is an unparented strand object.
-        theta_m_multiple: Angle between this and the next workers' line of tangency. Multiple of theta_c.
-            This is the angle between i,i+1's line of tangency and i+1,i+2's line of tangency
-            where i is the index of this domain.
-            This is the theta_m_multiple times the characteristic angle.
+        up_strand (Strand): The up strand of the domain. This is an unparented strand
+            object.
+        down_strand (Strand): The down strand of the domain. This is an unparented
+            strand object.
+        theta_m_multiple: Angle between this and the next workers' line of tangency.
+            Multiple of theta_c. This is the angle between i,i+1's line of tangency
+            and i+1,i+2's line of tangency where i is the index of this domain. This
+            is the theta_m_multiple times the characteristic angle.
         theta_m: Angle between this and the next workers' line of tangency. In degrees.
-            This is the angle between i,i+1's line of tangency and i+1,i+2's line of tangency
-            where i is the index of this domain.
-            This is the theta_m_multiple times the characteristic angle.
-        theta_s_multiple: The switch from upness to downness (or lack thereof) of the helix joints.
-            (-1) for up to down switch; (0) for both up/down switch; (1) for down to up switch
-        theta_s: The switch angle for the transition between an up and down strand (or 0 if there is none).
-            This is the theta_s_multiple times the characteristic angle.
+            This is the angle between i,i+1's line of tangency and i+1,i+2's line of
+            tangency where i is the index of this domain. This is the theta_m_multiple
+            times the characteristic angle.
+        theta_s_multiple: The switch from upness to downness (or lack thereof) of the
+            helix joints.
+            (-1) for up to down switch; (0) for both up/down switch; (1) for down to up
+            switch
+        theta_s: The switch angle for the transition between an up and down strand
+            (or 0 if there is none). This is the theta_s_multiple times the
+            characteristic angle.
         nucleic_acid_profile: the nucleic acid configuration for the domain.
         left_helix_joint: The left helix joint's upwardness or downwardness.
             "Left" indicates that the left side of this domain will be lined up to
-            the right helix joint of the previous domain. Uses the constant 0 for up and 1 for down.
+            the right helix joint of the previous domain. Uses the constant 0 for up and
+            1 for down.
         right_helix_joint: The right helix joint's upwardness or downwardness.
             "right" indicates that the right side of this domain will be lined up to
-            the left helix joint of the next domain. Uses the constant 0 for up and 1 for down.
-        left_helix_count: Number of initial NEMids/strand to generate. This is a list of bottom-count, body-count,
-            and top-count. The number of NEMids in the domains' is determined by count[1], and then count[0] NEMids are
-            added to the bottom strand and count[2] NEMids are added to the top of the strand.
-        other_helix_count: Number of initial NEMids/strand to generate for the non-left helix. This is a list of
-            bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
-            and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the
-            strand.
+            the left helix joint of the next domain. Uses the constant 0 for up and 1
+            for down.
+        left_helix_count: Number of initial NEMids/strand to generate. This is a list
+            of bottom-count, body-count,
+            and top-count. The number of NEMids in the domains' is determined by
+            count[1], and then count[0] NEMids are added to the bottom strand and
+            count[2] NEMids are added to the top of the strand.
+        other_helix_count: Number of initial NEMids/strand to generate for the non-left
+        helix. This is a list of
+            bottom-count, body-count, and top-count. The number of NEMids in the
+            domains' is determined by count[1], and then count[0] NEMids are added to
+            the bottom strand and count[2] NEMids are added to the top of the strand.
     """
 
     def __init__(
@@ -60,20 +71,27 @@ class Domain:
 
         Args:
             nucleic_acid_profile: The nucleic acid settings nucleic_acid_profile
-            theta_m_multiple: Angle between this and the next workers' lines of tangency. Multiple of theta c.
+            theta_m_multiple: Angle between this and the next workers' lines of
+                tangency. Multiple of theta c.
             left_helix_joint: The left helix joint's upwardness or downwardness.
                 "Left" indicates that the left side of this domain will be lined up to
-                the right helix joint of the previous domain. Uses the constant 0 for up and 1 for down.
+                the right helix joint of the previous domain. Uses the constant 0 for
+                up and 1 for down.
             right_helix_joint: The right helix joint's upwardness or downwardness.
                 "right" indicates that the right side of this domain will be lined up to
-                the left helix joint of the next domain. Uses the constant 0 for up and 1 for down.
-            left_helix_count: Number of initial NEMids/strand to generate. This is a list of bottom-count, body-count,
-                and top-count. The number of NEMids in the domains' is determined by count[1], and then count[0] NEMids are
-                added to the bottom strand and count[2] NEMids are added to the top of the strand.
-            other_helix_count: Number of initial NEMids/strand to generate for the non-left helix. This is a list of
-                bottom-count, body-count, and top-count. The number of NEMids in the domains' is determined by count[1],
-                and then count[0] NEMids are added to the bottom strand and count[2] NEMids are added to the top of the
-                strand.
+                the left helix joint of the next domain. Uses the constant 0 for up and
+                1 for down.
+            left_helix_count: Number of initial NEMids/strand to generate. This is a
+                list of bottom-count, body-count, and top-count. The number of NEMids
+                in the domains' is determined by count[1], and then count[0] NEMids are
+                added to the bottom strand and count[2] NEMids are added to the top of
+                the strand.
+            other_helix_count: Number of initial NEMids/strand to generate for the
+            non-left helix. This is a list of
+                bottom-count, body-count, and top-count. The number of NEMids in the
+                domains' is determined by count[1], and then count[0] NEMids are
+                added to the bottom strand and count[2] NEMids are added to the top
+                of the strand.
             parent (Subunit): The parent subunit. Defaults to None.
             index (int): The index of this domain in its parent. Defaults to None.
         """
@@ -140,10 +158,10 @@ class Domain:
         """
         The left strand of the domain.
 
-        The grandparent's .points() method is used to obtain the strand. Note that the grandparent
-        of a Domain object is the parent of the parent. The parent of a Domains object is a Subunit object,
-        and the parent of a Subunit object is a Domains object. It is the Domains object that has a .points()
-        method.
+        The grandparent's .points() method is used to obtain the strand. Note that
+        the grandparent of a Domain object is the parent of the parent. The parent of
+        a Domains object is a Subunit object, and the parent of a Subunit object is a
+        Domains object. It is the Domains object that has a .points() method.
 
         Returns:
             The left strand of the domain or None if the domain doesn't have a parent.
@@ -158,10 +176,10 @@ class Domain:
         """
         The right strand of the domain.
 
-        The grandparent's .points() method is used to obtain the strand. Note that the grandparent
-        of a Domain object is the parent of the parent. The parent of a Domains object is a Subunit object,
-        and the parent of a Subunit object is a Domains object. It is the Domains object that has a .points()
-        method.
+        The grandparent's .points() method is used to obtain the strand. Note that
+        the grandparent of a Domain object is the parent of the parent. The parent of
+        a Domains object is a Subunit object, and the parent of a Subunit object is a
+        Domains object. It is the Domains object that has a .points() method.
 
         Returns:
             The right strand of the domain or None if the domain doesn't have a parent.
@@ -178,7 +196,8 @@ class Domain:
         Based on the left and right helical joints, this outputs:
         (-1) for up to down; (0) for both up/down; (1) for down to up
 
-        This is very computationally inexpensive, so it is a property. (self.theta_s_multiple)
+        This is very computationally inexpensive, so it is a property.
+        (self.theta_s_multiple)
         """
         helix_joints = (
             self.left_helix_joint,

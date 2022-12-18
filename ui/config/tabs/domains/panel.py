@@ -26,8 +26,9 @@ class DomainsPanel(QWidget):
     Nucleic Acid Config Tab.
 
     Signals:
-        updated: Emitted when the panel is updated. Emits a function which would do the proper updating. No updating is
-            actually done in this class, rather it is someone else's job to call that function.
+        updated: Emitted when the panel is updated. Emits a function which would do the
+            proper updating. No updating is actually done in this class, rather it is
+            someone else's job to call that function.
     """
 
     updated = pyqtSignal(object)
@@ -122,9 +123,7 @@ class DomainsPanel(QWidget):
                 logger.info(
                     f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}"
                 )
-                refs.domains.current.to_file(
-                    filepath=filepath
-                )
+                refs.domains.current.to_file(filepath=filepath)
 
         self.save_domains_button.clicked.connect(save_domains)
 

@@ -18,7 +18,8 @@ class Point:
     Attributes:
         x_coord: The x coord of the point.
         z_coord: The z coord of the point.
-        angle: Angle from this domain and next domains' line of tangency going counterclockwise.
+        angle: Angle from this domain and next domains' line of tangency going
+            counterclockwise.
         direction: The direction of the helix at this point.
         strand: The strand that this point belongs to.
         domain: The domain this point belongs to.
@@ -65,14 +66,16 @@ class Point:
         The matching point is computed on-the-fly based off of the parent domain's other
         helix for the domain of this point.
 
-        If the point lacks a domain or a strand, None is returned because matching cannot be determined.
+        If the point lacks a domain or a strand, None is returned because matching
+        cannot be determined.
 
         Returns:
             Point: The matching point.
             None: There is no matching point.
         """
-        # our domain's parent is a subunit; our domain's subunit's parent is a Domains object
-        # we need access to this Domains object in order to locate the matching point
+        # our domain's parent is a subunit; our domain's subunit's parent is a
+        # Domains object we need access to this Domains object in order to locate the
+        # matching point
         if (
             self.strand.closed
             or self.domain is None
@@ -95,7 +98,8 @@ class Point:
             other_helix: Deque[Point] = domains.points()[self.domain.index][
                 inverse(self.direction)
             ]
-            # since the other strand in our domain is going in the other direction, we reverse the other helix
+            # since the other strand in our domain is going in the other direction,
+            # we reverse the other helix
             other_helix: Tuple[Point] = tuple(reversed(other_helix))
 
             # obtain the matching point

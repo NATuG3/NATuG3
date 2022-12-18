@@ -26,13 +26,17 @@ class Strand:
     A strand of items.
 
     Attributes:
-        name: The user-set name of the strand. This appears when exporting, and is used as a title.
-        color: The RGB color of the strand. This is a tuple of 3 integers, each between 0 and 255.
-        auto_color: A flag to determine whether a Strands parent should automatically color this strand when its
-            restyle() method is called.
-        thickness: The thickness of the strand. This is an integer representing the number of pixels wide the strand.
-        auto_thickness: A flag to determine whether a Strands parent should automatically set the thickness of this
-            strand when its restyle() method is called.
+        name: The user-set name of the strand. This appears when exporting, and is used
+            as a title.
+        color: The RGB color of the strand. This is a tuple of 3 integers, each between
+            0 and 255.
+        auto_color: A flag to determine whether a Strands parent should automatically
+            color this strand when its restyle() method is called.
+        thickness: The thickness of the strand. This is an integer representing the
+            number of pixels wide the strand.
+        auto_thickness: A flag to determine whether a Strands parent should
+            automatically set the thickness of this strand when its restyle() method
+            is called.
         items: The items in the strand. This is a deque of Points.
         nucleic_acid_profile: The nucleic acid settings used.
         sequence (list): The sequence of the strand.
@@ -44,8 +48,8 @@ class Strand:
         down_strand: Whether all NEMids in this strand are down-NEMids.
             Recursively checks all items in the strand
         interdomain: Whether this strand spans multiple domains.
-            Recursively checks all items in the strand to see if any items have unique domains
-            from the other items.
+            Recursively checks all items in the strand to see if any items have unique
+            domains from the other items.
         cross_screen: Whether this strand wraps across the screen.
 
     Methods:
@@ -64,11 +68,17 @@ class Strand:
     name: str = "Strand"
     parent: "Strands" = None
 
-    nucleic_acid_profile: NucleicAcidProfile = field(default_factory=NucleicAcidProfile, repr=False)
+    nucleic_acid_profile: NucleicAcidProfile = field(
+        default_factory=NucleicAcidProfile, repr=False
+    )
     items: Deque[Point] = field(default_factory=deque)
     closed: bool = False
 
-    color: Tuple[int, int, int] = (0, 0, 0,)
+    color: Tuple[int, int, int] = (
+        0,
+        0,
+        0,
+    )
     auto_color: bool = True
     thickness: int = 2
     auto_thickness: bool = True
@@ -108,25 +118,30 @@ class Strand:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
-        This creates new NEMid and Nucleoside objects which are inserted into and parented to this strand.
+        This creates new NEMid and Nucleoside objects which are inserted into and
+        parented to this strand.
 
         Args:
-            count: The number of additional NEMids to generate. Nucleosides are generated automatically, this is
-                specifically an integer number of NEMids.
-            domain: The domain to use for x coord generation in the NEMid generation process. If this is None the
+            count: The number of additional NEMids to generate. Nucleosides are
+                generated automatically, this is specifically an integer number of
+                NEMids.
+            domain: The domain to use for x coord generation in the NEMid generation
+                process. If this is None the
                 domain of the right most NEMid is used by default.
-            direction: The direction to generate the NEMids in. This is either RIGHT or LEFT. If LEFT NEMids are
-                generated and left-appended to the left of the strand; if RIGHT NEMids are generated and appended to the
+            direction: The direction to generate the NEMids in. This is either RIGHT
+                or LEFT. If LEFT NEMids are generated and left-appended to the left
+                of the strand; if RIGHT NEMids are generated and appended to the
                 right side of the strand.
 
         Notes:
-            Items are appended directly to the left or right side of the strand, and are not returned. The strand
-            object is updated in place.
+            Items are appended directly to the left or right side of the strand, and are
+            not returned. The strand object is updated in place.
         """
-        # Compute variables dependent on direction.
-        # Edge_NEMid == rightmost or leftmost NEMid based off of the direction that we're generating NEMids in.
-        # Modifier == whether we are increasing or decreasing angles/z-coords as we progress. Takes the form of -1 or 1
-        # so that we can multiply it by the changes.
+        # Compute variables dependent on direction. Edge_NEMid == rightmost or
+        # leftmost NEMid based off of the direction that we're generating NEMids in.
+        # Modifier == whether we are increasing or decreasing angles/z-coords as we
+        # progress. Takes the form of -1 or 1 so that we can multiply it by the
+        # changes.
         if direction == RIGHT:
             edge_NEMid = self.NEMids()[-1]
             modifier = 1
@@ -139,33 +154,37 @@ class Strand:
         # If they do not pass a Domain object, use the domain of the right most NEMid
         domain = domain if domain is not None else edge_NEMid.domain
 
-        # Create a generator for angles. The angle generator begins at the angle of the item rightmost in the list,
-        # and yields angles increasing by theta_b. We slice the angle generator so that it stops yielding after count
-        # number of NEMids have been generated. As it yields, we apply a modulo operation to the angle to ensure that
-        # angles do not exceed 360 degrees.
+        # Create a generator for angles. The angle generator begins at the angle of
+        # the item rightmost in the list, and yields angles increasing by theta_b. We
+        # slice the angle generator so that it stops yielding after count number of
+        # NEMids have been generated. As it yields, we apply a modulo operation to
+        # the angle to ensure that angles do not exceed 360 degrees.
         angle_generator = itertools.count(
-            edge_NEMid.angle, self.nucleic_acid_profile.theta_b*modifier
+            edge_NEMid.angle, self.nucleic_acid_profile.theta_b * modifier
         )
         angle_generator = itertools.islice(angle_generator, count)
         angle_generator = map(lambda angle_: angle_ % 360, angle_generator)
 
-        # Create a generator for x coordinates. The x coordinates are generated based off of the angles, so this uses
-        # the above angle generator and mapping the Point.x_coord_from_angle() method onto it to transform the angles
-        # into x coordinates.
+        # Create a generator for x coordinates. The x coordinates are generated based
+        # off of the angles, so this uses the above angle generator and mapping the
+        # Point.x_coord_from_angle() method onto it to transform the angles into x
+        # coordinates.
         x_coord_generator = map(
             lambda angle_: Point.x_coord_from_angle(angle_, domain), angle_generator
         )
         x_coord_generator = itertools.islice(x_coord_generator, count)
 
-        # Create a generator for z coordinates. The z coordinate generator begins at the last z coordinate in the
-        # strand and yields z coordinates increasing by Z_b. We slice the z coordinate generator so that it stops
-        # yielding after count number of NEMids have been generated.
+        # Create a generator for z coordinates. The z coordinate generator begins at
+        # the last z coordinate in the strand and yields z coordinates increasing by
+        # Z_b. We slice the z coordinate generator so that it stops yielding after
+        # count number of NEMids have been generated.
         z_coord_generator = itertools.count(
-            edge_NEMid.z_coord, self.nucleic_acid_profile.Z_b*modifier
+            edge_NEMid.z_coord, self.nucleic_acid_profile.Z_b * modifier
         )
         z_coord_generator = itertools.islice(z_coord_generator, count)
 
-        # Iterate over the various generators and create NEMids and Nucleosides. Then append them to the strand.
+        # Iterate over the various generators and create NEMids and Nucleosides. Then
+        # append them to the strand.
         for angle, x_coord, z_coord in zip(
             angle_generator, x_coord_generator, z_coord_generator
         ):
@@ -179,12 +198,14 @@ class Strand:
             # Create a Nucleoside object from the NEMid object's data.
             nucleoside = NEMid_.to_nucleoside()
 
-            # If we are generating upwards boost the nucleoside up/down to be the next item in the strand.
+            # If we are generating upwards boost the nucleoside up/down to be the
+            # next item in the strand.
             nucleoside.angle += self.nucleic_acid_profile.theta_b / 2 * modifier
             nucleoside.z_coord += self.nucleic_acid_profile.Z_b / 2 * modifier
             nucleoside.x_coord = Point.x_coord_from_angle(nucleoside.angle, domain)
 
-            # append the new NEMid and nucleoside to the right/left side of the strand based off of the direction.
+            # append the new NEMid and nucleoside to the right/left side of the
+            # strand based off of the direction.
             if direction == RIGHT:
                 # right append
                 self.append(NEMid_)
@@ -298,9 +319,10 @@ class Strand:
         Uses self.random_sequence() to compute the random sequence
 
         Args:
-            overwrite: Whether to overwrite the current sequence or not. If overwrite is False then all unset
-                nucleosides (ones which are None) will be set to a random nucleoside. If overwrite is True then all
-                nucleosides will be set to a random nucleoside.
+            overwrite: Whether to overwrite the current sequence or not. If overwrite
+                is False then all unset nucleosides (ones which are None) will be set
+                to a random nucleoside. If overwrite is True then all nucleosides
+                will be set to a random nucleoside.
         """
         for nucleoside in self.nucleosides():
             if overwrite or nucleoside.base is None:
@@ -312,8 +334,9 @@ class Strand:
         Clear the sequence of the strand.
 
         Args:
-            overwrite: Whether to overwrite the current sequence or not. If overwrite is True then all set nucleosides
-                that are set (are not None) will be made None.
+            overwrite: Whether to overwrite the current sequence or not. If
+                overwrite is True then all set nucleosides that are set (are not
+                None) will be made None.
         """
         for nucleoside in self.nucleosides():
             if overwrite or nucleoside.base is not None:

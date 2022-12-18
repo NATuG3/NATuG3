@@ -7,7 +7,8 @@ class Action(QPushButton):
     """
     A singular action parent class for the toolbar.
 
-    Actions are modified QPushButtons that are checkable (toggleable), and have a fixed width.
+    Actions are modified QPushButtons that are checkable (toggleable), and have a
+        fixed width.
     """
 
     def __init__(self, title):

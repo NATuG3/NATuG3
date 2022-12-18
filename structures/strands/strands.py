@@ -292,20 +292,24 @@ class Strands:
             elif not strand.closed:
                 # this is the creating a loop strand case
                 if NEMid2.index < NEMid1.index:
-                    # crawl from the index of the right NEMid to the index of the left NEMid
+                    # crawl from the index of the right NEMid to the index of the
+                    # left NEMid
                     new_strands[0].items.extend(
                         strand.sliced(NEMid2.index, NEMid1.index)
                     )
-                    # crawl from the beginning of the strand to the index of the right NEMid
+                    # crawl from the beginning of the strand to the index of the
+                    # right NEMid
                     new_strands[1].items.extend(strand.sliced(0, NEMid2.index))
                     # crawl from the index of the left NEMid to the end of the strand
                     new_strands[1].items.extend(strand.sliced(NEMid1.index, None))
                 elif NEMid1.index < NEMid2.index:
-                    # crawl from the index of the left NEMid to the index of the right NEMid
+                    # crawl from the index of the left NEMid to the index of the
+                    # right NEMid
                     new_strands[0].items.extend(
                         strand.sliced(NEMid1.index, NEMid2.index)
                     )
-                    # crawl from the beginning of the strand to the index of the left NEMid
+                    # crawl from the beginning of the strand to the index of the left
+                    # NEMid
                     new_strands[1].items.extend(strand.sliced(0, NEMid1.index))
                     # crawl from the index of the right NEMid to the end of the strand
                     new_strands[1].items.extend(strand.sliced(NEMid2.index, None))
@@ -328,19 +332,23 @@ class Strands:
                     closed_strand_NEMid: NEMid = NEMid2
                     open_strand_NEMid: NEMid = NEMid1
 
-                # crawl from beginning of the open strand to the junction site NEMid of the open strand
+                # crawl from beginning of the open strand to the junction site NEMid
+                # of the open strand
                 new_strands[0].items.extend(
                     open_strand_NEMid.strand.sliced(0, open_strand_NEMid.index)
                 )
-                # crawl from the junction site's closed strand NEMid to the end of the closed strand
+                # crawl from the junction site's closed strand NEMid to the end of
+                # the closed strand
                 new_strands[0].items.extend(
                     closed_strand_NEMid.strand.sliced(closed_strand_NEMid.index, None)
                 )
-                # crawl from the beginning of the closed strand to the junction site of the closed strand
+                # crawl from the beginning of the closed strand to the junction site
+                # of the closed strand
                 new_strands[0].items.extend(
                     closed_strand_NEMid.strand.sliced(0, closed_strand_NEMid.index)
                 )
-                # crawl from the junction site of the open strand to the end of the open strand
+                # crawl from the junction site of the open strand to the end of the
+                # open strand
                 new_strands[0].items.extend(
                     open_strand_NEMid.strand.sliced(open_strand_NEMid.index, None)
                 )
@@ -366,7 +374,8 @@ class Strands:
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
                 new_strands[0].items.extend(NEMid1.strand.sliced(0, NEMid1.index))
-                # crawl from the junction site on NEMid#2's strand to the end of the strand
+                # crawl from the junction site on NEMid#2's strand to the end of the
+                # strand
                 new_strands[0].items.extend(NEMid2.strand.sliced(NEMid2.index, None))
 
                 # crawl from the beginning of NEMid#2's strand to the junction site

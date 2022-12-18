@@ -54,7 +54,8 @@ class SideViewPlotter(pg.PlotWidget):
 
     Attributes:
         strands: The sequencing to plot.
-        nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the sequencing to plot.
+        nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
+            sequencing to plot.
         plot_data: Currently plotted data.
         width: The width of the plot.
         height: The height of the plot.
@@ -79,7 +80,8 @@ class SideViewPlotter(pg.PlotWidget):
 
         Args:
             strands: The sequencing to plot.
-            nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the sequencing to plot.
+            nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
+                sequencing to plot.
             mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
         """
         super().__init__()
@@ -223,8 +225,8 @@ class SideViewPlotter(pg.PlotWidget):
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # update the point mappings (this is a dict that allows us to easily traverse between
-                # a coord and a Point)
+                # update the point mappings (this is a dict that allows us to easily
+                # traverse between a coord and a Point)
                 self.plot_data.points[
                     (
                         point.x_coord,
@@ -238,8 +240,9 @@ class SideViewPlotter(pg.PlotWidget):
 
                 # determine the symbol for the point
                 if isinstance(point, Nucleoside) and point.base is not None:
-                    # if the point is a nucleoside and the nucleoside has a base assigned to it
-                    # then make the symbol that base, rotated based on the direction of the nucleoside
+                    # if the point is a nucleoside and the nucleoside has a base
+                    # assigned to it then make the symbol that base, rotated based on
+                    # the direction of the nucleoside
                     if point.direction is UP:
                         symbols.append(
                             custom_symbol(point.base, flip=False, rotation=-90)
@@ -249,7 +252,8 @@ class SideViewPlotter(pg.PlotWidget):
                             custom_symbol(point.base, flip=False, rotation=90)
                         )
                 else:
-                    # otherwise we will make the point symbol a simple arrow indicating its direction
+                    # otherwise we will make the point symbol a simple arrow
+                    # indicating its direction
                     if point.direction == UP:
                         symbols.append("t1")  # up arrow for an upwards point
                     else:  # point.direction == DOWN
@@ -260,7 +264,8 @@ class SideViewPlotter(pg.PlotWidget):
                     symbol_brushes.append(highlight_brush)
                     symbol_pens.append(point_pen)
                     symbol_size = 18
-                # if it isn't highlighted then determine the properties of it based off of the type of the point
+                # if it isn't highlighted then determine the properties of it based
+                # off of the type of the point
                 else:
                     if isinstance(point, Nucleoside):
                         if point.base is None:
@@ -320,16 +325,18 @@ class SideViewPlotter(pg.PlotWidget):
                 # do not plot the entire connector line going from the left to the
                 # right of the screen
                 for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
-                    # if the distance between this x coord and the next one is large then add a break in the connector.
-                    # Note that the "next x coord" to check against is typically the next on in the array, except
-                    # when we reach the end of the list, in which case it becomes the first one.
+                    # if the distance between this x coord and the next one is large
+                    # then add a break in the connector. Note that the "next x coord"
+                    # to check against is typically the next on in the array,
+                    # except when we reach the end of the list, in which case it
+                    # becomes the first one.
                     if point_index != len(coords) - 1:
                         next_x_coord = coords[point_index + 1][0]
                     else:
                         next_x_coord = coords[0][0]
 
-                    # if the distance between this x coord and the next one is large then don't add a connection.
-                    # otherwise add a connection.
+                    # if the distance between this x coord and the next one is large
+                    # then don't add a connection. otherwise add a connection.
                     if abs(x_coord - next_x_coord) > 1:
                         # do not connect
                         connect.append(0)
@@ -337,7 +344,8 @@ class SideViewPlotter(pg.PlotWidget):
                         # connect
                         connect.append(1)
 
-                # closed strands will have one extra item in the end so that they appear connected
+                # closed strands will have one extra item in the end so that they
+                # appear connected
                 if strand.closed:
                     connect.append(1)
 

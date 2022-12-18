@@ -107,7 +107,8 @@ class NucleicAcidPanel(QWidget):
         self.theta_s.setValue(profile.theta_s)
 
     def fetch_settings(self) -> NucleicAcidProfile:
-        """Fetch a profiles object with all current nucleic acid settings from inputs."""
+        """Fetch a profiles object with all current nucleic acid settings from
+        inputs. """
         return NucleicAcidProfile(
             D=self.D.value(),
             H=self.H.value(),
@@ -152,12 +153,14 @@ class NucleicAcidPanel(QWidget):
 
         self.Z_s.setToolTip("Strand Switch Height")
         self.Z_s.setStatusTip(
-            "The vertical height between two NEMids on different helices of the same double helix."
+            "The vertical height between two NEMids on different helices of the same "
+            "double helix. "
         )
 
         self.Z_mate.setToolTip("Nucleoside-Mate Vertical Distance")
         self.Z_mate.setStatusTip(
-            "The vertical distance between a nucleoside and its mate on the other helix."
+            "The vertical distance between a nucleoside and its mate on the other "
+            "helix. "
         )
 
         self.theta_b.setToolTip("Base Angle")
@@ -165,12 +168,14 @@ class NucleicAcidPanel(QWidget):
 
         self.theta_c.setToolTip("Characteristic Angle")
         self.theta_c.setStatusTip(
-            "The smallest angle about the helix axis possible between two NEMids on the same helix."
+            "The smallest angle about the helix axis possible between two NEMids on "
+            "the same helix. "
         )
 
         self.theta_s.setToolTip("Switch Angle")
         self.theta_s.setStatusTip(
-            "The angle about the helix axis between two NEMids on different helices of a double helix."
+            "The angle about the helix axis between two NEMids on different helices "
+            "of a double helix. "
         )
 
         logger.info("Set statusTips/toolTips for all input widgets.")

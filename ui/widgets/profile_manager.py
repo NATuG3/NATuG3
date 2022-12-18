@@ -16,8 +16,9 @@ class ProfileManager(QGroupBox):
     """
     A profile managing widget.
 
-    This allows for easy management of settings profiles, and automates loading/saving/deleting of profiles.
-    Profiles are stored in a dict under string names, and functions for loading/saving are customizable.
+    This allows for easy management of settings profiles, and automates
+    loading/saving/deleting of profiles. Profiles are stored in a dict under string
+    names, and functions for loading/saving are customizable.
 
     Signals:
         profile_loaded: Emitted when a profile is loaded.
@@ -50,14 +51,16 @@ class ProfileManager(QGroupBox):
             parent: The parent QObject.
             extractor: The worker called to extract data for new profiles.
             dumper: The worker called to dump data for a loaded profile.
-            title: The title of the group box containing the profile manager. Shows up above manager.
+            title: The title of the group box containing the profile manager. Shows up
+                above manager.
             warning: Warning shown when user attempts to load a profile.
             defaults: Profile names that are defaults. User cannot delete default profiles.
             default: The profile that is chosen by default.
             profiles: The profiles in the profile manager.
 
         Notes:
-            When a profile is saved it is saved under a dict entry. The format is {new_name: extractor()}.
+            When a profile is saved it is saved under a dict entry. The format is
+                {new_name: extractor()}.
         """
         super().__init__(title, parent)
         uic.loadUi("ui/widgets/profile_manager.ui", self)
@@ -110,7 +113,8 @@ class ProfileManager(QGroupBox):
         return self.profile_chooser.currentText()
 
     def approve(self) -> bool:
-        """Present the user with a popup stating self.warning. If user approves request, return True."""
+        """Present the user with a popup stating self.warning. If user approves
+        request, return True. """
         if self.warning is not None:
             if not utils.confirm(
                 self.parent(), "Profile Manager Warning", self.warning
@@ -190,8 +194,8 @@ class ProfileManager(QGroupBox):
         assert name in self.profiles
         del self.profiles[name]
 
-        # the profiles with the name of the previous contents of the box has been deleted
-        # so now empty the profiles chooser's box
+        # the profiles with the name of the previous contents of the box has been
+        # deleted so now empty the profiles chooser's box
         self.profile_chooser.setCurrentText("")
 
         # clear profiles chooser to make placeholder text visible
@@ -235,29 +239,34 @@ class ProfileManager(QGroupBox):
             # if the chosen profiles name's settings match the current input box values
             if self.profiles.get(self.current) == self.extractor():
                 logger.debug(
-                    "Current profiles settings match the input box values\nprevious: %s; inputted: %s",
+                    "Current profiles settings match the input box values\nprevious: "
+                    "%s; inputted: %s",
                     self.profiles.get(self.current),
                     self.extractor(),
                 )
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
-                    f'Current settings match saved settings of profiles named "{chosen_profile_name}."'
+                    f'Current settings match saved settings of profiles named '
+                    f'"{chosen_profile_name}."'
                 )
 
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Current settings match saved settings of profiles named "{chosen_profile_name}.".'
+                    f'Current settings match saved settings of profiles named '
+                    f'"{chosen_profile_name}.".'
                 )
 
                 self.delete_profile_button.setEnabled(True)
                 self.delete_profile_button.setStatusTip(
-                    f'Delete the profiles named "{chosen_profile_name}." This action is irreversible.'
+                    f'Delete the profiles named "{chosen_profile_name}." This action '
+                    f'is irreversible. '
                 )
             # if the chosen profiles name is not in
             else:
                 logger.debug(
-                    "Current profiles settings do not match the input box values\nprevious: %s; inputted: %s",
+                    "Current profiles settings do not match the input box "
+                    "values\nprevious: %s; inputted: %s",
                     self.profiles.get(self.current),
                     self.extractor(),
                 )
@@ -269,12 +278,14 @@ class ProfileManager(QGroupBox):
                 self.save_profile_button.setEnabled(True)
                 self.save_profile_button.setToolTip("Overwrite Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Overwrite profiles named "{chosen_profile_name}" with current settings.'
+                    f'Overwrite profiles named "{chosen_profile_name}" with current '
+                    f'settings. '
                 )
 
                 self.delete_profile_button.setEnabled(True)
                 self.delete_profile_button.setStatusTip(
-                    f'Delete the profiles named "{chosen_profile_name}." This action is irreversible.'
+                    f'Delete the profiles named "{chosen_profile_name}." This action '
+                    f'is irreversible. '
                 )
 
             # no matter what, do not let the user alter default profiles
@@ -291,19 +302,23 @@ class ProfileManager(QGroupBox):
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a default profile.'
+                    f'Cannot alter a default profiles. "{chosen_profile_name}." is a '
+                    f'default profile. '
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
-                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a default profile.'
+                    f'Cannot delete a default profiles. "{chosen_profile_name}." is a '
+                    f'default profile. '
                 )
 
-        # the chosen profiles name is a brand-new profiles name (that has not already been saved)
+        # the chosen profiles name is a brand-new profiles name (that has not already
+        # been saved)
         else:
             self.load_profile_button.setEnabled(False)
             self.load_profile_button.setStatusTip(
-                f'No saved profiles is named "{chosen_profile_name}." Cannot load a profiles that does not exist.'
+                f'No saved profiles is named "{chosen_profile_name}." Cannot load a '
+                f'profiles that does not exist. '
             )
 
             self.save_profile_button.setEnabled(True)
@@ -314,24 +329,28 @@ class ProfileManager(QGroupBox):
 
             self.delete_profile_button.setEnabled(False)
             self.delete_profile_button.setStatusTip(
-                f'No saved profiles is named "{chosen_profile_name}." Cannot delete a profiles that does not exist.'
+                f'No saved profiles is named "{chosen_profile_name}." Cannot delete a '
+                f'profiles that does not exist. '
             )
 
         # No matter what we cannot save a profiles with a blank name
         if chosen_profile_name == "":
             self.load_profile_button.setEnabled(False)
             self.load_profile_button.setStatusTip(
-                "Profile chooser entry box is empty. Enter the name of the profiles to load."
+                "Profile chooser entry box is empty. Enter the name of the profiles "
+                "to load. "
             )
 
             self.save_profile_button.setEnabled(False)
             self.save_profile_button.setStatusTip(
-                "Profile chooser entry box is empty. Enter the name of the profiles to save."
+                "Profile chooser entry box is empty. Enter the name of the profiles "
+                "to save. "
             )
 
             self.delete_profile_button.setEnabled(False)
             self.delete_profile_button.setStatusTip(
-                "Profile chooser entry box is empty. Enter the name of the profiles to delete."
+                "Profile chooser entry box is empty. Enter the name of the profiles "
+                "to delete. "
             )
 
         self.chosen_changed.emit(chosen_profile_name)

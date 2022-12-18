@@ -150,7 +150,8 @@ class Window(QMainWindow):
             self.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
 
         # config resizing...
-        # if config is floating make the max size very large and make the tab area go on top
+        # if config is floating make the max size very large and make the tab area go
+        # on top
         if self.config.isFloating():
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.North)
             self.config.setMaximumWidth(600)

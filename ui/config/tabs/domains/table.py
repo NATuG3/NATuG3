@@ -261,8 +261,16 @@ class Table(QTableWidget):
                 theta_interior_multiple,
                 left_helical_joint,
                 right_helical_joint,
-                (0, left_helix_count, 0,),
-                (0, other_helix_count, 0,),
+                (
+                    0,
+                    left_helix_count,
+                    0,
+                ),
+                (
+                    0,
+                    other_helix_count,
+                    0,
+                ),
             )
 
             domains.append(domain_index)

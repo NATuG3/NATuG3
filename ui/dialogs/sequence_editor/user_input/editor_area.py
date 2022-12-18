@@ -172,8 +172,10 @@ class SequenceEditorArea(QWidget):
         Add a base to the bottom of the editor area.
 
         Args:
-            base: The base to add. If None then a new empty area for the user to add a base is created.
-            index: Inserts a base at the index provided. If None then a base is appended to the bottom of the editor.
+            base: The base to add. If None then a new empty area for the user to add a
+                base is created.
+            index: Inserts a base at the index provided. If None then a base is
+                appended to the bottom of the editor.
         """
         if index is None:
             # new index will be one after the end of the bases list
