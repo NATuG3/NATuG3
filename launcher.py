@@ -4,7 +4,7 @@ from contextlib import suppress
 from time import time
 
 # whether to delete restoration files
-RESET = False
+RESET = True
 
 # refs script logger object
 logger = logging.getLogger(__name__)
@@ -24,8 +24,11 @@ def main():
     if RESET:
         with suppress(FileNotFoundError):
             os.remove("saves/nucleic_acid/profiles.nano")
+        with suppress(FileNotFoundError):
             os.remove("saves/nucleic_acid/restored.nano")
+        with suppress(FileNotFoundError):
             os.remove("saves/domains/restored.nano")
+        with suppress(FileNotFoundError):
             os.remove("saves/sequencing/restored.nano")
 
     # create needed files
