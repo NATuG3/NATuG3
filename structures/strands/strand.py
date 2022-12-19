@@ -102,6 +102,46 @@ class Strand:
     def __post_init__(self):
         self.items = deque(self.items)
 
+    def __len__(self) -> int:
+        """Obtain number of items in strand."""
+        return len(self.items)
+
+    def __contains__(self, item) -> bool:
+        """Determine whether item is in strand."""
+        return item in self.items
+
+    def matching_items(self, other: "Strand") -> bool:
+        """
+        Determine whether this strand has items that match a different strand.
+
+        This method first checks if the length of the strands are equal, and then
+        recursively checks each item against the item of the same index in the other
+        strand (by zipping). If the two items are of different types or do not have all
+        the same attributes, then False is returned. If all items match, we return True.
+
+        Args:
+            other: The other strand to compare to.
+
+        Returns:
+            Whether the strands have matching items.
+        """
+        # If the lengths are different, then the strands are not matching.
+        if len(self) != len(other):
+            return False
+
+        # Check each item in the strand against the item of the same index in the other.
+        for item, other_item in zip(self.items, other.items):
+            # If the items are not the same type, they cannot match.
+            if type(item) != type(other_item):
+                return False
+            # Check each attribute of item against other_item's
+            for attr in item.__dataclass_fields__:
+                if getattr(item, attr) != getattr(other_item, attr):
+                    return False
+
+        # If we get here, then all items match.
+        return True
+
     def trim(self, count: int):
         """Remove <count> number of items from the right side of the strand."""
         self.items = deque(itertools.islice(self.items, 0, count))
@@ -292,14 +332,6 @@ class Strand:
             List of all nucleosides in strand.items.
         """
         return list(filter(lambda item: isinstance(item, Nucleoside), self.items))
-
-    def __len__(self) -> int:
-        """Obtain number of items in strand."""
-        return len(self.items)
-
-    def __contains__(self, item) -> bool:
-        """Determine whether item is in strand."""
-        return item in self.items
 
     @property
     def sequence(self):

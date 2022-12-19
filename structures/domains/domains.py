@@ -477,6 +477,11 @@ class Domains:
             final_angle = ((zeroed_strand_NEMid_count[1] + 1) * theta_b)
             final_z_coord = initial_z_coord + ((zeroed_strand_NEMid_count[1] + 1) * Z_b)
 
+            # Since sometimes we run into issues with calculating "just enough"
+            # NEMids, we will generate an extra and trim it later.
+            final_angle += theta_b
+            final_z_coord += Z_b
+
             # Generate all the angles. We begin at x=0 and step by theta_b/2 for
             # domain.left_helix_count[1] times. Note that we are generating the data
             # for NEMids and Nucleosides, which is why we step by half a theta_b.
@@ -517,6 +522,14 @@ class Domains:
             other_strand_z_coords = (
                 zeroed_strand_z_coords + self.nucleic_acid_profile.Z_mate
             )
+
+            # Since we generated an extra NEMid, we will trim it off here.
+            zeroed_strand_angles = zeroed_strand_angles[:zeroed_strand_NEMid_count[1]]
+            zeroed_strand_x_coords = zeroed_strand_x_coords[:zeroed_strand_NEMid_count[1]]
+            zeroed_strand_z_coords = zeroed_strand_z_coords[:zeroed_strand_NEMid_count[1]]
+            other_strand_angles = other_strand_angles[:other_strand_NEMid_count[1]]
+            other_strand_x_coords = other_strand_x_coords[:other_strand_NEMid_count[1]]
+            other_strand_z_coords = other_strand_z_coords[:other_strand_NEMid_count[1]]
 
             # Converge all the datapoints into their proper array
             strands[domain.index][zeroed_strand_direction].items = converge_point_data(
