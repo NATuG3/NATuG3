@@ -524,12 +524,15 @@ class Domains:
             )
 
             # Since we generated an extra NEMid, we will trim it off here.
-            zeroed_strand_angles = zeroed_strand_angles[:zeroed_strand_NEMid_count[1]]
-            zeroed_strand_x_coords = zeroed_strand_x_coords[:zeroed_strand_NEMid_count[1]]
-            zeroed_strand_z_coords = zeroed_strand_z_coords[:zeroed_strand_NEMid_count[1]]
-            other_strand_angles = other_strand_angles[:other_strand_NEMid_count[1]]
-            other_strand_x_coords = other_strand_x_coords[:other_strand_NEMid_count[1]]
-            other_strand_z_coords = other_strand_z_coords[:other_strand_NEMid_count[1]]
+            trim_to = zeroed_strand_NEMid_count[1] * 2
+            zeroed_strand_angles = zeroed_strand_angles[:trim_to]
+            zeroed_strand_x_coords = zeroed_strand_x_coords[:trim_to]
+            zeroed_strand_z_coords = zeroed_strand_z_coords[:trim_to]
+            # Repeat for the other strand.
+            trim_to = zeroed_strand_NEMid_count[1] * 2
+            other_strand_angles = other_strand_angles[:trim_to]
+            other_strand_x_coords = other_strand_x_coords[:trim_to]
+            other_strand_z_coords = other_strand_z_coords[:trim_to]
 
             # Converge all the datapoints into their proper array
             strands[domain.index][zeroed_strand_direction].items = converge_point_data(
