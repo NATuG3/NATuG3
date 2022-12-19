@@ -475,19 +475,18 @@ class Domains:
                 # Let "shifts" be the number of excess NEMids at the bottom of the
                 # data point arrays. We will start generating everything at
                 # Z_b/theta_b * shifts, and end at what the normal end index would be
-                # + shifts. Note that int -> float automatically floors the float
+                # + shifts.
                 if initial_z_coord >= 0:
                     shifts = 0
                 else:
-                    shifts = initial_z_coord // Z_b
-                    shifts = int(abs(shifts))
+                    shifts = round(np.divide(abs(initial_z_coord), Z_b))
 
                 # Boost the initial z coord based off of the shifts.
-                # initial_z_coord += shifts * Z_b TEMP Commenting
+                initial_z_coord += shifts * Z_b * 0  # the *0 is temporary!
 
             # If we start at a z coord that is not zero the angle must also start at
             # a different angle accordingly.
-            initial_angle = shifts * theta_b * 0  # the *0 is TEMP
+            initial_angle = shifts * theta_b * 0  # the * 0 is temporary!
 
             # Compute the final Z coord and angle to generate. Note that
             # numpy.arange() does not include the final value, so we add 1 to the
