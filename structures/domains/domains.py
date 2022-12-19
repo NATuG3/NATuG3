@@ -565,19 +565,65 @@ class Domains:
                 domain
             )
 
-            # Assign the domain and direction to all the NEMids and Nucleosides in
-            # the strands.
-            for direction, helix in enumerate(strands[domain.index]):
-                for point in helix.items:
-                    point.domain = domain
-                    point.direction = direction
-
         # Now that everything has been generated, we can assemble it into one large
         # Strands object.
         listed_strands = []
-        for up_strand, down_strand in strands:
+        for counter, (up_strand, down_strand) in enumerate(strands):
+            domain = domains[counter]
+
+            # Assign information to all items in both strands
+            for item1, item2 in zip(up_strand.items, down_strand.items):
+                # Assign directions to the items
+                item1.direction = UP
+                item2.direction = DOWN
+
+                # Assign directions to the items
+                item1.domain = domain
+                item2.domain = domain
+
             listed_strands.append(up_strand)
+            down_strand.items.reverse()
             listed_strands.append(down_strand)
+
+        # Determine juncmates and junctability
+        for domain in domains:
+            # To determine the next zeroed strand's direction we either look at the next
+            # strand's zeroed strand, or we wrap back to the first domain if we have
+            # reached the last domain (since cross-screen junctions are perfectly
+            # acceptable.
+            if domain.index != len(domains) - 1:
+                next_strand_index = domain.index + 1
+            else:
+                next_strand_index = 0
+
+            # The zeroed strand directions for the current and next strand
+            current_zeroed_strand_direction = domains[domain.index].left_helix_joint
+            next_zeroed_strand_direction = domains[next_strand_index].left_helix_joint
+
+            # The actual current domain's strands and the next domain's strands. Note
+            # that "strand_pair" here means that it is a tuple of two strands,
+            # one being up, and the other being down.
+            current_zeroed_strand = strands[domain.index][current_zeroed_strand_direction]
+            next_zeroed_strand = strands[next_strand_index][next_zeroed_strand_direction]
+
+            for item1 in current_zeroed_strand.items:
+                for item2 in next_zeroed_strand.items:
+                    # Perform a preliminary z coord check since dist() is much more
+                    # computationally intensive, and it is best to avoid it if possible
+                    if abs(item1.z_coord - item2.z_coord) > settings.junction_threshold:
+                        continue
+                    # Check the distance between the two points to determine
+                    # junctability.
+                    if math.dist(
+                        item1.position(), item2.position()
+                    ) < settings.junction_threshold:
+                        # Set junctability
+                        item1.junctable = True
+                        item2.junctable = True
+
+                        # Set juncmates
+                        item1.juncmate = item2
+                        item2.juncmate = item1
 
         # Recolor the strands
         for index, strand in enumerate(listed_strands):
