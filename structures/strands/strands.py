@@ -26,11 +26,14 @@ class Strands:
         up_strands: All up sequencing.
         down_strands: All down sequencing.
         name: The name of the strands object. Used when exporting the strands object.
+        package(List[Tuple[Strand, Strand]]): A list of tuples of up and down strands
+            from when the object is loaded with the from_package class method.
 
     Methods:
         randomize_sequences(overwrite)
         clear_sequences(ovewrite)
         conjunct()
+        from_package()
         assign_junctability()
         up_strands(), down_strands()
         recompute(), recolor()
@@ -43,7 +46,7 @@ class Strands:
         self,
         nucleic_acid_profile: NucleicAcidProfile,
         strands: Iterable[Strand],
-        name: str = "Strands",
+        name: str = "Strands"
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -57,6 +60,39 @@ class Strands:
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
         self.recompute()
+        self.package = None
+
+    @classmethod
+    def from_package(
+        cls,
+        nucleic_acid_profile: NucleicAcidProfile,
+        package: List[Tuple[Strand, Strand]],
+        name: str = "Strands"
+    ):
+        """
+        Load a Strands object from a package of up and down strands.
+
+        This package is saved under self.package, and is used primarily for
+        determining matching NEMids and Nucleosides.
+
+        This method automatically stores the Strands object in self.package,
+        and unpacks the strands into self.strands.
+
+        Args:
+            nucleic_acid_profile: The nucleic acid settings for the sequencing container.
+            package: The package to load from. This takes the form of a list of
+                tuples, where in each tuple there are two Strand objects. The first strand
+                object represents the up strand, and the second strand object represents
+                the down strand.
+            name: The name of the strands object. Used when exporting the strands object.
+        """
+        strands: List[Strand] = []
+        for up_strand, down_strand in package:
+            strands.append(up_strand)
+            strands.append(down_strand)
+        strands: "Strands" = cls(nucleic_acid_profile, strands, name)
+        strands.package = package
+        return strands
 
     def __contains__(self, item):
         """Check if a strand or point is contained within this container."""

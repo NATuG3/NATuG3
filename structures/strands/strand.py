@@ -110,7 +110,7 @@ class Strand:
         """Remove <count> number of items from the left side of the strand."""
         self.items = deque(itertools.islice(self.items, count, None))
 
-    def auto_extend(self, count: int, domain: "Domain") -> None:
+    def generate(self, count: int, domain: "Domain") -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
@@ -125,9 +125,9 @@ class Strand:
                 process. If this is None the
                 domain of the right most NEMid is used by default.
         """
-        self._auto_extend(count, domain, direction=RIGHT)
+        self._generate(count, domain, direction=RIGHT)
 
-    def auto_leftextend(self, count: int, domain: "Domain") -> None:
+    def leftgenerate(self, count: int, domain: "Domain") -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
@@ -142,9 +142,9 @@ class Strand:
                 process. If this is None the
                 domain of the right most NEMid is used by default.
         """
-        self._auto_extend(count, domain, direction=LEFT)
+        self._generate(count, domain, direction=LEFT)
 
-    def _auto_extend(
+    def _generate(
         self, count: int, domain: "Domain", direction: Literal[0, 1] = RIGHT
     ) -> None:
         """
@@ -228,6 +228,11 @@ class Strand:
         # Converge the newly generated data and add it to the strand
         new_items = converge_point_data(angles, x_coords, z_coords)
 
+        # Assign domains for all items
+        for item in new_items:
+            item.domain = domain
+            item.direction = edge_item.direction
+
         if direction == LEFT:
             self.leftextend(new_items)
         else:  # direction == RIGHT:
@@ -277,7 +282,7 @@ class Strand:
         """
         return list(filter(lambda item: isinstance(item, NEMid), self.items))
 
-    def nucleosides(self):
+    def nucleosides(self) -> List["Nucleoside"]:
         """
         Obtain all nucleosides in the strand, only.
 

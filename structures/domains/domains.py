@@ -548,26 +548,25 @@ class Domains:
             # strand are count[2] and the additional NEMids to place on the bottom
             # are count[0]. Recall that count[1] is the number of NEMids to generate
             # initially.
-            strands[domain.index][zeroed_strand_direction].auto_leftextend(
+            strands[domain.index][zeroed_strand_direction].leftgenerate(
                 zeroed_strand_NEMid_count[0],
                 domain,
             )
-            strands[domain.index][zeroed_strand_direction].auto_extend(
+            strands[domain.index][zeroed_strand_direction].generate(
                 zeroed_strand_NEMid_count[2] + shifts,
                 domain
             )
-            strands[domain.index][other_strand_direction].auto_leftextend(
+            strands[domain.index][other_strand_direction].leftgenerate(
                 other_strand_NEMid_count[0],
                 domain,
             )
-            strands[domain.index][other_strand_direction].auto_extend(
+            strands[domain.index][other_strand_direction].generate(
                 other_strand_NEMid_count[2] + shifts,
                 domain
             )
 
         # Now that everything has been generated, we can assemble it into one large
         # Strands object.
-        listed_strands = []
         for counter, (up_strand, down_strand) in enumerate(strands):
             domain = domains[counter]
 
@@ -581,9 +580,8 @@ class Domains:
                 item1.domain = domain
                 item2.domain = domain
 
-            listed_strands.append(up_strand)
+            # The down strand should go in reverse order
             down_strand.items.reverse()
-            listed_strands.append(down_strand)
 
         # Determine juncmates and junctability
         for domain in domains:
@@ -625,8 +623,11 @@ class Domains:
                         item1.juncmate = item2
                         item2.juncmate = item1
 
+        # Load the strands into a Strands package
+        strands = Strands.from_package(self.nucleic_acid_profile, strands)
+
         # Recolor the strands
-        for index, strand in enumerate(listed_strands):
+        for index, strand in enumerate(strands.strands):
             strand.color = settings.colors["sequencing"]["greys"][index % 2]
 
         # Log the amount of time it took to generate the strands.
@@ -635,7 +636,7 @@ class Domains:
             round((time() - start_time), 4),
         )
 
-        return Strands(self.nucleic_acid_profile, listed_strands)
+        return strands
 
     def __repr__(self) -> str:
         """

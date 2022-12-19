@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Tuple, Type, Deque
+from typing import Tuple, Type, Deque, List
 
 from constants.directions import DOWN, UP
 from utils import inverse
@@ -63,44 +63,43 @@ class Point:
         """
         Obtain the matching point.
 
-        The matching point is computed on-the-fly based off of the parent domain's other
-        helix for the domain of this point.
-
-        If the point lacks a domain or a strand, None is returned because matching
-        cannot be determined.
+        The matching point is determined based off of the parent strand's .package.
+        .package is a formatted list of domains' up and down strands. We will use this
+        to determine the matching point on the other strand of ours.
 
         Returns:
             Point: The matching point.
-            None: There is no matching point.
+            None: There is no matching point. This is the case for closed strands,
+                or for when there is no package within the parent's Strands object.
         """
         # our domain's parent is a subunit; our domain's subunit's parent is a
         # Domains object we need access to this Domains object in order to locate the
         # matching point
         if (
             self.strand.closed
-            or self.domain is None
-            or self.domain.parent is None
-            or self.domain.parent.parent is None
+            or self.strand is None
+            or self.strand.parent.package is None
         ):
             return None
         else:
-            # create a reference to the Domains object
-            domains = self.domain.parent.parent
+            # create a reference to the strands package
+            strands: List[Tuple["Strand", "Strand"]]
+            strands = self.strand.parent.package
 
             # obtain the helix that we are contained in
-            our_helix: Deque[Point] = domains.points()[self.domain.index][
+            our_helix: "Strand" = strands[self.domain.index][
                 self.direction
             ]
             # determine our index in our helix
             our_index = our_helix.index(self)
 
             # obtain the other helix of our domain
-            other_helix: Deque[Point] = domains.points()[self.domain.index][
+            other_helix: "Strand" = strands[self.domain.index][
                 inverse(self.direction)
             ]
             # since the other strand in our domain is going in the other direction,
             # we reverse the other helix
-            other_helix: Tuple[Point] = tuple(reversed(other_helix))
+            other_helix: Tuple[Point] = tuple(reversed(other_helix.items))
 
             # obtain the matching point
             matching: Point = other_helix[our_index]
