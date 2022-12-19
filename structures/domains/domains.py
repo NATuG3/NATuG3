@@ -1,8 +1,7 @@
 import logging
 import math
-from functools import cache
 from time import time
-from typing import List, Iterable, Tuple, Literal, Type
+from typing import List, Iterable, Tuple, Type
 
 import numpy as np
 import pandas as pd
@@ -11,8 +10,7 @@ import settings
 from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
-from structures.domains.utils import converge_point_data
-from structures.points import Nucleoside, NEMid
+from structures.utils import converge_point_data
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand, Strands
@@ -472,34 +470,18 @@ class Domains:
                     math.ceil(initial_z_coord / decrease_interval) * decrease_interval
                 )
 
-                # Let "shifts" be the number of excess NEMids at the bottom of the
-                # data point arrays. We will start generating everything at
-                # Z_b/theta_b * shifts, and end at what the normal end index would be
-                # + shifts.
-                if initial_z_coord >= 0:
-                    shifts = 0
-                else:
-                    shifts = round(np.divide(abs(initial_z_coord), Z_b))
-
-                # Boost the initial z coord based off of the shifts.
-                initial_z_coord += shifts * Z_b * 0  # the *0 is temporary!
-
-            # If we start at a z coord that is not zero the angle must also start at
-            # a different angle accordingly.
-            initial_angle = shifts * theta_b * 0  # the * 0 is temporary!
-
             # Compute the final Z coord and angle to generate. Note that
             # numpy.arange() does not include the final value, so we add 1 to the
             # final value. Also note that we boost based off of count[1] is the number
             # of NEMids to generate initially.
-            final_angle = initial_angle + ((zeroed_strand_NEMid_count[1] + 1) * theta_b)
+            final_angle = ((zeroed_strand_NEMid_count[1] + 1) * theta_b)
             final_z_coord = initial_z_coord + ((zeroed_strand_NEMid_count[1] + 1) * Z_b)
 
             # Generate all the angles. We begin at x=0 and step by theta_b/2 for
             # domain.left_helix_count[1] times. Note that we are generating the data
             # for NEMids and Nucleosides, which is why we step by half a theta_b.
             zeroed_strand_angles = np.arange(
-                initial_angle,  # when to start generating angles
+                0,  # when to start generating angles
                 final_angle,  # when to stop generating angles
                 theta_b / 2,  # the amount to step by for each angle
             )
@@ -545,20 +527,42 @@ class Domains:
                 other_strand_angles, other_strand_x_coords, other_strand_z_coords
             )
 
+            # Let "shifts" be the number of excess NEMids at the bottom of the
+            # data point arrays. We will start generating everything at
+            # Z_b/theta_b * shifts, and end at what the normal end index would be
+            # + shifts.
+            if initial_z_coord >= 0:
+                shifts = 0
+            else:
+                shifts = round(np.divide(abs(initial_z_coord), Z_b))
+
+            # We are cutting nucleosides and NEMids, so we must multiply shifts by 2.
+            to_cut = shifts * 2
+
+            # First trim the strands based off of the shifts
+            strands[domain.index][zeroed_strand_direction].lefttrim(to_cut)
+            strands[domain.index][other_strand_direction].lefttrim(to_cut)
+
             # Now that we have computed all the base NEMids we can compute the extra
             # lower and uppper NEMids. The additional NEMids to place on top for each
             # strand are count[2] and the additional NEMids to place on the bottom
             # are count[0]. Recall that count[1] is the number of NEMids to generate
             # initially.
-            strands[domain.index][zeroed_strand_direction].generate_NEMids(
+            strands[domain.index][zeroed_strand_direction].auto_leftextend(
                 zeroed_strand_NEMid_count[0],
                 domain,
-                direction=DOWN,
             )
-            strands[domain.index][zeroed_strand_direction].generate_NEMids(
-                zeroed_strand_NEMid_count[2],
+            strands[domain.index][zeroed_strand_direction].auto_extend(
+                zeroed_strand_NEMid_count[2] + shifts,
+                domain
+            )
+            strands[domain.index][other_strand_direction].auto_leftextend(
+                other_strand_NEMid_count[0],
                 domain,
-                direction=UP,
+            )
+            strands[domain.index][other_strand_direction].auto_extend(
+                other_strand_NEMid_count[2] + shifts,
+                domain
             )
 
             # Assign the domain and direction to all the NEMids and Nucleosides in
