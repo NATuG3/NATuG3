@@ -30,7 +30,7 @@ class Panel(QWidget):
     Attributes:
         nucleic_acid (NucleicAcidPanel): The nucleic acid tab.
         domains (DomainsPanel): The domains tab.
-        sequencing (SequencingPanel): The sequencing tab.
+        sequencing (SequencingPanel): The strands tab.
     """
 
     def __init__(
@@ -61,7 +61,7 @@ class Panel(QWidget):
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.domains)
 
-        # set the sequencing tab
+        # set the strands tab
         self.sequencing_tab.setLayout(QVBoxLayout())
         self.sequencing_tab.layout().addWidget(self.sequencing)
 
@@ -71,10 +71,10 @@ class Panel(QWidget):
         def warn_and_refresh(top_view, side_view, function):
             """Warn user if there are changes that will be lost and then update plots."""
             global dialog
-            # determine if there are any sequencing that the user has made
+            # determine if there are any strands that the user has made
             # (if there are not then we do not need to warn the user)
             for strand in refs.strands.current.strands:
-                if strand.interdomain:
+                if strand.interdomain():
                     if (dialog is None) or (not dialog.isVisible()):
                         dialog = RefreshConfirmer(refs.constructor, function)
                         dialog.show()

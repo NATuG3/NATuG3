@@ -1,6 +1,7 @@
 import logging
 from typing import Dict
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDockWidget
 
 from structures.domains import Domains
@@ -20,6 +21,9 @@ class Dockable(QDockWidget):
         self.setObjectName("Config Dockable")
         self.setStatusTip("Config panel")
         self.setWindowTitle("Config")
+
+        # Set window order
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
 
         # store the actual link to the widget in self.config
         self.panel = Panel(self, profiles, domains)

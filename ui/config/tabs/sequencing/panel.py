@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class SequencingPanel(QWidget):
-    """DomainsPanel for sequencing."""
+    """DomainsPanel for strands."""
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -73,7 +73,7 @@ class SequencingPanel(QWidget):
             filepath = QFileDialog.getSaveFileName(
                 self.parent(),
                 "Sequence Export Location Chooser",
-                f"{os.getcwd()}\\saves\\sequencing\\presets\\",
+                f"{os.getcwd()}\\saves\\strands\\presets\\",
                 filter=f"*.{filetype}",
             )[0]
             if len(filepath) > 0:

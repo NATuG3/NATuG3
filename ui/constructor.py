@@ -154,7 +154,7 @@ class Window(QMainWindow):
         # on top
         if self.config.isFloating():
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.North)
-            self.config.setMaximumWidth(600)
+            self.config.setMaximumWidth(400)
         # otherwise check the current tab of the config panel and adjust accordingly
         # and make the tab area go on the right
         else:
@@ -162,6 +162,7 @@ class Window(QMainWindow):
             if self.config.panel.sequencing.isVisible():
                 self.config.setFixedWidth(255)
             elif self.config.panel.domains.isVisible():
-                self.config.setFixedWidth(300)
+                self.config.setFixedWidth(400)
+                self.config.setFloating(True)
             elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

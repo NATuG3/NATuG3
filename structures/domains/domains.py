@@ -474,7 +474,7 @@ class Domains:
             # numpy.arange() does not include the final value, so we add 1 to the
             # final value. Also note that we boost based off of count[1] is the number
             # of NEMids to generate initially.
-            final_angle = ((zeroed_strand_NEMid_count[1] + 1) * theta_b)
+            final_angle = (zeroed_strand_NEMid_count[1] + 1) * theta_b
             final_z_coord = initial_z_coord + ((zeroed_strand_NEMid_count[1] + 1) * Z_b)
 
             # Since sometimes we run into issues with calculating "just enough"
@@ -535,12 +535,16 @@ class Domains:
             other_strand_z_coords = other_strand_z_coords[:trim_to]
 
             # Converge all the datapoints into their proper array
-            strands[domain.index][zeroed_strand_direction].items = converge_point_data(
-                zeroed_strand_angles, zeroed_strand_x_coords, zeroed_strand_z_coords
+            strands[domain.index][zeroed_strand_direction].extend(
+                converge_point_data(
+                    zeroed_strand_angles, zeroed_strand_x_coords, zeroed_strand_z_coords
+                )
             )
             # Converge all the datapoints into their proper array
-            strands[domain.index][other_strand_direction].items = converge_point_data(
-                other_strand_angles, other_strand_x_coords, other_strand_z_coords
+            strands[domain.index][other_strand_direction].items.extend(
+                converge_point_data(
+                    other_strand_angles, other_strand_x_coords, other_strand_z_coords
+                )
             )
 
             # Let "shifts" be the number of excess NEMids at the bottom of the
@@ -564,21 +568,19 @@ class Domains:
             # strand are count[2] and the additional NEMids to place on the bottom
             # are count[0]. Recall that count[1] is the number of NEMids to generate
             # initially.
-            strands[domain.index][zeroed_strand_direction].leftgenerate(
+            strands[domain.index][zeroed_strand_direction].generateleft(
                 zeroed_strand_NEMid_count[0],
                 domain,
             )
             strands[domain.index][zeroed_strand_direction].generate(
-                zeroed_strand_NEMid_count[2] + shifts,
-                domain
+                zeroed_strand_NEMid_count[2] + shifts, domain
             )
-            strands[domain.index][other_strand_direction].leftgenerate(
+            strands[domain.index][other_strand_direction].generateleft(
                 other_strand_NEMid_count[0],
                 domain,
             )
             strands[domain.index][other_strand_direction].generate(
-                other_strand_NEMid_count[2] + shifts,
-                domain
+                other_strand_NEMid_count[2] + shifts, domain
             )
 
         # Now that everything has been generated, we can assemble it into one large
@@ -617,8 +619,12 @@ class Domains:
             # The actual current domain's strands and the next domain's strands. Note
             # that "strand_pair" here means that it is a tuple of two strands,
             # one being up, and the other being down.
-            current_zeroed_strand = strands[domain.index][current_zeroed_strand_direction]
-            next_zeroed_strand = strands[next_strand_index][next_zeroed_strand_direction]
+            current_zeroed_strand = strands[domain.index][
+                current_zeroed_strand_direction
+            ]
+            next_zeroed_strand = strands[next_strand_index][
+                next_zeroed_strand_direction
+            ]
 
             for item1 in current_zeroed_strand.items:
                 for item2 in next_zeroed_strand.items:
@@ -628,9 +634,10 @@ class Domains:
                         continue
                     # Check the distance between the two points to determine
                     # junctability.
-                    if math.dist(
-                        item1.position(), item2.position()
-                    ) < settings.junction_threshold:
+                    if (
+                        math.dist(item1.position(), item2.position())
+                        < settings.junction_threshold
+                    ):
                         # Set junctability
                         item1.junctable = True
                         item2.junctable = True
@@ -644,7 +651,7 @@ class Domains:
 
         # Recolor the strands
         for index, strand in enumerate(strands.strands):
-            strand.color = settings.colors["sequencing"]["greys"][index % 2]
+            strand.color = settings.colors["strands"]["greys"][index % 2]
 
         # Log the amount of time it took to generate the strands.
         logger.info(

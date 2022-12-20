@@ -53,9 +53,9 @@ class StrandConfig(QDialog):
         self.thickness.setValue(thickness)
 
     def _sequencing(self):
-        """Set up the sequencing area."""
+        """Set up the strands area."""
 
-        # add the sequencing display area
+        # add the strands display area
         self.sequence_display = SequenceDisplayArea(None, self.strand.sequence)
         self.sequencing_area.layout().insertWidget(0, self.sequence_display)
 

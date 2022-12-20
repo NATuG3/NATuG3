@@ -42,6 +42,17 @@ class TableWidgets:
     left_helix_count: TripleSpinbox = None
     other_helix_count: TripleSpinbox = None
 
+    def to_domain(self, nucleic_acid_profile: NucleicAcidProfile):
+        """Obtain a domain object from the data in the TableWidgets."""
+        return Domain(
+            nucleic_acid_profile=nucleic_acid_profile,
+            theta_m_multiple=self.theta_m_multiple.value(),
+            left_helix_joint=self.left_helix_joint.state,
+            right_helix_joint=self.right_helix_joint.state,
+            left_helix_count=self.left_helix_count.values(),
+            other_helix_count=self.other_helix_count.values()
+        )
+
 class Table(QTableWidget):
     """Nucleic Acid Config Tab."""
 
@@ -65,7 +76,7 @@ class Table(QTableWidget):
         self._headers()
 
         # style the widget
-        self._style()
+        self._prettify()
 
     def keyPressEvent(self, event: QKeyEvent) -> None:
         """Intercept a keypress to alter tabbing."""
@@ -76,7 +87,7 @@ class Table(QTableWidget):
             Qt.Key.Key_Up,
         ):
             # Determine the row and column to highlight
-            row, column = seslf.currentRow(), self.currentColumn()
+            row, column = self.currentRow(), self.currentColumn()
             if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Down):
                 row += 1
             else:
@@ -122,13 +133,14 @@ class Table(QTableWidget):
     def _headers(self):
         """Configure top headers of widget"""
         # store headers (these do not change)
-        self.top_headers = ("left", "right", "s", "m", "left count", "other count")
+        self.top_headers = ("L-Joint", "R-Joint", "s", "m", "Left Count",
+                            "Other Count",)
         # create a column for each header
         self.setColumnCount(len(self.top_headers))
         # apply the headers
         self.setHorizontalHeaderLabels(self.top_headers)
 
-    def _style(self):
+    def _prettify(self):
         """Style the domain panel."""
         # set the style sheet of the panel
         self.setStyleSheet("QTableView::item{padding: 3.25px; text-align: center}")
@@ -139,18 +151,19 @@ class Table(QTableWidget):
         # enable smooth scrolling
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
 
-        # first two columns are statically sized
-        for i in range(2):
-            self.setColumnWidth(i, 35)
+        # all columns are statically sized
+        for column in range(self.columnCount()):
             self.horizontalHeader().setSectionResizeMode(
-                i, QHeaderView.ResizeMode.Fixed
+                0, QHeaderView.ResizeMode.Fixed
             )
 
-        # all others columns are dynamically sized
-        for i in range(2, 6):
-            self.horizontalHeader().setSectionResizeMode(
-                i, QHeaderView.ResizeMode.Stretch
-            )
+        # set column widths
+        self.setColumnWidth(0, 39)
+        self.setColumnWidth(1, 39)
+        self.setColumnWidth(2, 35)
+        self.setColumnWidth(3, 40)
+        self.setColumnWidth(4, 96)
+        self.setColumnWidth(5, 96)
 
     def dump_domains(self, domains: Domains) -> None:
         """
@@ -207,21 +220,23 @@ class Table(QTableWidget):
             self.setCellWidget(index, 3, row.theta_m_multiple)
 
             # column 4 - initial NEMid count for the left helix
-            row.left_helix_count = TableIntegerBox(domain.left_helix_count[1])
+            row.left_helix_count = TripleSpinbox(domain.left_helix_count)
             row.left_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 4, row.left_helix_count)
 
             # column 5 - initial NEMid count for the other helix
-            row.other_helix_count = TableIntegerBox(domain.other_helix_count[1])
+            row.other_helix_count = TripleSpinbox(domain.other_helix_count)
             row.other_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 5, row.other_helix_count)
 
+            # Add the label
             self.side_headers.append(f"#{index + 1}")
 
             # append to the row storage container
             self.rows.append(row)
 
         class smooth_interior_updating:
+            """A class that manages smooth theta_m arrow clicks."""
             @classmethod
             def surrounding(cls, i):
                 # make sure to wrap around to the beginning/end of the domains list
@@ -270,7 +285,8 @@ class Table(QTableWidget):
         self.setVerticalHeaderLabels(self.side_headers)
 
     def fetch_domains(self) -> List[Domain]:
-        """Obtain a list of the currently chosen domains.
+        """
+        Obtain a list of the currently chosen domains.
 
         This returns a list of Domain objects, NOT a Domains object.
 
@@ -278,42 +294,9 @@ class Table(QTableWidget):
             A list of the domains that populate the domains table.
         """
         domains = []  # output list of domains
-        for domain_index in range(self.rowCount()):
-            # column 0 - left helical joint
-            left_helical_joint: int = self.cellWidget(domain_index, 0).state
-
-            # column 1 - right helical joint
-            right_helical_joint: int = self.cellWidget(domain_index, 1).state
-
-            # column 2 - theta switch multiple
-            # not needed since it can be calculated from left and right helical joints
-
-            # column 3 - theta interior multiple
-            theta_interior_multiple: int = self.cellWidget(domain_index, 3).value()
-
-            # column 4 - initial NEMid count
-            left_helix_count: int = self.cellWidget(domain_index, 4).value()
-
-            # column 4 - initial NEMid count
-            other_helix_count: int = self.cellWidget(domain_index, 5).value()
-
-            domain_index = Domain(
-                self.nucleic_acid_profile,
-                theta_interior_multiple,
-                left_helical_joint,
-                right_helical_joint,
-                (
-                    0,
-                    left_helix_count,
-                    0,
-                ),
-                (
-                    0,
-                    other_helix_count,
-                    0,
-                ),
+        for row in self.rows:
+            domains.append(
+                row.to_domain(self.nucleic_acid_profile)
             )
-
-            domains.append(domain_index)
 
         return domains

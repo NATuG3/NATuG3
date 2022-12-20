@@ -30,7 +30,7 @@ class PlotData:
     Currently plotted data.
 
     Attributes:
-        strands: The currently plotted sequencing.
+        strands: The currently plotted strands.
         mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
@@ -50,12 +50,12 @@ class PlotData:
 
 class SideViewPlotter(pg.PlotWidget):
     """
-    Side view sequencing plot widget.
+    Side view strands plot widget.
 
     Attributes:
-        strands: The sequencing to plot.
+        strands: The strands to plot.
         nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
-            sequencing to plot.
+            strands to plot.
         plot_data: Currently plotted data.
         width: The width of the plot.
         height: The height of the plot.
@@ -79,9 +79,9 @@ class SideViewPlotter(pg.PlotWidget):
         Initialize plotter instance.
 
         Args:
-            strands: The sequencing to plot.
+            strands: The strands to plot.
             nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
-                sequencing to plot.
+                strands to plot.
             mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
         """
         super().__init__()
@@ -315,7 +315,7 @@ class SideViewPlotter(pg.PlotWidget):
 
             # if this strand contains a junction then
             # round the corners of the outline for aesthetics
-            if strand.interdomain:
+            if strand.interdomain():
                 coords = zip(x_coords, z_coords)
                 coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
                 coords = list(chaikins_corner_cutting(coords, refinements=1))

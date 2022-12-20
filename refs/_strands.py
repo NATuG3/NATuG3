@@ -17,7 +17,7 @@ class _Strands:
         dump: Dump the strands into a file.
         recompute: Recompute the strands.
     """
-    filename = "saves/sequencing/restored.nano"
+    filename = "saves/strands/restored.nano"
     current: Strands
 
     def __init__(self):
@@ -29,9 +29,9 @@ class _Strands:
 
     def load(self):
         """
-        Dump the current sequencing into a file.
+        Dump the current strands into a file.
 
-        The sequencing is loaded from a pickled file from a previous dump().
+        The strands is loaded from a pickled file from a previous dump().
         """
         try:
             with open(self.filename, "rb") as file:
