@@ -1,6 +1,7 @@
 import logging
+from dataclasses import dataclass
 from types import SimpleNamespace
-from typing import List
+from typing import List, Tuple
 
 from PyQt6.QtCore import pyqtSignal, Qt, QEvent
 from PyQt6.QtGui import QKeyEvent
@@ -14,9 +15,32 @@ from PyQt6.QtWidgets import (
 from structures.domains import Domain, Domains
 from structures.profiles import NucleicAcidProfile
 from ui.widgets import DirectionalButton, TableIntegerBox
+from ui.widgets.triple_spinbox import TripleSpinbox
 
 logger = logging.getLogger(__name__)
 
+
+@dataclass(slots=True)
+class TableWidgets:
+    """
+    A container for storing table data.
+
+    Attributes:
+        theta_m_multiple: User settable theta m multiple.
+        theta_s_multiple: Automatically computed switch angle multiple.
+        left_helix_joint: User settable left helix joint direction.
+        right_helix_joint: User settable right helix joint direction.
+        left_helix_count: User settable values for the bottom, middle, and top of the
+            left helical strand.
+        right_helix_count: User settable values for the bottom, middle, and top of the
+            right helical strand.
+    """
+    theta_m_multiple: TableIntegerBox = None
+    theta_s_multiple: TableIntegerBox = None
+    left_helix_joint: DirectionalButton = None
+    right_helix_joint: DirectionalButton = None
+    left_helix_count: TripleSpinbox = None
+    other_helix_count: TripleSpinbox = None
 
 class Table(QTableWidget):
     """Nucleic Acid Config Tab."""
@@ -51,31 +75,48 @@ class Table(QTableWidget):
             Qt.Key.Key_Down,
             Qt.Key.Key_Up,
         ):
-            row, column = self.currentRow(), self.currentColumn()
-            self.cellWidget(row, column).editingFinished.emit()
-            self.cell_widget_updated.emit()
+            # Determine the row and column to highlight
+            row, column = seslf.currentRow(), self.currentColumn()
             if event.key() in (Qt.Key.Key_Tab, Qt.Key.Key_Down):
                 row += 1
             else:
                 row -= 1
             if row == len(self.rows):
                 row = 0
+
+            # Ensure that the previous widget's data is saved
+            self.cellWidget(row, column).editingFinished.emit()
+            self.cell_widget_updated.emit()
+
+            # Disable signals temporarily
             self.setTabKeyNavigation(False)
             self.blockSignals(True)
+
+            # Obtain the widget
             to_focus = self.cellWidget(row, column)
+
+            # Create a list of key press events to send
+            events = []
             if to_focus is not None:
+                # Change the table focus
                 self.setCurrentCell(row, column)
                 to_focus.setFocus()
-                for i in range(6):
-                    event = QKeyEvent(
+
+                # Simulate a control A press
+                QApplication.postEvent(
+                    to_focus,
+                    QKeyEvent(
                         QEvent.Type.KeyPress,
-                        Qt.Key.Key_Right,
-                        Qt.KeyboardModifier.NoModifier,
-                    )
-                    QApplication.postEvent(to_focus, event)
+                        Qt.Key.Key_A,
+                        Qt.KeyboardModifier.ControlModifier,
+                    ),
+                )
+
+            # Unblock signals
             self.blockSignals(False)
             self.setTabKeyNavigation(True)
         else:
+            # Otherwise use the normal keypress event
             super().keyPressEvent(event)
 
     def _headers(self):
@@ -130,7 +171,7 @@ class Table(QTableWidget):
         # insert all domains
         for index, domain in enumerate(domains.subunit.domains):
             # container for currently-being-added widgets
-            row = SimpleNamespace()
+            row = TableWidgets()
 
             # column 0 - left helical joint
             row.left_helix_joint = DirectionalButton(
@@ -154,16 +195,16 @@ class Table(QTableWidget):
             self.setCellWidget(index, 2, row.theta_s_multiple)
 
             # column 3 - theta interior multiple
-            row.theta_interior_multiple = TableIntegerBox(
+            row.theta_m_multiple = TableIntegerBox(
                 domain.theta_interior_multiple,
                 show_buttons=True,
                 minimum=1,
                 maximum=30,
             )
-            row.theta_interior_multiple.editingFinished.connect(
+            row.theta_m_multiple.editingFinished.connect(
                 self.cell_widget_updated.emit
             )
-            self.setCellWidget(index, 3, row.theta_interior_multiple)
+            self.setCellWidget(index, 3, row.theta_m_multiple)
 
             # column 4 - initial NEMid count for the left helix
             row.left_helix_count = TableIntegerBox(domain.left_helix_count[1])
@@ -219,10 +260,10 @@ class Table(QTableWidget):
                 self.cell_widget_updated.emit()
 
         for index, row in enumerate(self.rows):
-            row.theta_interior_multiple.down_button_clicked.connect(
+            row.theta_m_multiple.down_button_clicked.connect(
                 lambda i=index: smooth_interior_updating.down(i)
             )
-            row.theta_interior_multiple.up_button_clicked.connect(
+            row.theta_m_multiple.up_button_clicked.connect(
                 lambda i=index: smooth_interior_updating.up(i)
             )
 

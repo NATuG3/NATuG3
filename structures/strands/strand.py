@@ -165,7 +165,10 @@ class Strand:
                 process. If this is None the
                 domain of the right most NEMid is used by default.
         """
-        self._generate(count, domain, direction=RIGHT)
+        if count < 0:
+            self.trim(count)
+        else:
+            self._generate(count, domain, direction=RIGHT)
 
     def leftgenerate(self, count: int, domain: "Domain") -> None:
         """
@@ -182,7 +185,10 @@ class Strand:
                 process. If this is None the
                 domain of the right most NEMid is used by default.
         """
-        self._generate(count, domain, direction=LEFT)
+        if count < 0:
+            self.lefttrim(count)
+        else:
+            self._generate(count, domain, direction=LEFT)
 
     def _generate(
         self, count: int, domain: "Domain", direction: Literal[0, 1] = RIGHT
