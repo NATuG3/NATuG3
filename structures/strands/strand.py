@@ -3,7 +3,6 @@ import random
 from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
-from functools import cached_property
 from typing import Tuple, Iterable, Deque, List, ClassVar, Literal
 
 import numpy as np
@@ -46,13 +45,6 @@ class Strand:
             This is a list of all the bases of all the nucleosides in the strand.
         closed: Whether the strand is closed. Must be manually set.
         empty: Whether the strand is empty. This is equivalent to len(self) == 0.
-        up_strand: Whether all NEMids in this strand are up-NEMids.
-            Recursively checks all items in the strand.
-        down_strand: Whether all NEMids in this strand are down-NEMids.
-            Recursively checks all items in the strand
-        interdomain: Whether this strand spans multiple domains.
-            Recursively checks all items in the strand to see if any items have unique
-            domains from the other items.
         cross_screen: Whether this strand wraps across the screen.
 
     Methods:
@@ -60,12 +52,15 @@ class Strand:
         appendleft(item): Add an item to the left of the strand.
         extend(items): Extend our items to the right with an iterable's items.
         extendleft(items): Extend our items to the left with an iterable's items.
-        auto_extend(count, domain): Generate additional NEMids and Nucleosides to the
+        generate(count, domain): Generate additional NEMids and Nucleosides to the
             right side of the strand.
-        auto_leftextend(count, domain): Generate additional NEMids and Nucleosides to
+        generateleft(count, domain): Generate additional NEMids and Nucleosides to
             left side of the strand.
+        up_strand(): Whether all items in this strand are upwards pointing.
+        down_strand(): Whether all items in this strand are downwards pointing.
         NEMids(): Obtain all NEMids in the strand, only.
         nucleosides(): Obtain all nucleosides in the strand, only.
+        interdomain(): Whether there are items of differing domains in the strand.
         index(item): Determine the index of an item.
         sliced(from, to): Return self.NEMids as a list.
         clear_sequence(overwrite): Clear the sequence of the strand.
@@ -91,16 +86,10 @@ class Strand:
     auto_thickness: bool = True
     highlighted: bool = False
 
-    __cached: ClassVar[Tuple[str]] = (
-        "up_strand",
-        "down_strand",
-        "interdomain",
-        "cross_screen",
-        "nucleosides",
-    )
-
     def __post_init__(self):
         self.items = deque(self.items)
+        for item in self.items:
+            item.strand = self
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
@@ -145,10 +134,16 @@ class Strand:
     def trim(self, count: int):
         """Remove <count> number of items from the right side of the strand."""
         self.items = deque(itertools.islice(self.items, 0, count))
+        to_remove = itertools.islice(self.items, count, None)
+        for item in to_remove:
+            item.strand = None
 
     def lefttrim(self, count: int):
         """Remove <count> number of items from the left side of the strand."""
         self.items = deque(itertools.islice(self.items, count, None))
+        to_remove = itertools.islice(self.items, 0, count)
+        for item in to_remove:
+            item.strand = None
 
     def generate(self, count: int, domain: "Domain") -> None:
         """
@@ -170,7 +165,7 @@ class Strand:
         else:
             self._generate(count, domain, direction=RIGHT)
 
-    def leftgenerate(self, count: int, domain: "Domain") -> None:
+    def generateleft(self, count: int, domain: "Domain") -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
@@ -284,9 +279,14 @@ class Strand:
         else:  # direction == RIGHT:
             self.extend(new_items)
 
+    def remove(self, item: Point) -> None:
+        """Remove an item from the strand."""
+        self.items.remove(item)
+        item.strand = None
+
     def append(self, item: Point) -> None:
         """Add an item to the right of the strand."""
-        item.parent = self
+        item.strand = self
         self.items.append(item)
 
     def appendleft(self, item: Point):
@@ -296,7 +296,7 @@ class Strand:
         Args:
             item: The item to add.
         """
-        item.parent = self
+        item.strand = self
         self.items.appendleft(item)
 
     def extend(self, items: Iterable[Point]) -> None:
@@ -306,7 +306,8 @@ class Strand:
         Args:
             items: The iterable to extend with.
         """
-        self.items.extend(items)
+        for item in items:
+            self.append(item)
 
     def leftextend(self, items: Iterable[Point]) -> None:
         """
@@ -315,7 +316,8 @@ class Strand:
         Args:
             items: The iterable to extend with.
         """
-        self.items.extendleft(items)
+        for item in items:
+            self.appendleft(item)
 
     def NEMids(self) -> List[NEMid]:
         """
@@ -414,17 +416,6 @@ class Strand:
         """Return self.NEMids as a list."""
         return list(itertools.islice(self.items, start, end))
 
-    def recompute(self) -> None:
-        """Clear cached methods, and reassign juncmates, and recompute nucleosides."""
-        # clear all cache
-        for cached in self.__cached:
-            with suppress(KeyError):
-                del self.__dict__[cached]
-
-        # assign all our items to have us as their parent strand
-        for index, item in enumerate(self.items):
-            self.items[index].strand = self
-
     def touching(self, other: "Strand") -> bool:
         """
         Check whether this strand is touching a different strand.
@@ -445,19 +436,16 @@ class Strand:
         """Whether this strand is empty."""
         return len(self.items) == 0
 
-    @cached_property
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
         checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids()]
         return all(checks)
 
-    @cached_property
     def down_strand(self) -> bool:
         """Whether the strand is a down strand."""
         checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids()]
         return all(checks)
 
-    @cached_property
     def cross_screen(self) -> bool:
         """
         Whether the strand wraps across the screen.
@@ -473,10 +461,9 @@ class Strand:
                 return True
         return False
 
-    @cached_property
     def interdomain(self) -> bool:
-        """Whether all the NEMids in this strand belong to the same domain."""
-        domains = [NEMid_.domain for NEMid_ in self.NEMids()]
+        """Whether all the items in this strand belong to the same domain."""
+        domains = [item.domain for item in self.items]
 
         if len(domains) == 0:
             return False
@@ -484,9 +471,9 @@ class Strand:
         for domain in domains:
             if domain is not checker:
                 return True
+
         return False
 
-    @cached_property
     def size(self) -> Tuple[float, float]:
         """
         The overall size of the strand in nanometers.

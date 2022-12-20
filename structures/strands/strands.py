@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from functools import partial
 from typing import List, Tuple, Iterable, Literal
 
@@ -21,10 +22,10 @@ class Strands:
     A container for multiple strands.
 
     Attributes:
-        nucleic_acid_profile: The nucleic acid settings for the sequencing container.
-        strands: The actual sequencing.
-        up_strands: All up sequencing.
-        down_strands: All down sequencing.
+        nucleic_acid_profile: The nucleic acid settings for the strands container.
+        strands: The actual strands.
+        up_strands: All up strands.
+        down_strands: All down strands.
         name: The name of the strands object. Used when exporting the strands object.
         package(List[Tuple[Strand, Strand]]): A list of tuples of up and down strands
             from when the object is loaded with the from_package class method.
@@ -52,14 +53,15 @@ class Strands:
         Initialize an instance of Strands.
 
         Args:
-            nucleic_acid_profile: The nucleic acid settings for the sequencing container.
-            strands: A list of sequencing to create a Strands object from.
+            nucleic_acid_profile: The nucleic acid settings for the strands container.
+            strands: A list of strands to create a Strands object from.
             name: The name of the strands object. Used when exporting the strands object.
         """
         self.name = name
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
-        self.recompute()
+        for strand in self.strands:
+            strand.parent = self
         self.package = None
 
     @classmethod
@@ -79,7 +81,7 @@ class Strands:
         and unpacks the strands into self.strands.
 
         Args:
-            nucleic_acid_profile: The nucleic acid settings for the sequencing container.
+            nucleic_acid_profile: The nucleic acid settings for the strands container.
             package: The package to load from. This takes the form of a list of
                 tuples, where in each tuple there are two Strand objects. The first strand
                 object represents the up strand, and the second strand object represents
@@ -105,7 +107,7 @@ class Strands:
                         return True
 
     def __len__(self):
-        """Obtain the number of sequencing this Strands object contains."""
+        """Obtain the number of strands this Strands object contains."""
         return len(self.strands)
 
     def to_file(
@@ -200,18 +202,11 @@ class Strands:
 
     @property
     def up_strands(self):
-        return list(filter(lambda strand: strand.down_strand, self.strands))
+        return list(filter(lambda strand: strand.down_strand(), self.strands))
 
     @property
     def down_strands(self):
-        return list(filter(lambda strand: strand.up_strand, self.strands))
-
-    def recompute(self):
-        """Reparent and recompute sequencing."""
-        # reparent all the sequencing
-        for strand in self.strands:
-            strand.parent = self
-            strand.recompute()
+        return list(filter(lambda strand: strand.up_strand(), self.strands))
 
     def index(self, item: object) -> int:
         """Obtain the index of a given strand."""
@@ -219,42 +214,42 @@ class Strands:
 
     def append(self, strand: Strand):
         """Add a strand to the container."""
-        if not isinstance(strand, Strand):
-            raise TypeError("Cannot add non-strand to strand list.", strand)
+        strand.parent = self
         self.strands.append(strand)
 
     def remove(self, strand: Strand):
         """Remove a strand from the container."""
+        strand.parent = None
         self.strands.remove(strand)
 
     def restyle(self) -> None:
         """
-        Recompute colors for all sequencing contained within.
-        Prevents touching sequencing from sharing colors.
+        Recompute colors for all strands contained within.
+        Prevents touching strands from sharing colors.
         """
         for strand in self.strands:
             if strand.auto_thickness:
-                if strand.interdomain:
+                if strand.interdomain():
                     strand.thickness = 9.5
                 else:
                     strand.thickness = 2
             if strand.auto_color:
-                if strand.interdomain:
+                if strand.interdomain():
                     illegal_colors: List[Tuple[int, int, int]] = []
 
                     for potentially_touching in self.strands:
                         if strand.touching(potentially_touching):
                             illegal_colors.append(potentially_touching.color)
 
-                    for color in settings.colors["sequencing"]["colors"]:
+                    for color in settings.colors["strands"]["colors"]:
                         if color not in illegal_colors:
                             strand.color = color
                             break
                 else:
-                    if strand.up_strand:
-                        strand.color = settings.colors["sequencing"]["greys"][1]
-                    elif strand.down_strand:
-                        strand.color = settings.colors["sequencing"]["greys"][0]
+                    if strand.up_strand():
+                        strand.color = settings.colors["strands"]["greys"][1]
+                    elif strand.down_strand():
+                        strand.color = settings.colors["strands"]["greys"][0]
                     else:
                         raise ValueError(
                             "Strand should all be up/down if it is single-domain."
@@ -427,8 +422,10 @@ class Strands:
             if not new_strand.empty:
                 self.append(new_strand)
 
-        # recompute the new sequencing
-        [new_strand.recompute() for new_strand in new_strands]
+        # parent the items in the strands
+        for new_strand in new_strands:
+            for item in new_strand.items:
+                item.strand = new_strand
 
         # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
         # then mark NEMid1 as not-a-junction
@@ -443,12 +440,11 @@ class Strands:
         NEMid2.juncmate = NEMid1
 
         self.restyle()
-        self.recompute()
 
     @property
     def size(self) -> Tuple[float, float]:
         """
-        Obtain the size of all sequencing when laid out.
+        Obtain the size of all strands when laid out.
 
         Returns:
             tuple(width, height)
@@ -457,10 +453,8 @@ class Strands:
         z_coords: List[float] = []
 
         for strand in self.strands:
-            strand: Strand
-            for NEMid_ in strand.items:
-                NEMid_: NEMid
-                x_coords.append(NEMid_.x_coord)
-                z_coords.append(NEMid_.z_coord)
+            for item in strand.items:
+                x_coords.append(item.x_coord)
+                z_coords.append(item.z_coord)
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
