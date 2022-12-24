@@ -21,7 +21,7 @@ class _NucleicAcid:
     """
     class filenames:
         profiles = f"saves/nucleic_acid"
-        restored = f"saves/nucleic_acid/restored.json"
+        restored = f"saves/nucleic_acid/Restored.json"
 
     defaults = {
         "MFD B-DNA": NucleicAcidProfile(
