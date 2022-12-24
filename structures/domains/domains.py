@@ -141,20 +141,20 @@ class Domains:
         right_helix_joints = [
             "UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains
         ]
-        m = [domain.theta_m_multiple for domain in domains]
+        theta_m_multiples = [domain.theta_m_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
         left_helix_count = [
-            ";".join(map(str, domain.left_helix_count)) for domain in domains
+            "-".join(map(str, domain.left_helix_count)) for domain in domains
         ]
         other_helix_count = [
-            ";".join(map(str, domain.other_helix_count)) for domain in domains
+            "-".join(map(str, domain.other_helix_count)) for domain in domains
         ]
 
         # create a pandas dataframe with the columns above
         data = pd.DataFrame(
             {
-                "m": m,
+                "m": theta_m_multiples,
                 "Left Helix Joints": left_helix_joints,
                 "Right Helix Joints": right_helix_joints,
                 "Left Helix Count": left_helix_count,
@@ -207,11 +207,11 @@ class Domains:
         ]
         m = [int(m) for m in data["m"].to_list()]
         left_helix_count = [
-            tuple(map(int, count.split(";")))
+            tuple(map(int, count.split("-")))
             for count in data["Left Helix Count"].to_list()
         ]
         other_helix_count = [
-            tuple(map(int, count.split(";")))
+            tuple(map(int, count.split("-")))
             for count in data["Other Helix Count"].to_list()
         ]
         symmetry = int(data["Symmetry"].to_list()[0])
@@ -226,7 +226,7 @@ class Domains:
                     theta_m_multiple=m[i],
                     left_helix_joint=left_helix_joints[i],
                     right_helix_joint=right_helix_joints[i],
-                    left_helix_count=left_helix_count[i],
+                    left_helix_count=(left_helix_count[i]),
                     other_helix_count=other_helix_count[i],
                 )
             )
