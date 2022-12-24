@@ -10,7 +10,8 @@ class DirectionalButton(QPushButton):
     """
     A button to choose between UP or DOWN.
 
-    The button always displays an up or down arrow, and clicking it alternates between the two.
+    The button always displays an up or down arrow, and clicking it alternates
+    between the two.
 
     Attributes:
         state (int): The state of the button. Either UP or DOWN. 0 for UP 1 for DOWN.
@@ -22,7 +23,10 @@ class DirectionalButton(QPushButton):
         self.state = state
 
         self.setStyleSheet(
-            "QPushButton{border: 2px solid rgb(220, 220, 220); border-radius: 5px; text-align: center}"
+            "QPushButton{"
+            "border: 2px solid rgb(220, 220, 220);"
+            " border-radius: 5px; text-align: center"
+            "}"
         )
         self.setFlat(True)
         self.setFixedWidth(25)

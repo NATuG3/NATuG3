@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import (
 
 import refs
 import settings
+import utils
 from structures.domains import Domains
 from ui.config.tabs.domains.table import Table
 from ui.resources import fetch_icon
@@ -25,8 +26,9 @@ class DomainsPanel(QWidget):
     Nucleic Acid Config Tab.
 
     Signals:
-        updated: Emitted when the panel is updated. Emits a function which would do the proper updating. No updating is
-            actually done in this class, rather it is someone else's job to call that function.
+        updated: Emitted when the panel is updated. Emits a function which would do the
+            proper updating. No updating is actually done in this class, rather it is
+            someone else's job to call that function.
     """
 
     updated = pyqtSignal(object)
@@ -121,9 +123,7 @@ class DomainsPanel(QWidget):
                 logger.info(
                     f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}"
                 )
-                refs.domains.current.to_file(
-                    filepath=filepath
-                )
+                refs.domains.current.to_file(filepath=filepath)
 
         self.save_domains_button.clicked.connect(save_domains)
 
@@ -146,10 +146,6 @@ class DomainsPanel(QWidget):
                     self._setup()
                     QApplication.processEvents()
                     refs.constructor.config.panel.update_graphs.click()
-                    logger.info(
-                        "Importing domains from file.\nNew domains: %s",
-                        refs.domains.current,
-                    )
 
                 self.updated.emit(loader)
 
@@ -175,7 +171,7 @@ class DomainsPanel(QWidget):
         # https://github.com/404Wolf/NATuG3/issues/4
         current_domains = refs.domains.current
         M: int = sum(
-            [domain.theta_interior_multiple for domain in current_domains.domains()]
+            [domain.theta_m_multiple for domain in current_domains.domains()]
         )
         N: int = current_domains.count
         B: int = refs.nucleic_acid.current.B
@@ -226,7 +222,7 @@ class DomainsPanel(QWidget):
         # (if that is what they are attempting to do)
         if self.subunit_count.value() < refs.domains.current.subunit.count:
             # helpers.confirm will return a bool
-            confirmation: bool = helpers.confirm(
+            confirmation: bool = utils.confirm(
                 self.parent(),
                 "Subunit Count Reduction",
                 f"The prospective subunit count ({self.subunit_count.value()}) is lower than the number of domains in "
@@ -254,7 +250,7 @@ class DomainsPanel(QWidget):
             new_domains.symmetry = self.symmetry.value()
 
         # update current domains
-        refs.domains.current = new_domains
+        refs.domains.current.update(new_domains)
 
         # refresh table
         self.table.dump_domains(refs.domains.current)

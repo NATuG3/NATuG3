@@ -10,7 +10,8 @@ class NEMid(Point):
     NEMid object.
 
     Attributes:
-        juncmate: NEMid that can this NEMid can conjunct-with. NoneType if this no NEMid overlaps.
+        juncmate: NEMid that can this NEMid can conjunct-with. NoneType if this no
+            NEMid overlaps.
         junction: Whether this NEMid is at the site of an active junction.
         junctable: Whether this NEMid overlaps another NEMid and can thus can conjunct.
     """

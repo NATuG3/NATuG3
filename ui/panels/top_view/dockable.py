@@ -42,9 +42,9 @@ class Dockable(QDockWidget):
 
         # set up the plot
         self.plot = ui.plotters.TopViewPlotter(
-            refs.domains.current.top_view(),
-            refs.domains.current,
-            refs.nucleic_acid.current.D,
+            domains=refs.domains.current,
+            domain_radius=refs.nucleic_acid.current.D,
+            rotation=0
         )
 
         self.plot.point_clicked.connect(self.point_clicked)
@@ -67,8 +67,6 @@ class Dockable(QDockWidget):
 
         This updates the plot with the current domains, nucleic acid settings, and rotation.
         """
-        self.plot.worker = refs.domains.current.top_view()
-        self.plot.nucleic_acid_profile = refs.nucleic_acid.current
         self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()
         self.plot.autoRange()

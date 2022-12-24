@@ -30,7 +30,7 @@ class Panel(QWidget):
     Attributes:
         nucleic_acid (NucleicAcidPanel): The nucleic acid tab.
         domains (DomainsPanel): The domains tab.
-        sequencing (SequencingPanel): The sequencing tab.
+        sequencing (SequencingPanel): The strands tab.
     """
 
     def __init__(
@@ -61,7 +61,7 @@ class Panel(QWidget):
         self.domains_tab.setLayout(QVBoxLayout())
         self.domains_tab.layout().addWidget(self.domains)
 
-        # set the sequencing tab
+        # set the strands tab
         self.sequencing_tab.setLayout(QVBoxLayout())
         self.sequencing_tab.layout().addWidget(self.sequencing)
 
@@ -71,10 +71,10 @@ class Panel(QWidget):
         def warn_and_refresh(top_view, side_view, function):
             """Warn user if there are changes that will be lost and then update plots."""
             global dialog
-            # determine if there are any sequencing that the user has made
+            # determine if there are any strands that the user has made
             # (if there are not then we do not need to warn the user)
             for strand in refs.strands.current.strands:
-                if strand.interdomain:
+                if strand.interdomain():
                     if (dialog is None) or (not dialog.isVisible()):
                         dialog = RefreshConfirmer(refs.constructor, function)
                         dialog.show()
@@ -110,7 +110,18 @@ class Panel(QWidget):
         self.nucleic_acid.updated.connect(tab_updated)
 
         def tab_changed(index: int):
-            """Update the plotting mode based on the currently opened tab."""
+            """
+            Update the plotting mode based on the currently opened tab.
+
+            Args:
+                index (int): The index of the tab that is currently open (the tab
+                    that has been changed to).
+
+            Performs the following actions:
+                1) Updates the plotting mode and the enabled status of the buttons in
+                    the toolbar.
+            """
+            # First set the toolbar and current plotting mode
             if index in (
                 NUCLEIC_ACID,
                 DOMAINS,
@@ -139,12 +150,13 @@ class Panel(QWidget):
 
 class RefreshConfirmer(QDialog):
     """
-    A dialog that warns the user that they will lose any changes they have made if they continue, and gives them the
-    option to either save their changes or continue without saving or abort.
+    A dialog that warns the user that they will lose any changes they have made if
+    they continue, and gives them the option to either save their changes or continue
+    without saving or abort.
 
     Attributes:
-        function: Function to execute if the user confirms that they would like to proceed (whether with or without
-            saving).
+        function: Function to execute if the user confirms that they would like to
+            proceed (whether with or without saving).
     """
 
     def __init__(self, parent, function):
@@ -176,8 +188,9 @@ class RefreshConfirmer(QDialog):
         for filename in os.listdir(f"{os.getcwd()}/saves"):
             if timestamp in filename:
                 with suppress(ValueError):
-                    # if we find a save that contains a timestamp, see if it has a # at the end of it
-                    # and if it does than append that number to the counter list
+                    # if we find a save that contains a timestamp, see if it has a #
+                    # at the end of it and if it does than append that number to the
+                    # counter list
                     counter.append(
                         int(filename[filename.find("_") + 1 :].replace(".nano", ""))
                     )

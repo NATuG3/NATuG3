@@ -6,8 +6,7 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QMenuBar,
     QWidget,
-    QTabWidget,
-)
+    QTabWidget, )
 
 import refs
 import settings
@@ -150,10 +149,11 @@ class Window(QMainWindow):
             self.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
 
         # config resizing...
-        # if config is floating make the max size very large and make the tab area go on top
+        # if config is floating make the max size very large and make the tab area go
+        # on top
         if self.config.isFloating():
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.North)
-            self.config.setMaximumWidth(600)
+            self.config.setMaximumWidth(400)
         # otherwise check the current tab of the config panel and adjust accordingly
         # and make the tab area go on the right
         else:
@@ -161,6 +161,7 @@ class Window(QMainWindow):
             if self.config.panel.sequencing.isVisible():
                 self.config.setFixedWidth(255)
             elif self.config.panel.domains.isVisible():
-                self.config.setFixedWidth(300)
+                self.config.setFixedWidth(420)
+                self.config.setFloating(True)
             elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

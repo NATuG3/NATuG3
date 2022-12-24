@@ -45,7 +45,8 @@ class NucleicAcidProfile:
         """
         Update our nucleic_acid_profile with theirs.
 
-        Updates all of our attributes with the attributes of the given nucleic_acid_profile.
+        Updates all of our attributes with the attributes of the given
+        nucleic_acid_profile.
 
         This is useful for updating profiles in-place.
         """

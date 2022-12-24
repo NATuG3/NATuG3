@@ -53,9 +53,9 @@ class StrandConfig(QDialog):
         self.thickness.setValue(thickness)
 
     def _sequencing(self):
-        """Set up the sequencing area."""
+        """Set up the strands area."""
 
-        # add the sequencing display area
+        # add the strands display area
         self.sequence_display = SequenceDisplayArea(None, self.strand.sequence)
         self.sequencing_area.layout().insertWidget(0, self.sequence_display)
 
@@ -81,9 +81,10 @@ class StrandConfig(QDialog):
                 QBrush(QColor(*self.strand.color))
             )
 
-        # strand color could change for many reasons other than them using the color selector
-        # so for ease we will just automatically update the preview box every .1 seconds with
-        # the current strand color (this is an unideal solution, but it works perfectly fine)
+        # strand color could change for many reasons other than them using the color
+        # selector so for ease we will just automatically update the preview box
+        # every .1 seconds with the current strand color (this is an unideal
+        # solution, but it works perfectly fine)
         update_color_preview()
         update_color_looper = QTimer(self)
         update_color_looper.timeout.connect(update_color_preview)

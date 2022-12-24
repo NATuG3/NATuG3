@@ -24,7 +24,7 @@ def worker(filepath):
 
     # update the current domains array
     assert isinstance(refs.domains.current, Domains)
-    refs.domains.current = package.domains
+    refs.domains.current.update(package.domains)
     refs.strands.current = package.strands
 
     # update all domains settings/dump domains
