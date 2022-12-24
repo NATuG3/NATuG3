@@ -385,7 +385,7 @@ class Strands:
                 )
 
                 new_strands[0].closed = False
-                new_strands[1].closed = None
+                new_strands[1].closed = False
 
             # if both of the NEMids have closed sequencing
             elif NEMid1.strand.closed and NEMid2.strand.closed:

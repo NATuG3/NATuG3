@@ -10,8 +10,8 @@ class Subunit:
     """
     A domain subunit. Contains all the domains for a given subunit.
 
-    The parent of a Subunit is a Domains object. There is thorough integration with the parenting
-    of subunits, domains, domain.
+    The parent of a Subunit is a Domains object. There is thorough integration with the
+    parenting of subunits, domains, domain.
 
     Notes:
         - If this is a template subunit then it is frozen and immutable.
@@ -89,7 +89,8 @@ class Subunit:
         Obtain a copy of a subunit object.
 
         Returns:
-            A brand-new subunit object with brand-new domain objects (which are identical copies).
+            A brand-new subunit object with brand-new domain objects
+            (which are identical copies).
         """
         return Subunit(
             self.nucleic_acid_profile,
@@ -113,9 +114,9 @@ class Subunit:
         """
         Change the number of domains in the subunit.
 
-        * When the count is increased new domains are added with alternating helix joints but
-        with the same settings. Looks at the right helix joint of the last domain to begin the
-        oscillation of parallel-ness.
+        * When the count is increased new domains are added with alternating helix
+            joints but with the same settings. Looks at the right helix joint of the last
+            domain to begin the oscillation of parallel-ness.
         * When the count is decreased domains are trimmed off of the end of the subunit.
 
         Args:
@@ -123,27 +124,28 @@ class Subunit:
                 The number of domains changes based off the difference between this
                 and the previous count.
         """
-        # we couldn't import domains before because it was partially initialized
-        # but we can now (and we will need it if the count increases to make new domains)
+        # we couldn't import domains before because it was partially initialized but
+        # we can now (and we will need it if the count increases to make new domains)
         from structures.domains import Domain
 
         # if the subunit count has decreased then trim off extra domains
         if new < self.count:
             self.domains = self.domains[:new]
-        # if the subunit count has increased then add placeholder domains based on last domain in domain list
+        # if the subunit count has increased then add placeholder domains based on
+        # last domain in domain list
         else:
             i = 0
             while self.count < new:
                 previous_domain = self.domains[-1]
-                # the new template domains will be of altering strand directions with assumed
-                # strand switches of 0
+                # the new template domains will be of altering strand directions with
+                # assumed strand switches of 0
                 self.domains.append(
                     Domain(
                         self.nucleic_acid_profile,
                         previous_domain.theta_interior_multiple,
                         inverse(previous_domain.right_helix_joint),
                         inverse(previous_domain.right_helix_joint),
-                        previous_domain.count,
+                        previous_domain.index,
                         parent=self,
                     )
                 )
