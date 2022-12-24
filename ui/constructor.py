@@ -6,8 +6,7 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QMenuBar,
     QWidget,
-    QTabWidget,
-)
+    QTabWidget, )
 
 import refs
 import settings

@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Tuple, Type, Deque, List
+from typing import Tuple, Type, List
 
 from constants.directions import DOWN, UP
 from utils import inverse

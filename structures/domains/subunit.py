@@ -1,4 +1,3 @@
-from contextlib import suppress
 from copy import copy
 from typing import Iterable, List
 

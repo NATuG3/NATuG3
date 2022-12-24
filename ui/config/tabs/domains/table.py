@@ -1,7 +1,6 @@
 import logging
 from dataclasses import dataclass
-from types import SimpleNamespace
-from typing import List, Tuple
+from typing import List
 
 from PyQt6.QtCore import pyqtSignal, Qt, QEvent
 from PyQt6.QtGui import QKeyEvent

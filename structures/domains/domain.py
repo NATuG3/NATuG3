@@ -1,5 +1,4 @@
-import itertools
-from typing import List, Tuple
+from typing import Tuple
 
 from constants.directions import *
 from structures.points.point import Point

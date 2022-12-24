@@ -110,7 +110,18 @@ class Panel(QWidget):
         self.nucleic_acid.updated.connect(tab_updated)
 
         def tab_changed(index: int):
-            """Update the plotting mode based on the currently opened tab."""
+            """
+            Update the plotting mode based on the currently opened tab.
+
+            Args:
+                index (int): The index of the tab that is currently open (the tab
+                    that has been changed to).
+
+            Performs the following actions:
+                1) Updates the plotting mode and the enabled status of the buttons in
+                    the toolbar.
+            """
+            # First set the toolbar and current plotting mode
             if index in (
                 NUCLEIC_ACID,
                 DOMAINS,
