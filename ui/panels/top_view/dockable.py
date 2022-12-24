@@ -81,7 +81,6 @@ class Dockable(QDockWidget):
         Args:
             domain: The index of the domain that was clicked.
         """
-        print(domain)
         # create the new active x-range for the plot
         range = domain - 1, domain + 2
 
