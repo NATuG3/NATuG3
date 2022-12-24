@@ -142,10 +142,11 @@ class Subunit:
                 self.domains.append(
                     Domain(
                         self.nucleic_acid_profile,
-                        previous_domain.theta_interior_multiple,
-                        inverse(previous_domain.right_helix_joint),
-                        inverse(previous_domain.right_helix_joint),
-                        previous_domain.index,
+                        theta_m_multiple=previous_domain.theta_m_multiple,
+                        left_helix_joint=inverse(previous_domain.right_helix_joint),
+                        right_helix_joint=inverse(previous_domain.right_helix_joint),
+                        left_helix_count=previous_domain.left_helix_count,
+                        other_helix_count=previous_domain.other_helix_count,
                         parent=self,
                     )
                 )
