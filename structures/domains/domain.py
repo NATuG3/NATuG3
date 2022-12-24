@@ -102,7 +102,7 @@ class Domain:
         self.nucleic_acid_profile = nucleic_acid_profile
 
         # multiple of the characteristic angle (theta_c) for the interior angle
-        self.theta_interior_multiple: int = theta_m_multiple
+        self.theta_m_multiple: int = theta_m_multiple
 
         # the helical joints
         self.left_helix_joint = left_helix_joint
@@ -228,15 +228,15 @@ class Domain:
         """
         Obtain the theta interior angle.
 
-        This is equivalent to self.theta_interior_multiple * self.theta_c.
+        This is equivalent to self.theta_m_multiple * self.theta_c.
         """
-        return self.theta_interior_multiple * self.nucleic_acid_profile.theta_c
+        return self.theta_m_multiple * self.nucleic_acid_profile.theta_c
 
     def __repr__(self):
         """Return a string representation of the Domain object."""
         return (
             f"Domain("
-            f"m={self.theta_interior_multiple}, "
+            f"m={self.theta_m_multiple}, "
             f"left_joint={self.left_helix_joint}, "
             f"right_joint={self.right_helix_joint}, "
             f"left_count={self.left_helix_count}, "

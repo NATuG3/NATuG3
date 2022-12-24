@@ -171,7 +171,7 @@ class DomainsPanel(QWidget):
         # https://github.com/404Wolf/NATuG3/issues/4
         current_domains = refs.domains.current
         M: int = sum(
-            [domain.theta_interior_multiple for domain in current_domains.domains()]
+            [domain.theta_m_multiple for domain in current_domains.domains()]
         )
         N: int = current_domains.count
         B: int = refs.nucleic_acid.current.B

@@ -209,7 +209,7 @@ class Table(QTableWidget):
 
             # column 3 - theta interior multiple
             row.theta_m_multiple = TableIntegerBox(
-                domain.theta_interior_multiple,
+                domain.theta_m_multiple,
                 show_buttons=True,
                 minimum=1,
                 maximum=30,
@@ -249,9 +249,9 @@ class Table(QTableWidget):
                     surrounding = (i - 1, i, i + 1)
 
                 surrounding = [
-                    self.rows[surrounding[0]].theta_interior_multiple,
-                    self.rows[surrounding[1]].theta_interior_multiple,
-                    self.rows[surrounding[2]].theta_interior_multiple,
+                    self.rows[surrounding[0]].theta_m_multiple,
+                    self.rows[surrounding[1]].theta_m_multiple,
+                    self.rows[surrounding[2]].theta_m_multiple,
                 ]
 
                 return surrounding
