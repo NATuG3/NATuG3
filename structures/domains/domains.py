@@ -38,13 +38,14 @@ class Domains:
         antiparallel: Whether the domains are forced to have alternating upness/downness.
 
     Methods:
-        strands()
-        top_view()
-        domains()
-        subunits()
-        update()
-        to_file()
-        from_file()
+        strands(): Returns a Strands object containing all the strands in the domains.
+        top_view(): Obtain a set of coords for the centers of all the double helices.
+        domains(): Returns a list of all domains.
+        subunits(): Returns a list of subunits.
+        closed(): Whether the tube is closed or not.
+        update(): Update the domains object in place.
+        to_file(): Write the domains to a file.
+        from_file(): Load a domains object from a file.
     """
 
     def __init__(
@@ -140,7 +141,7 @@ class Domains:
         right_helix_joints = [
             "UP" if domain.right_helix_joint == UP else "DOWN" for domain in domains
         ]
-        m = [domain.theta_interior_multiple for domain in domains]
+        m = [domain.theta_m_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
         left_helix_count = [
@@ -268,7 +269,7 @@ class Domains:
             theta_s: float = domains[index - 1].theta_s_multiple * theta_s
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                domains[index - 1].theta_interior_multiple * theta_c
+                domains[index - 1].theta_m_multiple * theta_c
             )
 
             # calculate the actual interior angle (with strand switching angle factored in)
@@ -295,6 +296,21 @@ class Domains:
         )
 
         return list(zip(u_coords, v_coords))
+
+    def closed(self):
+        """
+        Whether the Domains object is closed.
+
+        This method determines if the (u, v) top view coordinate of the first domain
+        is the same as the last domain. If they are the same then this is a closed
+        DNA nanotube.
+
+        Note that a threshold of settings.close_threshold is in case of real number
+        errors. This just means that there is a small tolerance for a gap between the
+        first and last domain's top view coord.
+        """
+        coords = self.top_view()
+        return math.dist(coords[0], coords[-1]) < settings.closed_threshold
 
     @property
     def subunit(self) -> Subunit:
@@ -628,16 +644,9 @@ class Domains:
 
             for item1 in current_zeroed_strand.items:
                 for item2 in next_zeroed_strand.items:
-                    # Perform a preliminary z coord check since dist() is much more
-                    # computationally intensive, and it is best to avoid it if possible
-                    if abs(item1.z_coord - item2.z_coord) > settings.junction_threshold:
-                        continue
-                    # Check the distance between the two points to determine
-                    # junctability.
-                    if (
-                        math.dist(item1.position(), item2.position())
-                        < settings.junction_threshold
-                    ):
+
+                    def junct():
+                        """Assign junctability and juncmates to the items."""
                         # Set junctability
                         item1.junctable = True
                         item2.junctable = True
@@ -645,6 +654,18 @@ class Domains:
                         # Set juncmates
                         item1.juncmate = item2
                         item2.juncmate = item1
+
+                    # Perform a preliminary z coord check since dist() is much more
+                    # computationally intensive, and it is best to avoid it if possible
+                    if abs(item1.z_coord - item2.z_coord) > settings.junction_threshold:
+                        continue
+                    elif (
+                        (x_dist := abs(item1.x_coord - item2.x_coord))
+                        > len(domains) - 0.1 and self.closed()
+                    ):
+                        junct()
+                    elif x_dist < settings.junction_threshold:
+                        junct()
 
         # Load the strands into a Strands package
         strands = Strands.from_package(self.nucleic_acid_profile, strands)
