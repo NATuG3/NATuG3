@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass, field
+from functools import partial
 from math import cos, radians, sin
 from typing import List
 
@@ -34,6 +35,27 @@ class PlotData:
     plotted_stroke: pg.PlotDataItem = None
     plotted_numbers: List[pg.PlotDataItem] = None
 
+    def coords(self, round_to=None):
+        """
+        Obtain a list of all the currently plotted coords as a zip of x and y coords.
+
+        Args:
+            round_to: The number of decimal places to round the coords to. If None, no
+            rounding is performed.
+
+        Returns:
+            List of plotted coordinates. Each coordinate is a tuple of the form (x, y).
+        """
+        if round_to is None:
+            return list(zip(self.x_coords, self.y_coords))
+        else:
+            return list(
+                zip(
+                    [round(coord, round_to) for coord in self.x_coords],
+                    [round(coord, round_to) for coord in self.y_coords],
+                )
+            )
+
 
 class TopViewPlotter(pg.PlotWidget):
     """
@@ -49,8 +71,11 @@ class TopViewPlotter(pg.PlotWidget):
     Signals:
         point_clicked(a tuple of the points that were clicked): Emitted when a point
             is clicked.
+        domain_clicked(the index of the domain that was clicked): Emitted when a domain
+            is clicked.
     """
 
+    domain_clicked = pyqtSignal(int)
     point_clicked = pyqtSignal(tuple)
 
     def __init__(
@@ -85,9 +110,6 @@ class TopViewPlotter(pg.PlotWidget):
     def _point_clicked(self, event, points: List[pg.ScatterPlotItem]):
         """Slot for when points are clicked."""
         point = points[0].pos()
-        assert self.worker.u_coords.index(point[0]) == self.worker.v_coords.index(
-            point[1]
-        )
         self.point_clicked.emit(tuple(point))
 
     def refresh(self):
@@ -189,21 +211,32 @@ class TopViewPlotter(pg.PlotWidget):
         """
         self.plot_data.plotted_numbers = []
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
-            counter = str(counter)
             symbol_size = self.circle_radius / 3
-            symbol_size *= 1 + (0.255 * (len(counter) - 1))
-            counter = f"#{counter}"
+            symbol_size *= 1 + (0.255 * (len(str(counter)) - 1))
 
+            # Plot the number
             text = self.plot(
-                [position[0]],
-                [position[1]],
-                symbol=plotters.utils.custom_symbol(counter),
-                symbolBrush=pg.mkBrush(
+                [position[0]],  # x coord
+                [position[1]],  # y coord
+                symbol=plotters.utils.custom_symbol(f"#{counter}"),  # symbol
+                symbolBrush=pg.mkBrush(  # symbol color
                     color=settings.colors["domains"]["plotted_numbers"]
                 ),
-                symbolSize=symbol_size,
-                pxMode=False,
-                pen=None,
+                symbolSize=symbol_size,  # symbol size
+                pxMode=False,  # whether to dynamically scale the symbol
+                pen=None,  # pen for interpoint lines. We are plotting just one
+                # point at a time, so this can be set to None.
             )
+
+            # Emit a domain_clicked signal when the user clicks a number, since the
+            # numbers are the centers of domains and if they click the number it
+            # means they also clicked the domain.
+            text.sigPointsClicked.connect(
+                lambda *args, index=counter: self.domain_clicked.emit(index)
+            )
+            # Emit a point_clicked signal when the user clicks a number too. This
+            # emits the coordinates of the plotted number graphic that was clicked.
             text.sigPointsClicked.connect(self._point_clicked)
+
+            # Add the text to the plot data.
             self.plot_data.plotted_numbers.append(text)

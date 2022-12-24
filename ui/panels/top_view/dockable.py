@@ -47,7 +47,7 @@ class Dockable(QDockWidget):
             rotation=0
         )
 
-        self.plot.point_clicked.connect(self.point_clicked)
+        self.plot.domain_clicked.connect(self._domain_clicked)
         self.body.layout().addWidget(self.plot)
 
         # set up rotation slider
@@ -71,30 +71,19 @@ class Dockable(QDockWidget):
         self.plot.refresh()
         self.plot.autoRange()
 
-    def point_clicked(self, point: Tuple[float, float]):
+    def _domain_clicked(self, domain: int):
         """
-        Signal for when a point in the plot is clicked.
+        Slot for when a point in the plot is clicked.
 
-        This method either zooms the side view in on the domain that was clicked, or restores the autofocus of the plot
-        if the domain is already zoomed in on.
-
-        This method requires the top view plot to be computed, since it handles the point click by indexing the clicked
-        points against the points that are plotted.
+        This method either zooms the side view in on the domain that was clicked,
+        or restores the autofocus of the plot if the domain is already zoomed in on.
 
         Args:
-            point: The coordinates of the point that was clicked. This should take the form of (x-coord, y-coord) where
-                the x and y coords are floats.
+            domain: The index of the domain that was clicked.
         """
-        # ensure that the point passed is of the proper form
-        assert (
-            len(point) == 2
-            and isinstance(point[0], float)
-            and isinstance(point[1], float)
-        )
-
+        print(domain)
         # create the new active x-range for the plot
-        range = self.plot.worker.u_coords.index(point[0])
-        range = range - 1, range + 2
+        range = domain - 1, domain + 2
 
         # store the previous range of the ui
         previous = refs.constructor.side_view.plot.visibleRange()
