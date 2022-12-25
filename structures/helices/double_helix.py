@@ -1,4 +1,4 @@
-from structures.domains import Domain
+from constants.directions import DOWN, UP
 from structures.strands import Strand
 from utils import inverse
 
@@ -27,7 +27,7 @@ class DoubleHelix:
 
     def __init__(
         self,
-        domain: Domain,
+        domain: "Domain",
         up_helix: Strand | None = None,
         down_helix: Strand | None = None,
     ) -> None:
@@ -46,6 +46,10 @@ class DoubleHelix:
             up_helix if up_helix is not None else Strand(),
             down_helix if down_helix is not None else Strand(),
         )
+
+    def __getitem__(self, item):
+        if item in (DOWN, UP):
+            return self.strands[item]
 
     @property
     def left_helix(self) -> Strand:
