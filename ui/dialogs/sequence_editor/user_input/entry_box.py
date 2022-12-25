@@ -120,7 +120,7 @@ class InfoArea(QLineEdit):
     def __init__(self, parent):
         super().__init__(parent)
         self.setStyleSheet(
-             """QLineEdit{
+            """QLineEdit{
                     border-radius: 2px
                 }
                 QLineEdit::disabled{

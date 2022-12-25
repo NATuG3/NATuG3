@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass, field
-from functools import partial
 from math import cos, radians, sin
 from typing import List
 

@@ -87,16 +87,12 @@ class Point:
             strands = self.strand.parent.package
 
             # obtain the helix that we are contained in
-            our_helix: "Strand" = strands[self.domain.index][
-                self.direction
-            ]
+            our_helix: "Strand" = strands[self.domain.index][self.direction]
             # determine our index in our helix
             our_index = our_helix.index(self)
 
             # obtain the other helix of our domain
-            other_helix: "Strand" = strands[self.domain.index][
-                inverse(self.direction)
-            ]
+            other_helix: "Strand" = strands[self.domain.index][inverse(self.direction)]
             # since the other strand in our domain is going in the other direction,
             # we reverse the other helix
             other_helix: Tuple[Point] = tuple(reversed(other_helix.items))

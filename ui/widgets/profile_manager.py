@@ -114,7 +114,7 @@ class ProfileManager(QGroupBox):
 
     def approve(self) -> bool:
         """Present the user with a popup stating self.warning. If user approves
-        request, return True. """
+        request, return True."""
         if self.warning is not None:
             if not utils.confirm(
                 self.parent(), "Profile Manager Warning", self.warning
@@ -246,21 +246,21 @@ class ProfileManager(QGroupBox):
                 )
                 self.load_profile_button.setEnabled(False)
                 self.load_profile_button.setStatusTip(
-                    f'Current settings match saved settings of profiles named '
+                    f"Current settings match saved settings of profiles named "
                     f'"{chosen_profile_name}."'
                 )
 
                 self.save_profile_button.setEnabled(False)
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
-                    f'Current settings match saved settings of profiles named '
+                    f"Current settings match saved settings of profiles named "
                     f'"{chosen_profile_name}.".'
                 )
 
                 self.delete_profile_button.setEnabled(True)
                 self.delete_profile_button.setStatusTip(
                     f'Delete the profiles named "{chosen_profile_name}." This action '
-                    f'is irreversible. '
+                    f"is irreversible. "
                 )
             # if the chosen profiles name is not in
             else:
@@ -279,13 +279,13 @@ class ProfileManager(QGroupBox):
                 self.save_profile_button.setToolTip("Overwrite Profile")
                 self.save_profile_button.setStatusTip(
                     f'Overwrite profiles named "{chosen_profile_name}" with current '
-                    f'settings. '
+                    f"settings. "
                 )
 
                 self.delete_profile_button.setEnabled(True)
                 self.delete_profile_button.setStatusTip(
                     f'Delete the profiles named "{chosen_profile_name}." This action '
-                    f'is irreversible. '
+                    f"is irreversible. "
                 )
 
             # no matter what, do not let the user alter default profiles
@@ -303,13 +303,13 @@ class ProfileManager(QGroupBox):
                 self.save_profile_button.setToolTip("Save Profile")
                 self.save_profile_button.setStatusTip(
                     f'Cannot alter a default profiles. "{chosen_profile_name}." is a '
-                    f'default profile. '
+                    f"default profile. "
                 )
 
                 self.delete_profile_button.setEnabled(False)
                 self.delete_profile_button.setStatusTip(
                     f'Cannot delete a default profiles. "{chosen_profile_name}." is a '
-                    f'default profile. '
+                    f"default profile. "
                 )
 
         # the chosen profiles name is a brand-new profiles name (that has not already
@@ -318,7 +318,7 @@ class ProfileManager(QGroupBox):
             self.load_profile_button.setEnabled(False)
             self.load_profile_button.setStatusTip(
                 f'No saved profiles is named "{chosen_profile_name}." Cannot load a '
-                f'profiles that does not exist. '
+                f"profiles that does not exist. "
             )
 
             self.save_profile_button.setEnabled(True)
@@ -330,7 +330,7 @@ class ProfileManager(QGroupBox):
             self.delete_profile_button.setEnabled(False)
             self.delete_profile_button.setStatusTip(
                 f'No saved profiles is named "{chosen_profile_name}." Cannot delete a '
-                f'profiles that does not exist. '
+                f"profiles that does not exist. "
             )
 
         # No matter what we cannot save a profiles with a blank name

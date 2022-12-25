@@ -34,6 +34,7 @@ class TableWidgets:
         right_helix_count: User settable values for the bottom, middle, and top of the
             right helical strand.
     """
+
     theta_m_multiple: TableIntegerBox = None
     theta_s_multiple: TableIntegerBox = None
     left_helix_joint: DirectionalButton = None
@@ -49,8 +50,9 @@ class TableWidgets:
             left_helix_joint=self.left_helix_joint.state,
             right_helix_joint=self.right_helix_joint.state,
             left_helix_count=self.left_helix_count.values(),
-            other_helix_count=self.other_helix_count.values()
+            other_helix_count=self.other_helix_count.values(),
         )
+
 
 class Table(QTableWidget):
     """Nucleic Acid Config Tab."""
@@ -132,8 +134,14 @@ class Table(QTableWidget):
     def _headers(self):
         """Configure top headers of widget"""
         # store headers (these do not change)
-        self.top_headers = ("L-Joint", "R-Joint", "s", "m", "Left Count",
-                            "Other Count",)
+        self.top_headers = (
+            "L-Joint",
+            "R-Joint",
+            "s",
+            "m",
+            "Left Count",
+            "Other Count",
+        )
         # create a column for each header
         self.setColumnCount(len(self.top_headers))
         # apply the headers
@@ -213,9 +221,7 @@ class Table(QTableWidget):
                 minimum=1,
                 maximum=30,
             )
-            row.theta_m_multiple.editingFinished.connect(
-                self.cell_widget_updated.emit
-            )
+            row.theta_m_multiple.editingFinished.connect(self.cell_widget_updated.emit)
             self.setCellWidget(index, 3, row.theta_m_multiple)
 
             # column 4 - initial NEMid count for the left helix
@@ -236,6 +242,7 @@ class Table(QTableWidget):
 
         class smooth_interior_updating:
             """A class that manages smooth theta_m arrow clicks."""
+
             @classmethod
             def surrounding(cls, i):
                 # make sure to wrap around to the beginning/end of the domains list
@@ -294,8 +301,6 @@ class Table(QTableWidget):
         """
         domains = []  # output list of domains
         for row in self.rows:
-            domains.append(
-                row.to_domain(self.nucleic_acid_profile)
-            )
+            domains.append(row.to_domain(self.nucleic_acid_profile))
 
         return domains

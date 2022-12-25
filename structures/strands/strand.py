@@ -246,10 +246,7 @@ class Strand:
         )
 
         # Generate additional x coordinates.
-        x_coords = [
-            Point.x_coord_from_angle(angle, domain)
-            for angle in angles
-        ]
+        x_coords = [Point.x_coord_from_angle(angle, domain) for angle in angles]
         x_coords = np.array(x_coords)
 
         # Generate the z coords for the points.
@@ -260,7 +257,13 @@ class Strand:
         )
 
         # Ensure that all the items are the same length
-        greatest_count = min((len(angles), len(x_coords), len(z_coords),))
+        greatest_count = min(
+            (
+                len(angles),
+                len(x_coords),
+                len(z_coords),
+            )
+        )
         angles = angles[:greatest_count]
         x_coords = x_coords[:greatest_count]
         z_coords = z_coords[:greatest_count]

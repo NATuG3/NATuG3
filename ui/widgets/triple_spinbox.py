@@ -7,7 +7,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QSpinBox
 class TripleSpinbox(QWidget):
     editingFinished = pyqtSignal()
 
-    def __init__(self, values: Tuple[int, int, int]=None):
+    def __init__(self, values: Tuple[int, int, int] = None):
         super().__init__()
 
         # Set the layout

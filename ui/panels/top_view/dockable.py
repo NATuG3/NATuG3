@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDockWidget, QSlider, QWidget, QVBoxLayout
 
@@ -44,7 +42,7 @@ class Dockable(QDockWidget):
         self.plot = ui.plotters.TopViewPlotter(
             domains=refs.domains.current,
             domain_radius=refs.nucleic_acid.current.D,
-            rotation=0
+            rotation=0,
         )
 
         self.plot.domain_clicked.connect(self._domain_clicked)

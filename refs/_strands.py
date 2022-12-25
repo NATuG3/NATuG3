@@ -17,6 +17,7 @@ class _Strands:
         dump: Dump the strands into a file.
         recompute: Recompute the strands.
     """
+
     filename = "saves/strands/restored.nano"
     current: Strands
 

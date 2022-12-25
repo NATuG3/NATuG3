@@ -1,4 +1,3 @@
-
 from typing import List
 
 import numpy as np
@@ -26,14 +25,10 @@ def converge_point_data(angles, x_coords, z_coords) -> List[Point]:
     for counter, (angle, x_coord, z_coord) in enumerate(zipped):
         if counter % 2:
             # If the counter is odd, we are generating a NEMid.
-            item = NEMid(
-                x_coord=x_coord, z_coord=z_coord, angle=angle
-            )
+            item = NEMid(x_coord=x_coord, z_coord=z_coord, angle=angle)
         else:
             # If the counter is even, we are generating a Nucleoside.
-            item = Nucleoside(
-                x_coord=x_coord, z_coord=z_coord, angle=angle
-            )
+            item = Nucleoside(x_coord=x_coord, z_coord=z_coord, angle=angle)
         output.append(item)
 
     return output

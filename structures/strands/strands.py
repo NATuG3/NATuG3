@@ -46,7 +46,7 @@ class Strands:
         self,
         nucleic_acid_profile: NucleicAcidProfile,
         strands: Iterable[Strand],
-        name: str = "Strands"
+        name: str = "Strands",
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -68,7 +68,7 @@ class Strands:
         cls,
         nucleic_acid_profile: NucleicAcidProfile,
         package: List[Tuple[Strand, Strand]],
-        name: str = "Strands"
+        name: str = "Strands",
     ):
         """
         Load a Strands object from a package of up and down strands.

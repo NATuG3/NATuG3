@@ -19,6 +19,7 @@ class _NucleicAcid:
         load: Load the nucleic acid profiles from files.
         dump: Dump the nucleic acid profiles into files.
     """
+
     class filenames:
         profiles = f"saves/nucleic_acid"
         restored = f"saves/nucleic_acid/Restored.json"
@@ -66,7 +67,9 @@ class _NucleicAcid:
             os.listdir(self.filenames.profiles),
         ):
             # load the profile from the file (we make sure to replace underscores with spaces and ".json" with "")
-            self.profiles[name.replace("_", " ").replace(".json", "")] = NucleicAcidProfile.from_file(
+            self.profiles[
+                name.replace("_", " ").replace(".json", "")
+            ] = NucleicAcidProfile.from_file(
                 "json", f"{self.filenames.profiles}/{name}"
             )
             logger.info(
@@ -75,9 +78,7 @@ class _NucleicAcid:
 
         # attempt to load the restored state from the restored file
         try:
-            self.current = NucleicAcidProfile.from_file(
-                "json", self.filenames.restored
-            )
+            self.current = NucleicAcidProfile.from_file("json", self.filenames.restored)
         # if unable to locate nucleic acid settings file then make no changes and announce that
         # the default settings will be used
         except FileNotFoundError:

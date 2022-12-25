@@ -659,10 +659,9 @@ class Domains:
                     # computationally intensive, and it is best to avoid it if possible
                     if abs(item1.z_coord - item2.z_coord) > settings.junction_threshold:
                         continue
-                    elif (
-                        (x_dist := abs(item1.x_coord - item2.x_coord))
-                        > len(domains) - 0.1 and self.closed()
-                    ):
+                    elif (x_dist := abs(item1.x_coord - item2.x_coord)) > len(
+                        domains
+                    ) - 0.1 and self.closed():
                         junct()
                     elif x_dist < settings.junction_threshold:
                         junct()

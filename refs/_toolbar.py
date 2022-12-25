@@ -14,6 +14,7 @@ class _Toolbar:
     Notes:
         - self.actions.buttons[constant-for-an-action] returns the action's button widget.
     """
+
     def __init__(self):
         self.actions: QButtonGroup = refs.constructor.toolbar.actions
         self.actions.buttons[JUNCTER].setChecked(True)

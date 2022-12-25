@@ -25,7 +25,7 @@ class File(QMenu):
 
     def _open(self):
         """Open a save of a state of the program. This loads strands, domains,
-        and nucleic acid settings. """
+        and nucleic acid settings."""
         open_ = self.actions.open = self.addAction("Open")
         open_.setIcon(fetch_icon("open-outline"))
         open_.setShortcut("ctrl+o")
@@ -34,7 +34,7 @@ class File(QMenu):
 
     def _save(self):
         """Save the current state of the program. This saves strands, domains,
-        and nucleic acid settings. """
+        and nucleic acid settings."""
         save = self.actions.save = self.addAction("Save")
         save.setIcon(fetch_icon("save-outline"))
         save.setShortcut("ctrl+s")

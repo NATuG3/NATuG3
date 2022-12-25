@@ -22,18 +22,124 @@ class _Domains:
         dump: Dump the domains into a file.
         recompute: Recompute the domains.
     """
+
     filename: str = f"saves/domains/restored.{settings.extension}"
 
     default: Domains = Domains(
         refs.nucleic_acid.current,
         [
-            Domain(refs.nucleic_acid.current, 9, UP, UP, (0, 60, 0,), (0, 60, 0,)),
-            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, (0, 60, 0,), (0, 60, 0,)),
-            Domain(refs.nucleic_acid.current, 9, UP, UP, (0, 60, 0,), (0, 60, 0,)),
-            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, (0, 60, 0,), (0, 60, 0,)),
-            Domain(refs.nucleic_acid.current, 9, UP, UP, (0, 60, 0,), (0, 60, 0,)),
-            Domain(refs.nucleic_acid.current, 9, DOWN, DOWN, (0, 60, 0,), (0, 60, 0,)),
-            Domain(refs.nucleic_acid.current, 9, UP, UP, (0, 60, 0,), (0, 60, 0,)),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                UP,
+                UP,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                DOWN,
+                DOWN,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                UP,
+                UP,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                DOWN,
+                DOWN,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                UP,
+                UP,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                DOWN,
+                DOWN,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
+            Domain(
+                refs.nucleic_acid.current,
+                9,
+                UP,
+                UP,
+                (
+                    0,
+                    60,
+                    0,
+                ),
+                (
+                    0,
+                    60,
+                    0,
+                ),
+            ),
         ],
         2,
         True,

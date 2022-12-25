@@ -14,8 +14,10 @@ class SequenceDisplayArea(QTextEdit):
         bases: The bases in the editor area.
     """
 
-    count = "<span style='font-style: italic; font-family: Ariel; color: rgb(180, " \
-            "180, 180)'>&#8202;({count})</span> "
+    count = (
+        "<span style='font-style: italic; font-family: Ariel; color: rgb(180, "
+        "180, 180)'>&#8202;({count})</span> "
+    )
     space = "<span style='background-color: rgb(210, 210, 210)'>&nbsp;</span>"
     nonspace = "<span style='background-color: rgb(240, 240, 240)'>{char}</span>"
     highlighted_base = "<span style='background-color: rgb(245, 245, 0)'>{char}</span>"

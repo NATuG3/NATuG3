@@ -108,7 +108,7 @@ class NucleicAcidPanel(QWidget):
 
     def fetch_settings(self) -> NucleicAcidProfile:
         """Fetch a profiles object with all current nucleic acid settings from
-        inputs. """
+        inputs."""
         return NucleicAcidProfile(
             D=self.D.value(),
             H=self.H.value(),
