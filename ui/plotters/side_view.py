@@ -176,6 +176,9 @@ class SideViewPlotter(pg.PlotWidget):
         Plot the side view.
 
         All plotted data gets saved in the current plot_data.
+
+        Raises:
+            ValueError: If the mode is not of type "nucleoside" or "NEMid".
         """
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
@@ -222,6 +225,8 @@ class SideViewPlotter(pg.PlotWidget):
                 to_plot = strand.NEMids()
             elif self.plot_data.mode == "nucleoside":
                 to_plot = strand.nucleosides()
+            else:
+                raise ValueError("Invalid mode.")
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
