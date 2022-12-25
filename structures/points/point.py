@@ -63,14 +63,14 @@ class Point:
         """
         Obtain the matching point.
 
-        The matching point is determined based off of the parent strand's .package.
-        .package is a formatted list of domains' up and down strands. We will use this
+        The matching point is determined based off of the parent strand's .double_helices.
+        .double_helices is a formatted list of domains' up and down strands. We will use this
         to determine the matching point on the other strand of ours.
 
         Returns:
             Point: The matching point.
             None: There is no matching point. This is the case for closed strands,
-                or for when there is no package within the parent's Strands object.
+                or for when there is no double_helices within the parent's Strands object.
         """
         # our domain's parent is a subunit; our domain's subunit's parent is a
         # Domains object we need access to this Domains object in order to locate the
@@ -78,13 +78,13 @@ class Point:
         if (
             self.strand.closed
             or self.strand is None
-            or self.strand.parent.package is None
+            or self.strand.parent.double_helices is None
         ):
             return None
         else:
-            # create a reference to the strands package
+            # create a reference to the strands double_helices
             strands: List[Tuple["Strand", "Strand"]]
-            strands = self.strand.parent.package
+            strands = self.strand.parent.double_helices
 
             # obtain the helix that we are contained in
             our_helix: "Strand" = strands[self.domain.index][self.direction]
