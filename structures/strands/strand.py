@@ -98,6 +98,18 @@ class Strand:
         """Determine whether item is in strand."""
         return item in self.items
 
+    def __getitem__(self, item):
+        """Obtain an item from the strand."""
+        return self.items[item]
+
+    def __setitem__(self, key, value):
+        """Set an item in the strand."""
+        self.items[key] = value
+
+    def __iter__(self):
+        """Iterate over the strand."""
+        return iter(self.items)
+
     def matching_items(self, other: "Strand") -> bool:
         """
         Determine whether this strand has items that match a different strand.
@@ -144,85 +156,47 @@ class Strand:
         for item in to_remove:
             item.strand = None
 
-    def generate(self, count: int, domain: "Domain") -> None:
-        """
-        Generate additional NEMids and Nucleosides for the strand.
-
-        This creates new NEMid and Nucleoside objects which are inserted into and
-        parented to this strand.
-
-        Args:
-            count: The number of additional NEMids to generate. Nucleosides are
-                generated automatically, this is specifically an integer number of
-                NEMids.
-            domain: The domain to use for x coord generation in the NEMid generation
-                process. If this is None the
-                domain of the right most NEMid is used by default.
-        """
-        if count < 0:
-            self.trim(count)
-        else:
-            self._generate(count, domain, direction=RIGHT)
-
-    def generateleft(self, count: int, domain: "Domain") -> None:
-        """
-        Generate additional NEMids and Nucleosides for the strand.
-
-        This creates new NEMid and Nucleoside objects which are inserted into and
-        parented to the left side of this strand.
-
-        Args:
-            count: The number of additional NEMids to generate. Nucleosides are
-                generated automatically, this is specifically an integer number of
-                NEMids.
-            domain: The domain to use for x coord generation in the NEMid generation
-                process. If this is None the
-                domain of the right most NEMid is used by default.
-        """
-        if count < 0:
-            self.lefttrim(count)
-        else:
-            self._generate(count, domain, direction=LEFT)
-
-    def _generate(
-        self, count: int, domain: "Domain", direction: Literal[0, 1] = RIGHT
+    def generate(
+        self, count: int, domain: "Domain"
     ) -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
-        This creates new NEMid and Nucleoside objects which are inserted into and
-        parented to the left side of this strand.
-
-        DO NOT use this function directly; instead use .auto_extend() or
-        .auto_leftextend().
+        If a negative count is given, then NEMids and Nucleosides are generated for
+        and appended to the left side of the strand. Otherwise, they are generated for
+        and appended to the right side of the strand.
 
         Args:
             count: The number of additional NEMids to generate. Nucleosides are
                 generated automatically, this is specifically an integer number of
                 NEMids.
             domain: The domain to use for x coord generation in the NEMid generation
-                process. If this is None the
-                domain of the right most NEMid is used by default.
-            direction: The direction in which to extend the strand. This is either RIGHT
-                or LEFT, where RIGHT and LEFT are constant integers of either 0 or 1.
+                process. If this is None the domain of the right most NEMid is used
+                by default if the count is positive, and the domain of the left most
+                NEMid is used by default if the count is negative.
+
+        Raises:
+            ValueError: If the strand is empty we cannot generate additional NEMids.
         """
-        # If they do not want to add anything than ignore the request
-        if count == 0:
-            return
+        if self.empty:
+            raise ValueError("Cannot generate for an empty strand.")
 
         # Compute variables dependent on direction. Edge_NEMid == rightmost or
         # leftmost NEMid based off of the direction that we're generating NEMids in.
         # Modifier == whether we are increasing or decreasing angles/z-coords as we
         # progress. Takes the form of -1 or 1 so that we can multiply it by the
         # changes.
-        if direction == RIGHT:
+        if count > 0:
+            # If we're generating to the right, the edge NEMid is the rightmost NEMid.
             edge_item = self.items[-1]
             modifier = 1
-        elif direction == LEFT:
+        elif count < 0:
+            # If we're generating to the left, the edge item is the leftmost item.
             edge_item = self.items[0]
             modifier = -1
         else:
-            raise ValueError(f"Invalid direction: %s", direction)
+            # If count == 0, then we don't need to do anything.
+            return
 
         # If they do not pass a Domain object, use the domain of the right most NEMid
         domain = domain if domain is not None else edge_item.domain
@@ -437,6 +411,23 @@ class Strand:
     def empty(self) -> bool:
         """Whether this strand is empty."""
         return len(self.items) == 0
+
+    def direction(self) -> int | None:
+        """
+        Determine the direction of the strand.
+
+        This method utilizes up_strand and down_strand to determine the direction.
+
+        Returns:
+            The direction of the strand, or None if the strand does not have one
+            finite direction.
+        """
+        if self.up_strand:
+            return UP
+        elif self.down_strand:
+            return DOWN
+        else:
+            return None
 
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
