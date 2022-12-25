@@ -51,6 +51,7 @@ class Strand:
         appendleft(item): Add an item to the left of the strand.
         extend(items): Extend our items to the right with an iterable's items.
         extendleft(items): Extend our items to the left with an iterable's items.
+        reverse(): Reverse the order of the items in the strand.
         generate(count, domain): Generate additional NEMids and Nucleosides to the
             right side of the strand.
         generateleft(count, domain): Generate additional NEMids and Nucleosides to
@@ -110,6 +111,10 @@ class Strand:
         """Iterate over the strand."""
         return iter(self.items)
 
+    def reverse(self) -> None:
+        """Reverse the order of the items in the strand."""
+        self.items.reverse()
+
     def matching_items(self, other: "Strand") -> bool:
         """
         Determine whether this strand has items that match a different strand.
@@ -157,7 +162,7 @@ class Strand:
             item.strand = None
 
     def generate(
-        self, count: int, domain: "Domain"
+        self, count: int, domain: "Domain" = None
     ) -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
@@ -250,7 +255,7 @@ class Strand:
             item.domain = domain
             item.direction = edge_item.direction
 
-        if direction == LEFT:
+        if count < 0:
             self.leftextend(new_items)
         else:  # direction == RIGHT:
             self.extend(new_items)
