@@ -309,7 +309,7 @@ class Strand:
         Returns:
             List of all nucleosides in strand.items.
         """
-        return list(filter(lambda item: isinstance(item, NEMid), self.items))
+        return [item for item in self.items if isinstance(item, NEMid)]
 
     def nucleosides(self) -> List["Nucleoside"]:
         """
@@ -320,7 +320,7 @@ class Strand:
         Returns:
             List of all nucleosides in strand.items.
         """
-        return list(filter(lambda item: isinstance(item, Nucleoside), self.items))
+        return [item for item in self.items if isinstance(item, Nucleoside)]
 
     @property
     def sequence(self):
