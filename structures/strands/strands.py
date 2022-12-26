@@ -260,9 +260,9 @@ class Strands:
                             break
                 else:
                     if strand.up_strand():
-                        strand.color = settings.colors["strands"]["greys"][1]
-                    elif strand.down_strand():
                         strand.color = settings.colors["strands"]["greys"][0]
+                    elif strand.down_strand():
+                        strand.color = settings.colors["strands"]["greys"][1]
                     else:
                         raise ValueError(
                             "Strand should all be up/down if it is single-domain."
