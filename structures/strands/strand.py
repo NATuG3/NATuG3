@@ -149,21 +149,15 @@ class Strand:
 
     def trim(self, count: int):
         """Remove <count> number of items from the right side of the strand."""
-        self.items = deque(itertools.islice(self.items, 0, count))
-        to_remove = itertools.islice(self.items, count, None)
-        for item in to_remove:
-            item.strand = None
+        for i in range(count):
+            self.items.pop().strand = None
 
     def lefttrim(self, count: int):
         """Remove <count> number of items from the left side of the strand."""
-        self.items = deque(itertools.islice(self.items, count, None))
-        to_remove = itertools.islice(self.items, 0, count)
-        for item in to_remove:
-            item.strand = None
+        for i in range(count):
+            self.items.popleft().strand = None
 
-    def generate(
-        self, count: int, domain: "Domain" = None
-    ) -> None:
+    def generate(self, count: int, domain: "Domain" = None) -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
