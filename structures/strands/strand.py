@@ -2,7 +2,7 @@ import itertools
 import random
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, Deque, List, Literal
+from typing import Tuple, Iterable, Deque, List
 
 import numpy as np
 
