@@ -98,7 +98,10 @@ class Point:
             other_helix: Tuple[Point] = tuple(reversed(other_helix.items))
 
             # obtain the matching point
-            matching: Point = other_helix[our_index]
+            try:
+                matching: Point = other_helix[our_index]
+            except IndexError:
+                return None
 
             assert isinstance(matching, type(self))
             assert other_helix is not our_helix

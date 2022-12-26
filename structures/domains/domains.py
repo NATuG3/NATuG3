@@ -425,16 +425,7 @@ class Domains:
         # the creation of the double helices and applies the proper domains.
         double_helices = DoubleHelices(domains)
 
-        for index, double_helix in enumerate(double_helices):
-            # Create a NEMid. We will modify the coords and angle later.
-            NEMid_ = NEMid(
-                x_coord=index,
-                z_coord=0,
-                angle=0,
-                direction=domains[index].left_helix_joint,
-                domain=domains[index],
-            )
-
+        for index, (double_helix, domain) in enumerate(zip(double_helices, domains)):
             if index == 0:
                 # 1) The first domain is a special case. The z coord of the first NEMid
                 # of the first domain is 0.
@@ -442,98 +433,101 @@ class Domains:
             else:
                 # 1) Obtain the index of the previous domain's right helix.
                 previous_domain_right_helix = double_helices[index - 1].right_helix
+                previous_domain_right_helix_NEMids = (
+                    previous_domain_right_helix.NEMids()
+                )
 
                 # 2) Build a list of all the x coords of all the NEMids in that helix.
-                previous_domain_right_helix_x_coords = [
-                    NEMid_.x_coord for NEMid_ in previous_domain_right_helix
+                previous_domain_right_helix_NEMid_x_coords = [
+                    NEMid_.x_coord for NEMid_ in previous_domain_right_helix_NEMids
                 ]
 
                 # 3) Use numpy.argmax to find the index of the NEMid with the largest
                 #   x coord. This is the NEMid that is furthest to the right.
-                previous_domain_right_helix_max_x_coord_index = np.argmax(
-                    previous_domain_right_helix_x_coords
+                previous_domain_right_helix_max_NEMid_x_coord_index = np.argmax(
+                    previous_domain_right_helix_NEMid_x_coords
                 )
 
-                # 4) Obtain the corresponding z coord of the previous domain's right
-                #   helix's item at the above-ly found index.
-                initial_z_coord = previous_domain_right_helix[
-                    previous_domain_right_helix_max_x_coord_index
+                # 4) Obtain the corresponding z coord and angle of the previous
+                # domain's right helix's item at the above-ly found index.
+                initial_z_coord = previous_domain_right_helix_NEMids[
+                    previous_domain_right_helix_max_NEMid_x_coord_index
                 ].z_coord
 
                 # 5) Shift down the initial z coord. We can shift it down in increments
                 #   of Z_b * B, which we will call the "decrease_interval" (the
                 #   interval at which the z coord decreases).
-                decrease_interval = (
-                    self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
-                )
                 initial_z_coord -= (
-                    math.ceil(initial_z_coord / decrease_interval) * decrease_interval
+                    math.ceil(initial_z_coord / self.nucleic_acid_profile.H)
+                    * self.nucleic_acid_profile.H
                 )
-
-            # 6) Now that we've determined the initial z coord, we can set the z coord
-            #   of the first NEMid of the current domain.
-            NEMid_.z_coord = initial_z_coord
-
-            # 7) Append the NEMid to the double helix's zeroed strand.
-            double_helices[index].zeroed_strand.append(NEMid_)
 
             # 8) Create the rest of the NEMids for the current domain's z_strand.
-            double_helix.zeroed_strand.generate(domains[index].left_helix_count[1])
+            double_helix.zeroed_helix.generate(
+                domain.left_helix_count[1],
+                initial_angle=0,
+                initial_z_coord=initial_z_coord,
+                domain=domain,
+                direction=domain.left_helix_joint,
+                initial_type=NEMid
+            )
 
-        # 11) Now that we have the zeroed strands, we can generate the rest of the
-        # strands.
-        for index, double_helix in enumerate(double_helices):
-            # 11a) Trim off the excess NEMids that are below zero and regenerate them
-            # on the top.
-            initial_z_coord = double_helix.zeroed_strand[0].z_coord
-
+            # 9) Trim off extraneous NEMids from the bottom of the zeroed helix and
+            #    then readd them to the top of the zeroed helix.
             # Let "shifts" be the number of excess NEMids at the bottom of the
             # data point arrays.
-            if initial_z_coord >= 0:
-                shifts = 0
-            else:
-                shifts = round(abs(initial_z_coord) / self.nucleic_acid_profile.Z_b)
+            # if initial_z_coord >= 0:
+            #     shifts = 0
+            # else:
+            #     shifts = round(abs(initial_z_coord) / self.nucleic_acid_profile.Z_b)
+            #
+            # # Generate the needed amount of additional NEMids atop the strand.
+            # double_helix.zeroed_helix.generate(shifts)
+            # # Trim off the excess NEMids from the bottom of the strand.
+            # double_helix.zeroed_helix.lefttrim(shifts * 2)  # Trim nucleosides & NEMids
 
-            # Generate the needed amount of additional NEMids atop the strand.
-            double_helix.zeroed_strand.generate(shifts)
-            # Trim off the excess NEMids from the bottom of the strand.
-            double_helix.zeroed_strand.lefttrim(shifts * 2)  # Trim nucleosides & NEMids
-
-            # 11b) Generate the rest of the strands.
-            other_strand_initial_NEMid = copy(double_helix.zeroed_strand[0])
+        # 10) Now that we have the zeroed strands, we can generate the rest of the
+        #     strands.
+        for index, (double_helix, domain) in enumerate(zip(double_helices, domains)):
+            # 10a) Generate the rest of the strands.
+            other_strand_initial_NEMid = copy(double_helix.zeroed_helix[0])
             other_strand_initial_NEMid.direction = inverse(
                 other_strand_initial_NEMid.direction
             )
-            other_strand_initial_NEMid.z_coord += self.nucleic_acid_profile.Z_mate
+            if domain.theta_s_multiple == 1:
+                other_strand_initial_NEMid.z_coord += self.nucleic_acid_profile.Z_mate
+            else:
+                other_strand_initial_NEMid.z_coord -= self.nucleic_acid_profile.Z_mate
             other_strand_initial_NEMid.angle += self.nucleic_acid_profile.g
             other_strand_initial_NEMid.x_coord = Point.x_coord_from_angle(
-                other_strand_initial_NEMid.angle, domains[index]
+                other_strand_initial_NEMid.angle, domain
             )
-            double_helix.other_strand.append(other_strand_initial_NEMid)
-            double_helix.other_strand.generate(domains[index].other_helix_count[1])
+            double_helix.other_helix.append(other_strand_initial_NEMid)
+            double_helix.other_helix.generate(domain.other_helix_count[1])
 
-            # 11c) Reverse the down strand of the helix.
+            # 10b) Reverse the down strand of the helix.
             double_helix.down_helix.reverse()
 
-            # 11d) Generate the additional NEMids.
-            #   First we generate NEMids onto the left side as requested, then we
-            #   generate NEMids onto the right side as requested. Note that
-            #   generating by a negative number translates to generating onto the
-            #   left side, which is why we use the negative of the left_helix_count[0].
-            double_helix.zeroed_strand.generate(
+            # 10c) Generate the additional NEMids.
+            #      First we generate NEMids onto the left side as requested, then we
+            #      generate NEMids onto the right side as requested. Note that
+            #      generating by a negative number translates to generating onto the
+            #      left side, which is why we use the negative of the
+            #      left_helix_count[0].
+            double_helix.zeroed_helix.generate(
                 -1 * double_helix.domain.left_helix_count[0]
             )
-            double_helix.other_strand.generate(
+            double_helix.other_helix.generate(
                 -1 * double_helix.domain.other_helix_count[0]
             )
-            double_helix.zeroed_strand.generate(double_helix.domain.left_helix_count[2])
-            double_helix.other_strand.generate(double_helix.domain.other_helix_count[2])
+            double_helix.zeroed_helix.generate(double_helix.domain.left_helix_count[2])
+            double_helix.other_helix.generate(double_helix.domain.other_helix_count[2])
 
-        # 12) Assign juncmates and junctability.
+        # 11) Assign juncmates and junctability.
         #   For this we will use the DoubleHelices class's assign_junctability method.
         double_helices.assign_junctability(self.closed())
 
-        # 13) Load the strands into a Strands double_helices
+        # 12) Load the strands into a Strands double_helices
         strands = Strands.from_double_helices(self.nucleic_acid_profile, double_helices)
         strands.restyle()
 

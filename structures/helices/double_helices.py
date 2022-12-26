@@ -62,10 +62,10 @@ class DoubleHelices:
             # The actual current domain's strands and the next domain's strands. Note
             # that "strand_pair" here means that it is a tuple of two strands,
             # one being up, and the other being down.
-            current_zeroed_strand = double_helix.zeroed_strand
+            current_zeroed_strand = double_helix.zeroed_helix
             next_zeroed_strand = self.double_helices[
                 index + 1 if index + 1 != len(domains) else 0
-            ].zeroed_strand
+            ].zeroed_helix
 
             for item1 in current_zeroed_strand.NEMids():
                 for item2 in next_zeroed_strand.NEMids():

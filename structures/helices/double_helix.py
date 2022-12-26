@@ -82,14 +82,14 @@ class DoubleHelix:
         return self.strands[1]
 
     @property
-    def zeroed_strand(self) -> Strand:
+    def zeroed_helix(self) -> Strand:
         """
         The strand that is lined up with the previous double helix on the left side.
         """
         return self.strands[self.domain.left_helix_joint]
 
     @property
-    def other_strand(self) -> Strand:
+    def other_helix(self) -> Strand:
         """
         The other strand in the same domain as the zeroed strand.
         """
