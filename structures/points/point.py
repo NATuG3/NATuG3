@@ -25,6 +25,8 @@ class Point:
         domain: The domain this point belongs to.
         matching: Point in same domain on other direction's helix across from this one.
         highlighted: Whether the point is highlighted.
+        index: Index of the point in respect to its parent strand. None if there is
+            no parent strand set.
     """
 
     # positional attributes
