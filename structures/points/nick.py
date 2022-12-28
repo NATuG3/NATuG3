@@ -1,33 +1,47 @@
 from typing import Tuple
 
 from structures.points import NEMid
+from structures.points.point import Point
 
 
 class Nick:
     """
-    Nick object.
+    A Nick object.
+
+    Contains the location of where the previous NEMid used to be before a nick was
+    created, and the previous NEMid object (if the user wishes to undo the nick then
+    the nick is converted back into a NEMid and is placed after the previous item).
+
+    All attributes of the original NEMid object are directly accessible through this
+    object.
 
     Attributes:
-        x_coord: X coord of the nick.
-        z_coord: Z coord of the nick.
-        prior: The object that this was before it became a nick.
+        previous_item: The NEMid object in the same strand as the original_NEMid.
+        original_item: The NEMid object that was transformed into a nick.
+
+    Methods:
+        position: Obtain coords of the point as a tuple of form (x, z).
     """
 
-    def __init__(self, NEMid_: NEMid):
-        self.x_coord, self.z_coord = NEMid_.x_coord, NEMid_.z_coord
-        self.prior = NEMid_
-
-    @classmethod
-    def to_nick(cls, NEMid_):
-        """Create a nick in the parent strand of NEMid_."""
-        NEMid_.strand.items[NEMid_.index] = cls(NEMid_)
-
-    def position(self) -> Tuple[float, float]:
+    def __init__(self, original_item: Point):
         """
-        Obtain coords of the point as a tuple of form (x, z).
+        Create a Nick object.
+
+        Args:
+            original_item: The Point object that is to be transformed into a nick.
+                This object must be a child of a strand, so that the previous item can be
+                found.
         """
-        return self.x_coord, self.z_coord
+        self.previous_item = original_item.strand[original_item.index - 1]
+        self.original_item = original_item
+
+    def __getattr__(self, key: str) -> object:
+        """
+        When __getattribute__ fails, this method is called. This method searches for
+        the attribute in the original NEMid object.
+        """
+        return getattr(self.original_item, key)
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
-        return f"Nick@({self.position()})"
+        return f"Nick@({round(self.x_coord, 4), round(self.z_coord, 4)})"
