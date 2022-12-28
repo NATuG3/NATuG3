@@ -36,4 +36,4 @@ class Nick:
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
-        return f"Nick@({round(self.x_coord, 4), round(self.z_coord, 4)})"
+        return f"Nick@{round(self.x_coord, 4), round(self.z_coord, 4)}"
