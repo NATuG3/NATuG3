@@ -26,21 +26,22 @@ class Strands:
         strands: The actual strands.
         up_strands: All up strands.
         down_strands: All down strands.
+        nicks: All Nick objects.
         name: The name of the strands object. Used when exporting the strands object.
         double_helices(List[Tuple[Strand, Strand]]): A list of tuples of up and down strands
             from when the object is loaded with the from_package class method.
 
     Methods:
-        randomize_sequences(overwrite)
-        clear_sequences(ovewrite)
-        conjunct()
-        from_package()
-        assign_junctability()
-        up_strands(), down_strands()
-        recompute(), recolor()
-        append()
-        remove()
-        export()
+        randomize_sequences: Randomize the sequences for all strands.
+        clear_sequences: Clear the sequences for all strands.
+        conjunct: Create a cross-strand exchange (AKA a junction).
+        nick: Nicks the strands at the given point (splits the strand into two).
+        from_double_helices: Create a Strands object from a DoubleHelices object.
+        assign_junctability: Assigns the junctability of all NEMids in all strands.
+        up_strands, down_strands: Obtain all up or down strands.
+        recompute, recolor: Recompute or recolor all strands.
+        append: Append a strand to the container.
+        remove: Remove a strand from the container.
     """
 
     def __init__(
@@ -57,11 +58,18 @@ class Strands:
             strands: A list of strands to create a Strands object from.
             name: The name of the strands object. Used when exporting the strands object.
         """
+        # Store various attributes.
         self.name = name
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
+        self.nicks = []
+
+        # Assign the parent attribute of all strands to this object.
         for strand in self.strands:
             strand.parent = self
+
+        # If this class is initialized with a list of strands, then there are no double
+        # helices to store.
         self.double_helices = None
 
     def __contains__(self, item):
@@ -89,6 +97,14 @@ class Strands:
     def __iter__(self):
         """Iterate over all strands."""
         return iter(self.strands)
+
+    def nick(self, point: NEMid) -> None:
+        """
+        Nicks the strands at the given point (splits the strand into two).
+
+        Args:
+            point: The point to create a nick at.
+        """
 
     @classmethod
     def from_double_helices(
