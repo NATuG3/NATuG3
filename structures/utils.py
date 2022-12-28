@@ -39,7 +39,6 @@ def converge_point_data(angles, x_coords, z_coords, initial_type=Nucleoside) -> 
         if counter_check(counter):
             # If the counter is odd, we are generating a NEMid.
             item = NEMid(x_coord=x_coord, z_coord=z_coord, angle=angle)
-            print(counter, NEMid)
         else:
             # If the counter is even, we are generating a Nucleoside.
             item = Nucleoside(x_coord=x_coord, z_coord=z_coord, angle=angle)
