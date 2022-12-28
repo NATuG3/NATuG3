@@ -2,7 +2,6 @@ import itertools
 import random
 from collections import deque
 from contextlib import suppress
-from copy import copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, Deque, List, Type
 

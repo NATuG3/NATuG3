@@ -1,9 +1,6 @@
 from dataclasses import dataclass
-from typing import Tuple
 
-from structures.points import NEMid
 from structures.points.point import Point
-from structures.strands import Strand
 
 
 @dataclass(slots=True, frozen=True)

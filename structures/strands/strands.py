@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from typing import List, Tuple, Iterable, Literal
+from typing import List, Tuple, Iterable
 
 import pandas as pd
 from PyQt6.QtCore import QTimer
