@@ -62,6 +62,7 @@ class Strand:
         NEMids(): Obtain all NEMids in the strand, only.
         nucleosides(): Obtain all nucleosides in the strand, only.
         interdomain(): Whether there are items of differing domains in the strand.
+        split(index or NEMid): Split the strand into two strands.
         index(item): Determine the index of an item.
         sliced(from, to): Return self.NEMids as a list.
         clear_sequence(overwrite): Clear the sequence of the strand.
@@ -115,6 +116,49 @@ class Strand:
     def reverse(self) -> None:
         """Reverse the order of the items in the strand."""
         self.items.reverse()
+
+    def split(self, index_or_item) -> Tuple["Strand", "Strand"]:
+        """
+        Split the strand into two strands.
+
+        Creates two strand objects with the same attributes as this strand, but with
+        different items. The first strand will have all items up to and including the
+        index provided; the second strand will have all items after that index.
+
+        Args:
+            index_or_item: The index of the item to split at or an item within the
+                strand.
+
+        Returns:
+            A tuple of two strands.
+        """
+        index = (
+            self.index(index_or_item)
+            if isinstance(index_or_item, Point)
+            else index_or_item
+        )
+
+        strand1 = Strand(
+            name=f"{self.name} (1)" if self.name is not None else None,
+            nucleic_acid_profile=self.nucleic_acid_profile,
+            items=deque(self.items[:index]),
+            closed=self.closed,
+            color=self.color,
+            auto_color=self.auto_color,
+            thickness=self.thickness,
+            auto_thickness=self.auto_thickness,
+        )
+        strand2 = Strand(
+            name=f"{self.name} (2)" if self.name is not None else None,
+            nucleic_acid_profile=self.nucleic_acid_profile,
+            items=deque(self.items[index:]),
+            closed=self.closed,
+            color=self.color,
+            auto_color=self.auto_color,
+            thickness=self.thickness,
+            auto_thickness=self.auto_thickness,
+        )
+        return strand1, strand2
 
     def matching_items(self, other: "Strand") -> bool:
         """
