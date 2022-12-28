@@ -9,6 +9,8 @@ from pandas import ExcelWriter
 import settings
 from structures.helices import DoubleHelices
 from structures.points import NEMid
+from structures.points.nick import Nick
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
 from structures.strands.strand import Strand
@@ -41,6 +43,7 @@ class Strands:
         up_strands, down_strands: Obtain all up or down strands.
         recompute, recolor: Recompute or recolor all strands.
         append: Append a strand to the container.
+        extend: Append multiple strands to the container.
         remove: Remove a strand from the container.
     """
 
@@ -98,13 +101,69 @@ class Strands:
         """Iterate over all strands."""
         return iter(self.strands)
 
-    def nick(self, point: NEMid) -> None:
+    def nick(self, point: Point) -> None:
         """
         Nicks the strands at the given point (splits the strand into two).
 
         Args:
             point: The point to create a nick at.
+
+        Raises:
+            ValueError: If the point's parent strand is not a strand of ours.
         """
+        # Obtain the strand
+        strand = point.strand
+
+        # Check if the strand is in this container.
+        if strand not in self.strands:
+            raise ValueError(
+                f"The point's parent is not a strand of ours. "
+                f"Point: {point}, Strand: {strand}, Strands: {self.strands}"
+            )
+
+        # Create a nick object from the point
+        nick = Nick(point, point.strand[point.index - 1], point.strand[point.index + 1])
+        self.nicks.append(nick)
+
+        # Split the strand into two strands.
+        new_strands = strand.split(point)
+        nick.previous_item.strand = new_strands[0]
+        nick.next_item.strand = new_strands[1]
+
+        # Split the strand at the point, add the two new strands, and remove the old
+        # strand.
+        self.extend(new_strands)
+        self.remove(strand)
+
+    def unnick(self, nick: "Nick"):
+        """
+        Recombine a strand and remove a nick.
+
+        The attributes of the longer strand are preserved.
+
+        Raises:
+            IndexError: If the nick is not in the container.
+        """
+        # Ensure the nick is in the container.
+        if nick not in self.nicks:
+            raise IndexError(f"Nick {nick} is not in this container.")
+
+        # Obtain the strands that are before and after the nick.
+        strand1 = nick.previous_item.strand
+        strand2 = nick.next_item.strand
+
+        # Then build the new strand.
+        new_strand = Strand(**strand1.__dict__)  # create a deep copy of strand1
+        new_strand.append(nick.original_item)
+        new_strand.extend(strand2)
+
+        # Remove the two strands and add the new strand.
+        self.remove(strand1)
+        self.remove(strand2)
+        self.append(new_strand)
+
+        # Remove the nick.
+        self.nicks.remove(nick)
 
     @classmethod
     def from_double_helices(
@@ -139,9 +198,7 @@ class Strands:
 
         return strands
 
-    def to_file(
-        self, filepath: str, mode: Literal["xlsx"], open_in_file_explorer: bool = True
-    ) -> None:
+    def to_file(self, filepath: str, open_in_file_explorer: bool = True) -> None:
         """
         Export all sequences to a file.
 
@@ -152,58 +209,53 @@ class Strands:
 
         Args:
             filepath: The filepath to export to. Do not include the file suffix.
-            mode: The mode to export in.
-            open_in_file_explorer: Whether to open the file location in file after exporting.
+            open_in_file_explorer: Whether to open the file location in file after
+                exporting.
         """
         if "." in filepath:
             raise ValueError(
                 "Filepath includes a suffix. Do not include suffixes in filepaths."
             )
-        filepath = f"{filepath}.{mode}"
 
-        if mode == "xlsx":
-            # create a pandas dataset for exporting to the spreadsheet
-            dataset = []
-            for index, strand in enumerate(self.strands):
-                # the three columns of the spreadsheet are name, sequence, and color
-                name = f"Strand #{index}"
-                sequence = "".join(map(str, strand.sequence)).replace("None", "")
-                color = utils.rgb_to_hex(strand.color)
-                dataset.append(
-                    (
-                        name,
-                        sequence,
-                        color,
-                    )
+        # create a pandas dataset for exporting to the spreadsheet
+        dataset = []
+        for index, strand in enumerate(self.strands):
+            # the three columns of the spreadsheet are name, sequence, and color
+            name = f"Strand #{index}"
+            sequence = "".join(map(str, strand.sequence)).replace("None", "")
+            color = utils.rgb_to_hex(strand.color)
+            dataset.append(
+                (
+                    name,
+                    sequence,
+                    color,
                 )
-
-            # compile the dataset into pd.DataFrame
-            sequences = pd.DataFrame(
-                dataset, columns=["Name", "Sequence (5' to 3')", "Color"]
             )
 
-            # create an Excel writer object
-            writer = ExcelWriter(filepath, engine="openpyxl")
+        # compile the dataset into pd.DataFrame
+        sequences = pd.DataFrame(
+            dataset, columns=["Name", "Sequence (5' to 3')", "Color"]
+        )
 
-            # export the dataframe to an Excel sheet
-            sequences.to_excel(writer, sheet_name=self.name, index=False)
+        # create an Excel writer object
+        writer = ExcelWriter(filepath, engine="openpyxl")
 
-            # adjust the widths of the various columns
-            worksheet = writer.sheets[self.name]
-            worksheet.column_dimensions["A"].width = 15
-            worksheet.column_dimensions["B"].width = 50
-            worksheet.column_dimensions["C"].width = 15
-            worksheet.column_dimensions["D"].width = 15
+        # export the dataframe to an Excel sheet
+        sequences.to_excel(writer, sheet_name=self.name, index=False)
 
-            # Save the workbook
-            workbook = writer.book
-            workbook.save(filepath)
+        # adjust the widths of the various columns
+        worksheet = writer.sheets[self.name]
+        worksheet.column_dimensions["A"].width = 15
+        worksheet.column_dimensions["B"].width = 50
+        worksheet.column_dimensions["C"].width = 15
+        worksheet.column_dimensions["D"].width = 15
 
-            # log
-            logger.info("Exported sequences as excel @ {filepath}")
-        else:
-            # raise an error if the mode is invalid
-            raise ValueError("Invalid export mode.", mode)
+        # Save the workbook
+        workbook = writer.book
+        workbook.save(filepath)
+
+        # log
+        logger.info("Exported sequences as excel @ {filepath}")
 
         if open_in_file_explorer:
             QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
@@ -245,6 +297,11 @@ class Strands:
         """Add a strand to the container."""
         strand.parent = self
         self.strands.append(strand)
+
+    def extend(self, strands: List[Strand]):
+        """Add multiple strands to the container."""
+        for strand in strands:
+            self.append(strand)
 
     def remove(self, strand: Strand):
         """Remove a strand from the container."""

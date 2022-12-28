@@ -34,6 +34,7 @@ class PlotData:
         mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
+        plotted_nicks: The nicks.
         plotted_labels: All plotted text labels.
         plotted_strokes: The strand pen line.
         plotted_gridlines: All the grid lines.
@@ -43,6 +44,7 @@ class PlotData:
     mode: Literal["nucleoside", "NEMid"] = "NEMid"
     points: Dict[Tuple[float, float], Point] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_labels: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_strokes: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
@@ -185,6 +187,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.points.clear()
         self.plot_data.plotted_labels.clear()
         self.plot_data.plotted_points.clear()
+        self.plot_data.plotted_nicks.clear()
         self.plot_data.plotted_strokes.clear()
 
         for strand_index, strand in enumerate(self.plot_data.strands.strands):
@@ -232,12 +235,7 @@ class SideViewPlotter(pg.PlotWidget):
             for point_index, point in enumerate(to_plot):
                 # update the point mappings (this is a dict that allows us to easily
                 # traverse between a coord and a Point)
-                self.plot_data.points[
-                    (
-                        point.x_coord,
-                        point.z_coord,
-                    )
-                ] = point
+                self.plot_data.points[(point.x_coord, point.z_coord)] = point
 
                 # assign the coords of the point
                 x_coords.append(point.x_coord)
@@ -375,13 +373,33 @@ class SideViewPlotter(pg.PlotWidget):
             )
             self.plot_data.plotted_strokes.append(stroke)
 
+        # Add the points and strokes to the plot
         for stroke, points in zip(
             self.plot_data.plotted_strokes, self.plot_data.plotted_points
         ):
             self.addItem(stroke)
             self.addItem(points)
 
+        # Add the labels to the plot
         for label in self.plot_data.plotted_labels:
             self.addItem(label)
 
+        # Add the nicks to the plot
+        nick_brush = pg.mkBrush(color=settings.colors["nicks"])
+        for nick in self.plot_data.strands.nicks:
+            plotted_nick = pg.PlotDataItem(
+                (nick.x_coord,),
+                (nick.z_coord,),
+                symbol="o",
+                symbolSize=8,
+                pxMode=True,
+                symbolBrush=nick_brush,
+                symbolPen=None,
+                pen=None,
+            )
+            self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
+            plotted_nick.sigPointsClicked.connect(self._points_clicked)
+            self.addItem(plotted_nick)
+
+        # Style the plot
         self._prettify()

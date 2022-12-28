@@ -6,6 +6,7 @@ import ui.dialogs.informers
 import ui.plotters
 from structures.domains import Domains
 from structures.points import NEMid, Nucleoside
+from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.strands import Strands
 from utils import inverse
@@ -133,16 +134,26 @@ def informer(
     logger.info("Informer mode was run.")
 
 
-def nicker(points: List[Point], strands: Strands) -> None:
+def nicker(points: List[Point], strands: Strands, refresh: Callable) -> None:
     """
-    Create a nick in a strand.
+    Create a nick in a strand, or undoes a nick.
 
     Args:
-        points: The points that the nick is being created for.
-        strands: A reference to all the strands currently plotted.
+        points: The points that the nick is being created/removed for. Nicks are
+            recursively created for all points.
+        strands: The strands object containing the points. The nick() method is called
+            on this object.
+        refresh: Function called to refresh plot after nicker mode is run.
     """
-    raise NotImplementedError("Nicker is not yet implemented")
-    # logger.info("Nicker mode was run.")
+    for point in points:
+        print(point, type(point))
+        if isinstance(point, Nick):
+            strands.unnick(point)
+        else:
+            strands.nick(point)
+
+    refresh()
+    logger.info("Nicker mode was run.")
 
 
 def highlighter(points: List[Point], refresh: Callable):
@@ -155,4 +166,6 @@ def highlighter(points: List[Point], refresh: Callable):
     """
     for point in points:
         point.highlighted = inverse(point.highlighted)
+
     refresh()
+    logger.info("Highlighter mode was run.")

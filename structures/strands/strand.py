@@ -2,6 +2,7 @@ import itertools
 import random
 from collections import deque
 from contextlib import suppress
+from copy import copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, Deque, List, Type
 
@@ -131,33 +132,24 @@ class Strand:
 
         Returns:
             A tuple of two strands.
+
+        Notes:
+            The item at the index provided will not be included in either strand.
         """
+        # Obtain the index of the item to split at.
         index = (
             self.index(index_or_item)
             if isinstance(index_or_item, Point)
             else index_or_item
         )
 
-        strand1 = Strand(
-            name=f"{self.name} (1)" if self.name is not None else None,
-            nucleic_acid_profile=self.nucleic_acid_profile,
-            items=deque(self.items[:index]),
-            closed=self.closed,
-            color=self.color,
-            auto_color=self.auto_color,
-            thickness=self.thickness,
-            auto_thickness=self.auto_thickness,
-        )
-        strand2 = Strand(
-            name=f"{self.name} (2)" if self.name is not None else None,
-            nucleic_acid_profile=self.nucleic_acid_profile,
-            items=deque(self.items[index:]),
-            closed=self.closed,
-            color=self.color,
-            auto_color=self.auto_color,
-            thickness=self.thickness,
-            auto_thickness=self.auto_thickness,
-        )
+        # Create two new strands (these are copies of this strand).
+        strand1, strand2 = Strand(**self.__dict__), Strand(**self.__dict__)
+
+        # Set the items of the new strands
+        strand1.items = self.sliced(0, index)
+        strand2.items = self.sliced(index + 1, None)
+
         return strand1, strand2
 
     def matching_items(self, other: "Strand") -> bool:
