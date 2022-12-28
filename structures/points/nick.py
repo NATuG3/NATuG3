@@ -6,7 +6,7 @@ from structures.points.point import Point
 from structures.strands import Strand
 
 
-@dataclass(slot=True, frozen=True)
+@dataclass(slots=True, frozen=True)
 class Nick:
     """
     A Nick object.
