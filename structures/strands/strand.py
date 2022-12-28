@@ -149,6 +149,12 @@ class Strand:
         strand1.items = self.sliced(0, index)
         strand2.items = self.sliced(index + 1, None)
 
+        # Update the items' parents (.strand)
+        for item in strand1.items:
+            item.strand = strand1
+        for item in strand2.items:
+            item.strand = strand2
+
         return strand1, strand2
 
     def matching_items(self, other: "Strand") -> bool:

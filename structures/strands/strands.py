@@ -130,10 +130,15 @@ class Strands:
         nick.previous_item.strand = new_strands[0]
         nick.next_item.strand = new_strands[1]
 
-        # Split the strand at the point, add the two new strands, and remove the old
-        # strand.
-        self.extend(new_strands)
+        # Remove the old strand.
         self.remove(strand)
+
+        # Parent the new strands
+        for strand in new_strands:
+            strand.parent = self
+
+        # Add the two new strands
+        self.extend(new_strands)
 
     def unnick(self, nick: "Nick"):
         """
