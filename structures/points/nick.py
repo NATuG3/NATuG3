@@ -1,9 +1,12 @@
+from dataclasses import dataclass
 from typing import Tuple
 
 from structures.points import NEMid
 from structures.points.point import Point
+from structures.strands import Strand
 
 
+@dataclass(slot=True, frozen=True)
 class Nick:
     """
     A Nick object.
@@ -18,22 +21,11 @@ class Nick:
     Attributes:
         previous_item: The NEMid object in the same strand as the original_NEMid.
         original_item: The NEMid object that was transformed into a nick.
-
-    Methods:
-        position: Obtain coords of the point as a tuple of form (x, z).
     """
 
-    def __init__(self, original_item: Point):
-        """
-        Create a Nick object.
-
-        Args:
-            original_item: The Point object that is to be transformed into a nick.
-                This object must be a child of a strand, so that the previous item can be
-                found.
-        """
-        self.previous_item = original_item.strand[original_item.index - 1]
-        self.original_item = original_item
+    original_item: Point
+    previous_item: Point
+    next_item: Point
 
     def __getattr__(self, key: str) -> object:
         """
