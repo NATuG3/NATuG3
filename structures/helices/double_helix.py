@@ -1,4 +1,7 @@
+from typing import Type
+
 from constants.directions import DOWN, UP
+from structures.points import Nucleoside, NEMid
 from structures.strands import Strand
 from utils import inverse
 
@@ -50,6 +53,24 @@ class DoubleHelix:
     def __getitem__(self, item):
         if item in (DOWN, UP):
             return self.strands[item]
+
+    def __iter__(self):
+        return iter(self.strands)
+
+    def assign_metadata(self):
+        """
+        Assign the domain and direction of each item in both strands of the double helix.
+
+        This method iterates through the up and down strand, and then iterates through
+        the items, setting each item's .domain and .direction attributes to the strand's
+        domain and direction, respectively.
+        """
+        for item in self.up_helix:
+            item.domain = self.domain
+            item.direction = UP
+        for item in self.down_helix:
+            item.domain = self.domain
+            item.direction = DOWN
 
     @property
     def left_helix(self) -> Strand:
