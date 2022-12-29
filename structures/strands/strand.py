@@ -143,6 +143,9 @@ class Strand:
         # Create two new strands (these are copies of this strand).
         strand1, strand2 = Strand(**self.__dict__), Strand(**self.__dict__)
 
+        # Set both the new strands to be open (since they were split)
+        strand1.closed = strand2.closed = False
+
         # Set the items of the new strands
         strand1.items = self.sliced(0, index)
         strand2.items = self.sliced(index + 1, None)
