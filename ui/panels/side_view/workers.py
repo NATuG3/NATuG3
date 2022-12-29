@@ -146,7 +146,6 @@ def nicker(points: List[Point], strands: Strands, refresh: Callable) -> None:
         refresh: Function called to refresh plot after nicker mode is run.
     """
     for point in points:
-        print(point, type(point))
         if isinstance(point, Nick):
             strands.unnick(point)
         else:

@@ -11,10 +11,10 @@ from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.helices import DoubleHelices
-from structures.utils import converge_point_data
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
-from structures.strands import Strand, Strands
+from structures.strands import Strands
+from structures.utils import converge_point_data
 from utils import inverse
 
 logger = logging.getLogger(__name__)

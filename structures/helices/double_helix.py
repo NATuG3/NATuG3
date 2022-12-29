@@ -1,7 +1,4 @@
-from typing import Type
-
 from constants.directions import DOWN, UP
-from structures.points import Nucleoside, NEMid
 from structures.strands import Strand
 from utils import inverse
 

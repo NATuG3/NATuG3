@@ -28,9 +28,12 @@ def converge_point_data(angles, x_coords, z_coords, initial_type=NEMid) -> List[
     zipped = np.column_stack((angles, x_coords, z_coords))
 
     if initial_type == Nucleoside:
+
         def counter_check(counter):
             return counter % 2 == 1
+
     else:
+
         def counter_check(counter):
             return counter % 2 == 0
 

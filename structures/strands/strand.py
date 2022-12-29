@@ -3,7 +3,7 @@ import random
 from collections import deque
 from contextlib import suppress
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, Deque, List, Type
+from typing import Tuple, Iterable, Deque, List
 
 import numpy as np
 
