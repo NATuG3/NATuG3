@@ -201,9 +201,9 @@ class SideViewPlotter(pg.PlotWidget):
 
             # create various brushes
             point_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.9))
-            bright_brush = pg.mkBrush(color=utils.brighten_color(strand.color, 0.2))
             dim_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.3))
             highlight_brush = pg.mkBrush(color=settings.colors["highlighted"])
+            junctable_brush = pg.mkBrush(color=(244, 244, 244))
 
             # create various pens
             dark_pen = pg.mkPen(color=utils.dim_color(strand.color, 0.5), width=0.3)
@@ -284,8 +284,8 @@ class SideViewPlotter(pg.PlotWidget):
                     elif isinstance(point, NEMid):
                         if point.junctable:
                             # junctable NEMids are dimmly colored
-                            symbol_brushes.append(bright_brush)
-                            symbol_pens.append(point_pen)
+                            symbol_brushes.append(junctable_brush)
+                            symbol_pens.append(dark_pen)
                             symbol_size = 6
                         else:
                             # non-junctable NEMids are normally colored
