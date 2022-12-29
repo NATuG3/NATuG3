@@ -195,11 +195,12 @@ class Strands:
         """
         strands: List[Strand] = []
         for double_helix in double_helices:
-            strands.append(double_helix.up_helix)
-            strands.append(double_helix.down_helix)
+            for helix in double_helix:
+                strands.append(helix)
 
         strands: "Strands" = cls(nucleic_acid_profile, strands, name)
         strands.double_helices = double_helices
+        strands.style()
 
         return strands
 
@@ -313,7 +314,7 @@ class Strands:
         strand.parent = None
         self.strands.remove(strand)
 
-    def restyle(self) -> None:
+    def style(self) -> None:
         """
         Recompute colors for all strands contained within.
         Prevents touching strands from sharing colors.
@@ -338,9 +339,9 @@ class Strands:
                             break
                 else:
                     if strand.up_strand():
-                        strand.color = settings.colors["strands"]["greys"][0]
-                    elif strand.down_strand():
                         strand.color = settings.colors["strands"]["greys"][1]
+                    elif strand.down_strand():
+                        strand.color = settings.colors["strands"]["greys"][0]
                     else:
                         raise ValueError(
                             "Strand should all be up/down if it is single-domain."
@@ -530,7 +531,7 @@ class Strands:
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
-        self.restyle()
+        self.style()
 
     @property
     def size(self) -> Tuple[float, float]:
