@@ -52,5 +52,5 @@ class View(QMenu):
         self.recolor = self.addAction("Recolor Strands")
         self.recolor.setStatusTip("Recompute colors for strands")
         self.recolor.setIcon(fetch_icon("color-palette-outline"))
-        self.recolor.triggered.connect(refs.strands.current.restyle)
+        self.recolor.triggered.connect(refs.strands.current.style)
         self.recolor.triggered.connect(refs.constructor.side_view.refresh)
