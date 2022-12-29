@@ -6,7 +6,7 @@ from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 
 
-def converge_point_data(angles, x_coords, z_coords, initial_type=Nucleoside) -> List[Point]:
+def converge_point_data(angles, x_coords, z_coords, initial_type=NEMid) -> List[Point]:
     """
     Converge angles, x coords, and z coord arrays into a list of NEMids and
     nucleosides.
