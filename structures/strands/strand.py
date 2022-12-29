@@ -78,14 +78,12 @@ class Strand:
     items: Deque[Point] = field(default_factory=deque)
     closed: bool = False
 
-    color: Tuple[int, int, int] = (
-        0,
-        0,
-        0,
-    )
+    color: Tuple[int, int, int] = (0, 0, 0)
     auto_color: bool = True
+
     thickness: int = 2
     auto_thickness: bool = True
+
     highlighted: bool = False
 
     def __post_init__(self):
@@ -190,24 +188,23 @@ class Strand:
         return True
 
     def trim(self, count: int):
-        """Remove <count> number of items from the right side of the strand."""
-        for i in range(count):
-            self.items.pop().strand = None
+        """
+        Remove <count> number of items from the strand.
 
-    def lefttrim(self, count: int):
-        """Remove <count> number of items from the left side of the strand."""
-        for i in range(count):
-            self.items.popleft().strand = None
+        Removes from the right side of the strand if count is positive, and from the
+        left side of the strand if count is negative.
 
-    def generate(
-        self,
-        count: int,
-        domain: "Domain" = None,
-        initial_angle: int = None,
-        initial_z_coord: int = None,
-        initial_type: Type[Nucleoside] | Type[NEMid] = None,
-        direction: int = None,
-    ) -> None:
+        Args:
+            count: The number of items to remove.
+        """
+        if count > 0:
+            for i in range(count):
+                self.items.pop().strand = None
+        else:
+            for i in range(abs(count)):
+                self.items.popleft().strand = None
+
+    def generate(self, count: int, domain: "Domain" = None) -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
 
@@ -223,36 +220,32 @@ class Strand:
                 process. If this is None the domain of the right most NEMid is used
                 by default if the count is positive, and the domain of the left most
                 NEMid is used by default if the count is negative.
-            initial_angle: The angle to use for the first NEMid generated. If this is
-                None, the angle of the right/left most NEMid is used by default. This
-                is required if the strand is empty.
-            initial_z_coord: The z coord to use for the first NEMid generated. If this
-                is None, the z coord of the right/left most NEMid is used by default.
-                This is required if the strand is empty.
-            initial_type: The type to use for the first item generated. Either
-                Nucleoside or NEMid. If this is None, the type of the right/left most
-                NEMid is used by default. This is required if the strand is empty.
-            direction: The direction to apply to the items generated. If this is None,
-                the direction of the right/left most NEMid is used by default. This is
-                required if the strand is empty.
+
+        Raises:
+            ValueError: If the strand is empty we cannot generate additional NEMids.
         """
+        if self.empty:
+            raise ValueError("Cannot generate for an empty strand.")
 
         # Compute variables dependent on direction. Edge_NEMid == rightmost or
         # leftmost NEMid based off of the direction that we're generating NEMids in.
         # Modifier == whether we are increasing or decreasing angles/z-coords as we
         # progress. Takes the form of -1 or 1 so that we can multiply it by the
         # changes.
-        if count > 0 or len(self) == 1:
+        if count > 0:
             # If we're generating to the right, the edge NEMid is the rightmost NEMid.
-            edge_item = self[-1] if len(self) > 0 else None
+            edge_item = self.items[-1]
             modifier = 1
         elif count < 0:
             # If we're generating to the left, the edge item is the leftmost item.
-            edge_item = self[0] if len(self) > 0 else None
+            edge_item = self.items[0]
             modifier = -1
         else:
             # If count == 0, then we don't need to do anything.
             return
+
+        # If they do not pass a Domain object, use the domain of the right most NEMid
+        domain = domain if domain is not None else edge_item.domain
 
         # Create easy referneces for various nucleic acid setting attributes. This is to
         # make the code more readable.
@@ -260,26 +253,8 @@ class Strand:
         Z_b = self.nucleic_acid_profile.Z_b
 
         # Obtain preliminary data
-        domain = domain if domain is not None else edge_item.domain
-        direction = direction if direction is not None else edge_item.direction
-        initial_angle = (
-            initial_angle
-            if initial_angle is not None
-            else edge_item.angle + ((theta_b / 2) * modifier)
-        )
-        initial_z_coord = (
-            initial_z_coord
-            if initial_z_coord is not None
-            else edge_item.z_coord + ((Z_b / 2) * modifier)
-        )
-        if initial_type is None:
-            if isinstance(edge_item, NEMid):
-                initial_type = Nucleoside
-            else:
-                initial_type = NEMid
-
-        # Compute the final angle and z coord based off of the initial values and the
-        # number of NEMids to generate.
+        initial_angle = edge_item.angle + ((theta_b / 2) * modifier)
+        initial_z_coord = edge_item.z_coord + ((Z_b / 2) * modifier)
         final_angle = initial_angle + ((count + 1) * (theta_b * modifier))
         final_z_coord = initial_z_coord + ((count + 1) * (Z_b * modifier))
 
@@ -314,17 +289,12 @@ class Strand:
         z_coords = z_coords[:greatest_count]
 
         # Converge the newly generated data and add it to the strand
-        new_items = converge_point_data(
-            angles,
-            x_coords,
-            z_coords,
-            initial_type=initial_type,
-        )
+        new_items = converge_point_data(angles, x_coords, z_coords)
 
         # Assign domains for all items
         for item in new_items:
             item.domain = domain
-            item.direction = direction
+            item.direction = edge_item.direction
 
         if count < 0:
             self.leftextend(new_items)
