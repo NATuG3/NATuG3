@@ -10,16 +10,20 @@ class NEMid(Point):
     NEMid object.
 
     Attributes:
+        junctable: Whether this NEMid overlaps another NEMid and can thus can conjunct.
         juncmate: NEMid that can this NEMid can conjunct-with. NoneType if this no
             NEMid overlaps.
-        junction: Whether this NEMid is at the site of an active junction.
-        junctable: Whether this NEMid overlaps another NEMid and can thus can conjunct.
+        junction: Whether this NEMid is a member of an active junction.
         connected: Whether this NEMid is connected to another NEMid.
+        connectmate: NEMid that this NEMid is connected to.
     """
 
     juncmate: Type["NEMid"] | None = None
-    junction: bool = False
     junctable: bool = False
+    junction: bool = False
+
+    connectmate: Type["NEMid"] | None = None
+    connected: bool = False
 
     def to_nucleoside(self):
         """
@@ -38,11 +42,6 @@ class NEMid(Point):
             domain=self.domain,
         )
 
-    @property
-    def connected(self):
-        """Determine whether this NEMid is connected to another NEMid."""
-        return self.juncmate is not None
-
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
         return (
@@ -50,6 +49,7 @@ class NEMid(Point):
             f"pos={tuple(map(lambda i: round(i, 3), self.position()))}, "
             f"angle={round(self.angle, 3)}°, "
             f"junction={str(self.junction).lower()}, "
-            f"junctable={str(self.junctable).lower()}"
+            f"junctable={str(self.junctable).lower()}, "
+            f"connected={str(self.connected).lower()}"
             f")"
         )
