@@ -362,8 +362,10 @@ class Strands:
             NEMid2: The second NEMid.
         """
         if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
-            NEMid1.juncmate = NEMid2
-            NEMid2.juncmate = NEMid1
+            NEMid1.connectmate = NEMid2
+            NEMid2.connectmate = NEMid1
+            NEMid1.connected = True
+            NEMid2.connected = True
         self.connected_NEMids.append((NEMid1, NEMid2))
 
     def unconnect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
@@ -375,8 +377,10 @@ class Strands:
             NEMid2: The second NEMid.
         """
         if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
-            NEMid1.juncmate = None
-            NEMid2.juncmate = None
+            NEMid1.connectmate = None
+            NEMid2.connectmate = None
+            NEMid1.connected = False
+            NEMid2.connected = False
         self.connected_NEMids.remove((NEMid1, NEMid2))
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
