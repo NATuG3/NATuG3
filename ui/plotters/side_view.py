@@ -106,11 +106,11 @@ class SideViewPlotter(pg.PlotWidget):
 
     @property
     def height(self):
-        return self.strands.size[1]
+        return self.plot_data.strands.size[1]
 
     @property
     def width(self):
-        return self.strands.size[0]
+        return self.plot_data.strands.size[0]
 
     def refresh(self):
         """Replot plot data."""
@@ -145,7 +145,11 @@ class SideViewPlotter(pg.PlotWidget):
         # use point mapping to detect the clicked points
         located = [self.plot_data.points[position]]
         # if the located item is a NEMid with a juncmate append the juncmate too
-        if isinstance(located[0], NEMid) and (located[0].juncmate is not None):
+        if (
+            isinstance(located[0], NEMid)
+            and (located[0].juncmate is not None)
+            and not located[0].connected
+        ):
             located.append(located[0].juncmate)
 
         self.points_clicked.emit(tuple(located))
@@ -159,7 +163,7 @@ class SideViewPlotter(pg.PlotWidget):
         grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
 
         # domain index grid
-        for i in range(ceil(self.strands.size[0]) + 1):
+        for i in range(ceil(self.plot_data.strands.size[0]) + 1):
             self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
 
         # for i in <number of helical twists of the tallest domain>...
@@ -182,6 +186,8 @@ class SideViewPlotter(pg.PlotWidget):
         Raises:
             ValueError: If the mode is not of type "nucleoside" or "NEMid".
         """
+        self.strands.connect(self.strands[0][0], self.strands[1][-1])
+
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
         self.plot_data.points.clear()
@@ -233,6 +239,10 @@ class SideViewPlotter(pg.PlotWidget):
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
+                # ignore all connected points
+                if isinstance(point, NEMid) and point.connected:
+                    continue
+
                 # update the point mappings (this is a dict that allows us to easily
                 # traverse between a coord and a Point)
                 self.plot_data.points[(point.x_coord, point.z_coord)] = point
@@ -241,26 +251,30 @@ class SideViewPlotter(pg.PlotWidget):
                 x_coords.append(point.x_coord)
                 z_coords.append(point.z_coord)
 
-                # determine the symbol for the point
-                if isinstance(point, Nucleoside) and point.base is not None:
-                    # if the point is a nucleoside and the nucleoside has a base
-                    # assigned to it then make the symbol that base, rotated based on
-                    # the direction of the nucleoside
-                    if point.direction is UP:
-                        symbols.append(
-                            custom_symbol(point.base, flip=False, rotation=-90)
-                        )
+                if point.symbol is None:
+                    # determine the symbol for the point
+                    if isinstance(point, Nucleoside) and point.base is not None:
+                        # if the point is a nucleoside and the nucleoside has a base
+                        # assigned to it then make the symbol that base, rotated
+                        # based on the direction of the nucleoside
+                        if point.direction is UP:
+                            symbols.append(
+                                custom_symbol(point.base, flip=False, rotation=-90)
+                            )
+                        else:
+                            symbols.append(
+                                custom_symbol(point.base, flip=False, rotation=90)
+                            )
                     else:
-                        symbols.append(
-                            custom_symbol(point.base, flip=False, rotation=90)
-                        )
+                        # otherwise we will make the point symbol a simple arrow
+                        # indicating its direction
+                        if point.direction == UP:
+                            symbols.append("t1")  # up arrow for an upwards point
+                        else:  # point.direction == DOWN
+                            symbols.append("t")  # down arrow for a downwards point
                 else:
-                    # otherwise we will make the point symbol a simple arrow
-                    # indicating its direction
-                    if point.direction == UP:
-                        symbols.append("t1")  # up arrow for an upwards point
-                    else:  # point.direction == DOWN
-                        symbols.append("t")  # down arrow for a downwards point
+                    # if the point has a symbol assigned to it then use that
+                    symbols.append(point.symbol)
 
                 # if the Point is highlighted then make it larger and yellow
                 if point.highlighted:
@@ -373,6 +387,62 @@ class SideViewPlotter(pg.PlotWidget):
             )
             self.plot_data.plotted_strokes.append(stroke)
 
+        # Add the nicks to the plot
+        nick_brush = pg.mkBrush(color=settings.colors["nicks"])
+        for nick in self.plot_data.strands.nicks:
+            self.plotted_points.append(
+                pg.PlotDataItem(
+                    (nick.x_coord,),
+                    (nick.z_coord,),
+                    symbol="o",
+                    symbolSize=8,
+                    pxMode=True,
+                    symbolBrush=nick_brush,
+                    symbolPen=None,
+                    pen=None,
+                )
+            )
+            self.plot_data.plotted_nicks.append(self.plotted_points[-1])
+            self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
+
+        # Add all the connected NEMids to the plot, but with a fine pink line and
+        # direct connections between them. Note that connected NEMids are pairs of
+        # two NEMids that are directly connected to each other.
+        pen = pg.mkPen(color=(255, 0, 255, 100), width=4)
+        point_brush = pg.mkBrush(color=(168, 57, 142))
+        point_pen = pg.mkPen(color=(56, 20, 48), width=2)
+        for connected_NEMids in self.plot_data.strands.connected_NEMids:
+            # First plot the thin pink stroke, then plot the points on top of it
+            plotted_stroke = pg.PlotDataItem(
+                (connected_NEMids[0].x_coord, connected_NEMids[1].x_coord),
+                (connected_NEMids[0].z_coord, connected_NEMids[1].z_coord),
+                pen=pen,
+                symbols=None,
+            )
+
+            self.addItem(plotted_stroke)
+
+            # Add the points on top of the stroke
+            for NEMid_ in connected_NEMids:
+                plotted_point = pg.PlotDataItem(
+                    (NEMid_.x_coord,),
+                    (NEMid_.z_coord,),
+                    pen=None,
+                    symbol="o",
+                    symbolSize=5,
+                    pxMode=True,
+                    symbolBrush=point_brush,
+                    symbolPen=point_pen,
+                )
+                # Hook the clicked signal
+                plotted_point.sigPointsClicked.connect(self._points_clicked)
+
+                # Add point mapping
+                self.plot_data.points[(NEMid_.x_coord, NEMid_.z_coord)] = NEMid_
+
+                # Plot the item
+                self.addItem(plotted_point)
+
         # Add the points and strokes to the plot
         for stroke, points in zip(
             self.plot_data.plotted_strokes, self.plot_data.plotted_points
@@ -383,23 +453,6 @@ class SideViewPlotter(pg.PlotWidget):
         # Add the labels to the plot
         for label in self.plot_data.plotted_labels:
             self.addItem(label)
-
-        # Add the nicks to the plot
-        nick_brush = pg.mkBrush(color=settings.colors["nicks"])
-        for nick in self.plot_data.strands.nicks:
-            plotted_nick = pg.PlotDataItem(
-                (nick.x_coord,),
-                (nick.z_coord,),
-                symbol="o",
-                symbolSize=8,
-                pxMode=True,
-                symbolBrush=nick_brush,
-                symbolPen=None,
-                pen=None,
-            )
-            self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
-            plotted_nick.sigPointsClicked.connect(self._points_clicked)
-            self.addItem(plotted_nick)
 
         # Style the plot
         self._prettify()
