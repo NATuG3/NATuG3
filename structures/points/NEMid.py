@@ -14,6 +14,7 @@ class NEMid(Point):
             NEMid overlaps.
         junction: Whether this NEMid is at the site of an active junction.
         junctable: Whether this NEMid overlaps another NEMid and can thus can conjunct.
+        connected: Whether this NEMid is connected to another NEMid.
     """
 
     juncmate: Type["NEMid"] | None = None
@@ -36,6 +37,11 @@ class NEMid(Point):
             strand=self.strand,
             domain=self.domain,
         )
+
+    @property
+    def connected(self):
+        """Determine whether this NEMid is connected to another NEMid."""
+        return self.juncmate is not None
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
