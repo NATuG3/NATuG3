@@ -27,6 +27,7 @@ class Point:
         highlighted: Whether the point is highlighted.
         index: Index of the point in respect to its parent strand. None if there is
             no parent strand set.
+        symbol: The symbol of the point.
     """
 
     # positional attributes
@@ -41,6 +42,7 @@ class Point:
 
     # plotting attributes
     highlighted: bool = False
+    symbol: str = None
 
     def __post_init__(self):
         """
