@@ -584,6 +584,9 @@ class Domains:
             double_helix.other_helix.generate(-other_strand_NEMid_count[0])
             double_helix.other_helix.generate(other_strand_NEMid_count[2] + shifts)
 
+            # Now reasign metadata for new items
+            double_helix.assign_metadata()
+
             # Flip the down strand
             double_helix.down_helix.reverse()
 
