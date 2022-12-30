@@ -32,11 +32,14 @@ class Strands:
         name: The name of the strands object. Used when exporting the strands object.
         double_helices(List[Tuple[Strand, Strand]]): A list of tuples of up and down strands
             from when the object is loaded with the from_package class method.
+        connected_NEMids: A list of tuples of NEMids that are connected.
 
     Methods:
         randomize_sequences: Randomize the sequences for all strands.
         clear_sequences: Clear the sequences for all strands.
         conjunct: Create a cross-strand exchange (AKA a junction).
+        connect: Bind two arbitrary NEMids together.
+        disconnect: Unbind two arbitrary NEMids.
         nick: Nicks the strands at the given point (splits the strand into two).
         from_double_helices: Create a Strands object from a DoubleHelices object.
         assign_junctability: Assigns the junctability of all NEMids in all strands.
@@ -61,18 +64,21 @@ class Strands:
             strands: A list of strands to create a Strands object from.
             name: The name of the strands object. Used when exporting the strands object.
         """
-        # Store various attributes.
+        # Store various attributes
         self.name = name
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
-        self.nicks = []
 
-        # Assign the parent attribute of all strands to this object.
+        # Create various containers
+        self.nicks = []
+        self.connected_NEMids = []
+
+        # Assign the parent attribute of all strands to this object
         for strand in self.strands:
             strand.parent = self
 
         # If this class is initialized with a list of strands, then there are no double
-        # helices to store.
+        # helices to store
         self.double_helices = None
 
     def __contains__(self, item):
@@ -346,6 +352,32 @@ class Strands:
                         raise ValueError(
                             "Strand should all be up/down if it is single-domain."
                         )
+
+    def connect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+        """
+        Connect two arbitrary NEMids together.
+
+        Args:
+            NEMid1: The first NEMid.
+            NEMid2: The second NEMid.
+        """
+        if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
+            NEMid1.juncmate = NEMid2
+            NEMid2.juncmate = NEMid1
+        self.connected_NEMids.append((NEMid1, NEMid2))
+
+    def unconnect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+        """
+        Disconnect two arbitrary NEMids.
+
+        Args:
+            NEMid1: The first NEMid.
+            NEMid2: The second NEMid.
+        """
+        if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
+            NEMid1.juncmate = None
+            NEMid2.juncmate = None
+        self.connected_NEMids.remove((NEMid1, NEMid2))
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
