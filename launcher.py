@@ -26,7 +26,7 @@ def main():
             f"saves/nucleic_acid/profiles.nano",
             f"saves/nucleic_acid/restored.nano",
             f"saves/domains/restored.nano",
-            f"saves/sequencing/restored.nano",
+            f"saves/strands/restored.nano",
         ):
             with suppress(FileNotFoundError):
                 os.remove(filepath)
@@ -35,7 +35,7 @@ def main():
     with suppress(FileExistsError):
         os.mkdir(f"{os.getcwd()}/saves/nucleic_acid")
         os.mkdir(f"{os.getcwd()}/saves/domains")
-        os.mkdir(f"{os.getcwd()}/saves/sequencing")
+        os.mkdir(f"{os.getcwd()}/saves/strands")
 
     import pyqtgraph as pg
 
