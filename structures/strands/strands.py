@@ -107,6 +107,10 @@ class Strands:
         """Iterate over all strands."""
         return iter(self.strands)
 
+    def points(self) -> List[Point]:
+        """Obtain a list of all points in the container."""
+        return [point for strand in self.strands for point in strand]
+
     def nick(self, point: Point) -> None:
         """
         Nicks the strands at the given point (splits the strand into two).

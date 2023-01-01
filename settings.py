@@ -12,6 +12,7 @@ colors = {
     "background": (255, 255, 255),
     "nicks": (255, 0, 0),
     "highlighted": (245, 245, 0),
+    "selected": (103, 184, 235),
     "success": (212, 229, 208),
     "domains": {
         "pen": (0, 0, 0, 120),

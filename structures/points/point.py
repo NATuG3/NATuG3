@@ -47,7 +47,16 @@ class PointStyles:
         self.fill = settings.colors["highlighted"]
         self.size = 18
         self.rotation = 0
-        self.outline = dim_color(self.fill, 0.5)
+        self.outline = dim_color(self.fill, 0.7), 1
+
+    def select(self):
+        """Select the point."""
+        from ui.plotters.utils import dim_color
+
+        self.fill = settings.colors["selected"]
+        self.size = 18
+        self.rotation = 0
+        self.outline = dim_color(self.fill, 0.7), 1
 
     def set_defaults(self):
         """
@@ -66,6 +75,8 @@ class PointStyles:
 
         if point.highlighted:
             self.highlight()
+        elif point.selected:
+            self.select()
         elif isinstance(point, Nucleoside):
             if point.base is None:
                 # Baseless nucleosides are normally colored
@@ -135,6 +146,7 @@ class Point:
         domain: The domain this point belongs to.
         matching: Point in same domain on other direction's helix across from this one.
         highlighted: Whether the point is highlighted.
+        selected: Whether the point is selected.
         index: Index of the point in respect to its parent strand. None if there is
             no parent strand set.
         symbol_str: The symbol of the point as a string. Automatically determined if
@@ -155,6 +167,7 @@ class Point:
 
     # plotting attributes
     highlighted: bool = False
+    selected: bool = False
     styles: PointStyles = None
 
     def __post_init__(self):

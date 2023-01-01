@@ -168,3 +168,29 @@ def highlighter(points: List[Point], refresh: Callable):
 
     refresh()
     logger.info("Highlighter mode was run.")
+
+
+def hairpinner(points: List[Point], strands: Strands, refresh: Callable):
+    """
+    Create a hairpin in a strand.
+
+    Args:
+        points: The points that the hairpin is being created for. Hairpins are
+            recursively created for all points.
+        strands: The strands object containing the points. The hairpin() method is called
+            on this object.
+        refresh: Function called to refresh plot after hairpinner mode is run.
+    """
+    if len(points) == 2:
+        strands.conjunct(points[0], points[1])
+    elif len(points) == 1:
+        selected_points = tuple(filter(lambda point: point.selected, strands.points()))
+        if len(selected_points) == 1:
+
+            strands.connect(points[0], selected_points[0])
+            selected_points[0].selected = False
+        else:
+            points[0].selected = True
+
+    refresh()
+    logger.info("Hairpinner mode was run.")

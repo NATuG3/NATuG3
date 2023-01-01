@@ -212,6 +212,9 @@ class SideViewPlotter(pg.PlotWidget):
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
+                # set point styles
+                point.styles.set_defaults()
+
                 # ignore all connected points
                 if isinstance(point, NEMid) and point.connected:
                     continue
