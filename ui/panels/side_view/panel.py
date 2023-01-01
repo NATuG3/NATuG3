@@ -91,10 +91,13 @@ class Panel(QGroupBox):
         worker = partial(
             logger.info, "Point was clicked but no worker handled the click"
         )
+
         if refs.toolbar.current == INFORMER:
             worker = partial(
                 workers.informer, parent, points, strands, domains, refresh
             )
+        elif refs.toolbar.current == HAIRPINNER:
+            pass
         elif refs.toolbar.current == JUNCTER:
             worker = partial(workers.juncter, points, strands, refresh)
         elif refs.toolbar.current == NICKER:

@@ -40,6 +40,15 @@ class PointStyles:
         """Return whether the symbol is a custom symbol."""
         return self.symbol not in self._all_symbols
 
+    def highlight(self):
+        """Highlight the point."""
+        from ui.plotters.utils import dim_color
+
+        self.fill = settings.colors["highlighted"]
+        self.size = 18
+        self.rotation = 0
+        self.outline = dim_color(self.fill, 0.5)
+
     def set_defaults(self):
         """
         Automatically set the color of the Point.
@@ -48,7 +57,7 @@ class PointStyles:
             ValueError: If the point does not have a strand associated with it.
         """
         from structures.points import Nucleoside, NEMid
-        from ui.plotters.utils import dim_color, brighten_color
+        from ui.plotters.utils import dim_color
 
         strand, point = self.point.strand, self.point  # Create easy references
 
@@ -56,11 +65,7 @@ class PointStyles:
             raise ValueError("Point does not have a strand associated with it.")
 
         if point.highlighted:
-            # All highlighted items possess the same styles
-            self.fill = settings.colors["highlighted"]
-            self.size = 18
-            self.rotation = 0
-            self.outline = dim_color(self.fill, 0.5)
+            self.highlight()
         elif isinstance(point, Nucleoside):
             if point.base is None:
                 # Baseless nucleosides are normally colored
@@ -177,6 +182,10 @@ class Point:
         else:
             self.styles = PointStyles(point=self)
 
+        # If highlighted, highlight the point
+        if self.highlighted:
+            self.styles.highlight()
+
     def matching(self) -> Type["Point"] | None:
         """
         Obtain the matching point.
@@ -221,11 +230,10 @@ class Point:
             except IndexError:
                 return None
 
-            assert isinstance(matching, type(self))
-            assert other_helix is not our_helix
-            assert matching not in our_helix
-
-            return matching
+            if isinstance(matching, type(self)):
+                return matching
+            else:
+                return None
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:

@@ -415,8 +415,9 @@ class Strand:
         for nucleoside in self.nucleosides():
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
-                with suppress(AttributeError):
-                    nucleoside.matching().base = nucleoside.complement
+                nucleoside.styles.set_defaults()
+                if (matching := nucleoside.matching()) is not None:
+                    matching.base = nucleoside.complement
 
     def clear_sequence(self, overwrite: bool = False) -> None:
         """

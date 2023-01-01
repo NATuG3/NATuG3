@@ -185,8 +185,6 @@ class SideViewPlotter(pg.PlotWidget):
         Raises:
             ValueError: If the mode is not of type "nucleoside" or "NEMid".
         """
-        self.strands.connect(self.strands[0][0], self.strands[1][-1])
-
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
         self.plot_data.points.clear()
