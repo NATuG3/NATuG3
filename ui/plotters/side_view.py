@@ -13,8 +13,7 @@ from PyQt6.QtGui import (
 
 import settings
 from constants.directions import *
-from structures.points import NEMid, Nucleoside
-from structures.points.point import Point
+from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
@@ -42,7 +41,7 @@ class PlotData:
 
     strands: Strands = None
     mode: Literal["nucleoside", "NEMid"] = "NEMid"
-    points: Dict[Tuple[float, float], Point] = field(default_factory=dict)
+    points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_labels: List[pg.PlotDataItem] = field(default_factory=list)
@@ -205,30 +204,6 @@ class SideViewPlotter(pg.PlotWidget):
             x_coords: List[float] = list()
             z_coords: List[float] = list()
 
-            # create various brushes
-            point_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.9))
-            dim_brush = pg.mkBrush(color=utils.dim_color(strand.color, 0.3))
-            highlight_brush = pg.mkBrush(color=settings.colors["highlighted"])
-            junctable_brush = pg.mkBrush(color=(244, 244, 244))
-
-            # create various pens
-            dark_pen = pg.mkPen(color=utils.dim_color(strand.color, 0.5), width=0.3)
-            strand_pen = pg.mkPen(color=strand.color, width=strand.thickness)
-
-            # if the strand color is dark
-            if sum(strand.color) < (255 * 3) / 2:
-                # a light symbol pen
-                point_pen = pg.mkPen(
-                    color=[200] * 3,
-                    width=0.65,
-                )
-            else:
-                # otherwise create a dark one
-                point_pen = pg.mkPen(
-                    color=[0] * 3,
-                    width=0.5,
-                )
-
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
                 to_plot = strand.NEMids()
@@ -243,78 +218,31 @@ class SideViewPlotter(pg.PlotWidget):
                 if isinstance(point, NEMid) and point.connected:
                     continue
 
-                # update the point mappings (this is a dict that allows us to easily
-                # traverse between a coord and a Point)
-                self.plot_data.points[(point.x_coord, point.z_coord)] = point
-
                 # assign the coords of the point
                 x_coords.append(point.x_coord)
                 z_coords.append(point.z_coord)
 
-                if point.symbol is None:
-                    # determine the symbol for the point
-                    if isinstance(point, Nucleoside) and point.base is not None:
-                        # if the point is a nucleoside and the nucleoside has a base
-                        # assigned to it then make the symbol that base, rotated
-                        # based on the direction of the nucleoside
-                        if point.direction is UP:
-                            symbols.append(
-                                custom_symbol(point.base, flip=False, rotation=-90)
-                            )
-                        else:
-                            symbols.append(
-                                custom_symbol(point.base, flip=False, rotation=90)
-                            )
-                    else:
-                        # otherwise we will make the point symbol a simple arrow
-                        # indicating its direction
-                        if point.direction == UP:
-                            symbols.append("t1")  # up arrow for an upwards point
-                        else:  # point.direction == DOWN
-                            symbols.append("t")  # down arrow for a downwards point
-                else:
-                    # if the point has a symbol assigned to it then use that
-                    symbols.append(point.symbol)
+                # update the point mappings (this is a dict that allows us to easily
+                # traverse between a coord and a Point)
+                self.plot_data.points[(point.x_coord, point.z_coord)] = point
 
-                # if the Point is highlighted then make it larger and yellow
-                if point.highlighted:
-                    symbol_brushes.append(highlight_brush)
-                    symbol_pens.append(point_pen)
-                    symbol_size = 18
-                # if it isn't highlighted then determine the properties of it based
-                # off of the type of the point
-                else:
-                    if isinstance(point, Nucleoside):
-                        if point.base is None:
-                            # baseless nucleosides are normally colored
-                            symbol_brushes.append(point_brush)
-                            symbol_pens.append(point_pen)
-                            symbol_size = 7
-                        else:
-                            # based nucleosides are dimly colored
-                            symbol_brushes.append(dim_brush)
-                            symbol_pens.append(dark_pen)
-                            symbol_size = 9
-                    elif isinstance(point, NEMid):
-                        if point.junctable:
-                            # junctable NEMids are dimmly colored
-                            symbol_brushes.append(junctable_brush)
-                            symbol_pens.append(dark_pen)
-                            symbol_size = 6
-                        else:
-                            # non-junctable NEMids are normally colored
-                            symbol_brushes.append(point_brush)
-                            symbol_pens.append(point_pen)
-                            symbol_size = 6
-                    else:
-                        raise TypeError(
-                            f"Point is not a Nucleoside or NEMid. Point Type: {type(point)}"
-                        )
-
-                # if the strand is highlighted boost the size of the symbol brush
-                if strand.highlighted:
-                    symbol_size += 5
-                symbol_sizes.append(symbol_size)
+                # if the symbol is a custom symbol, use the custom symbol
+                symbols.append(
+                    custom_symbol(
+                        point.styles.symbol, flip=False, rotation=point.styles.rotation
+                    )
+                ) if point.styles.custom_symbol() else symbols.append(
+                    point.styles.symbol
+                )
+                symbol_sizes.append(point.styles.size)
+                symbol_brushes.append(
+                    pg.mkBrush(color=point.styles.fill, width=point.styles.outline[1])
+                )
+                symbol_pens.append(
+                    pg.mkPen(
+                        color=point.styles.outline[0], width=point.styles.outline[1]
+                    )
+                )
 
             # graph the points separately
             plotted_points = pg.PlotDataItem(
@@ -377,7 +305,10 @@ class SideViewPlotter(pg.PlotWidget):
                 x_coords.append(x_coords[0])
                 z_coords.append(z_coords[0])
             stroke = pg.PlotDataItem(
-                x_coords, z_coords, pen=strand_pen, connect=connect
+                x_coords,
+                z_coords,
+                pen=pg.mkPen(color=strand.color, width=strand.thickness),
+                connect=connect,
             )
             stroke.setCurveClickable(True)
             stroke.sigClicked.connect(

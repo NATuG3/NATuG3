@@ -353,6 +353,9 @@ class Strands:
                             "Strand should all be up/down if it is single-domain."
                         )
 
+            # Set the styles of each point based off new strand styles
+            [item.styles.set_defaults() for item in strand.items]
+
     def connect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
         Connect two arbitrary NEMids together.

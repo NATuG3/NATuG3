@@ -2,10 +2,115 @@ import logging
 from dataclasses import dataclass
 from typing import Tuple, Type, List
 
+import settings
 from constants.directions import DOWN, UP
 from utils import inverse
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class PointStyles:
+    """
+    A container for the styles of a Point.
+
+    Attributes:
+        point: The point that the styles are for.
+        symbol: The symbol of the Point.
+        size: The size of the symbol.
+        rotation: The rotation of the symbol. This only is checked when the symbol
+            isn't a default symbol (is not in _all_symbols).
+        fill: The color of the Point.
+        outline: The color of the outline of the Point.
+
+    Methods:
+        set_defaults: Automatically set the color of the Point.
+    """
+
+    point: "Point" = None
+    symbol: str = "o"
+    size: int = 10
+    rotation: float = 0
+    fill: Tuple[int, int, int] = (0, 0, 0)
+    outline: Tuple[Tuple[int, int, int], float] = (0, 0, 0), 0.5
+
+    _all_symbols = ("o", "t", "t1", "t2", "t3", "s", "p", "h", "star", "+", "d", "x")
+
+    def custom_symbol(self):
+        """Return whether the symbol is a custom symbol."""
+        return self.symbol not in self._all_symbols
+
+    def set_defaults(self):
+        """
+        Automatically set the color of the Point.
+
+        Raises:
+            ValueError: If the point does not have a strand associated with it.
+        """
+        from structures.points import Nucleoside, NEMid
+        from ui.plotters.utils import dim_color, brighten_color
+
+        strand, point = self.point.strand, self.point  # Create easy references
+
+        if self.point.strand is None:
+            raise ValueError("Point does not have a strand associated with it.")
+
+        if point.highlighted:
+            # All highlighted items possess the same styles
+            self.fill = settings.colors["highlighted"]
+            self.size = 18
+            self.rotation = 0
+            self.outline = dim_color(self.fill, 0.5)
+        elif isinstance(point, Nucleoside):
+            if point.base is None:
+                # Baseless nucleosides are normally colored
+                self.fill = dim_color(strand.color, 0.9)
+
+                # If strand color is light use dark outline else use a light outline
+                self.outline = (
+                    ((200, 200, 200), 0.65)
+                    if (sum(strand.color) < (255 * 3) / 2)
+                    else ((0, 0, 0), 0.5)
+                )
+
+                # Since there is no base make the symbol an arrow
+                self.symbol = "t1" if point.direction is UP else "t"
+
+                # Since there's no base make the point smaller
+                self.size = 7
+            else:
+                # Based nucleosides are dimly colored
+                self.fill = dim_color(strand.color, 0.3)
+                self.outline = dim_color(strand.color, 0.5), 0.3
+
+                # Since there is a base make the symbol the base
+                self.symbol = point.base  # type: ignore
+
+                # Make the base orient based off of the symbol direction
+                self.rotation = -90 if point.direction is UP else 90
+
+                # Since there is a base make it bigger
+                self.size = 9
+        elif isinstance(point, NEMid):
+            # All NEMids share some common styles
+            self.symbol = "t1" if point.direction is UP else "t"
+            self.rotation = 0
+            self.size = 6
+
+            if point.junctable:
+                # junctable NEMids are dimly colored
+                self.fill = (244, 244, 244)
+                self.outline = dim_color(strand.color, 0.5), 0.3
+            else:
+                # non-junctable NEMids are normally colored
+                self.fill = dim_color(strand.color, 0.9)
+
+                # If strand color is light use dark outline else use a light outline
+                self.outline = (
+                    ((200, 200, 200), 0.65)
+                    if (sum(strand.color) < (255 * 3) / 2)
+                    else ((0, 0, 0), 0.5)
+                )
 
 
 @dataclass(kw_only=True, slots=True)
@@ -27,7 +132,10 @@ class Point:
         highlighted: Whether the point is highlighted.
         index: Index of the point in respect to its parent strand. None if there is
             no parent strand set.
-        symbol: The symbol of the point.
+        symbol_str: The symbol of the point as a string. Automatically determined if
+        None.
+        symbol_size: The size of the point's symbol in pixels. Automatically determined if
+            None.
     """
 
     # positional attributes
@@ -42,7 +150,7 @@ class Point:
 
     # plotting attributes
     highlighted: bool = False
-    symbol: str = None
+    styles: PointStyles = None
 
     def __post_init__(self):
         """
@@ -62,6 +170,12 @@ class Point:
         # Ensure that the direction is either UP or DOWN
         if self.direction not in (UP, DOWN, None):
             raise ValueError("Direction must be UP or DOWN.")
+
+        # Set the styles
+        if self.styles is not None:
+            self.styles.point = self
+        else:
+            self.styles = PointStyles(point=self)
 
     def matching(self) -> Type["Point"] | None:
         """
