@@ -44,10 +44,10 @@ class StrandConfig(QDialog):
         self.closed.setChecked(self.strand.closed)
         self.empty.setChecked(self.strand.empty)
 
-        if self.strand.thickness > self.max_thickness:
+        if self.strand.styles.thickness.value > self.max_thickness:
             thickness = 99
         else:
-            thickness = (self.strand.thickness) * 99 / self.max_thickness
+            thickness = self.strand.styles.thickness.value * 99 / self.max_thickness
 
         thickness = round(thickness)
         self.thickness.setValue(thickness)
@@ -78,7 +78,7 @@ class StrandConfig(QDialog):
         def update_color_preview():
             """Update the color preview box to the current strand color."""
             self.color_preview.scene().setBackgroundBrush(
-                QBrush(QColor(*self.strand.color))
+                QBrush(QColor(*self.strand.styles.color.value))
             )
 
         # strand color could change for many reasons other than them using the color
@@ -93,7 +93,7 @@ class StrandConfig(QDialog):
         def color_chooser_clicked():
             """Worker for when the color chooser box is clicked."""
             self.auto_color.setChecked(False)
-            self.strand.color = QColorDialog.getColor().getRgb()
+            self.strand.styles.color.value = QColorDialog.getColor().getRgb()
             self.strand.styles.color.automatic = False
             update_color_preview()
             self.updated.emit()
@@ -122,7 +122,7 @@ class StrandConfig(QDialog):
 
         def thickness_to_slider():
             """Map the strand thickness to the thickness slider."""
-            return int((self.strand.thickness * 99) / self.max_thickness)
+            return int((self.strand.styles.thickness.value * 99) / self.max_thickness)
 
         def thickness_changed():
             """Worker for when the thickness slider is changed."""

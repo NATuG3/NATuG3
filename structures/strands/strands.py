@@ -239,7 +239,7 @@ class Strands:
             # the three columns of the spreadsheet are name, sequence, and color
             name = f"Strand #{index}"
             sequence = "".join(map(str, strand.sequence)).replace("None", "")
-            color = utils.rgb_to_hex(strand.color)
+            color = utils.rgb_to_hex(strand.styles.color.value)
             dataset.append(
                 (
                     name,
@@ -335,29 +335,30 @@ class Strands:
         for strand in self.strands:
             if strand.styles.thickness.automatic:
                 if strand.interdomain():
-                    strand.thickness = 9.5
+                    strand.styles.thickness.value = 9.5
                 else:
-                    strand.thickness = 2
+                    strand.styles.thickness.value = 2
             if strand.styles.color.automatic:
                 if strand.interdomain():
                     illegal_colors: List[Tuple[int, int, int]] = []
 
                     for potentially_touching in self.strands:
                         if strand.touching(potentially_touching):
-                            illegal_colors.append(potentially_touching.color)
+                            illegal_colors.append(
+                                potentially_touching.styles.color.value)
 
                     for color in settings.colors["strands"]["colors"]:
                         if color not in illegal_colors:
-                            strand.color = color
+                            strand.styles.color.value = color
                             break
                 else:
                     if strand.up_strand():
-                        strand.color = settings.colors["strands"]["greys"][1]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][1]
                     elif strand.down_strand():
-                        strand.color = settings.colors["strands"]["greys"][0]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][0]
                     else:
                         if skip_checks:
-                            strand.color = settings.colors["strands"]["greys"][0]
+                            strand.styles.color.value = settings.colors["strands"]["greys"][0]
                         else:
                             raise ValueError(
                                 "Strand should all be up/down if it is single-domain."

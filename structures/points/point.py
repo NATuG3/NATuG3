@@ -82,12 +82,12 @@ class PointStyles:
         elif isinstance(point, Nucleoside):
             if point.base is None:
                 # Baseless nucleosides are normally colored
-                self.fill = dim_color(strand.color, 0.9)
+                self.fill = dim_color(strand.styles.color.value, 0.9)
 
                 # If strand color is light use dark outline else use a light outline
                 self.outline = (
                     ((200, 200, 200), 0.65)
-                    if (sum(strand.color) < (255 * 3) / 2)
+                    if (sum(strand.styles.color.value) < (255 * 3) / 2)
                     else ((0, 0, 0), 0.5)
                 )
 
@@ -98,8 +98,8 @@ class PointStyles:
                 self.size = 7
             else:
                 # Based nucleosides are dimly colored
-                self.fill = dim_color(strand.color, 0.3)
-                self.outline = dim_color(strand.color, 0.5), 0.3
+                self.fill = dim_color(strand.styles.color.value, 0.3)
+                self.outline = dim_color(strand.styles.color.value, 0.5), 0.3
 
                 # Since there is a base make the symbol the base
                 self.symbol = point.base  # type: ignore
@@ -118,15 +118,15 @@ class PointStyles:
             if point.junctable:
                 # junctable NEMids are dimly colored
                 self.fill = (244, 244, 244)
-                self.outline = dim_color(strand.color, 0.5), 0.3
+                self.outline = dim_color(strand.styles.color.value, 0.5), 0.3
             else:
                 # non-junctable NEMids are normally colored
-                self.fill = dim_color(strand.color, 0.9)
+                self.fill = dim_color(strand.styles.color.value, 0.9)
 
                 # If strand color is light use dark outline else use a light outline
                 self.outline = (
                     ((200, 200, 200), 0.65)
-                    if (sum(strand.color) < (255 * 3) / 2)
+                    if (sum(strand.styles.color.value) < (255 * 3) / 2)
                     else ((0, 0, 0), 0.5)
                 )
 
