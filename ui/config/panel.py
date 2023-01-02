@@ -127,8 +127,8 @@ class Panel(QWidget):
                 DOMAINS,
             ):
                 # if the plot mode was not already NEMid make it NEMid
-                if refs.plot_mode.current != "NEMid":
-                    refs.plot_mode.current = "NEMid"
+                if refs.misc.plot_mode != "NEMid":
+                    refs.misc.plot_mode = "NEMid"
                     refs.constructor.side_view.refresh()
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(True)
@@ -136,10 +136,10 @@ class Panel(QWidget):
                 refs.toolbar.actions.buttons[JUNCTER].setEnabled(True)
             elif index in (STRANDS,):
                 # if the plot mode was not already nucleoside make it nucleoside
-                if refs.plot_mode.current != "nucleoside":
-                    refs.plot_mode.current = "nucleoside"
+                if refs.misc.plot_mode != "nucleoside":
+                    refs.misc.plot_mode = "nucleoside"
                     refs.constructor.side_view.refresh()
-                refs.toolbar.current = INFORMER
+                refs.toolbar.plot_mode = INFORMER
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(False)
                 refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(False)

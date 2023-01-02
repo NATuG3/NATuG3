@@ -40,7 +40,7 @@ class Panel(QGroupBox):
         self.setStatusTip("A plot of the side view of all domains")
 
         self.plot = ui.plotters.SideViewPlotter(
-            refs.strands.current, refs.nucleic_acid.current, refs.plot_mode.current
+            refs.strands.current, refs.nucleic_acid.current, refs.misc.plot_mode
         )
         self.plot.points_clicked.connect(self.points_clicked)
         self.plot.strand_clicked.connect(self.strand_clicked)
@@ -55,7 +55,7 @@ class Panel(QGroupBox):
         """
         self.plot.strands = refs.strands.current
         self.plot.nucleic_acid = refs.nucleic_acid.current
-        self.plot.mode = refs.plot_mode.current
+        self.plot.mode = refs.misc.plot_mode
         self.plot.refresh()
 
     def strand_clicked(self, strand: Strand) -> None:

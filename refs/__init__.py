@@ -1,10 +1,10 @@
+from .misc import _Misc
+
+misc = _Misc()
+
 from ._application import _Application
 
 application = _Application()
-
-from ._plot_mode import _PlotMode
-
-plot_mode = _PlotMode()
 
 from ._nucleic_acid import _NucleicAcid
 
