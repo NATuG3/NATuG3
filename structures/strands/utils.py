@@ -1,4 +1,4 @@
-from random import random
+from random import shuffle
 from typing import Iterable
 
 
@@ -10,5 +10,5 @@ def rgb_to_hex(rgb):
 def shuffled(iterable: Iterable) -> list:
     """Shuffle an iterable and return a copy."""
     output = list(iterable)
-    random.shuffle(output)
+    shuffle(output)
     return output
