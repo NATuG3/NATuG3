@@ -345,7 +345,8 @@ class Strands:
                     for potentially_touching in self.strands:
                         if strand.touching(potentially_touching):
                             illegal_colors.append(
-                                potentially_touching.styles.color.value)
+                                potentially_touching.styles.color.value
+                            )
 
                     for color in settings.colors["strands"]["colors"]:
                         if color not in illegal_colors:
@@ -353,12 +354,18 @@ class Strands:
                             break
                 else:
                     if strand.up_strand():
-                        strand.styles.color.value = settings.colors["strands"]["greys"][1]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][
+                            1
+                        ]
                     elif strand.down_strand():
-                        strand.styles.color.value = settings.colors["strands"]["greys"][0]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][
+                            0
+                        ]
                     else:
                         if skip_checks:
-                            strand.styles.color.value = settings.colors["strands"]["greys"][0]
+                            strand.styles.color.value = settings.colors["strands"][
+                                "greys"
+                            ][0]
                         else:
                             raise ValueError(
                                 "Strand should all be up/down if it is single-domain."

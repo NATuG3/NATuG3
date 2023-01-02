@@ -302,7 +302,9 @@ class SideViewPlotter(pg.PlotWidget):
             stroke = pg.PlotDataItem(
                 x_coords,
                 z_coords,
-                pen=pg.mkPen(color=strand.styles.color.value, width=strand.styles.thickness.value),
+                pen=pg.mkPen(
+                    color=strand.styles.color.value, width=strand.styles.thickness.value
+                ),
                 connect=connect,
             )
             stroke.setCurveClickable(True)

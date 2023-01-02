@@ -25,6 +25,7 @@ class StrandStyle:
             strands.style() is called.
         value: The value of the specific style.
     """
+
     automatic: bool = True
     value: str | int = None
 
@@ -41,6 +42,7 @@ class StrandStyles:
     Methods:
         set_defaults: Automatically set the color of the Point.
     """
+
     thickness: float = field(default_factory=StrandStyle)
     color: str = field(default_factory=StrandStyle)
     highlighted: bool = False
