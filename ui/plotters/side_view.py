@@ -12,12 +12,10 @@ from PyQt6.QtGui import (
 )
 
 import settings
-from constants.directions import *
 from structures.points import NEMid
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
-from ui.plotters import utils
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 
 logger = logging.getLogger(__name__)
@@ -213,11 +211,7 @@ class SideViewPlotter(pg.PlotWidget):
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
                 # set point styles
-                point.styles.set_defaults()
-
-                # ignore all connected points
-                if isinstance(point, NEMid) and point.connected:
-                    continue
+                point.styles.reset()
 
                 # assign the coords of the point
                 x_coords.append(point.x_coord)
@@ -232,7 +226,7 @@ class SideViewPlotter(pg.PlotWidget):
                     custom_symbol(
                         point.styles.symbol, flip=False, rotation=point.styles.rotation
                     )
-                ) if point.styles.custom_symbol() else symbols.append(
+                ) if point.styles.symbol_is_custom() else symbols.append(
                     point.styles.symbol
                 )
                 symbol_sizes.append(point.styles.size)
@@ -336,44 +330,6 @@ class SideViewPlotter(pg.PlotWidget):
             )
             self.plot_data.plotted_nicks.append(self.plotted_points[-1])
             self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
-
-        # Add all the connected NEMids to the plot, but with a fine pink line and
-        # direct connections between them. Note that connected NEMids are pairs of
-        # two NEMids that are directly connected to each other.
-        pen = pg.mkPen(color=(255, 0, 255, 100), width=4)
-        point_brush = pg.mkBrush(color=(168, 57, 142))
-        point_pen = pg.mkPen(color=(56, 20, 48), width=2)
-        for connected_NEMids in self.plot_data.strands.connected_NEMids:
-            # First plot the thin pink stroke, then plot the points on top of it
-            plotted_stroke = pg.PlotDataItem(
-                (connected_NEMids[0].x_coord, connected_NEMids[1].x_coord),
-                (connected_NEMids[0].z_coord, connected_NEMids[1].z_coord),
-                pen=pen,
-                symbols=None,
-            )
-
-            self.addItem(plotted_stroke)
-
-            # Add the points on top of the stroke
-            for NEMid_ in connected_NEMids:
-                plotted_point = pg.PlotDataItem(
-                    (NEMid_.x_coord,),
-                    (NEMid_.z_coord,),
-                    pen=None,
-                    symbol="o",
-                    symbolSize=5,
-                    pxMode=True,
-                    symbolBrush=point_brush,
-                    symbolPen=point_pen,
-                )
-                # Hook the clicked signal
-                plotted_point.sigPointsClicked.connect(self._points_clicked)
-
-                # Add point mapping
-                self.plot_data.points[(NEMid_.x_coord, NEMid_.z_coord)] = NEMid_
-
-                # Plot the item
-                self.addItem(plotted_point)
 
         # Add the points and strokes to the plot
         for stroke, points in zip(

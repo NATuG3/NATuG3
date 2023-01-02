@@ -324,18 +324,21 @@ class Strands:
         strand.parent = None
         self.strands.remove(strand)
 
-    def style(self) -> None:
+    def style(self, skip_checks: bool = False) -> None:
         """
         Recompute colors for all strands contained within.
         Prevents touching strands from sharing colors.
+
+        Args:
+            skip_checks: Whether to skip checks for strand direction consistency.
         """
         for strand in self.strands:
-            if strand.auto_thickness:
+            if strand.styles.thickness.automatic:
                 if strand.interdomain():
                     strand.thickness = 9.5
                 else:
                     strand.thickness = 2
-            if strand.auto_color:
+            if strand.styles.color.automatic:
                 if strand.interdomain():
                     illegal_colors: List[Tuple[int, int, int]] = []
 
@@ -353,12 +356,15 @@ class Strands:
                     elif strand.down_strand():
                         strand.color = settings.colors["strands"]["greys"][0]
                     else:
-                        raise ValueError(
-                            "Strand should all be up/down if it is single-domain."
-                        )
+                        if skip_checks:
+                            strand.color = settings.colors["strands"]["greys"][0]
+                        else:
+                            raise ValueError(
+                                "Strand should all be up/down if it is single-domain."
+                            )
 
             # Set the styles of each point based off new strand styles
-            [item.styles.set_defaults() for item in strand.items]
+            [item.styles.reset() for item in strand.items]
 
     def connect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
@@ -368,6 +374,7 @@ class Strands:
             NEMid1: The first NEMid.
             NEMid2: The second NEMid.
         """
+        self.conjunct(NEMid1, NEMid2, skip_checks=True)
         if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
             NEMid1.connectmate = NEMid2
             NEMid2.connectmate = NEMid1
@@ -390,13 +397,14 @@ class Strands:
             NEMid2.connected = False
         self.connected_NEMids.remove((NEMid1, NEMid2))
 
-    def conjunct(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+    def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
         Add/remove a junction where NEMid1 and NEMid2 overlap.
 
         Args:
             NEMid1: One NEMid at the junction site.
             NEMid2: Another NEMid at the junction site.
+            skip_checks: Whether to skip checks for whether the junction is valid.
 
         Raises:
             ValueError: NEMids are ineligible to be made into a junction.
@@ -406,13 +414,16 @@ class Strands:
             - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
             - NEMid.matching may be changed based on whether the strand is closed or not.
         """
-        # ensure that both NEMids are junctable
-        if (not NEMid1.junctable) or (not NEMid2.junctable):
-            raise ValueError(
-                "NEMids are not close enough to create a junction.",
-                NEMid1,
-                NEMid2,
-            )
+        if not skip_checks:
+            # ensure that both NEMids are junctable
+            if (not NEMid1.junctable) or (not NEMid2.junctable):
+                raise ValueError(
+                    "NEMids are not both junctable.",
+                    NEMid1,
+                    NEMid2,
+                )
+            assert isinstance(NEMid1, NEMid)
+            assert isinstance(NEMid2, NEMid)
 
         # ensure that NEMid1 is the lefter NEMid
         if NEMid1.x_coord > NEMid2.x_coord:
@@ -574,7 +585,7 @@ class Strands:
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
-        self.style()
+        self.style(skip_checks)
 
     @property
     def size(self) -> Tuple[float, float]:

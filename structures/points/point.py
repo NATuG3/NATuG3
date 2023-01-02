@@ -16,15 +16,17 @@ class PointStyles:
 
     Attributes:
         point: The point that the styles are for.
-        symbol: The symbol of the Point.
-        size: The size of the symbol.
+        symbol: The symbol of the Point. Either a subset of pyqtgraph symbols or a str.
+        size: The size of the symbol. This is in pixels.
         rotation: The rotation of the symbol. This only is checked when the symbol
-            isn't a default symbol (is not in _all_symbols).
-        fill: The color of the Point.
-        outline: The color of the outline of the Point.
+            isn't a default symbol (is not in _all_symbols). This is in degrees.
+        fill: The color of the Point. Tuple of (r, g, b) values.
+        outline: The color of the outline of the Point. Tuple of (color, width).
 
     Methods:
         set_defaults: Automatically set the color of the Point.
+        highlight: Highlight the point.
+        select: Select the point.
     """
 
     point: "Point" = None
@@ -36,7 +38,7 @@ class PointStyles:
 
     _all_symbols = ("o", "t", "t1", "t2", "t3", "s", "p", "h", "star", "+", "d", "x")
 
-    def custom_symbol(self):
+    def symbol_is_custom(self):
         """Return whether the symbol is a custom symbol."""
         return self.symbol not in self._all_symbols
 
@@ -58,7 +60,7 @@ class PointStyles:
         self.rotation = 0
         self.outline = dim_color(self.fill, 0.7), 1
 
-    def set_defaults(self):
+    def reset(self):
         """
         Automatically set the color of the Point.
 
@@ -127,6 +129,10 @@ class PointStyles:
                     if (sum(strand.color) < (255 * 3) / 2)
                     else ((0, 0, 0), 0.5)
                 )
+
+        # Enlarge the point if the parent strand exists and is highlighted
+        if strand is not None and strand.styles.highlighted:
+            self.size += 5
 
 
 @dataclass(kw_only=True, slots=True)

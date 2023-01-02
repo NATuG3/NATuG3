@@ -28,13 +28,13 @@ class StrandConfig(QDialog):
         self._thickness_selector()
         self._strand_params()
 
-        self.strand.highlighted = True
+        self.strand.styles.highlight()
 
         self.finished.connect(self.when_finished)
         atexit.register(self.when_finished)
 
     def when_finished(self) -> None:
-        self.strand.highlighted = False
+        self.strand.styles.reset()
         self.updated.emit()
 
     def _strand_params(self):
@@ -94,21 +94,21 @@ class StrandConfig(QDialog):
             """Worker for when the color chooser box is clicked."""
             self.auto_color.setChecked(False)
             self.strand.color = QColorDialog.getColor().getRgb()
-            self.strand.auto_color = False
+            self.strand.styles.color.automatic = False
             update_color_preview()
             self.updated.emit()
 
         self.color_chooser.clicked.connect(color_chooser_clicked)
 
         # update the auto color checkbox to the current state of the strand
-        self.auto_color.setChecked(self.strand.auto_color)
+        self.auto_color.setChecked(self.strand.styles.color.automatic)
 
         def auto_color_checked(checked):
             """Worker for when the auto color checkbox is clicked."""
             if checked:
-                self.strand.auto_color = True
+                self.strand.styles.color.automatic = True
             else:
-                self.strand.auto_color = False
+                self.strand.styles.color.automatic = False
             self.updated.emit()
 
         self.auto_color.stateChanged.connect(auto_color_checked)
@@ -133,12 +133,12 @@ class StrandConfig(QDialog):
         self.thickness.valueChanged.connect(thickness_changed)
 
         # update the thickness based on the current strand's thickness
-        self.auto_thickness.setChecked(self.strand.auto_thickness)
+        self.auto_thickness.setChecked(self.strand.styles.thickness.automatic)
 
         def auto_thickness_checked(checked):
             """Worker for when the auto thickness checkbox is checked."""
             if checked:
-                self.strand.auto_thickness = True
+                self.strand.styles.thickness.automatic = True
             else:
                 self.strand.thickness = slider_to_thickness()
             self.updated.emit()
