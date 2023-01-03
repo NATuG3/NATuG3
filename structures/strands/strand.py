@@ -1,7 +1,6 @@
 import itertools
 import random
 from collections import deque
-from contextlib import suppress
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, Deque, List
 
@@ -12,14 +11,49 @@ from constants.directions import *
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
+from structures.strands.utils import shuffled
 from structures.utils import converge_point_data
 
 
-def shuffled(iterable: Iterable) -> list:
-    """Shuffle an iterable and return a copy."""
-    output = list(iterable)
-    random.shuffle(output)
-    return output
+@dataclass
+class StrandStyle:
+    """
+    A container for the style of a Point.
+
+    Attributes:
+        automatic: Whether the style is automatically determined when
+            strands.style() is called.
+        value: The value of the specific style.
+    """
+
+    automatic: bool = True
+    value: str | int = None
+
+
+@dataclass
+class StrandStyles:
+    """
+    A container for the styles of a Point.
+
+    Attributes:
+        thickness: The thickness of the strand.
+        color: The color of the strand.
+
+    Methods:
+        set_defaults: Automatically set the color of the Point.
+    """
+
+    thickness: float = field(default_factory=StrandStyle)
+    color: str = field(default_factory=StrandStyle)
+    highlighted: bool = False
+
+    def highlight(self):
+        """Highlight the strand."""
+        self.highlighted = True
+
+    def reset(self):
+        """Reset the strand to its default state."""
+        self.highlighted = False
 
 
 @dataclass
@@ -30,15 +64,7 @@ class Strand:
     Attributes:
         name: The user-set name of the strand. This appears when exporting, and is used
             as a title.
-        color: The RGB color of the strand. This is a tuple of 3 integers, each between
-            0 and 255.
-        auto_color: A flag to determine whether a Strands parent should automatically
-            color this strand when its restyle() method is called.
-        thickness: The thickness of the strand. This is an integer representing the
-            number of pixels wide the strand.
-        auto_thickness: A flag to determine whether a Strands parent should
-            automatically set the thickness of this strand when its restyle() method
-            is called.
+        styles: The styles of the strand.
         items: The items in the strand. This is a deque of Points.
         nucleic_acid_profile: The nucleic acid settings used.
         sequence (list): The sequence of the strand.
@@ -78,13 +104,7 @@ class Strand:
     items: Deque[Point] = field(default_factory=deque)
     closed: bool = False
 
-    color: Tuple[int, int, int] = (0, 0, 0)
-    auto_color: bool = True
-
-    thickness: int = 2
-    auto_thickness: bool = True
-
-    highlighted: bool = False
+    styles: StrandStyles = field(default_factory=StrandStyles)
 
     def __post_init__(self):
         self.items = deque(self.items)
@@ -415,8 +435,9 @@ class Strand:
         for nucleoside in self.nucleosides():
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
-                with suppress(AttributeError):
-                    nucleoside.matching().base = nucleoside.complement
+                nucleoside.styles.reset()
+                if (matching := nucleoside.matching()) is not None:
+                    matching.base = nucleoside.complement
 
     def clear_sequence(self, overwrite: bool = False) -> None:
         """

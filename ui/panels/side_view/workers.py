@@ -2,6 +2,7 @@ import logging
 from functools import partial
 from typing import List, Callable
 
+import refs
 import ui.dialogs.informers
 import ui.plotters
 from structures.domains import Domains
@@ -79,7 +80,7 @@ def informer(
                 )
             )
             # highlight the point that was clicked
-            point.highlighted = True
+            point.styles.highlight()
 
         # if a Nucleoside was clicked create a NucleosideInformer objcet
         elif isinstance(point, Nucleoside):
@@ -92,7 +93,7 @@ def informer(
                 )
             )
             # highlight the point that was clicked
-            point.highlighted = True
+            point.styles.highlight()
 
         # if an unsupported type of point is clicked raise an error
         else:
@@ -168,3 +169,29 @@ def highlighter(points: List[Point], refresh: Callable):
 
     refresh()
     logger.info("Highlighter mode was run.")
+
+
+def hairpinner(points: List[Point], strands: Strands, refresh: Callable):
+    """
+    Create a hairpin in a strand.
+
+    Args:
+        points: The points that the hairpin is being created for. Hairpins are
+            recursively created for all points.
+        strands: The strands object containing the points. The hairpin() method is called
+            on this object.
+        refresh: Function called to refresh plot after hairpinner mode is run.
+    """
+    # Store the points that are currently selected
+    currently_selected = refs.misc.currently_selected
+    currently_selected.extend(points)
+    [setattr(point, "selected", True) for point in currently_selected]
+
+    if len(currently_selected) == 2:
+        strands.connect(*currently_selected)
+        currently_selected[0].selected = False
+        currently_selected[1].selected = False
+        currently_selected.clear()
+
+    refresh()
+    logger.info("Hairpinner mode was run.")
