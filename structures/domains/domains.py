@@ -521,13 +521,19 @@ class Domains:
             # Now, using various attributes of the nucleic acid profile, we can
             # easily compute the other_strand (the strand that does not make a
             # connection with the previous domain).
-            other_strand_angles = zeroed_strand_angles + self.nucleic_acid_profile.g
+            other_strand_modifier = -1 if other_strand_direction == DOWN else 1
+
+            other_strand_angles = (
+                zeroed_strand_angles
+                + self.nucleic_acid_profile.g * -other_strand_modifier
+            )
             other_strand_x_coords = [
                 Point.x_coord_from_angle(angle, domain) for angle in other_strand_angles
             ]
             other_strand_x_coords = np.array(other_strand_x_coords)
             other_strand_z_coords = (
-                zeroed_strand_z_coords + self.nucleic_acid_profile.Z_mate
+                np.copy(zeroed_strand_z_coords)
+                + self.nucleic_acid_profile.Z_mate * other_strand_modifier
             )
 
             # Since we generated an extra NEMid, we will trim it off here.
