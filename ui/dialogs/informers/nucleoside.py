@@ -17,7 +17,7 @@ class NucleosideInformer(QDialog):
         Initialize the NucleosideInformer.
 
         Args:
-            parent: The parent widget for the dialog.
+            parent: The strands widget for the dialog.
             nucleoside: The Nucleoside to display information about.
             all_strands: The strands that contain the Nucleoside.
             all_domains: The domains that contain the Nucleoside.

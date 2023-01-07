@@ -48,7 +48,7 @@ class ProfileManager(QGroupBox):
         Initialize the profile manager.
 
         Args:
-            parent: The parent QObject.
+            parent: The strands QObject.
             extractor: The worker called to extract data for new profiles.
             dumper: The worker called to dump data for a loaded profile.
             title: The title of the group box containing the profile manager. Shows up

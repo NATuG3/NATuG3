@@ -5,5 +5,5 @@ class StrandButton(QPushButton):
     def __init__(self, strand):
         super().__init__()
 
-        if strand.parent.index(strand) is not None:
-            self.setText(f"Strand #{strand.parent.index(strand) + 1}")
+        if strand.strands.index(strand) is not None:
+            self.setText(f"Strand #{strand.strands.index(strand) + 1}")

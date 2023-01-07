@@ -30,7 +30,7 @@ class Panel(QGroupBox):
         Initialize the SideView panel.
 
         Args:
-            parent: The parent widget in which the side view panel is contained. Can be None.
+            parent: The strands widget in which the side view panel is contained. Can be None.
         """
         super().__init__(parent)
 
@@ -72,7 +72,7 @@ class Panel(QGroupBox):
         dialog.show()
         self.refresh()
 
-        logger.info(f"Strand #{strand.parent.index(strand)} was clicked.")
+        logger.info(f"Strand #{strand.strands.index(strand)} was clicked.")
 
     def points_clicked(self, points: List[Point]) -> None:
         """

@@ -17,7 +17,7 @@ class NEMidInformer(QDialog):
         Initialize the NEMidInformer.
 
         Args:
-            parent: The parent widget for the dialog.
+            parent: The strands widget for the dialog.
             NEMid_: The NEMid to display information about.
             all_strands: The strands that contain the NEMid.
             all_domains: The domains that contain the NEMid.

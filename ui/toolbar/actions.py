@@ -5,7 +5,7 @@ from constants.toolbar import *
 
 class Action(QPushButton):
     """
-    A singular action parent class for the toolbar.
+    A singular action strands class for the toolbar.
 
     Actions are modified QPushButtons that are checkable (toggleable), and have a
         fixed width.

@@ -98,7 +98,7 @@ class Strand:
     """
 
     name: str = "Strand"
-    parent: "Strands" = None
+    strands: "Strands" = None
 
     nucleic_acid_profile: NucleicAcidProfile = field(
         default_factory=NucleicAcidProfile, repr=False

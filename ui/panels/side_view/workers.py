@@ -55,7 +55,7 @@ def informer(
     Create an informer for a clicked point and its juncmate (if applicable).
 
     Args:
-        parent: The parent widget. This is what all dialogs will be parented to.
+        parent: The strands widget. This is what all dialogs will be parented to.
         points: The points that the informer is being created for.
         strands: A reference to all the strands currently plotted.
         domains: A reference to all the domains currently plotted.

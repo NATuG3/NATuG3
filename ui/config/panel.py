@@ -164,7 +164,7 @@ class RefreshConfirmer(QDialog):
         Initialize the refresh confirmer dialog.
 
         Args:
-            parent: The parent widget.
+            parent: The strands widget.
             function: A function to be called if a non-cancel button is pressed.
         """
         super().__init__(parent)

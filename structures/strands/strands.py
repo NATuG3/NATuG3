@@ -71,9 +71,9 @@ class Strands:
         # Create various containers
         self.nicks = []
 
-        # Assign the parent attribute of all strands to this object
+        # Assign the strands attribute of all strands to this object
         for strand in self.strands:
-            strand.parent = self
+            strand.strands = self
 
         # If this class is initialized with a list of strands, then there are no double
         # helices to store
@@ -117,7 +117,7 @@ class Strands:
             point: The point to create a nick at.
 
         Raises:
-            ValueError: If the point's parent strand is not a strand of ours.
+            ValueError: If the point's strands strand is not a strand of ours.
         """
         # Obtain the strand
         strand = point.strand
@@ -125,7 +125,7 @@ class Strands:
         # Check if the strand is in this container.
         if strand not in self.strands:
             raise ValueError(
-                f"The point's parent is not a strand of ours. "
+                f"The point's strands is not a strand of ours. "
                 f"Point: {point}, Strand: {strand}, Strands: {self.strands}"
             )
 
@@ -143,7 +143,7 @@ class Strands:
 
         # Parent the new strands
         for strand in new_strands:
-            strand.parent = self
+            strand.strands = self
 
         # Add the two new strands
         self.extend(new_strands)
@@ -309,7 +309,7 @@ class Strands:
 
     def append(self, strand: Strand):
         """Add a strand to the container."""
-        strand.parent = self
+        strand.strands = self
         self.strands.append(strand)
 
     def extend(self, strands: List[Strand]):
@@ -319,7 +319,7 @@ class Strands:
 
     def remove(self, strand: Strand):
         """Remove a strand from the container."""
-        strand.parent = None
+        strand.strands = None
         self.strands.remove(strand)
 
     def style(self, skip_checks: bool = False) -> None:
@@ -543,7 +543,7 @@ class Strands:
             if not new_strand.empty:
                 self.append(new_strand)
 
-        # parent the items in the strands
+        # strands the items in the strands
         for new_strand in new_strands:
             for item in new_strand.items:
                 item.strand = new_strand

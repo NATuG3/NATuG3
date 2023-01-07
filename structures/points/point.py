@@ -130,7 +130,7 @@ class PointStyles:
                     else ((0, 0, 0), 0.5)
                 )
 
-        # Enlarge the point if the parent strand exists and is highlighted
+        # Enlarge the point if the strands strand exists and is highlighted
         if strand is not None and strand.styles.highlighted:
             self.size += 5
 
@@ -153,8 +153,8 @@ class Point:
         matching: Point in same domain on other direction's helix across from this one.
         highlighted: Whether the point is highlighted.
         selected: Whether the point is selected.
-        index: Index of the point in respect to its parent strand. None if there is
-            no parent strand set.
+        index: Index of the point in respect to its strands strand. None if there is
+            no strands strand set.
         symbol_str: The symbol of the point as a string. Automatically determined if
         None.
         symbol_size: The size of the point's symbol in pixels. Automatically determined if
@@ -209,28 +209,28 @@ class Point:
         """
         Obtain the matching point.
 
-        The matching point is determined based off of the parent strand's .double_helices.
+        The matching point is determined based off of the strands strand's .double_helices.
         .double_helices is a formatted list of domains' up and down strands. We will use this
         to determine the matching point on the other strand of ours.
 
         Returns:
             Point: The matching point.
             None: There is no matching point. This is the case for closed strands,
-                or for when there is no double_helices within the parent's Strands object.
+                or for when there is no double_helices within the strands's Strands object.
         """
-        # our domain's parent is a subunit; our domain's subunit's parent is a
+        # our domain's strands is a subunit; our domain's subunit's strands is a
         # Domains object we need access to this Domains object in order to locate the
         # matching point
         if (
             self.strand.closed
             or self.strand is None
-            or self.strand.parent.double_helices is None
+            or self.strand.strands.double_helices is None
         ):
             return None
         else:
             # create a reference to the strands double_helices
             strands: List[Tuple["Strand", "Strand"]]
-            strands = self.strand.parent.double_helices
+            strands = self.strand.strands.double_helices
 
             # obtain the helix that we are contained in
             our_helix: "Strand" = strands[self.domain.index][self.direction]
@@ -289,11 +289,11 @@ class Point:
     @property
     def index(self):
         """
-        Obtain the index of this domain in its respective parent strand.
+        Obtain the index of this domain in its respective strands strand.
 
         Returns:
-            int: The index of this domain in its respective parent strand.
-            None: This point has no parent strand.
+            int: The index of this domain in its respective strands strand.
+            None: This point has no strands strand.
 
         Notes:
             If self.strand is None then this returns None.

@@ -21,7 +21,7 @@ class View(QMenu):
         Initialize the view section of the menu bar.
 
         Args:
-            parent: The parent of the view section of the menu bar.
+            parent: The strands of the view section of the menu bar.
         """
         super().__init__("&View", parent)
 

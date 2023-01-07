@@ -68,7 +68,7 @@ class SequenceEditorArea(QWidget):
         Initialize the editor area.
 
         Args:
-            parent: The parent widget.
+            parent: The strands widget.
             bases: The bases for the editor area.
             selected: The currently selected base.
         """

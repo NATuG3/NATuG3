@@ -21,7 +21,7 @@ class StrandConfig(QDialog):
 
         self.strand = strand
         self.setWindowTitle(
-            f"Strand #{self.strand.parent.index(self.strand) + 1} Config"
+            f"Strand #{self.strand.strands.index(self.strand) + 1} Config"
         )
         self._sequencing()
         self._color_selector()

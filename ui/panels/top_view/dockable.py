@@ -25,7 +25,7 @@ class Dockable(QDockWidget):
         Initialize the TopView dockable area.
 
         Args:
-            parent: The parent widget in which the top view dockable area is contained. Can be None.
+            parent: The strands widget in which the top view dockable area is contained. Can be None.
         """
         super().__init__(parent)
 

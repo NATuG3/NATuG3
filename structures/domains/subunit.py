@@ -9,7 +9,7 @@ class Subunit:
     """
     A domain subunit. Contains all the domains for a given subunit.
 
-    The parent of a Subunit is a Domains object. There is thorough integration with the
+    The strands of a Subunit is a Domains object. There is thorough integration with the
     parenting of subunits, domains, domain.
 
     Notes:
@@ -21,7 +21,7 @@ class Subunit:
         domains: The domains in the subunit.
         count: The number of domains in the subunit.
         template: Whether this is a template subunit.
-        parent: The parent Domains object.
+        parent: The strands Domains object.
 
     Methods:
         append()
@@ -44,31 +44,31 @@ class Subunit:
             template: Whether this subunit is a template subunit. Defaults to False.
                 If this is not a template subunit then the subunit becomes immutable.
                 In other words, only template subunits can be modified.
-            parent: The parent Domains object.
+            parent: The strands Domains object.
         """
         self.template = template  # must be the first property set
         self.domains = domains
         self.parent = parent
         self.nucleic_acid_profile = nucleic_acid_profile
 
-        # assign the parent of all the domains to us
+        # assign the strands of all the domains to us
         for domain in self.domains:
-            domain.parent = self
+            domain.strands = self
 
         assert isinstance(domains, Iterable)
 
     def append(self, domain: "Domain") -> None:
         """
-        Append a worker to the subunit and parent it.
+        Append a worker to the subunit and strands it.
 
         Args:
             domain: The domain to append to the subunit.
 
         Notes:
-            The domain will have its parent set to this subunit.
+            The domain will have its strands set to this subunit.
         """
         self.domains.append(domain)
-        domain.parent = self
+        domain.strands = self
 
     def remove(self, domain: "Domain") -> None:
         """
@@ -78,10 +78,10 @@ class Subunit:
             domain: The domain to remove from the subunit.
 
         Notes:
-            The domain will have its parent reset to None.
+            The domain will have its strands reset to None.
         """
         self.domains.remove(domain)
-        domain.parent = None
+        domain.strands = None
 
     def copy(self) -> "Subunit":
         """
