@@ -93,6 +93,8 @@ class Strand:
         sliced(from, to): Return self.NEMids as a list.
         clear_sequence(overwrite): Clear the sequence of the strand.
         randomize_sequence(overwrite): Randomize the sequence of the strand.
+        startswith(point): Determine whether the strand starts with a point.
+        endswith(point): Determine whether the strand ends with a point.
     """
 
     name: str = "Strand"
@@ -226,6 +228,30 @@ class Strand:
         else:
             for i in range(abs(count)):
                 self.items.popleft().strand = None
+
+    def startswith(self, point: Point) -> bool:
+        """
+        Determine whether the strand starts with a point.
+
+        Args:
+            point: The point to check.
+
+        Returns:
+            Whether the strand starts with the point.
+        """
+        return self.items[0] == point
+
+    def endswith(self, point: Point) -> bool:
+        """
+        Determine whether the strand ends with a point.
+
+        Args:
+            point: The point to check.
+
+        Returns:
+            Whether the strand ends with the point.
+        """
+        return self.items[-1] == point
 
     def generate(self, count: int, domain: "Domain" = None) -> None:
         """
