@@ -101,6 +101,10 @@ class Strands:
         """Set a strand at a given index."""
         self.strands[key] = value
 
+    def __delitem__(self, key):
+        """Delete a strand by index."""
+        del self.strands[key]
+
     def __iter__(self):
         """Iterate over all strands."""
         return iter(self.strands)
@@ -371,6 +375,18 @@ class Strands:
 
             # Set the styles of each point based off new strand styles
             [item.styles.reset() for item in strand.items]
+
+    def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+        """
+        Link two NEMids together.
+
+        A linkage is a
+
+        Args:
+            NEMid1: The first NEMid to link.
+            NEMid2: The second NEMid to link.
+        """
+
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
