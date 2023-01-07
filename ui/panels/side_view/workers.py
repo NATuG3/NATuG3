@@ -171,16 +171,16 @@ def highlighter(points: List[Point], refresh: Callable):
     logger.info("Highlighter mode was run.")
 
 
-def hairpinner(points: List[Point], strands: Strands, refresh: Callable):
+def linker(points: List[Point], strands: Strands, refresh: Callable):
     """
-    Create a hairpin in a strand.
+    Create a linkage in a strand.
 
     Args:
-        points: The points that the hairpin is being created for. Hairpins are
+        points: The points that the hairpin is being created for. linkages are
             recursively created for all points.
         strands: The strands object containing the points. The hairpin() method is called
             on this object.
-        refresh: Function called to refresh plot after hairpinner mode is run.
+        refresh: Function called to refresh plot after linker mode is run.
     """
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected
@@ -194,4 +194,4 @@ def hairpinner(points: List[Point], strands: Strands, refresh: Callable):
         currently_selected.clear()
 
     refresh()
-    logger.info("Hairpinner mode was run.")
+    logger.info("Linkage mode was run.")

@@ -132,7 +132,7 @@ class Panel(QWidget):
                     refs.constructor.side_view.refresh()
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(True)
-                refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(True)
+                refs.toolbar.actions.buttons[LINKER].setEnabled(True)
                 refs.toolbar.actions.buttons[JUNCTER].setEnabled(True)
             elif index in (STRANDS,):
                 # if the plot mode was not already nucleoside make it nucleoside
@@ -142,7 +142,7 @@ class Panel(QWidget):
                 refs.toolbar.plot_mode = INFORMER
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(False)
-                refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(False)
+                refs.toolbar.actions.buttons[LINKER].setEnabled(False)
                 refs.toolbar.actions.buttons[JUNCTER].setEnabled(False)
 
         self.tab_area.currentChanged.connect(tab_changed)

@@ -95,8 +95,8 @@ class Panel(QGroupBox):
             worker = partial(
                 workers.informer, parent, points, strands, domains, refresh
             )
-        elif refs.toolbar.current == HAIRPINNER:
-            worker = partial(workers.hairpinner, points, strands, refresh)
+        elif refs.toolbar.current == LINKER:
+            worker = partial(workers.linker, points, strands, refresh)
         elif refs.toolbar.current == JUNCTER:
             worker = partial(workers.juncter, points, strands, refresh)
         elif refs.toolbar.current == NICKER:

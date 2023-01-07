@@ -1,4 +1,8 @@
+import random
+
+from constants.bases import DNA
 from constants.directions import DOWN, UP
+from structures.points import Nucleoside
 from structures.strands import Strand
 from utils import inverse
 
@@ -68,6 +72,11 @@ class DoubleHelix:
         for item in self.down_helix:
             item.domain = self.domain
             item.direction = DOWN
+
+        for up_helix, down_helix in zip(self.up_helix, self.down_helix):
+            if isinstance(up_helix, Nucleoside) and isinstance(down_helix, Nucleoside):
+                up_helix.base = (random.choice("ATCG"))
+                down_helix.base = up_helix.complement
 
     @property
     def left_helix(self) -> Strand:
