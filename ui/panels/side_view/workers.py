@@ -5,6 +5,7 @@ from typing import List, Callable
 import refs
 import ui.dialogs.informers
 import ui.plotters
+import utils
 from structures.domains import Domains
 from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
@@ -184,8 +185,17 @@ def linker(points: List[Point], strands: Strands, refresh: Callable):
     """
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected
-    currently_selected.extend(points)
-    [setattr(point, "selected", True) for point in currently_selected]
+
+    for point in points:
+        if point.strand.startswith(point) or point.strand.endswith(point):
+            currently_selected.append(point)
+        else:
+            utils.warning(
+                refs.constructor,
+                "Invalid Selection",
+                "Linkages must be created across the ends of two strands."
+                "The point that was clicked on is not an end of a strand.",
+            )
 
     if len(currently_selected) == 2:
         strands.connect(*currently_selected)

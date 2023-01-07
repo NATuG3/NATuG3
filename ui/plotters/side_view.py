@@ -145,7 +145,6 @@ class SideViewPlotter(pg.PlotWidget):
         if (
             isinstance(located[0], NEMid)
             and (located[0].juncmate is not None)
-            and not located[0].connected
         ):
             located.append(located[0].juncmate)
 
