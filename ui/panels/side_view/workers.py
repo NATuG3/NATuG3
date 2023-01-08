@@ -178,7 +178,13 @@ def linker(point: Point, strands: Strands, refresh: Callable):
         refresh: Function called to refresh plot after linker mode is run.
     """
     if not isinstance(point, NEMid):
-        raise ValueError("Point is not a NEMid.")
+        utils.warning(
+            refs.constructor,
+            "Invalid Click",
+            "Linker mode only works on NEMids. A nick was clicked. To undo a nick "
+            "please enter nicker mode.",
+        )
+        return
 
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected
@@ -189,10 +195,7 @@ def linker(point: Point, strands: Strands, refresh: Callable):
 
     # Ensure that only endpoints are being selected
     NEMid_index = point.strand.items.by_type(NEMid).index(point)
-    if (
-        NEMid_index == 0
-        or NEMid_index == len(point.strand.items.by_type(NEMid)) - 1
-    ):
+    if NEMid_index == 0 or NEMid_index == len(point.strand.items.by_type(NEMid)) - 1:
         currently_selected.append(point)
         point.styles.change_state("selected")
     else:
