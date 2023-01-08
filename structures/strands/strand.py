@@ -60,7 +60,7 @@ class StrandStyles:
         """Reset the strand to its default state."""
         if self.highlighted:
             self.highlighted = False
-            for point in self.strand:
+            for point in self.strand.items.by_type(Point):
                 point.styles.size -= 5
 
 

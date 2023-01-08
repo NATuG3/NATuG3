@@ -13,6 +13,7 @@ from PyQt6.QtGui import (
 
 import settings
 from structures.points import NEMid, Nucleoside
+from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
@@ -66,7 +67,7 @@ class SideViewPlotter(pg.PlotWidget):
         strand_clicked(the strand that was clicked): When a strand is clicked.
     """
 
-    points_clicked = pyqtSignal(Point, arguments=("Clicked Point NEMids",))
+    points_clicked = pyqtSignal(object, arguments=("Clicked Point NEMids",))
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
 
     def __init__(

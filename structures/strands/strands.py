@@ -441,7 +441,7 @@ class Strands:
 
         # Build the linkage. The linkage begins with the Nucleoside after the first
         # NEMid, then ends with the Nucleoside before the second NEMid.
-        new_strand = Strand(styles=longer_strand.styles)
+        new_strand = Strand()
         new_strand.extend(ends_with_NEMid_strand.sliced(0, NEMid1.index + 1))
         new_strand.append(linkage)
         new_strand.extend(begins_with_NEMid_strand.sliced(NEMid2.index, None))
