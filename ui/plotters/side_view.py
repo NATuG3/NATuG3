@@ -142,10 +142,7 @@ class SideViewPlotter(pg.PlotWidget):
         # use point mapping to detect the clicked points
         located = [self.plot_data.points[position]]
         # if the located item is a NEMid with a juncmate append the juncmate too
-        if (
-            isinstance(located[0], NEMid)
-            and (located[0].juncmate is not None)
-        ):
+        if isinstance(located[0], NEMid) and (located[0].juncmate is not None):
             located.append(located[0].juncmate)
 
         self.points_clicked.emit(tuple(located))
@@ -317,20 +314,19 @@ class SideViewPlotter(pg.PlotWidget):
         # Add the nicks to the plot
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
         for nick in self.plot_data.strands.nicks:
-            self.plotted_points.append(
-                pg.PlotDataItem(
-                    (nick.x_coord,),
-                    (nick.z_coord,),
-                    symbol="o",
-                    symbolSize=8,
-                    pxMode=True,
-                    symbolBrush=nick_brush,
-                    symbolPen=None,
-                    pen=None,
-                )
+            plotted_nick = pg.PlotDataItem(
+                (nick.x_coord,),
+                (nick.z_coord,),
+                symbol="o",
+                symbolSize=8,
+                pxMode=True,
+                symbolBrush=nick_brush,
+                symbolPen=None,
+                pen=None,
             )
-            self.plot_data.plotted_nicks.append(self.plotted_points[-1])
+            self.plot_data.plotted_nicks.append(plotted_nick)
             self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
+            plotted_nick.sigPointsClicked.connect(self._points_clicked)
 
         # Add the points and strokes to the plot
         for stroke, points in zip(
@@ -342,6 +338,10 @@ class SideViewPlotter(pg.PlotWidget):
         # Add the labels to the plot
         for label in self.plot_data.plotted_labels:
             self.addItem(label)
+
+        # Add the nicks to the plot
+        for nick in self.plot_data.plotted_nicks:
+            self.addItem(nick)
 
         # Style the plot
         self._prettify()

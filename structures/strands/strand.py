@@ -550,7 +550,7 @@ class Strand:
 
     def sliced(self, start: int | None, end: int | None) -> list:
         """Return self.NEMids as a list."""
-        return list(itertools.islice(self.items, start, end))
+        return StrandItems(itertools.islice(self.items, start, end))
 
     def touching(self, other: "Strand") -> bool:
         """
