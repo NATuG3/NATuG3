@@ -56,6 +56,69 @@ class StrandStyles:
         self.highlighted = False
 
 
+class StrandItems(deque):
+    """
+    A container for the items in a Strand.
+
+    This is a subclass of deque with various utility methods.
+
+    Methods:
+        NEMids: A list of all the NEMids in the StrandItems.
+        nucleosides: A list of all the nucleosides in the StrandItems.
+        unpacked: A list of all the items in the StrandItems where all iterables are
+            unpacked.
+        unpack: Replace all the items in the StrandItems with the unpacked version of
+            the StrandItems.
+    """
+
+    def NEMids(self) -> List[NEMid]:
+        """
+        Obtain a list of all the NEMids in the StrandItems.
+
+        Returns:
+            list: A list of all the NEMids in the StrandItems.
+        """
+        return [item for item in self if isinstance(item, NEMid)]
+
+    def nucleosides(self) -> List[Nucleoside]:
+        """
+        Obtain a list of all the nucleosides in the StrandItems.
+
+        Returns:
+            list: A list of all the nucleosides in the StrandItems.
+        """
+        return [item for item in self if isinstance(item, Nucleoside)]
+
+    def unpack(self) -> None:
+        """
+        Unpack the items.
+
+        This utilizes StrandItems.unpacked() to replace the items with the unpacked
+        version of the items.
+        """
+        self.clear()
+        self.extend(self.unpacked())
+
+    def unpacked(self) -> List[Point]:
+        """
+        Obtain an unpacked version of the items.
+
+        Return a list of all the contained items, and for each item, if it is an
+        iterable, unpack it.
+
+        Returns:
+            list: A list of all the items in the StrandItems where all iterables are
+            unpacked.
+        """
+        unpacked = []
+        for item in self:
+            if isinstance(item, Iterable):
+                unpacked.extend(item)
+            else:
+                unpacked.append(item)
+        return unpacked
+
+
 @dataclass
 class Strand:
     """
@@ -103,13 +166,13 @@ class Strand:
     nucleic_acid_profile: NucleicAcidProfile = field(
         default_factory=NucleicAcidProfile, repr=False
     )
-    items: Deque[Point] = field(default_factory=deque)
+    items: Deque[Point] = field(default_factory=StrandItems)
     closed: bool = False
 
     styles: StrandStyles = field(default_factory=StrandStyles)
 
     def __post_init__(self):
-        self.items = deque(self.items)
+        self.items = StrandItems(self.items)
         for item in self.items:
             item.strand = self
 
@@ -394,23 +457,23 @@ class Strand:
         """
         Obtain all NEMids in the strand, only.
 
-        Works by recursively checking the type of items in self.items.
+        Utilizes self.items.NEMids() to obtain the NEMids.
 
         Returns:
-            List of all nucleosides in strand.items.
+            A list of NEMids in the strand.
         """
-        return [item for item in self.items if isinstance(item, NEMid)]
+        return self.items.NEMids()
 
     def nucleosides(self) -> List["Nucleoside"]:
         """
         Obtain all nucleosides in the strand, only.
 
-        Works by recursively checking the type of items in self.items.
+        Utilizes self.items.nucleosides() to obtain the nucleosides.
 
         Returns:
-            List of all nucleosides in strand.items.
+            A list of nucleosides in the strand.
         """
-        return [item for item in self.items if isinstance(item, Nucleoside)]
+        return self.items.nucleosides()
 
     @property
     def sequence(self):

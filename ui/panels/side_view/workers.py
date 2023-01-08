@@ -186,6 +186,7 @@ def linker(points: List[Point], strands: Strands, refresh: Callable):
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected
 
+    # Ensure that only endpoints are being selected
     for point in points:
         if point.strand.startswith(point) or point.strand.endswith(point):
             currently_selected.append(point)
@@ -197,8 +198,14 @@ def linker(points: List[Point], strands: Strands, refresh: Callable):
                 "The point that was clicked on is not an end of a strand.",
             )
 
+    # If the point was already selected, deselect it
+    for point in points:
+        if point.selected:
+            point.selected = False
+
+    # If two points are selected, create a linkage
     if len(currently_selected) == 2:
-        strands.connect(*currently_selected)
+        strands.link(*currently_selected)
         currently_selected[0].selected = False
         currently_selected[1].selected = False
         currently_selected.clear()

@@ -1,6 +1,7 @@
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Deque, Literal, Tuple
+import matplotlib.path as mpath
 
 from constants.directions import UP, DOWN
 from structures.points import NEMid, Nucleoside
@@ -48,22 +49,71 @@ class Linkage:
     styles: LinkageStyles = field(default_factory=LinkageStyles)
     strand: "Strand" = None
 
-    def unpack(self):
-        """
-        Unpack the linkage.
-
-        A linkage is a list of points that were between the ends of two strands. To
-        remove the linkage we must place the points into the strand at the location
-        of the linkage.
-        """
-        for item in self.items:
-            self.strand.insert(self.strand.index(self), item)
+    def __setitem__(self, key, value):
+        self.items[key] = value
 
     def __getitem__(self, item):
         return self.items[item]
 
     def __delitem__(self, key):
         del self.items[key]
+
+    def append(self, item: Point):
+        """Append a point to the linkage."""
+        self.items.append(item)
+
+    def leftappend(self, item: Point):
+        """Append a point to the left of the linkage."""
+        self.items.appendleft(item)
+
+    def extend(self, items: Deque[Point]):
+        """Extend the linkage with a list of points."""
+        self.items.extend(items)
+
+    def leftextend(self, items: Deque[Point]):
+        """Extend the linkage with a list of points to the left."""
+        self.items.extendleft(items)
+
+    def plotting_coords(self, resolution: int):
+        """
+        Obtain a list of points for plotting of the linkage.
+
+        A linkage's individual points are not plotted. Rather, the slightly curved
+        arc is generally plotted in a thin stroke to indicate the existence of a
+        linkage.
+
+        To determine the linkage's plotting coordinates, we look at the first point
+        in the linkage, the middlemost x coord point in the linkage, and the right
+        most point in the linkage. Then we move the middlemost x coord point upwards
+        slightly, and create a quadratic bezier curve between the three points.
+
+        Args:
+            resolution: The resolution of the plot. This is the number of times the
+                plotting coordinates are calculated. The higher the resolution, the
+                smoother the curve.
+
+        Returns:
+            A list of plotting coordinates. Each coordinate is a tuple of the form
+            (x, y).
+        """
+        # get the first point in the linkage
+        first_point = self.items[0].x_coord, self.items[0].z_coord
+
+        # obtain the midpoint. This is mean x coord, mean y coord for all points
+        middle_point = [
+            sum([item.x_coord for item in self.items]) / len(self.items),
+            sum([item.z_coord for item in self.items]) / len(self.items),
+        ]
+        middle_point[0] += 0.2
+
+        # get the last point in the linkage
+        last_point = self.items[-1].x_coord, self.items[-1].z_coord
+
+        path = mpath.Path(first_point, middle_point, last_point)
+
+        # return the plotting coordinates. this creates a Bézier curve with the three
+        # points
+        return path.interpolated(resolution).vertices
 
     def NEMids(self):
         """Return all NEMids in the linkage."""

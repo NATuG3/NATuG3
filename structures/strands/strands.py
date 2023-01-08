@@ -1,4 +1,5 @@
 import logging
+from copy import copy
 from functools import partial
 from typing import List, Tuple, Iterable
 
@@ -13,6 +14,7 @@ from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
+from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
 from utils import show_in_file_explorer
 
@@ -378,15 +380,47 @@ class Strands:
 
     def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
-        Link two NEMids together.
+        Create a linkage between two end NEMids.
 
-        A linkage is a
+        This conjoins two different strands, and places a Linkage object in between
+        the two strands.
 
         Args:
-            NEMid1: The first NEMid to link.
-            NEMid2: The second NEMid to link.
-        """
+            NEMid1: A NEMid at either the beginning or end of a strand.
+            NEMid2: A different NEMid at either the beginning or end of a strand.
 
+        Returns:
+            The Linkage object that was created.
+
+        Notes:
+            - NEMids must be at opposite ends of strands.
+            - The NEMids' parent strands must be in this Strands container.
+            - Properties of the longer strand are preserved (styles, etc.).
+        """
+        # 1) Check whether the NEMids' .strand(s) are both self. This ensures that
+        #    the strands will actually be in the same Strands container.
+        # 2) Check whether the NEMids' .strand(s) .startswith or .endswith the NEMid.
+        #    This will ensure that the NEMids are at opposite ends of the strands.
+        # 3) Create a new strand object with NEMid1's strand, a Linkage, and
+        #    NEMid2's strand
+
+        # Check that the NEMids are in the same Strands container
+        if NEMid1.strand.strands != self or NEMid2.strand.strands != self:
+            raise ValueError("NEMids's strands' Strands container must be in the same.")
+
+        # Check that the NEMids are at opposite ends of the strands
+        for NEMid_ in (NEMid1, NEMid2):
+            if not NEMid_.strand.startswith(NEMid_) or NEMid_.strand.endswith(NEMid_):
+                raise ValueError(
+                    "NEMids must be at opposite ends of strands to be linked."
+                )
+
+        if len(NEMid1.strand) > len(NEMid2.strand):
+            longer_strand = NEMid1.strand
+            shorter_strand = NEMid2.strand
+
+        new_strand = copy(longer_strand)
+        new_strand.append(Linkage())
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
