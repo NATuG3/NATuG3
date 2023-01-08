@@ -302,30 +302,6 @@ class Strand:
             for i in range(abs(count)):
                 self.items.popleft().strand = None
 
-    def startswith(self, point: Point) -> bool:
-        """
-        Determine whether the strand starts with a point.
-
-        Args:
-            point: The point to check.
-
-        Returns:
-            Whether the strand starts with the point.
-        """
-        return self.items[0] == point
-
-    def endswith(self, point: Point) -> bool:
-        """
-        Determine whether the strand ends with a point.
-
-        Args:
-            point: The point to check.
-
-        Returns:
-            Whether the strand ends with the point.
-        """
-        return self.items[-1] == point
-
     def generate(self, count: int, domain: "Domain" = None) -> None:
         """
         Generate additional NEMids and Nucleosides for the strand.
@@ -539,7 +515,7 @@ class Strand:
         for nucleoside in self.nucleosides():
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
-                nucleoside.styles.reset()
+                nucleoside.styles.state = nucleoside.styles.DEFAULT
                 if (matching := nucleoside.matching()) is not None:
                     matching.base = nucleoside.complement
 
