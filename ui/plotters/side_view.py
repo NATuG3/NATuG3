@@ -206,9 +206,6 @@ class SideViewPlotter(pg.PlotWidget):
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # set point styles
-                point.styles.reset()
-
                 # assign the coords of the point
                 x_coords.append(point.x_coord)
                 z_coords.append(point.z_coord)

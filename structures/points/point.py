@@ -22,6 +22,10 @@ class PointStyles:
             isn't a default symbol (is not in _all_symbols). This is in degrees.
         fill: The color of the Point. Tuple of (r, g, b) values.
         outline: The color of the outline of the Point. Tuple of (color, width).
+        highlighted: Whether the Point is highlighted. This is immutable; to
+            highlight the strand use .highlight() and to unhighlight use .reset().
+        selected: Whether the Point is selected. This is immutable; to select the
+            strand use .select() and to unselect use .reset().
 
     Methods:
         set_defaults: Automatically set the color of the Point.
@@ -36,7 +40,19 @@ class PointStyles:
     fill: Tuple[int, int, int] = (0, 0, 0)
     outline: Tuple[Tuple[int, int, int], float] = (0, 0, 0), 0.5
 
+    _highlighted: bool = False
+    _selected: bool = False
     _all_symbols = ("o", "t", "t1", "t2", "t3", "s", "p", "h", "star", "+", "d", "x")
+
+    @property
+    def highlighted(self):
+        """Return whether the Point is highlighted."""
+        return self._highlighted
+
+    @property
+    def selected(self):
+        """Return whether the Point is selected."""
+        return self._selected
 
     def symbol_is_custom(self):
         """Return whether the symbol is a custom symbol."""
@@ -51,6 +67,8 @@ class PointStyles:
         self.rotation = 0
         self.outline = dim_color(self.fill, 0.7), 1
 
+        self._highlighted = True
+
     def select(self):
         """Select the point."""
         from ui.plotters.utils import dim_color
@@ -59,6 +77,8 @@ class PointStyles:
         self.size = 18
         self.rotation = 0
         self.outline = dim_color(self.fill, 0.7), 1
+
+        self._selected = True
 
     def reset(self):
         """
@@ -75,11 +95,7 @@ class PointStyles:
         if self.point.strand is None:
             raise ValueError("Point does not have a strand associated with it.")
 
-        if point.highlighted:
-            self.highlight()
-        elif point.selected:
-            self.select()
-        elif isinstance(point, Nucleoside):
+        if isinstance(point, Nucleoside):
             if point.base is None:
                 # Baseless nucleosides are normally colored
                 self.fill = dim_color(strand.styles.color.value, 0.9)
@@ -151,14 +167,12 @@ class Point:
         strand: The strand that this point belongs to.
         domain: The domain this point belongs to.
         matching: Point in same domain on other direction's helix across from this one.
-        highlighted: Whether the point is highlighted.
-        selected: Whether the point is selected.
         index: Index of the point in respect to its strands strand. None if there is
             no strands strand set.
         symbol_str: The symbol of the point as a string. Automatically determined if
         None.
-        symbol_size: The size of the point's symbol in pixels. Automatically determined if
-            None.
+        symbol_size: The size of the point's symbol in pixels. Automatically determined
+            if None.
     """
 
     # positional attributes

@@ -36,13 +36,16 @@ class StrandStyles:
     A container for the styles of a Point.
 
     Attributes:
+        strand: The strand that the styles are for.
         thickness: The thickness of the strand.
         color: The color of the strand.
+        highlighted: Whether the strand is highlighted.
 
     Methods:
         set_defaults: Automatically set the color of the Point.
     """
 
+    strand: "Strand" = None
     thickness: float = field(default_factory=StrandStyle)
     color: str = field(default_factory=StrandStyle)
     highlighted: bool = False
@@ -50,10 +53,15 @@ class StrandStyles:
     def highlight(self):
         """Highlight the strand."""
         self.highlighted = True
+        for point in self.strand:
+            point.styles.size += 5
 
     def reset(self):
         """Reset the strand to its default state."""
-        self.highlighted = False
+        if self.highlighted:
+            self.highlighted = False
+            for point in self.strand:
+                point.styles.size -= 5
 
 
 class StrandItems(deque):
@@ -175,6 +183,8 @@ class Strand:
         self.items = StrandItems(self.items)
         for item in self.items:
             item.strand = self
+        if self.styles.strand == None:
+            self.styles.strand = self
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
@@ -401,7 +411,12 @@ class Strand:
         z_coords = z_coords[:greatest_count]
 
         # Converge the newly generated data and add it to the strand
-        new_items = converge_point_data(angles, x_coords, z_coords)
+        new_items = converge_point_data(
+            angles,
+            x_coords,
+            z_coords,
+            NEMid if isinstance(edge_item, Nucleoside) else Nucleoside,
+        )
 
         # Assign domains for all items
         for item in new_items:
