@@ -554,10 +554,7 @@ class Domains:
                 converge_point_data(
                     zeroed_strand_angles,
                     zeroed_strand_x_coords,
-                    zeroed_strand_z_coords,
-                    initial_type=Nucleoside
-                    if zeroed_strand_direction == DOWN
-                    else NEMid,
+                    zeroed_strand_z_coords
                 )
             )
             # Converge all the datapoints into their proper array
@@ -565,10 +562,7 @@ class Domains:
                 converge_point_data(
                     other_strand_angles,
                     other_strand_x_coords,
-                    other_strand_z_coords,
-                    initial_type=Nucleoside
-                    if other_strand_direction == DOWN
-                    else NEMid,
+                    other_strand_z_coords
                 )
             )
 

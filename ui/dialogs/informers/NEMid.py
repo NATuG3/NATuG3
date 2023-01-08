@@ -46,7 +46,7 @@ class NEMidInformer(QDialog):
         else:  # not item.strand.closed
             openness = "open"
         self.strand.setText(
-            f"NEMid #{NEMid_.strand.NEMids().index(NEMid_) + 1} in {openness} "
+            f"NEMid #{NEMid_.strand.items.by_type(NEMid).index(NEMid_) + 1} in {openness} "
             f"strand #{strand_index + 1}"
         )
 

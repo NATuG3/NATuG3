@@ -376,7 +376,8 @@ class Strands:
                             )
 
             # Set the styles of each point based off new strand styles
-            [item.styles.reset() for item in strand.items]
+            for item in strand.items:
+                item.styles.change_state("default")
 
     def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
@@ -405,7 +406,8 @@ class Strands:
 
         # Check that the NEMids are at opposite ends of the strands
         for NEMid_ in (NEMid1, NEMid2):
-            if not NEMid_.strand.startswith(NEMid_) or NEMid_.strand.endswith(NEMid_):
+            NEMid_index = NEMid_.strand.items.by_type(NEMid).index(NEMid_)
+            if not (NEMid_index == 0 or NEMid_index == len(NEMid_.strand.items.by_type(NEMid)) - 1):
                 raise ValueError(
                     "NEMids must be at opposite ends of strands to be linked."
                 )
@@ -424,7 +426,8 @@ class Strands:
         # shorter strand.
         new_strand = copy(longer_strand)
         linkage = Linkage(NEMid1, NEMid2)
-        new_strand.add_strand(shorter_strand, linkage)
+        new_strand.append(shorter_strand)
+        new_strand.append(linkage)
 
         # Remove the old strands from the container
         self.remove(NEMid1.strand)

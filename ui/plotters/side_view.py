@@ -12,7 +12,7 @@ from PyQt6.QtGui import (
 )
 
 import settings
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
@@ -198,9 +198,9 @@ class SideViewPlotter(pg.PlotWidget):
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
-                to_plot = strand.NEMids()
+                to_plot = strand.items.by_type(NEMid)
             elif self.plot_data.mode == "nucleoside":
-                to_plot = strand.nucleosides()
+                to_plot = strand.items.by_type(Nucleoside)
             else:
                 raise ValueError("Invalid mode.")
 

@@ -57,6 +57,8 @@ class DoubleHelices:
         # Create a list of all the domains
         domains = self.domains()
 
+        from structures.points import NEMid
+
         # Iterate through all the double helices
         for index, double_helix in enumerate(self.double_helices):
             # The actual current domain's strands and the next domain's strands. Note
@@ -67,8 +69,8 @@ class DoubleHelices:
                 index + 1 if index + 1 != len(domains) else 0
             ].zeroed_helix
 
-            for item1 in current_zeroed_strand.NEMids():
-                for item2 in next_zeroed_strand.NEMids():
+            for item1 in current_zeroed_strand.items.by_type(NEMid):
+                for item2 in next_zeroed_strand.items.by_type(NEMid):
                     # Create a function that will assign the juncmate and junctability
                     # of the two NEMids if they need to be assigned.
                     def junct():

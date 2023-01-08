@@ -87,7 +87,7 @@ def informer(
                 )
             )
             # highlight the point that was clicked
-            point.styles.highlight()
+            point.styles.change_state("highlighted")
 
         # if a Nucleoside was clicked create a NucleosideInformer objcet
         elif isinstance(point, Nucleoside):
@@ -100,7 +100,7 @@ def informer(
                 )
             )
             # highlight the point that was clicked
-            point.styles.highlight()
+            point.styles.change_state("highlighted")
 
         # if an unsupported type of point is clicked raise an error
         else:
@@ -113,7 +113,7 @@ def informer(
         for dialog_ in dialogs_:
             dialog_.close()
         for point_ in points_:
-            point_.styles.reset()
+            point_.styles.change_state("default")
 
     if len(dialogs) > 0:
         # connect the completed events for all the dialogs
@@ -190,14 +190,27 @@ def linker(points: List[Point], strands: Strands, refresh: Callable):
             called on this object.
         refresh: Function called to refresh plot after linker mode is run.
     """
+    # If there are any points that are not NEMids then ignore the request
+    if not all([isinstance(point, NEMid) for point in points]):
+        logger.info("Linker mode was run, but not all points were NEMids.")
+        return
+
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected
 
+    # If the point was already selected, deselect it
+    for point in points:
+        if point.styles.is_state("selected"):
+            point.styles.change_state("default")
+
     # Ensure that only endpoints are being selected
     for point in points:
-        print("\n".join([str(type(item)) for item in point.strand.items]))
-        if point.strand.startswith(point) or point.strand.endswith(point):
+        NEMid_index = point.strand.items.by_type(NEMid).index(point)
+        print(NEMid_index)
+        if NEMid_index == 0 or NEMid_index == len(point.strand.items.by_type(NEMid)) - 1:
             currently_selected.append(point)
+            point.styles.change_state("selected")
+            print(point)
         else:
             utils.warning(
                 refs.constructor,
@@ -206,16 +219,11 @@ def linker(points: List[Point], strands: Strands, refresh: Callable):
                 "The point that was clicked on is not an end of a strand.",
             )
 
-    # If the point was already selected, deselect it
-    for point in points:
-        if point.selected:
-            point.styles.reset()
-
     # If two points are selected, create a linkage
     if len(currently_selected) == 2:
         strands.link(*currently_selected)
-        currently_selected[0].styles.select()
-        currently_selected[1].styles.select()
+        currently_selected[0].styles.change_state("default")
+        currently_selected[1].styles.change_state("default")
         currently_selected.clear()
 
     refresh()

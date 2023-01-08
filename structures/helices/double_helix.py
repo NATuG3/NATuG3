@@ -73,11 +73,6 @@ class DoubleHelix:
             item.domain = self.domain
             item.direction = DOWN
 
-        for up_helix, down_helix in zip(self.up_helix, self.down_helix):
-            if isinstance(up_helix, Nucleoside) and isinstance(down_helix, Nucleoside):
-                up_helix.base = (random.choice("ATCG"))
-                down_helix.base = up_helix.complement
-
     @property
     def left_helix(self) -> Strand:
         """

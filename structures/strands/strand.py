@@ -79,23 +79,17 @@ class StrandItems(deque):
             the StrandItems.
     """
 
-    def NEMids(self) -> List[NEMid]:
+    def by_type(self, type_):
         """
-        Obtain a list of all the NEMids in the StrandItems.
+        Obtain a list of all the items of a specific type.
+
+        Args:
+            type_: The type of the items to obtain.
 
         Returns:
-            list: A list of all the NEMids in the StrandItems.
+            list: A list of all the items of the specified type.
         """
-        return [item for item in self if isinstance(item, NEMid)]
-
-    def nucleosides(self) -> List[Nucleoside]:
-        """
-        Obtain a list of all the nucleosides in the StrandItems.
-
-        Returns:
-            list: A list of all the nucleosides in the StrandItems.
-        """
-        return [item for item in self if isinstance(item, Nucleoside)]
+        return [item for item in self if isinstance(item, type_)]
 
     def unpack(self) -> None:
         """
@@ -448,31 +442,31 @@ class Strand:
         """
         Obtain all NEMids in the strand, only.
 
-        Utilizes self.items.NEMids() to obtain the NEMids.
+        Utilizes self.items.by_type(NEMid) to obtain the NEMids.
 
         Returns:
             A list of NEMids in the strand.
         """
-        return self.items.NEMids()
+        return self.items.by_type(NEMid)
 
     def nucleosides(self) -> List["Nucleoside"]:
         """
         Obtain all nucleosides in the strand, only.
 
-        Utilizes self.items.nucleosides() to obtain the nucleosides.
+        Utilizes self.items.by_type(Nucleoside) to obtain the nucleosides.
 
         Returns:
             A list of nucleosides in the strand.
         """
-        return self.items.nucleosides()
+        return self.items.by_type(Nucleoside)
 
     @property
     def sequence(self):
-        return [nucleoside.base for nucleoside in self.nucleosides()]
+        return [nucleoside.base for nucleoside in self.items.by_type(Nucleoside)]
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        nucleosides = self.nucleosides()
+        nucleosides = self.items.by_type(Nucleoside)
         if len(new_sequence) == len(nucleosides):
             for index, base in enumerate(new_sequence):
                 our_nucleoside = nucleosides[index]
@@ -512,7 +506,7 @@ class Strand:
                 to a random nucleoside. If overwrite is True then all nucleosides
                 will be set to a random nucleoside.
         """
-        for nucleoside in self.nucleosides():
+        for nucleoside in self.items.by_type(Nucleoside):
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
                 nucleoside.styles.state = nucleoside.styles.DEFAULT
@@ -528,7 +522,7 @@ class Strand:
                 overwrite is True then all set nucleosides that are set (are not
                 None) will be made None.
         """
-        for nucleoside in self.nucleosides():
+        for nucleoside in self.items.by_type(Nucleoside):
             if overwrite or nucleoside.base is not None:
                 nucleoside.base = None
 
@@ -550,8 +544,8 @@ class Strand:
         Args:
             other: The strand potentially touching this one.
         """
-        for our_item in shuffled(self.NEMids()):
-            for their_item in shuffled(other.NEMids()):
+        for our_item in shuffled(self.items.by_type(NEMid)):
+            for their_item in shuffled(other.items.by_type(NEMid)):
                 if our_item.juncmate is their_item:
                     return True
         else:
@@ -582,12 +576,12 @@ class Strand:
 
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
-        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids()]
+        checks = [bool(NEMid_.direction) for NEMid_ in self.items.by_type(NEMid)]
         return all(checks)
 
     def down_strand(self) -> bool:
         """Whether the strand is a down strand."""
-        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids()]
+        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.items.by_type(NEMid)]
         return all(checks)
 
     def cross_screen(self) -> bool:
@@ -599,7 +593,7 @@ class Strand:
         Returns:
             True if the strand wraps across the screen, False otherwise.
         """
-        junctions = filter(lambda NEMid_: NEMid_.junction, self.NEMids())
+        junctions = filter(lambda NEMid_: NEMid_.junction, self.items.by_type(NEMid))
         for junction in junctions:
             if abs(junction.x_coord - junction.juncmate.x_coord) > 1:
                 return True
@@ -607,14 +601,11 @@ class Strand:
 
     def interdomain(self) -> bool:
         """Whether all the items in this strand belong to the same domain."""
-        domains = [item.domain for item in self.items]
-
-        if len(domains) == 0:
-            return False
-        checker = domains[0]
-        for domain in domains:
-            if domain is not checker:
-                return True
+        checker = self.items.by_type(Point)[0].domain
+        for item in self.items.by_type(Point):
+            if isinstance(item, Point):
+                if item.domain is not checker:
+                    return True
 
         return False
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Type
 
+from constants.directions import UP
 from structures.points.point import Point
 
 
@@ -39,11 +40,18 @@ class NEMid(Point):
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
+        properties = {
+            "pos": tuple(map(lambda i: round(i, 3), self.position())),
+            "angle": round(self.angle, 3),
+            "direction": "UP" if self.direction == UP else "DOWN",
+            "junctable": self.junctable,
+            "juncmate": self.juncmate,
+            "junction": self.junction,
+            "domain": self.domain,
+            "index": self.index,
+        }
+        # Create a string in the format NEMid(key1=value1, key2=value2, ...)
         return (
-            f"NEMid("
-            f"pos={tuple(map(lambda i: round(i, 3), self.position()))}, "
-            f"angle={round(self.angle, 3)}°, "
-            f"junction={str(self.junction).lower()}, "
-            f"junctable={str(self.junctable).lower()}, "
-            f")"
+            f"NEMid"
+            f"({', '.join(f'{key}={value}' for key, value in properties.items())})"
         )

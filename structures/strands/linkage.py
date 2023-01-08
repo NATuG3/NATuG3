@@ -18,8 +18,11 @@ class LinkageStyles:
         thickness: The width of the linkage. This is in pixels.
     """
 
-    color: Tuple[int, int, int]
-    thickness: int
+    color: Tuple[int, int, int] = None
+    thickness: int = None
+
+    def __post_init__(self):
+        self.reset()
 
     def reset(self):
         """
@@ -48,6 +51,8 @@ class Linkage:
     direction: Literal[UP, DOWN] = UP
     styles: LinkageStyles = field(default_factory=LinkageStyles)
     strand: "Strand" = None
+
+    domain = None
 
     def __setitem__(self, key, value):
         self.items[key] = value

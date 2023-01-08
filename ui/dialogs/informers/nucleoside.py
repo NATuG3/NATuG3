@@ -4,7 +4,7 @@ import logging
 
 from constants.directions import *
 from structures.domains import Domains
-from structures.points import Nucleoside
+from structures.points import Nucleoside, NEMid
 from structures.strands import Strands
 
 
@@ -46,7 +46,7 @@ class NucleosideInformer(QDialog):
         else:  # not item.strand.closed
             openness = "open"
         self.strand.setText(
-            f"nucleoside #{nucleoside.strand.NEMids().index(nucleoside) + 1} in"
+            f"nucleoside #{nucleoside.strand.items.by_type(NEMid).index(nucleoside) + 1} in"
             f" {openness} strand #{strand_index + 1}"
         )
 
