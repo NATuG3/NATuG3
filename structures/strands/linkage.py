@@ -117,7 +117,7 @@ class Linkage:
         # get the last point in the linkage
         last_point = self.items[-1].x_coord, self.items[-1].z_coord
 
-        path = mpath.Path(first_point, middle_point, last_point)
+        path = mpath.Path((first_point, middle_point, last_point,))
 
         # return the plotting coordinates. this creates a Bézier curve with the three
         # points
