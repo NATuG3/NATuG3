@@ -2,6 +2,7 @@ import logging
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
+from pprint import pprint
 from typing import List, Tuple, Dict, Literal
 
 import numpy as np
@@ -17,6 +18,7 @@ from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
+from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 
@@ -34,6 +36,7 @@ class PlotData:
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
         plotted_nicks: The nicks.
+        plotted_linkages: The linkages.
         plotted_labels: All plotted text labels.
         plotted_strokes: The strand pen line.
         plotted_gridlines: All the grid lines.
@@ -44,6 +47,7 @@ class PlotData:
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_linkages: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_labels: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_strokes: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
@@ -180,6 +184,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.plotted_labels.clear()
         self.plot_data.plotted_points.clear()
         self.plot_data.plotted_nicks.clear()
+        self.plot_data.plotted_linkages.clear()
         self.plot_data.plotted_strokes.clear()
 
         for strand_index, strand in enumerate(self.plot_data.strands.strands):
@@ -241,67 +246,101 @@ class SideViewPlotter(pg.PlotWidget):
             plotted_points.sigPointsClicked.connect(self._points_clicked)
             self.plot_data.plotted_points.append(plotted_points)
 
-            # if this strand contains a junction then
-            # round the corners of the outline for aesthetics
-            if strand.interdomain():
-                coords = zip(x_coords, z_coords)
-                coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
-                coords = list(chaikins_corner_cutting(coords, refinements=1))
+            broken_up_strokes = []
+            current_stroke = []
+            for item in strand:
+                if self.mode == "NEMid" and isinstance(item, NEMid):
+                    current_stroke.append(item)
+                elif self.mode == "nucleoside" and isinstance(item, Nucleoside):
+                    current_stroke.append(item)
+                elif isinstance(item, Linkage):
+                    broken_up_strokes.append(current_stroke)
+                    current_stroke = []
+            broken_up_strokes.append(current_stroke)
 
-                connect = []
-                # in case the junction is a left-to-right side of screen junction
-                # do not plot the entire connector line going from the left to the
-                # right of the screen
-                for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
-                    # if the distance between this x coord and the next one is large
-                    # then add a break in the connector. Note that the "next x coord"
-                    # to check against is typically the next on in the array,
-                    # except when we reach the end of the list, in which case it
-                    # becomes the first one.
-                    if point_index != len(coords) - 1:
-                        next_x_coord = coords[point_index + 1][0]
-                    else:
-                        next_x_coord = coords[0][0]
+            for stroke in broken_up_strokes:
+                x_coords = [point.x_coord for point in stroke]
+                z_coords = [point.z_coord for point in stroke]
 
-                    # if the distance between this x coord and the next one is large
-                    # then don't add a connection. otherwise add a connection.
-                    if abs(x_coord - next_x_coord) > 1:
-                        # do not connect
-                        connect.append(0)
-                    else:
-                        # connect
+                # if this strand contains a junction then
+                # round the corners of the outline for aesthetics
+                if strand.interdomain():
+                    coords = zip(x_coords, z_coords)
+                    coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
+                    coords = list(chaikins_corner_cutting(coords, refinements=1))
+
+                    connect = []
+                    # in case the junction is a left-to-right side of screen junction
+                    # do not plot the entire connector line going from the left to the
+                    # right of the screen
+                    for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
+                        # if the distance between this x coord and the next one is large
+                        # then add a break in the connector. Note that the "next x coord"
+                        # to check against is typically the next on in the array,
+                        # except when we reach the end of the list, in which case it
+                        # becomes the first one.
+                        if point_index != len(coords) - 1:
+                            next_x_coord = coords[point_index + 1][0]
+                        else:
+                            next_x_coord = coords[0][0]
+
+                        # if the distance between this x coord and the next one is large
+                        # then don't add a connection. otherwise add a connection.
+                        if abs(x_coord - next_x_coord) > 1:
+                            # do not connect
+                            connect.append(0)
+                        else:
+                            # connect
+                            connect.append(1)
+
+                    # closed strands will have one extra item in the end so that they
+                    # appear connected
+                    if strand.closed:
                         connect.append(1)
 
-                # closed strands will have one extra item in the end so that they
-                # appear connected
-                if strand.closed:
-                    connect.append(1)
+                    connect = np.array(connect)
+                    x_coords = [coord[0] for coord in coords]
+                    z_coords = [coord[1] for coord in coords]
+                else:
+                    connect = "all"
 
-                connect = np.array(connect)
+                # plot the outline separately
+                if strand.closed:
+                    x_coords.append(x_coords[0])
+                    z_coords.append(z_coords[0])
+                stroke = pg.PlotDataItem(
+                    x_coords,
+                    z_coords,
+                    pen=pg.mkPen(
+                        color=strand.styles.color.value,
+                        width=strand.styles.thickness.value,
+                    ),
+                    connect=connect,
+                )
+                stroke.setCurveClickable(True)
+                stroke.sigClicked.connect(
+                    lambda plot_data_item, mouse_event, to_emit=strand: self.strand_clicked.emit(
+                        to_emit
+                    )
+                )
+                self.plot_data.plotted_strokes.append(stroke)
+
+            # Add the linkages to the plot
+            for linkage in strand.items.by_type(Linkage):
+                # obtain the coords of the linkage
+                coords = linkage.plotting_coords(15)
                 x_coords = [coord[0] for coord in coords]
                 z_coords = [coord[1] for coord in coords]
-            else:
-                connect = "all"
 
-            # plot the outline separately
-            if strand.closed:
-                x_coords.append(x_coords[0])
-                z_coords.append(z_coords[0])
-            stroke = pg.PlotDataItem(
-                x_coords,
-                z_coords,
-                pen=pg.mkPen(
-                    color=strand.styles.color.value, width=strand.styles.thickness.value
-                ),
-                connect=connect,
-            )
-            stroke.setCurveClickable(True)
-            stroke.sigClicked.connect(
-                lambda plot_data_item, mouse_event, to_emit=strand: self.strand_clicked.emit(
-                    to_emit
+                # plot the linkage
+                plotted_linkage = pg.PlotDataItem(
+                    x_coords,
+                    z_coords,
+                    pen=pg.mkPen(
+                        color=linkage.styles.color, width=linkage.styles.thickness
+                    ),
                 )
-            )
-            self.plot_data.plotted_strokes.append(stroke)
+                self.plot_data.plotted_linkages.append(plotted_linkage)
 
         # Add the nicks to the plot
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
@@ -319,6 +358,10 @@ class SideViewPlotter(pg.PlotWidget):
             self.plot_data.plotted_nicks.append(plotted_nick)
             self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
             plotted_nick.sigPointsClicked.connect(self._points_clicked)
+
+        # Add the linkages to the plot
+        for linkage in self.plot_data.plotted_linkages:
+            self.addItem(linkage)
 
         # Add the points and strokes to the plot
         for stroke, points in zip(
