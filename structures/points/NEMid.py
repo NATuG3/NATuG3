@@ -45,10 +45,8 @@ class NEMid(Point):
             "angle": round(self.angle, 3),
             "direction": "UP" if self.direction == UP else "DOWN",
             "junctable": self.junctable,
-            "juncmate": self.juncmate,
             "junction": self.junction,
             "domain": self.domain,
-            "index": self.index,
         }
         # Create a string in the format NEMid(key1=value1, key2=value2, ...)
         return (
