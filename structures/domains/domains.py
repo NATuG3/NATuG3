@@ -11,6 +11,7 @@ from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.helices import DoubleHelices
+from structures.points import Nucleoside, NEMid
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
@@ -551,13 +552,23 @@ class Domains:
             # Converge all the datapoints into their proper array
             double_helix.zeroed_helix.extend(
                 converge_point_data(
-                    zeroed_strand_angles, zeroed_strand_x_coords, zeroed_strand_z_coords
+                    zeroed_strand_angles,
+                    zeroed_strand_x_coords,
+                    zeroed_strand_z_coords,
+                    initial_type=Nucleoside
+                    if zeroed_strand_direction == DOWN
+                    else NEMid,
                 )
             )
             # Converge all the datapoints into their proper array
             double_helix.other_helix.extend(
                 converge_point_data(
-                    other_strand_angles, other_strand_x_coords, other_strand_z_coords
+                    other_strand_angles,
+                    other_strand_x_coords,
+                    other_strand_z_coords,
+                    initial_type=Nucleoside
+                    if other_strand_direction == DOWN
+                    else NEMid,
                 )
             )
 

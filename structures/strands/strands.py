@@ -383,7 +383,9 @@ class Strands:
         Create a linkage between two end NEMids.
 
         This conjoins two different strands, and places a Linkage object in between
-        the two strands.
+        the two strands. The two strands that are being conjoined will be deleted,
+        and a new strand that contains all the items of those two strands and a
+        linkage will be created and added to the container.
 
         Args:
             NEMid1: A NEMid at either the beginning or end of a strand.
@@ -397,13 +399,6 @@ class Strands:
             - The NEMids' parent strands must be in this Strands container.
             - Properties of the longer strand are preserved (styles, etc.).
         """
-        # 1) Check whether the NEMids' .strand(s) are both self. This ensures that
-        #    the strands will actually be in the same Strands container.
-        # 2) Check whether the NEMids' .strand(s) .startswith or .endswith the NEMid.
-        #    This will ensure that the NEMids are at opposite ends of the strands.
-        # 3) Create a new strand object with NEMid1's strand, a Linkage, and
-        #    NEMid2's strand
-
         # Check that the NEMids are in the same Strands container
         if NEMid1.strand.strands != self or NEMid2.strand.strands != self:
             raise ValueError("NEMids's strands' Strands container must be in the same.")
@@ -415,12 +410,31 @@ class Strands:
                     "NEMids must be at opposite ends of strands to be linked."
                 )
 
+        # Determine the shorter and longer strand. Note that the longer strand will
+        # have its properties preserved.
         if len(NEMid1.strand) > len(NEMid2.strand):
             longer_strand = NEMid1.strand
             shorter_strand = NEMid2.strand
+        else:
+            longer_strand = NEMid2.strand
+            shorter_strand = NEMid1.strand
 
+        # Begin building the new strand. First we will create a copy of the longer
+        # strand, then we will create a Linkage object, and finally we will add the
+        # shorter strand.
         new_strand = copy(longer_strand)
-        new_strand.append(Linkage())
+        linkage = Linkage(NEMid1, NEMid2)
+        new_strand.add_strand(shorter_strand, linkage)
+
+        # Remove the old strands from the container
+        self.remove(NEMid1.strand)
+        self.remove(NEMid2.strand)
+
+        # Add the new strand to the container
+        self.append(new_strand)
+
+        # Return the linkage
+        return linkage
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
