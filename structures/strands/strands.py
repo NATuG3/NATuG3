@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from copy import copy
 from functools import partial
 from typing import List, Tuple, Iterable
@@ -154,6 +155,8 @@ class Strands:
         # Add the two new strands
         self.extend(new_strands)
 
+        self.style()
+
     def unnick(self, nick: "Nick"):
         """
         Recombine a strand and remove a nick.
@@ -177,8 +180,10 @@ class Strands:
         new_strand.extend(strand2)
 
         # Remove the two strands and add the new strand.
-        self.remove(strand1)
-        self.remove(strand2)
+        with suppress(ValueError):
+            self.remove(strand1)
+        with suppress(ValueError):
+            self.remove(strand2)
         self.append(new_strand)
 
         # Remove the nick.
@@ -328,7 +333,7 @@ class Strands:
         strand.strands = None
         self.strands.remove(strand)
 
-    def style(self, skip_checks: bool = False) -> None:
+    def style(self) -> None:
         """
         Recompute colors for all strands contained within.
         Prevents touching strands from sharing colors.
@@ -366,14 +371,9 @@ class Strands:
                             0
                         ]
                     else:
-                        if skip_checks:
-                            strand.styles.color.value = settings.colors["strands"][
-                                "greys"
-                            ][0]
-                        else:
-                            raise ValueError(
-                                "Strand should all be up/down if it is single-domain."
-                            )
+                        strand.styles.color.value = settings.colors["strands"][
+                            "greys"
+                        ][0]
 
             # Set the styles of each point based off new strand styles
             for item in strand.items.by_type(Point):
@@ -419,32 +419,25 @@ class Strands:
         self.remove(NEMid1.strand)
         self.remove(NEMid2.strand)
 
-        # Determine the shorter and longer strand. Note that the longer strand will
-        # have its properties preserved.
-        if len(NEMid1.strand) > len(NEMid2.strand):
-            longer_strand = NEMid1.strand
-            shorter_strand = NEMid2.strand
-        else:
-            longer_strand = NEMid2.strand
-            shorter_strand = NEMid1.strand
-
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
         if NEMid1.strand.items[0] == NEMid1:
-            begins_with_NEMid_strand = NEMid1.strand
-            ends_with_NEMid_strand = NEMid2.strand
+            begins_with_NEMid = NEMid1
+            ends_with_NEMid = NEMid2
         else:
-            begins_with_NEMid_strand = NEMid2.strand
-            ends_with_NEMid_strand = NEMid1.strand
+            begins_with_NEMid = NEMid2
+            ends_with_NEMid = NEMid1
 
-        linkage = Linkage(items=(NEMid1, NEMid2))
+        linkage = Linkage(items=(ends_with_NEMid, begins_with_NEMid))
 
         # Build the linkage. The linkage begins with the Nucleoside after the first
         # NEMid, then ends with the Nucleoside before the second NEMid.
-        new_strand = Strand()
-        new_strand.extend(ends_with_NEMid_strand.sliced(0, NEMid1.index + 1))
+        new_strand = Strand(
+            nucleic_acid_profile=self.nucleic_acid_profile
+        )
+        new_strand.extend(ends_with_NEMid.strand.sliced(0, NEMid1.index + 1))
         new_strand.append(linkage)
-        new_strand.extend(begins_with_NEMid_strand.sliced(NEMid2.index, None))
+        new_strand.extend(begins_with_NEMid.strand.sliced(NEMid2.index, None))
 
         # Add the new strand to the container
         self.append(new_strand)
@@ -490,7 +483,7 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        # new sequencing we are creating
+        # new strands we are creating
         new_strands = [
             Strand(self.nucleic_acid_profile),
             Strand(self.nucleic_acid_profile),
@@ -646,7 +639,7 @@ class Strands:
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
-        self.style(skip_checks)
+        self.style()
 
     @property
     def size(self) -> Tuple[float, float]:
