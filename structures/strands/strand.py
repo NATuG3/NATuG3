@@ -229,7 +229,7 @@ class Strand:
             The item at the index provided will not be included in either strand.
         """
         # Obtain the index of the item to split at.
-        index = (a
+        index = (
             self.index(index_or_item)
             if isinstance(index_or_item, Point)
             else index_or_item
