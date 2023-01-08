@@ -46,9 +46,15 @@ class StrandStyles:
     """
 
     strand: "Strand" = None
-    thickness: float = field(default_factory=StrandStyle)
-    color: str = field(default_factory=StrandStyle)
+    thickness: StrandStyle = field(default_factory=StrandStyle)
+    color: StrandStyle = field(default_factory=StrandStyle)
     highlighted: bool = False
+
+    def __post_init__(self):
+        if self.thickness.value is None:
+            self.thickness.value = 3
+        if self.color.value is None:
+            self.color.value = (255, 192, 203)
 
     def highlight(self):
         """Highlight the strand."""
@@ -223,14 +229,18 @@ class Strand:
             The item at the index provided will not be included in either strand.
         """
         # Obtain the index of the item to split at.
-        index = (
+        index = (a
             self.index(index_or_item)
             if isinstance(index_or_item, Point)
             else index_or_item
         )
 
         # Create two new strands (these are copies of this strand).
-        strand1, strand2 = Strand(**self.__dict__), Strand(**self.__dict__)
+        attrs = {
+            "nucleic_acid_profile": self.nucleic_acid_profile,
+            "closed": self.closed,
+        }
+        strand1, strand2 = Strand(**attrs), Strand(**attrs)
 
         # Set both the new strands to be open (since they were split)
         strand1.closed = strand2.closed = False
@@ -244,6 +254,8 @@ class Strand:
             item.strand = strand1
         for item in strand2.items:
             item.strand = strand2
+
+        self.strands.style()
 
         return strand1, strand2
 
