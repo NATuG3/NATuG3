@@ -1,6 +1,6 @@
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Deque, Literal, Tuple
+from typing import Deque, Literal, Tuple, Iterable
 import matplotlib.path as mpath
 
 from constants.directions import UP, DOWN
@@ -47,12 +47,15 @@ class Linkage:
         strand: The strand that the linkage is a part of.
     """
 
-    items: Deque[Point] = field(default_factory=deque)
+    items: Iterable[Point] = field(default_factory=deque)
     direction: Literal[UP, DOWN] = UP
     styles: LinkageStyles = field(default_factory=LinkageStyles)
     strand: "Strand" = None
 
     domain = None
+
+    def __post_init__(self):
+        self.items = deque(self.items)
 
     def __setitem__(self, key, value):
         self.items[key] = value

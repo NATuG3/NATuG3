@@ -376,7 +376,7 @@ class Strands:
                             )
 
             # Set the styles of each point based off new strand styles
-            for item in strand.items:
+            for item in strand.items.by_type(Point):
                 item.styles.change_state("default")
 
     def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
@@ -407,10 +407,17 @@ class Strands:
         # Check that the NEMids are at opposite ends of the strands
         for NEMid_ in (NEMid1, NEMid2):
             NEMid_index = NEMid_.strand.items.by_type(NEMid).index(NEMid_)
-            if not (NEMid_index == 0 or NEMid_index == len(NEMid_.strand.items.by_type(NEMid)) - 1):
+            if not (
+                NEMid_index == 0
+                or NEMid_index == len(NEMid_.strand.items.by_type(NEMid)) - 1
+            ):
                 raise ValueError(
                     "NEMids must be at opposite ends of strands to be linked."
                 )
+
+        # Remove the old strands from the container
+        self.remove(NEMid1.strand)
+        self.remove(NEMid2.strand)
 
         # Determine the shorter and longer strand. Note that the longer strand will
         # have its properties preserved.
@@ -421,20 +428,32 @@ class Strands:
             longer_strand = NEMid2.strand
             shorter_strand = NEMid1.strand
 
-        # Begin building the new strand. First we will create a copy of the longer
-        # strand, then we will create a Linkage object, and finally we will add the
-        # shorter strand.
-        new_strand = copy(longer_strand)
-        linkage = Linkage(NEMid1, NEMid2)
-        new_strand.append(shorter_strand)
-        new_strand.append(linkage)
+        # Determine the strand that begins with NEMid1 and the strand that begins with
+        # NEMid2
+        if NEMid1.strand.items[0] == NEMid1:
+            begins_with_NEMid_strand = NEMid1.strand
+            ends_with_NEMid_strand = NEMid2.strand
+        else:
+            begins_with_NEMid_strand = NEMid2.strand
+            ends_with_NEMid_strand = NEMid1.strand
 
-        # Remove the old strands from the container
-        self.remove(NEMid1.strand)
-        self.remove(NEMid2.strand)
+        linkage = Linkage(items=(NEMid1, NEMid2))
+
+        # Build the linkage. The linkage begins with the Nucleoside after the first
+        # NEMid, then ends with the Nucleoside before the second NEMid.
+        new_strand = Strand(styles=longer_strand.styles)
+        new_strand.extend(ends_with_NEMid_strand.sliced(0, NEMid1.index + 1))
+        new_strand.append(linkage)
+        new_strand.extend(begins_with_NEMid_strand.sliced(NEMid2.index, None))
 
         # Add the new strand to the container
         self.append(new_strand)
+
+        for item in new_strand:
+            item.strand = new_strand
+
+        # Restyle the strands
+        self.style()
 
         # Return the linkage
         return linkage
@@ -641,7 +660,7 @@ class Strands:
         z_coords: List[float] = []
 
         for strand in self.strands:
-            for item in strand.items:
+            for item in strand.items.by_type(Point):
                 x_coords.append(item.x_coord)
                 z_coords.append(item.z_coord)
 

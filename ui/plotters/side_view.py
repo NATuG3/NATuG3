@@ -13,6 +13,7 @@ from PyQt6.QtGui import (
 
 import settings
 from structures.points import NEMid, Nucleoside
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.strand import Strand
@@ -65,7 +66,7 @@ class SideViewPlotter(pg.PlotWidget):
         strand_clicked(the strand that was clicked): When a strand is clicked.
     """
 
-    points_clicked = pyqtSignal(tuple, arguments=("Clicked Point NEMids",))
+    points_clicked = pyqtSignal(Point, arguments=("Clicked Point NEMids",))
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
 
     def __init__(
@@ -138,14 +139,7 @@ class SideViewPlotter(pg.PlotWidget):
     def _points_clicked(self, event, points):
         """Called when a point on a strand is clicked."""
         position = tuple(points[0].pos())
-
-        # use point mapping to detect the clicked points
-        located = [self.plot_data.points[position]]
-        # if the located item is a NEMid with a juncmate append the juncmate too
-        if isinstance(located[0], NEMid) and (located[0].juncmate is not None):
-            located.append(located[0].juncmate)
-
-        self.points_clicked.emit(tuple(located))
+        self.points_clicked.emit(self.plot_data.points[position])
 
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""

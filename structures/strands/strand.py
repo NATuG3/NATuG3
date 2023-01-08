@@ -53,7 +53,7 @@ class StrandStyles:
     def highlight(self):
         """Highlight the strand."""
         self.highlighted = True
-        for point in self.strand:
+        for point in self.strand.items.by_type(Point):
             point.styles.size += 5
 
     def reset(self):
@@ -168,7 +168,7 @@ class Strand:
     nucleic_acid_profile: NucleicAcidProfile = field(
         default_factory=NucleicAcidProfile, repr=False
     )
-    items: Deque[Point] = field(default_factory=StrandItems)
+    items: StrandItems = field(default_factory=StrandItems)
     closed: bool = False
 
     styles: StrandStyles = field(default_factory=StrandStyles)
@@ -509,7 +509,7 @@ class Strand:
         for nucleoside in self.items.by_type(Nucleoside):
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
-                nucleoside.styles.state = nucleoside.styles.DEFAULT
+                nucleoside.styles.change_state("default")
                 if (matching := nucleoside.matching()) is not None:
                     matching.base = nucleoside.complement
 
@@ -533,7 +533,7 @@ class Strand:
         except IndexError:
             return None
 
-    def sliced(self, start: int | None, end: int | None) -> list:
+    def sliced(self, start: int | None, end: int | None) -> StrandItems:
         """Return self.NEMids as a list."""
         return StrandItems(itertools.islice(self.items, start, end))
 
