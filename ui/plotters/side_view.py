@@ -19,7 +19,7 @@ from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.strands.linkage import Linkage
-from structures.strands.strand import Strand
+from structures.strands.strand import Strand, StrandItems
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 
 logger = logging.getLogger(__name__)
@@ -198,15 +198,18 @@ class SideViewPlotter(pg.PlotWidget):
 
             # iterate on the proper type based on toolbar
             if self.plot_data.mode == "NEMid":
-                to_plot = strand.items.by_type(NEMid)
+                to_plot = strand.items.by_type((NEMid, Linkage))
             elif self.plot_data.mode == "nucleoside":
-                to_plot = strand.items.by_type(Nucleoside)
+                to_plot = strand.items.by_type((Nucleoside, Linkage))
             else:
                 raise ValueError("Invalid mode.")
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # assign the coords of the point
+                if isinstance(point, Linkage):
+                    continue
+
+                # store the point's coordinates
                 x_coords.append(point.x_coord)
                 z_coords.append(point.z_coord)
 
@@ -215,17 +218,26 @@ class SideViewPlotter(pg.PlotWidget):
                 self.plot_data.points[(point.x_coord, point.z_coord)] = point
 
                 # if the symbol is a custom symbol, use the custom symbol
-                symbols.append(
-                    custom_symbol(
-                        point.styles.symbol, flip=False, rotation=point.styles.rotation
+                if point.styles.symbol_is_custom():
+                    symbols.append(
+                        custom_symbol(
+                            point.styles.symbol,
+                            flip=False,
+                            rotation=point.styles.rotation,
+                        )
                     )
-                ) if point.styles.symbol_is_custom() else symbols.append(
-                    point.styles.symbol
-                )
+                else:
+                    symbols.append(point.styles.symbol)
+
+                # store the symbol size
                 symbol_sizes.append(point.styles.size)
+
+                # store the symbol brush
                 symbol_brushes.append(
                     pg.mkBrush(color=point.styles.fill, width=point.styles.outline[1])
                 )
+
+                # store the symbol pen
                 symbol_pens.append(
                     pg.mkPen(
                         color=point.styles.outline[0], width=point.styles.outline[1]
@@ -246,101 +258,47 @@ class SideViewPlotter(pg.PlotWidget):
             plotted_points.sigPointsClicked.connect(self._points_clicked)
             self.plot_data.plotted_points.append(plotted_points)
 
-            broken_up_strokes = []
-            current_stroke = []
-            for item in strand:
-                if self.mode == "NEMid" and isinstance(item, NEMid):
-                    current_stroke.append(item)
-                elif self.mode == "nucleoside" and isinstance(item, Nucleoside):
-                    current_stroke.append(item)
-                elif isinstance(item, Linkage):
-                    broken_up_strokes.append(current_stroke)
-                    current_stroke = []
-            broken_up_strokes.append(current_stroke)
+            for stroke_segment in StrandItems(to_plot).split(Linkage):
+                x_coords = [point.x_coord for point in stroke_segment]
+                z_coords = [point.z_coord for point in stroke_segment]
 
-            for stroke in broken_up_strokes:
-                x_coords = [point.x_coord for point in stroke]
-                z_coords = [point.z_coord for point in stroke]
-
-                # if this strand contains a junction then
-                # round the corners of the outline for aesthetics
-                if strand.interdomain():
-                    coords = zip(x_coords, z_coords)
-                    coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
-                    coords = list(chaikins_corner_cutting(coords, refinements=1))
-
-                    connect = []
-                    # in case the junction is a left-to-right side of screen junction
-                    # do not plot the entire connector line going from the left to the
-                    # right of the screen
-                    for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
-                        # if the distance between this x coord and the next one is large
-                        # then add a break in the connector. Note that the "next x coord"
-                        # to check against is typically the next on in the array,
-                        # except when we reach the end of the list, in which case it
-                        # becomes the first one.
-                        if point_index != len(coords) - 1:
-                            next_x_coord = coords[point_index + 1][0]
-                        else:
-                            next_x_coord = coords[0][0]
-
-                        # if the distance between this x coord and the next one is large
-                        # then don't add a connection. otherwise add a connection.
-                        if abs(x_coord - next_x_coord) > 1:
-                            # do not connect
-                            connect.append(0)
-                        else:
-                            # connect
-                            connect.append(1)
-
-                    # closed strands will have one extra item in the end so that they
-                    # appear connected
-                    if strand.closed:
-                        connect.append(1)
-
-                    connect = np.array(connect)
-                    x_coords = [coord[0] for coord in coords]
-                    z_coords = [coord[1] for coord in coords]
-                else:
-                    connect = "all"
-
-                # plot the outline separately
+                # if the strand is closed then connect the last point to the first
+                # point
                 if strand.closed:
                     x_coords.append(x_coords[0])
                     z_coords.append(z_coords[0])
-                stroke = pg.PlotDataItem(
+
+                # plot the outline
+                plotted_stroke = pg.PlotDataItem(
                     x_coords,
                     z_coords,
                     pen=pg.mkPen(
                         color=strand.styles.color.value,
                         width=strand.styles.thickness.value,
                     ),
-                    connect=connect,
                 )
-                stroke.setCurveClickable(True)
-                stroke.sigClicked.connect(
-                    lambda plot_data_item, mouse_event, to_emit=strand: self.strand_clicked.emit(
-                        to_emit
+                plotted_stroke.setCurveClickable(True)
+                plotted_stroke.sigClicked.connect(
+                    lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)
+                )
+                self.plot_data.plotted_strokes.append(plotted_stroke)
+
+                # Add the linkages to the plot
+                for linkage in strand.items.by_type(Linkage):
+                    # obtain the coords of the linkage
+                    coords = linkage.plotting_coords(15)
+                    x_coords = [coord[0] for coord in coords]
+                    z_coords = [coord[1] for coord in coords]
+
+                    # plot the linkage
+                    plotted_linkage = pg.PlotDataItem(
+                        x_coords,
+                        z_coords,
+                        pen=pg.mkPen(
+                            color=linkage.styles.color, width=linkage.styles.thickness
+                        ),
                     )
-                )
-                self.plot_data.plotted_strokes.append(stroke)
-
-            # Add the linkages to the plot
-            for linkage in strand.items.by_type(Linkage):
-                # obtain the coords of the linkage
-                coords = linkage.plotting_coords(15)
-                x_coords = [coord[0] for coord in coords]
-                z_coords = [coord[1] for coord in coords]
-
-                # plot the linkage
-                plotted_linkage = pg.PlotDataItem(
-                    x_coords,
-                    z_coords,
-                    pen=pg.mkPen(
-                        color=linkage.styles.color, width=linkage.styles.thickness
-                    ),
-                )
-                self.plot_data.plotted_linkages.append(plotted_linkage)
+                    self.plot_data.plotted_linkages.append(plotted_linkage)
 
         # Add the nicks to the plot
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
@@ -359,24 +317,19 @@ class SideViewPlotter(pg.PlotWidget):
             self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
             plotted_nick.sigPointsClicked.connect(self._points_clicked)
 
-        # Add the linkages to the plot
-        for linkage in self.plot_data.plotted_linkages:
-            self.addItem(linkage)
+        # Configure the order to add things to the plot
+        # Note that the lower items are plotted last and therefore are on top
+        layers = (
+            self.plot_data.plotted_linkages,
+            self.plot_data.plotted_strokes,
+            self.plot_data.plotted_nicks,
+            self.plot_data.plotted_points,
+        )
 
-        # Add the points and strokes to the plot
-        for stroke, points in zip(
-            self.plot_data.plotted_strokes, self.plot_data.plotted_points
-        ):
-            self.addItem(stroke)
-            self.addItem(points)
-
-        # Add the labels to the plot
-        for label in self.plot_data.plotted_labels:
-            self.addItem(label)
-
-        # Add the nicks to the plot
-        for nick in self.plot_data.plotted_nicks:
-            self.addItem(nick)
+        # Add the items to the plot
+        for layer in layers:
+            for item in layer:
+                self.addItem(item)
 
         # Style the plot
         self._prettify()

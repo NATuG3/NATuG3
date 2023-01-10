@@ -2,7 +2,7 @@ import itertools
 import random
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, Deque, List
+from typing import Tuple, Iterable, Deque, List, Type, Set
 
 import numpy as np
 
@@ -83,29 +83,42 @@ class StrandItems(deque):
             unpacked.
         unpack: Replace all the items in the StrandItems with the unpacked version of
             the StrandItems.
+        item_types: A list of all the types of items in the StrandItems.
     """
 
-    def by_type(self, type_):
+    def by_type(self, type_: Type | Tuple[Type]) -> List[object]:
         """
         Obtain a list of all the items of a specific type.
 
         Args:
-            type_: The type of the items to obtain.
+            type_: The type(s) of the items to obtain. If multiple types are specified,
+                the items of the types provided will be returned.
 
         Returns:
             list: A list of all the items of the specified type.
         """
         return [item for item in self if isinstance(item, type_)]
 
-    def unpack(self) -> None:
+    def split(self, type_: Type) -> List[List[object]]:
         """
-        Unpack the items.
+        Split the items into a list of lists. A new list is created whenever an item
+        of the specified type is encountered. The items of the specified type are not
+        included in the returned lists.
 
-        This utilizes StrandItems.unpacked() to replace the items with the unpacked
-        version of the items.
+        Args:
+            type_: The type of items to split on.
+
+        Returns:
+            list: A list of lists of items split on the specified type.
         """
-        self.clear()
-        self.extend(self.unpacked())
+        split = [[]]
+        for item in self:
+            if isinstance(item, type_):
+                split.append([])
+            else:
+                split[-1].append(item)
+        print(len(split))
+        return split
 
     def unpacked(self) -> List[Point]:
         """
@@ -126,6 +139,14 @@ class StrandItems(deque):
                 unpacked.append(item)
         return unpacked
 
+    def item_types(self) -> Set[Type]:
+        """
+        Obtain a list of all the types of items in the StrandItems.
+
+        Returns:
+            list: A list of all the types of items in the StrandItems.
+        """
+        return set([type(item) for item in self])
 
 @dataclass
 class Strand:
