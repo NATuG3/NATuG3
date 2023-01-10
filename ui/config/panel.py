@@ -145,6 +145,10 @@ class Panel(QWidget):
                 refs.toolbar.actions.buttons[LINKER].setEnabled(False)
                 refs.toolbar.actions.buttons[JUNCTER].setEnabled(False)
 
+        for item in refs.misc.currently_selected:
+            item.styles.change_state("default")
+            refs.misc.currently_selected.remove(item)
+        refs.constructor.side_view.plot.refresh()
         self.tab_area.currentChanged.connect(tab_changed)
 
 
