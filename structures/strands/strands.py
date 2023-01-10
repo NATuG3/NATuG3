@@ -1,6 +1,5 @@
 import logging
 from contextlib import suppress
-from copy import copy
 from functools import partial
 from typing import List, Tuple, Iterable
 

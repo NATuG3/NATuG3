@@ -1,8 +1,4 @@
-import random
-
-from constants.bases import DNA
 from constants.directions import DOWN, UP
-from structures.points import Nucleoside
 from structures.strands import Strand
 from utils import inverse
 

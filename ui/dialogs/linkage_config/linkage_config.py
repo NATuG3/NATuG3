@@ -2,7 +2,6 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QDialog
 
-from structures.points import Nucleoside
 from structures.strands.linkage import Linkage
 from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor

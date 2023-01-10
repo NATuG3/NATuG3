@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass
-from typing import Tuple, Type, List, Literal
+from typing import Tuple, Type, List
 
 import settings
 from constants.directions import DOWN, UP

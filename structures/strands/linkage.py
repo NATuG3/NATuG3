@@ -2,11 +2,9 @@ from collections import deque
 from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Deque, Literal, Tuple, Iterable, ClassVar, List
-import matplotlib.path as mpath
 
 from constants.directions import UP, DOWN
-from structures.points import NEMid, Nucleoside
-from structures.points.point import Point
+from structures.points import Nucleoside
 
 
 @dataclass

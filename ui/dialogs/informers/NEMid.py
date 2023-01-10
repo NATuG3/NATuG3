@@ -1,12 +1,12 @@
+import logging
+
 from PyQt6 import uic
 from PyQt6.QtWidgets import QDialog
-import logging
 
 from constants.directions import *
 from structures.domains import Domains
 from structures.points import NEMid
 from structures.strands import Strands
-
 
 logger = logging.getLogger(__name__)
 

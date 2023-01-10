@@ -2,10 +2,8 @@ import logging
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
-from pprint import pprint
 from typing import List, Tuple, Dict, Literal
 
-import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import (
@@ -14,7 +12,6 @@ from PyQt6.QtGui import (
 
 import settings
 from structures.points import NEMid, Nucleoside
-from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands

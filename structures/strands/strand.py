@@ -2,7 +2,7 @@ import itertools
 import random
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, Deque, List, Type, Set
+from typing import Tuple, Iterable, List, Type, Set
 
 import numpy as np
 
@@ -147,6 +147,7 @@ class StrandItems(deque):
             list: A list of all the types of items in the StrandItems.
         """
         return set([type(item) for item in self])
+
 
 @dataclass
 class Strand:

@@ -1,6 +1,6 @@
 import logging
 from functools import partial
-from typing import List, Callable
+from typing import Callable
 
 import refs
 import ui.dialogs.informers
@@ -11,7 +11,6 @@ from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.strands import Strands
-from utils import inverse
 
 logger = logging.getLogger(__name__)
 
