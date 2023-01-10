@@ -73,6 +73,7 @@ class SideViewPlotter(pg.PlotWidget):
 
     points_clicked = pyqtSignal(object, arguments=("Clicked Point NEMids",))
     strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
+    linkage_clicked = pyqtSignal(Linkage, arguments=("Clicked Linkages",))
 
     def __init__(
         self,
@@ -297,6 +298,10 @@ class SideViewPlotter(pg.PlotWidget):
                         pen=pg.mkPen(
                             color=linkage.styles.color, width=linkage.styles.thickness
                         ),
+                    )
+                    plotted_linkage.setCurveClickable(True)
+                    plotted_linkage.sigClicked.connect(
+                        lambda *args, to_emit=linkage: self.linkage_clicked.emit(to_emit)
                     )
                     self.plot_data.plotted_linkages.append(plotted_linkage)
 

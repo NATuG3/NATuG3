@@ -11,6 +11,7 @@ import ui.plotters
 from constants.toolbar import *
 from structures.points.point import Point
 from structures.strands import Strand
+from structures.strands.linkage import Linkage
 from ui.dialogs.strand_config.strand_config import StrandConfig
 from ui.panels.side_view import workers
 
@@ -44,6 +45,7 @@ class Panel(QGroupBox):
         )
         self.plot.points_clicked.connect(self.points_clicked)
         self.plot.strand_clicked.connect(self.strand_clicked)
+        self.plot.linkage_clicked.connect(self.linkage_clicked)
         self.layout().addWidget(self.plot)
 
     def refresh(self) -> None:
@@ -57,6 +59,16 @@ class Panel(QGroupBox):
         self.plot.nucleic_acid = refs.nucleic_acid.current
         self.plot.mode = refs.misc.plot_mode
         self.plot.refresh()
+
+    def linkage_clicked(self, linkage: Linkage) -> None:
+        """
+        Slot for when a linkage is clicked.
+
+
+
+        Args:
+            linkage: The linkage that was clicked.
+        """
 
     def strand_clicked(self, strand: Strand) -> None:
         """

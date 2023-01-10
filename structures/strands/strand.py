@@ -118,7 +118,6 @@ class StrandItems(deque):
                 split.append([])
             else:
                 split[-1].append(item)
-        print(len(split))
         return split
 
     def unpacked(self) -> List[Point]:
