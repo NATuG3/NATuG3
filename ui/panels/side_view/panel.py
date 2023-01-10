@@ -12,6 +12,7 @@ from constants.toolbar import *
 from structures.points.point import Point
 from structures.strands import Strand
 from structures.strands.linkage import Linkage
+from ui.dialogs.linkage_config.linkage_config import LinkageConfig
 from ui.dialogs.strand_config.strand_config import StrandConfig
 from ui.panels.side_view import workers
 
@@ -64,11 +65,17 @@ class Panel(QGroupBox):
         """
         Slot for when a linkage is clicked.
 
-
+        Opens a linkage dialog for configuring the linkage.
 
         Args:
             linkage: The linkage that was clicked.
         """
+        dialog = LinkageConfig(self.parent(), linkage)
+        dialog.updated.connect(self.refresh)
+        dialog.show()
+        self.refresh()
+
+        logger.info(f"A linkage was clicked.")
 
     def strand_clicked(self, strand: Strand) -> None:
         """

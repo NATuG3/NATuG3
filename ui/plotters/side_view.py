@@ -136,6 +136,10 @@ class SideViewPlotter(pg.PlotWidget):
             self.removeItem(stroke)
         for points in plot_data.plotted_points:
             self.removeItem(points)
+        for nick in plot_data.plotted_nicks:
+            self.removeItem(nick)
+        for linkage in plot_data.plotted_linkages:
+            self.removeItem(linkage)
         for labels in plot_data.plotted_labels:
             self.removeItem(labels)
         for gridline in plot_data.plotted_gridlines:
@@ -287,7 +291,8 @@ class SideViewPlotter(pg.PlotWidget):
                 # Add the linkages to the plot
                 for linkage in strand.items.by_type(Linkage):
                     # obtain the coords of the linkage
-                    coords = linkage.plotting_coords(15)
+                    coords = linkage.plot_points
+                    coords = chaikins_corner_cutting(coords, refinements=9)
                     x_coords = [coord[0] for coord in coords]
                     z_coords = [coord[1] for coord in coords]
 
@@ -301,7 +306,9 @@ class SideViewPlotter(pg.PlotWidget):
                     )
                     plotted_linkage.setCurveClickable(True)
                     plotted_linkage.sigClicked.connect(
-                        lambda *args, to_emit=linkage: self.linkage_clicked.emit(to_emit)
+                        lambda *args, to_emit=linkage: self.linkage_clicked.emit(
+                            to_emit
+                        )
                     )
                     self.plot_data.plotted_linkages.append(plotted_linkage)
 

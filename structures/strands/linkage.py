@@ -1,6 +1,7 @@
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Deque, Literal, Tuple, Iterable
+from functools import cached_property
+from typing import Deque, Literal, Tuple, Iterable, ClassVar, List
 import matplotlib.path as mpath
 
 from constants.directions import UP, DOWN
@@ -41,21 +42,133 @@ class Linkage:
 
     Attributes:
         items: A list of all the points in the linkage.
-        direction: The direction to bend the linkage when the linkage is plotted.
-            Note that the linkage is bent and curved when it is plotted.
         styles: A list of styles to apply to the linkage when it is plotted.
         strand: The strand that the linkage is a part of.
+        sequence: The bases of the nucleosides, as a list of strings of capital letters.
+        plot_points: The points to plot the linkage with. This is a tuple of three
+            tuples, where the first is the position of the lefter Nucleoside from
+            initialisation, the second is the position of the righter Nucleoside from
+            initialisation, and the third is the average of the two, with a boost in its
+            z coord.
+
+    Methods:
+        trim: Trim the linkage to a certain length.
+        generate: Generate additional Nucleoside objects, and add them to the linkage.
     """
 
-    items: Iterable[Point] = field(default_factory=deque)
-    direction: Literal[UP, DOWN] = UP
+    items: Deque[Nucleoside] = field(default_factory=deque)
+    inflection: Literal[UP, DOWN] = UP
     styles: LinkageStyles = field(default_factory=LinkageStyles)
     strand: "Strand" = None
 
-    domain = None
+    # Items that go into strands must have a domain attribute. This will always be None
+    # for linkages.
+    domain: ClassVar[None] = None
 
     def __post_init__(self):
+        # Convert the items to a deque if they are not already.
         self.items = deque(self.items)
+        self._initial_item_coordinates = tuple(item.position() for item in self.items)
+
+        # Ensure all the items are nucleosides
+        for item in self.items:
+            if not isinstance(item, Nucleoside):
+                raise TypeError("All items in a linkage must be nucleosides.")
+
+        # Clear the angles, x coords, and z coords of all the nucleosides in the
+        # linkage. Also, assign this linkage to the nucleosides.
+        for item in self.items:
+            item.angle = None
+            item.x_coord = None
+            item.z_coord = None
+            item.linkage = self
+
+    @cached_property
+    def plot_points(self):
+        # Store the plot_points as a tuple of three tuples.
+        items_sorted_by_x_coord = sorted(
+            self._initial_item_coordinates, key=lambda item: item[0]
+        )
+        plot_points = (
+            items_sorted_by_x_coord[0],
+            [
+                ((items_sorted_by_x_coord[0][0] + items_sorted_by_x_coord[1][0]) / 2),
+                ((items_sorted_by_x_coord[0][1] + items_sorted_by_x_coord[1][1]) / 2),
+            ],
+            items_sorted_by_x_coord[1],
+        )
+        # If the midpoint is lower than both of the other points, then the inflection
+        # is down.
+        if plot_points[0][1] < plot_points[2][1]:
+            plot_points[1][1] -= 0.1
+        else:
+            plot_points[1][1] += 0.1
+        return plot_points
+
+    def generate(self, length: int):
+        """
+        Generate additional nucleosides, and add them to the linkage.
+
+        All the attributes of the generated nucleosides will be None except for
+        .linkage, which will be this linkage.
+
+        Args:
+            length: The number of nucleosides to generate. If negative, generate
+                nucleosides to the left of the linkage. If positive, generate
+                nucleosides to the right of the linkage.
+        """
+        if length < 0:
+            for _ in range(-length):
+                self.leftappend(Nucleoside(linkage=self))
+        else:
+            for _ in range(length):
+                self.append(Nucleoside(linkage=self))
+
+    def trim(self, length: int):
+        """
+        Trim the linkage to a certain length.
+
+        Args:
+            length: The length to trim the linkage to. If negative, trim the linkage
+                to the left. If positive, trim the linkage to the right.
+        """
+        if length < 0:
+            self.items = deque(list(self.items)[:length])
+        else:
+            self.items = deque(list(self.items)[length:])
+
+    @property
+    def sequence(self) -> List[Literal["A", "T", "C", "G"]]:
+        """
+        Return the sequence of the linkage as a list of strings of bases.
+        """
+        return [nucleoside.base for nucleoside in self]
+
+    @sequence.setter
+    def sequence(self, sequence: Iterable[Literal["A", "T", "C", "G"]]):
+        """
+        Set the sequence of the linkage.
+
+        Args:
+            sequence: The sequence of the linkage as a list of strings of bases.
+
+        Raises:
+            ValueError: If the sequence is not the same length as the linkage.
+        """
+        if len(sequence) != len(self):
+            raise ValueError(
+                f"Sequence length ({len(sequence)}) does not match the length of the "
+                f"linkage ({len(self)})."
+            )
+
+        for nucleoside, base in zip(self, sequence):
+            nucleoside.base = base
+
+    def __iter__(self):
+        return iter(self.items)
+
+    def __len__(self) -> int:
+        return len(self.items)
 
     def __setitem__(self, key, value):
         self.items[key] = value
@@ -66,67 +179,18 @@ class Linkage:
     def __delitem__(self, key):
         del self.items[key]
 
-    def append(self, item: Point):
+    def append(self, item: Nucleoside):
         """Append a point to the linkage."""
         self.items.append(item)
 
-    def leftappend(self, item: Point):
+    def leftappend(self, item: Nucleoside):
         """Append a point to the left of the linkage."""
         self.items.appendleft(item)
 
-    def extend(self, items: Deque[Point]):
+    def extend(self, items: Deque[Nucleoside]):
         """Extend the linkage with a list of points."""
         self.items.extend(items)
 
-    def leftextend(self, items: Deque[Point]):
+    def leftextend(self, items: Deque[Nucleoside]):
         """Extend the linkage with a list of points to the left."""
         self.items.extendleft(items)
-
-    def plotting_coords(self, resolution: int):
-        """
-        Obtain a list of points for plotting of the linkage.
-
-        A linkage's individual points are not plotted. Rather, the slightly curved
-        arc is generally plotted in a thin stroke to indicate the existence of a
-        linkage.
-
-        To determine the linkage's plotting coordinates, we look at the first point
-        in the linkage, the middlemost x coord point in the linkage, and the right
-        most point in the linkage. Then we move the middlemost x coord point upwards
-        slightly, and create a quadratic bezier curve between the three points.
-
-        Args:
-            resolution: The resolution of the plot. This is the number of times the
-                plotting coordinates are calculated. The higher the resolution, the
-                smoother the curve.
-
-        Returns:
-            A list of plotting coordinates. Each coordinate is a tuple of the form
-            (x, y).
-        """
-        # get the first point in the linkage
-        first_point = self.items[0].x_coord, self.items[0].z_coord
-
-        # obtain the midpoint. This is mean x coord, mean y coord for all points
-        middle_point = [
-            sum([item.x_coord for item in self.items]) / len(self.items),
-            sum([item.z_coord for item in self.items]) / len(self.items),
-        ]
-        middle_point[0] += 0.2
-
-        # get the last point in the linkage
-        last_point = self.items[-1].x_coord, self.items[-1].z_coord
-
-        path = mpath.Path((first_point, middle_point, last_point,))
-
-        # return the plotting coordinates. this creates a Bézier curve with the three
-        # points
-        return path.interpolated(resolution).vertices
-
-    def NEMids(self):
-        """Return all NEMids in the linkage."""
-        return [item for item in self.items if isinstance(item, NEMid)]
-
-    def nucleosides(self):
-        """Return all nucleosides in the linkage."""
-        return [item for item in self.items if isinstance(item, Nucleoside)]

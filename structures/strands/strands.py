@@ -11,7 +11,7 @@ from pandas import ExcelWriter
 import settings
 from constants.directions import DOWN
 from structures.helices import DoubleHelices
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -372,9 +372,9 @@ class Strands:
                             0
                         ]
                     else:
-                        strand.styles.color.value = settings.colors["strands"][
-                            "greys"
-                        ][0]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][
+                            0
+                        ]
 
             # Set the styles of each point based off new strand styles
             for item in strand.items.by_type(Point):
@@ -404,7 +404,10 @@ class Strands:
         """
         # Check that the NEMids are in the same Strands container
         if NEMid1.strand.strands != self or NEMid2.strand.strands != self:
-            raise ValueError("NEMids's strands' Strands container must be in the same.")
+            raise ValueError(
+                "NEMids's strands' Strands container must be in the same. ("
+                f"{NEMid1.strand.strands} != {NEMid2.strand.strands})"
+            )
 
         # Check that the NEMids are at opposite ends of the strands
         for NEMid_ in (NEMid1, NEMid2):
@@ -438,16 +441,35 @@ class Strands:
             begins_with_NEMid = NEMid2
             ends_with_NEMid = NEMid1
 
-        linkage = Linkage(items=(ends_with_NEMid, begins_with_NEMid))
+        # Attempt to surf forward one point, if that does not work then try surfing
+        # backwards. We need nucleosides.
+        if isinstance(ends_with_NEMid.surf_strand(1), Nucleoside):
+            nucleoside1 = ends_with_NEMid.strand.items[-1]
+        else:
+            nucleoside1 = ends_with_NEMid.strand.items[0]
+
+        # Attempt to surf forward one point, if that does not work then try surfing
+        # backwards. We need nucleosides.
+        if isinstance(begins_with_NEMid.surf_strand(-1), Nucleoside):
+            nucleoside2 = begins_with_NEMid.strand.items[0]
+        else:
+            nucleoside2 = begins_with_NEMid.strand.items[-1]
+
+        linkage = Linkage(
+            items=(
+                nucleoside1,
+                nucleoside2,
+            )
+        )
 
         # Build the linkage. The linkage begins with the Nucleoside after the first
         # NEMid, then ends with the Nucleoside before the second NEMid.
-        new_strand = Strand(
-            nucleic_acid_profile=self.nucleic_acid_profile
-        )
-        new_strand.extend(ends_with_NEMid.strand.sliced(0, NEMid1.index + 1))
+        new_strand = Strand(nucleic_acid_profile=self.nucleic_acid_profile)
+        new_strand.extend(tuple(ends_with_NEMid.strand.items))
         new_strand.append(linkage)
-        new_strand.extend(begins_with_NEMid.strand.sliced(NEMid2.index, None))
+        new_strand.extend(tuple(begins_with_NEMid.strand.items))
+        new_strand.remove(nucleoside1)
+        new_strand.remove(nucleoside2)
 
         # Add the new strand to the container
         self.append(new_strand)
@@ -664,7 +686,9 @@ class Strands:
 
         for strand in self.strands:
             for item in strand.items.by_type(Point):
-                x_coords.append(item.x_coord)
-                z_coords.append(item.z_coord)
+                if item.x_coord is not None:
+                    x_coords.append(item.x_coord)
+                if item.z_coord is not None:
+                    z_coords.append(item.z_coord)
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)

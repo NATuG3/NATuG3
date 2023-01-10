@@ -144,7 +144,8 @@ class Point:
         angle: Angle from this domain and next domains' line of tangency going
             counterclockwise.
         direction: The direction of the helix at this point.
-        strand: The strand that this point belongs to.
+        strand: The strand that this point belongs to. Can be None.
+        linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
 
     Methods:
@@ -152,6 +153,7 @@ class Point:
         x_coord_from_angle: Obtain the x coord of the point from the angle.
         position: Obtain the position of the point as a tuple.
         is_endpoint: Return whether the point is an endpoint in the strand.
+        midpoint: Obtain the midpoint between this point and a different point.
     """
 
     # positional attributes
@@ -162,6 +164,7 @@ class Point:
     # nucleic acid attributes
     direction: int = None
     strand: Type["Strand"] = None
+    linkage: Type["Linkage"] = None
     domain: Type["Domain"] = None
 
     # plotting attributes
@@ -176,7 +179,8 @@ class Point:
         3) Computes the x coord from the angle if the x coord is not provided.
         """
         # Modulo the angle to be between 0 and 360 degrees
-        self.angle %= 360
+        if self.angle is not None:
+            self.angle %= 360
 
         # Compute the x coord from the angle if the x coord is not provided
         if self.x_coord is None and self.angle is not None and self.domain is not None:
@@ -193,6 +197,18 @@ class Point:
             self.styles = PointStyles(point=self)
 
         self.styles.reset()
+
+    def midpoint(self, point: "Point") -> Tuple[float, float]:
+        """
+        Obtain the midpoint location between this point and a different point.
+
+        Args:
+            point: The point to find the midpoint with.
+
+        Returns:
+            The midpoint location as a tuple.
+        """
+        return (self.x_coord + point.x_coord) / 2, (self.z_coord + point.z_coord) / 2
 
     def matching(self) -> Type["Point"] | None:
         """
@@ -243,6 +259,26 @@ class Point:
             else:
                 return None
 
+    def surf_strand(self, dist) -> Type["Point"] | None:
+        """
+        Obtain the point on the point's strand that is dist away from this point.
+
+        Parameters:
+            dist: The distance away from this point to obtain the point.
+
+        Returns:
+            Point: The point that is dist away from this point.
+            None: There is no point that is dist away from this point.
+        """
+        # obtain the index of this point
+        index = self.strand.index(self)
+
+        # obtain the point that is dist away from this point
+        try:
+            return self.strand.items[index + dist]
+        except IndexError:
+            return None
+
     def is_endpoint(self, of_its_type=False) -> bool:
         """
         Return whether the point is either the last or the first item in its strand.
@@ -270,7 +306,6 @@ class Point:
             return self == items[0] or self == items[-1]
         else:
             return self == self.strand.items[0] or self == self.strand.items[-1]
-
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
