@@ -417,6 +417,10 @@ class Strands:
                     "NEMids must be at opposite ends of strands to be linked."
                 )
 
+        # Ensure that the NEMids are of different direction
+        if NEMid1.strand.direction == NEMid2.strand.direction:
+            raise ValueError("NEMids must be of different direction to be linked.")
+
         # Force NEMid1 to be the upwards NEMid
         if NEMid1.strand.direction == DOWN:
             NEMid1, NEMid2 = NEMid2, NEMid1
@@ -433,12 +437,6 @@ class Strands:
         else:
             begins_with_NEMid = NEMid2
             ends_with_NEMid = NEMid1
-
-        # There are three primary cases
-        # 1) Begins with to begins with
-        # 3) Ends with to ends with
-        # 2) Begins with to ends with
-
 
         linkage = Linkage(items=(ends_with_NEMid, begins_with_NEMid))
 

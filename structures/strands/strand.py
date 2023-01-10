@@ -11,6 +11,7 @@ from constants.directions import *
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
+from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
 from structures.utils import converge_point_data
 
@@ -436,12 +437,12 @@ class Strand:
         self.items.remove(item)
         item.strand = None
 
-    def append(self, item: Point) -> None:
+    def append(self, item: Point | Linkage) -> None:
         """Add an item to the right of the strand."""
         item.strand = self
         self.items.append(item)
 
-    def appendleft(self, item: Point):
+    def appendleft(self, item: Point | Linkage):
         """
         Add an item to the left of the strand.
 
@@ -451,7 +452,7 @@ class Strand:
         item.strand = self
         self.items.appendleft(item)
 
-    def extend(self, items: Iterable[Point]) -> None:
+    def extend(self, items: Iterable[Point | Linkage]) -> None:
         """
         Extend our items to the right with an iterable's items.
 
@@ -461,7 +462,7 @@ class Strand:
         for item in items:
             self.append(item)
 
-    def leftextend(self, items: Iterable[Point]) -> None:
+    def leftextend(self, items: Iterable[Point | Linkage]) -> None:
         """
         Extend our items to the left with an iterable's items.
 

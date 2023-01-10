@@ -213,6 +213,17 @@ def linker(
     # If a point is already selected, create a linkage between the previously selected
     # point and the currently selected point.
     elif len(currently_selected) == 1:
+        # Ensure that the direction of the point that we are about to make a linkage
+        # for is different to the direction of the point that is already selected.
+        if currently_selected[0].direction == point.direction:
+            utils.warning(
+                refs.constructor,
+                error_title,
+                "Linkages must be created across NEMids of differing directions. The "
+                "selected NEMids are not of differing directions.",
+            )
+            return
+
         strands.link(currently_selected[0], point)
         currently_selected[0].styles.change_state("default")
         point.styles.change_state("default")
