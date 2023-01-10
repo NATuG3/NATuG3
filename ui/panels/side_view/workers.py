@@ -198,6 +198,7 @@ def linker(
             "Linkages must be created across the ends of two strands. "
             "The point that was clicked on is not an end of a strand.",
         )
+        return
 
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected
