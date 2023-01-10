@@ -16,7 +16,12 @@ from utils import inverse
 logger = logging.getLogger(__name__)
 
 
-def juncter(point: Point, strands: Strands, refresh: Callable) -> None:
+def juncter(
+    point: Point,
+    strands: Strands,
+    refresh: Callable,
+    error_title="Invalid Point Clicked",
+) -> None:
     """
     Create a junction.
 
@@ -27,12 +32,20 @@ def juncter(point: Point, strands: Strands, refresh: Callable) -> None:
             function does not always create junctions (for instance, if only one
             point is passed), so the function only calls refresh if a junction is
             created.
+        error_title: The title of the error dialog that is shown when the user clicks
+            an invalid point.
     """
     if isinstance(point, NEMid) and point.junctable:
         strands.conjunct(point, point.juncmate)
         refresh()
     else:
-        raise ValueError("Point is not junctable.")
+        ui.dialogs.error_dialog(
+            refs.constructor,
+            error_title,
+            "Junctions can only be created by clicking on overlapping NEMids. "
+            "Junctable NEMids are made white, and are overlapping. \nThe point clicked "
+            "was either not an overlapping NEMid, or was not a NEMid at all.",
+        )
     logger.info("Juncter mode was run.")
 
 
@@ -93,7 +106,7 @@ def informer(
 
         # if an unsupported type of point is clicked raise an error
         else:
-            logger.info(
+            logger.warn(
                 "Unsupported point type passed to informer. Point type: %s", type(point)
             )
 
@@ -160,7 +173,10 @@ def highlighter(point: Point, refresh: Callable):
         point: The point to highlight.
         refresh: Function called to refresh plot after highlighter mode is run.
     """
-    point.highlighted = inverse(point.highlighted)
+    if point.styles.state == "highlighted":
+        point.styles.change_state("default")
+    else:
+        point.styles.change_state("highlighted")
 
     refresh()
     logger.info("Highlighter mode was run.")
@@ -192,6 +208,7 @@ def linker(
         return
     # Ensure that only endpoints are being selected
     if not point.is_endpoint(of_its_type=True):
+        logger.warning("User tried to create a linkage on a non-endpoint.")
         utils.warning(
             refs.constructor,
             error_title,
@@ -216,6 +233,9 @@ def linker(
         # Ensure that the direction of the point that we are about to make a linkage
         # for is different to the direction of the point that is already selected.
         if currently_selected[0].direction == point.direction:
+            logger.warning(
+                "User tried to create a linkage with two points in the same direction."
+            )
             utils.warning(
                 refs.constructor,
                 error_title,
