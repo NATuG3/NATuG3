@@ -440,19 +440,22 @@ class Strands:
             begins_with_NEMid = NEMid2
             ends_with_NEMid = NEMid1
 
-        # Attempt to surf forward one point, if that does not work then try surfing
-        # backwards. We need nucleosides.
-        if isinstance(ends_with_NEMid.surf_strand(1), Nucleoside):
-            nucleoside1 = ends_with_NEMid.strand.items[-1]
+        # Attempt to surf forward one point, if that does not work then surf forward two
+        # points
+        if isinstance((next_item := begins_with_NEMid.surf_strand(1)), Nucleoside):
+            nucleoside1 = next_item
         else:
-            nucleoside1 = ends_with_NEMid.strand.items[0]
-
-        # Attempt to surf forward one point, if that does not work then try surfing
-        # backwards. We need nucleosides.
-        if isinstance(begins_with_NEMid.surf_strand(-1), Nucleoside):
-            nucleoside2 = begins_with_NEMid.strand.items[0]
-        else:
-            nucleoside2 = begins_with_NEMid.strand.items[-1]
+            nucleoside1 = begins_with_NEMid.surf_strand(2)
+        # Attempt to surf forward one point. If an indexerror is raised, try surfing
+        # back one point if the prior point is a nucleoside. If it isn't then surf
+        # back two points.
+        try:
+            nucleoside2 = ends_with_NEMid.surf_strand(1)
+        except IndexError:
+            if isinstance((next_item := ends_with_NEMid.surf_strand(-1)), Nucleoside):
+                nucleoside2 = next_item
+            else:
+                nucleoside2 = ends_with_NEMid.surf_strand(-2)
 
         linkage = Linkage(
             items=(

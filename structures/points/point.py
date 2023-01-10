@@ -274,10 +274,7 @@ class Point:
         index = self.strand.index(self)
 
         # obtain the point that is dist away from this point
-        try:
-            return self.strand.items[index + dist]
-        except IndexError:
-            return None
+        return self.strand.items[index + dist]
 
     def is_endpoint(self, of_its_type=False) -> bool:
         """
@@ -360,7 +357,8 @@ class Point:
         """
         Obtain coords of the point as a tuple of form (x, z).
 
-        This function merely changes the formatting of the x and z coords to be a zipped tuple.
+        This function merely changes the formatting of the x and z coords to be a zipped
+        tuple.
         """
         return self.x_coord, self.z_coord
 

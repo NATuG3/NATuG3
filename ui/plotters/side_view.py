@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from math import ceil
 from typing import List, Tuple, Dict, Literal
 
+import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import (
@@ -264,6 +265,48 @@ class SideViewPlotter(pg.PlotWidget):
                 x_coords = [point.x_coord for point in stroke_segment]
                 z_coords = [point.z_coord for point in stroke_segment]
 
+                # if this strand contains a junction then
+                # round the corners of the outline for aesthetics
+                if strand.interdomain():
+                    coords = zip(x_coords, z_coords)
+                    coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
+                    coords = list(chaikins_corner_cutting(coords, refinements=1))
+
+                    connect = []
+                    # in case the junction is a left-to-right side of screen junction
+                    # do not plot the entire connector line going from the left to the
+                    # right of the screen
+                    for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
+                        # if the distance between this x coord and the next one is large
+                        # then add a break in the connector. Note that the "next x coord"
+                        # to check against is typically the next on in the array,
+                        # except when we reach the end of the list, in which case it
+                        # becomes the first one.
+                        if point_index != len(coords) - 1:
+                            next_x_coord = coords[point_index + 1][0]
+                        else:
+                            next_x_coord = coords[0][0]
+
+                        # if the distance between this x coord and the next one is large
+                        # then don't add a connection. otherwise add a connection.
+                        if abs(x_coord - next_x_coord) > 1:
+                            # do not connect
+                            connect.append(0)
+                        else:
+                            # connect
+                            connect.append(1)
+
+                    # closed strands will have one extra item in the end so that they
+                    # appear connected
+                    if strand.closed:
+                        connect.append(1)
+
+                    connect = np.array(connect)
+                    x_coords = [coord[0] for coord in coords]
+                    z_coords = [coord[1] for coord in coords]
+                else:
+                    connect = "all"
+
                 # if the strand is closed then connect the last point to the first
                 # point
                 if strand.closed:
@@ -278,7 +321,9 @@ class SideViewPlotter(pg.PlotWidget):
                         color=strand.styles.color.value,
                         width=strand.styles.thickness.value,
                     ),
+                    connect=connect
                 )
+
                 plotted_stroke.setCurveClickable(True)
                 plotted_stroke.sigClicked.connect(
                     lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)

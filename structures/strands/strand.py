@@ -635,11 +635,14 @@ class Strand:
 
     def interdomain(self) -> bool:
         """Whether all the items in this strand belong to the same domain."""
-        checker = self.items.by_type(Point)[0].domain
-        for item in self.items.by_type(Point):
-            if isinstance(item, Point):
-                if item.domain is not checker:
-                    return True
+        try:
+            checker = self.items.by_type(Point)[0].domain
+            for item in self.items.by_type(Point):
+                if isinstance(item, Point):
+                    if item.domain is not checker:
+                        return True
+        except IndexError:
+            return False
 
         return False
 
