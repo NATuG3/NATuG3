@@ -146,6 +146,12 @@ class Point:
         direction: The direction of the helix at this point.
         strand: The strand that this point belongs to.
         domain: The domain this point belongs to.
+
+    Methods:
+        matching: Obtain the matching point on the other helix of the same domain.
+        x_coord_from_angle: Obtain the x coord of the point from the angle.
+        position: Obtain the position of the point as a tuple.
+        is_endpoint: Return whether the point is an endpoint in the strand.
     """
 
     # positional attributes
@@ -236,6 +242,35 @@ class Point:
                 return matching
             else:
                 return None
+
+    def is_endpoint(self, of_its_type=False) -> bool:
+        """
+        Return whether the point is either the last or the first item in its strand.
+
+        By default, this method returns whether the point is the last or the first item
+        in its strand. If of_its_type is True then this method returns whether the point
+        is the last or the first item of its type in its strand.
+
+        Args:
+            of_its_type: Whether to only consider the point an endpoint if it is
+                the last/first of its type (i.e. a Nucleoside or a NEMid). This
+                method obtains a list of all the points of the specific subtype that
+                this point is, and then sees if this point is the first or last item
+                in that list.
+
+        Returns:
+            bool: Whether the point is an endpoint in the strand. If the point's strand
+                is None then this method returns False.
+        """
+        if self.strand is None:
+            return False
+
+        if of_its_type:
+            items = self.strand.items.by_type(type(self))
+            return self == items[0] or self == items[-1]
+        else:
+            return self == self.strand.items[0] or self == self.strand.items[-1]
+
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:

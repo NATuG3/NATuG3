@@ -166,7 +166,9 @@ def highlighter(point: Point, refresh: Callable):
     logger.info("Highlighter mode was run.")
 
 
-def linker(point: Point, strands: Strands, refresh: Callable):
+def linker(
+    point: Point, strands: Strands, refresh: Callable, error_title="Invalid Selection"
+):
     """
     Create a linkage in a strand.
 
@@ -176,42 +178,59 @@ def linker(point: Point, strands: Strands, refresh: Callable):
         strands: The strands object containing the points. The hairpin() method is
             called on this object.
         refresh: Function called to refresh plot after linker mode is run.
+        error_title: The title of the error dialog that is shown if the user tries to
+            create an invalid linkage. Defaults to "Invalid Selection".
     """
-    if not isinstance(point, NEMid):
+    # Ensure that the point is a NEMid
+    if isinstance(point, Nick):
         utils.warning(
             refs.constructor,
-            "Invalid Click",
+            error_title,
             "Linker mode only works on NEMids. A nick was clicked. To undo a nick "
             "please enter nicker mode.",
         )
         return
-
-    # Store the points that are currently selected
-    currently_selected = refs.misc.currently_selected
-
-    # If the point was already selected, deselect it
-    if point.styles.is_state("selected"):
-        point.styles.change_state("default")
-
     # Ensure that only endpoints are being selected
-    NEMid_index = point.strand.items.by_type(NEMid).index(point)
-    if NEMid_index == 0 or NEMid_index == len(point.strand.items.by_type(NEMid)) - 1:
-        currently_selected.append(point)
-        point.styles.change_state("selected")
-    else:
+    if not point.is_endpoint(of_its_type=True):
         utils.warning(
             refs.constructor,
-            "Invalid Selection",
+            error_title,
             "Linkages must be created across the ends of two strands. "
             "The point that was clicked on is not an end of a strand.",
         )
 
-    # If two points are selected, create a linkage
-    if len(currently_selected) == 2:
-        strands.link(*currently_selected)
+    # Store the points that are currently selected
+    currently_selected = refs.misc.currently_selected
+
+    # At this point the point should be guaranteed to be a NEMid
+    assert isinstance(point, NEMid)
+
+    # If the point was already selected, deselect it.
+    if point.styles.is_state("selected"):
+        currently_selected.remove(point)
+        point.styles.change_state("default")
+    # If a point is already selected, create a linkage between the previously selected
+    # point and the currently selected point.
+    elif len(currently_selected) == 1:
+        # Before creating a linkage ensure that the direction of the already selected
+        # point is not the same as the direction of the currently selected point.
+        if currently_selected[0].direction == point.direction:
+            utils.warning(
+                refs.constructor,
+                error_title,
+                "The two NEMids of a linkage must be in opposite directions. The "
+                "NEMid clicked is in the same direction as the previously selected "
+                "NEMid.",
+            )
+            return
+        strands.link(currently_selected[0], point)
         currently_selected[0].styles.change_state("default")
-        currently_selected[1].styles.change_state("default")
+        point.styles.change_state("default")
         currently_selected.clear()
+    # If no points are already selected, select the point.
+    elif len(currently_selected) == 0:
+        currently_selected.append(point)
+        point.styles.change_state("selected")
 
     refresh()
     logger.info("Linkage mode was run.")
