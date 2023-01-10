@@ -496,12 +496,15 @@ class Strand:
 
     @property
     def sequence(self):
-        return [nucleoside.base for nucleoside in self.items.by_type(Nucleoside)]
+        return [
+            nucleoside.base
+            for nucleoside in StrandItems(self.items.unpacked()).by_type(Nucleoside)
+        ]
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
         nucleosides = self.items.by_type(Nucleoside)
-        if len(new_sequence) == len(nucleosides):
+        if len(new_sequence) == len(self.sequence):
             for index, base in enumerate(new_sequence):
                 our_nucleoside = nucleosides[index]
                 our_nucleoside.base = base
