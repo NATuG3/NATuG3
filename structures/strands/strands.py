@@ -9,6 +9,7 @@ from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
 
 import settings
+from constants.directions import DOWN
 from structures.helices import DoubleHelices
 from structures.points import NEMid
 from structures.points.nick import Nick
@@ -397,6 +398,7 @@ class Strands:
 
         Notes:
             - NEMids must be at opposite ends of strands.
+            - NEMids must be of the same direction.
             - The NEMids' parent strands must be in this Strands container.
             - Properties of the longer strand are preserved (styles, etc.).
         """
@@ -415,18 +417,28 @@ class Strands:
                     "NEMids must be at opposite ends of strands to be linked."
                 )
 
+        # Force NEMid1 to be the upwards NEMid
+        if NEMid1.strand.direction == DOWN:
+            NEMid1, NEMid2 = NEMid2, NEMid1
+
         # Remove the old strands from the container
         self.remove(NEMid1.strand)
         self.remove(NEMid2.strand)
 
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
-        if NEMid1.strand.items[0] == NEMid1:
+        if NEMid1.strand.NEMids().index(NEMid1) == 0:
             begins_with_NEMid = NEMid1
             ends_with_NEMid = NEMid2
         else:
             begins_with_NEMid = NEMid2
             ends_with_NEMid = NEMid1
+
+        # There are three primary cases
+        # 1) Begins with to begins with
+        # 3) Ends with to ends with
+        # 2) Begins with to ends with
+
 
         linkage = Linkage(items=(ends_with_NEMid, begins_with_NEMid))
 
