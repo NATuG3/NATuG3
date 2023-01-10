@@ -38,12 +38,13 @@ def juncter(
         strands.conjunct(point, point.juncmate)
         refresh()
     else:
-        ui.dialogs.error_dialog(
+        utils.warning(
             refs.constructor,
             error_title,
             "Junctions can only be created by clicking on overlapping NEMids. "
-            "Junctable NEMids are made white, and are overlapping. \nThe point clicked "
-            "was either not an overlapping NEMid, or was not a NEMid at all.",
+            "Junctable NEMids are made white, and are overlapping.\n\n"
+            "The point clicked was either not an overlapping NEMid, or was not a NEMid "
+            "at all.",
         )
     logger.info("Juncter mode was run.")
 
