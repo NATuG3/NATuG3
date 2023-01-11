@@ -216,6 +216,17 @@ def linker(
             "The point that was clicked on is not an end of a strand.",
         )
         return
+    # Ensure that the strand that is having an item selected contains at least two
+    # items.
+    if len(point.strand) < 2:
+        logger.warning("User tried to create a linkage on a strand with only one item.")
+        utils.warning(
+            refs.constructor,
+            error_title,
+            "Linkages must be created across the ends of two strands. "
+            "The strand that was clicked on only contains one item.",
+        )
+        return
 
     # Store the points that are currently selected
     currently_selected = refs.misc.currently_selected

@@ -46,7 +46,8 @@ class NucleosideInformer(QDialog):
         else:  # not item.strand.closed
             openness = "open"
         self.strand.setText(
-            f"nucleoside #{nucleoside.strand.items.by_type(NEMid).index(nucleoside) + 1} in"
+            f"nucleoside #"
+            f"{nucleoside.strand.items.by_type(Nucleoside).index(nucleoside) + 1} in"
             f" {openness} strand #{strand_index + 1}"
         )
 

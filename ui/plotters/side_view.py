@@ -200,7 +200,9 @@ class SideViewPlotter(pg.PlotWidget):
             z_coords: List[float] = list()
 
             # iterate on the proper type based on toolbar
-            if self.plot_data.mode == "NEMid":
+            if settings.debug:
+                to_plot = strand.items.by_type((Point, Linkage))
+            elif self.plot_data.mode == "NEMid":
                 to_plot = strand.items.by_type((NEMid, Linkage))
             elif self.plot_data.mode == "nucleoside":
                 to_plot = strand.items.by_type((Nucleoside, Linkage))

@@ -98,9 +98,9 @@ class Linkage:
         # If the midpoint is lower than both of the other points, then the inflection
         # is down.
         if plot_points[0][1] < plot_points[2][1]:
-            plot_points[1][1] -= 0.1
+            plot_points[1][1] -= 0.2
         else:
-            plot_points[1][1] += 0.1
+            plot_points[1][1] += 0.2
         return plot_points
 
     def generate(self, length: int):

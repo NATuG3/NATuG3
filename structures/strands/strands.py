@@ -433,34 +433,16 @@ class Strands:
 
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
-        if NEMid1.strand.NEMids().index(NEMid1) == 0:
-            begins_with_NEMid = NEMid1
-            ends_with_NEMid = NEMid2
-        else:
-            begins_with_NEMid = NEMid2
-            ends_with_NEMid = NEMid1
+        begins_with_NEMid = NEMid1 if NEMid1.is_endpoint(True) else NEMid2
+        ends_with_NEMid = NEMid2 if NEMid2.is_endpoint(True) else NEMid1
 
-        # Attempt to surf forward one point, if that does not work then surf forward two
-        # points
-        if isinstance((next_item := begins_with_NEMid.surf_strand(1)), Nucleoside):
-            nucleoside1 = next_item
-        else:
-            nucleoside1 = begins_with_NEMid.surf_strand(2)
-        # Attempt to surf forward one point. If an indexerror is raised, try surfing
-        # back one point if the prior point is a nucleoside. If it isn't then surf
-        # back two points.
-        try:
-            nucleoside2 = ends_with_NEMid.surf_strand(1)
-        except IndexError:
-            if isinstance((next_item := ends_with_NEMid.surf_strand(-1)), Nucleoside):
-                nucleoside2 = next_item
-            else:
-                nucleoside2 = ends_with_NEMid.surf_strand(-2)
+        # Nucleoside 1 is the last nucleoside in the first strand, and nucleoside 2 is
+        # the first nucleoside in the second strand
 
         linkage = Linkage(
             items=(
-                nucleoside1,
-                nucleoside2,
+                begins_with_NEMid.strand.items.by_type(Nucleoside)[-1],
+                ends_with_NEMid.strand.items.by_type(Nucleoside)[0],
             )
         )
 
@@ -470,8 +452,7 @@ class Strands:
         new_strand.extend(tuple(ends_with_NEMid.strand.items))
         new_strand.append(linkage)
         new_strand.extend(tuple(begins_with_NEMid.strand.items))
-        new_strand.remove(nucleoside1)
-        new_strand.remove(nucleoside2)
+        [new_strand.remove(item) for item in linkage.items]
 
         # Add the new strand to the container
         self.append(new_strand)

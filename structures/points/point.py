@@ -147,6 +147,7 @@ class Point:
         strand: The strand that this point belongs to. Can be None.
         linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
+        prime: The prime of the point. Either 5' or 3'.
 
     Methods:
         matching: Obtain the matching point on the other helix of the same domain.
