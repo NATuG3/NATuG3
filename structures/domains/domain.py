@@ -11,9 +11,9 @@ class Domain:
     A singular domain object.
 
     Attributes:
-        parent: The parent workers container object. If this is None then index becomes
+        parent: The strands workers container object. If this is None then index becomes
             None too.
-        index: The index of this domain in its parent.
+        index: The index of this domain in its strands.
         up_strand (Strand): The up strand of the domain. This is an unparented strand
             object.
         down_strand (Strand): The down strand of the domain. This is an unparented
@@ -88,10 +88,10 @@ class Domain:
                 domains' is determined by count[1], and then count[0] NEMids are
                 added to the bottom strand and count[2] NEMids are added to the top
                 of the strand.
-            parent (Subunit): The parent subunit. Defaults to None.
-            index (int): The index of this domain in its parent. Defaults to None.
+            parent (Subunit): The strands subunit. Defaults to None.
+            index (int): The index of this domain in its strands. Defaults to None.
         """
-        # store the parent subunit
+        # store the strands subunit
         self.parent = parent
 
         # store the nucleic acid settings
@@ -155,17 +155,17 @@ class Domain:
         The left strand of the domain.
 
         The grandparent's .points() method is used to obtain the strand. Note that
-        the grandparent of a Domain object is the parent of the parent. The parent of
-        a Domains object is a Subunit object, and the parent of a Subunit object is a
+        the grandparent of a Domain object is the strands of the strands. The strands of
+        a Domains object is a Subunit object, and the strands of a Subunit object is a
         Domains object. It is the Domains object that has a .points() method.
 
         Returns:
-            The left strand of the domain or None if the domain doesn't have a parent.
+            The left strand of the domain or None if the domain doesn't have a strands.
         """
-        if self.parent is None or self.parent.parent:
+        if self.parent is None or self.parent.strands:
             return None
         else:
-            return Strand(self.parent.parent.points()[self.index][RIGHT])
+            return Strand(self.parent.strands.points()[self.index][RIGHT])
 
     @property
     def right_strand(self) -> Strand | None:
@@ -173,17 +173,17 @@ class Domain:
         The right strand of the domain.
 
         The grandparent's .points() method is used to obtain the strand. Note that
-        the grandparent of a Domain object is the parent of the parent. The parent of
-        a Domains object is a Subunit object, and the parent of a Subunit object is a
+        the grandparent of a Domain object is the strands of the strands. The strands of
+        a Domains object is a Subunit object, and the strands of a Subunit object is a
         Domains object. It is the Domains object that has a .points() method.
 
         Returns:
-            The right strand of the domain or None if the domain doesn't have a parent.
+            The right strand of the domain or None if the domain doesn't have a strands.
         """
         if self.parent is None:
             return None
         else:
-            return Strand(self.parent.parent.points()[self.index][RIGHT])
+            return Strand(self.parent.strands.points()[self.index][RIGHT])
 
     @property
     def theta_s_multiple(self) -> int:

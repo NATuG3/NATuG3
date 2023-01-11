@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QVBoxLayout, QDialog
+from PyQt6.QtWidgets import QVBoxLayout, QDialog, QLabel
 
 from ui.dialogs.sequence_editor.bulk_input.panel import BulkInputSequenceEditor
 from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor
@@ -18,9 +18,12 @@ class SequenceEditor(QDialog):
 
         self.bases = sequence
 
-        self.manual_input = UserInputSequenceEditor(self, sequence)
-        self.manual_input_tab.setLayout(QVBoxLayout())
-        self.manual_input_tab.layout().addWidget(self.manual_input)
+        if len(sequence) < 1000:
+            self.manual_input = UserInputSequenceEditor(self, sequence)
+            self.manual_input_tab.setLayout(QVBoxLayout())
+            self.manual_input_tab.layout().addWidget(self.manual_input)
+        else:
+            self.tab_area.removeTab(0)
 
         self.bulk_input = BulkInputSequenceEditor(self, sequence)
         self.bulk_input_tab.setLayout(QVBoxLayout())

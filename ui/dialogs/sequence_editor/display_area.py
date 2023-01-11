@@ -28,7 +28,7 @@ class SequenceDisplayArea(QTextEdit):
         Initialize the display area.
 
         Args:
-            parent: The parent widget.
+            parent: The strands widget.
             bases: The bases for the editor area.
         """
         super().__init__(parent)

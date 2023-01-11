@@ -24,7 +24,7 @@ class Domains:
     """
     Container for multiple domains.
 
-    This is the parent of a Subunit, and the grandparent of a Domain.
+    This is the strands of a Subunit, and the grandparent of a Domain.
 
     The Domains container automatically keeps track of a template subunit (created with domains
     passed through the init), and then automatically creates copies of that subunit and the
@@ -77,7 +77,7 @@ class Domains:
             self.nucleic_acid_profile, domains, template=True, parent=self
         )
         for domain in self.subunit.domains:
-            assert domain.parent is self.subunit
+            assert domain.strands is self.subunit
 
     def update(self, domains: Type["Domains"]) -> None:
         """
@@ -99,7 +99,7 @@ class Domains:
 
         # set parents
         for domain in domains.subunit.domains:
-            domain.parent = self.subunit
+            domain.strands = self.subunit
         domains.subunit.parent = self
 
         # set attributes
@@ -337,7 +337,7 @@ class Domains:
         logger.info(f"Replacing the template subunit.")
         self._subunit = new_subunit
         for domain in self._subunit.domains:
-            domain.parent = self._subunit
+            domain.strands = self._subunit
 
     @property
     def count(self) -> int:

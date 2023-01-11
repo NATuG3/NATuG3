@@ -2,7 +2,7 @@ import itertools
 import random
 from collections import deque
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, Deque, List
+from typing import Tuple, Iterable, List, Type, Set
 
 import numpy as np
 
@@ -11,6 +11,7 @@ from constants.directions import *
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
+from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
 from structures.utils import converge_point_data
 
@@ -36,24 +37,116 @@ class StrandStyles:
     A container for the styles of a Point.
 
     Attributes:
+        strand: The strand that the styles are for.
         thickness: The thickness of the strand.
         color: The color of the strand.
+        highlighted: Whether the strand is highlighted.
 
     Methods:
         set_defaults: Automatically set the color of the Point.
     """
 
-    thickness: float = field(default_factory=StrandStyle)
-    color: str = field(default_factory=StrandStyle)
+    strand: "Strand" = None
+    thickness: StrandStyle = field(default_factory=StrandStyle)
+    color: StrandStyle = field(default_factory=StrandStyle)
     highlighted: bool = False
+
+    def __post_init__(self):
+        if self.thickness.value is None:
+            self.thickness.value = 3
+        if self.color.value is None:
+            self.color.value = (255, 192, 203)
 
     def highlight(self):
         """Highlight the strand."""
         self.highlighted = True
+        for point in self.strand.items.by_type(Point):
+            point.styles.size += 5
 
     def reset(self):
         """Reset the strand to its default state."""
-        self.highlighted = False
+        if self.highlighted:
+            self.highlighted = False
+            for point in self.strand.items.by_type(Point):
+                point.styles.size -= 5
+
+
+class StrandItems(deque):
+    """
+    A container for the items in a Strand.
+
+    This is a subclass of deque with various utility methods.
+
+    Methods:
+        NEMids: A list of all the NEMids in the StrandItems.
+        nucleosides: A list of all the nucleosides in the StrandItems.
+        unpacked: A list of all the items in the StrandItems where all iterables are
+            unpacked.
+        unpack: Replace all the items in the StrandItems with the unpacked version of
+            the StrandItems.
+        item_types: A list of all the types of items in the StrandItems.
+    """
+
+    def by_type(self, type_: Type | Tuple[Type]) -> List[object]:
+        """
+        Obtain a list of all the items of a specific type.
+
+        Args:
+            type_: The type(s) of the items to obtain. If multiple types are specified,
+                the items of the types provided will be returned.
+
+        Returns:
+            list: A list of all the items of the specified type.
+        """
+        return [item for item in self if isinstance(item, type_)]
+
+    def split(self, type_: Type) -> List[List[object]]:
+        """
+        Split the items into a list of lists. A new list is created whenever an item
+        of the specified type is encountered. The items of the specified type are not
+        included in the returned lists.
+
+        Args:
+            type_: The type of items to split on.
+
+        Returns:
+            list: A list of lists of items split on the specified type.
+        """
+        split = [[]]
+        for item in self:
+            if isinstance(item, type_):
+                split.append([])
+            else:
+                split[-1].append(item)
+        return split
+
+    def unpacked(self) -> List[Point]:
+        """
+        Obtain an unpacked version of the items.
+
+        Return a list of all the contained items, and for each item, if it is an
+        iterable, unpack it.
+
+        Returns:
+            list: A list of all the items in the StrandItems where all iterables are
+            unpacked.
+        """
+        unpacked = []
+        for item in self:
+            if isinstance(item, Iterable):
+                unpacked.extend(item)
+            else:
+                unpacked.append(item)
+        return unpacked
+
+    def item_types(self) -> Set[Type]:
+        """
+        Obtain a list of all the types of items in the StrandItems.
+
+        Returns:
+            list: A list of all the types of items in the StrandItems.
+        """
+        return set([type(item) for item in self])
 
 
 @dataclass
@@ -93,23 +186,27 @@ class Strand:
         sliced(from, to): Return self.NEMids as a list.
         clear_sequence(overwrite): Clear the sequence of the strand.
         randomize_sequence(overwrite): Randomize the sequence of the strand.
+        startswith(point): Determine whether the strand starts with a point.
+        endswith(point): Determine whether the strand ends with a point.
     """
 
     name: str = "Strand"
-    parent: "Strands" = None
+    strands: "Strands" = None
 
     nucleic_acid_profile: NucleicAcidProfile = field(
         default_factory=NucleicAcidProfile, repr=False
     )
-    items: Deque[Point] = field(default_factory=deque)
+    items: StrandItems = field(default_factory=StrandItems)
     closed: bool = False
 
     styles: StrandStyles = field(default_factory=StrandStyles)
 
     def __post_init__(self):
-        self.items = deque(self.items)
+        self.items = StrandItems(self.items)
         for item in self.items:
             item.strand = self
+        if self.styles.strand == None:
+            self.styles.strand = self
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
@@ -161,7 +258,11 @@ class Strand:
         )
 
         # Create two new strands (these are copies of this strand).
-        strand1, strand2 = Strand(**self.__dict__), Strand(**self.__dict__)
+        attrs = {
+            "nucleic_acid_profile": self.nucleic_acid_profile,
+            "closed": self.closed,
+        }
+        strand1, strand2 = Strand(**attrs), Strand(**attrs)
 
         # Set both the new strands to be open (since they were split)
         strand1.closed = strand2.closed = False
@@ -175,6 +276,8 @@ class Strand:
             item.strand = strand1
         for item in strand2.items:
             item.strand = strand2
+
+        self.strands.style()
 
         return strand1, strand2
 
@@ -312,7 +415,12 @@ class Strand:
         z_coords = z_coords[:greatest_count]
 
         # Converge the newly generated data and add it to the strand
-        new_items = converge_point_data(angles, x_coords, z_coords)
+        new_items = converge_point_data(
+            angles,
+            x_coords,
+            z_coords,
+            NEMid if isinstance(edge_item, Nucleoside) else Nucleoside,
+        )
 
         # Assign domains for all items
         for item in new_items:
@@ -329,12 +437,12 @@ class Strand:
         self.items.remove(item)
         item.strand = None
 
-    def append(self, item: Point) -> None:
+    def append(self, item: Point | Linkage) -> None:
         """Add an item to the right of the strand."""
         item.strand = self
         self.items.append(item)
 
-    def appendleft(self, item: Point):
+    def appendleft(self, item: Point | Linkage):
         """
         Add an item to the left of the strand.
 
@@ -344,7 +452,7 @@ class Strand:
         item.strand = self
         self.items.appendleft(item)
 
-    def extend(self, items: Iterable[Point]) -> None:
+    def extend(self, items: Iterable[Point | Linkage]) -> None:
         """
         Extend our items to the right with an iterable's items.
 
@@ -354,7 +462,7 @@ class Strand:
         for item in items:
             self.append(item)
 
-    def leftextend(self, items: Iterable[Point]) -> None:
+    def leftextend(self, items: Iterable[Point | Linkage]) -> None:
         """
         Extend our items to the left with an iterable's items.
 
@@ -368,32 +476,35 @@ class Strand:
         """
         Obtain all NEMids in the strand, only.
 
-        Works by recursively checking the type of items in self.items.
+        Utilizes self.items.by_type(NEMid) to obtain the NEMids.
 
         Returns:
-            List of all nucleosides in strand.items.
+            A list of NEMids in the strand.
         """
-        return [item for item in self.items if isinstance(item, NEMid)]
+        return self.items.by_type(NEMid)
 
     def nucleosides(self) -> List["Nucleoside"]:
         """
         Obtain all nucleosides in the strand, only.
 
-        Works by recursively checking the type of items in self.items.
+        Utilizes self.items.by_type(Nucleoside) to obtain the nucleosides.
 
         Returns:
-            List of all nucleosides in strand.items.
+            A list of nucleosides in the strand.
         """
-        return [item for item in self.items if isinstance(item, Nucleoside)]
+        return self.items.by_type(Nucleoside)
 
     @property
     def sequence(self):
-        return [nucleoside.base for nucleoside in self.nucleosides()]
+        return [
+            nucleoside.base
+            for nucleoside in StrandItems(self.items.unpacked()).by_type(Nucleoside)
+        ]
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        nucleosides = self.nucleosides()
-        if len(new_sequence) == len(nucleosides):
+        nucleosides = self.items.by_type(Nucleoside)
+        if len(new_sequence) == len(self.sequence):
             for index, base in enumerate(new_sequence):
                 our_nucleoside = nucleosides[index]
                 our_nucleoside.base = base
@@ -432,10 +543,10 @@ class Strand:
                 to a random nucleoside. If overwrite is True then all nucleosides
                 will be set to a random nucleoside.
         """
-        for nucleoside in self.nucleosides():
+        for nucleoside in self.items.by_type(Nucleoside):
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
-                nucleoside.styles.reset()
+                nucleoside.styles.change_state("default")
                 if (matching := nucleoside.matching()) is not None:
                     matching.base = nucleoside.complement
 
@@ -448,7 +559,7 @@ class Strand:
                 overwrite is True then all set nucleosides that are set (are not
                 None) will be made None.
         """
-        for nucleoside in self.nucleosides():
+        for nucleoside in self.items.by_type(Nucleoside):
             if overwrite or nucleoside.base is not None:
                 nucleoside.base = None
 
@@ -459,9 +570,9 @@ class Strand:
         except IndexError:
             return None
 
-    def sliced(self, start: int | None, end: int | None) -> list:
+    def sliced(self, start: int | None, end: int | None) -> StrandItems:
         """Return self.NEMids as a list."""
-        return list(itertools.islice(self.items, start, end))
+        return StrandItems(itertools.islice(self.items, start, end))
 
     def touching(self, other: "Strand") -> bool:
         """
@@ -470,8 +581,8 @@ class Strand:
         Args:
             other: The strand potentially touching this one.
         """
-        for our_item in shuffled(self.NEMids()):
-            for their_item in shuffled(other.NEMids()):
+        for our_item in shuffled(self.items.by_type(NEMid)):
+            for their_item in shuffled(other.items.by_type(NEMid)):
                 if our_item.juncmate is their_item:
                     return True
         else:
@@ -502,12 +613,12 @@ class Strand:
 
     def up_strand(self) -> bool:
         """Whether the strand is an up strand."""
-        checks = [bool(NEMid_.direction) for NEMid_ in self.NEMids()]
+        checks = [bool(NEMid_.direction) for NEMid_ in self.items.by_type(NEMid)]
         return all(checks)
 
     def down_strand(self) -> bool:
         """Whether the strand is a down strand."""
-        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.NEMids()]
+        checks = [(not bool(NEMid_.direction)) for NEMid_ in self.items.by_type(NEMid)]
         return all(checks)
 
     def cross_screen(self) -> bool:
@@ -519,7 +630,7 @@ class Strand:
         Returns:
             True if the strand wraps across the screen, False otherwise.
         """
-        junctions = filter(lambda NEMid_: NEMid_.junction, self.NEMids())
+        junctions = filter(lambda NEMid_: NEMid_.junction, self.items.by_type(NEMid))
         for junction in junctions:
             if abs(junction.x_coord - junction.juncmate.x_coord) > 1:
                 return True
@@ -527,14 +638,14 @@ class Strand:
 
     def interdomain(self) -> bool:
         """Whether all the items in this strand belong to the same domain."""
-        domains = [item.domain for item in self.items]
-
-        if len(domains) == 0:
+        try:
+            checker = self.items.by_type(Point)[0].domain
+            for item in self.items.by_type(Point):
+                if isinstance(item, Point):
+                    if item.domain is not checker:
+                        return True
+        except IndexError:
             return False
-        checker = domains[0]
-        for domain in domains:
-            if domain is not checker:
-                return True
 
         return False
 

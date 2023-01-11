@@ -30,42 +30,32 @@ class PointStyles:
     """
 
     point: "Point" = None
-    symbol: str = "o"
-    size: int = 10
-    rotation: float = 0
-    fill: Tuple[int, int, int] = (0, 0, 0)
-    outline: Tuple[Tuple[int, int, int], float] = (0, 0, 0), 0.5
+    symbol: str = None
+    size: int = None
+    rotation: float = None
+    fill: Tuple[int, int, int] = None
+    outline: Tuple[Tuple[int, int, int], float] = None, None
+    state = "default"
 
+    _all_states = ["default", "highlighted", "selected"]
     _all_symbols = ("o", "t", "t1", "t2", "t3", "s", "p", "h", "star", "+", "d", "x")
+
+    def is_state(self, state: str):
+        """Return whether the point is in the given state."""
+        return self.state == state
+
+    def change_state(self, state: str):
+        """Set the state of the point."""
+        self.state = state
+        self.reset()
 
     def symbol_is_custom(self):
         """Return whether the symbol is a custom symbol."""
         return self.symbol not in self._all_symbols
 
-    def highlight(self):
-        """Highlight the point."""
-        from ui.plotters.utils import dim_color
-
-        self.fill = settings.colors["highlighted"]
-        self.size = 18
-        self.rotation = 0
-        self.outline = dim_color(self.fill, 0.7), 1
-
-    def select(self):
-        """Select the point."""
-        from ui.plotters.utils import dim_color
-
-        self.fill = settings.colors["selected"]
-        self.size = 18
-        self.rotation = 0
-        self.outline = dim_color(self.fill, 0.7), 1
-
     def reset(self):
         """
-        Automatically set the color of the Point.
-
-        Raises:
-            ValueError: If the point does not have a strand associated with it.
+        Automatically set the styles of the point based on the state.
         """
         from structures.points import Nucleoside, NEMid
         from ui.plotters.utils import dim_color
@@ -73,66 +63,72 @@ class PointStyles:
         strand, point = self.point.strand, self.point  # Create easy references
 
         if self.point.strand is None:
-            raise ValueError("Point does not have a strand associated with it.")
-
-        if point.highlighted:
-            self.highlight()
-        elif point.selected:
-            self.select()
-        elif isinstance(point, Nucleoside):
-            if point.base is None:
-                # Baseless nucleosides are normally colored
-                self.fill = dim_color(strand.styles.color.value, 0.9)
-
-                # If strand color is light use dark outline else use a light outline
-                self.outline = (
-                    ((200, 200, 200), 0.65)
-                    if (sum(strand.styles.color.value) < (255 * 3) / 2)
-                    else ((0, 0, 0), 0.5)
-                )
-
-                # Since there is no base make the symbol an arrow
-                self.symbol = "t1" if point.direction is UP else "t"
-
-                # Since there's no base make the point smaller
-                self.size = 7
-            else:
-                # Based nucleosides are dimly colored
-                self.fill = dim_color(strand.styles.color.value, 0.3)
-                self.outline = dim_color(strand.styles.color.value, 0.5), 0.3
-
-                # Since there is a base make the symbol the base
-                self.symbol = point.base  # type: ignore
-
-                # Make the base orient based off of the symbol direction
-                self.rotation = -90 if point.direction is UP else 90
-
-                # Since there is a base make it bigger
-                self.size = 9
-        elif isinstance(point, NEMid):
-            # All NEMids share some common styles
-            self.symbol = "t1" if point.direction is UP else "t"
+            return
+        if self.state == "highlighted":
+            self.fill = settings.colors["highlighted"]
+            self.size = 18
             self.rotation = 0
-            self.size = 6
+            self.outline = dim_color(self.fill, 0.7), 1
+        elif self.state == "selected":
+            self.fill = settings.colors["selected"]
+            self.size = 18
+            self.rotation = 0
+            self.outline = dim_color(self.fill, 0.7), 1
+        elif self.state == "default":
+            if isinstance(point, Nucleoside):
+                if point.base is None:
+                    # Baseless nucleosides are normally colored
+                    self.fill = dim_color(strand.styles.color.value, 0.9)
 
-            if point.junctable:
-                # junctable NEMids are dimly colored
-                self.fill = (244, 244, 244)
-                self.outline = dim_color(strand.styles.color.value, 0.5), 0.3
-            else:
-                # non-junctable NEMids are normally colored
-                self.fill = dim_color(strand.styles.color.value, 0.9)
+                    # If strand color is light use dark outline else use a light outline
+                    self.outline = (
+                        ((200, 200, 200), 0.65)
+                        if (sum(strand.styles.color.value) < (255 * 3) / 2)
+                        else ((0, 0, 0), 0.5)
+                    )
 
-                # If strand color is light use dark outline else use a light outline
-                self.outline = (
-                    ((200, 200, 200), 0.65)
-                    if (sum(strand.styles.color.value) < (255 * 3) / 2)
-                    else ((0, 0, 0), 0.5)
-                )
+                    # Since there is no base make the symbol an arrow
+                    self.symbol = "t1" if point.direction is UP else "t"
 
-        # Enlarge the point if the parent strand exists and is highlighted
-        if strand is not None and strand.styles.highlighted:
-            self.size += 5
+                    # Since there's no base make the point smaller
+                    self.size = 7
+                else:
+                    # Based nucleosides are dimly colored
+                    self.fill = dim_color(strand.styles.color.value, 0.3)
+                    self.outline = dim_color(strand.styles.color.value, 0.5), 0.3
+
+                    # Since there is a base make the symbol the base
+                    self.symbol = point.base  # type: ignore
+
+                    # Make the base orient based off of the symbol direction
+                    self.rotation = -90 if point.direction is UP else 90
+
+                    # Since there is a base make it bigger
+                    self.size = 9
+            elif isinstance(point, NEMid):
+                # All NEMids share some common styles
+                self.symbol = "t1" if point.direction is UP else "t"
+                self.rotation = 0
+                self.size = 6
+
+                if point.junctable:
+                    # junctable NEMids are dimly colored
+                    self.fill = (244, 244, 244)
+                    self.outline = dim_color(strand.styles.color.value, 0.5), 0.3
+                else:
+                    # non-junctable NEMids are normally colored
+                    self.fill = dim_color(strand.styles.color.value, 0.9)
+
+                    # If strand color is light use dark outline else use a light outline
+                    self.outline = (
+                        ((200, 200, 200), 0.65)
+                        if (sum(strand.styles.color.value) < (255 * 3) / 2)
+                        else ((0, 0, 0), 0.5)
+                    )
+
+            # Enlarge the point if the strands strand exists and is highlighted
+            if strand is not None and strand.styles.highlighted:
+                self.size += 5
 
 
 @dataclass(kw_only=True, slots=True)
@@ -148,17 +144,17 @@ class Point:
         angle: Angle from this domain and next domains' line of tangency going
             counterclockwise.
         direction: The direction of the helix at this point.
-        strand: The strand that this point belongs to.
+        strand: The strand that this point belongs to. Can be None.
+        linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
-        matching: Point in same domain on other direction's helix across from this one.
-        highlighted: Whether the point is highlighted.
-        selected: Whether the point is selected.
-        index: Index of the point in respect to its parent strand. None if there is
-            no parent strand set.
-        symbol_str: The symbol of the point as a string. Automatically determined if
-        None.
-        symbol_size: The size of the point's symbol in pixels. Automatically determined if
-            None.
+        prime: The prime of the point. Either 5' or 3'.
+
+    Methods:
+        matching: Obtain the matching point on the other helix of the same domain.
+        x_coord_from_angle: Obtain the x coord of the point from the angle.
+        position: Obtain the position of the point as a tuple.
+        is_endpoint: Return whether the point is an endpoint in the strand.
+        midpoint: Obtain the midpoint between this point and a different point.
     """
 
     # positional attributes
@@ -169,11 +165,10 @@ class Point:
     # nucleic acid attributes
     direction: int = None
     strand: Type["Strand"] = None
+    linkage: Type["Linkage"] = None
     domain: Type["Domain"] = None
 
     # plotting attributes
-    highlighted: bool = False
-    selected: bool = False
     styles: PointStyles = None
 
     def __post_init__(self):
@@ -185,7 +180,8 @@ class Point:
         3) Computes the x coord from the angle if the x coord is not provided.
         """
         # Modulo the angle to be between 0 and 360 degrees
-        self.angle %= 360
+        if self.angle is not None:
+            self.angle %= 360
 
         # Compute the x coord from the angle if the x coord is not provided
         if self.x_coord is None and self.angle is not None and self.domain is not None:
@@ -201,36 +197,46 @@ class Point:
         else:
             self.styles = PointStyles(point=self)
 
-        # If highlighted, highlight the point
-        if self.highlighted:
-            self.styles.highlight()
+        self.styles.reset()
+
+    def midpoint(self, point: "Point") -> Tuple[float, float]:
+        """
+        Obtain the midpoint location between this point and a different point.
+
+        Args:
+            point: The point to find the midpoint with.
+
+        Returns:
+            The midpoint location as a tuple.
+        """
+        return (self.x_coord + point.x_coord) / 2, (self.z_coord + point.z_coord) / 2
 
     def matching(self) -> Type["Point"] | None:
         """
         Obtain the matching point.
 
-        The matching point is determined based off of the parent strand's .double_helices.
+        The matching point is determined based off of the strands strand's .double_helices.
         .double_helices is a formatted list of domains' up and down strands. We will use this
         to determine the matching point on the other strand of ours.
 
         Returns:
             Point: The matching point.
             None: There is no matching point. This is the case for closed strands,
-                or for when there is no double_helices within the parent's Strands object.
+                or for when there is no double_helices within the strands's Strands object.
         """
-        # our domain's parent is a subunit; our domain's subunit's parent is a
+        # our domain's strands is a subunit; our domain's subunit's strands is a
         # Domains object we need access to this Domains object in order to locate the
         # matching point
         if (
             self.strand.closed
             or self.strand is None
-            or self.strand.parent.double_helices is None
+            or self.strand.strands.double_helices is None
         ):
             return None
         else:
             # create a reference to the strands double_helices
             strands: List[Tuple["Strand", "Strand"]]
-            strands = self.strand.parent.double_helices
+            strands = self.strand.strands.double_helices
 
             # obtain the helix that we are contained in
             our_helix: "Strand" = strands[self.domain.index][self.direction]
@@ -253,6 +259,51 @@ class Point:
                 return matching
             else:
                 return None
+
+    def surf_strand(self, dist) -> Type["Point"] | None:
+        """
+        Obtain the point on the point's strand that is dist away from this point.
+
+        Parameters:
+            dist: The distance away from this point to obtain the point.
+
+        Returns:
+            Point: The point that is dist away from this point.
+            None: There is no point that is dist away from this point.
+        """
+        # obtain the index of this point
+        index = self.strand.index(self)
+
+        # obtain the point that is dist away from this point
+        return self.strand.items[index + dist]
+
+    def is_endpoint(self, of_its_type=False) -> bool:
+        """
+        Return whether the point is either the last or the first item in its strand.
+
+        By default, this method returns whether the point is the last or the first item
+        in its strand. If of_its_type is True then this method returns whether the point
+        is the last or the first item of its type in its strand.
+
+        Args:
+            of_its_type: Whether to only consider the point an endpoint if it is
+                the last/first of its type (i.e. a Nucleoside or a NEMid). This
+                method obtains a list of all the points of the specific subtype that
+                this point is, and then sees if this point is the first or last item
+                in that list.
+
+        Returns:
+            bool: Whether the point is an endpoint in the strand. If the point's strand
+                is None then this method returns False.
+        """
+        if self.strand is None:
+            return False
+
+        if of_its_type:
+            items = self.strand.items.by_type(type(self))
+            return self == items[0] or self == items[-1]
+        else:
+            return self == self.strand.items[0] or self == self.strand.items[-1]
 
     @staticmethod
     def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
@@ -289,11 +340,11 @@ class Point:
     @property
     def index(self):
         """
-        Obtain the index of this domain in its respective parent strand.
+        Obtain the index of this domain in its respective strands strand.
 
         Returns:
-            int: The index of this domain in its respective parent strand.
-            None: This point has no parent strand.
+            int: The index of this domain in its respective strands strand.
+            None: This point has no strands strand.
 
         Notes:
             If self.strand is None then this returns None.
@@ -307,7 +358,8 @@ class Point:
         """
         Obtain coords of the point as a tuple of form (x, z).
 
-        This function merely changes the formatting of the x and z coords to be a zipped tuple.
+        This function merely changes the formatting of the x and z coords to be a zipped
+        tuple.
         """
         return self.x_coord, self.z_coord
 

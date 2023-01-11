@@ -29,7 +29,7 @@ class Window(QMainWindow):
 
     def __init__(self):
         # this is an inherited class of QMainWindow,
-        # so we must initialize the parent qt widget
+        # so we must initialize the strands qt widget
         super().__init__()
 
         # store reference to self in refs

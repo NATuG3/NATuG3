@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from functools import partial
 from typing import List, Tuple, Iterable
 
@@ -7,12 +8,14 @@ from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
 
 import settings
+from constants.directions import DOWN
 from structures.helices import DoubleHelices
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
+from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
 from utils import show_in_file_explorer
 
@@ -32,7 +35,6 @@ class Strands:
         name: The name of the strands object. Used when exporting the strands object.
         double_helices(List[Tuple[Strand, Strand]]): A list of tuples of up and down strands
             from when the object is loaded with the from_package class method.
-        connected_NEMids: A list of tuples of NEMids that are connected.
 
     Methods:
         randomize_sequences: Randomize the sequences for all strands.
@@ -71,11 +73,10 @@ class Strands:
 
         # Create various containers
         self.nicks = []
-        self.connected_NEMids = []
 
-        # Assign the parent attribute of all strands to this object
+        # Assign the strands attribute of all strands to this object
         for strand in self.strands:
-            strand.parent = self
+            strand.strands = self
 
         # If this class is initialized with a list of strands, then there are no double
         # helices to store
@@ -103,6 +104,10 @@ class Strands:
         """Set a strand at a given index."""
         self.strands[key] = value
 
+    def __delitem__(self, key):
+        """Delete a strand by index."""
+        del self.strands[key]
+
     def __iter__(self):
         """Iterate over all strands."""
         return iter(self.strands)
@@ -119,7 +124,7 @@ class Strands:
             point: The point to create a nick at.
 
         Raises:
-            ValueError: If the point's parent strand is not a strand of ours.
+            ValueError: If the point's strands strand is not a strand of ours.
         """
         # Obtain the strand
         strand = point.strand
@@ -127,7 +132,7 @@ class Strands:
         # Check if the strand is in this container.
         if strand not in self.strands:
             raise ValueError(
-                f"The point's parent is not a strand of ours. "
+                f"The point's strands is not a strand of ours. "
                 f"Point: {point}, Strand: {strand}, Strands: {self.strands}"
             )
 
@@ -145,10 +150,12 @@ class Strands:
 
         # Parent the new strands
         for strand in new_strands:
-            strand.parent = self
+            strand.strands = self
 
         # Add the two new strands
         self.extend(new_strands)
+
+        self.style()
 
     def unnick(self, nick: "Nick"):
         """
@@ -173,8 +180,10 @@ class Strands:
         new_strand.extend(strand2)
 
         # Remove the two strands and add the new strand.
-        self.remove(strand1)
-        self.remove(strand2)
+        with suppress(ValueError):
+            self.remove(strand1)
+        with suppress(ValueError):
+            self.remove(strand2)
         self.append(new_strand)
 
         # Remove the nick.
@@ -311,7 +320,7 @@ class Strands:
 
     def append(self, strand: Strand):
         """Add a strand to the container."""
-        strand.parent = self
+        strand.strands = self
         self.strands.append(strand)
 
     def extend(self, strands: List[Strand]):
@@ -321,10 +330,10 @@ class Strands:
 
     def remove(self, strand: Strand):
         """Remove a strand from the container."""
-        strand.parent = None
+        strand.strands = None
         self.strands.remove(strand)
 
-    def style(self, skip_checks: bool = False) -> None:
+    def style(self) -> None:
         """
         Recompute colors for all strands contained within.
         Prevents touching strands from sharing colors.
@@ -362,48 +371,100 @@ class Strands:
                             0
                         ]
                     else:
-                        if skip_checks:
-                            strand.styles.color.value = settings.colors["strands"][
-                                "greys"
-                            ][0]
-                        else:
-                            raise ValueError(
-                                "Strand should all be up/down if it is single-domain."
-                            )
+                        strand.styles.color.value = settings.colors["strands"]["greys"][
+                            0
+                        ]
 
             # Set the styles of each point based off new strand styles
-            [item.styles.reset() for item in strand.items]
+            for item in strand.items.by_type(Point):
+                item.styles.change_state("default")
 
-    def connect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+    def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
-        Connect two arbitrary NEMids together.
+        Create a linkage between two end NEMids.
 
-        Args:
-            NEMid1: The first NEMid.
-            NEMid2: The second NEMid.
-        """
-        self.conjunct(NEMid1, NEMid2, skip_checks=True)
-        if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
-            NEMid1.connectmate = NEMid2
-            NEMid2.connectmate = NEMid1
-            NEMid1.connected = True
-            NEMid2.connected = True
-        self.connected_NEMids.append((NEMid1, NEMid2))
-
-    def unconnect(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
-        """
-        Disconnect two arbitrary NEMids.
+        This conjoins two different strands, and places a Linkage object in between
+        the two strands. The two strands that are being conjoined will be deleted,
+        and a new strand that contains all the items of those two strands and a
+        linkage will be created and added to the container.
 
         Args:
-            NEMid1: The first NEMid.
-            NEMid2: The second NEMid.
+            NEMid1: A NEMid at either the beginning or end of a strand.
+            NEMid2: A different NEMid at either the beginning or end of a strand.
+
+        Returns:
+            The Linkage object that was created.
+
+        Notes:
+            - NEMids must be at opposite ends of strands.
+            - NEMids must be of the same direction.
+            - The NEMids' parent strands must be in this Strands container.
+            - Properties of the longer strand are preserved (styles, etc.).
         """
-        if NEMid1.strand.parent is self and NEMid2.strand.parent is self:
-            NEMid1.connectmate = None
-            NEMid2.connectmate = None
-            NEMid1.connected = False
-            NEMid2.connected = False
-        self.connected_NEMids.remove((NEMid1, NEMid2))
+        # Check that the NEMids are in the same Strands container
+        if NEMid1.strand.strands != self or NEMid2.strand.strands != self:
+            raise ValueError(
+                "NEMids's strands' Strands container must be in the same. ("
+                f"{NEMid1.strand.strands} != {NEMid2.strand.strands})"
+            )
+
+        # Check that the NEMids are at opposite ends of the strands
+        for NEMid_ in (NEMid1, NEMid2):
+            NEMid_index = NEMid_.strand.items.by_type(NEMid).index(NEMid_)
+            if not (
+                NEMid_index == 0
+                or NEMid_index == len(NEMid_.strand.items.by_type(NEMid)) - 1
+            ):
+                raise ValueError(
+                    "NEMids must be at opposite ends of strands to be linked."
+                )
+
+        # Ensure that the NEMids are of different direction
+        if NEMid1.strand.direction == NEMid2.strand.direction:
+            raise ValueError("NEMids must be of different direction to be linked.")
+
+        # Force NEMid1 to be the upwards NEMid
+        if NEMid1.strand.direction == DOWN:
+            NEMid1, NEMid2 = NEMid2, NEMid1
+
+        # Remove the old strands from the container
+        self.remove(NEMid1.strand)
+        self.remove(NEMid2.strand)
+
+        # Determine the strand that begins with NEMid1 and the strand that begins with
+        # NEMid2
+        begins_with_NEMid = NEMid1 if NEMid1.is_endpoint(True) else NEMid2
+        ends_with_NEMid = NEMid2 if NEMid2.is_endpoint(True) else NEMid1
+
+        # Nucleoside 1 is the last nucleoside in the first strand, and nucleoside 2 is
+        # the first nucleoside in the second strand
+
+        linkage = Linkage(
+            items=(
+                begins_with_NEMid.strand.items.by_type(Nucleoside)[-1],
+                ends_with_NEMid.strand.items.by_type(Nucleoside)[0],
+            )
+        )
+
+        # Build the linkage. The linkage begins with the Nucleoside after the first
+        # NEMid, then ends with the Nucleoside before the second NEMid.
+        new_strand = Strand(nucleic_acid_profile=self.nucleic_acid_profile)
+        new_strand.extend(tuple(ends_with_NEMid.strand.items))
+        new_strand.append(linkage)
+        new_strand.extend(tuple(begins_with_NEMid.strand.items))
+        [new_strand.remove(item) for item in linkage.items]
+
+        # Add the new strand to the container
+        self.append(new_strand)
+
+        for item in new_strand:
+            item.strand = new_strand
+
+        # Restyle the strands
+        self.style()
+
+        # Return the linkage
+        return linkage
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
@@ -437,7 +498,7 @@ class Strands:
         if NEMid1.x_coord > NEMid2.x_coord:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        # new sequencing we are creating
+        # new strands we are creating
         new_strands = [
             Strand(self.nucleic_acid_profile),
             Strand(self.nucleic_acid_profile),
@@ -576,7 +637,7 @@ class Strands:
             if not new_strand.empty:
                 self.append(new_strand)
 
-        # parent the items in the strands
+        # strands the items in the strands
         for new_strand in new_strands:
             for item in new_strand.items:
                 item.strand = new_strand
@@ -593,7 +654,7 @@ class Strands:
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
-        self.style(skip_checks)
+        self.style()
 
     @property
     def size(self) -> Tuple[float, float]:
@@ -607,8 +668,10 @@ class Strands:
         z_coords: List[float] = []
 
         for strand in self.strands:
-            for item in strand.items:
-                x_coords.append(item.x_coord)
-                z_coords.append(item.z_coord)
+            for item in strand.items.by_type(Point):
+                if item.x_coord is not None:
+                    x_coords.append(item.x_coord)
+                if item.z_coord is not None:
+                    z_coords.append(item.z_coord)
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)

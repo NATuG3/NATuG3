@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Type
 
+from constants.directions import UP
 from structures.points.point import Point
 
 
@@ -14,16 +15,11 @@ class NEMid(Point):
         juncmate: NEMid that can this NEMid can conjunct-with. NoneType if this no
             NEMid overlaps.
         junction: Whether this NEMid is a member of an active junction.
-        connected: Whether this NEMid is connected to another NEMid.
-        connectmate: NEMid that this NEMid is connected to.
     """
 
     juncmate: Type["NEMid"] | None = None
     junctable: bool = False
     junction: bool = False
-
-    connectmate: Type["NEMid"] | None = None
-    connected: bool = False
 
     def to_nucleoside(self):
         """
@@ -44,12 +40,16 @@ class NEMid(Point):
 
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
+        properties = {
+            "pos": tuple(map(lambda i: round(i, 3), self.position())),
+            "angle": round(self.angle, 3),
+            "direction": "UP" if self.direction == UP else "DOWN",
+            "junctable": self.junctable,
+            "junction": self.junction,
+            "domain": self.domain,
+        }
+        # Create a string in the format NEMid(key1=value1, key2=value2, ...)
         return (
-            f"NEMid("
-            f"pos={tuple(map(lambda i: round(i, 3), self.position()))}, "
-            f"angle={round(self.angle, 3)}°, "
-            f"junction={str(self.junction).lower()}, "
-            f"junctable={str(self.junctable).lower()}, "
-            f"connected={str(self.connected).lower()}"
-            f")"
+            f"NEMid"
+            f"({', '.join(f'{key}={value}' for key, value in properties.items())})"
         )

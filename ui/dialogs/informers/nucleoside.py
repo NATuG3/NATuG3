@@ -1,10 +1,14 @@
+import logging
+
 from PyQt6 import uic
 from PyQt6.QtWidgets import QDialog
 
 from constants.directions import *
 from structures.domains import Domains
-from structures.points import Nucleoside
+from structures.points import Nucleoside, NEMid
 from structures.strands import Strands
+
+logger = logging.getLogger(__name__)
 
 
 class NucleosideInformer(QDialog):
@@ -17,7 +21,7 @@ class NucleosideInformer(QDialog):
         Initialize the NucleosideInformer.
 
         Args:
-            parent: The parent widget for the dialog.
+            parent: The strands widget for the dialog.
             nucleoside: The Nucleoside to display information about.
             all_strands: The strands that contain the Nucleoside.
             all_domains: The domains that contain the Nucleoside.
@@ -30,6 +34,8 @@ class NucleosideInformer(QDialog):
         self.setWindowTitle("Nucleoside Information")
         uic.loadUi("ui/dialogs/informers/nucleoside.ui", self)
 
+        logger.info("Displaying information for %s", nucleoside)
+
         self.x_coordinate.setText(f"{nucleoside.x_coord:.4f} nanometers")
         self.z_coordinate.setText(f"{nucleoside.z_coord:.4f} nanometers")
         self.angle.setText(f"{nucleoside.angle:.4f}°")
@@ -40,7 +46,9 @@ class NucleosideInformer(QDialog):
         else:  # not item.strand.closed
             openness = "open"
         self.strand.setText(
-            f"item #{nucleoside.index + 1} in {openness} strand #{strand_index + 1}"
+            f"nucleoside #"
+            f"{nucleoside.strand.items.by_type(Nucleoside).index(nucleoside) + 1} in"
+            f" {openness} strand #{strand_index + 1}"
         )
 
         self.original_domain.setText(

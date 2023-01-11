@@ -132,7 +132,7 @@ class Panel(QWidget):
                     refs.constructor.side_view.refresh()
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(True)
-                refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(True)
+                refs.toolbar.actions.buttons[LINKER].setEnabled(True)
                 refs.toolbar.actions.buttons[JUNCTER].setEnabled(True)
             elif index in (STRANDS,):
                 # if the plot mode was not already nucleoside make it nucleoside
@@ -142,9 +142,13 @@ class Panel(QWidget):
                 refs.toolbar.plot_mode = INFORMER
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(False)
-                refs.toolbar.actions.buttons[HAIRPINNER].setEnabled(False)
+                refs.toolbar.actions.buttons[LINKER].setEnabled(False)
                 refs.toolbar.actions.buttons[JUNCTER].setEnabled(False)
 
+        for item in refs.misc.currently_selected:
+            item.styles.change_state("default")
+            refs.misc.currently_selected.remove(item)
+        refs.constructor.side_view.plot.refresh()
         self.tab_area.currentChanged.connect(tab_changed)
 
 
@@ -164,7 +168,7 @@ class RefreshConfirmer(QDialog):
         Initialize the refresh confirmer dialog.
 
         Args:
-            parent: The parent widget.
+            parent: The strands widget.
             function: A function to be called if a non-cancel button is pressed.
         """
         super().__init__(parent)

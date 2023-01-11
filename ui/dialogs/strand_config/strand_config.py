@@ -5,6 +5,7 @@ from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import QDialog, QColorDialog, QGraphicsScene
 
+from structures.points import NEMid
 from structures.strands import Strand
 from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
@@ -21,7 +22,7 @@ class StrandConfig(QDialog):
 
         self.strand = strand
         self.setWindowTitle(
-            f"Strand #{self.strand.parent.index(self.strand) + 1} Config"
+            f"Strand #{self.strand.strands.index(self.strand) + 1} Config"
         )
         self._sequencing()
         self._color_selector()
@@ -39,8 +40,8 @@ class StrandConfig(QDialog):
 
     def _strand_params(self):
         """Setup parameters based on strand parameters."""
-        self.NEMids_in_strand.setValue(len(self.strand.NEMids()))
-        self.nucleosides_in_strand.setValue(len(self.strand.NEMids()))
+        self.NEMids_in_strand.setValue(len(self.strand.items.by_type(NEMid)))
+        self.nucleosides_in_strand.setValue(len(self.strand.items.by_type(NEMid)))
         self.closed.setChecked(self.strand.closed)
         self.empty.setChecked(self.strand.empty)
 
@@ -53,7 +54,7 @@ class StrandConfig(QDialog):
         self.thickness.setValue(thickness)
 
     def _sequencing(self):
-        """Set up the strands area."""
+        """Set up the sequencing area."""
 
         # add the strands display area
         self.sequence_display = SequenceDisplayArea(None, self.strand.sequence)

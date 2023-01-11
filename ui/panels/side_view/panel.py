@@ -11,6 +11,8 @@ import ui.plotters
 from constants.toolbar import *
 from structures.points.point import Point
 from structures.strands import Strand
+from structures.strands.linkage import Linkage
+from ui.dialogs.linkage_config.linkage_config import LinkageConfig
 from ui.dialogs.strand_config.strand_config import StrandConfig
 from ui.panels.side_view import workers
 
@@ -30,7 +32,7 @@ class Panel(QGroupBox):
         Initialize the SideView panel.
 
         Args:
-            parent: The parent widget in which the side view panel is contained. Can be None.
+            parent: The strands widget in which the side view panel is contained. Can be None.
         """
         super().__init__(parent)
 
@@ -44,6 +46,7 @@ class Panel(QGroupBox):
         )
         self.plot.points_clicked.connect(self.points_clicked)
         self.plot.strand_clicked.connect(self.strand_clicked)
+        self.plot.linkage_clicked.connect(self.linkage_clicked)
         self.layout().addWidget(self.plot)
 
     def refresh(self) -> None:
@@ -57,6 +60,22 @@ class Panel(QGroupBox):
         self.plot.nucleic_acid = refs.nucleic_acid.current
         self.plot.mode = refs.misc.plot_mode
         self.plot.refresh()
+
+    def linkage_clicked(self, linkage: Linkage) -> None:
+        """
+        Slot for when a linkage is clicked.
+
+        Opens a linkage dialog for configuring the linkage.
+
+        Args:
+            linkage: The linkage that was clicked.
+        """
+        dialog = LinkageConfig(self.parent(), linkage)
+        dialog.updated.connect(self.refresh)
+        dialog.show()
+        self.refresh()
+
+        logger.info(f"A linkage was clicked.")
 
     def strand_clicked(self, strand: Strand) -> None:
         """
@@ -72,7 +91,7 @@ class Panel(QGroupBox):
         dialog.show()
         self.refresh()
 
-        logger.info(f"Strand #{strand.parent.index(strand)} was clicked.")
+        logger.info(f"Strand #{strand.strands.index(strand)} was clicked.")
 
     def points_clicked(self, points: List[Point]) -> None:
         """
@@ -95,8 +114,8 @@ class Panel(QGroupBox):
             worker = partial(
                 workers.informer, parent, points, strands, domains, refresh
             )
-        elif refs.toolbar.current == HAIRPINNER:
-            worker = partial(workers.hairpinner, points, strands, refresh)
+        elif refs.toolbar.current == LINKER:
+            worker = partial(workers.linker, points, strands, refresh)
         elif refs.toolbar.current == JUNCTER:
             worker = partial(workers.juncter, points, strands, refresh)
         elif refs.toolbar.current == NICKER:

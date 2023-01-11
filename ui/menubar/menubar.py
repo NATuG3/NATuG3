@@ -26,7 +26,7 @@ class Menubar(QMenuBar):
         Initialize the file menu bar.
 
         Args:
-            parent: The parent of the file menu bar.
+            parent: The strands of the file menu bar.
         """
         super().__init__(parent)
         self._add_menus()

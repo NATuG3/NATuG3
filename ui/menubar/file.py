@@ -19,7 +19,7 @@ class File(QMenu):
         Initialize the file section of the menu bar.
 
         Args:
-            parent: The parent of the file section of the menu bar.
+            parent: The strands of the file section of the menu bar.
         """
         super().__init__("&File", parent)
 

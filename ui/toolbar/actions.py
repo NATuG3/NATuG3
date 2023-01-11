@@ -5,7 +5,7 @@ from constants.toolbar import *
 
 class Action(QPushButton):
     """
-    A singular action parent class for the toolbar.
+    A singular action strands class for the toolbar.
 
     Actions are modified QPushButtons that are checkable (toggleable), and have a
         fixed width.
@@ -36,7 +36,7 @@ class Actions(QButtonGroup):
         self.add_button(self.Informer(), INFORMER)
         self.add_button(self.Juncter(), JUNCTER)
         self.add_button(self.Nicker(), NICKER)
-        self.add_button(self.Hairpinner(), HAIRPINNER)
+        self.add_button(self.Linker(), LINKER)
         self.add_button(self.Highlighter(), HIGHLIGHTER)
 
     def add_button(self, button: QAbstractButton, id_: int) -> None:
@@ -71,12 +71,12 @@ class Actions(QButtonGroup):
             super().__init__("Nicker")
             self.setObjectName("Nicker")
 
-    class Hairpinner(Action):
+    class Linker(Action):
         """Mode for making nicks."""
 
         def __init__(self):
-            super().__init__("Hairpinner")
-            self.setObjectName("Hairpinner")
+            super().__init__("Linker")
+            self.setObjectName("Linker")
 
     class Highlighter(Action):
         """Mode for highlighting items."""
