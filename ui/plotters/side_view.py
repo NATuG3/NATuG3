@@ -200,14 +200,7 @@ class SideViewPlotter(pg.PlotWidget):
             z_coords: List[float] = list()
 
             # iterate on the proper type based on toolbar
-            if settings.debug:
-                to_plot = strand.items.by_type((Point, Linkage))
-            elif self.plot_data.mode == "NEMid":
-                to_plot = strand.items.by_type((NEMid, Linkage))
-            elif self.plot_data.mode == "nucleoside":
-                to_plot = strand.items.by_type((Nucleoside, Linkage))
-            else:
-                raise ValueError("Invalid mode.")
+            to_plot = strand.items.by_type((Point, Linkage))
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
@@ -222,32 +215,41 @@ class SideViewPlotter(pg.PlotWidget):
                 # traverse between a coord and a Point)
                 self.plot_data.points[(point.x_coord, point.z_coord)] = point
 
-                # if the symbol is a custom symbol, use the custom symbol
-                if point.styles.symbol_is_custom():
-                    symbols.append(
-                        custom_symbol(
-                            point.styles.symbol,
-                            flip=False,
-                            rotation=point.styles.rotation,
+                # based on plot mode, some items may be plotted as small stars:
+                if (
+                    self.plot_data.mode == "NEMid" and isinstance(point, Nucleoside)
+                ) or (self.plot_data.mode == "nucleoside" and isinstance(point, NEMid)):
+                    symbols.append("o")
+                    symbol_sizes.append(2)
+                    symbol_brushes.append(pg.mkBrush(color=(30, 30, 30)))
+                    symbol_pens.append(None)
+                else:
+                    # if the symbol is a custom symbol, use the custom symbol
+                    if point.styles.symbol_is_custom():
+                        symbols.append(
+                            custom_symbol(
+                                point.styles.symbol,
+                                flip=False,
+                                rotation=point.styles.rotation,
+                            )
+                        )
+                    else:
+                        symbols.append(point.styles.symbol)
+
+                    # store the symbol size
+                    symbol_sizes.append(point.styles.size)
+
+                    # store the symbol brush
+                    symbol_brushes.append(
+                        pg.mkBrush(color=point.styles.fill, width=point.styles.outline[1])
+                    )
+
+                    # store the symbol pen
+                    symbol_pens.append(
+                        pg.mkPen(
+                            color=point.styles.outline[0], width=point.styles.outline[1]
                         )
                     )
-                else:
-                    symbols.append(point.styles.symbol)
-
-                # store the symbol size
-                symbol_sizes.append(point.styles.size)
-
-                # store the symbol brush
-                symbol_brushes.append(
-                    pg.mkBrush(color=point.styles.fill, width=point.styles.outline[1])
-                )
-
-                # store the symbol pen
-                symbol_pens.append(
-                    pg.mkPen(
-                        color=point.styles.outline[0], width=point.styles.outline[1]
-                    )
-                )
 
             # graph the points separately
             plotted_points = pg.PlotDataItem(
@@ -323,7 +325,7 @@ class SideViewPlotter(pg.PlotWidget):
                         color=strand.styles.color.value,
                         width=strand.styles.thickness.value,
                     ),
-                    connect=connect
+                    connect=connect,
                 )
 
                 plotted_stroke.setCurveClickable(True)

@@ -433,8 +433,8 @@ class Strands:
 
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
-        begins_with_NEMid = NEMid1 if NEMid1.is_endpoint(True) else NEMid2
-        ends_with_NEMid = NEMid2 if NEMid2.is_endpoint(True) else NEMid1
+        begins_with_NEMid = NEMid1 if NEMid1.strand.items.by_type(NEMid) else NEMid2
+        ends_with_NEMid = NEMid2 if NEMid2.strand.items.by_type(NEMid) else NEMid1
 
         # Nucleoside 1 is the last nucleoside in the first strand, and nucleoside 2 is
         # the first nucleoside in the second strand
@@ -454,11 +454,11 @@ class Strands:
         new_strand.extend(tuple(begins_with_NEMid.strand.items))
         [new_strand.remove(item) for item in linkage.items]
 
-        # Add the new strand to the container
-        self.append(new_strand)
-
         for item in new_strand:
             item.strand = new_strand
+
+        # Add the new strand to the container
+        self.append(new_strand)
 
         # Restyle the strands
         self.style()

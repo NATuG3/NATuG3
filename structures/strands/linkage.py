@@ -73,12 +73,8 @@ class Linkage:
             if not isinstance(item, Nucleoside):
                 raise TypeError("All items in a linkage must be nucleosides.")
 
-        # Clear the angles, x coords, and z coords of all the nucleosides in the
-        # linkage. Also, assign this linkage to the nucleosides.
+        # Assign this linkage to the nucleosides.
         for item in self.items:
-            item.angle = None
-            item.x_coord = None
-            item.z_coord = None
             item.linkage = self
 
     @cached_property

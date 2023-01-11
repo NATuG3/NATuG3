@@ -541,7 +541,7 @@ class Domains:
             zeroed_strand_z_coords = zeroed_strand_z_coords[:trim_to]
 
             # Repeat for the other strand.
-            trim_to = zeroed_strand_NEMid_count[1] * 2
+            trim_to = other_strand_NEMid_count[1] * 2
             other_strand_angles = other_strand_angles[:trim_to]
             other_strand_x_coords = other_strand_x_coords[:trim_to]
             other_strand_z_coords = other_strand_z_coords[:trim_to]
@@ -569,14 +569,11 @@ class Domains:
             if initial_z_coord >= 0:
                 shifts = 0
             else:
-                shifts = round(np.divide(abs(initial_z_coord), Z_b))
-
-            # We are cutting nucleosides and NEMids, so we must multiply shifts by 2.
-            to_cut = shifts * 2
+                shifts = round(np.divide(abs(initial_z_coord), (Z_b/2)))
 
             # First trim the strands based off of the shifts
-            double_helix.zeroed_helix.trim(-to_cut)
-            double_helix.other_helix.trim(-to_cut)
+            double_helix.zeroed_helix.trim(-shifts)
+            double_helix.other_helix.trim(-shifts)
 
             # Now that we have computed all the base NEMids we can compute the extra
             # lower and uppper NEMids. The additional NEMids to place on top for each

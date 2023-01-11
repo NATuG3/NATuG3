@@ -47,9 +47,13 @@ class NucleicAcidPanel(QWidget):
     def _signals(self):
         def on_input_updated():
             """Worker for when a widget is changed."""
+            # Update the current nucleic_acid_profile with the new settings
             self.updated.emit(
                 partial(refs.nucleic_acid.current.update, self.fetch_settings())
             )
+            # Then dump the profile right back so that settings that need to be
+            # computed get computed and displayed
+            self.updated.emit(self.dump_settings(refs.nucleic_acid.current))
 
         for input in (
             self.D,
@@ -112,7 +116,6 @@ class NucleicAcidPanel(QWidget):
             Z_c=self.Z_c.value(),
             Z_mate=self.Z_mate.value(),
         )
-        self.dump_settings(profile)
         logger.debug("Fetched nucleic acid settings from inputs. (%s)", profile)
         return profile
 

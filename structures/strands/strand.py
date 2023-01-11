@@ -381,8 +381,8 @@ class Strand:
         # Obtain preliminary data
         initial_angle = edge_item.angle + ((theta_b / 2) * modifier)
         initial_z_coord = edge_item.z_coord + ((Z_b / 2) * modifier)
-        final_angle = initial_angle + ((count + 1) * (theta_b * modifier))
-        final_z_coord = initial_z_coord + ((count + 1) * (Z_b * modifier))
+        final_angle = initial_angle + ((count + 3) * (theta_b * modifier))
+        final_z_coord = initial_z_coord + ((count + 3) * (Z_b * modifier))
 
         # Generate the angles for the points
         angles = np.arange(
@@ -419,7 +419,8 @@ class Strand:
             angles,
             x_coords,
             z_coords,
-            NEMid if isinstance(edge_item, Nucleoside) else Nucleoside,
+            initial_type=NEMid if isinstance(edge_item, Nucleoside) else Nucleoside,
+            break_at=abs(count)
         )
 
         # Assign domains for all items

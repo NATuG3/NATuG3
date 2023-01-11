@@ -6,7 +6,9 @@ from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 
 
-def converge_point_data(angles, x_coords, z_coords, initial_type=NEMid) -> List[Point]:
+def converge_point_data(
+    angles, x_coords, z_coords, initial_type=NEMid, break_at: bool = None
+) -> List[Point]:
     """
     Converge angles, x coords, and z coord arrays into a list of NEMids and
     nucleosides.
@@ -16,6 +18,7 @@ def converge_point_data(angles, x_coords, z_coords, initial_type=NEMid) -> List[
         x_coords: The x coordinates of the points.
         z_coords: The z coordinates of the points.
         initial_type: The type of point to start with.
+        break_at: The index to break at. If None, don't break.
 
     Returns:
         list: A list of alternating NEMids and Nucleosides set with the provided
@@ -39,6 +42,8 @@ def converge_point_data(angles, x_coords, z_coords, initial_type=NEMid) -> List[
 
     # Generate the NEMid and Nucleoside objects.
     for counter, (angle, x_coord, z_coord) in enumerate(zipped):
+        if counter == break_at:
+            break
         if counter_check(counter):
             # If the counter is odd, we are generating a NEMid.
             item = NEMid(x_coord=x_coord, z_coord=z_coord, angle=angle)
