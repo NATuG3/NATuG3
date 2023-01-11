@@ -580,9 +580,9 @@ class Domains:
             # strand are count[2] and the additional NEMids to place on the bottom
             # are count[0]. Recall that count[1] is the number of NEMids to generate
             # initially.
-            double_helix.zeroed_helix.generate(-zeroed_strand_NEMid_count[0])
+            double_helix.zeroed_helix.generate(-zeroed_strand_NEMid_count[0]-1)
             double_helix.zeroed_helix.generate(zeroed_strand_NEMid_count[2] + shifts)
-            double_helix.other_helix.generate(-other_strand_NEMid_count[0])
+            double_helix.other_helix.generate(-other_strand_NEMid_count[0]-1)
             double_helix.other_helix.generate(other_strand_NEMid_count[2] + shifts)
 
             # Now reasign metadata for new items
