@@ -32,11 +32,7 @@ class _NucleicAcid:
             T=2,
             B=21,
             Z_c=0.17,
-            Z_s=1.26,
             Z_mate=0.094,
-            theta_b=34.29,
-            theta_c=17.1428,
-            theta_s=2.343,
         )
     }
 
@@ -58,15 +54,17 @@ class _NucleicAcid:
         """
         Load saved profiles and restored state from files.
 
-        Each profile is loaded from a separate file in the profiles directory. The names of the files are the
-        names of the profiles where underscores are replaced with spaces (dumping is the reverse of this).
+        Each profile is loaded from a separate file in the profiles directory. The
+        names of the files are the names of the profiles where underscores are
+        replaced with spaces (dumping is the reverse of this).
         """
         # load all profiles from individual files in the profiles directory
         for name in filter(
             lambda filename: filename.endswith(".json"),
             os.listdir(self.filenames.profiles),
         ):
-            # load the profile from the file (we make sure to replace underscores with spaces and ".json" with "")
+            # load the profile from the file (we make sure to replace underscores
+            # with spaces and ".json" with "")
             self.profiles[
                 name.replace("_", " ").replace(".json", "")
             ] = NucleicAcidProfile.from_file(
@@ -79,8 +77,8 @@ class _NucleicAcid:
         # attempt to load the restored state from the restored file
         try:
             self.current = NucleicAcidProfile.from_file("json", self.filenames.restored)
-        # if unable to locate nucleic acid settings file then make no changes and announce that
-        # the default settings will be used
+        # if unable to locate nucleic acid settings file then make no changes and
+        # announce that the default settings will be used
         except FileNotFoundError:
             logger.warning("Saved profiles file not found. Defaults restored.")
 
@@ -91,8 +89,9 @@ class _NucleicAcid:
         """
         Dump profiles and the current state to files.
 
-        Each profile is dumped to a separate file in the profiles directory. The names of the files are the
-        names of the profiles where spaces are replaced with underscores (loading is the reverse of this).
+        Each profile is dumped to a separate file in the profiles directory. The
+        names of the files are the names of the profiles where spaces are replaced
+        with underscores (loading is the reverse of this).
         """
         # dump all profiles into individual files
         for name, profile in self.profiles.items():

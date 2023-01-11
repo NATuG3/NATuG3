@@ -23,8 +23,6 @@ def main():
 
     if RESET:
         for filepath in (
-            f"saves/nucleic_acid/profiles.nano",
-            f"saves/nucleic_acid/restored.nano",
             f"saves/domains/restored.nano",
             f"saves/strands/restored.nano",
         ):

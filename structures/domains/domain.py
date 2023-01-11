@@ -30,9 +30,6 @@ class Domain:
             helix joints.
             (-1) for up to down switch; (0) for both up/down switch; (1) for down to up
             switch
-        theta_s: The switch angle for the transition between an up and down strand
-            (or 0 if there is none). This is the theta_s_multiple times the
-            characteristic angle.
         nucleic_acid_profile: the nucleic acid configuration for the domain.
         left_helix_joint: The left helix joint's upwardness or downwardness.
             "Left" indicates that the left side of this domain will be lined up to
@@ -220,7 +217,7 @@ class Domain:
 
         This is equivalent to self.theta_s_multiple * self.theta_c.
         """
-        return self.theta_s_multiple * self.nucleic_acid_profile.theta_s
+        return self.theta_s_multiple * self.nucleic_acid_profile.theta_c
 
     @property
     def theta_m(self) -> float:

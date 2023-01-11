@@ -262,16 +262,14 @@ class Domains:
 
         # Create references for various nucleic acid settings. This is done to make
         # the code more readable.
-        theta_s = self.nucleic_acid_profile.theta_s
-        theta_c = self.nucleic_acid_profile.theta_c
         D = self.nucleic_acid_profile.D
 
         for index, domain in enumerate(domains):
             # locate strand switch angle for the previous domain.
-            theta_s: float = domains[index - 1].theta_s_multiple * theta_s
+            theta_s: float = domains[index - 1].theta_s
             # locate interior angle for the previous domain.
             interior_angle_multiple: float = (
-                domains[index - 1].theta_m_multiple * theta_c
+                domains[index - 1].theta_m
             )
 
             # calculate the actual interior angle (with strand switching angle

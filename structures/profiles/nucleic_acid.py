@@ -16,11 +16,7 @@ class NucleicAcidProfile:
         T: There are T turns every B bases.
         B: There are B bases every T turns.
         Z_c: Characteristic height.
-        Z_s: Switch height.
-        Z_b: Base height.
         Z_mate: Nucleoside-Mate Vertical Distance.
-        theta_b: Base angle.
-        theta_c: Characteristic angle.
         theta_s: Switch angle.
     """
 
@@ -30,16 +26,23 @@ class NucleicAcidProfile:
     T: int = 2
     B: int = 21
     Z_c: float = 0.17
-    Z_s: float = 1.26
     Z_mate: float = 0.094
-    theta_b: float = 34.29
-    theta_c: float = 17.1428
     theta_s: float = 2.343
 
     @property
     def Z_b(self) -> float:
         """The base height."""
         return (self.T * self.H) / self.B
+
+    @property
+    def theta_b(self) -> float:
+        """The base angle."""
+        return 360 * (self.T / self.B)
+
+    @property
+    def theta_c(self) -> float:
+        """The characteristic angle."""
+        return 360 / self.B
 
     def update(self, profile: Type["NucleicAcidProfile"]) -> None:
         """
