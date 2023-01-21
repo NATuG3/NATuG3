@@ -168,12 +168,12 @@
 	
 	\subsection{Domains}
 	
-	\begin{wrapfigure}{r}{0.5\textwidth}
+	\begin{figure}[h]
 		\centering
 		\caption{Domains Config Table}
-		\includegraphics[width=2.5in]{domain-config-table.png}
+		\includegraphics[height=2in]{domain-config-table.png}
 		\label{fig:domain-config-table}
-	\end{wrapfigure}
+	\end{figure}
 
 	The Domains Tab is the area in which all the settings for each helical domain can be set. The angles between each domain are what determine what the ultimate shape of the nanostructure will be. NATuG provides support for symmetrical designs, saving and loading designs, and provides tools for designing closed structures.
 	
@@ -184,6 +184,36 @@
 	\end{itemize}
 	
 	\subsection{Sequencing}
+	
+	\begin{figure}[h]
+		\centering
+		\caption{Sequencing Tab}
+		\includegraphics[height=2in]{sequencing-tab.png}
+		\label{fig:sequencing-tab}
+	\end{figure}
+	
+	This tab allows for bulk sequence operations, and for exporting sequences to a spreadsheet for synthesis.
+	
+	\newpage
+	
+	\subsubsection{Bulk Sequence Operations}
+	Bulk sequence operations let you set the sequence of many nucleosides at once. In order to run a bulk sequence operation, select a "Scope," then an "Operation," and then click "Run."
+	
+	\paragraph{Scopes}
+	The scope is which nucleosides the operation should run on.
+	
+	\begin{itemize}
+		\item \textbf{All bases:} All the nucleosides of all the strands.
+		\item \textbf{Unset bases:} All the nucleosides of all the strands that do not currently have a base set.
+	\end{itemize}
+
+	\paragraph{Operations}
+	The operation is what to do to the nucleosides within the scope.
+	
+	\begin{itemize}
+		\item \textbf{Randomize:} Select random bases.
+		\item \textbf{Clear:} Unset the bases.
+	\end{itemize}
 	
 	\section{Side View Plot}
 	The Side View Plot is the heart of NATuG. It allows you to directly interact with strands that have been created as a result of user inputs set elsewhere. The plot can be broken into a few distinct parts that function together to allow for a high degree of interactivity. 
