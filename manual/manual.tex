@@ -11,12 +11,14 @@
 
 \begin{document}
 	\maketitle
+	\tableofcontents 
+	\newpage
 	
 	\section{Getting NATuG Running}
 	
 	The quick start guide is the fastest way to get NATuG running on any Mac, Windows, or Linux machine. These steps are by no means comprehensive, and are merely a guide to get the program running.
 	
-	\begin{figure}
+	\begin{figure}[h]
 		\centering
 		\label{fig:github-download-menu}
 		\includegraphics[width=2in]{github-download-menu.png}
@@ -93,32 +95,26 @@
 	The Sequencing Tab is where the user can apply bulk sequence actions to all the strands, and export sequences to a spreadsheet for synthesis. This is generally one of the later steps in the nanotube design process.
 	
 	\subsection{Graph Updating}
+	
 	By default, as changes are made within the various tabs of the Config Panel the Side View Plot and Top View Plot automatically update. To disable automatic updating for either plot, click either of the “Auto Side” or “Auto Top” buttons on the bottom of the Config panel. When automatic updating is disabled, the “Update Graphs” button must be clicked to refresh the plots. Manual updating can be useful for larger structures that take a long time to load.
 	
 	The current tab of the Config Panel determines what is currently plotted in the Side View Plot. When the current tab is either “Nucleic Acid” or “Domains” NEMids are plotted, and the mode of the Side View Plot is unrestricted. However, when “Sequencing” is active, nucleosides are plotted. When this is the case, only the “highlighter” and “informer” modes are enabled within the Side View Plot’s toolbar.
 	
-	\subsection{Tabs}
+	\subsection{Nucleic Acid Tab}
 	
-	\subsubsection{Nucleic Acid}
 	The Nucleic Acid Tab is the area in which all geometrical settings for the nucleic acid being used can be entered. All of NATuG’s computations utilize these constants, so only make changes if you know what you are doing.
 	
-	\paragraph{Profile Manager}
+	\subsubsection{Profile Manager}
+	
 	The profile manager lets you easily save and load various sets of nucleic acid settings. Using NATuG’s profile defaults will ensure that all the settings are correct, and you can also create your own profiles for future use.
 	
 	By default, NATuG includes common profiles, such as one for B type DNA. Profiles are saved internally, and can easily be loaded/retrieved, and .json files containing the profile data can be found within the saves/nucleic\_acid folder. These files are loaded when NATuG is booted, and can be modified directly. Additionally, when NATuG is closed, the last used settings are saved, and are automatically retrieved upon the next launch.
 	
 	To use the profile manager, enter the name of the profile you would like to save/load/delete into the “Profile Name Here” box, and click the respective button. For extended descriptions of what each button does, see below. When a profile manager box is disabled/gray consult the status bar for information as to why. For irreversible actions warnings will be shown.
 	
-	\subparagraph{Load Profile}
-	Load the profile with the currently chosen profile name. This requires a profile to already exist with the name chosen, and for the current settings to not be the same as the settings of that profile.
-	
-	\subparagraph{Save Profile}
-	Save the profile with the currently chosen profile name, or, if there is already a profile with that name, overwrite the existing profile. The profile will be saved to a .json file within saves/nucleic\_acid after the program is closed.
-	
-	\subparagraph{Delete Profile}
-	Delete the profile with the currently chosen profile name. This action is irreversible. Default profiles cannot be deleted.
-	
 	\begin{figure}[h]
+		\caption{Various Profile Actions}
+		
 		\centering
 		\begin{subfigure}{.3\textwidth}
 			\centering
@@ -141,8 +137,17 @@
 			\label{fig:delete-profile-button}
 		\end{subfigure}
 	\end{figure}
+	
+	\paragraph{Load Profile}
+	Load the profile with the currently chosen profile name. This requires a profile to already exist with the name chosen, and for the current settings to not be the same as the settings of that profile. (Icon~\ref{fig:load-profile-button})
+	
+	\paragraph{Save Profile}
+	Save the profile with the currently chosen profile name, or, if there is already a profile with that name, overwrite the existing profile. The profile will be saved to a .json file within saves/nucleic\_acid after the program is closed. (Icon~\ref{fig:save-profile-button})
+	
+	\paragraph{Delete Profile}
+	Delete the profile with the currently chosen profile name. This action is irreversible. Default profiles cannot be deleted. (Icon~\ref{fig:delete-profile-button})
 
-	\paragraph{Setting Descriptions}
+	\subsubsection{Setting Descriptions}
 	Below lies a list of all of the various Nucleic Acid settings that can be adjusted. Certain settings (the ones that are have an "(a)" in the table) are automatically determined based on other settings and cannot be user set.
 
 	\begin{tabular}{|p{.5in}|p{1in}|p{.7in}|p{1.5in}|}
@@ -161,7 +166,7 @@
 		$\theta_{b}$ (a) & Interbase Angle & number between 0 and 360 & The angle that about the helical axis between two NEMids \\
 	\end{tabular}
 	
-	\subsubsection{Domains}
+	\subsection{Domains}
 	
 	\begin{wrapfigure}{r}{0.5\textwidth}
 		\centering
@@ -178,7 +183,7 @@
 		\item To create sticky ends, adjust the left/rightmost boxes of the “Left/Other Count” columns. For more information, see "Settings Descriptions"
 	\end{itemize}
 	
-	\subsubsection{Sequencing}
+	\subsection{Sequencing}
 	
 	\section{Side View Plot}
 	The Side View Plot is the heart of NATuG. It allows you to directly interact with strands that have been created as a result of user inputs set elsewhere. The plot can be broken into a few distinct parts that function together to allow for a high degree of interactivity. 
@@ -195,7 +200,7 @@
 	
 	Importantly, the plot consists of various artifacts, which represent physical nucleosides, or abstract areas between physical nucleosides. Below lies further descriptions of what these artifacts are.
 	
-	\paragraph{Points}
+	\subsubsection{Points}
 	
 	\begin{figure}[h]
 		\centering
@@ -237,6 +242,8 @@
 		\item The dots represent NEMids, and cannot be interacted with.
 	\end{itemize}
 
+	\subsubsection{Lines}
+
 	\begin{figure}[h]
 		\centering
 		\caption{Side View Plot Line Graphics}
@@ -264,10 +271,10 @@
 	\subsection{Interaction}
 	NATuG utilizes the pyqtgraph framework for its plots. Below lies a general description of the means of interaction for the plot, but, for a more direct and comprehensive breakdown, visit \href{https://pyqtgraph.readthedocs.io/en/latest/user_guide/mouse_interaction.html}{pyqtgraph’s website} (\href{https://pyqtgraph.readthedocs.io/en/latest/user_guide/mouse_interaction.html}{pyqtgraph.readthedocs.io}).
 	
-	\paragraph{Panning}
+	\subsubsection{Panning}
 	To pan from left to right within the side view plot, left click, and then drag your cursor away from the area that you want to pan to. You can think of this as “pulling” the graph towards the cursor. Alternatively, if you have a mouse, you also have the option of clicking the scroll wheel and dragging in the direction that you would like to move the plot in.
 	
-	\paragraph{Zooming}
+	\subsubsection{Zooming}
 	If you have a mouse:
 	\begin{itemize}
 		\item To zoom while maintaining the aspect ratio of the plot, use the scroll wheel.
@@ -280,7 +287,7 @@
 		\item To zoom without regard for the aspect ratio of the plot, pinch and right click simultaneously. 
 	\end{itemize}
 
-	\paragraph{Configuration}
+	\subsubsection{Configuration}
 	For additional options for the plot, right click. Upon right clicking, a small dialog showing additional plot options will show up. This allows for more advanced configuration of how the plot appears.
 	
 	\subsection{Modes}
