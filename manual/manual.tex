@@ -112,7 +112,7 @@
 	
 	To use the profile manager, enter the name of the profile you would like to save/load/delete into the “Profile Name Here” box, and click the respective button. For extended descriptions of what each button does, see below. When a profile manager box is disabled/gray consult the status bar for information as to why. For irreversible actions warnings will be shown.
 	
-	\begin{figure}[h]
+	\begin{figure}
 		\caption{Various Profile Actions}
 		
 		\centering
@@ -139,7 +139,7 @@
 	\end{figure}
 	
 	\paragraph{Load Profile}
-	Load the profile with the currently chosen profile name. This requires a profile to already exist with the name chosen, and for the current settings to not be the same as the settings of that profile. (Icon~\ref{fig:load-profile-button})
+	Load the profile with the currently chosen profile name. This requires a profile to already exist with the name chosen, and for the current settings to not be the  the settings of that profile. (Icon~\ref{fig:load-profile-button})
 	
 	\paragraph{Save Profile}
 	Save the profile with the currently chosen profile name, or, if there is already a profile with that name, overwrite the existing profile. The profile will be saved to a .json file within saves/nucleic\_acid after the program is closed. (Icon~\ref{fig:save-profile-button})
@@ -168,12 +168,12 @@
 	
 	\subsection{Domains}
 	
-	\begin{figure}[h]
+	\begin{wrapfigure}{r}{.5\textwidth}
 		\centering
 		\caption{Domains Config Table}
 		\includegraphics[height=2in]{domain-config-table.png}
 		\label{fig:domain-config-table}
-	\end{figure}
+	\end{wrapfigure}
 
 	The Domains Tab is the area in which all the settings for each helical domain can be set. The angles between each domain are what determine what the ultimate shape of the nanostructure will be. NATuG provides support for symmetrical designs, saving and loading designs, and provides tools for designing closed structures.
 	
@@ -185,16 +185,14 @@
 	
 	\subsection{Sequencing}
 	
-	\begin{figure}[h]
+	\begin{wrapfigure}{r}{.5\textwidth}
 		\centering
 		\caption{Sequencing Tab}
 		\includegraphics[height=2in]{sequencing-tab.png}
 		\label{fig:sequencing-tab}
-	\end{figure}
+	\end{wrapfigure}
 	
 	This tab allows for bulk sequence operations, and for exporting sequences to a spreadsheet for synthesis.
-	
-	\newpage
 	
 	\subsubsection{Bulk Sequence Operations}
 	Bulk sequence operations let you set the sequence of many nucleosides at once. In order to run a bulk sequence operation, select a "Scope," then an "Operation," and then click "Run."
@@ -325,15 +323,60 @@
 	
 	\subsubsection{Informer}
 	
+	\begin{figure}
+		\caption{Informer Dialogs}
+		\centering
+		\begin{subfigure}{.3\textheight}
+			\centering
+			\includegraphics[height=1.3in]{NEMid-informer.png}
+			\caption{NEMid Informer Dialog}
+			\label{fig:NEMid-informer}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.3\textheight}
+			\centering
+			\includegraphics[height=1.3in]{nucleoside-informer.png}
+			\caption{Nucleoside Informer Dialog}
+			\label{fig:nucleoside-informer}
+		\end{subfigure}
+	\end{figure}
+	
+	The "Informer" mode is for obtaining additional information about given points. It provides a dialog that shows various attributes of the point(s) that were clicked on.
+	
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=3in]{"informer-activated.png"}
 		\label{fig:informer-activated}
 	\end{figure}
 
-	The "Informer" mode is for obtaining additional information about given points. It provides a dialog that shows various attributes of the point(s) that were clicked on.
+	The informer mode is for obtaining additional information about given points. When the informer mode is active, clicking on any point within the main plot will create a dialog that provides additional information about the point. If you click on a NEMid that could be made into a junction, two informers will appear---one for the NEMid that was clicked, and one for the NEMid that that NEMid could potentially be made into a junction with. There are two different types of dialogs: the NEMid Dialog~\ref{fig:NEMid-informer} and the Nucleoside Dialog~\ref{fig:nucleoside-informer}.
+	
+	\paragraph{Nucleoside Informer} \label{paragraph:nucleoside-informer}
+	Descriptions of the various properties that the Nucleoside Informer displays:
+	\begin{enumerate}
+		\item \textbf{X Coordinate:} The x coordinate of the nucleoside. \label{item:nucleoside-informer-x-coord}
+		\item \textbf{Z Coordinate:} The z coordinate of the nucleoside. \label{item:nucleoside-informer-z-coord}
+		\item \textbf{Angle:} The angle of the nucleoside. The line of tangency between the previous domain and this domain marks the zero degree mark. This is automatically moduloed by 360. \label{item:nucleoside-informer-angle}
+		\item \textbf{Strand:} The index of the nucleoside within its parent strand, and the index of the parent strand within the list of all strands. Indexes begin at \#1. This is the nucleoside index, not the item index, so even though it is true that strands progress nucleoside, NEMid, nucleoside, etc., this index only takes into account nucleosides. \label{item:nucleoside-informer-strand}
+		\item \textbf{Original Domain:} The domain that this nucleoside belongs to. \label{item:nucleoside-informer-domain}
+		\item \textbf{Base:} The base that this nucleoside is currently set to. If the nucleoside does not have a base set, this box will read "Unset Base."
+		\item \textbf{Direction:} The direction of the strand. The darker box is the direction that the strand is going in.  \label{item:nucleoside-informer-direction}
+	\end{enumerate}
 
-	\subsubsection{Juncter}
+	\paragraph{NEMid Informer}
+	Descriptions of the various properties that the NEMid Informer displays:
+	\begin{enumerate}
+		\item \textbf{X Coordinate:} Same as Nucleoside Informer \#\ref{item:nucleoside-informer-x-coord}
+		\item \textbf{Z Coordinate:} Same as Nucleoside Informer \#\ref{item:nucleoside-informer-z-coord}
+		\item \textbf{Angle:} Same as Nucleoside Informer \#\ref{item:nucleoside-informer-angle}
+		\item \textbf{Strand:} Same as Nucleoside Informer \#\ref{item:nucleoside-informer-strand}
+		\item \textbf{Original Domain:} Same as Nucleoside Informer \#\ref{item:nucleoside-informer-domain}
+		\item \textbf{Could Be Junction:} Whether this NEMid could be conjuncted with another NEMid. If this is set to true then clicking on this NEMid in Juncter Mode (\ref{sect:juncter}) will be allowed, otherwise an error will be displayed.
+		\item \textbf{Is Active Junction:} Whether this NEMid is currently conjuncted with another NEMid. 
+		\item \textbf{Direction:} Same as Nucleoside Informer \#\ref{item:nucleoside-informer-direction}
+	\end{enumerate}
+
+	\subsubsection{Juncter} \label{sect:juncter}
 
 	\begin{figure}[h]
 		\centering
