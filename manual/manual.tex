@@ -25,39 +25,120 @@
 		\caption{Github code download menu}
 	\end{figure}
 	
-	\begin{enumerate}
+	\begin{enumerate} \label{sect:getting-natug-running}
 		\item Visit \href{Python's download page}{www.python.org/downloads}, and then install the most recent version of Python for your operating system. NATuG has been confirmed to work on versions up to Python 3.11.1
 		\item Go to the \href{NATuG’s Github page}{github.com/404Wolf/NATuG}, click the green "code" button, and then click "download ZIP." See Figure~\ref{fig:github-download-menu}.
 		\item Open your computer’s terminal/console/command prompt. Enter the following commands, in the following order. 
 		
 		\begin{enumerate}
-			\item “cd $<$filepath$>$” to enter the directory of the project. Generally this will be something along the lines of \mbox{cd C:/Users/Name/Downloads/NATuG-main,”} but it may vary based on operating system, where you download the folder, and the name of the folder. \label{enum:enter-directory}
+			\item “cd $<$filepath$>$” to enter the directory of the project. Generally the path will be "Users/Name/Downloads/NATuG-main,” but it may vary based on operating system, where you download the folder, and the name of the folder. \label{enum:enter-directory}
 			\item “python -m venv venv” to create a virtual environment for the needed libraries to go into.
-			\item “venv\\Scripts\\activate” if you are on windows, or \nolinebreak{“source myenv/bin/activate”}	if you are on Mac/Linux, to enter into the virtual environment. You will know that you have successfully entered the virtual environment if the current line in terminal begins with “(venv).” \label{enum:activate-venv}
-			\item “python -m pip install -r requirements.txt” to automatically install all the needed libraries. They may take a while to download. Once they have installed, when	loading NATuG in the future you can skip this step.
+			\item “venv\\Scripts\\activate” if you are on windows, or “source myenv/bin/activate” if you are on Mac/Linux, to enter into the virtual environment. You will know that you have successfully entered the virtual environment if the current line in terminal begins with “(venv).” \label{enum:activate-venv}
+			\item “python -m pip install -r requirements.txt” to automatically install all the needed libraries. They may take a while to download.
 			\item “python -m launcher” to run the program. The first launch may take a bit while the code compiles. \label{enum:run-program}
 		\end{enumerate}
 	
 		\item You should now be in NATuG! When running the program in the future, simply CD into the folder (step~\ref{enum:enter-directory}), enter the virtual environment (step~\ref{enum:activate-venv}), and run the program (step~\ref{enum:run-program}).
 	\end{enumerate}
 
+	\newpage
 	\section{Quickstart}
 	
-	Constructing a DNA nanotube is a complex, multi-stage process, but NATuG streamlines the steps. Below lies a quick list of steps to design a very basic nanotube in NATuG, which covers the primary stages, but not the intricacies.
+	Constructing a DNA nanotube is a complex, multi-stage process, but NATuG streamlines the steps. Below is a quick list of things to do that should help you gain a basic level familiarity with NATuG. 
 	
-	\subsection{Nucleic Acid Profile Selection}
-	On the right side of the screen, in the config panel, enter the Nucleic Acid tab. Then locate the "Enter Profile Name Here" box. Now, click the small dropdown triangle, and choose the DNA type that you plan on working with. If you are just here to experiment, leave it at B type DNA.
+	\textbf{Disclaimer:} The below tasks are by no means comprehensive, and are meant to serve as a simple introduction to the program.
+	
+	\subsection{Running NATuG}
+	First, go to Section~\ref{sect:getting-natug-running} and follow the instructions to get NATuG running.
+	
+	\subsection{Nucleic Acid Selection}
+	
+	On the right side of the screen, in the config panel, you will find the Nucleic Acid settings tab. This is the area in which settings for the geometry of your DNA. While most of the time you will use NATuG's default provides for DNA settings, now is a good time to experiment with the different inputs. As you change the different settings, also look at the bottom of the NATuG's window---the Status Bar--when hovering over them. It should display a brief explanation of what the different settings actually are. Observe the Side View Plot and Top View Plot change as the settings update.
+	
+	\begin{figure}[h]
+		\caption{Experimenting with Nucleic Acid settings}
+		\centering
+		\begin{subfigure}{.5\textwidth}
+			\centering
+			\includegraphics[height=1.7in]{nucleic-acid-tinkering.png}
+			\caption{Tinkering With Nucleic Acid Settings}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.5\textwidth}
+			\centering
+			\includegraphics[width=1.7in]{nucleic-acid-tinkering-2.png}
+			\caption{Loading different Nucleic Acid profiles}
+		\end{subfigure}
+	\end{figure}
 		
-	\subsection{Interior Angle Adjustment}
-	In the config panel, enter the Domains tab. This may look intimidating at first because there are a lot of  options. To get started experimenting here, within the table of domain settings, use the small arrow buttons next to the "m" of each domain, and, as you do so, watch the Top View Plot update in real time. By increasing/decreasing the "m" values, the interior angles of domains will change. You can type numbers directly into the boxes, but without correcting for changes with other domains' angles, the tube will open up. Notice how when the tube is closed the M/R box in the symmetry section of the tab lights up green.
+	\subsection{Domain Adjustment}
 	
-	\subsection{Domain Profile Loading}
+	In the config panel on the right side of the screen, switch to the Domains tab. The panel will pop out because of the required width of the tab. The panel may appear intimidating at first, but you should start by using the small arrow buttons next to the "m" of each domain. As you do so, watch the Top View Plot update in real time. By increasing/decreasing the "m" values, the interior angles of domains will change, which will in turn change the shape of the tube. You can type numbers directly into the boxes, but without correcting for changes with other domains' angles, the tube will open up. Notice how when the tube is closed the M/R box in the symmetry section of the tab lights up green.
+	
 	In the settings area above the domains table, click the load button (the button that has an arrow pointing downwards into a box). Choose a different set of domains, for instance, "nested.csv." As you play around with this section of NATuG, you can use the save button to save your own designs/your adjustments to the default designs.
 		
+	\begin{figure}[h]
+		\caption{Changing up domain settings}
+		\centering
+		\begin{subfigure}{.5\textwidth}
+			\centering
+			\includegraphics[height=2in]{changing-theta-ms.png}
+			\caption{Changing domains' $\theta_{m}$s}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.5\textwidth}
+			\centering
+			\includegraphics[width=2in]{loading-domains.png}
+			\caption{Loading in different domain presets}
+		\end{subfigure}
+	\end{figure}
 		
-	\subsection{Creating Junctions}
-	In the Side View Plot--the main area of NATuG--locate two white triangles (which represent the middle of two nucleosides, and are called "NEMids") that are overlapping, and click on them. This will transform two helices of two different domains into two helices that traverse both of the domains. Continuing clicking on overlapping white triangles to weave together strands.
+	\newpage
+		
+	\subsection{Junction Creation}
+	\begin{figure}[h]
+		\centering
+		\includegraphics[height=2in]{creating-junctions.png}
+		\caption{Creating cross-strand junctions}
+		\label{fig:creating-junctions}
+	\end{figure}
+	
+	In the Side View Plot---the main area of NATuG---locate two white triangles (which represent the middle of two nucleosides, and are called "NEMids") that are overlapping, and click on them. This will transform two helices of two different domains into two helices that traverse both of the domains. Continuing clicking on overlapping white triangles to weave together strands. See Figure~\ref{fig:creating-junctions} for a visual example.
+	
+	\subsection{Nicks, Linkages, and Sequences}
+	Here, you can begin to experiment with more advanced features of NATuG. You just experimented with creating junctions, but the Side View Plot mode that creates junctions ("juncter" mode) is one of many modes. To try out other modes, go to the top of the window, where you see a list of different buttons ("Informer," "Juncter," "Nicker," etc.), and click on different modes. Then left click on points within the main plot. Below is a list of (very) simplified descriptions of the different modes and how to get started using them.
+	
+	\begin{figure}[h]
+		\caption{Advanced NATuG features}
+		\centering
+		\begin{subfigure}{.3\textwidth}
+			\centering
+			\includegraphics[width=1.4in]{juncter-activated.png}
+			\caption{There are other modes!}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.3\textwidth}
+			\centering
+			\includegraphics[height=1in]{nick-examples.png}
+			\caption{Examples of nicks}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.3\textwidth}
+			\centering
+			\includegraphics[width=1.5in]{linkage-example.png}
+			\caption{Example of linkages}
+		\end{subfigure}
+	\end{figure}
+	
+	\begin{enumerate}
+		\item \textbf{Informer Mode:} Obtain information about points. To use, click on any point.
+		\item \textbf{Juncter Mode:} Redirect strands across helical domains. To use, click on any two overlapping white triangles.
+		\item \textbf{Nicker Mode:} Split strands in half. To use, click on any point.
+		\item \textbf{Linker Mode:} Link the ends of two strands together to make one bigger strand. To use, click on one point that is at the end of a strand, and then another point that is at the end of a strand. Make sure that the arrows do not point towards each other.
+		\item \textbf{Highlighter Mode:} Highlight points. To use, click on any point.
+	\end{enumerate}
 
+	\newpage
 	\section{Overall Layout}
 	
 	NATuG’s interface consists of a main hub area, surrounded by two panels. There is a status bar at the bottom of NATuG, which provides helpful descriptions of what various buttons and input boxes do as you hover over them, and a file bar at the top of NATuG, which provides access to various cross-program functions.
@@ -70,22 +151,23 @@
 	\end{figure}
 
 	\subsection{Panels} \label{sect:panels}
-	NATuG has two panels: the Top View Panel and the Config Panel. Notes about panels:
+	NATuG has two panels: the Top View Panel and the Config Panel. Though the contents of panels differ, they do share various important properties:
 	
 	\begin{enumerate}
 		\item Panels are all undockable. By clicking twice on the top area of a panel, or by dragging the panel away from the main window, or by clicking the  button, one can make a panel become its own window. To redock, click on the top of the panel twice, or drag the panel back into the main window. 
-		\item Panels are hideable. By clicking the x button in the top corner of a panel, or by going to the file menu, “view,” and then the name of the panel you are trying to hide, you can hide the panel. To unhide a panel, go to the file menu, “view,” and then the name of the panel you are trying to unhide. 
+		\item Panels are hideable. By clicking the "x" button in the top corner of a panel, or by going to the file menu, "view," and then the name of the panel you are trying to hide, you can hide the panel. To unhide a panel, go to the file menu, "view," and then the name of the panel you are trying to unhide. 
 	\end{enumerate}
 
 	\subsection{Hub}
 	NATuG’s main area, the “hub,” is another name for the area of the program where the Side View plot is located. Located directly above the Hub is the toolbar, where you can select the current mode of NATuG. Each mode changes what a left click does in the Side View plot.
 	
-	\section{Configuration Panel} \label{section:config-panel}
+	\newpage
+	\section{Config Panel} \label{section:config-panel}
 	The Config Panel contains most of the user input areas of NATuG. Within the panel are three primary modes: “Nucleic Acid,” “Domains,” and “Sequencing,” outlined in greater depth on the following pages. 
 	
 	To navigate between panels of the config panel, simply click on one of the tabs. Below are brief descriptions of the various tabs; however, each tab has a dedicated page as well.
 	
-	\textbf{Warning:} changing settings within the config panel will reset all current junctions, nicks, links, and highlights. Attempting to change settings when there exist any junctions, links, or highlights will result in a popup dialog that offers to save the current state of the Side View Plot, or cancel.
+	\textbf{Warning:} changing settings within the config panel will reset all current junctions, nicks, links, and highlights. Attempting to change settings when there exist any junctions, links, or highlights will result in a popup dialog that offers to save the current state of the Side View Plot and then refresh the plot, refresh the plot without saving, or cancel the attempted refresh.
 	
 	\begin{figure}[h]
 		\centering
@@ -119,7 +201,7 @@
 	
 	\subsection{Nucleic Acid Tab} \label{sect:nucleic-acid-tab}
 	
-	The Nucleic Acid Tab is the area in which all geometrical settings for the nucleic acid being used can be entered. All of NATuG’s computations utilize these constants, so only make changes if you know what you are doing.
+	The Nucleic Acid Tab is the area in which all geometrical settings for the nucleic acid being used can be entered. All of NATuG’s computations utilize these constants, so only make changes if you know what you are doing. This tab contains a profile manager for easily loading in sets of settings, and has various fields that warrant extended descriptions. When using NATuG, recall that hovering over fields will show additional information in the Status Bar at the bottom of the window.
 	
 	\subsubsection{Profile Manager}
 	
@@ -127,7 +209,7 @@
 	
 	By default, NATuG includes common profiles, such as one for B type DNA. Profiles are saved internally, and can easily be loaded/retrieved, and .json files containing the profile data can be found within the saves/nucleic\_acid folder. These files are loaded when NATuG is booted, and can be modified directly. Additionally, when NATuG is closed, the last used settings are saved, and are automatically retrieved upon the next launch.
 	
-	To use the profile manager, enter the name of the profile you would like to save/load/delete into the “Profile Name Here” box, and click the respective button. For extended descriptions of what each button does, see below. When a profile manager box is disabled/gray consult the status bar for information as to why. For irreversible actions warnings will be shown.
+	To use the profile manager, enter the name of the profile you would like to save/load/delete into the “Profile Name Here” box, and click the respective button. For extended descriptions of what each button does, see below. When a profile manager box is disabled/gray, consult the status bar for information as to why. For irreversible actions warnings will be shown before the action is run. Below is a list of more extended descriptions of the various profile manager actions.
 	
 	\begin{figure}
 		\caption{Various Profile Actions}
@@ -182,10 +264,12 @@
 		$\theta_{c}$ (a) & Characteristic Angle & number between 0 and 360 & The smallest angle about the helical axis possible between two NEMids on the same helix. \\ \hline
 		$\theta_{b}$ (a) & Interbase Angle & number between 0 and 360 & The angle that about the helical axis between two NEMids \\
 	\end{tabular}
+
+	\newpage
 	
 	\subsection{Domains}
 	
-	\begin{figure}
+	\begin{figure}[h]
 		\centering
 		\caption{Domains Config Table}
 		\includegraphics[height=2.5in]{domain-config-table.png}
@@ -209,7 +293,7 @@
 		\label{fig:sequencing-tab}
 	\end{figure}
 	
-	This tab allows for bulk sequence operations, and for exporting sequences to a spreadsheet for synthesis.
+	This tab allows for bulk sequence operations, and for exporting sequences to a spreadsheet for synthesis. Because sequencing is such a critical part of NATuG, it has a section that goes into greater depth about how it works. It is also important to note that this is not the only place where sequences can be set. For more information about sequencing, consult section~\ref{sect:sequence-selector}.
 	
 	\subsubsection{Bulk Sequence Operations}
 	Bulk sequence operations let you set the sequence of many nucleosides at once. In order to run a bulk sequence operation, select a "Scope," then an "Operation," and then click "Run."
@@ -230,6 +314,7 @@
 		\item \textbf{Clear:} Unset the bases.
 	\end{itemize}
 	
+	\newpage
 	\section{Side View Plot}
 	The Side View Plot is the heart of NATuG. It allows you to directly interact with strands that have been created as a result of user inputs set elsewhere. The plot can be broken into a few distinct parts that function together to allow for a high degree of interactivity. 
 	
@@ -309,9 +394,9 @@
 		\end{subfigure}
 	\end{figure}
 
-	The lines connecting dots together are not a literal representation of the location of the phosphate backbone of the DNA, but rather serve as a visual aid to see which strands are which. To this end, by default "interdomain" strands (strands that traverse multiple domains) are automatically styled to be thicker and more colorful to stand out—however, the styles of lines is completely customizable.
+	The lines connecting dots together are not a literal representation of the location of the phosphate backbone of the DNA, but rather serve as a visual aid to see which strands are which. To this end, by default "interdomain" strands (strands that traverse multiple domains) are automatically styled to be thicker and more colorful to stand out—however, the styles of lines are completely customizable.
 	
-	Additionally, for interdomain strands, the lines are curved (with \href{https://www.cs.unc.edu/~dm/UNC/COMP258/LECTURES/Chaikins-Algorithm.pdf}{Chaikin's Corner Cutting Algorithm}). This is so that it is clear which strand is which, and because with the thicker lines that interdomain strands posses without corner rounding it becomes unclear at times whether a strand merges with itself. 
+	Additionally, for interdomain strands, the lines are curved (with \href{https://www.cs.unc.edu/~dm/UNC/COMP258/LECTURES/Chaikins-Algorithm.pdf}{Chaikin's Corner Cutting Algorithm}). This is so that it is clear which strand is which, and because with the thicker lines that interdomain strands posses appear to merge with themselves without rounding of corners. At this time, this setting cannot be disabled.
 	
 	\subsection{Interaction} \label{sect:plot-interaction}
 	NATuG utilizes the pyqtgraph framework for its plots. Below lies a general description of the means of interaction for the plot, but, for a more direct and comprehensive breakdown, visit \href{https://pyqtgraph.readthedocs.io/en/latest/user_guide/mouse_interaction.html}{pyqtgraph’s website} (\href{https://pyqtgraph.readthedocs.io/en/latest/user_guide/mouse_interaction.html}{pyqtgraph.readthedocs.io}).
@@ -545,6 +630,7 @@
 		\item At this time NATuG's highlighting is uncustomizable, so all higlighted items will be large and yellow versions of their past selves.
 	\end{itemize}
 	
+	\newpage
 	\section{Top View Plot}
 	
 	\begin{figure}[h]
@@ -579,9 +665,8 @@
 		\item Clicking on a number (not a circle, but rather on a number) will navigate the Side View Plot to the specific domain that was clicked on. Clicking on the same number a second time will restore the full view of the plot.
 	\end{itemize}
 
+	\newpage
 	\section{Strands}
-	
-	
 	
 	Whereas a "helix" is specifically a strand that stays within one domain, a "strand" can traverse many domains. When a strand crosses through many domains, it weaves the nanotube together. But, equally important to choosing where the strand goes is determining the base sequence. And, being able to choose styles to represent strands in publications is also critical. This section covers how to customize the properties of a strand.
 	
@@ -629,7 +714,7 @@
 		\item \textbf{Color:} The color of the strand. The "Color Chooser" button creates a Color Chooser Dialog that allows you to select the color of your choosing. Within the dialog, you can enter parameters for your color in RGB/CMYK, choose a screen color, or choose from a preset. By default, strands that stay in their own domain are either light or dark gray, and strands that traverse multiple domains are automatically assigned colors as to keep them distinct from other strands that traverse multiple domains.
 	\end{itemize}
 	
-	\subsection{Sequence Selector}
+	\subsection{Sequence Selector} \label{sect:sequence-selector}
 		The purpose of the Sequence Selector is to provide a user-friendly way to obtain a valid sequence for a given strand/portion of a strand. Generally, this will pop up when you click a button along the lines of "Choose a Sequence." To use the Sequence Selector, you can either choose to use the Bulk Sequence Input tab, or, if the length of the sequence you are being prompted to choose is under 1,000 bases, the Manual Input Tab. Once you have made your selection of sequence, click the "Load Sequence" button, or click the "Cancel" button to exit the Sequence Selector and cancel the sequence choosing operation. Below, more information about the two areas of the Sequence Selector can be found.
 	
 	\begin{figure}
