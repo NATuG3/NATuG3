@@ -7,6 +7,7 @@
 \usepackage{hyperref}
 \usepackage{subcaption}
 \usepackage{wrapfig}
+\usepackage[margin=1in]{geometry}
 \graphicspath{{resources/images}} % all graphics will come from the resources/images folder
 
 \begin{document}
@@ -18,11 +19,11 @@
 	
 	The quick start guide is the fastest way to get NATuG running on any Mac, Windows, or Linux machine. These steps are by no means comprehensive, and are merely a guide to get the program running.
 	
-	\begin{figure}[h]
+	\begin{figure}[h] 
 		\centering
-		\label{fig:github-download-menu}
 		\includegraphics[width=2in]{github-download-menu.png}
 		\caption{Github code download menu}
+		\label{fig:github-download-menu}
 	\end{figure}
 	
 	\begin{enumerate} \label{sect:getting-natug-running}
@@ -31,9 +32,9 @@
 		\item Open your computer’s terminal/console/command prompt. Enter the following commands, in the following order. 
 		
 		\begin{enumerate}
-			\item “cd $<$filepath$>$” to enter the directory of the project. Generally the path will be "Users/Name/Downloads/NATuG-main,” but it may vary based on operating system, where you download the folder, and the name of the folder. \label{enum:enter-directory}
-			\item “python -m venv venv” to create a virtual environment for the needed libraries to go into.
-			\item “venv\\Scripts\\activate” if you are on windows, or “source myenv/bin/activate” if you are on Mac/Linux, to enter into the virtual environment. You will know that you have successfully entered the virtual environment if the current line in terminal begins with “(venv).” \label{enum:activate-venv}
+			\item “cd $<$filepath$>$” to enter the directory of the project. \label{enum:enter-directory}
+			\item “python~-m~venv~venv” to create a virtual environment for the needed libraries to go into.
+			\item “venv/Scripts/activate” if you are on windows, or “source~myenv/bin/activate” if you are on Mac/Linux, to enter into the virtual environment. You will know that you have successfully entered the virtual environment if the current line in terminal begins with “(venv).” \label{enum:activate-venv}
 			\item “python -m pip install -r requirements.txt” to automatically install all the needed libraries. They may take a while to download.
 			\item “python -m launcher” to run the program. The first launch may take a bit while the code compiles. \label{enum:run-program}
 		\end{enumerate}
@@ -41,7 +42,6 @@
 		\item You should now be in NATuG! When running the program in the future, simply CD into the folder (step~\ref{enum:enter-directory}), enter the virtual environment (step~\ref{enum:activate-venv}), and run the program (step~\ref{enum:run-program}).
 	\end{enumerate}
 
-	\newpage
 	\section{Quickstart}
 	
 	Constructing a DNA nanotube is a complex, multi-stage process, but NATuG streamlines the steps. Below is a quick list of things to do that should help you gain a basic level familiarity with NATuG. 
@@ -93,14 +93,29 @@
 		\end{subfigure}
 	\end{figure}
 		
-	\newpage
-		
 	\subsection{Junction Creation}
 	\begin{figure}[h]
 		\centering
-		\includegraphics[height=2in]{creating-junctions.png}
 		\caption{Creating cross-strand junctions}
 		\label{fig:creating-junctions}
+		
+		\begin{subfigure}{.3\textwidth}
+			\centering
+			\includegraphics[height=1.7in]{creating-junctions-1.png}
+			\caption{Domains with overlapping NEMids}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.3\textwidth}
+			\centering
+			\includegraphics[height=1.7in]{creating-junctions-2.png}
+			\caption{Domains with inter-domain strands}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.3\textwidth}
+			\centering
+			\includegraphics[height=1.7in]{creating-junctions-3.png}
+			\caption{Domains with a closed-loop strand and inter-domain strands}
+		\end{subfigure}
 	\end{figure}
 	
 	In the Side View Plot---the main area of NATuG---locate two white triangles (which represent the middle of two nucleosides, and are called "NEMids") that are overlapping, and click on them. This will transform two helices of two different domains into two helices that traverse both of the domains. Continuing clicking on overlapping white triangles to weave together strands. See Figure~\ref{fig:creating-junctions} for a visual example.
@@ -138,7 +153,6 @@
 		\item \textbf{Highlighter Mode:} Highlight points. To use, click on any point.
 	\end{enumerate}
 
-	\newpage
 	\section{Overall Layout}
 	
 	NATuG’s interface consists of a main hub area, surrounded by two panels. There is a status bar at the bottom of NATuG, which provides helpful descriptions of what various buttons and input boxes do as you hover over them, and a file bar at the top of NATuG, which provides access to various cross-program functions.
@@ -161,7 +175,6 @@
 	\subsection{Hub}
 	NATuG’s main area, the “hub,” is another name for the area of the program where the Side View plot is located. Located directly above the Hub is the toolbar, where you can select the current mode of NATuG. Each mode changes what a left click does in the Side View plot.
 	
-	\newpage
 	\section{Config Panel} \label{section:config-panel}
 	The Config Panel contains most of the user input areas of NATuG. Within the panel are three primary modes: “Nucleic Acid,” “Domains,” and “Sequencing,” outlined in greater depth on the following pages. 
 	
@@ -201,7 +214,7 @@
 	
 	\subsection{Nucleic Acid Tab} \label{sect:nucleic-acid-tab}
 	
-	The Nucleic Acid Tab is the area in which all geometrical settings for the nucleic acid being used can be entered. All of NATuG’s computations utilize these constants, so only make changes if you know what you are doing. This tab contains a profile manager for easily loading in sets of settings, and has various fields that warrant extended descriptions. When using NATuG, recall that hovering over fields will show additional information in the Status Bar at the bottom of the window.
+	The Nucleic Acid Tab is the area in which all geometrical settings for the nucleic acid being used can be entered. All of NATuG’s computations utilize these constants, so only make changes if you know what you are doing. This tab contains a profile manager for easily loading in sets of settings, and has various fields that warrant extended descriptions. When using NATuG, recall that hovering over fields will show additional information in the Status Bar at the bottom of the window---this feature is particularly useful for the Nucleic Acid Tab because hovering over setting fields shows descriptions in the status bar of what they represent.
 	
 	\subsubsection{Profile Manager}
 	
@@ -249,9 +262,9 @@
 	\subsubsection{Setting Descriptions}
 	Below lies a list of all of the various Nucleic Acid settings that can be adjusted. Certain settings (the ones that are have an "(a)" in the table) are automatically determined based on other settings and cannot be user set. \linebreak
 	
+	\begin{center}
 	\begin{tabular}{|p{.5in}|p{1in}|p{.7in}|p{1.5in}|}
 		\label{tab:setting-descriptions}
-		\centering
 		Input & Name & Data Type & Description \\
 		\hline
 		$D$ & Diameter & number & The diameter of a given domain in nanometers \\ \hline
@@ -264,8 +277,7 @@
 		$\theta_{c}$ (a) & Characteristic Angle & number between 0 and 360 & The smallest angle about the helical axis possible between two NEMids on the same helix. \\ \hline
 		$\theta_{b}$ (a) & Interbase Angle & number between 0 and 360 & The angle that about the helical axis between two NEMids \\
 	\end{tabular}
-
-	\newpage
+	\end{center}
 	
 	\subsection{Domains}
 	
@@ -314,7 +326,6 @@
 		\item \textbf{Clear:} Unset the bases.
 	\end{itemize}
 	
-	\newpage
 	\section{Side View Plot}
 	The Side View Plot is the heart of NATuG. It allows you to directly interact with strands that have been created as a result of user inputs set elsewhere. The plot can be broken into a few distinct parts that function together to allow for a high degree of interactivity. 
 	
@@ -630,8 +641,9 @@
 		\item At this time NATuG's highlighting is uncustomizable, so all higlighted items will be large and yellow versions of their past selves.
 	\end{itemize}
 	
-	\newpage
 	\section{Top View Plot}
+	
+	The Top View Plot presents an overhead view of the nanostructure that is currently being created. It allows you to visualize the actual tube shape, and see the interior angles of all the domains. The Top View Plot is a panel, which means that it can be undocked, among other things. For information on panels, see~\ref{sect:panels}.
 	
 	\begin{figure}[h]
 		\centering
@@ -652,8 +664,6 @@
 		\end{subfigure}
 	\end{figure}
 	
-	The Top View Plot presents an overhead view of the nanostructure that is currently being created. It allows you to visualize the actual tube shape, and see the interior angles of all the domains. The Top View Plot is a panel, which means that it can be undocked, among other things. For information on panels, see~\ref{sect:panels}.
-	
 	\subsection{Graphics}
 	In the Top View Plot, each circle represents a helical domain, which is the region in which the double helices exist. The circles are numbered, and the numbers represent the domains' respective indexes. The units of the axes are in nanometers, and depend on the diameter of domains, which can be set in the Nucleic Acid Tab (\ref{sect:nucleic-acid-tab}). An imaginary $0^{th}$ domain is drawn as well to show the last domain's interior angle, but this domain does not actually exist. Additionally, to make it easier to see the interior angles of the domains, a thin line is drawn atop all of the domains' circles.
 	
@@ -665,7 +675,6 @@
 		\item Clicking on a number (not a circle, but rather on a number) will navigate the Side View Plot to the specific domain that was clicked on. Clicking on the same number a second time will restore the full view of the plot.
 	\end{itemize}
 
-	\newpage
 	\section{Strands}
 	
 	Whereas a "helix" is specifically a strand that stays within one domain, a "strand" can traverse many domains. When a strand crosses through many domains, it weaves the nanotube together. But, equally important to choosing where the strand goes is determining the base sequence. And, being able to choose styles to represent strands in publications is also critical. This section covers how to customize the properties of a strand.
