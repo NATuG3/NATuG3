@@ -71,10 +71,9 @@ class DoubleHelices:
 
             for item1 in current_zeroed_strand.items.by_type(NEMid):
                 for item2 in next_zeroed_strand.items.by_type(NEMid):
-                    # Create a function that will assign the juncmate and junctability
-                    # of the two NEMids if they need to be assigned.
-                    def junct():
-                        """Assign junctability and juncmates to the items."""
+                    # Perform a preliminary z coord check since dist() is much more
+                    # computationally intensive, and it is best to avoid it if possible
+                    if item1.overlaps(item2, len(self.double_helices)):
                         # Set junctability
                         item1.junctable = True
                         item2.junctable = True
@@ -82,14 +81,3 @@ class DoubleHelices:
                         # Set juncmates
                         item1.juncmate = item2
                         item2.juncmate = item1
-
-                    # Perform a preliminary z coord check since dist() is much more
-                    # computationally intensive, and it is best to avoid it if possible
-                    if abs(item1.z_coord - item2.z_coord) > settings.junction_threshold:
-                        continue
-                    elif (x_dist := abs(item1.x_coord - item2.x_coord)) > len(
-                        domains
-                    ) - 0.1 and closed:
-                        junct()
-                    elif x_dist < settings.junction_threshold:
-                        junct()

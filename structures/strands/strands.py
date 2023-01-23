@@ -33,8 +33,10 @@ class Strands:
         down_strands: All down strands.
         nicks: All Nick objects.
         name: The name of the strands object. Used when exporting the strands object.
-        double_helices(List[Tuple[Strand, Strand]]): A list of tuples of up and down strands
-            from when the object is loaded with the from_package class method.
+        double_helices(List[Tuple[Strand, Strand]]): A list of tuples of up and down
+            strands from when the object is loaded with the from_package class method.
+        size: The width and height of the domains when they are all layed next to one
+            another.
 
     Methods:
         randomize_sequences: Randomize the sequences for all strands.
@@ -533,7 +535,7 @@ class Strands:
                 new_strands[1].items.extend(strand.sliced(NEMid1.index, NEMid2.index))
 
                 new_strands[0].closed = True
-                new_strands[1].closed = True
+                new_strands[1].closed = False
 
             elif not strand.closed:
                 # this is the creating a loop strand case

@@ -163,6 +163,5 @@ class Window(QMainWindow):
                 self.config.setFixedWidth(255)
             elif self.config.panel.domains.isVisible():
                 self.config.setFixedWidth(420)
-                self.config.setFloating(True)
             elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

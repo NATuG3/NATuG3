@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from math import dist
 from typing import Tuple, Type, List
 
 import settings
@@ -155,6 +156,7 @@ class Point:
         position: Obtain the position of the point as a tuple.
         is_endpoint: Return whether the point is an endpoint in the strand.
         midpoint: Obtain the midpoint between this point and a different point.
+        overlaps: Return whether the point overlaps with another point.
     """
 
     # positional attributes
@@ -198,6 +200,46 @@ class Point:
             self.styles = PointStyles(point=self)
 
         self.styles.reset()
+
+    def overlaps(self, point: Type["Point"], width=None) -> bool:
+        """
+        Return whether the point overlaps with another point.
+
+        Args:
+            point: The point to check for overlap with.
+            width: The width of the strands container. This is generally equal to the
+                number of double helices in the strands container. If not provided,
+                the width is extracted from the points' strand's strands container.
+
+        Returns:
+            True: If the point is within setting.junction_threshold distance of the
+                other point or, if the point has a parent strand, and the parent
+                strand has a parent Strands container, then if one point is on the
+                left side of the Strands container and the other is on the right if
+                the z coords are within the junction threshold.
+            False: Otherwise.
+        """
+        # Return True if the points are within junction_threshold distance of
+        # each other
+        if dist(self.position(), point.position()) < settings.junction_threshold:
+            return True
+        # If there is a parent strands container for both the points and it is the same
+        elif (self.x_coord == 0 or point.x_coord == 0) and (
+            width is not None
+            or (
+                self.strand is not None
+                and point.strand is not None
+                and self.strand.strands is not None
+                and point.strand.strands is not None
+                and self.strand.strands is point.strand.strands
+            )
+        ):
+            width = width or len(self.strand.strands.double_helices)
+            right_side_point = point if self.x_coord == 0 else self
+            if (
+                abs(right_side_point.x_coord - width) < settings.junction_threshold
+            ) and (abs(point.z_coord - self.z_coord) < settings.junction_threshold):
+                return True
 
     def midpoint(self, point: "Point") -> Tuple[float, float]:
         """
