@@ -1,4 +1,7 @@
-\documentclass[titlepage]{article}
+\documentclass[
+titlepage,
+fontsize=12pt
+]{article}
 
 \title{NATuG User Manual}
 \author{Wolf S. Mermelstein and William B. Sherman}
@@ -7,8 +10,29 @@
 \usepackage{hyperref}
 \usepackage{subcaption}
 \usepackage{wrapfig}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{tcolorbox} % extends colorbox package so that we can round the corners of colorboxes
 \usepackage[margin=1in]{geometry}
-\graphicspath{{resources/images}} % all graphics will come from the resources/images folder
+
+\usepackage [english]{babel}
+\usepackage [autostyle, english = american]{csquotes}
+\MakeOuterQuote{"}
+
+
+% define constants
+\def\fileExtension{nano}
+
+% define colors and styles
+\definecolor{sunken-color-background}{rgb}{0.94,0.94,0.94}
+\definecolor{sunken-color-outline}{rgb}{0.9,0.9,0.9}
+
+% styles to make a block of text appear more sunken
+\newcommand{\sunken}[1]{\tcbox[on line, boxsep=.01in, left=0in, right=0in, top=0in, bottom=0in, colframe=sunken-color-outline, colback=sunken-color-background, arc=0.015in]{\texttt{#1}}}
+
+% all graphics will come from the resources/images folder
+\graphicspath{{resources/images}}
 
 \begin{document}
 	\maketitle
@@ -17,7 +41,7 @@
 	
 	\section{Getting NATuG Running}
 	
-	The quick start guide is the fastest way to get NATuG running on any Mac, Windows, or Linux machine. These steps are by no means comprehensive, and are merely a guide to get the program running.
+	NATuG is a desktop application supported by Mac, Windows, and Linux. This section covers how to download the latest version of NATuG, the needed libraries, and then compile and run the program. Eventually NATuG will offer pre-compiled and pacakged versions, but that is not currently the case.
 	
 	\begin{figure}[h] 
 		\centering
@@ -27,33 +51,36 @@
 	\end{figure}
 	
 	\begin{enumerate} \label{sect:getting-natug-running}
-		\item Visit \href{Python's download page}{www.python.org/downloads}, and then install the most recent version of Python for your operating system. NATuG has been confirmed to work on versions up to Python 3.11.1
+		\item Visit \href{Python's download page}{www.python.org/downloads}, and then install the most recent version of Python for your operating system. NATuG has been confirmed to work on versions up to Python \sunken{3.11.1}.
 		\item Go to the \href{NATuG’s Github page}{github.com/404Wolf/NATuG}, click the green "code" button, and then click "download ZIP." See Figure~\ref{fig:github-download-menu}.
 		\item Open your computer’s terminal/console/command prompt. Enter the following commands, in the following order. 
 		
 		\begin{enumerate}
-			\item “cd $<$filepath$>$” to enter the directory of the project. \label{enum:enter-directory}
-			\item “python~-m~venv~venv” to create a virtual environment for the needed libraries to go into.
-			\item “venv/Scripts/activate” if you are on windows, or “source~myenv/bin/activate” if you are on Mac/Linux, to enter into the virtual environment. You will know that you have successfully entered the virtual environment if the current line in terminal begins with “(venv).” \label{enum:activate-venv}
-			\item “python -m pip install -r requirements.txt” to automatically install all the needed libraries. They may take a while to download.
-			\item “python -m launcher” to run the program. The first launch may take a bit while the code compiles. \label{enum:run-program}
+			\item \sunken{cd $<$filepath$>$} to enter the directory of the project. \label{enum:enter-directory}
+			\item \sunken{python~-m~venv~venv} to create a virtual environment for the needed libraries to go into.
+			\item \sunken{venv/Scripts/activate} if you are on windows, or “source~myenv/bin/activate” if you are on Mac/Linux, to enter into the virtual environment. You will know that you have successfully entered the virtual environment if the current line in terminal begins with “(venv).” \label{enum:activate-venv}
+			\item \sunken{python -m pip install -r requirements.txt} to automatically install all the needed libraries. They may take a while to download.
+			\item \sunken{python -m launcher} to run the program. The first launch may take a bit while the code compiles. \label{enum:run-program}
 		\end{enumerate}
-	
+		
 		\item You should now be in NATuG! When running the program in the future, simply CD into the folder (step~\ref{enum:enter-directory}), enter the virtual environment (step~\ref{enum:activate-venv}), and run the program (step~\ref{enum:run-program}).
 	\end{enumerate}
-
+	
 	\section{Quickstart}
 	
-	Constructing a DNA nanotube is a complex, multi-stage process, but NATuG streamlines the steps. Below is a quick list of things to do that should help you gain a basic level familiarity with NATuG. 
-	
+	Constructing a DNA nanotube is a complex, multi-stage process, but NATuG streamlines the steps. However, NATuG also provides a high level of customizability and advanced features that can feel overwhelming at first. Here, you will find a list of things to do that should help you gain a basic level familiarity with NATuG. Each step in this section is designed to provide an exploration opportunity for NATuG's various a core features, in order of how you would generally go about designing a DNA nanotube.
+	\linebreak
+	\linebreak
 	\textbf{Disclaimer:} The below tasks are by no means comprehensive, and are meant to serve as a simple introduction to the program.
 	
 	\subsection{Running NATuG}
-	First, go to Section~\ref{sect:getting-natug-running} and follow the instructions to get NATuG running.
+	First, go to Section~\ref{sect:getting-natug-running} and follow the instructions to get NATuG running. Once NATuG is running, proceed to section~\ref{sect:nucleic-acid-selection}.
 	
-	\subsection{Nucleic Acid Selection}
+	\subsection{Nucleic Acid Selection} \label{sect:nucleic-acid-selection}
 	
-	On the right side of the screen, in the config panel, you will find the Nucleic Acid settings tab. This is the area in which settings for the geometry of your DNA. While most of the time you will use NATuG's default provides for DNA settings, now is a good time to experiment with the different inputs. As you change the different settings, also look at the bottom of the NATuG's window---the Status Bar--when hovering over them. It should display a brief explanation of what the different settings actually are. Observe the Side View Plot and Top View Plot change as the settings update.
+	\paragraph{Summary} For this step, you will begin to gain familiarity with the Nucleic Acid Tab of the Config Panel (for more information about the Config Panel, see section~\ref{section:config-panel}).  
+	
+	\paragraph{Instructions} On the right side of the screen, in the config panel, you will find the Nucleic Acid settings tab. This is the area in which settings for the geometry of your DNA. While most of the time you will use NATuG's default provides for DNA settings, now is a good time to experiment with the different inputs. As you change the different settings, also look at the bottom of the NATuG's window---the Status Bar--when hovering over them. It should display a brief explanation of what the different settings actually are. Observe the Side View Plot and Top View Plot change as the settings update.
 	
 	\begin{figure}[h]
 		\caption{Experimenting with Nucleic Acid settings}
@@ -70,30 +97,43 @@
 			\caption{Loading different Nucleic Acid profiles}
 		\end{subfigure}
 	\end{figure}
-		
+	
 	\subsection{Domain Adjustment}
 	
-	In the config panel on the right side of the screen, switch to the Domains tab. The panel will pop out because of the required width of the tab. The panel may appear intimidating at first, but you should start by using the small arrow buttons next to the "m" of each domain. As you do so, watch the Top View Plot update in real time. By increasing/decreasing the "m" values, the interior angles of domains will change, which will in turn change the shape of the tube. You can type numbers directly into the boxes, but without correcting for changes with other domains' angles, the tube will open up. Notice how when the tube is closed the M/R box in the symmetry section of the tab lights up green.
+	\paragraph{Summary} For this step, you will experiment with adjusting the shape of the nanostructure by tinkering with NATuG's presets.
 	
-	In the settings area above the domains table, click the load button (the button that has an arrow pointing downwards into a box). Choose a different set of domains, for instance, "nested.csv." As you play around with this section of NATuG, you can use the save button to save your own designs/your adjustments to the default designs.
-		
+	\paragraph{Instructions} In the Config Panel (\ref{section:config-panel}) on the right side of the screen, switch to the Domains tab. The panel will pop out because of the required width of the tab. The panel may appear intimidating at first, but here we are just going to focus on changing the interior angles of the domains. Start by click the up and down arrow buttons next to the "m" of each domain. As you do, watch the Top View Plot update in real time. By increasing/decreasing the "m" values, the interior angles of domains will change, which will in turn change the shape of the tube. You can type numbers directly into the boxes, but without correcting for changes with other domains' angles, the tube will open up. Notice how when the tube is closed the M/R box in the symmetry section of the tab lights up green.
+	
+	\paragraph{Loading Presets} In the settings area above the domains table, click the load button (the button that has an arrow pointing downwards into a box). Choose a different set of domains, for instance, "nested.csv." As you play around with this section of NATuG, you can use the save button to save your own designs/your adjustments to the default designs.
+	
 	\begin{figure}[h]
 		\caption{Changing up domain settings}
 		\centering
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[height=2in]{changing-theta-ms.png}
+			\includegraphics[height=1.7in]{changing-theta-ms.png}
 			\caption{Changing domains' $\theta_{m}$s}
 		\end{subfigure}%
 		~
 		\begin{subfigure}{.5\textwidth}
 			\centering
-			\includegraphics[width=2in]{loading-domains.png}
+			\includegraphics[width=1.7in]{loading-domains.png}
 			\caption{Loading in different domain presets}
 		\end{subfigure}
 	\end{figure}
-		
+	
 	\subsection{Junction Creation}
+	
+	In the Side View Plot---the main area of NATuG---locate two white triangles (which represent the midpoint between two nucleosides, and are called "NEMids") that are overlapping, and click on them. This will transform two helices of two different domains into two helices that traverse both of the domains. Continuing clicking on overlapping white triangles to weave together strands. See Figure~\ref{fig:creating-junctions} for a visual example.
+	
+	\subsection{Nicks, Linkages, and More}
+	
+	\paragraph{summary}
+	Here, you will begin to experiment with additional Side View Plot modes, and will learn to create nicks in strands, linkages across strands, and more.
+	\paragraph{Instructions}
+	
+	You just experimented with creating junctions, but the Side View Plot mode that creates junctions ("juncter" mode) is one of many modes. The "mode" of the side view plot dictates what happens when you left click points within the side view plot. To try out other modes, go to the top of the window, where you see a list of different buttons ("Informer," "Juncter," "Nicker," etc.), and click on different modes. Then left click on points within the main plot. Below is a list of (very) simplified descriptions of the different modes and how to get started using them.
+	
 	\begin{figure}[h]
 		\centering
 		\caption{Creating cross-strand junctions}
@@ -101,27 +141,22 @@
 		
 		\begin{subfigure}{.3\textwidth}
 			\centering
-			\includegraphics[height=1.7in]{creating-junctions-1.png}
+			\includegraphics[height=1.5in]{creating-junctions-1.png}
 			\caption{Domains with overlapping NEMids}
 		\end{subfigure}%
 		~
 		\begin{subfigure}{.3\textwidth}
 			\centering
-			\includegraphics[height=1.7in]{creating-junctions-2.png}
+			\includegraphics[height=1.5in]{creating-junctions-2.png}
 			\caption{Domains with inter-domain strands}
 		\end{subfigure}%
 		~
 		\begin{subfigure}{.3\textwidth}
 			\centering
-			\includegraphics[height=1.7in]{creating-junctions-3.png}
+			\includegraphics[height=1.5in]{creating-junctions-3.png}
 			\caption{Domains with a closed-loop strand and inter-domain strands}
 		\end{subfigure}
 	\end{figure}
-	
-	In the Side View Plot---the main area of NATuG---locate two white triangles (which represent the middle of two nucleosides, and are called "NEMids") that are overlapping, and click on them. This will transform two helices of two different domains into two helices that traverse both of the domains. Continuing clicking on overlapping white triangles to weave together strands. See Figure~\ref{fig:creating-junctions} for a visual example.
-	
-	\subsection{Nicks, Linkages, and Sequences}
-	Here, you can begin to experiment with more advanced features of NATuG. You just experimented with creating junctions, but the Side View Plot mode that creates junctions ("juncter" mode) is one of many modes. To try out other modes, go to the top of the window, where you see a list of different buttons ("Informer," "Juncter," "Nicker," etc.), and click on different modes. Then left click on points within the main plot. Below is a list of (very) simplified descriptions of the different modes and how to get started using them.
 	
 	\begin{figure}[h]
 		\caption{Advanced NATuG features}
@@ -152,28 +187,107 @@
 		\item \textbf{Linker Mode:} Link the ends of two strands together to make one bigger strand. To use, click on one point that is at the end of a strand, and then another point that is at the end of a strand. Make sure that the arrows do not point towards each other.
 		\item \textbf{Highlighter Mode:} Highlight points. To use, click on any point.
 	\end{enumerate}
-
-	\section{Overall Layout}
 	
+	\subsection{Sequences}
+	
+	\paragraph{Summary}
+	In this step, you will explore NATuG's sequencing potential by applying sequences to strands and viewing the nucleosides of strands. You will get to use NATuG's Sequence Selector for the first time, too.
+	
+	\paragraph{Instructions}
+	In the Config Panel, go to the "Sequencing" Tab. When you change to the sequencing tab (figure~\ref{fig:sequencing-tab-instructions}), the Side View Plot will automatically update to display actual nucleosides instead of the midpoints between the nucleosides. Currently you will only see arrows representing the nucleosides, but this is because you have not yet set the bases of the nucleosides. To set the bases of the nucleosides, click on one of the lines (not a point)---also known as a strand---and a Strand Config dialog should pop up. Click the "load sequence" button, and manually enter random "A"s, "T"s, "G"s, or "C"s to fill up the editor. When you click the "Choose Sequence" button when you are done, the strand will no longer display its points as arrows; rather, there will be letters. 
+	
+	\begin{figure}
+		\caption{Sequencing capabilities}
+		\centering
+		\begin{subfigure}{.4\linewidth}
+			\centering
+			\includegraphics[width=2in]{sequence-editor-manual-input.png}
+			\caption{The sequence editor}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.4\linewidth}
+			\centering
+			\includegraphics[height=2in]{sequencing-tab.png}
+			\caption{The sequencing tab}
+			\label{fig:sequencing-tab-instructions}
+		\end{subfigure}
+	\end{figure}
+	
+	\section{Program Layout}
+	
+	\paragraph{Summary}
+	In this section, you will learn about the overall layout of NATuG. Various different user-interface elements (such as "panels") show up in multiple places, and have commonalities in how to interact with them that are expounded in this section.
+	
+	\paragraph{Breakdown}
 	NATuG’s interface consists of a main hub area, surrounded by two panels. There is a status bar at the bottom of NATuG, which provides helpful descriptions of what various buttons and input boxes do as you hover over them, and a file bar at the top of NATuG, which provides access to various cross-program functions.
 	
 	\begin{figure}[h]
 		\centering
 		\caption{The overall layout of NATuG}
 		\label{program-layout}
-		\includegraphics[width=5in]{program-layout.png}
+		\includegraphics[width=4.5in]{program-layout.png}
 	\end{figure}
-
+	
 	\subsection{Panels} \label{sect:panels}
-	NATuG has two panels: the Top View Panel and the Config Panel. Though the contents of panels differ, they do share various important properties:
+	NATuG has two panels: the Top View Panel and the Config Panel. Though the contents of panels differ, they do share various important properties, listed below.
 	
 	\begin{enumerate}
-		\item Panels are all undockable. By clicking twice on the top area of a panel, or by dragging the panel away from the main window, or by clicking the  button, one can make a panel become its own window. To redock, click on the top of the panel twice, or drag the panel back into the main window. 
+		\item Panels are all undockable. By clicking twice on the top area of a panel, or by dragging the panel away from the main window, or by clicking the small middlemost icon in the top right button, one can make a panel become its own window. To redock, click on the top of the panel twice, or drag the panel back into the main window (sometimes the latter can be a bit finicky, but the former should always work). 
 		\item Panels are hideable. By clicking the "x" button in the top corner of a panel, or by going to the file menu, "view," and then the name of the panel you are trying to hide, you can hide the panel. To unhide a panel, go to the file menu, "view," and then the name of the panel you are trying to unhide. 
+		\item Some panels are resizable. If a panel is resizable when it is docked, you will see three very small circles in the middle between the panel and the Hub. To increase/decrease the size of the panel, drag from the intersection to/away from the Hub. If a panel is undocked, even if it was not originally resizable it may become resizable when it becomes undocked.
 	\end{enumerate}
-
+	
 	\subsection{Hub}
-	NATuG’s main area, the “hub,” is another name for the area of the program where the Side View plot is located. Located directly above the Hub is the toolbar, where you can select the current mode of NATuG. Each mode changes what a left click does in the Side View plot.
+	NATuG’s main area, the “hub,” is another name for the area of the program where the Side View plot is located. 
+	
+	\subsection{Toolbar}
+	Located directly above the Hub is the toolbar, where you can select the current mode of NATuG. Each mode changes what a left click does in the Side View plot. The modes are explained in more detail in section~\ref{sect:side-view-plot-modes}. Only one mode can be selected at a time, and one mode will always be active. In some cases, depending on the current tab that the Config Panel is in, certain tabs may be restricted (i.e. you cannot choose them, and you will be kicked back to "Informer" mode). This is because you cannot perform certain actions on nucleosides, such as junctions; so, the actions are made unavailable. 
+	
+	\subsection{File Menu}
+	The file menu contains general, program-wide actions for NATuG, such as accessing this very manual (under "help$\rightarrow$manual"). It is essentially an organized list of buttons in a "tree" structure, which are explained in further detail at~\ref{sect:file-menu-breakdown}. On Windows and Linux machines, the File Menu will be on the top of the window itself. On Macs, the File Menu will always be at the very top of the screen.
+	
+	\begin{figure}[h]
+		\centering
+		\includegraphics[width=1.5in]{file-menu.png}
+		\caption{The file menu}
+		\subcaption{In the screenshot view submenu is expanded.}
+		\label{fig:file-menu}
+	\end{figure}
+	
+	\subsubsection{Breakdown} \label{sect:file-menu-breakdown}
+	Herein lies a breakdown of what the various buttons of the File Menu do, and their respective keyboard shortcuts (if they have any).
+	
+	\paragraph{File} 
+	The file submenu contains functions pertaining to file and save management. 
+	
+	\subparagraph{Open} (\sunken{control+o})
+	Open a save. This will create a dialog prompting you to choose a file ending with \sunken{.\fileExtension} that is a save created via the File Menu's "save" function. 
+	
+	\subparagraph{Save} (\sunken{control+s})
+	Create a save of the current state of the program. This will create a dialog prompting you to choose a location and a file name to create a save at. If you enter a file name that has an extension of anything other than \sunken{.\fileExtension}, or you do not specify a file extension, \sunken{.\fileExtension} will always be the file extension. 
+	
+	\paragraph{View}
+	The view submenu contains functions partaining to the user interface itself.
+	\subparagraph{Config}
+	Hide the Config Panel if it is currently being displayed, or display it if it is currently hidden.
+	
+	\subparagraph{Helices Top View}
+	Hide the Top View Plot if it is currently being displayed, or display it if it is currently hidden.
+	
+	\subparagraph{Recolor Strands}
+	Rerun the strand coloring algorithm. For more information on what this entails, see section~\ref{sect:side-view-plot-styling}.
+	
+	\paragraph{Help}
+	The help submenu is for seeking additional information about NATuG.
+	
+	\subparagraph{About} 
+	Obtain information about NATuG. This creates a popup with text that briefly explains what NATuG is.
+	
+	\subparagraph{Manual} (\sunken{control+h}) 
+	Open the user manual. This will open a web browser that takes you to this very PDF. The web browser will be your system default web browser, and NATuG will simply create a new tab.
+	
+	\subparagraph{Github} 
+	Open \href{https://github.com/404Wolf/NATuG}{NATuG's Github Page}. The Github page is where the actual codebase for the program is, and is where the entire history of the development of the program can be found. The web browser will be your system default web browser, and NATuG will simply create a new tab.
 	
 	\section{Config Panel} \label{section:config-panel}
 	The Config Panel contains most of the user input areas of NATuG. Within the panel are three primary modes: “Nucleic Acid,” “Domains,” and “Sequencing,” outlined in greater depth on the following pages. 
@@ -187,30 +301,30 @@
 		\includegraphics[width=3in]{"nucleic-acid-tab-activated.png"}
 		\label{fig:nucleic-acid-tab-activated}
 	\end{figure}
-
+	
 	The Nucleic Acid Tab is where one can customize the geometrical settings of the nucleic acid that they are creating a nanotube for. This defaults to B type DNA, and generally does not need to be changed. 
-
+	
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=3in]{"domains-tab-activated.png"}
 		\label{fig:domains-tab-activated}
 	\end{figure}
-
+	
 	The Domains Tab is where settings for the interior angles, strand switches, and the number of NEMids to generate are inputted. This section allows the user to actually define the shape of the nanotube.
-
+	
 	\begin{figure}[h]
 		\centering
 		\includegraphics[width=3in]{"sequencing-tab-activated.png"}
 		\label{fig:sequencing-activated}
 	\end{figure}
-
+	
 	The Sequencing Tab is where the user can apply bulk sequence actions to all the strands, and export sequences to a spreadsheet for synthesis. This is generally one of the later steps in the nanotube design process.
 	
 	\subsection{Graph Updating}
 	
-	By default, as changes are made within the various tabs of the Config Panel the Side View Plot and Top View Plot automatically update. To disable automatic updating for either plot, click either of the “Auto Side” or “Auto Top” buttons on the bottom of the Config panel. When automatic updating is disabled, the “Update Graphs” button must be clicked to refresh the plots. Manual updating can be useful for larger structures that take a long time to load.
+	By default, as changes are made within the various tabs of the Config Panel (section~\ref{section:config-panel}) the Side View Plot and Top View Plot automatically update. To disable automatic updating for either plot, click either of the “Auto Side” or “Auto Top” buttons on the bottom of the Config panel. When automatic updating is disabled, the “Update Graphs” button must be clicked to refresh the plots, or you can use the keybind \sunken{control+u} ("u" for Update). Manual updating can be useful for larger structures that take a long time to load.
 	
-	The current tab of the Config Panel determines what is currently plotted in the Side View Plot. When the current tab is either “Nucleic Acid” or “Domains” NEMids are plotted, and the mode of the Side View Plot is unrestricted. However, when “Sequencing” is active, nucleosides are plotted. When this is the case, only the “highlighter” and “informer” modes are enabled within the Side View Plot’s toolbar.
+	The current tab of the Config Panel (section~\ref{section:config-panel}) determines what is currently plotted in the Side View Plot. When the current tab is either “Nucleic Acid” or “Domains” NEMids are plotted, and the mode of the Side View Plot is unrestricted. However, when “Sequencing” is active, nucleosides are plotted. When this is the case, only the “highlighter” and “informer” modes are enabled within the Side View Plot’s toolbar.
 	
 	\subsection{Nucleic Acid Tab} \label{sect:nucleic-acid-tab}
 	
@@ -263,18 +377,26 @@
 	Below lies a list of all of the various Nucleic Acid settings that can be adjusted. Certain settings (the ones that are have an "(a)" in the table) are automatically determined based on other settings and cannot be user set. \linebreak
 	
 	\begin{center}
-	\begin{tabular}{|p{.5in}|p{1in}|p{.7in}|p{1.5in}|}
+	\begin{tabular}{|p{.5in}|p{.7in}|p{1in}|p{3in}|}
 		\label{tab:setting-descriptions}
-		Input & Name & Data Type & Description \\
-		\hline
+		Input & Name & Data Type & Description \\ \hline
+		
 		$D$ & Diameter & number & The diameter of a given domain in nanometers \\ \hline
+		
 		$H$ & Height & number & The height of one turn of the helical axes \\ \hline
+		
 		$g$ & Nucleoside-Mate Angle & number between 0 and 360 & The angle about the helical axis between a nucleoside and its Watson-Crick mate \\ \hline
+		
 		$T/B$ & Helical Turns per Bases & integers & There are T turns every B bases \\ \hline
+		
 		$Z_b$ (a) & Base Height & number & The height between two NEMids on a given helix \\ \hline
+		
 		$Z_c$ & Characteristic Angle & number & The height a helix climbs as it rotates through the characteristic angle \\ \hline
+		
 		$Z_{mate}$ & Nucleoside-Mate Height & number & Vertical distance between a NEMid and its mate on the other helix. \\ \hline
+		
 		$\theta_{c}$ (a) & Characteristic Angle & number between 0 and 360 & The smallest angle about the helical axis possible between two NEMids on the same helix. \\ \hline
+	
 		$\theta_{b}$ (a) & Interbase Angle & number between 0 and 360 & The angle that about the helical axis between two NEMids \\
 	\end{tabular}
 	\end{center}
@@ -283,18 +405,132 @@
 	
 	\begin{figure}[h]
 		\centering
-		\caption{Domains Config Table}
-		\includegraphics[height=2.5in]{domain-config-table.png}
-		\label{fig:domain-config-table}
+		\caption{Domains Config Panel}
+		\label{fig:domain-config-panel}
+		
+		\begin{subfigure}{.29\textwidth}
+			\centering
+			\includegraphics[height=1.9in]{domain-config-table.png}
+			\label{fig:domain-config-table}
+			\caption{Entire Panel}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.29\textwidth}
+			\centering
+			\includegraphics[width=1.9in]{domains-settings.png}
+			\label{fig:domain-config-table-settings}
+			\caption{Settings Area}
+		\end{subfigure}%
+		~
+		\begin{subfigure}{.29\textwidth}
+			\centering
+			\includegraphics[width=1.7in]{domains-table.png}
+			\label{fig:domain-config-table-table}
+			\caption{Table Area}
+		\end{subfigure}
+			
 	\end{figure}
 
-	The Domains Tab is the area in which all the settings for each helical domain can be set. The angles between each domain are what determine what the ultimate shape of the nanostructure will be. NATuG provides support for symmetrical designs, saving and loading designs, and provides tools for designing closed structures.
+	The Domains Tab is the area in which all the settings for each helical domain can be set--such as the interior angles of each domain, or how many NEMids to initially generate. NATuG provides support for symmetrical designs, saving and loading designs, and provides tools for designing closed structures. 
 	
+	\subsubsection{Symmetry Settings} \label{sect:domains-symmetry-settings}
+	
+	For larger, more complex nanostructures, it is often helpful to take advantage of symmetries. This means repeating the settings of a set, or ``subunit,'' of domains a certain number of times. To this end, the Subunit Table (\ref{sect:domain-subunit-table}) is not a place to enter settings for every single domain, but rather contains the domains of a single subunit; single subunit structures are a special case in the Subunit Table does showcase the settings of all domains. Within the Symmetry Settings area of the Domains Tab (Figure~\ref{fig:domain-config-table-settings}) you can change the number of copies of the domains listed in Subunit Table, along with more advanced settings, listed below. After you have made changes within this area, click the check icon, the top right button, to confirm your choices. 
+	
+	\begin{center}
+		\begin{tabular}{|p{1in}|p{.7in}|p{3.5in}|}
+			\label{tab:domains-settings-descriptions}
+			
+			Name & Data Type & Description \\
+			\hline
+			
+			Domains & integer & The number of domains per subunit. This dictates how many domains show up in the Subunit Table. This is also known as the domain count, or $N$ \\ \hline
+			
+			Subunits & integer & How many times to copy the current subunit. This is also known as the symmetry factor, or "$R$." \\ \hline
+			
+			Total & integer & The total number of domains within all subunits. This is equivalent to subunits$\cdot$domains. \\ \hline
+			
+			$M$ & integer & The sum of all the $m$s for all the domains within all the subunits. \\ \hline
+			
+			$M/R$ & number & The sum of all the $m$s for a given subunit. This is equivalent to, as the name implies, $M/R$. \\ \hline
+			
+			Target M/R & number & This is equivalent to $B\frac{N-2}{2R}$, where B is a parameter of the specific nucleic acid (which can be adjusted within the Nucleic Acid Tab, discussed in more detail in section~\ref{sect:nucleic-acid-tab}), $N$ is number of domains, and $R$ is the symmetry factor. \\
+			
+			Antiparallel & boolean & Whether the domains’ L/R-Joints automatically alternate (up-up, down-down, up-up, etc.) across all domains of all subunits. In most cases this should be checked, and this is the default. If this is unchecked, the helical joints will not be copied, and will be blindly cycled across all domains.
+		\end{tabular}
+	\end{center}
+	
+	\subsubsection{Subunit Table} \label{sect:domain-subunit-table}
+	
+	The Subunit Table (Figure~\ref{fig:domain-config-table-table}) is the place where you actually enters settings for all of the domains in a given subunit. As discussed in section~\ref{sect:domains-symmetry-settings}, all of the domains that get plotted are a specific number of copies of the current domain settings in this table. Each domain possess various different settings, which are listed in greater detail below.
+	
+	\begin{center}
+		\begin{tabular}{|p{1in}|p{.7in}|p{3.5in}|}
+			\label{tab:domains-table-settings-descriptions}
+			Column & Data Type & Description \\ \hline
+			L-Joint & up or down & Whether the up helix or the down helix is the helix that lines up to the R-Joint direction helix of the previous domain. \\ \hline
+			
+			R-Joint & up or down & Whether the up helix or the down helix is the helix that lines up to the L-Joint direction helix of the next domain. \\ \hline
+			
+			$s$ & integer & $\theta_{switch}$ multiple. This is automatically determined based off of L-Joint and R-Joint. If the joints are the same direction, this is 0; if they go from up to down, this is -1; and, if they go from down to up, this is 1. \\ \hline
+			
+			$m$ & integer & The angle between the domain’s center and the next domain’s center. This is a multiple of $\theta_{c}$, (which can be set in the Nucleic Acid Tab, discussed in section~\ref{sect:nucleic-acid-tab}). While you can manually enter an integer into this box, if you increase the angle of a single domain without compensating elsewhere, the tube will no longer be closed. Clicking the buttons will automatically adjust the interior angle of the surrounding domains, so that this one increases by 2, and the next and previous ones decrease by 1, and vice versa. \\ \hline
+			
+			Left Count & integer (x3) & A set of three integers representing how many NEMids to generate for the left-helical-joint direction helix---the helix that is lined up to the right-helical-joint of the previous domain. For each NEMid generated, a nucleoside will also be generated, but these boxes indicate only how many NEMids to generate. They represent the following, in the following order:
+			\begin{enumerate}
+				\item After generating the initial number of NEMids (integer 2), this is how many additional NEMids to generate on the bottom of the strand. This can be negative to trim NEMids.
+				\item The initial number of NEMids to generate. The first NEMid is lined up to a NEMid on the line of tangency between the previous and this domain. 
+				\item After generating the initial number of NEMids (integer 2), this is how many additional NEMids to generate on the top of the strand. This can be negative to trim NEMids.
+			\end{enumerate}
+			Note that adjusting box 1 and 3 is particularly useful for creating sticky ends, since you can tell NATuG to generate nucleosides without mates.
+			\\ \hline
+			
+			Right Count & integer (x3) & A set of three integers representing how many NEMids to generate for the other helix in the double helix. See above for further descriptions of the boxes. \\
+		\end{tabular}
+	\end{center}
+
+	\subsubsection{Presets}
+	
+	The Domains Tab allows you to export and sets of domain settings, along with the complementary symmetry settings, in a matter of clicks. This section covers how to save and import collections of domains.
+	
+	\paragraph{Exporting}
+	To save the current state of the Domains Tab, including the Subunit Domains and symmetry settings, click the save button (the floppy disk icon), and choose a location to save. A file dialog will prompt you to choose an output filepath and file name for the save, and will open by default to the filepath \sunken{saves/domains/presets}. The output file is a .csv file with a format outlined in section~\ref{sect:domains-export-csv-format}.
+	
+	\paragraph{Importing}
+	To import the current state of the Domains Tab, including the Subunit Domains and symmetry settings, click the load button (the arrow pointing down into a box). A file dialog will prompt you to choose an output filepath and file name for the profile that you are trying to import, and will open by default to the filepath \sunken{saves/domains/presets}. If the file is of the wrong format, and error will be raised. 
+	
+	NATuG includes, by default, within the \sunken{saves/domains/presets} folder, various different profiles, listed below. For the most part, the names are an indication of the top view nanotube shape.
 	\begin{itemize}
-		\item "M" represents the sum of all of the little "m"s for each domain in the Table Area.
-		\item "R" represents the number of subunits, and a green "M/R" box indicates that the tube is closed.
-		\item To create sticky ends, adjust the left/rightmost boxes of the “Left/Other Count” columns. For more information, see "Settings Descriptions"
+		\item circle.csv
+		\item heart.csv
+		\item hexagon.csv
+		\item nested.csv
+		\item start.csv
+		\item tengon.csv
+		\item triangle.csv
 	\end{itemize}
+	
+	\paragraph{CSV Format} \label{sect:domains-export-csv-format}
+	When you import/export a collection of domains, the file must be a .CSV file with the format found in the table below. For the table below, column is the CSV column, and description is what the entries should take the form of for that column. The formatting here is very strict, and anything other than the below listed formatting will likely raise an error when importing/exporting.
+	\begin{center}
+		\begin{tabular}{|p{1in}|p{4.5in}|}
+			\label{tab:domains-csv-columns}
+			Column & Description \\ \hline
+			
+			Left Helix Joints & Either \sunken{UP} or \sunken{DOWN} for each row. Each row represents a domain. \\ \hline
+			
+			Right Helix Joints & Either \sunken{UP} or \sunken{DOWN} for each domain. Each row represents a domain. \\ \hline
+			
+			Left Helix Count & A set of the three left helical counts, in the format \sunken{bottomCount-baseCount-topCount} (separated with dashes), for each row. Each row represents a domain. See the Settings Descriptions chart (\ref{tab:domains-table-settings-descriptions}) for further explanation of what these represent. \\ \hline
+			
+			Other Helix Count & The same as the left helical count, but for the other helix. \\ \hline
+			
+			Symmetry & The first row should be an integer indicating how many subunits to use. There will be no symmetry if the first row is set to 1. \\ \hline
+			
+			Antiparallel & The first row should either be \sunken{True} or \sunken{False}. If \sunken{True} the \sunken{Left Helix Joints} and \sunken{Right Helix Joints} will be ignored upon loading.
+			
+		\end{tabular}
+	\end{center}
 	
 	\subsection{Sequencing}
 	
@@ -543,14 +779,12 @@
 			\centering
 			\includegraphics[height=.6in]{nick.png}
 			\caption{A nick}
-			\label{fig:nick}
 		\end{subfigure}%
 		~
 		\begin{subfigure}{.4\linewidth}
 			\centering
 			\includegraphics[height=.6in]{end-of-strand-nick.png}
 			\caption{A nick at the end of a strand.}
-			\label{fig:end-of-strand-nick}
 		\end{subfigure}
 	\end{figure}
 
@@ -595,14 +829,12 @@
 			\centering
 			\includegraphics[height=.6in]{pre-linkage-1.png}
 			\caption{A selected NEMid that can be linked to another NEMid}
-			\label{fig:nick}
 		\end{subfigure}%
 		~
 		\begin{subfigure}{.3\linewidth}
 			\centering
 			\includegraphics[height=.6in]{linked.png}
 			\caption{A completed linkage. This is now one strand.}
-			\label{fig:end-of-strand-nick}
 		\end{subfigure}
 	\end{figure}
 	
@@ -621,7 +853,7 @@
 	\begin{wrapfigure}{r}{.3\linewidth}
 		\centering
 		\includegraphics[width=1in]{highlighted-nemid.png}
-		\caption{"A highlighted NEMid}
+		\caption{A highlighted NEMid}
 		\label{fig:highlighted-NEMid}
 	\end{wrapfigure}
 
