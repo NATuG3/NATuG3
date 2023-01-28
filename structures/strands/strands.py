@@ -1,5 +1,6 @@
 import logging
 from contextlib import suppress
+from copy import deepcopy
 from functools import partial
 from typing import List, Tuple, Iterable
 
@@ -177,7 +178,7 @@ class Strands:
         strand2 = nick.next_item.strand
 
         # Then build the new strand.
-        new_strand = Strand(**strand1.__dict__)  # create a deep copy of strand1
+        new_strand = deepcopy(strand1)
         new_strand.append(nick.original_item)
         new_strand.extend(strand2)
 
@@ -190,6 +191,8 @@ class Strands:
 
         # Remove the nick.
         self.nicks.remove(nick)
+
+        self.style()
 
     @classmethod
     def from_double_helices(
@@ -441,18 +444,19 @@ class Strands:
         # Nucleoside 1 is the last nucleoside in the first strand, and nucleoside 2 is
         # the first nucleoside in the second strand
 
+        # Build the linkage. The linkage begins with the Nucleoside after the first
+        # NEMid, then ends with the Nucleoside before the second NEMid.
+        new_strand = Strand(nucleic_acid_profile=self.nucleic_acid_profile)
+        new_strand.extend(tuple(ends_with_NEMid.strand.items))
+
         linkage = Linkage(
             items=(
                 begins_with_NEMid.strand.items.by_type(Nucleoside)[-1],
                 ends_with_NEMid.strand.items.by_type(Nucleoside)[0],
             )
         )
-
-        # Build the linkage. The linkage begins with the Nucleoside after the first
-        # NEMid, then ends with the Nucleoside before the second NEMid.
-        new_strand = Strand(nucleic_acid_profile=self.nucleic_acid_profile)
-        new_strand.extend(tuple(ends_with_NEMid.strand.items))
         new_strand.append(linkage)
+
         new_strand.extend(tuple(begins_with_NEMid.strand.items))
         [new_strand.remove(item) for item in linkage.items]
 
@@ -502,8 +506,8 @@ class Strands:
 
         # new strands we are creating
         new_strands = [
-            Strand(self.nucleic_acid_profile),
-            Strand(self.nucleic_acid_profile),
+            Strand(nucleic_acid_profile=self.nucleic_acid_profile),
+            Strand(nucleic_acid_profile=self.nucleic_acid_profile),
         ]
 
         # log basic info for debugging

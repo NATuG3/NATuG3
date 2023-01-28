@@ -1,6 +1,7 @@
 import itertools
 import random
 from collections import deque
+from copy import deepcopy, copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, List, Type, Set
 
@@ -149,7 +150,6 @@ class StrandItems(deque):
         return set([type(item) for item in self])
 
 
-@dataclass
 class Strand:
     """
     A strand of items.
@@ -190,16 +190,22 @@ class Strand:
         endswith(point): Determine whether the strand ends with a point.
     """
 
-    name: str = "Strand"
-    strands: "Strands" = None
-
-    nucleic_acid_profile: NucleicAcidProfile = field(
-        default_factory=NucleicAcidProfile, repr=False
-    )
-    items: StrandItems = field(default_factory=StrandItems)
-    closed: bool = False
-
-    styles: StrandStyles = field(default_factory=StrandStyles)
+    def __init__(
+        self,
+        items: Iterable[Point] = None,
+        name: str = "Strand",
+        closed: bool = False,
+        nucleic_acid_profile: NucleicAcidProfile = None,
+    ):
+        self.name = name
+        self.items = StrandItems() if items is None else StrandItems(items)
+        self.closed = closed
+        self.styles = StrandStyles(self)
+        self.nucleic_acid_profile = (
+            NucleicAcidProfile()
+            if nucleic_acid_profile is None
+            else nucleic_acid_profile
+        )
 
     def __post_init__(self):
         self.items = StrandItems(self.items)
@@ -227,6 +233,17 @@ class Strand:
     def __iter__(self):
         """Iterate over the strand."""
         return iter(self.items)
+
+    def __deepcopy__(self, memodict={}):
+        """Deepcopy the strand."""
+        copied = Strand(
+            items=deepcopy(self.items, memodict),
+            name=self.name,
+            closed=self.closed,
+            nucleic_acid_profile=self.nucleic_acid_profile,
+        )
+        copied.styles = copy(self.styles)
+        return copied
 
     def reverse(self) -> None:
         """Reverse the order of the items in the strand."""
@@ -420,7 +437,7 @@ class Strand:
             x_coords,
             z_coords,
             initial_type=NEMid if isinstance(edge_item, Nucleoside) else Nucleoside,
-            break_at=abs(count)
+            break_at=abs(count),
         )
 
         # Assign domains for all items
