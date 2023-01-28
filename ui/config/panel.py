@@ -139,7 +139,7 @@ class Panel(QWidget):
                 if refs.misc.plot_mode != "nucleoside":
                     refs.misc.plot_mode = "nucleoside"
                     refs.constructor.side_view.refresh()
-                refs.toolbar.plot_mode = INFORMER
+                refs.toolbar.current = INFORMER
                 refs.toolbar.actions.buttons[INFORMER].setEnabled(True)
                 refs.toolbar.actions.buttons[NICKER].setEnabled(False)
                 refs.toolbar.actions.buttons[LINKER].setEnabled(False)

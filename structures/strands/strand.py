@@ -188,6 +188,7 @@ class Strand:
         randomize_sequence(overwrite): Randomize the sequence of the strand.
         startswith(point): Determine whether the strand starts with a point.
         endswith(point): Determine whether the strand ends with a point.
+        clear(): Clear the strand.
     """
 
     def __init__(
@@ -244,6 +245,10 @@ class Strand:
         )
         copied.styles = copy(self.styles)
         return copied
+
+    def clear(self) -> None:
+        """Clear the strand."""
+        self.items.clear()
 
     def reverse(self) -> None:
         """Reverse the order of the items in the strand."""

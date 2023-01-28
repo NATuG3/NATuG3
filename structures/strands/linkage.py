@@ -3,8 +3,11 @@ from dataclasses import dataclass, field
 from functools import cached_property
 from typing import Deque, Literal, Tuple, Iterable, ClassVar, List
 
+import numpy as np
+
 from constants.directions import UP, DOWN
 from structures.points import Nucleoside
+from ui.plotters.utils import chaikins_corner_cutting
 
 
 @dataclass
@@ -39,6 +42,7 @@ class Linkage:
     A single stranded region between the ends of two strands.
 
     Attributes:
+        count: The number of nucleosides that the linkage starts with.
         items: A list of all the points in the linkage.
         styles: A list of styles to apply to the linkage when it is plotted.
         strand: The strand that the linkage is a part of.
@@ -54,18 +58,20 @@ class Linkage:
         generate: Generate additional Nucleoside objects, and add them to the linkage.
     """
 
-    items: Deque[Nucleoside] = field(default_factory=deque)
-    inflection: Literal[UP, DOWN] = UP
-    styles: LinkageStyles = field(default_factory=LinkageStyles)
-    strand: "Strand" = None
+    def __init__(
+        self,
+        coord_one: Tuple[float, float],
+        coord_two: Tuple[float, float],
+        inflection: Literal[UP, DOWN],  # type: ignore
+        strand: "Strand" = None,  # type: ignore
+        count=6,
+    ):
+        self.inflection: inflection
+        self.styles = LinkageStyles()
+        self.strand = strand
+        self.items = [Nucleoside() for _ in range(count)]
 
-    # Items that go into strands must have a domain attribute. This will always be None
-    # for linkages.
-    domain: ClassVar[None] = None
-
-    def __post_init__(self):
         # Convert the items to a deque if they are not already.
-        self.items = deque(self.items)
         self._initial_item_coordinates = tuple(item.position() for item in self.items)
 
         # Ensure all the items are nucleosides
@@ -77,27 +83,12 @@ class Linkage:
         for item in self.items:
             item.linkage = self
 
-    @cached_property
-    def plot_points(self):
-        # Store the plot_points as a tuple of three tuples.
-        items_sorted_by_x_coord = sorted(
-            self._initial_item_coordinates, key=lambda item: item[0]
-        )
-        plot_points = (
-            items_sorted_by_x_coord[0],
-            [
-                ((items_sorted_by_x_coord[0][0] + items_sorted_by_x_coord[1][0]) / 2),
-                ((items_sorted_by_x_coord[0][1] + items_sorted_by_x_coord[1][1]) / 2),
-            ],
-            items_sorted_by_x_coord[1],
-        )
         # If the midpoint is lower than both of the other points, then the inflection
         # is down.
-        if plot_points[0][1] < plot_points[2][1]:
-            plot_points[1][1] -= 0.2
-        else:
-            plot_points[1][1] += 0.2
-        return plot_points
+        midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
+        midpoint[1] += 0.2 if inflection == UP else -0.2
+        self.plot_points = [coord_one, midpoint, coord_two]
+        self.plot_points = chaikins_corner_cutting(self.plot_points, refinements=4)
 
     def generate(self, length: int):
         """

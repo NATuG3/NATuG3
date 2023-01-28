@@ -9,7 +9,7 @@ from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
 
 import settings
-from constants.directions import DOWN
+from constants.directions import DOWN, UP
 from structures.helices import DoubleHelices
 from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
@@ -438,27 +438,27 @@ class Strands:
 
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
-        begins_with_NEMid = NEMid1 if NEMid1.strand.items.by_type(NEMid) else NEMid2
-        ends_with_NEMid = NEMid2 if NEMid2.strand.items.by_type(NEMid) else NEMid1
+        if NEMid1.strand.items.by_type(NEMid)[-1] == NEMid1:
+            begin_point = NEMid1.strand[-1]
+            end_point = NEMid2.strand[0]
+        else:
+            begin_point = NEMid2.strand[-1]
+            end_point = NEMid1.strand[0]
 
-        # Nucleoside 1 is the last nucleoside in the first strand, and nucleoside 2 is
-        # the first nucleoside in the second strand
+        # Begin building the new strand.
+        new_strand = deepcopy(begin_point.strand)
 
-        # Build the linkage. The linkage begins with the Nucleoside after the first
-        # NEMid, then ends with the Nucleoside before the second NEMid.
-        new_strand = Strand(nucleic_acid_profile=self.nucleic_acid_profile)
-        new_strand.extend(tuple(ends_with_NEMid.strand.items))
-
+        # Create a linkage. The first coordinate is NEMid1.position(), and the second
+        # coordinate is NEMid2.position().
         linkage = Linkage(
-            items=(
-                begins_with_NEMid.strand.items.by_type(Nucleoside)[-1],
-                ends_with_NEMid.strand.items.by_type(Nucleoside)[0],
-            )
+            coord_one=begin_point.position(),
+            coord_two=end_point.position(),
+            strand=new_strand,
+            inflection=UP,
         )
         new_strand.append(linkage)
 
-        new_strand.extend(tuple(begins_with_NEMid.strand.items))
-        [new_strand.remove(item) for item in linkage.items]
+        new_strand.extend(end_point.strand)
 
         for item in new_strand:
             item.strand = new_strand

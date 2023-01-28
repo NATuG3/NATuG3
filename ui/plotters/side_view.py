@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, Literal
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt6.QtCore import pyqtSignal, QTimer
+from PyQt6.QtCore import pyqtSignal, QTimer, QVariant
 from PyQt6.QtGui import (
     QPen,
 )
@@ -15,9 +15,6 @@ import settings
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
-from structures.strands import Strands
-from structures.strands.linkage import Linkage
-from structures.strands.strand import Strand, StrandItems
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 
 logger = logging.getLogger(__name__)
@@ -40,7 +37,7 @@ class PlotData:
         plotted_gridlines: All the grid lines.
     """
 
-    strands: Strands = None
+    strands: "Strands" = None
     mode: Literal["nucleoside", "NEMid"] = "NEMid"
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
@@ -70,12 +67,12 @@ class SideViewPlotter(pg.PlotWidget):
     """
 
     points_clicked = pyqtSignal(object, arguments=("Clicked Point NEMids",))
-    strand_clicked = pyqtSignal(Strand, arguments=("Clicked Strand",))
-    linkage_clicked = pyqtSignal(Linkage, arguments=("Clicked Linkages",))
+    strand_clicked = pyqtSignal(object, arguments=("Clicked Strand",))
+    linkage_clicked = pyqtSignal(object, arguments=("Clicked Linkages",))
 
     def __init__(
         self,
-        strands: Strands,
+        strands: "Strands",
         nucleic_acid_profile: NucleicAcidProfile,
         mode: Literal["nucleoside", "NEMid"],
     ) -> None:
@@ -181,6 +178,9 @@ class SideViewPlotter(pg.PlotWidget):
         Raises:
             ValueError: If the mode is not of type "nucleoside" or "NEMid".
         """
+        from structures.strands.linkage import Linkage
+        from structures.strands.strand import StrandItems
+
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
         self.plot_data.points.clear()

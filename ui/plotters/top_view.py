@@ -8,7 +8,6 @@ from PyQt6.QtCore import pyqtSignal
 
 import settings
 import utils
-from structures.domains import Domains
 from ui import plotters
 
 logger = logging.getLogger(__name__)
@@ -79,7 +78,7 @@ class TopViewPlotter(pg.PlotWidget):
 
     def __init__(
         self,
-        domains: Domains,
+        domains: "Domains",
         domain_radius: int,
         rotation: float = 0,
     ):
