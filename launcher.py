@@ -2,8 +2,7 @@ import logging
 import os
 import sys
 from contextlib import suppress
-from threading import Thread
-from time import time, sleep
+from time import time
 
 from runner import Runner
 from ui.splash_screen import SplashScreen
