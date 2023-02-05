@@ -119,9 +119,9 @@ class Panel(QGroupBox):
                 workers.informer, parent, points, strands, domains, refresh
             )
         elif self.runner.managers.toolbar.current == LINKER:
-            worker = partial(workers.linker, points, strands, refresh)
+            worker = partial(workers.linker, points, strands, refresh, self.runner)
         elif self.runner.managers.toolbar.current == JUNCTER:
-            worker = partial(workers.juncter, points, strands, refresh)
+            worker = partial(workers.juncter, points, strands, refresh, self.runner)
         elif self.runner.managers.toolbar.current == NICKER:
             worker = partial(workers.nicker, points, strands, refresh)
         elif self.runner.managers.toolbar.current == HIGHLIGHTER:

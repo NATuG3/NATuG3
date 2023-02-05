@@ -20,7 +20,7 @@ class PointStyles:
         symbol: The symbol of the Point. Either a subset of pyqtgraph symbols or a str.
         size: The size of the symbol. This is in pixels.
         rotation: The rotation of the symbol. This only is checked when the symbol
-            isn't a default symbol (is not in _all_symbols). This is in degrees.
+            isn't a default symbol (is not in all_symbols). This is in degrees.
         fill: The color of the Point. Tuple of (r, g, b) values.
         outline: The color of the outline of the Point. Tuple of (color, width).
 
@@ -38,8 +38,8 @@ class PointStyles:
     outline: Tuple[Tuple[int, int, int], float] = None, None
     state = "default"
 
-    _all_states = ["default", "highlighted", "selected"]
-    _all_symbols = ("o", "t", "t1", "t2", "t3", "s", "p", "h", "star", "+", "d", "x")
+    all_states = ("default", "highlighted", "selected")
+    all_symbols = ("o", "t", "t1", "t2", "t3", "s", "p", "h", "star", "+", "d", "x")
 
     def is_state(self, state: str):
         """Return whether the point is in the given state."""
@@ -52,7 +52,7 @@ class PointStyles:
 
     def symbol_is_custom(self):
         """Return whether the symbol is a custom symbol."""
-        return self.symbol not in self._all_symbols
+        return self.symbol not in self.all_symbols
 
     def reset(self):
         """
@@ -148,7 +148,6 @@ class Point:
         strand: The strand that this point belongs to. Can be None.
         linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
-        prime: The prime of the point. Either 5' or 3'.
 
     Methods:
         matching: Obtain the matching point on the other helix of the same domain.

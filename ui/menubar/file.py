@@ -32,7 +32,7 @@ class File(QMenu):
         self.open.setIcon(fetch_icon("open-outline"))
         self.open.setShortcut("ctrl+o")
         self.open.setStatusTip("Open saved stage from file")
-        self.open.triggered.connect(lambda: self.runner.load)
+        self.open.triggered.connect(self.runner.load)
 
     def _save(self):
         """Save the current state of the program. This saves strands, domains,
@@ -41,4 +41,4 @@ class File(QMenu):
         self.save.setIcon(fetch_icon("save-outline"))
         self.save.setShortcut("ctrl+s")
         self.save.setStatusTip("Save current stage top file")
-        self.save.triggered.connect(lambda: self.runner.save)
+        self.save.triggered.connect(self.runner.save)

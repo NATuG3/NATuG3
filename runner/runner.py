@@ -2,10 +2,12 @@ import logging
 import sys
 
 import pyqtgraph as pg
+from PyQt6.QtWidgets import QFileDialog
 
 import ui
 from runner.application import Application
 from runner.managers import Managers
+from structures.nanostructures.nanostructure import Nanostructure
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +54,6 @@ class Runner:
         self.managers.nucleic_acid_profile.setup()
         self.managers.domains.setup()
         self.managers.strands.setup()
-        self.managers.nanostructure.setup()
         logger.debug("Managers loaded.")
 
         # Create a main window instance
@@ -62,6 +63,44 @@ class Runner:
         # toolbar requires the main window to be created first.
         self.managers.toolbar.setup()
         logger.debug("Main window created.")
+
+    def nanostructure(self):
+        """
+        Obtain the current nanostructure.
+
+        A Nanostructure object is created from the current strands, domains, and
+        nucleic acid profile, all combined into a single object.
+
+        Returns:
+            Nanostructure: The current nanostructure.
+        """
+
+        return Nanostructure(
+            strands=self.managers.strands.current,
+            nucleic_acid_profile=self.managers.nucleic_acid_profile.current,
+            domains=self.managers.domains.current,
+            helices=self.managers.strands.current.double_helices,
+        )
+
+    def save(self):
+        """
+        Initiate the save process, allowing the user to save the current nanostructure.
+        """
+        filepath = QFileDialog.getSaveFileName(
+            self.window, "Save Nanostructure", "", "Excel Workbook (*.xlsx)"
+        )[0]
+        if filepath:
+            self.nanostructure().to_file(filepath)
+
+    def load(self):
+        """
+        Initiate the load process, allowing the user to load a nanostructure.
+        """
+        filepath = QFileDialog.getOpenFileName(
+            self.window, "Load Nanostructure", "", "Excel Workbook (*.xlsx)"
+        )[0]
+        if filepath:
+            self.nanostructure().from_file(filepath)
 
     def boot(self):
         """

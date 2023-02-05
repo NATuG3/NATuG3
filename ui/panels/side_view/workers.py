@@ -2,6 +2,8 @@ import logging
 from functools import partial
 from typing import Callable
 
+from PyQt6.QtWidgets import QMainWindow
+
 import ui.dialogs.informers
 import ui.plotters
 import utils
@@ -18,6 +20,7 @@ def juncter(
     point: Point,
     strands: Strands,
     refresh: Callable,
+    runner: "runner.Runner",
     error_title="Invalid Point Clicked",
 ) -> None:
     """
@@ -30,6 +33,7 @@ def juncter(
             function does not always create junctions (for instance, if only one
             point is passed), so the function only calls refresh if a junction is
             created.
+        runner: NATuG's runner.
         error_title: The title of the error dialog that is shown when the user clicks
             an invalid point.
     """
@@ -38,7 +42,7 @@ def juncter(
         refresh()
     else:
         utils.warning(
-            runner.constructor,
+            runner.window,
             error_title,
             "Junctions can only be created by clicking on overlapping NEMids. "
             "Junctable NEMids are made white, and are overlapping.\n\n"
@@ -182,7 +186,11 @@ def highlighter(point: Point, refresh: Callable):
 
 
 def linker(
-    point: Point, strands: Strands, refresh: Callable, error_title="Invalid Selection"
+    point: Point,
+    strands: Strands,
+    refresh: Callable,
+    runner: "runner.Runner",
+    error_title="Invalid Selection",
 ):
     """
     Create a linkage in a strand.
@@ -193,13 +201,14 @@ def linker(
         strands: The strands object containing the points. The hairpin() method is
             called on this object.
         refresh: Function called to refresh plot after linker mode is run.
+        runner: NATuG's runner.
         error_title: The title of the error dialog that is shown if the user tries to
             create an invalid linkage. Defaults to "Invalid Selection".
     """
     # Ensure that the point is a NEMid
     if isinstance(point, Nick):
         utils.warning(
-            runner.constructor,
+            runner.window,
             error_title,
             "Linker mode only works on NEMids. A nick was clicked. To undo a nick "
             "please enter nicker mode.",
@@ -211,7 +220,7 @@ def linker(
         print(point.strand.index(point))
         logger.warning("User tried to create a linkage on a non-endpoint.")
         utils.warning(
-            runner.constructor,
+            runner.window,
             error_title,
             "Linkages must be created across the ends of two strands. "
             "The point that was clicked on is not an end of a strand.",
@@ -222,7 +231,7 @@ def linker(
     if len(point.strand) < 2:
         logger.warning("User tried to create a linkage on a strand with only one item.")
         utils.warning(
-            runner.constructor,
+            runner.window,
             error_title,
             "Linkages must be created across the ends of two strands. "
             "The strand that was clicked on only contains one item.",
@@ -249,7 +258,7 @@ def linker(
                 "User tried to create a linkage with two points in the same direction."
             )
             utils.warning(
-                runner.constructor,
+                runner.window,
                 error_title,
                 "Linkages must be created across NEMids of differing directions. The "
                 "selected NEMids are not of differing directions.",
