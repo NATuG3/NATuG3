@@ -1,6 +1,5 @@
 from runner.managers.domains import DomainsManager
 from runner.managers.misc import MiscManager
-from runner.managers.nanostructure import NanostructureManager
 from runner.managers.nucleic_acid_profile import NucleicAcidProfileManager
 from runner.managers.strands import StrandsManager
 from runner.managers.toolbar import ToolbarManager
@@ -14,10 +13,6 @@ class Managers:
         self.nucleic_acid_profile = NucleicAcidProfileManager()
         self.domains = DomainsManager(self.runner)
         self.strands = StrandsManager(self.runner)
-
-        # Assemble the current nanostructure. The nanostructure manager provides
-        # references to the individual pieces aforelisted, which makes access easier.
-        self.nanostructure = NanostructureManager(self.runner)
 
         # Load in other data managers
         self.toolbar = ToolbarManager(self.runner)

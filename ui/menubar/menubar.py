@@ -37,6 +37,6 @@ class Menubar(QMenuBar):
         from ui.menubar import File, View, Help
 
         # add menus
-        self.addMenu(File(self))
+        self.addMenu(File(self, self.runner))
         self.addMenu(View(self, self.runner))
         self.addMenu(Help(self))

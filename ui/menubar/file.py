@@ -12,29 +12,33 @@ class File(QMenu):
         - Save
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, runner):
         """
         Initialize the file section of the menu bar.
 
         Args:
             parent: The strands of the file section of the menu bar.
         """
+        self.runner = runner
         super().__init__("&File", parent)
+
+        self._open()
+        self._save()
 
     def _open(self):
         """Open a save of a state of the program. This loads strands, domains,
         and nucleic acid settings."""
-        open_ = self.actions.open = self.addAction("Open")
-        open_.setIcon(fetch_icon("open-outline"))
-        open_.setShortcut("ctrl+o")
-        open_.setStatusTip("Open saved stage from file")
-        open_.triggered.connect(lambda: runner.saver.load.runner(self.parent()))
+        self.open = self.addAction("Open")
+        self.open.setIcon(fetch_icon("open-outline"))
+        self.open.setShortcut("ctrl+o")
+        self.open.setStatusTip("Open saved stage from file")
+        self.open.triggered.connect(lambda: self.runner.load)
 
     def _save(self):
         """Save the current state of the program. This saves strands, domains,
         and nucleic acid settings."""
-        save = self.actions.save = self.addAction("Save")
-        save.setIcon(fetch_icon("save-outline"))
-        save.setShortcut("ctrl+s")
-        save.setStatusTip("Save current stage top file")
-        save.triggered.connect(lambda: runner.saver.save.runner(self.parent()))
+        self.save = self.addAction("Save")
+        self.save.setIcon(fetch_icon("save-outline"))
+        self.save.setShortcut("ctrl+s")
+        self.save.setStatusTip("Save current stage top file")
+        self.save.triggered.connect(lambda: self.runner.save)
