@@ -4,15 +4,14 @@ import os
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog, QLineEdit
 
-import refs
-
 logger = logging.getLogger(__name__)
 
 
 class SequencingPanel(QWidget):
     """DomainsPanel for strands."""
 
-    def __init__(self, parent):
+    def __init__(self, parent, runner):
+        self.runner = runner
         super().__init__(parent)
         uic.loadUi("ui/config/tabs/sequencing/panel.ui", self)
 
@@ -28,26 +27,26 @@ class SequencingPanel(QWidget):
             """Worker for when the run bulk operation button is clicked."""
             scope = self.scope.currentText()
             operation = self.operation.currentText()
-            refresh = refs.constructor.side_view.plot.refresh
+            refresh = self.runner.window.side_view.refresh
 
             if operation == "Randomize":
                 logger.debug("Performing randomization bulk operation.")
                 if scope == "All Bases":
-                    refs.strands.current.randomize_sequences(True)
+                    self.runner.managers.strands.current.randomize_sequences(True)
                     refresh()
                     logger.info("Randomized all bases in all strands.")
                 elif scope == "Unset Bases":
-                    refs.strands.current.randomize_sequences(False)
+                    self.runner.managers.strands.current.randomize_sequences(False)
                     refresh()
                     logger.info("Randomized all unset bases in all strands.")
             elif operation == "Clear":
                 logger.debug("Performing clear bulk operation.")
                 if scope == "All Bases":
-                    refs.strands.current.clear_sequences(True)
+                    self.runner.managers.strands.current.clear_sequences(True)
                     refresh()
                     logger.info("Cleared all bases in all strands.")
                 elif scope == "Unset Bases":
-                    refs.strands.current.clear_sequences(False)
+                    self.runner.managers.strands.current.clear_sequences(False)
                     refresh()
                     logger.info("Cleared all unset bases in all strands.")
 
@@ -87,6 +86,6 @@ class SequencingPanel(QWidget):
             """Worker for when the export sequences button is clicked."""
             filepath = self.filepath.text()[: self.filepath.text().find(".")]
             mode = self.filetype.currentText().replace(".", "")
-            refs.strands.current.to_file(filepath, mode)
+            self.runner.managers.strands.current.to_file(filepath, mode)
 
         self.export_sequences.clicked.connect(export_sequences_clicked)

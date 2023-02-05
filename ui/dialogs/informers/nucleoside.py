@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QDialog
 
 from constants.directions import *
 from structures.domains import Domains
-from structures.points import Nucleoside, NEMid
+from structures.points import Nucleoside
 from structures.strands import Strands
 
 logger = logging.getLogger(__name__)

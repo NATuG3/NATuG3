@@ -21,13 +21,14 @@ class Menubar(QMenuBar):
             - About
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, runner: "runner.Runner"):
         """
         Initialize the file menu bar.
 
         Args:
             parent: The strands of the file menu bar.
         """
+        self.runner = runner
         super().__init__(parent)
         self._add_menus()
 
@@ -37,5 +38,5 @@ class Menubar(QMenuBar):
 
         # add menus
         self.addMenu(File(self))
-        self.addMenu(View(self))
+        self.addMenu(View(self, self.runner))
         self.addMenu(Help(self))

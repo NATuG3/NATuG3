@@ -11,10 +11,11 @@ QApplication.setHighDpiScaleFactorRoundingPolicy(
 )
 if platform.system() == "Windows":
     if int(platform.release()) >= 8:
-        ctypes.windll.shcore.SetProcessDpiAwareness(True)
+        pass
+        # ctypes.windll.shcore.SetProcessDpiAwareness(True)
 
 
-class _Application(QApplication):
+class Application(QApplication):
     def __init__(self):
         super().__init__(sys.argv)
 

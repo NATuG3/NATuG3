@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QVBoxLayout, QDialog, QLabel
+from PyQt6.QtWidgets import QVBoxLayout, QDialog
 
 from ui.dialogs.sequence_editor.bulk_input.panel import BulkInputSequenceEditor
 from ui.dialogs.sequence_editor.user_input.panel import UserInputSequenceEditor

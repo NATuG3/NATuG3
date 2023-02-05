@@ -1,12 +1,8 @@
 import logging
-from typing import Dict
 
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDockWidget
 
-import refs
-from structures.domains import Domains
-from structures.profiles import NucleicAcidProfile
 from ui.config.panel import Panel
 
 logger = logging.getLogger(__name__)
@@ -14,8 +10,11 @@ logger = logging.getLogger(__name__)
 
 class Dockable(QDockWidget):
     def __init__(
-        self, parent, profiles: Dict[str, NucleicAcidProfile], domains: Domains
+        self,
+        parent,
+        runner: "runner.Runner",
     ):
+        self.runner = runner
         super().__init__(parent)
 
         # set titles/descriptions
@@ -27,7 +26,7 @@ class Dockable(QDockWidget):
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint, False)
 
         # store the actual link to the widget in self.config
-        self.panel = Panel(self, profiles, domains)
+        self.panel = Panel(self, self.runner)
         self.tab_area = self.panel.tab_area
         self.setWidget(self.panel)
 
@@ -42,6 +41,6 @@ class Dockable(QDockWidget):
             floating (bool): Whether the dock widget is floating.
         """
         qr = self.frameGeometry()
-        cp = refs.constructor.geometry().center()
+        cp = runner.constructor.geometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())

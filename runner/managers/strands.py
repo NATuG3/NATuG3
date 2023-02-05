@@ -1,11 +1,10 @@
 import atexit
 import pickle
 
-import refs
 from structures.strands.strands import Strands
 
 
-class _Strands:
+class StrandsManager:
     """
     Manager for the application's strands.
 
@@ -18,15 +17,16 @@ class _Strands:
         recompute: Recompute the strands.
     """
 
-    filename = "saves/strands/restored.nano"
-    current: Strands
+    restored_filepath = "saves/strands/restored.nano"
 
-    def __init__(self):
+    def __init__(self, runner: "runner.Runner"):
         """Initialize the strands module."""
+        self.runner = runner
         self.current = None
+
+    def setup(self):
         self.load()
         atexit.register(self.dump)
-        assert isinstance(self.current, Strands)
 
     def load(self):
         """
@@ -35,7 +35,7 @@ class _Strands:
         The strands is loaded from a pickled file from a previous dump().
         """
         try:
-            with open(self.filename, "rb") as file:
+            with open(self.restored_filepath, "rb") as file:
                 self.current = pickle.load(file)
         except FileNotFoundError:
             self.recompute()
@@ -46,7 +46,7 @@ class _Strands:
 
         The strands are dumped into a file using pickle, so that they can be loaded later.
         """
-        with open(self.filename, "wb") as file:
+        with open(self.restored_filepath, "wb") as file:
             pickle.dump(self.current, file)
 
     def recompute(self) -> Strands:
@@ -58,5 +58,5 @@ class _Strands:
         Notes:
             This is a very expensive operation.
         """
-        self.current = refs.domains.current.strands()
+        self.current = self.runner.managers.domains.current.strands()
         return self.current

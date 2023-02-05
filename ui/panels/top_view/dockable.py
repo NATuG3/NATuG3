@@ -1,7 +1,6 @@
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QDockWidget, QSlider, QWidget, QVBoxLayout
 
-import refs
 import ui.plotters
 
 
@@ -20,13 +19,15 @@ class Dockable(QDockWidget):
         refresh()
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, runner: "runner.Runner"):
         """
         Initialize the TopView dockable area.
 
         Args:
-            parent: The strands widget in which the top view dockable area is contained. Can be None.
+            parent: The strands widget in which the top view dockable area is
+            contained. Can be None.
         """
+        self.runner = runner
         super().__init__(parent)
 
         # set styles
@@ -40,8 +41,8 @@ class Dockable(QDockWidget):
 
         # set up the plot
         self.plot = ui.plotters.TopViewPlotter(
-            domains=refs.domains.current,
-            domain_radius=refs.nucleic_acid.current.D,
+            domains=self.runner.managers.domains.current,
+            domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
             rotation=0,
         )
 
@@ -83,14 +84,16 @@ class Dockable(QDockWidget):
         range = domain - 1, domain + 2
 
         # store the previous range of the ui
-        previous = refs.constructor.side_view.plot.visibleRange()
+        previous = self.runner.window.side_view.plot.visibleRange()
 
         # zoom in on the proper area of the plot
-        refs.constructor.side_view.plot.setXRange(*range)
-        refs.constructor.side_view.plot.setYRange(-1, refs.strands.current.size[1] + 1)
+        self.runner.window.side_view.plot.setXRange(*range)
+        self.runner.window.side_view.plot.setYRange(
+            -1, self.runner.managers.strands.current.size[1] + 1
+        )
 
         # if the new range is the same as the old range then this means
         # that the user has clicked on the button a second time and wants
         # to revert to the auto range of the side view plot
-        if previous == refs.constructor.side_view.plot.visibleRange():
-            refs.constructor.side_view.plot.autoRange()
+        if previous == self.runner.window.side_view.plot.visibleRange():
+            self.runner.window.side_view.plot.autoRange()

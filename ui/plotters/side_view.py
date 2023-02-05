@@ -6,7 +6,7 @@ from typing import List, Tuple, Dict, Literal
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt6.QtCore import pyqtSignal, QTimer, QVariant
+from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import (
     QPen,
 )

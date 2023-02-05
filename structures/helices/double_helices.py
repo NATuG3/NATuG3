@@ -1,7 +1,5 @@
 from typing import List
 
-import settings
-
 
 class DoubleHelices:
     """

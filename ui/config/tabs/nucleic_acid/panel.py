@@ -7,7 +7,6 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QWidget
 
-import refs
 from structures.profiles import NucleicAcidProfile
 from ui.widgets.profile_manager import ProfileManager
 
@@ -24,7 +23,10 @@ class NucleicAcidPanel(QWidget):
 
     updated = pyqtSignal(object)
 
-    def __init__(self, parent, profiles: Dict[str, NucleicAcidProfile]) -> None:
+    def __init__(
+        self, parent, runner: "runner.Runner", profiles: Dict[str, NucleicAcidProfile]
+    ) -> None:
+        self.runner = runner
         super().__init__(parent)
         self.profiles: Dict[str, NucleicAcidProfile] = profiles
 
@@ -37,7 +39,7 @@ class NucleicAcidPanel(QWidget):
         self._profile_manager()
 
         # load defaults
-        self.dump_settings(refs.nucleic_acid.current)
+        self.dump_settings(self.runner.managers.nucleic_acid_profile.current)
 
         # setup signals
         self._signals()
@@ -49,11 +51,16 @@ class NucleicAcidPanel(QWidget):
             """Worker for when a widget is changed."""
             # Update the current nucleic_acid_profile with the new settings
             self.updated.emit(
-                partial(refs.nucleic_acid.current.update, self.fetch_settings())
+                partial(
+                    self.runner.managers.nucleic_acid_profile.current.update,
+                    self.fetch_settings(),
+                )
             )
             # Then dump the profile right back so that settings that need to be
             # computed get computed and displayed
-            self.updated.emit(self.dump_settings(refs.nucleic_acid.current))
+            self.updated.emit(
+                self.dump_settings(self.runner.managers.nucleic_acid_manager.current)
+            )
 
         for input in (
             self.D,
@@ -73,17 +80,21 @@ class NucleicAcidPanel(QWidget):
             self,
             self.fetch_settings,
             self.dump_settings,
-            profiles=copy(refs.nucleic_acid.profiles),
-            defaults=refs.nucleic_acid.defaults,
+            profiles=copy(self.runner.managers.nucleic_acid_profile.profiles),
+            defaults=self.runner.managers.nucleic_acid_profile.default_profile_name,
         )
 
         def profile_updated():
             """Slot for when a nucleic_acid_profile is loaded/saved."""
-            refs.nucleic_acid.profiles = self.profile_manager.profiles
+            self.runner.managers.nucleic_acid_profile.profiles = (
+                self.profile_manager.profiles
+            )
             name = self.profile_manager.current
             if len(name) > 0:
                 profile = self.profile_manager.profiles[name]
-                self.updated.emit(partial(refs.nucleic_acid.current.update, profile))
+                self.updated.emit(
+                    partial(self.runner.managers.nucleic_acid_profile.current.update, profile)
+                )
 
         # connect signals
         self.profile_manager.profile_loaded.connect(profile_updated)

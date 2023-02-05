@@ -1,9 +1,13 @@
 import logging
 import os
+import sys
 from contextlib import suppress
-from time import time
+from threading import Thread
+from time import time, sleep
 
-# whether to delete restoration files
+from runner import Runner
+from ui.splash_screen import SplashScreen
+
 RESET = True
 
 # refs script logger object
@@ -11,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 # mute pyqt logs
 logging.getLogger("PyQt6").setLevel(logging.WARNING)
+
+# create the main program runner
+runner = Runner()
 
 
 def main():
@@ -35,20 +42,7 @@ def main():
         os.mkdir(f"{os.getcwd()}/saves/domains")
         os.mkdir(f"{os.getcwd()}/saves/strands")
 
-    import pyqtgraph as pg
-
-    # set up pyqtgraph
-    pg.setConfigOptions(
-        useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
-    )
-
-    import refs
-
     logger.debug(f"Booting @ {time()}")
-
-    logger.info("Loaded profiles and domain settings.")
-
-    import sys
 
     if sys.platform.startswith("win"):
         # to get icon to work properly on Windows this code must be run
@@ -58,16 +52,17 @@ def main():
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
 
-    logger.info("Loaded the config.")
+    splash_screen = SplashScreen()
+    splash_screen.show()
 
-    # show the ui window
-    refs.constructor.show()
-    refs.constructor.resizeEvent(None)  # trigger initial resize event
-    logger.debug("Set up refs window")
+    # set up the runner
+    runner.setup()
 
-    # begin app event loop
-    logger.debug("Beginning event loop...")
-    sys.exit(refs.application.exec())
+    splash_screen.finish(runner.window)
+
+    # close the splash screen and run the program
+    # splash_screen.finish(runner.window)
+    runner.boot()
 
 
 if __name__ == "__main__":

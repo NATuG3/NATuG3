@@ -11,7 +11,7 @@ from pandas import ExcelWriter
 import settings
 from constants.directions import DOWN, UP
 from structures.helices import DoubleHelices
-from structures.points import NEMid, Nucleoside
+from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile

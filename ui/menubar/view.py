@@ -1,7 +1,5 @@
 from PyQt6.QtWidgets import QMenu
 
-import refs
-import refs.saver
 import utils
 from ui.resources import fetch_icon
 
@@ -16,13 +14,15 @@ class View(QMenu):
         - Recolor Strands
     """
 
-    def __init__(self, parent):
+    def __init__(self, parent, runner: "runner.Runner"):
         """
         Initialize the view section of the menu bar.
 
         Args:
             parent: The strands of the view section of the menu bar.
+            runner: NATuG's main runner.
         """
+        self.runner = runner
         super().__init__("&View", parent)
 
         self._config()
@@ -35,7 +35,7 @@ class View(QMenu):
         self.config.setStatusTip("Display the config tab menu")
         self.config.setIcon(fetch_icon("eye-outline"))
         self.config.triggered.connect(
-            lambda: utils.reverse_hidenness(refs.constructor.config)
+            lambda: utils.reverse_hidenness(self.runner.window.config)
         )
 
     def _top_view(self):
@@ -44,7 +44,7 @@ class View(QMenu):
         self.top_view.setStatusTip("Display the helices top view graph")
         self.top_view.setIcon(fetch_icon("eye-outline"))
         self.top_view.triggered.connect(
-            lambda: utils.reverse_hidenness(refs.constructor.top_view)
+            lambda: utils.reverse_hidenness(self.runner.window.top_view)
         )
 
     def _recolor(self):
@@ -52,5 +52,5 @@ class View(QMenu):
         self.recolor = self.addAction("Recolor Strands")
         self.recolor.setStatusTip("Recompute colors for strands")
         self.recolor.setIcon(fetch_icon("color-palette-outline"))
-        self.recolor.triggered.connect(refs.strands.current.style)
-        self.recolor.triggered.connect(refs.constructor.side_view.refresh)
+        self.recolor.triggered.connect(self.runner.managers.strands.current.style)
+        self.recolor.triggered.connect(self.runner.window.side_view.refresh)

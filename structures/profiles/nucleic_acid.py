@@ -1,7 +1,7 @@
 import dataclasses
 import json
 from dataclasses import dataclass
-from typing import Type, Literal
+from typing import Type
 
 
 @dataclass(kw_only=True)
@@ -56,29 +56,26 @@ class NucleicAcidProfile:
         for attr in self.__dataclass_fields__:
             setattr(self, attr, getattr(profile, attr))
 
-    def to_file(self, mode: Literal["json"], filepath: str) -> None:
+    def to_file(self, filepath: str) -> None:
         """
         Write the nucleic acid nucleic_acid_profile to a file.
 
         Args:
-            mode: The type of file to save the nucleic acid nucleic_acid_profile to.
             filepath: The path to the file to write to.
         """
         with open(filepath, "w") as file:
             json.dump(dataclasses.asdict(self), file, indent=3)
 
     @classmethod
-    def from_file(cls, mode: Literal["json"], filepath: str) -> "NucleicAcidProfile":
+    def from_file(cls, filepath: str) -> "NucleicAcidProfile":
         """
         Load a NucleicAcidProfile from a file.
 
         Args:
-            mode: The type of file to load the nucleic acid nucleic_acid_profile from.
             filepath: The path to the file to read from.
         """
-        if mode == "json":
-            with open(filepath, "r") as file:
-                return cls(**json.load(file))
+        with open(filepath, "r") as file:
+            return cls(**json.load(file))
 
     def __eq__(self, other: object) -> bool:
         """

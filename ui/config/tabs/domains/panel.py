@@ -11,7 +11,6 @@ from PyQt6.QtWidgets import (
     QApplication,
 )
 
-import refs
 import settings
 import utils
 from structures.domains import Domains
@@ -33,12 +32,13 @@ class DomainsPanel(QWidget):
 
     updated = pyqtSignal(object)
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, runner: "runner.Runner") -> None:
+        self.runner = runner
         super().__init__(parent)
         uic.loadUi("ui/config/tabs/domains/panel.ui", self)
 
         # create domains editor table and append it to the bottom of the domains panel
-        self.table = Table(self, refs.nucleic_acid.current)
+        self.table = Table(self, self.runner.managers.nucleic_acid_profile.current)
         self.layout().addWidget(self.table)
 
         # set initial values
@@ -56,10 +56,10 @@ class DomainsPanel(QWidget):
 
     def _setup(self):
         """Fill boxes and table with the current values."""
-        self.subunit_count.setValue(refs.domains.current.subunit.count)
-        self.symmetry.setValue(refs.domains.current.symmetry)
-        self.total_count.setValue(refs.domains.current.count)
-        self.table.dump_domains(refs.domains.current)
+        self.subunit_count.setValue(self.runner.managers.domains.current.subunit.count)
+        self.symmetry.setValue(self.runner.managers.domains.current.symmetry)
+        self.total_count.setValue(self.runner.managers.domains.current.count)
+        self.table.dump_domains(self.runner.managers.domains.current)
 
     def _signals(self):
         """Set up panel signals."""
@@ -81,7 +81,7 @@ class DomainsPanel(QWidget):
         )
 
         # dump the initial domains
-        self.table.dump_domains(refs.domains.current)
+        self.table.dump_domains(self.runner.managers.domains.current)
 
         # table update event hooking
         # when the force table update button is clicked
@@ -121,9 +121,9 @@ class DomainsPanel(QWidget):
             )[0]
             if len(filepath) > 0:
                 logger.info(
-                    f"Saving domains to {filepath}.\nDomains being saved: {refs.domains.current}"
+                    f"Saving domains to {filepath}.\nDomains being saved: {self.runner.managers.domains.current}"
                 )
-                refs.domains.current.to_file(filepath=filepath)
+                self.runner.managers.domains.current.to_file(filepath=filepath)
 
         self.save_domains_button.clicked.connect(save_domains)
 
@@ -140,12 +140,12 @@ class DomainsPanel(QWidget):
                 def loader():
                     domains = Domains.from_file(
                         filepath=filepath,
-                        nucleic_acid_profile=refs.nucleic_acid.current,
+                        nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
                     )
-                    refs.domains.current.update(domains)
+                    self.runner.managers.domains.current.update(domains)
                     self._setup()
                     QApplication.processEvents()
-                    refs.constructor.config.panel.update_graphs.click()
+                    runner.constructor.config.panel.update_graphs.click()
 
                 self.updated.emit(loader)
 
@@ -169,10 +169,10 @@ class DomainsPanel(QWidget):
 
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
-        current_domains = refs.domains.current
+        current_domains = self.runner.managers.domains.current
         M: int = sum([domain.theta_m_multiple for domain in current_domains.domains()])
         N: int = current_domains.count
-        B: int = refs.nucleic_acid.current.B
+        B: int = self.runner.managers.nucleic_acid_profile.current.B
         R: int = current_domains.symmetry
         target_M_over_R = (B * (N - 2)) / (2 * R)
         M_over_R = M / R
@@ -210,15 +210,18 @@ class DomainsPanel(QWidget):
         logger.info("Refreshing domains table.")
 
         new_domains: Domains = Domains(
-            refs.nucleic_acid.current,
+            self.runner.managers.nucleic_acid_profile.current,
             self.table.fetch_domains(),
-            refs.domains.current.symmetry,
+            self.runner.managers.domains.current.symmetry,
             self.auto_antiparallel.isChecked(),
         )
         # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count
         # (if that is what they are attempting to do)
-        if self.subunit_count.value() < refs.domains.current.subunit.count:
+        if (
+            self.subunit_count.value()
+            < self.runner.managers.domains.current.subunit.count
+        ):
             # helpers.confirm will return a bool
             confirmation: bool = utils.confirm(
                 self.parent(),
@@ -248,7 +251,7 @@ class DomainsPanel(QWidget):
             new_domains.symmetry = self.symmetry.value()
 
         # update current domains
-        refs.domains.current.update(new_domains)
+        self.runner.managers.domains.current.update(new_domains)
 
         # refresh table
-        self.table.dump_domains(refs.domains.current)
+        self.table.dump_domains(self.runner.managers.domains.current)

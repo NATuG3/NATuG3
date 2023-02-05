@@ -2,7 +2,6 @@ import logging
 from functools import partial
 from typing import Callable
 
-import refs
 import ui.dialogs.informers
 import ui.plotters
 import utils
@@ -39,7 +38,7 @@ def juncter(
         refresh()
     else:
         utils.warning(
-            refs.constructor,
+            runner.constructor,
             error_title,
             "Junctions can only be created by clicking on overlapping NEMids. "
             "Junctable NEMids are made white, and are overlapping.\n\n"
@@ -200,7 +199,7 @@ def linker(
     # Ensure that the point is a NEMid
     if isinstance(point, Nick):
         utils.warning(
-            refs.constructor,
+            runner.constructor,
             error_title,
             "Linker mode only works on NEMids. A nick was clicked. To undo a nick "
             "please enter nicker mode.",
@@ -212,7 +211,7 @@ def linker(
         print(point.strand.index(point))
         logger.warning("User tried to create a linkage on a non-endpoint.")
         utils.warning(
-            refs.constructor,
+            runner.constructor,
             error_title,
             "Linkages must be created across the ends of two strands. "
             "The point that was clicked on is not an end of a strand.",
@@ -223,7 +222,7 @@ def linker(
     if len(point.strand) < 2:
         logger.warning("User tried to create a linkage on a strand with only one item.")
         utils.warning(
-            refs.constructor,
+            runner.constructor,
             error_title,
             "Linkages must be created across the ends of two strands. "
             "The strand that was clicked on only contains one item.",
@@ -231,7 +230,7 @@ def linker(
         return
 
     # Store the points that are currently selected
-    currently_selected = refs.misc.currently_selected
+    currently_selected = runner.misc.currently_selected
 
     # At this point the point should be guaranteed to be a NEMid
     assert isinstance(point, NEMid)
@@ -250,7 +249,7 @@ def linker(
                 "User tried to create a linkage with two points in the same direction."
             )
             utils.warning(
-                refs.constructor,
+                runner.constructor,
                 error_title,
                 "Linkages must be created across NEMids of differing directions. The "
                 "selected NEMids are not of differing directions.",

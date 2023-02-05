@@ -9,7 +9,6 @@ from PyQt6.QtWidgets import (
     QTabWidget,
 )
 
-import refs
 import settings
 
 logger = logging.getLogger(__name__)
@@ -20,6 +19,7 @@ class Window(QMainWindow):
     The nanotube constructor main window.
 
     Attributes:
+        runner (Runner): NATuG's runner.
         status_bar (QStatusBar): The status bar.
         menu_bar (QMenuBar): The menu bar.
         toolbar (QToolBar): The toolbar.
@@ -27,14 +27,14 @@ class Window(QMainWindow):
         side_view (QWidget): Side view widget.
     """
 
-    def __init__(self):
+    def __init__(self, runner: "runner.Runner"):
+        self.runner = runner
+
         # this is an inherited class of QMainWindow,
         # so we must initialize the strands qt widget
         super().__init__()
 
-        # store reference to self in refs
-        refs.constructor = self
-
+    def setup(self):
         # create plot panels
         self._top_view()
         self._side_view()
@@ -70,7 +70,11 @@ class Window(QMainWindow):
         from ui.config import Dockable
 
         # initialize the config panel
-        self.config = Dockable(self, refs.nucleic_acid.profiles, refs.domains.current)
+        self.config = Dockable(
+            self,
+            self.runner,
+
+        )
 
         # only allow config to dock left/right
         self.config.setAllowedAreas(
@@ -90,7 +94,7 @@ class Window(QMainWindow):
         """Setup top view plot."""
         from ui.panels.top_view import Dockable
 
-        self.top_view = Dockable(self)
+        self.top_view = Dockable(self, self.runner)
 
         # set minimum width for top view
         self.top_view.setMinimumWidth(150)
@@ -112,7 +116,7 @@ class Window(QMainWindow):
         """Setup side view plot."""
         from .panels.side_view import Panel
 
-        self.side_view = Panel(self)
+        self.side_view = Panel(self, self.runner)
 
         # set the central widget of the window
         self.setCentralWidget(self.side_view)
@@ -130,7 +134,7 @@ class Window(QMainWindow):
         """Setup menu bar."""
         from .menubar import Menubar
 
-        self.menu_bar = Menubar(self)
+        self.menu_bar = Menubar(self, self.runner)
         self.setMenuBar(self.menu_bar)
 
         logger.info("Created menu bar.")

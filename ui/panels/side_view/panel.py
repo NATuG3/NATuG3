@@ -5,7 +5,6 @@ from typing import List
 
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
-import refs
 import ui.dialogs.informers
 import ui.plotters
 from constants.toolbar import *
@@ -23,17 +22,20 @@ class Panel(QGroupBox):
     """
     The side view panel.
 
-    This panel contains a SideViewPlotter with the current strands being plotted and contains a useful refresh()
-    method to automatically update the plot with the most current strands.
+    This panel contains a SideViewPlotter with the current strands being plotted and
+    contains a useful refresh() method to automatically update the plot with the most
+    current strands.
     """
 
-    def __init__(self, parent) -> None:
+    def __init__(self, parent, runner: "runner.Runner") -> None:
         """
         Initialize the SideView panel.
 
         Args:
             parent: The strands widget in which the side view panel is contained. Can be None.
+            runner: NATuG's runner.
         """
+        self.runner = runner
         super().__init__(parent)
 
         self.setObjectName("Side View")
@@ -42,7 +44,9 @@ class Panel(QGroupBox):
         self.setStatusTip("A plot of the side view of all domains")
 
         self.plot = ui.plotters.SideViewPlotter(
-            refs.strands.current, refs.nucleic_acid.current, refs.misc.plot_mode
+            self.runner.managers.strands.current,
+            self.runner.managers.nucleic_acid_profile.current,
+            self.runner.managers.misc.plot_mode,
         )
         self.plot.points_clicked.connect(self.points_clicked)
         self.plot.strand_clicked.connect(self.strand_clicked)
@@ -56,9 +60,9 @@ class Panel(QGroupBox):
         This will update the current plot with the most recent strands, domains, nucleic acid, and plot mode. Then
         the plot will be refreshed.
         """
-        self.plot.strands = refs.strands.current
-        self.plot.nucleic_acid = refs.nucleic_acid.current
-        self.plot.mode = refs.misc.plot_mode
+        self.plot.strands = self.runner.managers.strands.current
+        self.plot.nucleic_acid = self.runner.managers.nucleic_acid_profile.current
+        self.plot.mode = self.runner.managers.misc.plot_mode
         self.plot.refresh()
 
     def linkage_clicked(self, linkage: Linkage) -> None:
@@ -102,25 +106,25 @@ class Panel(QGroupBox):
         Args:
             points: The points that were clicked.
         """
-        strands = refs.strands.current
-        domains = refs.domains.current
+        strands = self.runner.managers.strands.current
+        domains = self.runner.managers.domains.current
         parent = self
-        refresh = refs.constructor.side_view.plot.refresh
+        refresh = self.runner.window.side_view.plot.refresh
 
         worker = partial(
             logger.info, "Point was clicked but no worker handled the click"
         )
-        if refs.toolbar.current == INFORMER:
+        if self.runner.managers.toolbar.current == INFORMER:
             worker = partial(
                 workers.informer, parent, points, strands, domains, refresh
             )
-        elif refs.toolbar.current == LINKER:
+        elif self.runner.managers.toolbar.current == LINKER:
             worker = partial(workers.linker, points, strands, refresh)
-        elif refs.toolbar.current == JUNCTER:
+        elif self.runner.managers.toolbar.current == JUNCTER:
             worker = partial(workers.juncter, points, strands, refresh)
-        elif refs.toolbar.current == NICKER:
+        elif self.runner.managers.toolbar.current == NICKER:
             worker = partial(workers.nicker, points, strands, refresh)
-        elif refs.toolbar.current == HIGHLIGHTER:
+        elif self.runner.managers.toolbar.current == HIGHLIGHTER:
             worker = partial(workers.highlighter, points, refresh)
         thread = Thread(target=worker)
         thread.run()

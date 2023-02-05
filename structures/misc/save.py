@@ -1,6 +1,5 @@
 import pickle
 
-import refs
 
 
 class Save:
@@ -12,8 +11,8 @@ class Save:
     """
 
     def __init__(self):
-        self.domains = refs.domains.current
-        self.strands = refs.strands.current
+        self.domains = runner.domains.current
+        self.strands = runner.strands.current
 
     @classmethod
     def from_file(cls, filename):
