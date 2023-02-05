@@ -7,6 +7,7 @@ from typing import List, Tuple, Iterable
 import pandas as pd
 from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
+from xlsxwriter import Workbook
 
 import settings
 from constants.directions import DOWN, UP
@@ -53,6 +54,7 @@ class Strands:
         append: Append a strand to the container.
         extend: Append multiple strands to the container.
         remove: Remove a strand from the container.
+        write_worksheets: Write the strands to a tab in an Excel document.
     """
 
     def __init__(
@@ -270,7 +272,7 @@ class Strands:
         # create an Excel writer object
         writer = ExcelWriter(filepath, engine="openpyxl")
 
-        # export the dataframe to an Excel sheet
+        # export the dataframe to an Excel worksheet
         sequences.to_excel(writer, sheet_name=self.name, index=False)
 
         # adjust the widths of the various columns
@@ -681,3 +683,185 @@ class Strands:
                     z_coords.append(item.z_coord)
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
+
+    def write_worksheets(
+        self,
+        workbook: Workbook,
+        strand_sheet_name: str = "Strands",
+        strand_sheet_color: str = "#FFCC00",
+        point_sheet_name: str = "Points",
+        point_sheet_color: str = "#00CC99",
+    ):
+        """
+        Write a worksheet to an Excel spreadsheet for the strands.
+
+        This method creates two sheets: a "Strands" sheet and a "Points" sheet.
+        The Strands sheet contains information for all of the strands, including a
+        list of their items by id, styles and more. The Points sheet contains more
+        detailed information about each point, including its coordinates, style,
+        and more. The strands sheet's items that reference points by ID are linked
+        to the points sheet.
+
+        Args:
+            workbook: The Excel workbook to create a tab for.
+            strand_sheet_name: The name of the strand worksheet.
+            strand_sheet_color: The color of the strand worksheet tab.
+            point_sheet_name: The name of the point worksheet.
+            point_sheet_color: The color of the point worksheet tab.
+        """
+        from structures.points import NEMid, Nucleoside
+
+        row_to_point = {}
+        point_id_to_row = {}
+        i = 2
+        for strand in self.strands:
+            for point in strand.items.by_type(Point):
+                i += 1
+                row_to_point[i] = point
+                point_id_to_row[id(point)] = i
+
+        border_color = "808080"
+
+        # Format for the very top headers
+        primary_headers = workbook.add_format(
+            {
+                "align": "center",
+                "bottom": 1,
+                "left": 1,
+                "right": 1,
+                "bottom_color": border_color,
+                "left_color": border_color,
+                "right_color": border_color,
+            }
+        )
+
+        # Format for the headers below the top headers
+        secondary_headers = workbook.add_format(
+            {
+                "top": 1,
+                "bottom": 1,
+                "left": 1,
+                "right": 1,
+                "top_color": border_color,
+                "bottom_color": border_color,
+                "left_color": border_color,
+                "right_color": border_color,
+            }
+        )
+
+        # Format for URLs and hyperlinks
+        links = workbook.add_format({"color": "blue", "underline": 1})
+
+        def write_strands_sheet(sheet):
+            column_span = 7  # number of columns each strand takes up
+            column = 0  # the column where the current strand begins
+
+            for i, strand in enumerate(self.strands):
+                sheet.merge_range(
+                    0, column, 0, column + column_span, f"Strand#{i}", primary_headers
+                )
+                column += column_span + 1
+
+        def write_points_sheet(sheet):
+            sheet.merge_range("A1:B1", "#", primary_headers)
+            sheet.set_column("A:A", 5)
+            sheet.write("A2", "ID", secondary_headers)
+            sheet.set_column("B:B", 10)
+            sheet.write("B2", "Type", secondary_headers)
+
+            sheet.merge_range("C1:F1", "Data", primary_headers)
+            sheet.write("C2", "X coord", secondary_headers)
+            sheet.write("D2", "Z coord", secondary_headers)
+            sheet.write("E2", "Angle", secondary_headers)
+            sheet.set_column("F:F", 5)
+            sheet.write("F2", "Direction", secondary_headers)
+
+            sheet.merge_range("G1:I1", "NEMid", primary_headers)
+            sheet.set_column("G:G", 6)
+            sheet.write("G2", "Junctable", secondary_headers)
+            sheet.set_column("H:H", 10)
+            sheet.write("H2", "Juncmate", secondary_headers)
+            sheet.set_column("I:I", 6)
+            sheet.write("I2", "Junction", secondary_headers)
+
+            sheet.set_column("J:J", 12)
+            sheet.write("J1", "Nucleoside", primary_headers)
+            sheet.write("J2", "Base", secondary_headers)
+
+            sheet.merge_range("K1:M1", "Containers", primary_headers)
+            sheet.set_column("K:K", 10)
+            sheet.write("K2", "Strand", secondary_headers)
+            sheet.write("L2", "Linkage", secondary_headers)
+            sheet.set_column("M:M", 10)
+            sheet.write("M2", "Domain", secondary_headers)
+
+            sheet.merge_range("N1:T1", "Styles", primary_headers)
+            sheet.write("N2", "State", secondary_headers)
+            sheet.set_column("O:O", 5)
+            sheet.write("O2", "Symbol", secondary_headers)
+            sheet.set_column("P:P", 5)
+            sheet.write("P2", "Size", secondary_headers)
+            sheet.write("Q2", "Rotation", secondary_headers)
+            sheet.write("R2", "Fill Color", secondary_headers)
+            sheet.set_column("S:S", 11)
+            sheet.write("S2", "Outline Color", secondary_headers)
+            sheet.set_column("T:T", 11)
+            sheet.write("T2", "Outline Width", secondary_headers)
+
+            points = []
+            for strand in self.strands:
+                points.extend(strand.items.by_type(Point))
+
+            for row, point in enumerate(points, start=3):
+                # Store general point data
+                sheet.write(f"A{row}", point_id_to_row[id(point)])
+                # Column B is reserved for the type, which is written later
+                sheet.write(f"C{row}", point.x_coord)
+                sheet.write(f"D{row}", point.z_coord)
+                sheet.write(f"E{row}", point.angle)
+                sheet.write(f"F{row}", "UP" if point.direction == UP else "DOWN")
+
+                # Store NEMid specific data
+                if isinstance(point, NEMid):
+                    sheet.write(f"B{row}", "NEMid")
+                    sheet.write(f"G{row}", point.junctable)
+                    if point.juncmate is not None:
+                        juncmate_row = point_id_to_row[id(point.juncmate)]
+                        sheet.write(
+                            f"H{row}",
+                            f'=HYPERLINK("#A{juncmate_row}", "Point#{juncmate_row}")',
+                            links,
+                        )
+                    sheet.write(f"I{row}", point.junction)
+
+                # Store Nucleoside specific data
+                if isinstance(point, Nucleoside):
+                    sheet.write(f"B{row}", "Nucleoside")
+                    sheet.write(f"J{row}", point.base)
+
+                # Store the various containers that the point is in
+                sheet.write(
+                    f"K{row}",
+                    f"Strand#{point.strand.strands.index(point.strand)+1}",
+                )
+                sheet.write(f"L{row}", str(id(point.linkage)))
+                sheet.write(f"M{row}", f"Domain" f"#{point.domain.index}")
+
+                # Store the point styles
+                sheet.write(f"N{row}", point.styles.state)
+                sheet.write(f"O{row}", point.styles.symbol)
+                sheet.write(f"P{row}", point.styles.size)
+                sheet.write(f"Q{row}", point.styles.rotation)
+                sheet.write(f"R{row}", utils.rgb_to_hex(point.styles.fill))
+                sheet.write(f"S{row}", utils.rgb_to_hex(point.styles.outline[0]))
+                sheet.write(f"T{row}", point.styles.outline[1])
+
+        # Create the strands sheet, set its color, and write the data
+        strands_sheet = workbook.add_worksheet(strand_sheet_name)
+        strands_sheet.set_tab_color(strand_sheet_color)
+        write_strands_sheet(strands_sheet)
+
+        # Create the points sheet, set its color, and write the data
+        points_sheet = workbook.add_worksheet(point_sheet_name)
+        points_sheet.set_tab_color(point_sheet_color)
+        write_points_sheet(points_sheet)

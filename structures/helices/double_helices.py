@@ -45,7 +45,7 @@ class DoubleHelices:
         """
         return [double_helix.domain for double_helix in self.double_helices]
 
-    def assign_junctability(self, closed: bool = True) -> None:
+    def assign_junctability(self) -> None:
         """
         Assign juncmates and junctability for all NEMids contained in all helices.
 

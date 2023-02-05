@@ -149,7 +149,7 @@ class Table(QTableWidget):
 
     def _prettify(self):
         """Style the domain panel."""
-        # set the style sheet of the panel
+        # set the style worksheet of the panel
         self.setStyleSheet("QTableView::item{padding: 3.25px; text-align: center}")
 
         # show table grid

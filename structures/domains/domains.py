@@ -5,6 +5,7 @@ from typing import List, Iterable, Tuple, Type
 
 import numpy as np
 import pandas as pd
+from xlsxwriter import Workbook
 
 import settings
 from constants.directions import DOWN, UP
@@ -26,9 +27,9 @@ class Domains:
 
     This is the strands of a Subunit, and the grandparent of a Domain.
 
-    The Domains container automatically keeps track of a template subunit (created with domains
-    passed through the init), and then automatically creates copies of that subunit and the
-    domains in it when the .domains() method is called.
+    The Domains container automatically keeps track of a template subunit (created
+    with domains passed through the init), and then automatically creates copies of
+    that subunit and the domains in it when the .domains() method is called.
 
     Attributes:
         nucleic_acid_profile: The nucleic acid configuration.
@@ -36,17 +37,19 @@ class Domains:
             This is a template subunit. Note that subunits can be mutated.
         symmetry: The symmetry type. Also known as "R".
         count: The total number of domains. Includes domains from all subunits.
-        antiparallel: Whether the domains are forced to have alternating upness/downness.
+        antiparallel: Whether the domains are forced to have alternating
+            upness/downness.
 
     Methods:
-        strands(): Returns a Strands object containing all the strands in the domains.
-        top_view(): Obtain a set of coords for the centers of all the double helices.
-        domains(): Returns a list of all domains.
-        subunits(): Returns a list of subunits.
-        closed(): Whether the tube is closed or not.
-        update(): Update the domains object in place.
-        to_file(): Write the domains to a file.
-        from_file(): Load a domains object from a file.
+        strands: Returns a Strands object containing all the strands in the domains.
+        top_view: Obtain a set of coords for the centers of all the double helices.
+        domains: Returns a list of all domains.
+        subunits: Returns a list of subunits.
+        closed: Whether the tube is closed or not.
+        update: Update the domains object in place.
+        to_file: Write the domains to a file.
+        from_file: Load a domains object from a file.
+        write_worksheet: Write the domains to a tab in an Excel document.
     """
 
     def __init__(
@@ -63,7 +66,8 @@ class Domains:
             nucleic_acid_profile: The nucleic acid configuration.
             domains: All the domains for the template subunit.
             symmetry: The symmetry type. Also known as "R".
-            antiparallel: Whether the domains are forced to have alternating upness/downness.
+            antiparallel: Whether the domains are forced to have alternating
+                upness/downness.
         """
         # store various settings
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -115,9 +119,10 @@ class Domains:
         Creates a csv file from self.domains() with the following columns:
             Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
             Right Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
-            Left Helix Count ("int:int:int"): The number of NEMids to add to the bottom of the left helix, followed by
-                the number of NEMids to compute initially for the left helix, followed by the number of NEMids to add to
-                the top of the left helix.
+            Left Helix Count ("int:int:int"): The number of NEMids to add to the bottom
+                of the left helix, followed by the number of NEMids to compute
+                initially for the left helix, followed by the number of NEMids to add
+                to the top of the left helix.
             Other Helix Count ("int:int:int"): Same as above but for the other helix.
             s: Which is based off left and right helix joints
             m: Interior angle multiple
@@ -128,7 +133,8 @@ class Domains:
             filepath: The filepath to export to.
 
         Raises:
-            ValueError: If the mode is not an allowed mode or if the filepath contains an extension.
+            ValueError: If the mode is not an allowed mode or if the filepath contains
+            an extension.
 
         Notes:
             - Filetype is determined by the extension.
@@ -242,6 +248,53 @@ class Domains:
 
         return domains
 
+    def write_worksheet(
+        self, workbook: Workbook, name: str = "Domains", color: str = "#33CCCC"
+    ):
+        """
+        Write the current domains to a tab in an Excel document.
+
+        Args:
+            workbook: The Excel spreadsheet to create a new tab for.
+            name: The name of the tab.
+            color: The color of the tab in the Excel spreadsheet.
+        """
+        # Add a tab for the domains to the workbook
+        sheet = workbook.add_worksheet(name)
+        sheet.set_tab_color(color)
+
+        # Write the headers
+        sheet.write(0, 0, "#")
+        sheet.write(0, 1, "m")
+        sheet.write(0, 2, "Left Helix Joints")
+        sheet.write(0, 3, "Right Helix Joints")
+        sheet.write(0, 4, "Left Helix Count (bottom)")
+        sheet.write(0, 5, "Left Helix Count (initial)")
+        sheet.write(0, 6, "Left Helix Count (top)")
+        sheet.write(0, 7, "Other Helix Count (bottom)")
+        sheet.write(0, 8, "Other Helix Count (initial)")
+        sheet.write(0, 9, "Other Helix Count (top)")
+        sheet.write(0, 10, "Symmetry")
+        sheet.write(0, 11, "Antiparallel")
+
+        # Write the data
+        for i, domain in enumerate(self.domains(), start=1):
+            sheet.write(i, 0, domain.index + 1)  # domain.index is index-0
+            sheet.write(i, 1, domain.theta_m_multiple)
+            sheet.write(i, 2, "UP" if domain.left_helix_joint == UP else "DOWN")
+            sheet.write(i, 3, "UP" if domain.right_helix_joint == UP else "DOWN")
+            sheet.write(i, 4, domain.left_helix_count[0])
+            sheet.write(i, 5, domain.left_helix_count[1])
+            sheet.write(i, 6, domain.left_helix_count[2])
+            sheet.write(i, 7, domain.other_helix_count[0])
+            sheet.write(i, 8, domain.other_helix_count[1])
+            sheet.write(i, 9, domain.other_helix_count[2])
+
+        # Symmetry and Antiparallelity have their own columns, but they only take up
+        # one row.
+        sheet.write(1, 10, self.symmetry)
+        sheet.write(1, 11, self.antiparallel)
+
     def top_view(self) -> List[Tuple[float, float]]:
         """
         Create a set of coordinates that represent the top view of all the domains.
@@ -268,9 +321,7 @@ class Domains:
             # locate strand switch angle for the previous domain.
             theta_s: float = domains[index - 1].theta_s
             # locate interior angle for the previous domain.
-            interior_angle_multiple: float = (
-                domains[index - 1].theta_m
-            )
+            interior_angle_multiple: float = domains[index - 1].theta_m
 
             # calculate the actual interior angle (with strand switching angle
             # factored in)
@@ -569,7 +620,7 @@ class Domains:
             if initial_z_coord >= 0:
                 shifts = 0
             else:
-                shifts = round(np.divide(abs(initial_z_coord), (Z_b/2)))
+                shifts = round(np.divide(abs(initial_z_coord), (Z_b / 2)))
 
             # First trim the strands based off of the shifts
             double_helix.zeroed_helix.trim(-shifts)
@@ -580,9 +631,9 @@ class Domains:
             # strand are count[2] and the additional NEMids to place on the bottom
             # are count[0]. Recall that count[1] is the number of NEMids to generate
             # initially.
-            double_helix.zeroed_helix.generate(-zeroed_strand_NEMid_count[0]-1)
+            double_helix.zeroed_helix.generate(-zeroed_strand_NEMid_count[0] - 1)
             double_helix.zeroed_helix.generate(zeroed_strand_NEMid_count[2] + shifts)
-            double_helix.other_helix.generate(-other_strand_NEMid_count[0]-1)
+            double_helix.other_helix.generate(-other_strand_NEMid_count[0] - 1)
             double_helix.other_helix.generate(other_strand_NEMid_count[2] + shifts)
 
             # Now reasign metadata for new items
@@ -592,7 +643,7 @@ class Domains:
             double_helix.down_helix.reverse()
 
         # Determine juncmates and junctability
-        double_helices.assign_junctability(self.closed())
+        double_helices.assign_junctability()
 
         # Load the strands into a Strands package
         strands = Strands.from_double_helices(self.nucleic_acid_profile, double_helices)
