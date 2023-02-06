@@ -19,7 +19,7 @@ from structures.profiles import NucleicAcidProfile
 from structures.strands import utils
 from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
-from utils import show_in_file_explorer
+from utils import show_in_file_explorer, rgb_to_hex
 
 logger = logging.getLogger(__name__)
 
@@ -753,14 +753,95 @@ class Strands:
         links = workbook.add_format({"color": "blue", "underline": 1})
 
         def write_strands_sheet(sheet):
-            column_span = 7  # number of columns each strand takes up
-            column = 0  # the column where the current strand begins
+            column_start = 0  # the column where the current strand begins
 
             for i, strand in enumerate(self.strands):
+
+                def c(index: int) -> int:
+                    return column_start + index
+
+                # Overall strand header
+                sheet.merge_range(0, c(0), 0, c(6), f"Strand#{i+1}", primary_headers)
+
+                # Secondary strand headers
+                sheet.merge_range(1, c(0), 1, c(1), "#", secondary_headers)
+
+                sheet.merge_range(1, c(2), 1, c(3), "Data", secondary_headers)
+
+                sheet.merge_range(1, c(4), 1, c(6), "Styles", secondary_headers)
+
+                # Territory strand headers
+                sheet.write(2, c(0), "ID", secondary_headers)
+                sheet.write(2, c(1), "Name", secondary_headers)
+                sheet.set_column(c(2), c(2), 12)
+                sheet.write(2, c(2), "Closed", secondary_headers)
+
+                sheet.set_column(c(3), c(3), 25)
+                sheet.write(2, c(3), "Sequence", secondary_headers)
+                sheet.set_column(c(4), c(6), 10)
+                sheet.write(2, c(4), "Color", secondary_headers)
+                sheet.write(2, c(5), "Thickness", secondary_headers)
+                sheet.write(2, c(6), "Highlighted", secondary_headers)
+
+                # Overall strand data
+                sheet.write(3, c(0), str(id(strand)))
+                sheet.write(3, c(1), strand.name)
+                sheet.write(3, c(2), strand.closed)
+
+                sequence = ""
+                for item in strand.sequence:
+                    sequence += item if item is not None else "X"
+
+                sheet.write(3, c(3), "".join(sequence))
+
+                color = rgb_to_hex(strand.styles.color.value)
+                if strand.styles.color.automatic:
+                    sheet.write(3, c(4), f"auto, {color}")
+                else:
+                    sheet.write(3, c(4), rgb_to_hex(strand.styles.color.value))
+
+                thickness = strand.styles.thickness.value
+                if strand.styles.thickness.automatic:
+                    sheet.write(3, c(5), f"auto, {thickness}")
+                else:
+                    sheet.write(3, c(5), thickness)
+
+                sheet.write(3, c(6), strand.styles.highlighted)
+
+                # Add the strand items header
+                sheet.merge_range(4, c(0), 4, c(6), f"Items", primary_headers)
+
+                # Add the strand items subheader
+                sheet.write(5, c(0), f"ID", secondary_headers)
+                sheet.write(5, c(1), f"Type", secondary_headers)
+                sheet.write(5, c(2), f"Overview", secondary_headers)
                 sheet.merge_range(
-                    0, column, 0, column + column_span, f"Strand#{i}", primary_headers
+                    5, c(3), 5, c(6), f"Linkage Sequence", secondary_headers
                 )
-                column += column_span + 1
+
+                for row, item in enumerate(strand.items, start=6):
+                    try:
+                        item_row = point_id_to_row[id(item)]
+                    except KeyError:
+                        item_row = None
+
+                    sheet.write(row, c(0), str(item_row))
+                    sheet.write(row, c(1), item.__class__.__name__)
+                    overview = '="(" & {x} & ", " & {y} & ")"'
+                    overview = overview.format(
+                        x=f"ROUND(Points!C{item_row}, 3)",
+                        y=f"ROUND(Points!D{item_row}, 3)",
+                    )
+                    sheet.write(row, c(2), overview)
+
+                    if isinstance(item, Linkage):
+                        linkage_sequence = item.sequence
+                    else:
+                        linkage_sequence = ""
+
+                    sheet.merge_range(row, c(3), row, c(6), linkage_sequence)
+
+                column_start += 8
 
         def write_points_sheet(sheet):
             sheet.merge_range("A1:B1", "#", primary_headers)
@@ -842,18 +923,18 @@ class Strands:
                 # Store the various containers that the point is in
                 sheet.write(
                     f"K{row}",
-                    f"Strand#{point.strand.strands.index(point.strand)+1}",
+                    f"Strand#{point.strand.strands.index(point.strand) + 1}",
                 )
                 sheet.write(f"L{row}", str(id(point.linkage)))
-                sheet.write(f"M{row}", f"Domain" f"#{point.domain.index}")
+                sheet.write(f"M{row}", f"Domain#{point.domain.index+1}")
 
                 # Store the point styles
                 sheet.write(f"N{row}", point.styles.state)
                 sheet.write(f"O{row}", point.styles.symbol)
                 sheet.write(f"P{row}", point.styles.size)
                 sheet.write(f"Q{row}", point.styles.rotation)
-                sheet.write(f"R{row}", utils.rgb_to_hex(point.styles.fill))
-                sheet.write(f"S{row}", utils.rgb_to_hex(point.styles.outline[0]))
+                sheet.write(f"R{row}", rgb_to_hex(point.styles.fill))
+                sheet.write(f"S{row}", rgb_to_hex(point.styles.outline[0]))
                 sheet.write(f"T{row}", point.styles.outline[1])
 
         # Create the strands sheet, set its color, and write the data

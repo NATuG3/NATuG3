@@ -1,14 +1,10 @@
 import logging
-
-import xlsxwriter
 from dataclasses import field, dataclass
 
-from constants.directions import UP, DOWN
-from runner import utils
+import xlsxwriter
+
 from structures.domains import Domains
 from structures.helices import DoubleHelices
-from structures.points import NEMid, Nucleoside
-from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 

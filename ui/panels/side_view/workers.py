@@ -2,8 +2,6 @@ import logging
 from functools import partial
 from typing import Callable
 
-from PyQt6.QtWidgets import QMainWindow
-
 import ui.dialogs.informers
 import ui.plotters
 import utils
