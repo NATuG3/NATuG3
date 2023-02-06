@@ -237,7 +237,7 @@ def linker(
         return
 
     # Store the points that are currently selected
-    currently_selected = runner.misc.currently_selected
+    currently_selected = runner.managers.misc.currently_selected
 
     # At this point the point should be guaranteed to be a NEMid
     assert isinstance(point, NEMid)

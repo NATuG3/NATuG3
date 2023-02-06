@@ -4,8 +4,10 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="1">
+          <list size="3">
             <item index="0" class="java.lang.String" itemvalue="webbrowser" />
+            <item index="1" class="java.lang.String" itemvalue="PyOpenGL-accelerate" />
+            <item index="2" class="java.lang.String" itemvalue="PyOpenGL_accelerate" />
           </list>
         </value>
       </option>
@@ -15,15 +17,18 @@
         <list>
           <option value="N801" />
           <option value="N806" />
-          <option value="N803" />
+          <option value="N802" />
         </list>
       </option>
     </inspection_tool>
     <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredIdentifiers">
         <list>
+          <option value="windows.constructor.main.window.top_view" />
           <option value="theta_interior" />
-          <option value="constructor.panels.domains.panel.Panel.*" />
+          <option value="angle_deltas" />
+          <option value="computers.side_view.side_view.Strand" />
+          <option value="inflection" />
         </list>
       </option>
     </inspection_tool>

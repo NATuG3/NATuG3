@@ -1,7 +1,8 @@
 import dataclasses
 import json
 from dataclasses import dataclass
-from typing import Type
+from typing import Type, Dict, List
+from xlsxwriter.utility import xl_col_to_name
 
 
 @dataclass(kw_only=True)
@@ -10,6 +11,7 @@ class NucleicAcidProfile:
     A container for all geometrical parameters for a nucleic acid.
 
     Attributes:
+        name: The name of the nucleic acid profile.
         D: Diameter of a domain.
         H: Height of a turn.
         g: Nucleoside-Mate Angle.
@@ -24,6 +26,8 @@ class NucleicAcidProfile:
         to_file: Write the nucleic acid nucleic_acid_profile to a file.
         write_worksheet: Write the NucleicAcidProfile to a tab in an Excel document.
     """
+
+    name: str = "MDF B-DNA"
 
     D: float = 2.2
     H: float = 3.549
@@ -83,7 +87,11 @@ class NucleicAcidProfile:
             return cls(**json.load(file))
 
     def write_worksheet(
-        self, workbook, name="Nucleic Acid Profile", color="#FF6699"
+        self,
+        workbook,
+        name="Nucleic Acid Profile",
+        color="#FF6699",
+        profiles: List["NucleicAcidProfile"] = None,
     ) -> None:
         """
         Write the NucleicAcidProfile to a tab in an Excel document.
@@ -92,93 +100,82 @@ class NucleicAcidProfile:
             workbook (xlsxwriter.Workbook): The Excel document to write to.
             color: The color of the tab in the Excel document.
             name: The name of the tab in the Excel document.
+            profiles: The nucleic acid profiles to write. If None this profile is
+                written to the sheet, else the profiles within the list are written.
         """
+        profiles = [self] if profiles is None else profiles
+
         sheet = workbook.add_worksheet(name)
         sheet.set_tab_color(color)
 
         subscript = workbook.add_format({"font_script": 2})
         comment_scale = {"x_scale": 1.5, "y_scale": 1.5}
 
-        sheet.write("A1", "Name")
-        sheet.write("B1", "Value")
+        sheet.write(1, 0, "D")
+        comment = "The diameter of a given domain in nanometers"
+        sheet.write_comment(1, 0, comment, comment_scale)
 
-        name = "D"
-        value = self.D
-        description = "The diameter of a given domain in nanometers"
-        sheet.write("A1", name)
-        sheet.write("B1", value)
-        sheet.write_comment("A1", description, comment_scale)
-
-        name = "H"
-        value = self.H
         description = "The height of one turn of the helical axes in nanometers"
-        sheet.write("A2", name)
-        sheet.write("B2", value)
-        sheet.write_comment("A2", description, comment_scale)
+        sheet.write(2, 0, "H")
+        sheet.write_comment(2, 0, description, comment_scale)
 
-        name = "g"
-        value = self.g
         description = (
             "The angle about the helical axis between a nucleoside and its "
             "Watson-Crick mate in degrees"
         )
-        sheet.write("A3", name)
-        sheet.write("B3", value)
-        sheet.write_comment("A3", description, comment_scale)
+        sheet.write(3, 0, "g")
+        sheet.write_comment(3, 0, description, comment_scale)
 
-        name = "T"
-        value = self.T
         description = "There are T turns every B bases"
-        sheet.write("A4", name)
-        sheet.write("B4", value)
-        sheet.write_comment("A4", description, comment_scale)
+        sheet.write(4, 0, "T")
+        sheet.write_comment(4, 0, description, comment_scale)
 
-        name = "B"
-        value = self.B
         description = "There are T turns every B bases"
-        sheet.write("A5", name)
-        sheet.write("B5", value)
-        sheet.write_comment("A5", description, comment_scale)
+        sheet.write(5, 0, "B")
+        sheet.write_comment(5, 0, description, comment_scale)
 
-        name = ("Z", subscript, "b")
-        value = "=(B4*B2)/B5"
         description = "The height between two NEMids on a given helix"
-        sheet.write_rich_string("A6", *name)
-        sheet.write("B6", value, None, "")
-        sheet.write_comment("A6", description, comment_scale)
+        sheet.write_rich_string(6, 0, "Z", subscript, "b")
+        sheet.write_comment(6, 0, description, comment_scale)
 
-        name = ("Z", subscript, "c")
-        value = self.Z_c
         description = "The height between two NEMids on a given helix"
-        sheet.write_rich_string("A7", *name)
-        sheet.write("B7", value)
-        sheet.write_comment("A7", description, comment_scale)
+        sheet.write_rich_string(7, 0, "Z", subscript, "c")
+        sheet.write_comment(7, 0, description, comment_scale)
 
-        name = ("Z", subscript, "mate")
-        value = self.Z_mate
         description = (
             "Vertical distance between a NEMid and its mate on the other helix"
         )
-        sheet.write_rich_string("A8", *name)
-        sheet.write("B8", value)
-        sheet.write_comment("A8", description, comment_scale)
+        sheet.write_rich_string(8, 0, "Z", subscript, "mate")
+        sheet.write_comment(8, 0, description, comment_scale)
 
-        name = ("θ", subscript, "c")
-        value = "=360/B5"
         description = (
             "The smallest angle about the helical axis possible between two NEMids "
             "on the same helix."
         )
-        sheet.write_rich_string("A9", *name)
-        sheet.write("B9", value, None, "")
-        sheet.write_comment("A9", description, comment_scale)
+        sheet.write_rich_string(9, 0, "θ", subscript, "c")
+        sheet.write_comment(9, 0, description, comment_scale)
 
-        name = ("θ", subscript, "b")
-        value = "=360*(B4/B5)"
         description = "The angle about the helical axis between two NEMids"
-        sheet.write_rich_string("A10", *name)
-        sheet.write("B10", value, None, "")
-        sheet.write_comment("A10", description, comment_scale)
+        sheet.write_rich_string(10, 0, "θ", subscript, "b")
+        sheet.write_comment(10, 0, description, comment_scale)
+
+        c = 1
+        for profile in profiles:
+            column_str = xl_col_to_name(c)
+
+            sheet.write(0, c, profile.name)
+            sheet.write(1, c, profile.D)
+            sheet.write(2, c, profile.H)
+            sheet.write(3, c, profile.g)
+            sheet.write(4, c, profile.T)
+            sheet.write(5, c, profile.B)
+            sheet.write(6, c, f"={column_str}5*{column_str}3/{column_str}6")
+            sheet.write(7, c, profile.Z_c)
+            sheet.write(8, c, profile.H)
+            sheet.write(9, c, f"=360/{column_str}6")
+            sheet.write(10, c, f"=360/({column_str}5*{column_str}6)")
+
+            c += 1
 
     def __eq__(self, other: object) -> bool:
         """

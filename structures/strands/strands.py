@@ -715,10 +715,15 @@ class Strands:
         point_id_to_row = {}
         i = 2
         for strand in self.strands:
-            for point in strand.items.by_type(Point):
-                i += 1
-                row_to_point[i] = point
-                point_id_to_row[id(point)] = i
+            for item in strand.items:
+                if isinstance(item, Point):
+                    points = (item,)
+                elif isinstance(item, Linkage):
+                    points = item.items
+                for point in points:
+                    i += 1
+                    row_to_point[i] = point
+                    point_id_to_row[id(point)] = i
 
         border_color = "808080"
 
@@ -832,14 +837,19 @@ class Strands:
                         x=f"ROUND(Points!C{item_row}, 3)",
                         y=f"ROUND(Points!D{item_row}, 3)",
                     )
-                    sheet.write(row, c(2), overview)
 
                     if isinstance(item, Linkage):
-                        linkage_sequence = item.sequence
+                        str_sequence = ""
+                        if item.sequence:
+                            for base in item.sequence:
+                                str_sequence += "X" if base is None else base
+                        overview = f"{item.plot_points}"
                     else:
-                        linkage_sequence = ""
+                        str_sequence = ""
 
-                    sheet.merge_range(row, c(3), row, c(6), linkage_sequence)
+                    sheet.write(row, c(2), overview)
+
+                    sheet.merge_range(row, c(3), row, c(6), str_sequence)
 
                 column_start += 8
 

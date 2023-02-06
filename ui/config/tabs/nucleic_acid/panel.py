@@ -59,10 +59,10 @@ class NucleicAcidPanel(QWidget):
             # Then dump the profile right back so that settings that need to be
             # computed get computed and displayed
             self.updated.emit(
-                self.dump_settings(self.runner.managers.nucleic_acid_manager.current)
+                self.dump_settings(self.runner.managers.nucleic_acid_profile.current)
             )
 
-        for input in (
+        for input_ in (
             self.D,
             self.H,
             self.T,
@@ -72,7 +72,7 @@ class NucleicAcidPanel(QWidget):
             self.Z_c,
             self.Z_mate,
         ):
-            input.editingFinished.connect(on_input_updated)
+            input_.editingFinished.connect(on_input_updated)
 
     def _profile_manager(self):
         """Set up nucleic_acid_profile manager."""

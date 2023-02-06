@@ -90,11 +90,17 @@ class Runner:
             self.window, "Save Nanostructure", "", "Excel Workbook (*.xlsx)"
         )[0]
         if filepath:
-            self.nanostructure().to_file(filepath)
+            additional_nucleic_acid_profiles = tuple(
+                self.managers.nucleic_acid_profile.profiles.values()
+            )
+            self.nanostructure().to_file(
+                filepath,
+                additional_nucleic_acid_profiles,
+            )
 
     def load(self):
         """
-        Initiate the load process, allowing the user to load a nanostructure.
+        Initiate the load proxcess, allowing the user to load a nanostructure.
         """
         filepath = QFileDialog.getOpenFileName(
             self.window, "Load Nanostructure", "", "Excel Workbook (*.xlsx)"

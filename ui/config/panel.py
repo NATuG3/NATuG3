@@ -102,7 +102,7 @@ class Panel(QWidget):
             )
         )
 
-        def tab_updated(function):
+        def tab_updated(function=lambda: None):
             """Worker for when a tab is updated and wants to call a function"""
             warn_and_refresh(
                 self.auto_update_top_view.isChecked(),

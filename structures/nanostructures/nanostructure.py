@@ -1,5 +1,7 @@
 import logging
+from copy import copy
 from dataclasses import field, dataclass
+from typing import List
 
 import xlsxwriter
 
@@ -29,23 +31,32 @@ class Nanostructure:
     domains: field(default_factory=Domains)
     nucleic_acid_profile: field(default_factory=NucleicAcidProfile)
 
-    def to_file(self, filepath: str) -> None:
+    def to_file(
+        self,
+        filepath: str,
+        additional_nucleic_acid_profiles: List[NucleicAcidProfile] | tuple = (),
+    ) -> None:
         """
         Create a multipage spreadsheet with the current nanostructure.
 
         Args:
             filepath: The path to the file to save.
-
-        Sheet 1: Nucleic Acid Profile
-        Sheet 2: Domains
-        Sheet 3: Strands
-        Sheet 4: Helices
+            additional_nucleic_acid_profiles: Additional nucleic acid profiles to
+                include in the save. If this is an empty tuple only the current
+                nucleic acid profile is used.
         """
         logger.debug("Saving nanostructure to file: %s", filepath)
 
         workbook = xlsxwriter.Workbook(filepath)
 
-        self.nucleic_acid_profile.write_worksheet(workbook)
+        current_nucleic_acid_profile = copy(self.nucleic_acid_profile)
+        current_nucleic_acid_profile.name = "Computed Profile"
+        nucleic_acid_profiles = [current_nucleic_acid_profile]
+        nucleic_acid_profiles.extend(additional_nucleic_acid_profiles)
+
+        self.nucleic_acid_profile.write_worksheet(
+            workbook, profiles=nucleic_acid_profiles
+        )
         self.domains.write_worksheet(workbook)
         self.strands.write_worksheets(workbook)
 
