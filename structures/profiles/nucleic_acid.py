@@ -3,6 +3,8 @@ import json
 from dataclasses import dataclass
 from typing import Type, Dict, List
 from xlsxwriter.utility import xl_col_to_name
+import openpyxl
+from openpyxl.worksheet.worksheet import Worksheet as pyxlWorksheet
 
 
 @dataclass(kw_only=True)
@@ -176,6 +178,9 @@ class NucleicAcidProfile:
             sheet.write(10, c, f"=360/({column_str}5*{column_str}6)")
 
             c += 1
+
+    def read_worksheet(self, worksheet: pyxlWorksheet) -> "NucleicAcidProfile":
+        pass
 
     def __eq__(self, other: object) -> bool:
         """

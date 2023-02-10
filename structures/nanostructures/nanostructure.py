@@ -4,6 +4,7 @@ from dataclasses import field, dataclass
 from typing import List
 
 import xlsxwriter
+from openpyxl import load_workbook
 
 from structures.domains import Domains
 from structures.helices import DoubleHelices
@@ -20,14 +21,11 @@ class Nanostructure:
 
     Attributes:
         strands: The strands in the nanostructure.
-        helices: The helices in the nanostructure. Helices are strands that don't
-            traverse multiple domains.
         domains: The domains in the nanostructure.
         nucleic_acid_profile: The nucleic acid settings that the nanostructure uses.
     """
 
     strands: field(default_factory=Strands)
-    helices: field(default_factory=DoubleHelices)
     domains: field(default_factory=Domains)
     nucleic_acid_profile: field(default_factory=NucleicAcidProfile)
 
@@ -64,5 +62,12 @@ class Nanostructure:
 
         logger.debug("Saved nanostructure")
 
-    def from_file(self, filepath: str) -> None:
-        pass
+    @classmethod
+    def from_file(cls, filepath: str) -> "Nanostructure":
+        workbook = load_workbook(filepath)
+
+        return cls(
+            Strands.read_worksheet(workbook["Strands"]),
+            Domains.read_worksheet(workbook["Domains"]),
+            NucleicAcidProfile.read_worksheet(workbook["Nucleic Acid Profile"]),
+        )

@@ -19,7 +19,6 @@ class Runner:
     This sets up and stores all the needed managers, and then runs the program.
     Various properties, such as Strands, Domains, and NucleicAcidProfiles will be
     stored under runner.
-
     """
 
     def __init__(self):
@@ -79,7 +78,6 @@ class Runner:
             strands=self.managers.strands.current,
             nucleic_acid_profile=self.managers.nucleic_acid_profile.current,
             domains=self.managers.domains.current,
-            helices=self.managers.strands.current.double_helices,
         )
 
     def save(self):
