@@ -1,7 +1,9 @@
-import dataclasses
 import json
-from dataclasses import dataclass
-from typing import Type, Dict, List
+
+from dataclasses import dataclass, field
+from typing import Type, Dict, List, Iterable
+from uuid import uuid1
+
 from xlsxwriter.utility import xl_col_to_name
 import openpyxl
 from openpyxl.worksheet.worksheet import Worksheet as pyxlWorksheet
@@ -22,6 +24,7 @@ class NucleicAcidProfile:
         Z_c: Characteristic height.
         Z_mate: Nucleoside-Mate Vertical Distance.
         theta_s: Switch angle.
+        uuid: The uuid of the nucleic acid profile. This is automatically generated.
 
     Methods:
         update: Update our nucleic_acid_profile in place.
@@ -39,6 +42,8 @@ class NucleicAcidProfile:
     Z_c: float = 0.17
     Z_mate: float = 0.094
     theta_s: float = 2.343
+
+    uuid: str = field(default_factory=lambda: str(uuid1()))
 
     @property
     def Z_b(self) -> float:
@@ -195,3 +200,18 @@ class NucleicAcidProfile:
             getattr(self, attr) == getattr(other, attr)
             for attr in dataclasses.asdict(self)
         )
+
+
+def export(nucleic_acid_profiles: Iterable[NucleicAcidProfile], filename: str | None):
+    """
+    Export many nucleic acid profiles to a csv file or a pandas dataframe.
+
+    Args:
+        nucleic_acid_profiles: The nucleic acid profiles to export.
+        filename: The name of the file to export to. If None, a pandas dataframe is
+            returned.
+
+    Returns:
+        pd.DataFrame: The dataframe containing the nucleic acid profiles.
+        None: If a filename is provided, a file is created and nothing is returned.
+    """

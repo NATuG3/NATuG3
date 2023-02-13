@@ -1,8 +1,10 @@
 from collections import deque
 from dataclasses import dataclass
 from typing import Deque, Literal, Tuple, Iterable, List
+from uuid import uuid1
 
 import numpy as np
+import pandas as pd
 
 from constants.directions import UP, DOWN
 from structures.points import Nucleoside
@@ -51,6 +53,9 @@ class Linkage:
             initialisation, the second is the position of the righter Nucleoside from
             initialisation, and the third is the average of the two, with a boost in its
             z coord.
+        inflection: Whether the linkage is bent upwards or downwards when plotted.
+        uuid (str): The unique identifier of the linkage. Automatically generated post
+        init.
 
     Methods:
         trim: Trim the linkage to a certain length.
@@ -88,6 +93,9 @@ class Linkage:
         midpoint[1] += 0.2 if inflection == UP else -0.2
         self.plot_points = [coord_one, midpoint, coord_two]
         self.plot_points = chaikins_corner_cutting(self.plot_points, refinements=4)
+
+        # Set the uuid of the linkage.
+        self.uuid = str(uuid1())
 
     def generate(self, length: int):
         """
@@ -178,3 +186,40 @@ class Linkage:
     def leftextend(self, items: Deque[Nucleoside]):
         """Extend the linkage with a list of points to the left."""
         self.items.extendleft(items)
+
+
+def export(linkages: Iterable[Linkage], filename: str | None):
+    """
+    Export an iterable of linkages to a csv file or a pandas dataframe.
+
+    All the items (nucleosides) within the linkage are compressed into a string
+    sequence, where each letter is the base of a given nucleoside, and nucleosides
+    with None bases are represented with an "X."
+
+    Args:
+        linkages: The linkages to export.
+        filename: The name of the file to export to. If this is None, then a pandas
+            dataframe will be returned instead.
+    """
+    data = {
+        "uuid": [],
+        "data:sequence": [],
+        "data:inflection": [],
+        "data:plot_points": [],
+        "data:strand": [],
+        "styles:color": [],
+        "styles:thickness": [],
+    }
+
+    for linkage in linkages:
+        data["uuid"].append(linkage.uuid)
+        data["data:sequence"].append("".join(map(str, linkage.sequence)))
+        data["data:inflection"].append(linkage.inflection)
+        data["data:plot_points"].append(linkage.plot_points)
+        data["data:strand"].append(linkage.strand.uuid if linkage.strand else None)
+        data["styles:color"].append(linkage.styles.color)
+        data["styles:thickness"].append(linkage.styles.thickness)
+
+    data = pd.DataFrame(data)
+
+    return data if filename is None else data.to_csv(filename, index=False)

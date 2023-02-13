@@ -165,7 +165,7 @@ class Domain:
         if self.parent is None or self.parent.strands:
             return None
         else:
-            return Strand(self.parent.strands.points()[self.index][RIGHT])
+            return Strand(self.parent.strands.items()[self.index][RIGHT])
 
     @property
     def right_strand(self) -> Strand | None:
@@ -183,7 +183,7 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return Strand(self.parent.strands.points()[self.index][RIGHT])
+            return Strand(self.parent.strands.items()[self.index][RIGHT])
 
     @property
     def theta_s_multiple(self) -> int:

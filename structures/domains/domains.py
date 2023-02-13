@@ -112,7 +112,7 @@ class Domains:
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
-    def to_file(self, filepath: str) -> None:
+    def to_file(self, filepath: str) -> None | pd.DataFrame:
         """
         Export all the current domains as a csv.
 
@@ -130,7 +130,8 @@ class Domains:
             Antiparallel ("true" or "false"): Whether the domains are antiparallel
 
         Args:
-            filepath: The filepath to export to.
+            filepath: The filepath to export to. If None then the data is returned
+                directly as a pandas dataframe.
 
         Raises:
             ValueError: If the mode is not an allowed mode or if the filepath contains
@@ -172,8 +173,10 @@ class Domains:
         )
 
         # based on the mode chosen by the user, export the data to a file
-        if filepath.endswith("csv"):
+        if isinstance(filepath, str) and filepath.endswith("csv"):
             data.to_csv(filepath, index=False)
+        elif filepath is None:
+            return data
         else:  # if the mode is not one that is allowed, raise an error
             raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")
 
@@ -182,13 +185,19 @@ class Domains:
         cls,
         filepath: str,
         nucleic_acid_profile: NucleicAcidProfile,
+        data: pd.DataFrame = None,
     ):
         """
         Import domains from a csv. Must be a csv in the format of self.to_file().
+        Data can be directly imported from a pandas dataframe, if the filepath is
+        None and the data argument is a pandas dataframe of the correct format.
 
         Args:
-            filepath: The filepath to import from.
+            filepath: The filepath to import from. If None, the data can be imported
+            directly from the data argument.
             nucleic_acid_profile: The nucleic acid configuration.
+            data: The data to import from. If None, the data will be imported from the
+            filepath.
 
         Returns:
             A Domains object.
@@ -197,8 +206,10 @@ class Domains:
             - Filetype is determined by the extension.
         """
         # read the file based on the mode
-        if filepath.endswith("csv"):
+        if isinstance(filepath, str) and filepath.endswith("csv"):
             data = pd.read_csv(filepath)
+        elif filepath is None and isinstance(data, pd.DataFrame):
+            pass
         # if the mode is not one that is allowed, raise an error
         else:
             raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")

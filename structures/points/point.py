@@ -1,7 +1,10 @@
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import dist
-from typing import Tuple, Type, List
+from typing import Tuple, Type, List, Iterable
+from uuid import uuid1
+
+import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
@@ -28,6 +31,8 @@ class PointStyles:
         set_defaults: Automatically set the color of the Point.
         highlight: Highlight the point.
         select: Select the point.
+        as_str: Return the styles as a string.
+        from_str: Set the styles from a string.
     """
 
     point: "Point" = None
@@ -148,6 +153,8 @@ class Point:
         strand: The strand that this point belongs to. Can be None.
         linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
+        styles: The styles of the point.
+        uuid (str): The uuid of the point. This is automatically generated post init.
 
     Methods:
         matching: Obtain the matching point on the other helix of the same domain.
@@ -172,13 +179,17 @@ class Point:
     # plotting attributes
     styles: PointStyles = None
 
+    uuid: str = field(default_factory=lambda: str(uuid1()))
+
     def __post_init__(self):
         """
         Post-init function.
 
-        1) Modulos the angle to be between 0 and 360 degrees.
-        2) Ensures that the direction is either UP or DOWN.
-        3) Computes the x coord from the angle if the x coord is not provided.
+        1) Modulo the angle to be between 0 and 360 degrees.
+        2) Ensure that the direction is either UP or DOWN.
+        3) Compute the x coord from the angle if the x coord is not provided.
+        4) Set the styles of the point.
+        5) Generate a UUID for the point.
         """
         # Modulo the angle to be between 0 and 360 degrees
         if self.angle is not None:
@@ -412,3 +423,52 @@ class Point:
             f"angle={round(self.angle, 3)}°,"
             f"matched={self.matched}"
         )
+
+
+def export(points: Iterable[Point], filename: str | None) -> None | pd.DataFrame:
+    """
+    Export an iterable of points to a csv file or pandas dataframe.
+
+    Creates a dataframe that has all the attributes that points possess, including
+    the point styles. The dataframe is then exported to a csv file or returned as a
+    pandas dataframe.
+
+    Args:
+        points: The points to export.
+        filename: The name of the file to export to. If the filename is None then
+            a pandas dataframe is returned instead of a csv file being created.
+
+    Returns:
+        None: If a filename is provided.
+        pd.DataFrame: If a filename is not provided.
+    """
+    # create a dataframe from the points
+    data = {
+        "uuid": [],
+        "data:x-coord": [],
+        "data:z-coord": [],
+        "data:angle": [],
+        "style:symbol": [],
+        "style:size": [],
+        "style:rotation": [],
+        "style:fill": [],
+        "style:outline": [],
+        "style:state": [],
+    }
+    for point in points:
+        data["uuid"].append(point.uuid)
+        data["data:x-coord"].append(point.x_coord)
+        data["data:z-coord"].append(point.z_coord)
+        data["data:angle"].append(point.angle)
+        data["style:symbol"].append(point.styles.symbol)
+        data["style:size"].append(point.styles.size)
+        data["style:rotation"].append(point.styles.rotation)
+        data["style:fill"].append(point.styles.fill)
+        data["style:outline"].append(
+            f"rgb{tuple(point.styles.outline[0])}, " f"{point.styles.outline[1]}px"
+        )
+        data["style:state"].append(point.styles.state)
+
+    data = pd.DataFrame(data)
+
+    return data if filename is None else data.to_csv(filename, index=False)

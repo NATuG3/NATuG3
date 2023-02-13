@@ -4,9 +4,8 @@ import sys
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QFileDialog
 
+import settings
 import ui
-from runner.application import Application
-from runner.managers import Managers
 from structures.nanostructures.nanostructure import Nanostructure
 
 logger = logging.getLogger(__name__)
@@ -19,9 +18,21 @@ class Runner:
     This sets up and stores all the needed managers, and then runs the program.
     Various properties, such as Strands, Domains, and NucleicAcidProfiles will be
     stored under runner.
+
+    Attributes:
+        application (Application): The main QApplication instance.
+        window (ui.Window): The main window of the application.
+        managers (Managers): The managers for the application. The managers store
+            all the various pieces of live data for the program, and are used to
+            access and modify them. Additionally, they handle automated loading and
+            saving upon exit/boot.
+        filehandler (logging.FileHandler): The file handler for the logger. This
+            is used to save and load the program state at the request of the user.
     """
 
     def __init__(self):
+        from runner.application import Application
+
         self.application = Application()
         self.window = None
         self.managers = None
@@ -44,6 +55,8 @@ class Runner:
         )
 
         # Load in all the managers
+        from runner.managers import Managers
+
         self.managers = Managers(self)
 
         # Call the setup methods of the various managers. The order in which managers
@@ -54,6 +67,11 @@ class Runner:
         self.managers.domains.setup()
         self.managers.strands.setup()
         logger.debug("Managers loaded.")
+
+        # Create an instance of a filehandler, for saving/loading on the fly.
+        from runner.filehandler import FileHandler
+
+        self.filehandler = FileHandler(self)
 
         # Create a main window instance
         self.window = ui.Window(self)
@@ -85,16 +103,13 @@ class Runner:
         Initiate the save process, allowing the user to save the current nanostructure.
         """
         filepath = QFileDialog.getSaveFileName(
-            self.window, "Save Nanostructure", "", "Excel Workbook (*.xlsx)"
+            self.window,
+            "Save Program State",
+            "",
+            f"NATuG Package (*.{settings.extension})",
         )[0]
         if filepath:
-            additional_nucleic_acid_profiles = tuple(
-                self.managers.nucleic_acid_profile.profiles.values()
-            )
-            self.nanostructure().to_file(
-                filepath,
-                additional_nucleic_acid_profiles,
-            )
+            self.filehandler.save(filepath)
 
     def load(self):
         """

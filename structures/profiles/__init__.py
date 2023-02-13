@@ -1,1 +1,1 @@
-from .nucleic_acid import NucleicAcidProfile
+from .nucleic_acid_profile import NucleicAcidProfile

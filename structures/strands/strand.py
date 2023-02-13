@@ -4,6 +4,7 @@ from collections import deque
 from copy import deepcopy, copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, List, Type, Set
+from uuid import uuid1
 
 import numpy as np
 
@@ -165,6 +166,8 @@ class Strand:
         closed: Whether the strand is closed. Must be manually set.
         empty: Whether the strand is empty. This is equivalent to len(self) == 0.
         cross_screen: Whether this strand wraps across the screen.
+        uuid (str): The unique identifier of the strand. This is automatically
+        generated.
 
     Methods:
         append(item): Add an item to the right of the strand.
@@ -192,11 +195,11 @@ class Strand:
     """
 
     def __init__(
-        self,
-        items: Iterable[Point] = None,
-        name: str = "Strand",
-        closed: bool = False,
-        nucleic_acid_profile: NucleicAcidProfile = None,
+            self,
+            items: Iterable[Point] = None,
+            name: str = "Strand",
+            closed: bool = False,
+            nucleic_acid_profile: NucleicAcidProfile = None,
     ):
         self.name = name
         self.items = StrandItems() if items is None else StrandItems(items)
@@ -210,10 +213,14 @@ class Strand:
 
     def __post_init__(self):
         self.items = StrandItems(self.items)
+
         for item in self.items:
             item.strand = self
-        if self.styles.strand == None:
+
+        if self.styles.strand is None:
             self.styles.strand = self
+
+        self.uuid = str(uuid1())
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""

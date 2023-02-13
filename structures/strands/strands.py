@@ -2,7 +2,7 @@ import logging
 from contextlib import suppress
 from copy import deepcopy
 from functools import partial
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Generator
 
 import pandas as pd
 from PyQt6.QtCore import QTimer
@@ -55,6 +55,7 @@ class Strands:
         extend: Append multiple strands to the container.
         remove: Remove a strand from the container.
         write_worksheets: Write the strands to a tab in an Excel document.
+        points: Obtain a generator of all points in the container.
     """
 
     def __init__(
@@ -117,9 +118,22 @@ class Strands:
         """Iterate over all strands."""
         return iter(self.strands)
 
-    def points(self) -> List[Point]:
-        """Obtain a list of all points in the container."""
-        return [point for strand in self.strands for point in strand]
+    def items(self, type_restriction=object) -> Generator:
+        """
+        Obtain a list of all points in the container.
+
+        Args:
+            type_restriction: The type of points to yield. Defaults to object,
+                which includes all types of points. To only yield NEMids, use NEMid.
+                To yield both NEMids and Nicks, but not Nucleosides/other types, use
+                (NEMid, Nick), for example.
+
+        Yields:
+            All points in the container.
+        """
+        for strand in self.strands:
+            for item in strand.items.by_type(type_restriction):
+                yield item
 
     def nick(self, point: Point) -> None:
         """

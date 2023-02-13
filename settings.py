@@ -1,9 +1,9 @@
-extension = "nano"
-
 name = "NATuG"
 version = 3.0
 github = "https://github.com/404Wolf/NATuG"
 debug = True
+
+extension = "nano"
 
 junction_threshold = 0.01
 closed_threshold = 0.01
@@ -33,5 +33,3 @@ colors = {
         ),
     },
 }
-
-experimental = False

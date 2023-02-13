@@ -5,3 +5,4 @@ from dataclasses import dataclass
 class Pseudo:
     x_coord: float
     z_coord: float
+    angle: float
