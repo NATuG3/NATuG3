@@ -702,7 +702,7 @@ class Strands:
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
 
-    def to_json(self):
+    def to_json(self) -> dict:
         """
         Convert the domain to a JSON serializable dictionary.
 
@@ -715,8 +715,8 @@ class Strands:
         return {
             "name": self.name,
             "uuid": self.uuid,
-            "strands": [strand.uuid for strand in self],
-            "nicks": [nick.uuid for nick in self.nicks],
+            "data:strands": [strand.uuid for strand in self],
+            "data:nicks": [nick.uuid for nick in self.nicks],
         }
 
     def write_worksheets(

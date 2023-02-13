@@ -1,5 +1,7 @@
 from uuid import uuid1
 
+import pandas as pd
+
 from constants.directions import DOWN, UP
 from structures.strands import Strand
 from utils import inverse
@@ -119,15 +121,23 @@ class DoubleHelix:
         """
         return self.strands[inverse(self.domain.left_helix_joint)]
 
-    def to_json(self) -> dict:
-        """
-        Return a JSON representation of the double helix.
 
-        Returns:
-            A dictionary containing the JSON representation of the double helix.
-        """
-        return {
-            "uuid": self.uuid,
-            "domain": self.domain.uuid,
-            "data:items": [item.uuid for item in self.up_helix],
-        }
+def to_df(double_helices) -> pd.DataFrame:
+    """
+    Obtain a pandas dataframe of many double helices.
+
+    Returns:
+        A pandas dataframe containing many double helices.
+    """
+    data = {"uuid": [], "data:domain": [], "data:up_helix": [], "data:down_helix": []}
+
+    for double_helices in double_helices:
+        up_helix = "; ".join(item.uuid for item in double_helices.up_helix)
+        down_helix = "; ".join(item.uuid for item in double_helices.down_helix)
+
+        data["uuid"].append(double_helices.uuid)
+        data["data:domain"].append(double_helices.domain.uuid)
+        data["data:up_helix"].append(up_helix)
+        data["data:down_helix"].append(down_helix)
+
+    return pd.DataFrame(data)

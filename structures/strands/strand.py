@@ -206,7 +206,6 @@ class Strand:
         startswith(point): Determine whether the strand starts with a point.
         endswith(point): Determine whether the strand ends with a point.
         clear(): Clear the strand.
-        to_csv(): Export the strand to a CSV file.
     """
 
     def __init__(
@@ -268,25 +267,6 @@ class Strand:
         )
         copied.styles = copy(self.styles)
         return copied
-
-    def to_json(self) -> dict:
-        """
-        Export the strand to a JSON style dictionary.
-
-        Returns:
-            dict: The strand as a JSON style dictionary.
-        """
-        data = {
-            "uuid": self.uuid,
-            "name": self.name,
-            "data:closed": self.closed,
-            "data:nucleic_acid_profile": self.nucleic_acid_profile.uuid,
-            "styles:thickness": self.styles.thickness.as_str(),
-            "styles:color": self.styles.color.as_str(),
-            "styles:highlighted": self.styles.highlighted,
-            "data:items": [item.uuid for item in self.items],
-        }
-        return data
 
     def clear(self) -> None:
         """Clear the strand."""
@@ -728,3 +708,37 @@ class Strand:
             [item.z_coord for item in self.items]
         )
         return width, height
+
+
+def to_df(strands: Iterable[Strand]) -> pd.DataFrame:
+    """
+    Export the strand to a pandas dataframe.
+
+    Arguments:
+        strands: All the strands to be exported.
+
+    Returns:
+        A pandas dataframe containing data for many strands.
+    """
+    data = {
+        "data:items": [],
+        "uuid": [],
+        "name": [],
+        "data:closed": [],
+        "data:nucleic_acid_profile": [],
+        "styles:thickness": [],
+        "styles:color": [],
+        "styles:highlighted": [],
+    }
+
+    for strand in strands:
+        data["data:items"].append(";".join([item.uuid for item in strand.items]))
+        data["uuid"].append(strand.uuid)
+        data["name"].append(strand.name)
+        data["data:closed"].append(strand.closed)
+        data["data:nucleic_acid_profile"].append(strand.nucleic_acid_profile.uuid)
+        data["styles:thickness"].append(strand.styles.thickness.as_str())
+        data["styles:color"].append(strand.styles.color.as_str())
+        data["styles:highlighted"].append(strand.styles.highlighted)
+
+    return pd.DataFrame(data)

@@ -1,4 +1,5 @@
 import json
+
 import logging
 from zipfile import ZipFile
 
@@ -9,6 +10,7 @@ import structures.points.nick
 import structures.strands.linkage
 import structures.profiles.nucleic_acid_profile
 import structures.domains
+import structures.helices
 
 logger = logging.getLogger(__name__)
 
@@ -97,22 +99,23 @@ class FileHandler:
             strands_json = strands.to_json()
             strands_json = json.dumps(strands_json, indent=4)
             file.writestr("strands/strands.json", strands_json)
-            file.mkdir("strands/strands")
-            for i, strand in enumerate(strands):
-                strands_json = json.dumps(strand.to_json(), indent=4)
-                file.writestr(f"strands/strands/{strand.uuid}.json", strands_json)
+            strands_df = structures.strands.strand.to_df(strands.strands)
+            file.writestr("strands/strands.csv", strands_df.to_csv(index=False))
 
             file.mkdir("double_helices")
-            # Save the double helices to the file
+            # Save the double helices container's data to a file
             double_helices_json = strands.double_helices.to_json()
             double_helices_json = json.dumps(double_helices_json, indent=4)
             file.writestr("double_helices/double_helices.json", double_helices_json)
-            for i, double_helix in enumerate(strands.double_helices):
-                double_helix_json = json.dumps(double_helix.to_json(), indent=4)
-                file.writestr(
-                    f"double_helices/double_helices/{double_helix.uuid}.json",
-                    double_helix_json,
-                )
+
+            # Save the actual double helices's data to a file
+            double_helices_df = structures.helices.double_helix.to_df(
+                strands.double_helices.double_helices
+            )
+            file.writestr(
+                "double_helices/double_helices.csv",
+                double_helices_df.to_csv(index=False),
+            )
 
             logger.info("Saved program state to %s.", filename)
 
