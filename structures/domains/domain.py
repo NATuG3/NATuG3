@@ -197,7 +197,7 @@ class Domain:
         """
         helix_joints = (
             self.left_helix_joint,
-            self.right_helix_joint,
+            self.right_helix_joint
         )
         if helix_joints == (UP, DOWN):
             return -1
@@ -215,9 +215,10 @@ class Domain:
         """
         Obtain the theta switch angle.
 
-        This is equivalent to self.theta_s_multiple * self.theta_c.
+        This is equivalent to self.theta_s_multiple * self.theta_s.
+        Updated Bill 2/11/23
         """
-        return self.theta_s_multiple * self.nucleic_acid_profile.theta_c
+        return self.theta_s_multiple * self.nucleic_acid_profile.theta_s
 
     @property
     def theta_m(self) -> float:

@@ -38,7 +38,7 @@ class NucleicAcidProfile:
     B: int = 21
     Z_c: float = 0.17
     Z_mate: float = 0.094
-    theta_s: float = 2.343
+    # theta_s: float = 2.343 - Commented out Bill 2/12/23
 
     @property
     def Z_b(self) -> float:
@@ -54,6 +54,15 @@ class NucleicAcidProfile:
     def theta_c(self) -> float:
         """The characteristic angle."""
         return 360 / self.B
+
+    @property
+    def theta_s(self) -> float:
+        """The angle adjustment switching from down strand to up strand. Bill 2/12/23"""
+        theta_s_calculated: float
+        if self.g % self.theta_c <= self.theta_c/2: self.theta_s_calculated = self.g%self.theta_c
+        else : theta_s_calculated = self.g % -self.theta_c
+        print('theta_s_calculated =',theta_s_calculated)
+        return theta_s_calculated
 
     def update(self, profile: Type["NucleicAcidProfile"]) -> None:
         """
