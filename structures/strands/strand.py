@@ -17,6 +17,7 @@ from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
 from structures.utils import converge_point_data
+from utils import rgb_to_hex
 
 
 @dataclass
@@ -37,14 +38,33 @@ class StrandStyle:
     automatic: bool = True
     value: str | int = None
 
-    def as_str(self) -> str:
-        """Return the value and automatic-ness as a string."""
-        return f"{self.value}{'a' if self.automatic else ''}"
+    def as_str(self, valuemod=lambda value: value) -> str:
+        """
+        Return the value and automatic-ness as a string.
 
-    def from_str(self, string: str):
-        """Set the value and automatic-ness from a string."""
-        self.value = string[:-1] if string[-1] == "a" else string
-        self.automatic = string[-1] == "a"
+        Args:
+            valuemod: A function to modify the value before it is returned.
+
+        Returns:
+            str: The value and automatic-ness as a string.
+        """
+        value = valuemod(self.value)
+        return f"{value}{', auto' if self.automatic else ''}"
+
+    def from_str(self, string: str, valuemod=lambda value: value) -> None:
+        """
+        Set the value and automatic-ness from a string.
+
+        Args:
+            string: The string to set the value and automatic-ness from.
+            valuemod: A function to modify the value before it is set.
+        """
+        if string[-1] == ", auto":
+            self.automatic = True
+            self.value = valuemod(string.replace(", auto", ""))
+        else:
+            self.automatic = False
+            self.value = valuemod(string.replace(", auto", ""))
 
 
 @dataclass
@@ -214,12 +234,14 @@ class Strand:
         name: str = "Strand",
         closed: bool = False,
         nucleic_acid_profile: NucleicAcidProfile = None,
+        styles: StrandStyles = None,
+        uuid: str = None,
     ):
         self.name = name
-        self.uuid = str(uuid1())
+        self.uuid = uuid or str(uuid1())
         self.items = StrandItems() if items is None else StrandItems(items)
         self.closed = closed
-        self.styles = StrandStyles(self)
+        self.styles = styles or StrandStyles(self)
         self.nucleic_acid_profile = (
             NucleicAcidProfile()
             if nucleic_acid_profile is None
@@ -726,19 +748,19 @@ def to_df(strands: Iterable[Strand]) -> pd.DataFrame:
         "name": [],
         "data:closed": [],
         "data:nucleic_acid_profile": [],
-        "styles:thickness": [],
-        "styles:color": [],
-        "styles:highlighted": [],
+        "style:thickness": [],
+        "style:color": [],
+        "style:highlighted": [],
     }
 
     for strand in strands:
-        data["data:items"].append(";".join([item.uuid for item in strand.items]))
         data["uuid"].append(strand.uuid)
         data["name"].append(strand.name)
         data["data:closed"].append(strand.closed)
         data["data:nucleic_acid_profile"].append(strand.nucleic_acid_profile.uuid)
-        data["styles:thickness"].append(strand.styles.thickness.as_str())
-        data["styles:color"].append(strand.styles.color.as_str())
-        data["styles:highlighted"].append(strand.styles.highlighted)
+        data["data:items"].append(";".join([item.uuid for item in strand.items]))
+        data["style:thickness"].append(strand.styles.thickness.as_str())
+        data["style:color"].append(strand.styles.color.as_str(valuemod=rgb_to_hex))
+        data["style:highlighted"].append(strand.styles.highlighted)
 
     return pd.DataFrame(data)

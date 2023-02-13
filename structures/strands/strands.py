@@ -59,6 +59,7 @@ class Strands:
         write_worksheets: Write the strands to a tab in an Excel document.
         points: Obtain a generator of all points in the container.
         to_json: Obtain a dict representation of the strands object.
+        update: Update the strands object in place.
     """
 
     def __init__(
@@ -66,6 +67,7 @@ class Strands:
         nucleic_acid_profile: NucleicAcidProfile,
         strands: Iterable[Strand],
         name: str = "Strands",
+        uuid: str = None,
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -74,10 +76,12 @@ class Strands:
             nucleic_acid_profile: The nucleic acid settings for the strands container.
             strands: A list of strands to create a Strands object from.
             name: The name of the strands object. Used when exporting the strands object.
+            uuid: A unique identifier for the strands object. Automatically generated,
+                but can be provided.
         """
         # Store various attributes
         self.name = name
-        self.uuid = str(uuid1())
+        self.uuid = uuid or str(uuid1())
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
 
@@ -121,6 +125,20 @@ class Strands:
     def __iter__(self):
         """Iterate over all strands."""
         return iter(self.strands)
+
+    def update(self, other: "Strands") -> None:
+        """
+        Update the strands object in place.
+
+        Args:
+            other: The other strands object to update from.
+        """
+        # Update the nucleic acid profile
+        self.nucleic_acid_profile = other.nucleic_acid_profile
+
+        self.strands = other.strands
+        for strand in self.strands:
+            strand.strands = self
 
     def items(self, type_restriction=object) -> Generator:
         """

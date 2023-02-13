@@ -145,7 +145,7 @@ class DomainsPanel(QWidget):
                     self.runner.managers.domains.current.update(domains)
                     self._setup()
                     QApplication.processEvents()
-                    runner.constructor.config.panel.update_graphs.click()
+                    self.runner.window.config.panel.update_graphs.click()
 
                 self.updated.emit(loader)
 

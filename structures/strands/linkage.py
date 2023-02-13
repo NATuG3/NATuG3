@@ -70,12 +70,15 @@ class Linkage:
         inflection: Literal[UP, DOWN],  # type: ignore
         basic_plot_points: Tuple[Tuple[float, float, float], ...] = None,
         strand: "Strand" = None,  # type: ignore
-        count=6,
+        items: Iterable[Nucleoside] = None,
+        count: int = 6,
+        uuid: str = None,
+        styles: LinkageStyles = None,
     ):
         self.inflection = inflection
-        self.styles = LinkageStyles()
+        self.styles = styles or LinkageStyles()
         self.strand = strand
-        self.items = [Nucleoside() for _ in range(count)]
+        self.items = items or [Nucleoside() for _ in range(count)]
 
         # Convert the items to a deque if they are not already.
         self._initial_item_coordinates = tuple(item.position() for item in self.items)
@@ -105,7 +108,7 @@ class Linkage:
             )
 
         # Set the uuid of the linkage.
-        self.uuid = str(uuid1())
+        self.uuid = uuid or str(uuid1())
 
     def generate(self, length: int):
         """
@@ -236,7 +239,7 @@ def to_df(linkages: Iterable[Linkage]):
         data["data:inflection"].append(linkage.inflection)
         data["data:plot_points"].append(plot_points)
         data["data:strand"].append(linkage.strand.uuid if linkage.strand else None)
-        data["styles:color"].append(linkage.styles.color)
-        data["styles:thickness"].append(linkage.styles.thickness)
+        data["style:color"].append(linkage.styles.color)
+        data["style:thickness"].append(linkage.styles.thickness)
 
     return pd.DataFrame(data)

@@ -159,9 +159,9 @@ class ProfileManager(QGroupBox):
 
         logger.debug("Profile Manager signals hooked.")
 
-    def save(self, name: str) -> None:
+    def save(self, name: str, override=False) -> None:
         if self.save_profile_button.toolTip() == "Overwrite Profile":
-            if not self.approve():
+            if not self.approve() and not override:
                 return
 
         # fetch current settings and store them under the chosen name
@@ -183,8 +183,8 @@ class ProfileManager(QGroupBox):
 
         logger.info(f'Saved new profile "{name}"')
 
-    def delete(self, name: str) -> None:
-        if not self.approve():
+    def delete(self, name: str, override=False) -> None:
+        if not self.approve() and not override:
             return
 
         # remove profiles by index from profiles chooser
@@ -210,8 +210,8 @@ class ProfileManager(QGroupBox):
         # log that the profiles was deleted
         logger.info(f'Deleted profiles named "{name}"')
 
-    def load(self, name: str) -> None:
-        if not self.approve():
+    def load(self, name: str, override=False) -> None:
+        if not self.approve() and not override:
             return
         # dump settings of profiles chooser's text
         self.dumper(self.profiles[name])

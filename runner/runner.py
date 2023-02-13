@@ -116,10 +116,12 @@ class Runner:
         Initiate the load proxcess, allowing the user to load a nanostructure.
         """
         filepath = QFileDialog.getOpenFileName(
-            self.window, "Load Nanostructure", "", "Excel Workbook (*.xlsx)"
+            self.window,
+            "Load Nanostructure",
+            f"NATuG Package (*.{settings.extension})",
         )[0]
         if filepath:
-            self.nanostructure().from_file(filepath)
+            self.filehandler.load(filepath)
 
     def boot(self):
         """

@@ -16,6 +16,8 @@ import structures.domains
 import structures.helices
 from structures.domains import Domains
 from structures.points.point import PointStyles
+from structures.strands.strand import StrandStyle
+from utils import hex_to_rgb
 
 logger = logging.getLogger(__name__)
 
@@ -136,27 +138,29 @@ class FileHandler:
             with package.open("nucleic_acid_profiles.csv") as file:
                 df = pd.read_csv(file)
 
-                for row in df.iterrows():
+                for index, row in df.iterrows():
                     row: Dict[str, object]
 
                     nucleic_acid_profile = (
                         structures.profiles.nucleic_acid_profile.NucleicAcidProfile(
-                            name=row["name"],  # type: ignore
-                            uuid=row["uuid"],  # type: ignore
-                            D=row["D"],  # type: ignore
-                            H=row["H"],  # type: ignore
-                            g=row["g"],  # type: ignore
-                            T=row["T"],  # type: ignore
-                            B=row["B"],  # type: ignore
-                            Z_c=row["Z_c"],  # type: ignore
-                            Z_mate=row["Z_mate"],  # type: ignore
-                            theta_s=row["theta_s"],  # type: ignore
+                            name=str(row["name"]),
+                            uuid=str(row["uuid"]),
+                            D=float(row["data:D"]),
+                            H=float(row["data:H"]),
+                            g=float(row["data:g"]),
+                            T=int(row["data:T"]),
+                            B=int(row["data:B"]),
+                            Z_c=float(row["data:Z_c"]),
+                            Z_mate=float(row["data:Z_mate"]),
+                            theta_s=float(row["data:theta_s"]),
                         )
                     )
                     nucleic_acid_profiles[
                         nucleic_acid_profile.name
                     ] = nucleic_acid_profile
                     items_by_uuid[row["uuid"]] = nucleic_acid_profile
+
+            nucleic_acid_profile = nucleic_acid_profiles["Restored"]
 
             with package.open("domains.csv") as file:
                 domains = structures.domains.Domains.from_df(
@@ -169,25 +173,32 @@ class FileHandler:
                 """
                 Convert a row from the point styles dataframe to a PointStyle object.
                 """
-                return PointStyles(
-                    symbol=row["styles:symbol"],  # type: ignore
-                    size=row["styles:size"],  # type: ignore
-                    rotation=row["styles:rotation"],  # type: ignore
-                    fill=row["styles:fill"],  # type: ignore
-                    outline=outline,  # type: ignore
-                    state=row["styles:state"],  # type: ignore
+                outline = (
+                    hex_to_rgb(str(row["style:outline"]).split(",")[0].strip()),
+                    float(row["style:outline"].split(",")[1].strip().replace("px", "")),
                 )
+
+                styles = PointStyles(
+                    symbol=row["style:symbol"],
+                    size=int(row["style:size"]),
+                    rotation=float(row["style:rotation"]),
+                    fill=hex_to_rgb(str(row["style:fill"])),
+                    outline=outline,
+                )
+                print(styles.fill, type(styles.fill))
+                styles.state = row["style:state"]
+                return styles
 
             with package.open("points/nucleosides.csv") as file:
                 df = pd.read_csv(file)
-                for row in df:
+                for index, row in df.iterrows():
                     nucleoside = structures.points.nucleoside.Nucleoside(
-                        uuid=row["uuid"],  # type: ignore
-                        x_coord=row["data:x-coord"],  # type: ignore
-                        z_coord=row["data:z-coord"],  # type: ignore
-                        angle=row["data:angle"],  # type: ignore
-                        base=row["data:base"],  # type: ignore
-                        styles=row_to_point_styles(row),  # type: ignore
+                        uuid=str(row["uuid"]),
+                        x_coord=float(row["data:x-coord"]),
+                        z_coord=float(row["data:z-coord"]),
+                        angle=float(row["data:angle"]),
+                        base=str(row["nucleoside:base"]),
+                        styles=row_to_point_styles(row),
                     )
                     items_by_uuid[row["uuid"]] = nucleoside
 
@@ -197,69 +208,113 @@ class FileHandler:
                 # First create all the NEMids without their juncmates, since we may
                 # not be able to fetch certain juncmates (since we're creating NEMids
                 # as we go)
-                for row in df.iterrows():
-                    outline = (
-                        tuple(row["styles:outline"].split(",")[0].strip()),
-                        float(row["styles:outline"].split(",")[1].strip()),
-                    )
-
-                    styles = PointStyles(
-                        symbol=row["styles:symbol"],  # type: ignore
-                        size=row["styles:size"],  # type: ignore
-                        rotation=row["styles:rotation"],  # type: ignore
-                        fill=row["styles:fill"],  # type: ignore
-                        outline=outline,  # type: ignore
-                        styles=row_to_point_styles(row),  # type: ignore
-                    )
-
+                for index, row in df.iterrows():
                     NEMid_ = structures.points.nemid.NEMid(
-                        uuid=row["uuid"],  # type: ignore
-                        x_coord=row["data:x-coord"],  # type: ignore
-                        z_coord=row["data:z-coord"],  # type: ignore
-                        angle=row["data:angle"],  # type: ignore
+                        uuid=str(row["uuid"]),
+                        x_coord=float(row["data:x-coord"]),
+                        z_coord=float(row["data:z-coord"]),
+                        angle=float(row["data:angle"]),
                         juncmate=None,
-                        junction=row["NEMid:junction"],  # type: ignore
-                        junctable=row["NEMid:junctable"],  # type: ignore
-                        styles=styles,
+                        junction=row["NEMid:junction"] == "TRUE",
+                        junctable=row["NEMid:junctable"] == "TRUE",
+                        styles=row_to_point_styles(row),
                     )
                     items_by_uuid[row["uuid"]] = NEMid_
 
+                df.where(df.notnull(), None)
+
                 # Then re-iterate through the dataframe and set the juncmates of the
                 # NEMids that we just created
-                for row in df.iterrows():
-                    if row["NEMid:juncmate"] is not None:
+                for index, row in df.iterrows():
+                    if row["NEMid:juncmate"] is None:
                         items_by_uuid[row["uuid"]].juncmate = items_by_uuid[
                             row["NEMid:juncmate"]
                         ]
 
             with package.open("points/nicks.csv") as file:
                 df = pd.read_csv(file)
-                for row in df.iterrows():
+                for index, row in df.iterrows():
                     nick = structures.points.nick.Nick(
-                        uuid=row["uuid"],
-                        previous_item=items_by_uuid[row["data:previous-item"]],
-                        next_item=items_by_uuid[row["data:next-item"]],
+                        uuid=str(row["uuid"]),
+                        previous_item=str(items_by_uuid[row["data:previous-item"]]),
+                        next_item=str(items_by_uuid[row["data:next-item"]]),
                     )
                     items_by_uuid[row["uuid"]] = nick
 
             with package.open("strands/linkages.csv") as file:
                 df = pd.read_csv(file)
-                for row in df.iterrows():
+                for index, row in df.iterrows():
                     items = [
-                        structures.points.nucleoside.Nucleoside(base=row["base"])
-                        for base in row["sequence"]
+                        structures.points.nucleoside.Nucleoside(base=base)
+                        for base in str(row["data:sequence"])
                     ]
 
                     styles = structures.strands.linkage.LinkageStyles(
-                        color=row["styles:color"],  # type: ignore
-                        width=row["styles:width"],  # type: ignore
+                        color=hex_to_rgb(str(row["style:color"])),
+                        thickness=int(row["style:thickness"]),
                     )
 
                     linkage = structures.strands.linkage.Linkage(
-                        uuid=row["uuid"],
+                        uuid=str(row["uuid"]),
                         items=items,
-                        inflection=row["inflection"],  # type: ignore
-                        basic_plot_points=row["data:plot_points"],  # type: ignore
+                        inflection=row["inflection"],
+                        basic_plot_points=row["data:plot_points"],
                         styles=styles,
                     )
+
                     items_by_uuid[row["uuid"]] = linkage
+
+            with package.open("strands/strands.csv") as file:
+                df = pd.read_csv(file)
+                for index, row in df.iterrows():
+                    items = [
+                        items_by_uuid[str(uuid)]
+                        for uuid in row["data:items"].split(";")
+                    ]
+
+                    styles = structures.strands.strand.StrandStyles()
+                    styles.color.from_str(str(row["style:color"]), valuemod=hex_to_rgb)
+                    styles.thickness.from_str(str(row["style:thickness"]), valuemod=int)
+                    styles.highlighted = row["style:highlighted"] == "TRUE"
+
+                    items_by_uuid[row["uuid"]] = structures.strands.strand.Strand(
+                        uuid=str(row["uuid"]),
+                        items=items,
+                        name=str(row["name"]),
+                        styles=styles,
+                        closed=row["data:closed"] == "TRUE",
+                    )
+
+            with package.open("strands/strands.json") as file:
+                loaded = json.load(file)
+                strands = structures.strands.Strands(
+                    name=str(loaded["name"]),
+                    uuid=str(loaded["uuid"]),
+                    nucleic_acid_profile=nucleic_acid_profile,
+                    strands=[
+                        items_by_uuid[str(uuid)] for uuid in loaded["data:strands"]
+                    ],
+                )
+
+            self.runner.managers.nucleic_acid_profile.current.update(
+                nucleic_acid_profile
+            )
+            profile_manager = (
+                self.runner.window.config.panel.nucleic_acid.profile_manager
+            )
+            for name, profile in tuple(profile_manager.profiles.items()):
+                profile_manager.delete(name, override=True)
+            for name, profile in tuple(nucleic_acid_profiles.items()):
+                profile_manager.save(name, override=True)
+            profile_manager.dumper(nucleic_acid_profile)
+            new_profile_name = filename.split("/")[-1]
+            profile_manager.profile_chooser.setCurrentText(new_profile_name)
+
+            self.runner.managers.domains.current.update(domains)
+            self.runner.window.config.panel.domains.table.dump_domains(domains)
+            self.runner.window.config.panel.domains.table_refresh()
+            self.runner.window.config.panel.domains.settings_refresh()
+
+            self.runner.managers.strands.current = strands
+            self.runner.window.side_view.refresh()
+            self.runner.window.top_view.refresh()

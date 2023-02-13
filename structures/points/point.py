@@ -8,7 +8,7 @@ import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
-from utils import inverse
+from utils import inverse, rgb_to_hex
 
 logger = logging.getLogger(__name__)
 
@@ -459,9 +459,9 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
         data["style:symbol"].append(point.styles.symbol)
         data["style:size"].append(point.styles.size)
         data["style:rotation"].append(point.styles.rotation)
-        data["style:fill"].append(point.styles.fill)
+        data["style:fill"].append(rgb_to_hex(point.styles.fill))
         data["style:outline"].append(
-            f"rgb{tuple(point.styles.outline[0])}, " f"{point.styles.outline[1]}px"
+            f"{rgb_to_hex(point.styles.outline[0])}, " f"{point.styles.outline[1]}px"
         )
         data["style:state"].append(point.styles.state)
 
