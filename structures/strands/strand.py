@@ -758,7 +758,7 @@ def to_df(strands: Iterable[Strand]) -> pd.DataFrame:
         data["name"].append(strand.name)
         data["data:closed"].append(strand.closed)
         data["data:nucleic_acid_profile"].append(strand.nucleic_acid_profile.uuid)
-        data["data:items"].append(";".join([item.uuid for item in strand.items]))
+        data["data:items"].append("; ".join([item.uuid for item in strand.items]))
         data["style:thickness"].append(strand.styles.thickness.as_str())
         data["style:color"].append(strand.styles.color.as_str(valuemod=rgb_to_hex))
         data["style:highlighted"].append(strand.styles.highlighted)

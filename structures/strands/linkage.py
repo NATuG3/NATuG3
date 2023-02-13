@@ -9,6 +9,7 @@ import pandas as pd
 from constants.directions import UP, DOWN
 from structures.points import Nucleoside
 from ui.plotters.utils import chaikins_corner_cutting
+from utils import rgb_to_hex
 
 
 @dataclass
@@ -53,7 +54,6 @@ class Linkage:
             initialisation, the second is the position of the righter Nucleoside from
             initialisation, and the third is the average of the two, with a boost in its
             z coord.
-        basic_plot_points: The three plot points that get rounded into the plot points.
         inflection: Whether the linkage is bent upwards or downwards when plotted.
         uuid (str): The unique identifier of the linkage. Automatically generated post
         init.
@@ -68,7 +68,6 @@ class Linkage:
         coord_one: Tuple[float, float],
         coord_two: Tuple[float, float],
         inflection: Literal[UP, DOWN],  # type: ignore
-        basic_plot_points: Tuple[Tuple[float, float, float], ...] = None,
         strand: "Strand" = None,  # type: ignore
         items: Iterable[Nucleoside] = None,
         count: int = 6,
@@ -92,20 +91,14 @@ class Linkage:
         for item in self.items:
             item.linkage = self
 
-        if basic_plot_points is not None:
-            self.basic_plot_points = basic_plot_points
-            self.plot_points = chaikins_corner_cutting(
-                self.basic_plot_points, refinements=4
-            )
-        else:
-            # If the midpoint is lower than both of the other points, then the inflection
-            # is down.
-            midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
-            midpoint[1] += 0.2 if inflection == UP else -0.2
-            self.basic_plot_points = [coord_one, midpoint, coord_two]
-            self.plot_points = chaikins_corner_cutting(
-                self.basic_plot_points, refinements=4
-            )
+        # If the midpoint is lower than both of the other points, then the inflection
+        # is down.
+        midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
+        midpoint[1] += 0.2 if inflection == UP else -0.2
+        basic_plot_points = [coord_one, midpoint, coord_two]
+        self.plot_points = chaikins_corner_cutting(
+            basic_plot_points, refinements=4
+        )
 
         # Set the uuid of the linkage.
         self.uuid = uuid or str(uuid1())
@@ -216,10 +209,11 @@ def to_df(linkages: Iterable[Linkage]):
         "uuid": [],
         "data:sequence": [],
         "data:inflection": [],
-        "data:plot_points": [],
+        "data:coord_one": [],
+        "data:coord_two": [],
         "data:strand": [],
-        "styles:color": [],
-        "styles:thickness": [],
+        "style:color": [],
+        "style:thickness": [],
     }
 
     for linkage in linkages:
@@ -227,19 +221,13 @@ def to_df(linkages: Iterable[Linkage]):
         for nucleoside in linkage:
             sequence += nucleoside.base or "X"
 
-        plot_points = "-".join(
-            map(
-                lambda point: f"{round(point[1], 6)}, {round(point[1], 6)}",
-                linkage.basic_plot_points,
-            )
-        )
-
         data["uuid"].append(linkage.uuid)
         data["data:sequence"].append(sequence)
         data["data:inflection"].append(linkage.inflection)
-        data["data:plot_points"].append(plot_points)
+        data["data:coord_one"].append(", ".join(map(str, linkage.plot_points[0])))
+        data["data:coord_two"].append(", ".join(map(str, linkage.plot_points[-1])))
         data["data:strand"].append(linkage.strand.uuid if linkage.strand else None)
-        data["style:color"].append(linkage.styles.color)
+        data["style:color"].append(rgb_to_hex(linkage.styles.color))
         data["style:thickness"].append(linkage.styles.thickness)
 
     return pd.DataFrame(data)

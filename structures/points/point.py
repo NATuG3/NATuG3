@@ -444,6 +444,7 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
         "data:x-coord": [],
         "data:z-coord": [],
         "data:angle": [],
+        "data:domain": [],
         "style:symbol": [],
         "style:size": [],
         "style:rotation": [],
@@ -456,6 +457,9 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
         data["data:x-coord"].append(point.x_coord)
         data["data:z-coord"].append(point.z_coord)
         data["data:angle"].append(point.angle)
+        data["data:domain"].append(
+            point.domain.index if point.domain is not None else None
+        )
         data["style:symbol"].append(point.styles.symbol)
         data["style:size"].append(point.styles.size)
         data["style:rotation"].append(point.styles.rotation)

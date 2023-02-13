@@ -1,6 +1,7 @@
 import json
 
 import logging
+from contextlib import suppress
 from typing import Dict
 from zipfile import ZipFile
 
@@ -185,7 +186,6 @@ class FileHandler:
                     fill=hex_to_rgb(str(row["style:fill"])),
                     outline=outline,
                 )
-                print(styles.fill, type(styles.fill))
                 styles.state = row["style:state"]
                 return styles
 
@@ -197,6 +197,7 @@ class FileHandler:
                         x_coord=float(row["data:x-coord"]),
                         z_coord=float(row["data:z-coord"]),
                         angle=float(row["data:angle"]),
+                        domain=domains.domains()[int(row["data:domain"])],
                         base=str(row["nucleoside:base"]),
                         styles=row_to_point_styles(row),
                     )
@@ -214,6 +215,7 @@ class FileHandler:
                         x_coord=float(row["data:x-coord"]),
                         z_coord=float(row["data:z-coord"]),
                         angle=float(row["data:angle"]),
+                        domain=domains.domains()[int(row["data:domain"])],
                         juncmate=None,
                         junction=row["NEMid:junction"] == "TRUE",
                         junctable=row["NEMid:junctable"] == "TRUE",
@@ -226,20 +228,23 @@ class FileHandler:
                 # Then re-iterate through the dataframe and set the juncmates of the
                 # NEMids that we just created
                 for index, row in df.iterrows():
-                    if row["NEMid:juncmate"] is None:
+                    with suppress(KeyError):
                         items_by_uuid[row["uuid"]].juncmate = items_by_uuid[
                             row["NEMid:juncmate"]
                         ]
 
             with package.open("points/nicks.csv") as file:
                 df = pd.read_csv(file)
+                nicks = []
                 for index, row in df.iterrows():
                     nick = structures.points.nick.Nick(
                         uuid=str(row["uuid"]),
-                        previous_item=str(items_by_uuid[row["data:previous-item"]]),
-                        next_item=str(items_by_uuid[row["data:next-item"]]),
+                        original_item=items_by_uuid[str(row["data:original_item"])],
+                        previous_item=items_by_uuid[str(row["data:previous_item"])],
+                        next_item=items_by_uuid[str(row["data:next_item"])],
                     )
                     items_by_uuid[row["uuid"]] = nick
+                    nicks.append(nick)
 
             with package.open("strands/linkages.csv") as file:
                 df = pd.read_csv(file)
@@ -255,10 +260,11 @@ class FileHandler:
                     )
 
                     linkage = structures.strands.linkage.Linkage(
+                        coord_one=str(row["data:coord_one"]).split(", ")[0],
+                        coord_two=str(row["data:coord_two"]).split(", ")[-1],
                         uuid=str(row["uuid"]),
                         items=items,
-                        inflection=row["inflection"],
-                        basic_plot_points=row["data:plot_points"],
+                        inflection=row["data:inflection"],
                         styles=styles,
                     )
 
@@ -269,12 +275,14 @@ class FileHandler:
                 for index, row in df.iterrows():
                     items = [
                         items_by_uuid[str(uuid)]
-                        for uuid in row["data:items"].split(";")
+                        for uuid in str(row["data:items"]).split("; ")
                     ]
 
                     styles = structures.strands.strand.StrandStyles()
                     styles.color.from_str(str(row["style:color"]), valuemod=hex_to_rgb)
-                    styles.thickness.from_str(str(row["style:thickness"]), valuemod=int)
+                    styles.thickness.from_str(
+                        str(row["style:thickness"]), valuemod=float
+                    )
                     styles.highlighted = row["style:highlighted"] == "TRUE"
 
                     items_by_uuid[row["uuid"]] = structures.strands.strand.Strand(
@@ -295,6 +303,14 @@ class FileHandler:
                         items_by_uuid[str(uuid)] for uuid in loaded["data:strands"]
                     ],
                 )
+                for strand in strands:
+                    strand.strands = strands
+                strands.nicks = nicks
+
+            for strand in strands:
+                for item in strand:
+                    if isinstance(item, structures.points.point.Point):
+                        item.strand = strand
 
             self.runner.managers.nucleic_acid_profile.current.update(
                 nucleic_acid_profile

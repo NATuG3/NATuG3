@@ -80,7 +80,8 @@ class Panel(QWidget):
             for strand in self.runner.managers.strands.current.strands:
                 if strand.interdomain():
                     if (dialog is None) or (not dialog.isVisible()):
-                        dialog = RefreshConfirmer(self.runner.window, function)
+                        dialog = RefreshConfirmer(self.runner.window, function,
+                                                  self.runner)
                         dialog.show()
                     elif (dialog is not None) and dialog.isVisible():
                         logger.info(
@@ -167,7 +168,7 @@ class RefreshConfirmer(QDialog):
             proceed (whether with or without saving).
     """
 
-    def __init__(self, parent, function):
+    def __init__(self, parent, function, runner):
         """
         Initialize the refresh confirmer dialog.
 
@@ -181,6 +182,7 @@ class RefreshConfirmer(QDialog):
         self._prettify()
         self._fileselector()
         self._buttons()
+        self.runner = runner
         self.finished.connect(self._finished)
 
     def _finished(self):
@@ -225,7 +227,7 @@ class RefreshConfirmer(QDialog):
         # change location button
         self.change_location.clicked.connect(self.close)
         self.change_location.clicked.connect(
-            lambda: runner.saver.save.runner(self.runner.window)
+            lambda: self.runner.saver.save.runner(self.runner.window)
         )
 
         # cancel button
@@ -242,7 +244,7 @@ class RefreshConfirmer(QDialog):
         self.save_and_refresh.clicked.connect(self.function)
         self.save_and_refresh.clicked.connect(self.close)
         self.save_and_refresh.clicked.connect(
-            lambda: runner.saver.save.worker(self.default_path)
+            lambda: self.runner.saver.save.worker(self.default_path)
         )
         self.save_and_refresh.clicked.connect(self.runner.managers.strands.recompute)
         self.save_and_refresh.clicked.connect(self.runner.window.side_view.refresh)
