@@ -138,7 +138,7 @@ class DomainsPanel(QWidget):
             if len(filepath) > 0:
 
                 def loader():
-                    domains = Domains.from_csv(
+                    domains = Domains.from_df(
                         filepath=filepath,
                         nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
                     )

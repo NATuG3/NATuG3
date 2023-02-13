@@ -58,8 +58,8 @@ def to_df(nicks: Iterable[Nick]) -> pd.DataFrame:
     """
     data = {
         "uuid": [nick.uuid for nick in nicks],
-        "original_item": [nick.original_item.uuid for nick in nicks],
-        "previous_item": [nick.previous_item.uuid for nick in nicks],
-        "next_item": [nick.next_item.uuid for nick in nicks],
+        "data:original_item": [nick.original_item.uuid for nick in nicks],
+        "data:previous_item": [nick.previous_item.uuid for nick in nicks],
+        "data:next_item": [nick.next_item.uuid for nick in nicks],
     }
     return pd.DataFrame(data)

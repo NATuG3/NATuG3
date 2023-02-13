@@ -68,6 +68,7 @@ class Linkage:
         coord_one: Tuple[float, float],
         coord_two: Tuple[float, float],
         inflection: Literal[UP, DOWN],  # type: ignore
+        basic_plot_points: Tuple[Tuple[float, float, float], ...] = None,
         strand: "Strand" = None,  # type: ignore
         count=6,
     ):
@@ -88,12 +89,20 @@ class Linkage:
         for item in self.items:
             item.linkage = self
 
-        # If the midpoint is lower than both of the other points, then the inflection
-        # is down.
-        midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
-        midpoint[1] += 0.2 if inflection == UP else -0.2
-        self.basic_plot_points = [coord_one, midpoint, coord_two]
-        self.plot_points = chaikins_corner_cutting(self.basic_plot_points, refinements=4)
+        if basic_plot_points is not None:
+            self.basic_plot_points = basic_plot_points
+            self.plot_points = chaikins_corner_cutting(
+                self.basic_plot_points, refinements=4
+            )
+        else:
+            # If the midpoint is lower than both of the other points, then the inflection
+            # is down.
+            midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
+            midpoint[1] += 0.2 if inflection == UP else -0.2
+            self.basic_plot_points = [coord_one, midpoint, coord_two]
+            self.plot_points = chaikins_corner_cutting(
+                self.basic_plot_points, refinements=4
+            )
 
         # Set the uuid of the linkage.
         self.uuid = str(uuid1())

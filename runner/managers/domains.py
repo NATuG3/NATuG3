@@ -1,6 +1,8 @@
 import atexit
 import logging
 
+import pandas as pd
+
 from structures.domains import Domains
 
 logger = logging.getLogger(__name__)
@@ -31,14 +33,14 @@ class DomainsManager:
 
     def load(self):
         try:
-            self.current = Domains.from_csv(
-                self.restored_filepath,
+            self.current = Domains.from_df(
+                pd.read_csv(self.restored_filepath),
                 self.runner.managers.nucleic_acid_profile.current,
             )
             logger.info("Restored previous domain editor state.")
         except FileNotFoundError:
-            self.current = Domains.from_csv(
-                "saves/domains/presets/circle.csv",
+            self.current = Domains.from_df(
+                pd.read_csv("saves/domains/presets/circle.csv"),
                 self.runner.managers.nucleic_acid_profile.current,
             )
             logger.warning(
