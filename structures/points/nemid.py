@@ -57,7 +57,7 @@ class NEMid(Point):
         )
 
 
-def export(NEMids: Iterable[NEMid], filename: str | None) -> None | pd.DataFrame:
+def to_df(NEMids: Iterable[NEMid]) -> pd.DataFrame:
     """
     Export many NEMids as either a pandas dataframe or a csv file.
 
@@ -66,11 +66,17 @@ def export(NEMids: Iterable[NEMid], filename: str | None) -> None | pd.DataFrame
     2) Extra columns for all NEMid specific data is added to the pandas dataframe.
     3) The NEMids passed are iterated through, and the data for each NEMid is
         added to the dataframe under the new column.
+
+    Args:
+        NEMids: The NEMids to export.
+
+    Returns:
+        A pandas dataframe with all the NEMid data.
     """
-    from structures.points.point import export as fetch_points_dataframe
+    from structures.points.point import to_df as fetch_points_dataframe
 
     # Get the dataframe of all the Point data
-    data = fetch_points_dataframe(NEMids, filename=None)
+    data = fetch_points_dataframe(NEMids)
 
     # Add the NEMid specific data to the dataframe
     data["NEMid:junctable"] = [NEMid_.junctable for NEMid_ in NEMids]
@@ -80,4 +86,4 @@ def export(NEMids: Iterable[NEMid], filename: str | None) -> None | pd.DataFrame
         for NEMid_ in NEMids
     ]
 
-    return data if filename is None else data.to_csv(filename, index=False)
+    return data

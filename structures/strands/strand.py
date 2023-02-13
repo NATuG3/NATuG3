@@ -7,6 +7,7 @@ from typing import Tuple, Iterable, List, Type, Set
 from uuid import uuid1
 
 import numpy as np
+import pandas as pd
 
 from constants.bases import DNA
 from constants.directions import *
@@ -27,10 +28,23 @@ class StrandStyle:
         automatic: Whether the style is automatically determined when
             strands.style() is called.
         value: The value of the specific style.
+
+    Methods:
+        as_str: Return the value and automatic-ness as a string.
+        from_str: Set the value and automatic-ness from a string.
     """
 
     automatic: bool = True
     value: str | int = None
+
+    def as_str(self) -> str:
+        """Return the value and automatic-ness as a string."""
+        return f"{self.value}{'a' if self.automatic else ''}"
+
+    def from_str(self, string: str):
+        """Set the value and automatic-ness from a string."""
+        self.value = string[:-1] if string[-1] == "a" else string
+        self.automatic = string[-1] == "a"
 
 
 @dataclass
@@ -192,16 +206,18 @@ class Strand:
         startswith(point): Determine whether the strand starts with a point.
         endswith(point): Determine whether the strand ends with a point.
         clear(): Clear the strand.
+        to_csv(): Export the strand to a CSV file.
     """
 
     def __init__(
-            self,
-            items: Iterable[Point] = None,
-            name: str = "Strand",
-            closed: bool = False,
-            nucleic_acid_profile: NucleicAcidProfile = None,
+        self,
+        items: Iterable[Point] = None,
+        name: str = "Strand",
+        closed: bool = False,
+        nucleic_acid_profile: NucleicAcidProfile = None,
     ):
         self.name = name
+        self.uuid = str(uuid1())
         self.items = StrandItems() if items is None else StrandItems(items)
         self.closed = closed
         self.styles = StrandStyles(self)
@@ -252,6 +268,25 @@ class Strand:
         )
         copied.styles = copy(self.styles)
         return copied
+
+    def to_json(self) -> dict:
+        """
+        Export the strand to a JSON style dictionary.
+
+        Returns:
+            dict: The strand as a JSON style dictionary.
+        """
+        data = {
+            "uuid": self.uuid,
+            "name": self.name,
+            "data:closed": self.closed,
+            "data:nucleic_acid_profile": self.nucleic_acid_profile.uuid,
+            "styles:thickness": self.styles.thickness.as_str(),
+            "styles:color": self.styles.color.as_str(),
+            "styles:highlighted": self.styles.highlighted,
+            "data:items": [item.uuid for item in self.items],
+        }
+        return data
 
     def clear(self) -> None:
         """Clear the strand."""

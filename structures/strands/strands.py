@@ -3,6 +3,7 @@ from contextlib import suppress
 from copy import deepcopy
 from functools import partial
 from typing import List, Tuple, Iterable, Generator
+from uuid import uuid1
 
 import pandas as pd
 from PyQt6.QtCore import QTimer
@@ -39,6 +40,7 @@ class Strands:
             strands from when the object is loaded with the from_package class method.
         size: The width and height of the domains when they are all layed next to one
             another.
+        uuid: A unique identifier for the strands object. Automatically generated.
 
     Methods:
         randomize_sequences: Randomize the sequences for all strands.
@@ -56,6 +58,7 @@ class Strands:
         remove: Remove a strand from the container.
         write_worksheets: Write the strands to a tab in an Excel document.
         points: Obtain a generator of all points in the container.
+        to_json: Obtain a dict representation of the strands object.
     """
 
     def __init__(
@@ -74,6 +77,7 @@ class Strands:
         """
         # Store various attributes
         self.name = name
+        self.uuid = str(uuid1())
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
 
@@ -697,6 +701,23 @@ class Strands:
                     z_coords.append(item.z_coord)
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
+
+    def to_json(self):
+        """
+        Convert the domain to a JSON serializable dictionary.
+
+        All the strands and nicks are referenced by their uuids. The ordering of
+        strands and nicks is preserved.
+
+        Returns:
+            dict: JSON serializable dictionary
+        """
+        return {
+            "name": self.name,
+            "uuid": self.uuid,
+            "strands": [strand.uuid for strand in self],
+            "nicks": [nick.uuid for nick in self.nicks],
+        }
 
     def write_worksheets(
         self,

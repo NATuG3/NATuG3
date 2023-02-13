@@ -31,13 +31,13 @@ class DomainsManager:
 
     def load(self):
         try:
-            self.current = Domains.from_file(
+            self.current = Domains.from_csv(
                 self.restored_filepath,
                 self.runner.managers.nucleic_acid_profile.current,
             )
             logger.info("Restored previous domain editor state.")
         except FileNotFoundError:
-            self.current = Domains.from_file(
+            self.current = Domains.from_csv(
                 "saves/domains/presets/circle.csv",
                 self.runner.managers.nucleic_acid_profile.current,
             )
@@ -47,4 +47,4 @@ class DomainsManager:
 
     def dump(self):
         """Save current domains state for state restoration on load."""
-        self.current.to_file(self.restored_filepath)
+        self.current.to_df().to_csv(self.restored_filepath)

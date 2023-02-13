@@ -53,6 +53,7 @@ class Linkage:
             initialisation, the second is the position of the righter Nucleoside from
             initialisation, and the third is the average of the two, with a boost in its
             z coord.
+        basic_plot_points: The three plot points that get rounded into the plot points.
         inflection: Whether the linkage is bent upwards or downwards when plotted.
         uuid (str): The unique identifier of the linkage. Automatically generated post
         init.
@@ -70,7 +71,7 @@ class Linkage:
         strand: "Strand" = None,  # type: ignore
         count=6,
     ):
-        self.inflection: inflection
+        self.inflection = inflection
         self.styles = LinkageStyles()
         self.strand = strand
         self.items = [Nucleoside() for _ in range(count)]
@@ -91,8 +92,8 @@ class Linkage:
         # is down.
         midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
         midpoint[1] += 0.2 if inflection == UP else -0.2
-        self.plot_points = [coord_one, midpoint, coord_two]
-        self.plot_points = chaikins_corner_cutting(self.plot_points, refinements=4)
+        self.basic_plot_points = [coord_one, midpoint, coord_two]
+        self.plot_points = chaikins_corner_cutting(self.basic_plot_points, refinements=4)
 
         # Set the uuid of the linkage.
         self.uuid = str(uuid1())
@@ -188,9 +189,9 @@ class Linkage:
         self.items.extendleft(items)
 
 
-def export(linkages: Iterable[Linkage], filename: str | None):
+def to_df(linkages: Iterable[Linkage]):
     """
-    Export an iterable of linkages to a csv file or a pandas dataframe.
+    Export an iterable of linkages to a pandas dataframe.
 
     All the items (nucleosides) within the linkage are compressed into a string
     sequence, where each letter is the base of a given nucleoside, and nucleosides
@@ -198,8 +199,6 @@ def export(linkages: Iterable[Linkage], filename: str | None):
 
     Args:
         linkages: The linkages to export.
-        filename: The name of the file to export to. If this is None, then a pandas
-            dataframe will be returned instead.
     """
     data = {
         "uuid": [],
@@ -212,14 +211,23 @@ def export(linkages: Iterable[Linkage], filename: str | None):
     }
 
     for linkage in linkages:
+        sequence = ""
+        for nucleoside in linkage:
+            sequence += nucleoside.base or "X"
+
+        plot_points = "-".join(
+            map(
+                lambda point: f"{round(point[1], 6)}, {round(point[1], 6)}",
+                linkage.basic_plot_points,
+            )
+        )
+
         data["uuid"].append(linkage.uuid)
-        data["data:sequence"].append("".join(map(str, linkage.sequence)))
+        data["data:sequence"].append(sequence)
         data["data:inflection"].append(linkage.inflection)
-        data["data:plot_points"].append(linkage.plot_points)
+        data["data:plot_points"].append(plot_points)
         data["data:strand"].append(linkage.strand.uuid if linkage.strand else None)
         data["styles:color"].append(linkage.styles.color)
         data["styles:thickness"].append(linkage.styles.thickness)
 
-    data = pd.DataFrame(data)
-
-    return data if filename is None else data.to_csv(filename, index=False)
+    return pd.DataFrame(data)

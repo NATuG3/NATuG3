@@ -1,9 +1,10 @@
 import json
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict
 from typing import Type, Dict, List, Iterable
 from uuid import uuid1
 
+import pandas as pd
 from xlsxwriter.utility import xl_col_to_name
 import openpyxl
 from openpyxl.worksheet.worksheet import Worksheet as pyxlWorksheet
@@ -80,7 +81,7 @@ class NucleicAcidProfile:
             filepath: The path to the file to write to.
         """
         with open(filepath, "w") as file:
-            json.dump(dataclasses.asdict(self), file, indent=3)
+            json.dump(asdict(self), file, indent=3)
 
     @classmethod
     def from_file(cls, filepath: str) -> "NucleicAcidProfile":
@@ -198,20 +199,31 @@ class NucleicAcidProfile:
 
         return all(
             getattr(self, attr) == getattr(other, attr)
-            for attr in dataclasses.asdict(self)
+            for attr in asdict(self)
         )
 
 
-def export(nucleic_acid_profiles: Iterable[NucleicAcidProfile], filename: str | None):
+def to_df(nucleic_acid_profiles: Iterable[NucleicAcidProfile]) -> pd.DataFrame:
     """
-    Export many nucleic acid profiles to a csv file or a pandas dataframe.
+    Export one or more nucleic acid profile(s) to a dataframe.
 
     Args:
         nucleic_acid_profiles: The nucleic acid profiles to export.
-        filename: The name of the file to export to. If None, a pandas dataframe is
-            returned.
 
     Returns:
-        pd.DataFrame: The dataframe containing the nucleic acid profiles.
-        None: If a filename is provided, a file is created and nothing is returned.
+        A dataframe containing the nucleic acid profiles.
     """
+    data = {
+        "uuid": [nap.uuid for nap in nucleic_acid_profiles],
+        "name": [nap.name for nap in nucleic_acid_profiles],
+        "data:D": [nap.D for nap in nucleic_acid_profiles],
+        "data:H": [nap.H for nap in nucleic_acid_profiles],
+        "data:g": [nap.g for nap in nucleic_acid_profiles],
+        "data:T": [nap.T for nap in nucleic_acid_profiles],
+        "data:B": [nap.B for nap in nucleic_acid_profiles],
+        "data:Z_c": [nap.Z_c for nap in nucleic_acid_profiles],
+        "data:Z_mate": [nap.Z_mate for nap in nucleic_acid_profiles],
+        "data:theta_s": [nap.theta_s for nap in nucleic_acid_profiles],
+    }
+
+    return pd.DataFrame(data)

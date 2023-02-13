@@ -123,7 +123,7 @@ class DomainsPanel(QWidget):
                 logger.info(
                     f"Saving domains to {filepath}.\nDomains being saved: {self.runner.managers.domains.current}"
                 )
-                self.runner.managers.domains.current.to_file(filepath=filepath)
+                self.runner.managers.domains.current.to_json(filepath=filepath)
 
         self.save_domains_button.clicked.connect(save_domains)
 
@@ -138,7 +138,7 @@ class DomainsPanel(QWidget):
             if len(filepath) > 0:
 
                 def loader():
-                    domains = Domains.from_file(
+                    domains = Domains.from_csv(
                         filepath=filepath,
                         nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
                     )

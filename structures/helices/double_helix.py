@@ -1,3 +1,5 @@
+from uuid import uuid1
+
 from constants.directions import DOWN, UP
 from structures.strands import Strand
 from utils import inverse
@@ -21,9 +23,12 @@ class DoubleHelix:
             lined up with the previous domain's right helical joint.
         right_helix: The helix that is on the right side of the domain and is thus
             lined up with the next domain's left helical joint.
+
+    Methods:
+        to_csv: Write the double helix to a CSV file.
     """
 
-    __slots__ = "domain", "strands"
+    __slots__ = "domain", "strands", "uuid"
 
     def __init__(
         self,
@@ -46,6 +51,7 @@ class DoubleHelix:
             up_helix if up_helix is not None else Strand(),
             down_helix if down_helix is not None else Strand(),
         )
+        self.uuid = str(uuid1())
 
     def __getitem__(self, item):
         if item in (DOWN, UP):
@@ -112,3 +118,16 @@ class DoubleHelix:
         The other strand in the same domain as the zeroed strand.
         """
         return self.strands[inverse(self.domain.left_helix_joint)]
+
+    def to_json(self) -> dict:
+        """
+        Return a JSON representation of the double helix.
+
+        Returns:
+            A dictionary containing the JSON representation of the double helix.
+        """
+        return {
+            "uuid": self.uuid,
+            "domain": self.domain.uuid,
+            "data:items": [item.uuid for item in self.up_helix],
+        }

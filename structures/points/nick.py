@@ -43,9 +43,15 @@ class Nick:
         return f"Nick@{round(self.x_coord, 4), round(self.z_coord, 4)}"
 
 
-def export(nicks: Iterable[Nick], filename: str | None) -> None | pd.DataFrame:
+def to_df(nicks: Iterable[Nick]) -> pd.DataFrame:
     """
     Export many Nicks as either a pandas dataframe or a csv file.
+
+    Args:
+        nicks: The Nicks to export.
+
+    Returns:
+        A pandas dataframe with all the Nick data.
 
     Notes:
         The original NEMid objects are referenced by uuid.
@@ -56,5 +62,4 @@ def export(nicks: Iterable[Nick], filename: str | None) -> None | pd.DataFrame:
         "previous_item": [nick.previous_item.uuid for nick in nicks],
         "next_item": [nick.next_item.uuid for nick in nicks],
     }
-    df = pd.DataFrame(data)
-    return df if filename is None else df.to_csv(filename, index=False)
+    return pd.DataFrame(data)

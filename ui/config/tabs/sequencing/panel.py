@@ -86,6 +86,6 @@ class SequencingPanel(QWidget):
             """Worker for when the export sequences button is clicked."""
             filepath = self.filepath.text()[: self.filepath.text().find(".")]
             mode = self.filetype.currentText().replace(".", "")
-            self.runner.managers.strands.current.to_file(filepath, mode)
+            self.runner.managers.strands.current.to_json(filepath, mode)
 
         self.export_sequences.clicked.connect(export_sequences_clicked)

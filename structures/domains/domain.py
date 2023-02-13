@@ -1,4 +1,5 @@
 from typing import Tuple
+from uuid import uuid1
 
 from constants.directions import *
 from structures.points.point import Point
@@ -49,6 +50,7 @@ class Domain:
             bottom-count, body-count, and top-count. The number of NEMids in the
             domains' is determined by count[1], and then count[0] NEMids are added to
             the bottom strand and count[2] NEMids are added to the top of the strand.
+        uuid: The unique identifier for the domain. This is automatically generated.
     """
 
     def __init__(
@@ -114,6 +116,9 @@ class Domain:
 
         # set the index of the domain
         self.index = index
+
+        # set the uuid
+        self.uuid = str(uuid1())
 
     def angles(self, start=0):
         """

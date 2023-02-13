@@ -112,9 +112,9 @@ class Domains:
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
-    def to_file(self, filepath: str) -> None | pd.DataFrame:
+    def to_df(self) -> pd.DataFrame:
         """
-        Export all the current domains as a csv.
+        Export all the current domains as a pandas dataframe.
 
         Creates a csv file from self.domains() with the following columns:
             Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
@@ -129,20 +129,16 @@ class Domains:
             Symmetry (int): The symmetry type
             Antiparallel ("true" or "false"): Whether the domains are antiparallel
 
-        Args:
-            filepath: The filepath to export to. If None then the data is returned
-                directly as a pandas dataframe.
-
-        Raises:
-            ValueError: If the mode is not an allowed mode or if the filepath contains
-            an extension.
+        Returns:
+            A pandas dataframe containing the domains data.
 
         Notes:
             - Filetype is determined by the extension.
             - Supported filetypes: csv
         """
-        # extract all the data to references
+        # extract all the data and compile it into lists
         domains = self.subunit.domains
+        uuids = [domain.uuid for domain in domains]
         left_helix_joints = [
             "UP" if domain.left_helix_joint == UP else "DOWN" for domain in domains
         ]
@@ -160,28 +156,21 @@ class Domains:
         ]
 
         # create a pandas dataframe with the columns above
-        data = pd.DataFrame(
+        return pd.DataFrame(
             {
-                "m": theta_m_multiples,
-                "Left Helix Joints": left_helix_joints,
-                "Right Helix Joints": right_helix_joints,
-                "Left Helix Count": left_helix_count,
-                "Other Helix Count": other_helix_count,
-                "Symmetry": symmetry,
-                "Antiparallel": antiparallel,
+                "uuid": uuids,
+                "data:m": theta_m_multiples,
+                "data:left_helix_joints": left_helix_joints,
+                "data:right_helix_joints": right_helix_joints,
+                "data:left_helix_count": left_helix_count,
+                "data:other_helix_count": other_helix_count,
+                "data:symmetry": symmetry,
+                "data:antiparallel": antiparallel,
             },
         )
 
-        # based on the mode chosen by the user, export the data to a file
-        if isinstance(filepath, str) and filepath.endswith("csv"):
-            data.to_csv(filepath, index=False)
-        elif filepath is None:
-            return data
-        else:  # if the mode is not one that is allowed, raise an error
-            raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")
-
     @classmethod
-    def from_file(
+    def from_csv(
         cls,
         filepath: str,
         nucleic_acid_profile: NucleicAcidProfile,
@@ -217,23 +206,23 @@ class Domains:
         # extract the data
         left_helix_joints = [
             UP if direction == "UP" else DOWN
-            for direction in data["Left Helix Joints"].to_list()
+            for direction in data["data:left_helix_joints"].to_list()
         ]
         right_helix_joints = [
             UP if direction == "UP" else DOWN
-            for direction in data["Right Helix Joints"].to_list()
+            for direction in data["data:right_helix_joints"].to_list()
         ]
-        m = [int(m) for m in data["m"].to_list()]
+        m = [int(m) for m in data["data:m"].to_list()]
         left_helix_count = [
             tuple(map(int, count.split("-")))
-            for count in data["Left Helix Count"].to_list()
+            for count in data["data:left_helix_count"].to_list()
         ]
         other_helix_count = [
             tuple(map(int, count.split("-")))
-            for count in data["Other Helix Count"].to_list()
+            for count in data["data:other_helix_count"].to_list()
         ]
-        symmetry = int(data["Symmetry"].to_list()[0])
-        antiparallel = data["Antiparallel"].to_list()[0]
+        symmetry = int(data["data:symmetry"].to_list()[0])
+        antiparallel = data["data:antiparallel"].to_list()[0]
 
         # create a list of domains
         domains = []

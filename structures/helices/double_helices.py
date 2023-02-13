@@ -1,4 +1,5 @@
 from typing import List
+from uuid import uuid1
 
 
 class DoubleHelices:
@@ -10,9 +11,10 @@ class DoubleHelices:
 
     Attributes:
         double_helices (list): A list of DoubleHelix objects.
+        uuid (str): A unique identifier for the double helices. Automatically generated.
     """
 
-    __slots__ = "double_helices"
+    __slots__ = "double_helices", "uuid"
 
     def __init__(self, items: List["Domain"] | List["DoubleHelix"]) -> None:
         """
@@ -30,11 +32,25 @@ class DoubleHelices:
         else:
             self.double_helices = items
 
+        self.uuid = str(uuid1())
+
     def __len__(self) -> int:
         return len(self.double_helices)
 
     def __getitem__(self, index: int) -> "DoubleHelix":
         return self.double_helices[index]
+
+    def to_json(self) -> dict:
+        """
+        Convert the double helices to a JSON object.
+
+        Returns:
+            A JSON representation of the double helices.
+        """
+        return {
+            "uuid": self.uuid,
+            "items": [item.uuid for item in self],
+        }
 
     def domains(self) -> List["Domain"]:
         """

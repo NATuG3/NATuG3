@@ -60,24 +60,31 @@ class Nucleoside(Point):
         )
 
 
-def export(
-    nucleosides: Iterable[Nucleoside], filename: str | None
+def to_df(
+    nucleosides: Iterable[Nucleoside]
 ) -> None | pd.DataFrame:
     """
-    Export many Nucleosides as either a pandas dataframe or a csv file.
+    Export the Nucleoside data to a pandas dataframe.
 
     1) Points module's export() function is called to obtain a dataframe with
         all the Point data for all the NEMids passed.
     2) Extra columns for all Nucleoside specific data is added to the pandas dataframe.
     3) The Nucleosides passed are iterated through, and the data for each Nucleoside is
-        added to the dataframe under the new column.
+        added to the dataframe under the new header.
+
+    Args:
+        nucleosides: The Nucleosides to export.
+
+    Returns:
+        None: If a filename is provided.
+        pd.DataFrame: If a filename is not provided.
     """
-    from structures.points.point import export as fetch_points_dataframe
+    from structures.points.point import to_df as fetch_points_dataframe
 
     # Get the dataframe of all the Point data
-    data = fetch_points_dataframe(nucleosides, filename=None)
+    data = fetch_points_dataframe(nucleosides)
 
     # Add the NEMid specific data to the dataframe
     data["nucleoside:base"] = [nucleoside.base for nucleoside in nucleosides]
 
-    return data if filename is None else data.to_csv(filename, index=False)
+    return data

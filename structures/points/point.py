@@ -425,22 +425,18 @@ class Point:
         )
 
 
-def export(points: Iterable[Point], filename: str | None) -> None | pd.DataFrame:
+def to_df(points: Iterable[Point]) -> pd.DataFrame:
     """
     Export an iterable of points to a csv file or pandas dataframe.
 
     Creates a dataframe that has all the attributes that points possess, including
-    the point styles. The dataframe is then exported to a csv file or returned as a
-    pandas dataframe.
+    the point styles.
 
     Args:
         points: The points to export.
-        filename: The name of the file to export to. If the filename is None then
-            a pandas dataframe is returned instead of a csv file being created.
 
     Returns:
-        None: If a filename is provided.
-        pd.DataFrame: If a filename is not provided.
+        pd.DataFrame: A dataframe that has all the points and their attributes.
     """
     # create a dataframe from the points
     data = {
@@ -469,6 +465,4 @@ def export(points: Iterable[Point], filename: str | None) -> None | pd.DataFrame
         )
         data["style:state"].append(point.styles.state)
 
-    data = pd.DataFrame(data)
-
-    return data if filename is None else data.to_csv(filename, index=False)
+    return pd.DataFrame(data)

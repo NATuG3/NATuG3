@@ -1,3 +1,4 @@
+import json
 import logging
 from zipfile import ZipFile
 
@@ -7,6 +8,7 @@ import structures.points.nick
 import structures.points.nick
 import structures.strands.linkage
 import structures.profiles.nucleic_acid_profile
+import structures.domains
 
 logger = logging.getLogger(__name__)
 
@@ -22,23 +24,35 @@ class FileHandler:
         logger.debug(f"Saving program state to {filename}...")
 
         with ZipFile(filename, "w") as file:
-            file.mkdir("nucleic_acid_profiles")
-            file.mkdir("domains")
-            file.mkdir("strands")
-            file.mkdir("strands/points")
+            # Save the domains
+            domains_df = self.runner.managers.domains.current.to_df()
+            file.writestr("domains.csv", domains_df.to_csv())
 
             # Save the nucleic acid profiles
-            current_nucleic_acid_profile = (
+            nucleic_acid_profiles_df = [
                 self.runner.managers.nucleic_acid_profile.current
+            ]
+            # Save the current nucleic acid profile
+            nucleic_acid_profiles_df[-1].name = "Restored"
+            # Add all the other nucleic acid profiles except the previously restored one
+            for (
+                nucleic_acid_profile
+            ) in self.runner.managers.nucleic_acid_profile.profiles.values():
+                if (nucleic_acid_profile.name != "Restored") and (
+                    nucleic_acid_profile not in nucleic_acid_profiles_df
+                ):
+                    nucleic_acid_profiles_df.append(nucleic_acid_profile)
+            # Export the nucleic acid profiles to a dataframe
+            nucleic_acid_profiles_df = structures.profiles.nucleic_acid_profile.to_df(
+                nucleic_acid_profiles_df
             )
-            current_nucleic_acid_profile.name = "Restored"
-            structures.profiles.nucleic_acid_profile.export(
-                [
-                    current_nucleic_acid_profile,
-                    *self.runner.managers.nucleic_acid_profile.profiles,
-                ],
-                None,
+            # Save the dataframe to the zip file
+            file.writestr(
+                "nucleic_acid_profiles.csv", nucleic_acid_profiles_df.to_csv()
             )
+
+            # Create a reference to the current strands
+            strands = self.runner.managers.strands.current
 
             # Sort all the items by type
             items_by_type = {
@@ -47,35 +61,60 @@ class FileHandler:
                 structures.points.nick.Nick: [],
                 structures.strands.linkage.Linkage: [],
             }
-            for item in self.runner.managers.strands.current.items():
+            for item in strands.items():
                 items_by_type[type(item)].append(item)
 
             # Some NEMids may not be included via strand.items, if they are nicks
             # that had the items removed. So, we'll add them manually.
-            for nick in self.runner.managers.strands.current.nicks:
+            for nick in strands.nicks:
                 items_by_type[structures.points.nemid.NEMid].append(nick.original_item)
 
             # Create dataframes of all the different types of strand items
-            nucleoside_df = structures.points.nucleoside.export(
-                items_by_type[structures.points.nucleoside.Nucleoside], None
+            nucleosides_df = structures.points.nucleoside.to_df(
+                items_by_type[structures.points.nucleoside.Nucleoside]
             )
-            NEMid_df = structures.points.nemid.export(
-                items_by_type[structures.points.nemid.NEMid], None
+            NEMids_df = structures.points.nemid.to_df(
+                items_by_type[structures.points.nemid.NEMid]
             )
-            nick_df = structures.points.nick.export(
-                items_by_type[structures.points.nick.Nick], None
+            nicks_df = structures.points.nick.to_df(
+                items_by_type[structures.points.nick.Nick]
             )
-            linkage_df = structures.strands.linkage.export(
-                items_by_type[structures.strands.linkage.Linkage], None
+            linkages_df = structures.strands.linkage.to_df(
+                items_by_type[structures.strands.linkage.Linkage]
             )
 
-            # Save the dataframes to the zip file
-            file.writestr("strands/points/nucleosides.csv", nucleoside_df.to_csv())
-            file.writestr("strands/points/NEMids.csv", NEMid_df.to_csv())
-            file.writestr("strands/points/nicks.csv", nick_df.to_csv())
-            file.writestr("strands/linkages.csv", linkage_df.to_csv())
+            # Create a directory for the points
+            file.mkdir("points")
 
-            logger.info("Saved program state to %s", filename)
+            # Save the various strand items to the file
+            file.writestr("points/nucleosides.csv", nucleosides_df.to_csv())
+            file.writestr("points/NEMids.csv", NEMids_df.to_csv())
+            file.writestr("points/nicks.csv", nicks_df.to_csv())
+            file.writestr("points/linkages.csv", linkages_df.to_csv())
+
+            file.mkdir("strands")
+            # Save the strands themselves, and the Strands container object
+            strands_json = strands.to_json()
+            strands_json = json.dumps(strands_json, indent=4)
+            file.writestr("strands/strands.json", strands_json)
+            file.mkdir("strands/strands")
+            for i, strand in enumerate(strands):
+                strands_json = json.dumps(strand.to_json(), indent=4)
+                file.writestr(f"strands/strands/{strand.uuid}.json", strands_json)
+
+            file.mkdir("double_helices")
+            # Save the double helices to the file
+            double_helices_json = strands.double_helices.to_json()
+            double_helices_json = json.dumps(double_helices_json, indent=4)
+            file.writestr("double_helices/double_helices.json", double_helices_json)
+            for i, double_helix in enumerate(strands.double_helices):
+                double_helix_json = json.dumps(double_helix.to_json(), indent=4)
+                file.writestr(
+                    f"double_helices/double_helices/{double_helix.uuid}.json",
+                    double_helix_json,
+                )
+
+            logger.info("Saved program state to %s.", filename)
 
     def load(self, filename: str):
         """
