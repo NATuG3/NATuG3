@@ -441,8 +441,8 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
     # create a dataframe from the points
     data = {
         "uuid": [],
-        "data:x-coord": [],
-        "data:z-coord": [],
+        "data:x_coord": [],
+        "data:z_coord": [],
         "data:angle": [],
         "data:domain": [],
         "data:direction": [],
@@ -455,8 +455,8 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
     }
     for point in points:
         data["uuid"].append(point.uuid)
-        data["data:x-coord"].append(point.x_coord)
-        data["data:z-coord"].append(point.z_coord)
+        data["data:x_coord"].append(point.x_coord)
+        data["data:z_coord"].append(point.z_coord)
         data["data:angle"].append(point.angle)
         data["data:domain"].append(
             point.domain.index if point.domain is not None else None

@@ -39,7 +39,6 @@ def juncter(
         strands.conjunct(point, point.juncmate)
         refresh()
     else:
-        print(point)
         utils.warning(
             runner.window,
             error_title,
