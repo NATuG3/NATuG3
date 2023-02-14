@@ -14,6 +14,7 @@ import structures.points.nick
 import structures.points.nucleoside
 import structures.profiles.nucleic_acid_profile
 import structures.strands.linkage
+from constants.directions import UP, DOWN
 from structures.domains import Domains
 from structures.points.point import PointStyles
 from utils import hex_to_rgb
@@ -189,7 +190,9 @@ class FileHandler:
             with package.open("points/nucleosides.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
-                df["data:direction"] = df["data:direction"].map({"UP": 1, "DOWN": 0})
+                df["data:direction"] = df["data:direction"].map(
+                    {"UP": UP, "DOWN": DOWN}
+                )
 
                 for index, row in df.iterrows():
                     base = row["nucleoside:base"] if row["nucleoside:base"] else None
@@ -208,7 +211,9 @@ class FileHandler:
             with package.open("points/NEMids.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
-                df["data:direction"] = df["data:direction"].map({"UP": 0, "DOWN": 1})
+                df["data:direction"] = df["data:direction"].map(
+                    {"UP": UP, "DOWN": DOWN}
+                )
 
                 # First create all the NEMids without their juncmates, since we may
                 # not be able to fetch certain juncmates (since we're creating NEMids
@@ -272,15 +277,12 @@ class FileHandler:
 
                 for index, row in df.iterrows():
                     items = [
-                        items_by_uuid[uuid]
-                        for uuid in row["data:items"].split("; ")
+                        items_by_uuid[uuid] for uuid in row["data:items"].split("; ")
                     ]
 
                     styles = structures.strands.strand.StrandStyles()
                     styles.color.from_str(row["style:color"], valuemod=hex_to_rgb)
-                    styles.thickness.from_str(
-                        row["style:thickness"], valuemod=float
-                    )
+                    styles.thickness.from_str(row["style:thickness"], valuemod=float)
                     styles.highlighted = row["style:highlighted"]
 
                     items_by_uuid[row["uuid"]] = structures.strands.strand.Strand(
@@ -297,9 +299,7 @@ class FileHandler:
                     name=loaded["name"],
                     uuid=loaded["uuid"],
                     nucleic_acid_profile=nucleic_acid_profile,
-                    strands=[
-                        items_by_uuid[uuid] for uuid in loaded["data:strands"]
-                    ],
+                    strands=[items_by_uuid[uuid] for uuid in loaded["data:strands"]],
                 )
                 for strand in strands:
                     strand.strands = strands
