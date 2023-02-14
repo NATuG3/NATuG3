@@ -117,7 +117,8 @@ class Runner:
         """
         filepath = QFileDialog.getOpenFileName(
             self.window,
-            "Load Nanostructure",
+            "Load Program State",
+            "",
             f"NATuG Package (*.{settings.package_extension})",
         )[0]
         if filepath:
