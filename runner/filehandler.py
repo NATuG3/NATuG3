@@ -1,5 +1,4 @@
 import json
-
 import logging
 from contextlib import suppress
 from typing import Dict
@@ -7,17 +6,17 @@ from zipfile import ZipFile
 
 import pandas as pd
 
-import structures.points.nucleoside
+import structures.domains
+import structures.helices
 import structures.points.nemid
 import structures.points.nick
 import structures.points.nick
-import structures.strands.linkage
+import structures.points.nucleoside
 import structures.profiles.nucleic_acid_profile
-import structures.domains
-import structures.helices
+import structures.strands.linkage
+from constants.directions import DOWN, UP
 from structures.domains import Domains
 from structures.points.point import PointStyles
-from structures.strands.strand import StrandStyle
 from utils import hex_to_rgb
 
 logger = logging.getLogger(__name__)
@@ -81,10 +80,10 @@ class FileHandler:
 
             # Create dataframes of all the different types of strand items
             nucleosides_df = structures.points.nucleoside.to_df(
-                items_by_type[structures.points.nucleoside.Nucleoside]
+                items_by_type[structures.points.Nucleoside]
             )
             NEMids_df = structures.points.nemid.to_df(
-                items_by_type[structures.points.nemid.NEMid]
+                items_by_type[structures.points.NEMid]
             )
             nicks_df = structures.points.nick.to_df(strands.nicks)
             linkages_df = structures.strands.linkage.to_df(
@@ -178,7 +177,6 @@ class FileHandler:
                     hex_to_rgb(str(row["style:outline"]).split(",")[0].strip()),
                     float(row["style:outline"].split(",")[1].strip().replace("px", "")),
                 )
-
                 styles = PointStyles(
                     symbol=row["style:symbol"],
                     size=int(row["style:size"]),
@@ -191,47 +189,54 @@ class FileHandler:
 
             with package.open("points/nucleosides.csv") as file:
                 df = pd.read_csv(file)
+                df = df.where(pd.notnull(df), None)
+
                 for index, row in df.iterrows():
+                    base = row["nucleoside:base"] if row["nucleoside:base"] else None
                     nucleoside = structures.points.nucleoside.Nucleoside(
                         uuid=str(row["uuid"]),
                         x_coord=float(row["data:x-coord"]),
                         z_coord=float(row["data:z-coord"]),
                         angle=float(row["data:angle"]),
+                        direction=UP if row["data:direction"] == "UP" else DOWN,
                         domain=domains.domains()[int(row["data:domain"])],
-                        base=str(row["nucleoside:base"]),
+                        base=base,
                         styles=row_to_point_styles(row),
                     )
                     items_by_uuid[row["uuid"]] = nucleoside
 
             with package.open("points/NEMids.csv") as file:
                 df = pd.read_csv(file)
+                df = df.where(pd.notnull(df), None)
 
+                NEMids = []
                 # First create all the NEMids without their juncmates, since we may
                 # not be able to fetch certain juncmates (since we're creating NEMids
                 # as we go)
                 for index, row in df.iterrows():
+                    juncmate = row["NEMid:juncmate"] if row["NEMid:juncmate"] else None
+
                     NEMid_ = structures.points.nemid.NEMid(
                         uuid=str(row["uuid"]),
                         x_coord=float(row["data:x-coord"]),
                         z_coord=float(row["data:z-coord"]),
+                        direction=UP if row["data:direction"] == "UP" else DOWN,
                         angle=float(row["data:angle"]),
                         domain=domains.domains()[int(row["data:domain"])],
-                        juncmate=None,
-                        junction=row["NEMid:junction"] == "TRUE",
-                        junctable=row["NEMid:junctable"] == "TRUE",
+                        juncmate=juncmate,
+                        junction=row["NEMid:junction"],
+                        junctable=row["NEMid:junctable"],
                         styles=row_to_point_styles(row),
                     )
-                    items_by_uuid[row["uuid"]] = NEMid_
-
-                df.where(df.notnull(), None)
+                    items_by_uuid[NEMid_.uuid] = NEMid_
+                    NEMids.append(NEMid_)
 
                 # Then re-iterate through the dataframe and set the juncmates of the
                 # NEMids that we just created
-                for index, row in df.iterrows():
+                for NEMid_ in NEMids:
                     with suppress(KeyError):
-                        items_by_uuid[row["uuid"]].juncmate = items_by_uuid[
-                            row["NEMid:juncmate"]
-                        ]
+                        NEMid_.juncmate = items_by_uuid[NEMid_.juncmate]
+
 
             with package.open("points/nicks.csv") as file:
                 df = pd.read_csv(file)
@@ -283,14 +288,14 @@ class FileHandler:
                     styles.thickness.from_str(
                         str(row["style:thickness"]), valuemod=float
                     )
-                    styles.highlighted = row["style:highlighted"] == "TRUE"
+                    styles.highlighted = row["style:highlighted"]
 
                     items_by_uuid[row["uuid"]] = structures.strands.strand.Strand(
                         uuid=str(row["uuid"]),
                         items=items,
                         name=str(row["name"]),
                         styles=styles,
-                        closed=row["data:closed"] == "TRUE",
+                        closed=row["data:closed"],
                     )
 
             with package.open("strands/strands.json") as file:

@@ -178,11 +178,11 @@ class RefreshConfirmer(QDialog):
         """
         super().__init__(parent)
         uic.loadUi("ui/config/refresh_confirmer.ui", self)
+        self.runner = runner
         self.function = function
         self._prettify()
         self._fileselector()
         self._buttons()
-        self.runner = runner
         self.finished.connect(self._finished)
 
     def _finished(self):

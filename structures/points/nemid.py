@@ -3,7 +3,6 @@ from typing import Type, Iterable
 
 import pandas as pd
 
-from constants.directions import UP
 from structures.points.point import Point
 
 
@@ -38,22 +37,6 @@ class NEMid(Point):
             direction=self.direction,
             strand=self.strand,
             domain=self.domain,
-        )
-
-    def __repr__(self) -> str:
-        """Determine what to print when instance is printed directly."""
-        properties = {
-            "pos": tuple(map(lambda i: round(i, 3), self.position())),
-            "angle": round(self.angle, 3),
-            "direction": "UP" if self.direction == UP else "DOWN",
-            "junctable": self.junctable,
-            "junction": self.junction,
-            "domain": self.domain,
-        }
-        # Create a string in the format NEMid(key1=value1, key2=value2, ...)
-        return (
-            f"NEMid"
-            f"({', '.join(f'{key}={value}' for key, value in properties.items())})"
         )
 
 

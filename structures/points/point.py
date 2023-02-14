@@ -172,12 +172,12 @@ class Point:
 
     # nucleic acid attributes
     direction: int = None
-    strand: Type["Strand"] = None
+    strand: Type["Strand"] = field(default=None, repr=False)
     linkage: Type["Linkage"] = None
     domain: Type["Domain"] = None
 
     # plotting attributes
-    styles: PointStyles = None
+    styles: PointStyles = field(default=None, repr=False)
 
     uuid: str = field(default_factory=lambda: str(uuid1()))
 
@@ -445,6 +445,7 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
         "data:z-coord": [],
         "data:angle": [],
         "data:domain": [],
+        "data:direction": [],
         "style:symbol": [],
         "style:size": [],
         "style:rotation": [],
@@ -460,6 +461,7 @@ def to_df(points: Iterable[Point]) -> pd.DataFrame:
         data["data:domain"].append(
             point.domain.index if point.domain is not None else None
         )
+        data["data:direction"].append("UP" if point.direction == UP else "DOWN")
         data["style:symbol"].append(point.styles.symbol)
         data["style:size"].append(point.styles.size)
         data["style:rotation"].append(point.styles.rotation)
