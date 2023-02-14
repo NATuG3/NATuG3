@@ -57,12 +57,16 @@ class NucleicAcidProfile:
 
     @property
     def theta_s(self) -> float:
-        """The angle adjustment switching from down strand to up strand. Bill 2/12/23"""
-        theta_s_calculated: float
-        if self.g % self.theta_c <= self.theta_c/2: self.theta_s_calculated = self.g%self.theta_c
-        else : theta_s_calculated = self.g % -self.theta_c
-        print('theta_s_calculated =',theta_s_calculated)
-        return theta_s_calculated
+        """
+        The angle adjustment switching from down strand to up strand.
+
+        Notes:
+            Bill 2/12/23
+        """
+        if self.g % self.theta_c <= self.theta_c / 2:
+            return self.g % self.theta_c
+        else:
+            return self.g % -self.theta_c
 
     def update(self, profile: Type["NucleicAcidProfile"]) -> None:
         """

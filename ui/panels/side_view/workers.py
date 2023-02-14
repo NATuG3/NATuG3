@@ -214,8 +214,8 @@ def linker(
         return
     # Ensure that only endpoints are being selected
     if not point.is_endpoint(of_its_type=True):
-        print(point.is_endpoint(of_its_type=True))
-        print(point.strand.index(point))
+        # print(point.is_endpoint(of_its_type=True))
+        # print(point.strand.index(point))
         logger.warning("User tried to create a linkage on a non-endpoint.")
         utils.warning(
             runner.window,

@@ -454,7 +454,7 @@ class Domains:
 
     def strands(self) -> Strands:
         """
-        Generate a list of all from the current domains.
+        Generate a list of all points from the current domains.
 
         Creates and lines up strands for junctions.
 
@@ -483,7 +483,9 @@ class Domains:
 
         # Create containers for the z coords and angles that we are about to compute.
         all_zeroed_strand_z_coords: List[np.ndarray] = []
+        all_other_strand_z_coords: List[np.ndarray] = []
         all_zeroed_strand_x_coords: List[np.ndarray] = []
+        all_other_strand_x_coords: List[np.ndarray] = []
         all_zeroed_strand_angles: List[np.ndarray] = []
 
         # Create easy references to various nucleic acid settings. This is done to
@@ -508,6 +510,12 @@ class Domains:
             other_strand_direction = inverse(zeroed_strand_direction)
             zeroed_strand_NEMid_count = domain.left_helix_count
             other_strand_NEMid_count = domain.other_helix_count
+            print(
+                "test",
+                double_helix.domain.index,
+                zeroed_strand_direction,
+                other_strand_direction,
+            )
 
             if domain.index == 0:
                 # The first domain is a special case. The z coord of the first NEMid
@@ -520,16 +528,29 @@ class Domains:
                 # The z coord of the first NEMid for other domains is the index of
                 # the greatest x coord of the previous domain's strand. "np.argmax(
                 # arr)" returns the index of the greatest element in an array.
-                initial_z_coord = all_zeroed_strand_z_coords[-1][
-                    np.argmax(all_zeroed_strand_x_coords[-1])
-                ]
+                right_direction = double_helices.domains()[]
+
+                if zeroed_strand_direction == right_direction:
+                    # the zeroed strand direction is the same as the right helix
+                    # joint, so THE ZEROED STRAND is the strand that we align to
+                    initial_z_coord = all_zeroed_strand_z_coords[-1][
+                        np.argmax(all_zeroed_strand_x_coords[-1])
+                    ]
+                else:
+                    # the zeroed strand direction is the opposite direction of the
+                    # right helix joint, so THE OTHER STRAND is the strand that we
+                    # align to
+                    initial_z_coord = all_other_strand_z_coords[-1][
+                        np.argmax(all_other_strand_x_coords[-1])
+                    ]
+
                 # Shift down the initial z coord. We can shift it down in increments
                 # of Z_b * B, which we will call the "decrease_interval" (the
                 # interval at which the z coord decreases).
-                decrease_interval = Z_b * B
-                initial_z_coord -= (
-                    math.ceil(initial_z_coord / decrease_interval) * decrease_interval
-                )
+                # decrease_interval = Z_b * B
+                # initial_z_coord -= (
+                #     math.ceil(initial_z_coord / decrease_interval) * decrease_interval
+                # )
 
             # Compute the final Z coord and angle to generate. Note that
             # numpy.arange() does not include the final value, so we add 1 to the
@@ -580,10 +601,12 @@ class Domains:
                 Point.x_coord_from_angle(angle, domain) for angle in other_strand_angles
             ]
             other_strand_x_coords = np.array(other_strand_x_coords)
+            all_other_strand_x_coords.append(other_strand_x_coords)
             other_strand_z_coords = (
-                np.copy(zeroed_strand_z_coords)
-                + self.nucleic_acid_profile.Z_mate * other_strand_modifier
+                zeroed_strand_z_coords
+                - self.nucleic_acid_profile.Z_mate * other_strand_modifier
             )
+            all_other_strand_z_coords.append(other_strand_z_coords)
 
             # Since we generated an extra NEMid, we will trim it off here.
             trim_to = zeroed_strand_NEMid_count[1] * 2
@@ -621,6 +644,7 @@ class Domains:
                 shifts = 0
             else:
                 shifts = round(np.divide(abs(initial_z_coord), (Z_b / 2)))
+            shifts = 0
 
             # First trim the strands based off of the shifts
             double_helix.zeroed_helix.trim(-shifts)
