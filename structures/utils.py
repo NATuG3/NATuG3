@@ -27,24 +27,14 @@ def converge_point_data(
     # The output array.
     output = []
 
-    # Roughly equivalent to zipped = tuple(zip(angles, x_coords, z_coords)).
-    zipped = np.column_stack((angles, x_coords, z_coords))
-
-    if initial_type == Nucleoside:
-
-        def counter_check(counter):
-            return counter % 2 == 1
-
-    else:
-
-        def counter_check(counter):
-            return counter % 2 == 0
-
     # Generate the NEMid and Nucleoside objects.
-    for counter, (angle, x_coord, z_coord) in enumerate(zipped):
+    for counter, (angle, x_coord, z_coord) in enumerate(
+        np.column_stack((angles, x_coords, z_coords)),
+        start=(0 if initial_type == Nucleoside else 1),
+    ):
         if counter == break_at:
             break
-        if counter_check(counter):
+        if counter % 2:
             # If the counter is odd, we are generating a NEMid.
             item = NEMid(x_coord=x_coord, z_coord=z_coord, angle=angle)
         else:

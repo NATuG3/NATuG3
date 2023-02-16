@@ -1,9 +1,85 @@
-from typing import Tuple
+from typing import Tuple, Literal
 
 from constants.directions import *
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
+
+
+class GenerationCount:
+    """
+    A class for storing the number of NEMids to generate for a domain.
+
+    Attributes:
+        bottom_count: The number of NEMids to generate for the bottom strand.
+        body_count: The number of NEMids to generate for the body strand.
+        top_count: The number of NEMids to generate for the top strand.
+
+    Method:
+        direction: The direction that this is the generation count for.
+    """
+
+    def __init__(self, count: Tuple[int, int, int], direction=None):
+        """
+        Initialize a GenerationCount object.
+
+        Args:
+            count: The number of NEMids to generate for the bottom, body, and top
+                strands.
+        """
+        self.bottom_count = count[0]
+        self.body_count = count[1]
+        self.top_count = count[2]
+
+        self.direction = direction
+
+    def __len__(self) -> int:
+        """
+        Get the number of NEMids to generate for the bottom, body, and top strands.
+
+        Returns:
+            The number of NEMids to generate for the bottom, body, and top strands.
+        """
+        return 3
+
+    def __getitem__(self, index: int) -> int:
+        """
+        Get the number of NEMids to generate for the bottom, body, and top strands.
+
+        Args:
+            index: The index of the number of NEMids to generate for the bottom, body,
+                and top strands.
+
+        Returns:
+            The number of NEMids to generate for the bottom, body, and top strands.
+        """
+        if index == 0:
+            return self.bottom_count
+        elif index == 1:
+            return self.body_count
+        elif index == 2:
+            return self.top_count
+        else:
+            raise IndexError("Index out of range.")
+
+    def __setitem__(self, index: int, value: int):
+        """
+        Set the number of NEMids to generate for the bottom, body, and top strands.
+
+        Args:
+            index: The index of the number of NEMids to generate for the bottom, body,
+                and top strands.
+            value: The number of NEMids to generate for the bottom, body, and top
+                strands.
+        """
+        if index == 0:
+            self.bottom_count = value
+        elif index == 1:
+            self.body_count = value
+        elif index == 2:
+            self.top_count = value
+        else:
+            raise IndexError("Index out of range.")
 
 
 class Domain:
@@ -39,16 +115,13 @@ class Domain:
             "right" indicates that the right side of this domain will be lined up to
             the left helix joint of the next domain. Uses the constant 0 for up and 1
             for down.
-        left_helix_count: Number of initial NEMids/strand to generate. This is a list
-            of bottom-count, body-count,
+        left_helix_count: Number of initial NEMids/strand to generate for the left
+            helix joint direction helix. This is a list of bottom-count, body-count,
             and top-count. The number of NEMids in the domains' is determined by
             count[1], and then count[0] NEMids are added to the bottom strand and
             count[2] NEMids are added to the top of the strand.
-        other_helix_count: Number of initial NEMids/strand to generate for the non-left
-        helix. This is a list of
-            bottom-count, body-count, and top-count. The number of NEMids in the
-            domains' is determined by count[1], and then count[0] NEMids are added to
-            the bottom strand and count[2] NEMids are added to the top of the strand.
+        other_helix_count: Number of initial NEMids/strand and excess NEMids/strand to
+            generate for the other helix.
     """
 
     def __init__(
@@ -107,13 +180,27 @@ class Domain:
         assert self.right_helix_joint in [0, 1]
 
         # the number of NEMids to generate for the left and right helices
-        self.left_helix_count = left_helix_count
-        self.other_helix_count = other_helix_count
+        self.left_helix_count = GenerationCount(
+            left_helix_count, direction=lambda: self.left_helix_joint
+        )
+        self.other_helix_count = GenerationCount(
+            other_helix_count, direction=lambda: self.right_helix_joint
+        )
         assert len(self.left_helix_count) == 3
         assert len(self.other_helix_count) == 3
 
         # set the index of the domain
         self.index = index
+
+    def count_by_direction(self, direction: Literal[UP, DOWN]) -> GenerationCount:
+        """
+        Get either the left_helix_count or the other_helix_count that possesses the
+        direction passed.
+        """
+        if direction == self.left_helix_count.direction():
+            return self.left_helix_count
+        else:
+            return self.other_helix_count
 
     def angles(self, start=0):
         """
@@ -195,10 +282,7 @@ class Domain:
         This is very computationally inexpensive, so it is a property.
         (self.theta_s_multiple)
         """
-        helix_joints = (
-            self.left_helix_joint,
-            self.right_helix_joint
-        )
+        helix_joints = (self.left_helix_joint, self.right_helix_joint)
         if helix_joints == (UP, DOWN):
             return -1
         elif helix_joints == (UP, UP):

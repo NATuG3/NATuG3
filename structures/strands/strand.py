@@ -165,6 +165,8 @@ class Strand:
         closed: Whether the strand is closed. Must be manually set.
         empty: Whether the strand is empty. This is equivalent to len(self) == 0.
         cross_screen: Whether this strand wraps across the screen.
+        direction: Whether this is an up or down helix. This is only useful for when
+            the strand represents a helix.
 
     Methods:
         append(item): Add an item to the right of the strand.
@@ -197,6 +199,7 @@ class Strand:
         name: str = "Strand",
         closed: bool = False,
         nucleic_acid_profile: NucleicAcidProfile = None,
+        direction=None,
     ):
         self.name = name
         self.items = StrandItems() if items is None else StrandItems(items)
@@ -207,6 +210,7 @@ class Strand:
             if nucleic_acid_profile is None
             else nucleic_acid_profile
         )
+        self.direction = direction
 
     def __post_init__(self):
         self.items = StrandItems(self.items)
@@ -686,3 +690,5 @@ class Strand:
             [item.z_coord for item in self.items]
         )
         return width, height
+
+

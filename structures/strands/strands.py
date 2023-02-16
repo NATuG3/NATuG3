@@ -4,6 +4,7 @@ from copy import deepcopy
 from functools import partial
 from typing import List, Tuple, Iterable
 
+import numpy as np
 import pandas as pd
 from PyQt6.QtCore import QTimer
 from pandas import ExcelWriter
@@ -87,6 +88,10 @@ class Strands:
         # helices to store
         self.double_helices = None
 
+        # Create caches
+        self.attr_list_recompute_needed = True
+        self.attr_list_cache = {}
+
     def __contains__(self, item):
         """Check if a strand or point is contained within this container."""
         if item in self.strands:
@@ -116,6 +121,31 @@ class Strands:
     def __iter__(self):
         """Iterate over all strands."""
         return iter(self.strands)
+
+    def _resized_event(self):
+        """Functions to run when the size of the container changes."""
+        self.attr_list_recompute_needed = True
+
+    def attr_list(self, attr: str) -> np.ndarray:
+        """
+        Fetch a nparray of a specific attribute of all the items in the strand.
+
+        For instance, attr_list("x") will return an array of all the x coordinates of
+        all the items in the strand.
+
+        Args:
+            attr: The attribute to fetch the array of.
+        """
+        if self.attr_list_recompute_needed:
+            self.attr_list_cache = {}
+
+        if attr not in self.attr_list_cache:
+            self.attr_list_recompute_needed = False
+            self.attr_list_cache[attr] = np.array(
+                [getattr(item, attr) for strand in self.strands for item in strand]
+            )
+
+        return self.attr_list_cache[attr]
 
     def points(self) -> List[Point]:
         """Obtain a list of all points in the container."""
@@ -329,16 +359,19 @@ class Strands:
         """Add a strand to the container."""
         strand.strands = self
         self.strands.append(strand)
+        self._resized_event()
 
     def extend(self, strands: List[Strand]):
         """Add multiple strands to the container."""
         for strand in strands:
             self.append(strand)
+        self._resized_event()
 
     def remove(self, strand: Strand):
         """Remove a strand from the container."""
         strand.strands = None
         self.strands.remove(strand)
+        self._resized_event()
 
     def style(self) -> None:
         """

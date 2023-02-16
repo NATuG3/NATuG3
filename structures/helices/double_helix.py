@@ -46,6 +46,8 @@ class DoubleHelix:
             up_helix if up_helix is not None else Strand(),
             down_helix if down_helix is not None else Strand(),
         )
+        self.up_helix.direction = UP
+        self.down_helix.direction = DOWN
 
     def __getitem__(self, item):
         if item in (DOWN, UP):
