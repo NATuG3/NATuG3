@@ -1,6 +1,6 @@
 import itertools
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, Type
 
 import numpy as np
 
@@ -45,7 +45,21 @@ class Helix:
         """The number of items in the given arrays of the helix."""
         return self._size
 
-    def yield_points(self, begin=Nucleoside):
+    def point(self, type_: Literal[Type[Nucleoside], Type[NEMid]] = Nucleoside):
+        """
+        Obtain a specific point in the helix.
+
+        Args:
+            type_: The type of the point to return. Either Nucleoside or NEMid.
+        """
+        return type_(
+            angle=self.angles[0],  # type: ignore
+            x_coord=self.x_coords[0],  # type: ignore
+            z_coord=self.z_coords[0],  # type: ignore
+            direction=self.direction,  # type: ignore
+        )
+
+    def points(self, begin=Nucleoside):
         """
         Yield alternating NEMids and Nucleosides from the data in the arrays.
 
@@ -63,7 +77,12 @@ class Helix:
             self.x_coords,
             self.z_coords,
         ):
-            yield cls(angle=angle, x_coord=x_coord, z_coord=z_coord)
+            yield cls(
+                angle=angle,
+                x_coord=x_coord,
+                z_coord=z_coord,
+                direction=self.direction,
+            )
 
     def to_strand(
         self, nucleic_acid_profile: NucleicAcidProfile, strand: Strand = None
@@ -81,5 +100,5 @@ class Helix:
                 the strand passed in.
         """
         strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile)
-        strand.extend(self.yield_points())
+        strand.extend(self.points())
         return strand
