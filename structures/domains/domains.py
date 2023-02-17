@@ -85,6 +85,9 @@ class Domains:
         for domain in self.subunit.domains:
             assert domain.strands is self.subunit
 
+    def __len__(self):
+        return self.count
+
     def update(self, domains: Type["Domains"]) -> None:
         """
         Update the domains object in place.
