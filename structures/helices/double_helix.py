@@ -31,9 +31,9 @@ class DoubleHelix:
 
     def __init__(
         self,
-        domain: "Domain",
-        up_helix: Helix = None,
-        down_helix: Helix = None,
+            domain: "Domain",
+            up_helix: Helix,
+            down_helix: Helix,
     ) -> None:
         """
         Initialize a double helix.
