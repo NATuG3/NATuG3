@@ -138,3 +138,11 @@ class DoubleHelices:
                 initial_z_coord -= (
                     ceil(initial_z_coord / decrease_interval) * decrease_interval
                 )
+
+            # We will compute the angles with numpy.arange(), which takes a start
+            # value and a stop value, and increments by a step value. The start value
+            # is 0, and the stop value is the number of points to generate times
+            # theta_b + 1. We add +1 since it's ok if we generate extra points,
+            # but we don't want any chance of missing a point due to being slightly
+            # under the step value * theta_b. The step value is theta_b.
+            angles = np.arange(
