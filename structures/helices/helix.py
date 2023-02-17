@@ -5,9 +5,11 @@ from typing import Literal, Type
 import numpy as np
 
 from constants.directions import UP, DOWN
+from structures.domains import Domain
 from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
+
 
 @dataclass(slots=True)
 class Helix:
@@ -18,21 +20,24 @@ class Helix:
 
     Attributes:
         direction: The direction of the helix. Either UP or DOWN.
+        domain: The domain that this helix belongs to.
         x_coords: The x-coordinates of the points in the helix.
         z_coords: The z-coordinates of the points in the helix.
         angles: The angles of the points in the helix.
         size: The number of points in the helix. This is fixed at init.
     """
 
-    def __init__(self, direction: Literal[UP, DOWN], size: int):
+    def __init__(self, direction: Literal[UP, DOWN], size: int, domain: Domain):
         """
         Initialize a helix.
 
         Args:
             direction: The direction of the helix. Either UP or DOWN.
             size: The number of points in the helix. This is fixed once set.
+            domain: The domain that this helix belongs to.
         """
         self.direction = direction
+        self.domain = domain
         self._size = size
 
         self.x_coords = np.zeros(self.size)
