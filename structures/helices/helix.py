@@ -9,7 +9,6 @@ from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
 
-
 @dataclass(slots=True)
 class Helix:
     """
