@@ -21,7 +21,6 @@ class HelixData:
         angles: The angles of the points in the helix.
     """
 
-    __slots__ = "x_coords", "z_coords", "angles"
     x_coords: np.ndarray | None
     z_coords: np.ndarray | None
     angles: np.ndarray | None
