@@ -73,7 +73,7 @@ class Helix:
         self,
         direction: Literal[UP, DOWN],
         size: int | None,
-        double_helix: "DoubleHelix" | None = None,
+        double_helix: Type["DoubleHelix"] | None = None,
     ):
         """
         Initialize a helix.

@@ -20,9 +20,6 @@ class DoubleHelicesManager:
             runner.managers.nucleic_acid_profile.current,
         )
 
-    def setup(self):
-
-
     def recompute(self):
         """
         Recompute the double helices.
