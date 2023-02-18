@@ -162,7 +162,6 @@ class Helix:
             Strand: The strand with the data in the arrays. Either a new strand or
                 the strand passed in.
         """
-        print(len(helix))
         strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile)
         strand.extend(tuple(self.points()))
         return strand
