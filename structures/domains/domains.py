@@ -1,4 +1,3 @@
-import itertools
 import logging
 import math
 from time import time
@@ -13,10 +12,9 @@ from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.helices import DoubleHelices
-from structures.points import NEMid, Nucleoside
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
-from structures.strands import Strands, Strand
+from structures.strands import Strands
 from structures.utils import converge_point_data
 from utils import inverse
 
@@ -530,16 +528,16 @@ class Domains:
             # final value. Also note that we boost based off of count[1] is the number
             # of NEMids to generate initially.
             final_angle = (
-                double_helix.domain.count_by_direction(
+                double_helix.domain.counts[
                     double_helix.zeroed_helix.direction
-                ).body_count
+                ].body_count
                 + 2
             ) * self.nucleic_acid_profile.theta_b
             final_z_coord = initial_z_coord + (
                 (
-                    double_helix.domain.count_by_direction(
+                    double_helix.domain.count_by_direction[
                         double_helix.zeroed_helix.direction
-                    ).body_count
+                    ].body_count
                     + 2
                 )
                 * self.nucleic_acid_profile.Z_b
@@ -596,9 +594,9 @@ class Domains:
 
             # Since we generated an extra NEMid, we will trim it off here.
             trim_to = (
-                double_helix.domain.count_by_direction(
+                double_helix.domain.counts[
                     double_helix.zeroed_helix.direction
-                )
+                ]
                 * 2
             )
             zeroed_strand_angles = zeroed_strand_angles[:trim_to]

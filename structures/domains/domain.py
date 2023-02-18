@@ -1,4 +1,4 @@
-from typing import Tuple, Literal
+from typing import Tuple
 
 from constants.directions import *
 from structures.points.point import Point
@@ -191,16 +191,6 @@ class Domain:
 
         # set the index of the domain
         self.index = index
-
-    def count_by_direction(self, direction: Literal[UP, DOWN]) -> GenerationCount:
-        """
-        Get either the left_helix_count or the other_helix_count that possesses the
-        direction passed.
-        """
-        if direction == self.left_helix_count.direction():
-            return self.left_helix_count
-        else:
-            return self.other_helix_count
 
     def angles(self, start=0):
         """
