@@ -50,7 +50,7 @@ class Nucleoside(Point):
 
     def __repr__(self) -> str:
         return (
-            f"nucleoside("
+            f"Nucleoside("
             f"pos={self.position() if self.position is not None else None}, "
             f"angle={round(self.angle, 3) if self.angle is not None else None}°, "
             f"base={str(self.base).replace('None', 'unset')}"
