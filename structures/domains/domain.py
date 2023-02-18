@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from constants.directions import *
-from structures.points.point import Point
+from structures.points.point import x_coord_from_angle
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
 
@@ -212,7 +212,7 @@ class Domain:
             The x coords of each NEMid in the domain.
         """
         for angle in self.angles():
-            yield Point.x_coord_from_angle(angle, self)
+            yield x_coord_from_angle(angle, self)
 
     def z_coords(self, start=0):
         """
