@@ -1,6 +1,6 @@
 from constants.directions import DOWN, UP
-from utils import inverse
 from structures.helices.helix import Helix
+from utils import inverse
 
 
 class DoubleHelix:
@@ -31,22 +31,29 @@ class DoubleHelix:
 
     def __init__(
         self,
-            domain: "Domain",
-            up_helix: Helix,
-            down_helix: Helix,
+        domain: "Domain",
+        up_helix: Helix | None = None,
+        down_helix: Helix | None = None,
     ) -> None:
         """
         Initialize a double helix.
 
         Args:
-            domain: The domain that the double helix is to be in.
-            up_helix: The helix that progresses upwards from its 5' to 3' end.
-            down_helix: The helix that progresses downwards from its 5' to 3' end.
+            domain: The domain that the double helix is in.
+            up_helix: The helix that progresses upwards from its 5' to 3' end. If
+                None, a new and empty helix will be created.
+            down_helix: The helix that progresses downwards from its 5' to 3' end. If
+                None, a new and empty helix will be created.
         """
         self.domain = domain
-        self.helices = (up_helix, down_helix)
-        self.up_helix.direction = UP
-        self.down_helix.direction = DOWN
+        self.helices = (
+            up_helix or Helix(direction=UP, size=None, double_helix=self),
+            down_helix or Helix(direction=DOWN, size=None, double_helix=self),
+        )
+
+        # The helices must contain empty arrays of the size that the Domains indicates.
+        self.left_helix.data.resize(self.domain.left_helix_count)
+        self.other_helix.data.resize(self.domain.other_helix_count)
 
     def __getitem__(self, item):
         if item in (DOWN, UP):
