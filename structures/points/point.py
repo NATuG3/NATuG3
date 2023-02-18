@@ -10,6 +10,47 @@ from utils import inverse
 logger = logging.getLogger(__name__)
 
 
+def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
+    """
+    Compute a new x coord based on the angle and domain of this Point.
+
+    This is a utility function, and doesn't apply to a specific instance of Point.
+
+    Args:
+        angle: The angle of the point to compute an x coord for.
+        domain: The domain of the point having its x angle computed.
+
+    Returns:
+        The x coord.
+    """
+    # modulo the angle between 0 and 360
+    angle %= 360
+    # Bill changed below 2/12/23
+    # if domain.theta_s_multiple != 0 :
+    print(
+        "domain.theta_s_multiple",
+        domain.theta_s_multiple,
+        " domain.theta_s=",
+        domain.theta_s,
+        " N=",
+        domain.index,
+    )
+    theta_interior: float = domain.theta_m + domain.theta_s
+    theta_exterior: float = 360 - theta_interior
+
+    if angle < theta_exterior:
+        x_coord = angle / theta_exterior
+    else:
+        x_coord = (360 - angle) / theta_interior
+
+    # domain 0 lies between [0, 1] on the x axis
+    # domain 1 lies between [1, 2] on the x axis
+    # ect...
+    x_coord += domain.index
+
+    return x_coord
+
+
 @dataclass
 class PointStyles:
     """
@@ -186,7 +227,7 @@ class Point:
 
         # Compute the x coord from the angle if the x coord is not provided
         if self.x_coord is None and self.angle is not None and self.domain is not None:
-            self.x_coord = self.x_coord_from_angle(self.angle, self.domain)
+            self.x_coord = x_coord_from_angle(self.angle, self.domain)
 
         # Ensure that the direction is either UP or DOWN
         if self.direction not in (UP, DOWN, None):
@@ -345,47 +386,6 @@ class Point:
             return self == items[0] or self == items[-1]
         else:
             return self == self.strand.items[0] or self == self.strand.items[-1]
-
-    @staticmethod
-    def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
-        """
-        Compute a new x coord based on the angle and domain of this Point.
-
-        This is a utility function, and doesn't apply to a specific instance of Point.
-
-        Args:
-            angle: The angle of the point to compute an x coord for.
-            domain: The domain of the point having its x angle computed.
-
-        Returns:
-            The x coord.
-        """
-        # modulo the angle between 0 and 360
-        angle %= 360
-        # Bill changed below 2/12/23
-        # if domain.theta_s_multiple != 0 :
-        print(
-            "domain.theta_s_multiple",
-            domain.theta_s_multiple,
-            " domain.theta_s=",
-            domain.theta_s,
-            " N=",
-            domain.index,
-        )
-        theta_interior: float = domain.theta_m + domain.theta_s
-        theta_exterior: float = 360 - theta_interior
-
-        if angle < theta_exterior:
-            x_coord = angle / theta_exterior
-        else:
-            x_coord = (360 - angle) / theta_interior
-
-        # domain 0 lies between [0, 1] on the x axis
-        # domain 1 lies between [1, 2] on the x axis
-        # ect...
-        x_coord += domain.index
-
-        return x_coord
 
     @property
     def index(self):

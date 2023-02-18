@@ -10,7 +10,7 @@ import numpy as np
 from constants.bases import DNA
 from constants.directions import *
 from structures.points import NEMid, Nucleoside
-from structures.points.point import Point
+from structures.points.point import Point, x_coord_from_angle
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
@@ -418,7 +418,7 @@ class Strand:
         )
 
         # Generate additional x coordinates.
-        x_coords = [Point.x_coord_from_angle(angle, domain) for angle in angles]
+        x_coords = [x_coord_from_angle(angle, domain) for angle in angles]
         x_coords = np.array(x_coords)
 
         # Generate the z coords for the points.

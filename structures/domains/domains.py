@@ -12,7 +12,7 @@ from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.helices import DoubleHelices
-from structures.points.point import Point
+from structures.points.point import x_coord_from_angle
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 from structures.utils import converge_point_data
@@ -556,7 +556,7 @@ class Domains:
             # Generate all the x coords. X coords are generated based off of the angles,
             # so we will use map Point.x_coord_from_angle onto a copy of current_angles.
             zeroed_strand_x_coords = [
-                Point.x_coord_from_angle(angle, domain)
+                x_coord_from_angle(angle, domain)
                 for angle in zeroed_strand_angles
             ]
             zeroed_strand_x_coords = np.array(zeroed_strand_x_coords)
@@ -584,7 +584,7 @@ class Domains:
                 + self.nucleic_acid_profile.g * -other_strand_modifier
             )
             other_strand_x_coords = [
-                Point.x_coord_from_angle(angle, domain) for angle in other_strand_angles
+                x_coord_from_angle(angle, domain) for angle in other_strand_angles
             ]
             other_strand_x_coords = np.array(other_strand_x_coords)
             other_strand_z_coords = (
