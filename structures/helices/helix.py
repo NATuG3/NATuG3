@@ -5,10 +5,57 @@ from typing import Literal, Type
 import numpy as np
 
 from constants.directions import UP, DOWN
-from structures.domains import Domain
+from structures.helices import DoubleHelix
 from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
+
+
+@dataclass(slots=True)
+class HelixData:
+    """
+    A container for the data of a helix.
+
+    Attributes:
+        x_coords: The x-coordinates of the points in the helix.
+        z_coords: The z-coordinates of the points in the helix.
+        angles: The angles of the points in the helix.
+    """
+
+    __slots__ = "x_coords", "z_coords", "angles"
+    x_coords: np.ndarray | None
+    z_coords: np.ndarray | None
+    angles: np.ndarray | None
+
+    def __init__(self, size: int | None):
+        """
+        Initialize a container for the data of a helix.
+
+        Args:
+            size: The number of points in the helix.
+        """
+        if size is None:
+            self.x_coords = None
+            self.z_coords = None
+            self.angles = None
+        else:
+            self.x_coords = np.zeros(size)
+            self.z_coords = np.zeros(size)
+            self.angles = np.zeros(size)
+
+    def resize(self, size: int):
+        """
+        Resize the data arrays of the helix.
+
+        Args:
+            size: The new size of the helix.
+
+        Notes:
+            This method flushes the data of the helix. Use with caution.
+        """
+        self.x_coords = np.zeros(size)
+        self.z_coords = np.zeros(size)
+        self.angles = np.zeros(size)
 
 
 @dataclass(slots=True)
@@ -16,38 +63,31 @@ class Helix:
     """
     A singular helix in a double helix.
 
-    The number of points allowed in the helix is fixed at init.
-
     Attributes:
         direction: The direction of the helix. Either UP or DOWN.
-        domain: The domain that this helix belongs to.
-        x_coords: The x-coordinates of the points in the helix.
-        z_coords: The z-coordinates of the points in the helix.
-        angles: The angles of the points in the helix.
-        size: The number of points in the helix. This is fixed at init.
+        double_helix: The double helix that this helix belongs to.
+        data: The data of the helix. This is a HelixData object, and contains the
+            x-coordinates, z-coordinates, and angles of the points in the helix.
     """
 
-    def __init__(self, direction: Literal[UP, DOWN], size: int, domain: Domain):
+    def __init__(
+        self,
+        direction: Literal[UP, DOWN],
+        size: int | None,
+        double_helix: DoubleHelix | None = None,
+    ):
         """
         Initialize a helix.
 
         Args:
             direction: The direction of the helix. Either UP or DOWN.
-            size: The number of points in the helix. This is fixed once set.
-            domain: The domain that this helix belongs to.
+            size: The number of points in the helix. If None, the size can be set
+                later with the resize method.
+            double_helix: The double helix that this helix belongs to.
         """
         self.direction = direction
-        self.domain = domain
-        self._size = size
-
-        self.x_coords = np.zeros(self.size)
-        self.z_coords = np.zeros(self.size)
-        self.angles = np.zeros(self.size)
-
-    @property
-    def size(self):
-        """The number of items in the given arrays of the helix."""
-        return self._size
+        self.double_helix = double_helix
+        self.data = HelixData(size)
 
     def point(self, type_: Literal[Type[Nucleoside], Type[NEMid]] = Nucleoside):
         """
