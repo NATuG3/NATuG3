@@ -266,7 +266,6 @@ class Point:
                 and self.strand.strands is point.strand.strands
             )
         ):
-            width = width or len(self.strand.strands.double_helices)
             right_side_point = point if self.x_coord == 0 else self
             if (
                 abs(right_side_point.x_coord - width) < settings.junction_threshold

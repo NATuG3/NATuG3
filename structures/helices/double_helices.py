@@ -5,6 +5,7 @@ import numpy as np
 from numpy import argmax
 
 from constants.directions import DOWN
+from structures.points import NEMid
 from structures.points.point import x_coord_from_angle
 
 
@@ -82,14 +83,45 @@ class DoubleHelices:
         """
         from structures.strands import Strands
 
-        strands = []
-        for double_helix in self:
-            for helix in double_helix.helices:
-                strands.append(helix.strand(self.nucleic_acid_profile))
+        strands = Strands(nucleic_acid_profile=self.nucleic_acid_profile, strands=())
 
+        double_helices = []
+        for double_helix in self:
+            up_helix = double_helix.up_helix.strand(
+                self.nucleic_acid_profile, strands=strands
+            )
+            down_helix = double_helix.down_helix.strand(
+                self.nucleic_acid_profile, begin=NEMid
+            )
+            double_helices.append((up_helix, down_helix))
+
+        # Assign junctability to each NEMid that superposes a NEMid in a helix of the
+        # subsequent double helix.
+        for index, double_helix in enumerate(double_helices):
+            if index == len(double_helices) - 1:
+                next_double_helix = double_helices[0]
+            else:
+                next_double_helix = double_helices[index + 1]
+
+            # Iterate through all the points in the current double helix, and check
+            # if they superpose with any points in the next double helix. Note that
+            # each double helix contains two helices, so we must iterate through all
+            # the points in both helices.
+            for helix1 in double_helix:
+                for helix2 in next_double_helix:
+                    for point1 in helix1.items.by_type(NEMid):
+                        for point2 in helix2.items.by_type(NEMid):
+                            if point1.overlaps(point2, width=len(self.domains())):
+                                point1.junctable = True
+                                point1.juncmate = point2
+                                point2.junctable = True
+                                point2.juncmate = point1
+
+        strands = [helix for double_helix in double_helices for helix in double_helix]
         strands = Strands(
             strands=strands, nucleic_acid_profile=self.nucleic_acid_profile
         )
+
         strands.style()
         return strands
 
@@ -253,4 +285,17 @@ class DoubleHelices:
             )
             double_helix.other_helix.data.x_coords = x_coords_from_angles(
                 double_helix.other_helix.data.angles, domain
+            )
+
+            # Now reverse the items in the down helix, whichever the zeroed helix may
+            # be. It could be either the zeroed helix or the other helix, but we'll
+            # just reference it with double_helix.down_helix.
+            double_helix.down_helix.data.z_coords = np.flip(
+                double_helix.down_helix.data.z_coords
+            )
+            double_helix.down_helix.data.angles = np.flip(
+                double_helix.down_helix.data.angles
+            )
+            double_helix.down_helix.data.x_coords = np.flip(
+                double_helix.down_helix.data.x_coords
             )

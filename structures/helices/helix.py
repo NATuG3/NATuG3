@@ -148,7 +148,11 @@ class Helix:
             )
 
     def strand(
-        self, nucleic_acid_profile: NucleicAcidProfile, strand: Strand = None
+        self,
+        nucleic_acid_profile: NucleicAcidProfile,
+        begin: Literal[Nucleoside, NEMid] = Nucleoside,
+        strand: Strand = None,
+        **kwargs
     ) -> Strand:
         """
         Convert the strand builder to a Strand object.
@@ -157,11 +161,14 @@ class Helix:
             nucleic_acid_profile: The nucleic acid profile to use for the strand.
             strand: The strand to fill with the data in the arrays. If None, a new
                 strand is created and returned.
+            begin: The type of the first item in the strand. Either Nucleoside or
+                NEMid.
+            **kwargs: Keyword arguments to pass to the Strand constructor.
 
         Returns:
             Strand: The strand with the data in the arrays. Either a new strand or
                 the strand passed in.
         """
-        strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile)
-        strand.extend(tuple(self.points()))
+        strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile, **kwargs)
+        strand.extend(tuple(self.points(begin=begin)))
         return strand

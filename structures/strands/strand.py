@@ -164,6 +164,8 @@ class Strand:
         cross_screen: Whether this strand wraps across the screen.
         direction: Whether this is an up or down helix. This is only useful for when
             the strand represents a helix.
+        strands: The container that this strand is in. Can be None. Is automatically
+            set when the strand is added to a Strands container.
 
     Methods:
         append(item): Add an item to the right of the strand.
@@ -198,6 +200,7 @@ class Strand:
         styles: StrandStyles = None,
         nucleic_acid_profile: NucleicAcidProfile = None,
         direction=None,
+        strands=None,
     ):
         self.name = name
         self.items = StrandItems() if items is None else StrandItems(items)
@@ -209,6 +212,7 @@ class Strand:
             else nucleic_acid_profile
         )
         self.direction = direction
+        self.strands = strands
 
     def __post_init__(self):
         self.items = StrandItems(self.items)
