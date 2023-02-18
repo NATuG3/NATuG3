@@ -486,8 +486,9 @@ class Strand:
         Args:
             items: The iterable to extend with.
         """
+        self.extend(items)
         for item in items:
-            self.append(item)
+            item.strand = self
 
     def leftextend(self, items: Iterable[Point | Linkage]) -> None:
         """
@@ -496,8 +497,9 @@ class Strand:
         Args:
             items: The iterable to extend with.
         """
+        self.leftextend(items)
         for item in items:
-            self.appendleft(item)
+            item.strand = self
 
     def NEMids(self) -> List[NEMid]:
         """
