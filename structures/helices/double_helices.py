@@ -4,8 +4,6 @@ from typing import List, Iterator
 import numpy as np
 from numpy import argmax
 
-from structures.domains import Domains, Domain
-from structures.helices import DoubleHelix
 from structures.points.point import x_coord_from_angle
 
 
@@ -31,7 +29,7 @@ class DoubleHelices:
 
     __slots__ = "double_helices", "nucleic_acid_profile"
 
-    def __init__(self, domains: Domains, nucleic_acid_profile) -> None:
+    def __init__(self, domains: "Domains", nucleic_acid_profile) -> None:
         """
         Initialize a container for DoubleHelix objects.
 
@@ -44,6 +42,8 @@ class DoubleHelices:
                 and the .domains() method will be used to fetch all the domains.
             nucleic_acid_profile: The nucleic acid profile to use for computations.
         """
+        from structures.helices import DoubleHelix
+
         self.double_helices = [DoubleHelix(domain) for domain in domains.domains()]
         self.nucleic_acid_profile = nucleic_acid_profile
 
@@ -53,10 +53,10 @@ class DoubleHelices:
     def __getitem__(self, index: int) -> "DoubleHelix":
         return self.double_helices[index]
 
-    def __setitem__(self, index: int, value: DoubleHelix):
+    def __setitem__(self, index: int, value: "DoubleHelix"):
         self.double_helices[index] = value
 
-    def __iter__(self) -> Iterator[DoubleHelix]:
+    def __iter__(self) -> Iterator["DoubleHelix"]:
         return iter(self.double_helices)
 
     def domains(self) -> List["Domain"]:
@@ -68,6 +68,26 @@ class DoubleHelices:
         """
         return [double_helix.domain for double_helix in self.double_helices]
 
+    def strands(self) -> "Strands":
+        """
+        Convert all the helices within the double helices within this container to
+        strands, and package them within a Strands container.
+
+        The .compute() method of this class must have been previously run for the
+        data to be correct.
+
+        Returns:
+            A Strands container containing all the strands.
+        """
+        from structures.strands import Strand, Strands
+
+        strands = np.empty(len(self), dtype=Strand)
+        for i, double_helix in enumerate(self):
+            strands[i] = double_helix.up_helix.to_strand(self.nucleic_acid_profile)
+            strands[i] = double_helix.down_helix.to_strand(self.nucleic_acid_profile)
+
+        return Strands(strands=strands, nucleic_acid_profile=self.nucleic_acid_profile)
+
     def compute(self):
         """
         Compute the point data for each helix.
@@ -76,14 +96,12 @@ class DoubleHelices:
         is stored in the helices respective x coord, z coord, and angle arrays.
         """
 
-        def x_coords_from_angles(x_coords: np.ndarray, domain: Domain) -> np.ndarray:
+        def x_coords_from_angles(x_coords: np.ndarray, domain: "Domain") -> np.ndarray:
             return np.array(
                 map(lambda angle: x_coord_from_angle(angle, domain), x_coords)
             )
 
         for index, double_helix in enumerate(self):
-            double_helix: DoubleHelix
-
             # Create a reference to the previous double helix
             previous_double_helix = self[index - 1]
 
@@ -95,8 +113,8 @@ class DoubleHelices:
                 # The initial z coord for all domains except the zeroth domain is the
                 # z coordinate of the right-most point of the previous double helix's
                 # right joint helix.
-                initial_z_coord = previous_double_helix.right_helix.z_coords[
-                    argmax(previous_double_helix.right_helix.x_coords)
+                initial_z_coord = previous_double_helix.right_helix.data.z_coords[
+                    argmax(previous_double_helix.right_helix.data.x_coords)
                 ]
 
                 # Shift down the initial z coord. We can shift it down in increments
@@ -177,8 +195,8 @@ class DoubleHelices:
             # coord array from the zeroed helix, and then shift them
             # up by half an increment.
             double_helix.other_helix.data.z_coords = (
-                    double_helix.other_helix.data.z_coords
-                    + (self.nucleic_acid_profile.Z_b / 2)
+                double_helix.other_helix.data.z_coords
+                + (self.nucleic_acid_profile.Z_b / 2)
             )
             double_helix.other_helix.data.angles = (
                 double_helix.zeroed_helix.data.angles
@@ -187,4 +205,3 @@ class DoubleHelices:
             double_helix.other_helix.data.x_coords = x_coords_from_angles(
                 double_helix.other_helix.data.angles, double_helix.domain
             )
-

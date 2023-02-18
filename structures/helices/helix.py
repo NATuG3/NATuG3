@@ -5,7 +5,6 @@ from typing import Literal, Type
 import numpy as np
 
 from constants.directions import UP, DOWN
-from structures.helices import DoubleHelix
 from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
@@ -75,7 +74,7 @@ class Helix:
         self,
         direction: Literal[UP, DOWN],
         size: int | None,
-        double_helix: DoubleHelix | None = None,
+        double_helix: "DoubleHelix" | None = None,
     ):
         """
         Initialize a helix.
