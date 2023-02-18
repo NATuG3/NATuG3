@@ -198,13 +198,14 @@ class Strand:
         items: Iterable[Point] = None,
         name: str = "Strand",
         closed: bool = False,
+        styles: StrandStyles = None,
         nucleic_acid_profile: NucleicAcidProfile = None,
         direction=None,
     ):
         self.name = name
         self.items = StrandItems() if items is None else StrandItems(items)
         self.closed = closed
-        self.styles = StrandStyles(self)
+        self.styles = styles or StrandStyles(self)
         self.nucleic_acid_profile = (
             NucleicAcidProfile()
             if nucleic_acid_profile is None
@@ -216,8 +217,7 @@ class Strand:
         self.items = StrandItems(self.items)
         for item in self.items:
             item.strand = self
-        if self.styles.strand == None:
-            self.styles.strand = self
+        self.styles.strand = self
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
@@ -486,7 +486,7 @@ class Strand:
         Args:
             items: The iterable to extend with.
         """
-        self.extend(items)
+        self.items.extend(items)
         for item in items:
             item.strand = self
 
@@ -497,7 +497,7 @@ class Strand:
         Args:
             items: The iterable to extend with.
         """
-        self.leftextend(items)
+        self.items.leftextend(items)
         for item in items:
             item.strand = self
 
@@ -692,5 +692,3 @@ class Strand:
             [item.z_coord for item in self.items]
         )
         return width, height
-
-
