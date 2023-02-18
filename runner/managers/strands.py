@@ -44,7 +44,8 @@ class StrandsManager:
         """
         Dump the current strands into a file.
 
-        The strands are dumped into a file using pickle, so that they can be loaded later.
+        The strands are dumped into a file using pickle, so that they can be loaded
+        later.
         """
         with open(self.restored_filepath, "wb") as file:
             pickle.dump(self.current, file)
@@ -53,10 +54,12 @@ class StrandsManager:
         """
         Recompute the strands.
 
-        This uses domains.strands() to recompute all data for strands.
+        This method first recomputes the double helices, and then uses the double
+        helices strand conversion functions to fetch a new strands object.
 
         Notes:
             This is a very expensive operation.
         """
-        self.current = self.runner.managers.domains.current.strands()
+        self.runner.managers.double_helices.recompute()
+        self.current = self.runner.managers.double_helices.current.to_strands()
         return self.current
