@@ -66,6 +66,7 @@ class Helix:
     Attributes:
         direction: The direction of the helix. Either UP or DOWN.
         double_helix: The double helix that this helix belongs to.
+        domain: The domain that this helix lies within.
         data: The data of the helix. This is a HelixData object, and contains the
             x-coordinates, z-coordinates, and angles of the points in the helix.
     """
@@ -88,6 +89,11 @@ class Helix:
         self.direction = direction
         self.double_helix = double_helix
         self.data = HelixData(size)
+
+    @property
+    def domain(self):
+        """The domain that this helix lies within."""
+        return self.double_helix.domain
 
     def point(self, type_: Literal[Type[Nucleoside], Type[NEMid]] = Nucleoside):
         """
