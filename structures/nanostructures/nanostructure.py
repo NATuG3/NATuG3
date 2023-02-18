@@ -7,7 +7,6 @@ import xlsxwriter
 from openpyxl import load_workbook
 
 from structures.domains import Domains
-from structures.helices import DoubleHelices
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 
