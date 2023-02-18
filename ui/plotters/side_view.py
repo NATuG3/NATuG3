@@ -241,7 +241,9 @@ class SideViewPlotter(pg.PlotWidget):
 
                     # store the symbol brush
                     symbol_brushes.append(
-                        pg.mkBrush(color=point.styles.fill, width=point.styles.outline[1])
+                        pg.mkBrush(
+                            color=point.styles.fill, width=point.styles.outline[1]
+                        )
                     )
 
                     # store the symbol pen

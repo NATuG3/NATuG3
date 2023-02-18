@@ -83,7 +83,6 @@ class DoubleHelices:
 
         strands = []
         for double_helix in self:
-            print(double_helix.other_helix.data)
             for helix in double_helix.helices:
                 strands.append(helix.strand(self.nucleic_acid_profile))
 

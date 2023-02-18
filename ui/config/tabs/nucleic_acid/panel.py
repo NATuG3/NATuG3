@@ -93,7 +93,10 @@ class NucleicAcidPanel(QWidget):
             if len(name) > 0:
                 profile = self.profile_manager.profiles[name]
                 self.updated.emit(
-                    partial(self.runner.managers.nucleic_acid_profile.current.update, profile)
+                    partial(
+                        self.runner.managers.nucleic_acid_profile.current.update,
+                        profile,
+                    )
                 )
 
         # connect signals

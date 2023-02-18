@@ -73,7 +73,6 @@ class Window(QMainWindow):
         self.config = Dockable(
             self,
             self.runner,
-
         )
 
         # only allow config to dock left/right

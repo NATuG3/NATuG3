@@ -1,7 +1,6 @@
 import pickle
 
 
-
 class Save:
     """
     Create a package to pickle and save.

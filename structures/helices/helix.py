@@ -92,6 +92,13 @@ class Helix:
         self.double_helix = double_helix
         self.data = HelixData(size)
 
+    def __len__(self):
+        """Return the number of points in the helix."""
+        assert (
+            len(self.data.x_coords) == len(self.data.z_coords) == len(self.data.angles)
+        )
+        return len(self.data.angles)
+
     @property
     def domain(self):
         """The domain that this helix lies within."""
@@ -155,6 +162,7 @@ class Helix:
             Strand: The strand with the data in the arrays. Either a new strand or
                 the strand passed in.
         """
+        print(len(helix))
         strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile)
         strand.extend(tuple(self.points()))
         return strand
