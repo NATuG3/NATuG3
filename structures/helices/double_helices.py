@@ -1,14 +1,12 @@
 from math import ceil
-from typing import List
+from typing import List, Iterator
 
 import numpy as np
 from numpy import argmax
 
-from constants.directions import DOWN, UP
-from structures.domains import Domains
+from structures.domains import Domains, Domain
 from structures.helices import DoubleHelix
-from structures.helices.helix import Helix
-from utils import inverse
+from structures.points.point import x_coord_from_angle
 
 
 class DoubleHelices:
@@ -41,40 +39,12 @@ class DoubleHelices:
         domains' GenerationCounts.
 
         Args:
-            domains: A list of Domain objects.
+            domains: A Domains object containing the domains for the creation of the
+                double helices. Each domain will be used to create a double helix,
+                and the .domains() method will be used to fetch all the domains.
             nucleic_acid_profile: The nucleic acid profile to use for computations.
         """
-        self.double_helices = np.ndarray((len(domains),), dtype=DoubleHelix)
-        for index, domain in enumerate(domains.domains()):
-            # When we instantiate a DoubleHelix, we need to pass an up and a down
-            # helix, since every double helix must have exactly one of each. However,
-            # the user inputs the generation counts (number of points to generate) for
-            # the given helices based on the zeroedness of the helices--that is,
-            # which helix is lined up to the right helix joint direction helix of the
-            # previous domain.
-
-            # Determine whether the zeroed helix is the up or down helix, and then
-            # fetch the sum of the generation count for the helix. Then create the helix.
-            zeroed_helix_direction = domain.left_helix_joint
-            zeroed_helix_count = sum(domain.count_by_direction(zeroed_helix_direction))
-            zeroed_helix = Helix(
-                direction=zeroed_helix_direction, size=zeroed_helix_count, domain=domain
-            )
-
-            # Repeat the same steps as above for the helix with the opposite direction.
-            other_helix_direction = inverse(zeroed_helix_direction)
-            other_helix_count = sum(domain.count_by_direction(other_helix_direction))
-            other_helix = Helix(
-                direction=other_helix_direction, size=other_helix_count, domain=domain
-            )
-
-            # Create references to the helices based on their direction.
-            up_helix = zeroed_helix if zeroed_helix.direction == UP else other_helix
-            down_helix = zeroed_helix if zeroed_helix.direction == DOWN else other_helix
-
-            # Create and store a DoubleHelix object that contains the two helices.
-            self.double_helices[index] = DoubleHelix(domain, up_helix, down_helix)
-
+        self.double_helices = [DoubleHelix(domain) for domain in domains.domains()]
         self.nucleic_acid_profile = nucleic_acid_profile
 
     def __len__(self) -> int:
@@ -86,7 +56,7 @@ class DoubleHelices:
     def __setitem__(self, index: int, value: DoubleHelix):
         self.double_helices[index] = value
 
-    def __iter__(self) -> "DoubleHelix":
+    def __iter__(self) -> Iterator[DoubleHelix]:
         return iter(self.double_helices)
 
     def domains(self) -> List["Domain"]:
@@ -105,15 +75,15 @@ class DoubleHelices:
         This computes the x coord, z coord, and angle arrays for each helix. The data
         is stored in the helices respective x coord, z coord, and angle arrays.
         """
-        # Each domain (except the zeroth domain) is lined up such that the left side
-        # of the domain lines up exactly with NEMids of the right side of the
-        # previous domain; however, each domain still has two helices.
 
-        # What we will do is compute the NEMids for the side of the domain that makes
-        # a connection with the previous domain, and then we will compute the NEMids
-        # for the other side of the domain later.
+        def x_coords_from_angles(x_coords: np.ndarray, domain: Domain) -> np.ndarray:
+            return np.array(
+                map(lambda angle: x_coord_from_angle(angle, domain), x_coords)
+            )
 
         for index, double_helix in enumerate(self):
+            double_helix: DoubleHelix
+
             # Create a reference to the previous double helix
             previous_double_helix = self[index - 1]
 
@@ -139,10 +109,82 @@ class DoubleHelices:
                     ceil(initial_z_coord / decrease_interval) * decrease_interval
                 )
 
-            # We will compute the angles with numpy.arange(), which takes a start
-            # value and a stop value, and increments by a step value. The start value
-            # is 0, and the stop value is the number of points to generate times
-            # theta_b + 1. We add +1 since it's ok if we generate extra points,
-            # but we don't want any chance of missing a point due to being slightly
-            # under the step value * theta_b. The step value is theta_b.
-            angles = np.arange(
+            # Determine how many points (nucleosides/NEMids) the initial z coord
+            # is below the x-axis. We are allowed to shift up the z coords so long as
+            # we also increment the angles and x coords accordingly.
+            if initial_z_coord >= 0:
+                shifts = 0
+            else:
+                shifts = round(
+                    np.divide(abs(initial_z_coord), self.nucleic_acid_profile.Z_b)
+                )
+
+            # Increment the starting z coord by the height between bases times the
+            # number of shifts that we must apply to force the initial z coord to be
+            # above the x-axis.
+            initial_z_coord += shifts * self.nucleic_acid_profile.Z_b
+            # Since we've shifted the z coord, we must also shift the angle accordingly.
+            initial_angle = shifts * self.nucleic_acid_profile.theta_b
+            # Note that the x coordinates are generated based off of the angles,
+            # so we don't need to even define an "initial_x_coord" variable.
+
+            # We must take into consideration the bottom_count of the zeroed helix.
+            # The bottom count is how many more shifts down to go, on top of the
+            # shifts that we've already applied. We will apply these shifts to the
+            # initial z coord, and initial angle that we've just computed.
+            increments = double_helix.zeroed_helix.domain.generation_count.bottom_count
+            initial_z_coord -= increments * self.nucleic_acid_profile.Z_b
+            initial_angle -= increments * self.nucleic_acid_profile.theta_b
+
+            # Now we can determine the ending z coord and angle for the zeroed helix.
+            # It is the domain's body_count plus the domain's top_count number of
+            # increments up from the respective initial z coord and angle.
+            increments = (
+                double_helix.zeroed_helix.domain.generation_count.body_count
+                + double_helix.zeroed_helix.domain.generation_count.top_count
+            )
+            final_z_coord = initial_z_coord + increments * self.nucleic_acid_profile.Z_b
+            final_angle = initial_angle + increments * self.nucleic_acid_profile.theta_b
+
+            # Compute the z coord and angle data for the zeroed helix; we will
+            # generate the angles based off of the x coords later. Recall that we're
+            # generating for the zeroed helix first because the initial z coord is
+            # defined to be the z coord of the right-most point of the previous
+            # double helix's right joint helix, which makes this domain's left helix
+            # the zeroed helix.
+            double_helix.zeroed_helix.data.z_coords = np.arange(
+                start=initial_z_coord,
+                stop=final_z_coord,
+                step=self.nucleic_acid_profile.Z_b,
+            )
+            double_helix.zeroed_helix.data.angles = np.arange(
+                start=initial_angle,
+                stop=final_angle,
+                step=self.nucleic_acid_profile.theta_b,
+            )
+
+            # The angles are computed based off of the x coords using the predefined
+            # x_coord_from_angle function. The map() function returns a generator
+            # that yields the x_coords_from_angle() function applied to each angle
+            # one by one. Then we convert the generator to a numpy array.
+            double_helix.zeroed_helix.data.x_coords = x_coords_from_angles(
+                double_helix.zeroed_helix.data.angles, double_helix.domain
+            )
+
+            # Now we can compute the x coords, z coords, and angles for the "other
+            # helix" (the strand in the same double helix that is of the opposite
+            # direction of the "zeroed helix"). We will simply copy the angle and z
+            # coord array from the zeroed helix, and then shift them
+            # up by half an increment.
+            double_helix.other_helix.data.z_coords = (
+                    double_helix.other_helix.data.z_coords
+                    + (self.nucleic_acid_profile.Z_b / 2)
+            )
+            double_helix.other_helix.data.angles = (
+                double_helix.zeroed_helix.data.angles
+                + (self.nucleic_acid_profile.theta_b / 2)
+            )
+            double_helix.other_helix.data.x_coords = x_coords_from_angles(
+                double_helix.other_helix.data.angles, double_helix.domain
+            )
+
