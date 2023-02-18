@@ -69,6 +69,10 @@ class Helix:
             x-coordinates, z-coordinates, and angles of the points in the helix.
     """
 
+    direction: Literal[UP, DOWN]
+    double_helix: Type["DoubleHelix"] | None
+    data: HelixData
+
     def __init__(
         self,
         direction: Literal[UP, DOWN],
@@ -100,11 +104,13 @@ class Helix:
         Args:
             type_: The type of the point to return. Either Nucleoside or NEMid.
         """
+        domain = self.double_helix.domain if self.double_helix else None
         return type_(
-            angle=self.angles[0],  # type: ignore
-            x_coord=self.x_coords[0],  # type: ignore
-            z_coord=self.z_coords[0],  # type: ignore
+            angle=self.data.angles[0],  # type: ignore
+            x_coord=self.data.x_coords[0],  # type: ignore
+            z_coord=self.data.z_coords[0],  # type: ignore
             direction=self.direction,  # type: ignore
+            domain=domain,  # type: ignore
         )
 
     def points(self, begin=Nucleoside):
@@ -117,22 +123,24 @@ class Helix:
         Yields:
             Nucleoside or NEMid: The next item in the strand.
         """
-        for cls, angle, x_coord, z_coord in np.column_stack(
+        domain = self.double_helix.domain if self.double_helix else None
+        for cls, angle, x_coord, z_coord in zip(
             itertools.cycle(
                 (NEMid, Nucleoside) if begin == NEMid else (Nucleoside, NEMid)
             ),
-            self.angles,
-            self.x_coords,
-            self.z_coords,
+            self.data.angles,
+            self.data.x_coords,
+            self.data.z_coords,
         ):
-            yield cls(
+            yield cls(  # type: ignore
                 angle=angle,
                 x_coord=x_coord,
                 z_coord=z_coord,
                 direction=self.direction,
+                domain=domain,
             )
 
-    def to_strand(
+    def strand(
         self, nucleic_acid_profile: NucleicAcidProfile, strand: Strand = None
     ) -> Strand:
         """
@@ -148,5 +156,5 @@ class Helix:
                 the strand passed in.
         """
         strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile)
-        strand.extend(self.points())
+        strand.extend(tuple(self.points()))
         return strand

@@ -1,5 +1,5 @@
 from runner.managers.domains import DomainsManager
-from runner.managers.helices import DoubleHelicesManager
+from runner.managers.double_helices import DoubleHelicesManager
 from runner.managers.misc import MiscManager
 from runner.managers.nucleic_acid_profile import NucleicAcidProfileManager
 from runner.managers.strands import StrandsManager

@@ -66,7 +66,7 @@ class DoubleHelices:
         Returns:
             A list of all the domains.
         """
-        return [double_helix.domain for double_helix in self.double_helices]
+        return [domain for domain in self.double_helices]
 
     def strands(self) -> "Strands":
         """
@@ -79,14 +79,19 @@ class DoubleHelices:
         Returns:
             A Strands container containing all the strands.
         """
-        from structures.strands import Strand, Strands
+        from structures.strands import Strands
 
-        strands = np.empty(len(self), dtype=Strand)
-        for i, double_helix in enumerate(self):
-            strands[i] = double_helix.up_helix.to_strand(self.nucleic_acid_profile)
-            strands[i] = double_helix.down_helix.to_strand(self.nucleic_acid_profile)
+        strands = []
+        for double_helix in self:
+            print(double_helix.other_helix.data)
+            for helix in double_helix.helices:
+                strands.append(helix.strand(self.nucleic_acid_profile))
 
-        return Strands(strands=strands, nucleic_acid_profile=self.nucleic_acid_profile)
+        strands = Strands(
+            strands=strands, nucleic_acid_profile=self.nucleic_acid_profile
+        )
+        strands.style()
+        return strands
 
     def compute(self):
         """
@@ -95,15 +100,10 @@ class DoubleHelices:
         This computes the x coord, z coord, and angle arrays for each helix. The data
         is stored in the helices respective x coord, z coord, and angle arrays.
         """
-
-        def x_coords_from_angles(x_coords: np.ndarray, domain: "Domain") -> np.ndarray:
-            return np.array(
-                map(lambda angle: x_coord_from_angle(angle, domain), x_coords)
-            )
-
         for index, double_helix in enumerate(self):
             # Create a reference to the previous double helix
             previous_double_helix = self[index - 1]
+            domain = double_helix.domain
 
             if index == 0:
                 # The first domain is a special case. The z coord of the first NEMid
@@ -150,7 +150,7 @@ class DoubleHelices:
             # The bottom count is how many more shifts down to go, on top of the
             # shifts that we've already applied. We will apply these shifts to the
             # initial z coord, and initial angle that we've just computed.
-            increments = double_helix.zeroed_helix.domain.generation_count.bottom_count
+            increments = double_helix.zeroed_helix.domain.left_helix_count.bottom_count
             initial_z_coord -= increments * self.nucleic_acid_profile.Z_b
             initial_angle -= increments * self.nucleic_acid_profile.theta_b
 
@@ -158,8 +158,8 @@ class DoubleHelices:
             # It is the domain's body_count plus the domain's top_count number of
             # increments up from the respective initial z coord and angle.
             increments = (
-                double_helix.zeroed_helix.domain.generation_count.body_count
-                + double_helix.zeroed_helix.domain.generation_count.top_count
+                double_helix.zeroed_helix.domain.left_helix_count.body_count
+                + double_helix.zeroed_helix.domain.left_helix_count.top_count
             )
             final_z_coord = initial_z_coord + increments * self.nucleic_acid_profile.Z_b
             final_angle = initial_angle + increments * self.nucleic_acid_profile.theta_b
@@ -185,9 +185,13 @@ class DoubleHelices:
             # x_coord_from_angle function. The map() function returns a generator
             # that yields the x_coords_from_angle() function applied to each angle
             # one by one. Then we convert the generator to a numpy array.
-            double_helix.zeroed_helix.data.x_coords = x_coords_from_angles(
-                double_helix.zeroed_helix.data.angles, double_helix.domain
+            double_helix.zeroed_helix.data.x_coords = np.zeros_like(
+                double_helix.zeroed_helix.data.angles
             )
+            for i, angle in enumerate(double_helix.zeroed_helix.data.angles):
+                double_helix.zeroed_helix.data.x_coords[i] = x_coord_from_angle(
+                    angle, domain
+                )
 
             # Now we can compute the x coords, z coords, and angles for the "other
             # helix" (the strand in the same double helix that is of the opposite
@@ -202,6 +206,10 @@ class DoubleHelices:
                 double_helix.zeroed_helix.data.angles
                 + (self.nucleic_acid_profile.theta_b / 2)
             )
-            double_helix.other_helix.data.x_coords = x_coords_from_angles(
-                double_helix.other_helix.data.angles, double_helix.domain
+            double_helix.other_helix.data.x_coords = np.zeros_like(
+                double_helix.other_helix.data.angles
             )
+            for i, angle in enumerate(double_helix.other_helix.data.angles):
+                double_helix.other_helix.data.x_coords[i] = x_coord_from_angle(
+                    angle, domain
+                )

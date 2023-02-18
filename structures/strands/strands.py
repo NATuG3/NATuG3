@@ -381,6 +381,7 @@ class Strands:
         Args:
             skip_checks: Whether to skip checks for strand direction consistency.
         """
+        logger.debug("Recomputing strand styles...")
         for strand in self.strands:
             if strand.styles.thickness.automatic:
                 if strand.interdomain():

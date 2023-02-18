@@ -52,6 +52,7 @@ class Runner:
         # profile manager has been loaded).
         self.managers.nucleic_acid_profile.setup()
         self.managers.domains.setup()
+        self.managers.double_helices.setup()
         self.managers.strands.setup()
         logger.debug("Managers loaded.")
 

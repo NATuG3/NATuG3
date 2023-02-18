@@ -26,15 +26,6 @@ def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
     # modulo the angle between 0 and 360
     angle %= 360
     # Bill changed below 2/12/23
-    # if domain.theta_s_multiple != 0 :
-    print(
-        "domain.theta_s_multiple",
-        domain.theta_s_multiple,
-        " domain.theta_s=",
-        domain.theta_s,
-        " N=",
-        domain.index,
-    )
     theta_interior: float = domain.theta_m + domain.theta_s
     theta_exterior: float = 360 - theta_interior
 
@@ -238,6 +229,7 @@ class Point:
             self.styles.point = self
         else:
             self.styles = PointStyles(point=self)
+            self.styles.change_state("default")
 
         self.styles.reset()
 

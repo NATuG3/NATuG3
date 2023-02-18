@@ -55,20 +55,13 @@ class DoubleHelix:
         self.left_helix.data.resize(self.domain.left_helix_count)
         self.other_helix.data.resize(self.domain.other_helix_count)
 
-    def __getitem__(self, item):
-        if item in (DOWN, UP):
-            return self[item]
-
-    def __iter__(self):
-        return iter(self.helices)
-
     @property
     def left_helix(self) -> Helix:
         """
         The helix that is on the left side of the domain and is thus lined up with
         the previous domain's right helical joint.
         """
-        return self[self.domain.left_helix_joint]
+        return self.helices[self.domain.left_helix_joint]
 
     @property
     def right_helix(self) -> Helix:
@@ -76,32 +69,32 @@ class DoubleHelix:
         The helix that is on the right side of the domain and is thus lined up with the
         next domain's left helical joint.
         """
-        return self[self.domain.right_helix_joint]
+        return self.helices[self.domain.right_helix_joint]
 
     @property
     def up_helix(self) -> Helix:
         """
         The helix that has progresses upwards from its 5' to 3' ends.
         """
-        return self[UP]
+        return self.helices[UP]
 
     @property
     def down_helix(self) -> Helix:
         """
         The helix that has progresses downwards from its 5' to 3' ends.
         """
-        return self[DOWN]
+        return self.helices[DOWN]
 
     @property
     def zeroed_helix(self) -> Helix:
         """
         The helix that is lined up with the previous double helix on the left side.
         """
-        return self[self.domain.left_helix_joint]
+        return self.helices[self.domain.left_helix_joint]
 
     @property
     def other_helix(self) -> Helix:
         """
         The other helix in the same domain as the zeroed helix.
         """
-        return self[inverse(self.domain.left_helix_joint)]
+        return self.helices[inverse(self.domain.left_helix_joint)]

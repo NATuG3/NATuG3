@@ -15,9 +15,19 @@ class DoubleHelicesManager:
     def __init__(self, runner: "runner.Runner"):
         """Initialize the double helices module."""
         self.runner = runner
+        self.current = None
+
+    def setup(self):
+        """
+        Setup the double helices manager.
+
+        This method creates the double helices object. The .compute() method of the
+        DoubleHelices must be called to obtain actual data, but the StrandsManager
+        calls that method automatically.
+        """
         self.current = DoubleHelices(
-            runner.managers.domains.current,
-            runner.managers.nucleic_acid_profile.current,
+            self.runner.managers.domains.current,
+            self.runner.managers.nucleic_acid_profile.current,
         )
 
     def recompute(self):
