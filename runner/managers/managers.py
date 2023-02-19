@@ -29,6 +29,5 @@ class Managers:
         self.nucleic_acid_profile.setup()
         self.domains.setup()
         self.strands.setup()
-        self.nanostructure.setup()
         self.toolbar.setup()
         # self.misc doesn't require setup()
