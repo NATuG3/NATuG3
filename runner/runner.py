@@ -85,6 +85,10 @@ class Runner:
         """
         Save the program state to a .natug file.
 
+        Returns:
+            False: If the user cancelled the file dialog.
+            True: If the file was successfully saved.
+
         Args:
             filepath (str): The path to the file to save. If None, a file dialog
                 will be opened to select the file to save.
@@ -98,6 +102,9 @@ class Runner:
             )[0]
         if filepath:
             self.filehandler.save(filepath)
+            return True
+        else:
+            return False
 
     def load(self, filepath: str | None = None):
         """
@@ -106,6 +113,10 @@ class Runner:
         Args:
             filepath (str): The path to the file to load. If None, a file dialog
                 will be opened to select the file to load.
+
+        Returns:
+            False: If the user cancelled the file dialog.
+            True: If the file was successfully loaded.
 
         Notes:
             This will overwrite the current program state.
@@ -119,6 +130,9 @@ class Runner:
             )[0]
         if filepath:
             self.filehandler.load(filepath)
+            return True
+        else:
+            return False
 
     def boot(self):
         """
