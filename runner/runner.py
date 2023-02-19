@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import QFileDialog
 
 import settings
 import ui
-from structures.nanostructures.nanostructure import Nanostructure
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +35,7 @@ class Runner:
         self.application = Application()
         self.window = None
         self.managers = None
+        self.filehandler = None
 
     def setup(self):
         """
@@ -81,26 +81,9 @@ class Runner:
         self.managers.toolbar.setup()
         logger.debug("Main window created.")
 
-    def nanostructure(self):
-        """
-        Obtain the current nanostructure.
-
-        A Nanostructure object is created from the current strands, domains, and
-        nucleic acid profile, all combined into a single object.
-
-        Returns:
-            Nanostructure: The current nanostructure.
-        """
-
-        return Nanostructure(
-            strands=self.managers.strands.current,
-            nucleic_acid_profile=self.managers.nucleic_acid_profile.current,
-            domains=self.managers.domains.current,
-        )
-
     def save(self):
         """
-        Initiate the save process, allowing the user to save the current nanostructure.
+        Save the program state to a .natug file.
         """
         filepath = QFileDialog.getSaveFileName(
             self.window,
@@ -113,7 +96,7 @@ class Runner:
 
     def load(self):
         """
-        Initiate the load proxcess, allowing the user to load a nanostructure.
+        Load a program state from a .natug file.
         """
         filepath = QFileDialog.getOpenFileName(
             self.window,
@@ -126,7 +109,7 @@ class Runner:
 
     def boot(self):
         """
-        Run the program and show the main window.
+        Run the program and show the main window. This must be run after setup().
 
         1) Show the main window. This makes the main window visible.
         2) Trigger an initial resize event. This is necessary to ensure that the
