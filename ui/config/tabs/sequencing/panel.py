@@ -57,7 +57,7 @@ class SequencingPanel(QWidget):
 
         def filetype_updated():
             """Worker for when the filetype is updated."""
-            self.filepath.setText(f"{os.getcwd()}\\export{self.filetype.currentText()}")
+            self.filepath.setText(f"{os.getcwd()}/export{self.filetype.currentText()}")
 
         self.filetype.currentTextChanged.connect(filetype_updated)
 
@@ -72,7 +72,7 @@ class SequencingPanel(QWidget):
             filepath = QFileDialog.getSaveFileName(
                 self.parent(),
                 "Sequence Export Location Chooser",
-                f"{os.getcwd()}\\saves\\strands\\presets\\",
+                f"{os.getcwd()}/saves/strands/presets/",
                 filter=f"*.{filetype}",
             )[0]
             if len(filepath) > 0:

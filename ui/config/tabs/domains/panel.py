@@ -132,7 +132,7 @@ class DomainsPanel(QWidget):
             filepath = QFileDialog.getOpenFileName(
                 parent=self,
                 caption="Domains Import File Location Chooser",
-                directory=f"{os.getcwd()}\\saves\\domains\\presets",
+                directory=f"{os.getcwd()}/saves/domains/presets",
                 filter="*.csv",
             )[0]
             if len(filepath) > 0:
