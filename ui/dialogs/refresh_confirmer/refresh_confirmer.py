@@ -40,13 +40,22 @@ class RefreshConfirmer(QDialog):
         self._buttons()
 
     @classmethod
-    def run(cls, *args, **kwargs):
-        """Run the dialog and return whether the user chose to refresh or not."""
-        dialog = cls(*args, **kwargs)
-        if dialog.exec():
-            pass
-        else:
-            return dialog.refreshed
+    def run(cls, runner, **kwargs):
+        """
+        Run the dialog and return whether the user chose to refresh or not.
+
+        Args:
+            runner: NATuG's runner.
+            **kwargs: Keyword arguments to pass to the dialog.
+        """
+        for strand in runner.managers.strands.current.strands:
+            if strand.interdomain():
+                dialog = cls(runner)
+                if dialog.exec():
+                    pass
+                else:
+                    return dialog.refreshed
+        return True  # if no interdomain strands, refresh without prompting
 
     def _setup_fileselector(self):
         """Set up the file selector."""

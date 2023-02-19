@@ -336,10 +336,8 @@ class FileHandler:
             profile_manager.profile_chooser.setCurrentText(new_profile_name)
 
             self.runner.managers.domains.current.update(domains)
-            self.runner.window.config.panel.domains.table.dump_domains(domains)
-            self.runner.window.config.panel.domains.table_refresh()
-            self.runner.window.config.panel.domains.settings_refresh()
-
             self.runner.managers.strands.current = strands
+            self.runner.window.config.panel.domains.dump_domains(domains)
+
             self.runner.window.side_view.refresh()
             self.runner.window.top_view.refresh()

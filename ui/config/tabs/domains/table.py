@@ -11,7 +11,7 @@ from PyQt6.QtWidgets import (
     QApplication,
 )
 
-from structures.domains import Domain, Domains
+from structures.domains import Domain
 from structures.profiles import NucleicAcidProfile
 from ui.widgets import DirectionalButton, TableIntegerBox
 from ui.widgets.triple_spinbox import TripleSpinbox
@@ -165,14 +165,14 @@ class Table(QTableWidget):
             )
 
         # set column widths
-        self.setColumnWidth(0, 39)
-        self.setColumnWidth(1, 39)
-        self.setColumnWidth(2, 35)
-        self.setColumnWidth(3, 40)
+        self.setColumnWidth(0, 40)
+        self.setColumnWidth(1, 40)
+        self.setColumnWidth(2, 40)
+        self.setColumnWidth(3, 47)
         self.setColumnWidth(4, 96)
         self.setColumnWidth(5, 96)
 
-    def dump_domains(self, domains: Domains) -> None:
+    def dump_domains(self, domains: List[Domain]) -> None:
         """
         Dump a list of domain objects.
 
@@ -180,7 +180,7 @@ class Table(QTableWidget):
             domains (List(Domain)): A list of all domains to dump.
         """
         # create rows before we input widgets
-        self.setRowCount(domains.subunit.count)
+        self.setRowCount(len(domains))
 
         # clear out the side headers list
         self.side_headers = []
@@ -189,13 +189,13 @@ class Table(QTableWidget):
         self.rows.clear()
 
         # insert all domains
-        for index, domain in enumerate(domains.subunit.domains):
+        for index, domain in enumerate(domains):
             # container for currently-being-added widgets
             row = TableWidgets()
 
             # column 0 - left helical joint
             row.left_helix_joint = DirectionalButton(
-                self, domains.domains()[index].left_helix_joint
+                self, domains[index].left_helix_joint
             )
             row.left_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.left_helix_joint.clicked.connect(self.cell_widget_updated.emit)
@@ -203,7 +203,7 @@ class Table(QTableWidget):
 
             # column 1 - right helical joint
             row.right_helix_joint = DirectionalButton(
-                self, domains.domains()[index].right_helix_joint
+                self, domains[index].right_helix_joint
             )
             row.right_helix_joint.clicked.connect(self.helix_joint_updated.emit)
             row.right_helix_joint.clicked.connect(self.cell_widget_updated.emit)
