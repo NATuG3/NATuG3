@@ -3,7 +3,6 @@ from contextlib import suppress
 from datetime import datetime
 
 from PyQt6 import uic
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QDialog
 
 import settings
@@ -21,21 +20,16 @@ class RefreshConfirmer(QDialog):
 
     Attributes:
         runner: NATuG's runner.
-
-    Signals:
-        refreshed: Emitted when the user has chosen to refresh the file. The signal
-            is emitted before recomputing the strands and refreshing the plots,
-            so changes to the managers can be made first.
+        refreshed: Whether the user chose to refresh. None up until the dialog is
+            closed.
     """
-
-    refreshed = pyqtSignal()
 
     def __init__(self, runner):
         """
         Initialize the refresh confirmer dialog.
 
         Args:
-            parent: The strands widget.
+            runner: NATuG's runner.
         """
         super().__init__(runner.window)
         uic.loadUi("ui/dialogs/refresh_confirmer/refresh_confirmer.ui", self)
@@ -44,6 +38,15 @@ class RefreshConfirmer(QDialog):
         self._prettify()
         self._setup_fileselector()
         self._buttons()
+
+    @classmethod
+    def run(cls, *args, **kwargs):
+        """Run the dialog and return whether the user chose to refresh or not."""
+        dialog = cls(*args, **kwargs)
+        if dialog.exec():
+            pass
+        else:
+            return dialog.refreshed
 
     def _setup_fileselector(self):
         """Set up the file selector."""
@@ -109,13 +112,9 @@ class RefreshConfirmer(QDialog):
         Runner for when the "refresh" button is clicked.
 
         1) Closes the dialog.
-        2) Refreshes the plots.
         """
-        self.refreshed.emit()
+        self.refreshed = True
         self.close()
-        self.runner.managers.strands.recompute()
-        self.runner.window.side_view.refresh()
-        self.runner.window.top_view.refresh()
 
     def _save_and_refresh_button_clicked(self):
         """
@@ -124,13 +123,9 @@ class RefreshConfirmer(QDialog):
         1) Closes the dialog.
         2) Saves the file to the filepath specified by the user or the default
               filepath if the user has not changed it.
-        3) Refreshes the plots.
         """
         self.close()
-        self.refreshed.emit()
-        self.runner.save(self.filepath)
-        self.runner.window.side_view.refresh()
-        self.runner.window.top_view.refresh()
+        self.refreshed = True
 
     def _change_location_button_clicked(self):
         """
@@ -138,7 +133,6 @@ class RefreshConfirmer(QDialog):
 
         1) Closes the dialog.
         2) Opens a normal save dialog.
-        3) Refreshes the plots.
         """
         # Close the dialog and create a normal save dialog. However, ensure that the
         # plots refresh after the save has been completed.
@@ -146,10 +140,7 @@ class RefreshConfirmer(QDialog):
 
         # if runner.save is called without a filepath, it will ask the user to choose
         # one and then save to that filepath automatically.
-        if self.runner.save():  # returns True if the save was successful
-            self.refreshed.emit()
-            self.runner.window.side_view.refresh()
-            self.runner.window.top_view.refresh()
+        self.refreshed = self.runner.save()  # returns True if the save was successful
 
     def _buttons(self):
         """
