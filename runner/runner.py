@@ -94,7 +94,7 @@ class Runner:
                 self.window,
                 "Save Program State",
                 "",
-                f"NATuG Package (*.{settings.package_extension})",
+                f"NATuG Package (*.{settings.extension})",
             )[0]
         if filepath:
             self.filehandler.save(filepath)
@@ -115,7 +115,7 @@ class Runner:
                 self.window,
                 "Load Program State",
                 "",
-                f"NATuG Package (*.{settings.package_extension})",
+                f"NATuG Package (*.{settings.extension})",
             )[0]
         if filepath:
             self.filehandler.load(filepath)

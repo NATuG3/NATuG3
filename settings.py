@@ -3,8 +3,7 @@ version = 3.0
 github = "https://github.com/404Wolf/NATuG"
 debug = True
 
-extension = "nano"
-package_extension = "natug"
+extension = "natug"
 
 junction_threshold = 0.01
 closed_threshold = 0.01
