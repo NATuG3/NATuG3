@@ -250,9 +250,12 @@ class FileHandler:
 
             with package.open("strands/linkages.csv") as file:
                 df = pd.read_csv(file)
+                df = df.where(pd.notnull(df), None)
                 for index, row in df.iterrows():
                     items = [
-                        structures.points.nucleoside.Nucleoside(base=base)
+                        structures.points.nucleoside.Nucleoside(
+                            base=None if base == "X" else base
+                        )
                         for base in row["data:sequence"]
                     ]
 
@@ -261,9 +264,12 @@ class FileHandler:
                         thickness=row["style:thickness"],
                     )
 
+                    coord_one = tuple(map(float, row["data:coord_one"].split(", ")))
+                    coord_two = tuple(map(float, row["data:coord_two"].split(", ")))
+
                     linkage = structures.strands.linkage.Linkage(
-                        coord_one=row["data:coord_one"].split(", ")[0],
-                        coord_two=row["data:coord_two"].split(", ")[-1],
+                        coord_one=coord_one,
+                        coord_two=coord_two,
                         uuid=row["uuid"],
                         items=items,
                         inflection=row["data:inflection"],
