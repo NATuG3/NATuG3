@@ -81,29 +81,42 @@ class Runner:
         self.managers.toolbar.setup()
         logger.debug("Main window created.")
 
-    def save(self):
+    def save(self, filepath: str | None = None):
         """
         Save the program state to a .natug file.
+
+        Args:
+            filepath (str): The path to the file to save. If None, a file dialog
+                will be opened to select the file to save.
         """
-        filepath = QFileDialog.getSaveFileName(
-            self.window,
-            "Save Program State",
-            "",
-            f"NATuG Package (*.{settings.package_extension})",
-        )[0]
+        if filepath is None:
+            filepath = QFileDialog.getSaveFileName(
+                self.window,
+                "Save Program State",
+                "",
+                f"NATuG Package (*.{settings.package_extension})",
+            )[0]
         if filepath:
             self.filehandler.save(filepath)
 
-    def load(self):
+    def load(self, filepath: str | None = None):
         """
         Load a program state from a .natug file.
+
+        Args:
+            filepath (str): The path to the file to load. If None, a file dialog
+                will be opened to select the file to load.
+
+        Notes:
+            This will overwrite the current program state.
         """
-        filepath = QFileDialog.getOpenFileName(
-            self.window,
-            "Load Program State",
-            "",
-            f"NATuG Package (*.{settings.package_extension})",
-        )[0]
+        if filepath is None:
+            filepath = QFileDialog.getOpenFileName(
+                self.window,
+                "Load Program State",
+                "",
+                f"NATuG Package (*.{settings.package_extension})",
+            )[0]
         if filepath:
             self.filehandler.load(filepath)
 
