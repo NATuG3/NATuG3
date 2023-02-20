@@ -123,6 +123,11 @@ class StrandItems(deque):
         item_types: A list of all the types of items in the StrandItems.
     """
 
+    def __getitem__(self, index: int | slice) -> object:
+        if isinstance(index, slice):
+            return itertools.islice(self, index.start, index.stop, index.step)
+        return super().__getitem__(index)
+
     def by_type(self, type_: Type | Tuple[Type]) -> List[object]:
         """
         Obtain a list of all the items of a specific type.
