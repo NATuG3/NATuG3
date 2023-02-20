@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Union
+from typing import Union, Iterable
+
+import pandas as pd
 
 from constants import bases
 from structures.points.point import Point
@@ -56,3 +58,33 @@ class Nucleoside(Point):
             f"base={str(self.base).replace('None', 'unset')}"
             f")"
         )
+
+
+def to_df(
+    nucleosides: Iterable[Nucleoside]
+) -> None | pd.DataFrame:
+    """
+    Export the Nucleoside data to a pandas dataframe.
+
+    1) Points module's export() function is called to obtain a dataframe with
+        all the Point data for all the NEMids passed.
+    2) Extra columns for all Nucleoside specific data is added to the pandas dataframe.
+    3) The Nucleosides passed are iterated through, and the data for each Nucleoside is
+        added to the dataframe under the new header.
+
+    Args:
+        nucleosides: The Nucleosides to export.
+
+    Returns:
+        None: If a filename is provided.
+        pd.DataFrame: If a filename is not provided.
+    """
+    from structures.points.point import to_df as fetch_points_dataframe
+
+    # Get the dataframe of all the Point data
+    data = fetch_points_dataframe(nucleosides)
+
+    # Add the NEMid specific data to the dataframe
+    data["nucleoside:base"] = [nucleoside.base for nucleoside in nucleosides]
+
+    return data

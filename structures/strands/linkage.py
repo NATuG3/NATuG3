@@ -1,12 +1,15 @@
 from collections import deque
 from dataclasses import dataclass
 from typing import Deque, Literal, Tuple, Iterable, List
+from uuid import uuid1
 
 import numpy as np
+import pandas as pd
 
 from constants.directions import UP, DOWN
 from structures.points import Nucleoside
 from ui.plotters.utils import chaikins_corner_cutting
+from utils import rgb_to_hex
 
 
 @dataclass
@@ -51,6 +54,9 @@ class Linkage:
             initialisation, the second is the position of the righter Nucleoside from
             initialisation, and the third is the average of the two, with a boost in its
             z coord.
+        inflection: Whether the linkage is bent upwards or downwards when plotted.
+        uuid (str): The unique identifier of the linkage. Automatically generated post
+        init.
 
     Methods:
         trim: Trim the linkage to a certain length.
@@ -63,12 +69,15 @@ class Linkage:
         coord_two: Tuple[float, float],
         inflection: Literal[UP, DOWN],  # type: ignore
         strand: "Strand" = None,  # type: ignore
-        count=6,
+        items: Iterable[Nucleoside] = None,
+        count: int = 6,
+        uuid: str = None,
+        styles: LinkageStyles = None,
     ):
-        self.inflection: inflection
-        self.styles = LinkageStyles()
+        self.inflection = inflection
+        self.styles = styles or LinkageStyles()
         self.strand = strand
-        self.items = [Nucleoside() for _ in range(count)]
+        self.items = items or [Nucleoside() for _ in range(count)]
 
         # Convert the items to a deque if they are not already.
         self._initial_item_coordinates = tuple(item.position() for item in self.items)
@@ -86,8 +95,13 @@ class Linkage:
         # is down.
         midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
         midpoint[1] += 0.2 if inflection == UP else -0.2
-        self.plot_points = [coord_one, midpoint, coord_two]
-        self.plot_points = chaikins_corner_cutting(self.plot_points, refinements=4)
+        basic_plot_points = [coord_one, midpoint, coord_two]
+        self.plot_points = chaikins_corner_cutting(
+            basic_plot_points, refinements=4
+        )
+
+        # Set the uuid of the linkage.
+        self.uuid = uuid or str(uuid1())
 
     def generate(self, length: int):
         """
@@ -178,3 +192,42 @@ class Linkage:
     def leftextend(self, items: Deque[Nucleoside]):
         """Extend the linkage with a list of points to the left."""
         self.items.extendleft(items)
+
+
+def to_df(linkages: Iterable[Linkage]):
+    """
+    Export an iterable of linkages to a pandas dataframe.
+
+    All the items (nucleosides) within the linkage are compressed into a string
+    sequence, where each letter is the base of a given nucleoside, and nucleosides
+    with None bases are represented with an "X."
+
+    Args:
+        linkages: The linkages to export.
+    """
+    data = {
+        "uuid": [],
+        "data:sequence": [],
+        "data:inflection": [],
+        "data:coord_one": [],
+        "data:coord_two": [],
+        "data:strand": [],
+        "style:color": [],
+        "style:thickness": [],
+    }
+
+    for linkage in linkages:
+        sequence = ""
+        for nucleoside in linkage:
+            sequence += nucleoside.base or "X"
+
+        data["uuid"].append(linkage.uuid)
+        data["data:sequence"].append(sequence)
+        data["data:inflection"].append(linkage.inflection)
+        data["data:coord_one"].append(", ".join(map(str, linkage.plot_points[0])))
+        data["data:coord_two"].append(", ".join(map(str, linkage.plot_points[-1])))
+        data["data:strand"].append(linkage.strand.uuid if linkage.strand else None)
+        data["style:color"].append(rgb_to_hex(linkage.styles.color))
+        data["style:thickness"].append(linkage.styles.thickness)
+
+    return pd.DataFrame(data)

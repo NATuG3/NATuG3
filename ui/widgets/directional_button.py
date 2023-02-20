@@ -1,3 +1,4 @@
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QPushButton
 
 from constants.directions import *
@@ -32,6 +33,7 @@ class DirectionalButton(QPushButton):
         self.setFixedWidth(25)
         self.text_updater()
 
+        @pyqtSlot()
         def on_click(event):
             # reverse the state of the button on click
             if self.state == UP:

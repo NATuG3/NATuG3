@@ -1,20 +1,22 @@
 import logging
-import os
+from copy import copy
 from functools import partial
 
+import pandas as pd
 from PyQt6 import uic
-from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
     QFileDialog,
-    QApplication,
 )
 
 import settings
 import utils
 from structures.domains import Domains
+from structures.profiles import NucleicAcidProfile
 from ui.config.tabs.domains.table import Table
+from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -30,150 +32,67 @@ class DomainsPanel(QWidget):
             someone else's job to call that function.
     """
 
-    updated = pyqtSignal(object)
+    updated = pyqtSignal()
 
     def __init__(self, parent, runner: "runner.Runner") -> None:
         self.runner = runner
         super().__init__(parent)
         uic.loadUi("ui/config/tabs/domains/panel.ui", self)
 
+        # Define internal attributes
+        self._pushing_updates = False
+
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self, self.runner.managers.nucleic_acid_profile.current)
         self.layout().addWidget(self.table)
 
-        # set initial values
-        self._setup()
-
         # run setup functions
-        self._signals()
+        self._hook_signals()
         self._prettify()
 
-        # run an initial refresh
-        self.table_refresh()
-        self.settings_refresh()
+        self.dump_domains(self.runner.managers.domains.current)
 
         logger.info("Loaded domains tab of config panel.")
 
-    def _setup(self):
-        """Fill boxes and table with the current values."""
-        self.subunit_count.setValue(self.runner.managers.domains.current.subunit.count)
-        self.symmetry.setValue(self.runner.managers.domains.current.symmetry)
-        self.total_count.setValue(self.runner.managers.domains.current.count)
-        self.table.dump_domains(self.runner.managers.domains.current)
+    def fetch_domains(self, nucleic_acid_profile: NucleicAcidProfile) -> Domains:
+        """
+        Fetch the domains from the domains table and settings panel.
 
-    def _signals(self):
-        """Set up panel signals."""
+        Args:
+            nucleic_acid_profile: The nucleic acid profile to use for the domains.
 
-        def update_total_domain_box():
-            """Update the total domain count box."""
-            self.total_count.setValue(
-                self.symmetry.value() * self.subunit_count.value()
-            )
-
-        # when domain panel settings are updated call the above worker
-        self.symmetry.valueChanged.connect(update_total_domain_box)
-        self.subunit_count.valueChanged.connect(update_total_domain_box)
-
-        # when helix joint buttons are clicked refresh the table
-        # so that the switch values (-1, 0, 1) get updated
-        self.table.helix_joint_updated.connect(
-            partial(self.updated.emit, self.table_refresh)
+        Returns:
+            The domains object.
+        """
+        return Domains(
+            domains=self.table.fetch_domains(),
+            symmetry=self.symmetry.value(),
+            nucleic_acid_profile=nucleic_acid_profile,
         )
 
-        # dump the initial domains
-        self.table.dump_domains(self.runner.managers.domains.current)
+    def dump_domains(self, domains: Domains) -> None:
+        """
+        Dump a Domains object's domains into the domains table and settings into the
+        settings panel of the DomainsPanel.
 
-        # table update event hooking
-        # when the force table update button is clicked
-        def updated_worker():
-            self.table_refresh()
-            self.settings_refresh()
+        Args:
+            domains: The Domains object to dump.
+        """
+        self.table.blockSignals(True)
+        self.symmetry.blockSignals(True)
 
-        self.update_table_button.clicked.connect(
-            partial(self.updated.emit, updated_worker)
-        )
+        # dump the current subunit into the subunit table
+        self.table.dump_domains(domains.subunit.domains)
 
-        def updated_table_item():
-            self.settings_refresh()
-            self.table_refresh()
-            self.settings_refresh()
-
-        # when the table itself is updated
-        self.table.cell_widget_updated.connect(
-            partial(self.updated.emit, updated_table_item)
-        )
-
-        # reset the checked button when a helix joint is updated
-        # because the user has opted out
-        self.table.helix_joint_updated.connect(
-            lambda: self.auto_antiparallel.setChecked(False)
-        )
-        self.auto_antiparallel.stateChanged.connect(
-            partial(self.updated.emit, self.table_refresh)
-        )
-
-        def save_domains():
-            """Save domains to file."""
-            filepath = QFileDialog.getSaveFileName(
-                parent=self,
-                caption="Domains Save File Location Chooser",
-                filter="*.csv",
-            )[0]
-            if len(filepath) > 0:
-                logger.info(
-                    f"Saving domains to {filepath}.\nDomains being saved: {self.runner.managers.domains.current}"
-                )
-                self.runner.managers.domains.current.to_file(filepath=filepath)
-
-        self.save_domains_button.clicked.connect(save_domains)
-
-        def load_domains():
-            """Load domains from file."""
-            filepath = QFileDialog.getOpenFileName(
-                parent=self,
-                caption="Domains Import File Location Chooser",
-                directory=f"{os.getcwd()}\\saves\\domains\\presets",
-                filter="*.csv",
-            )[0]
-            if len(filepath) > 0:
-
-                def loader():
-                    domains = Domains.from_file(
-                        filepath=filepath,
-                        nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
-                    )
-                    self.runner.managers.domains.current.update(domains)
-                    self._setup()
-                    QApplication.processEvents()
-                    runner.constructor.config.panel.update_graphs.click()
-
-                self.updated.emit(loader)
-
-        self.load_domains_button.clicked.connect(load_domains)
-
-    def _prettify(self):
-        """Set up styles of panel."""
-        # set panel widget buttons
-        self.update_table_button.setIcon(fetch_icon("checkmark-outline"))
-        self.load_domains_button.setIcon(fetch_icon("download-outline"))
-        self.save_domains_button.setIcon(fetch_icon("save-outline"))
-
-        # set scaling settings for config and table
-        config_size_policy = QSizePolicy()
-        config_size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
-        config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
-        self.config.setSizePolicy(config_size_policy)
-
-    def settings_refresh(self):
-        logger.info("Refreshing domains settings.")
+        self.subunit_count.setValue(domains.subunit.count)
+        self.symmetry.setValue(domains.symmetry)
 
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
-        current_domains = self.runner.managers.domains.current
-        M: int = sum([domain.theta_m_multiple for domain in current_domains.domains()])
-        N: int = current_domains.count
+        M: int = sum([domain.theta_m_multiple for domain in domains.domains()])
+        N: int = domains.count
         B: int = self.runner.managers.nucleic_acid_profile.current.B
-        R: int = current_domains.symmetry
+        R: int = domains.symmetry
         target_M_over_R = (B * (N - 2)) / (2 * R)
         M_over_R = M / R
         self.M.setValue(M)
@@ -205,15 +124,135 @@ class DomainsPanel(QWidget):
         self.M_over_R.setStyleSheet(style)
         self.target_M_over_R.setStyleSheet(style)
 
-    def table_refresh(self):
+        self.table.blockSignals(False)
+        self.symmetry.blockSignals(False)
+
+    def _prettify(self):
+        """Set up styles of panel."""
+        # set panel widget buttons
+        self.update_table_button.setIcon(fetch_icon("checkmark-outline"))
+        self.load_domains_button.setIcon(fetch_icon("download-outline"))
+        self.save_domains_button.setIcon(fetch_icon("save-outline"))
+
+        # set scaling settings for config and table
+        config_size_policy = QSizePolicy()
+        config_size_policy.setVerticalPolicy(QSizePolicy.Policy.Fixed)
+        config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
+        self.config.setSizePolicy(config_size_policy)
+
+    def _push_updates(self):
+        """
+        Warn the user if they are about to overwrite strand data, and if they are
+        okay with that, then update the domains. Otherwise, revert to the old domains.
+        """
+        if self._pushing_updates:
+            return
+        self._pushing_updates = True
+        # Warn the user if they are about to overwrite strand data, and give them the
+        # opportunity to save the current state and then update the domains.
+        if RefreshConfirmer.run(self.runner):
+            self.runner.managers.domains.current.update(
+                self.fetch_domains(self.runner.managers.nucleic_acid_profile.current)
+            )
+            self.dump_domains(self.runner.managers.domains.current)
+            self.updated.emit()
+            logger.debug("Updated domains.")
+        # They rather not update the domains, so revert to the old domains.
+        else:
+            self.dump_domains(self.runner.managers.domains.current)
+            logger.debug("Did not update domains because user chose not to.")
+        self._pushing_updates = False
+
+    def _hook_signals(self):
+        """
+        Hook all signals to their respective slots.
+
+        Hooks the following signals:
+            - table.cell_widget_updated
+            - table.helix_joint_updated
+            - symmetry.valueChanged
+            - subunit_count.valueChanged
+            - update_table_button.clicked
+            - table.helix_joint_updated
+            - auto_antiparallel_button.clicked
+        """
+        self.table.cell_widget_updated.connect(self._push_updates)
+        self.table.helix_joint_updated.connect(self._push_updates)
+
+        # Make sure that the total domain count is updated as the summands are changed.
+        self.symmetry.valueChanged.connect(self._on_symmetry_setting_change)
+        self.subunit_count.valueChanged.connect(self._on_symmetry_setting_change)
+
+        # Read the settings area when the update table button is clicked.
+        self.update_table_button.clicked.connect(self._on_table_update_button_clicked)
+
+        # Reset the checked button when a helix joint is updated because the user has
+        # opted out of the auto-antiparallel feature by changing the helix joint
+        self.table.helix_joint_updated.connect(self._on_helix_joint_updated)
+        self.auto_antiparallel.stateChanged.connect(self._push_updates)
+
+        # Set up the save/load buttons slots.
+        self.save_domains_button.clicked.connect(self._on_save_button_clicked)
+        self.load_domains_button.clicked.connect(self._on_load_button_clicked)
+
+    @pyqtSlot()
+    def _on_symmetry_setting_change(self):
+        """Update the total domain count box."""
+        self.total_count.setValue(self.symmetry.value() * self.subunit_count.value())
+
+    @pyqtSlot()
+    def _on_table_update_button_clicked(self):
+        new_table_domains = copy(self.runner.managers.domains.current)
+        new_table_domains.subunit.count = self.subunit_count.value()
+        self.table.dump_domains(new_table_domains.subunit.domains)
+        self._push_updates()
+
+    @pyqtSlot()
+    def _on_helix_joint_updated(self):
+        self.auto_antiparallel.setChecked(False)
+
+    @pyqtSlot()
+    def _on_save_button_clicked(self):
+        """Save domains to file."""
+        filepath = QFileDialog.getSaveFileName(
+            parent=self,
+            caption="Domains Save File Location Chooser",
+            filter="*.csv",
+        )[0]
+        if len(filepath) > 0:
+            logger.info(
+                f"Saving domains to {filepath}."
+                f"\nDomains being saved: {self.runner.managers.domains.current}"
+            )
+            domains_df = self.runner.managers.domains.current.to_df()
+            domains_df.to_csv(filepath, index=False)
+
+    @pyqtSlot()
+    def _on_load_button_clicked(self):
+        """Load domains from file."""
+        filepath = QFileDialog.getOpenFileName(
+            parent=self,
+            caption="Domains Import File Location Chooser",
+            directory=f"saves/domains/presets",
+            filter="*.csv",
+        )[0]
+        if filepath:
+            new_domains = Domains.from_df(
+                df=pd.read_csv(filepath),
+                nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
+            )
+            self.dump_domains(new_domains)
+            self._push_updates()
+            self.updated.emit()
+
+    @pyqtSlot()
+    def _on_settings_panel_update(self):
         """Refresh panel settings/domain table."""
         logger.info("Refreshing domains table.")
 
-        new_domains: Domains = Domains(
-            self.runner.managers.nucleic_acid_profile.current,
-            self.table.fetch_domains(),
-            self.runner.managers.domains.current.symmetry,
-            self.auto_antiparallel.isChecked(),
+        old_domains: Domains = self.runner.managers.domains.current
+        new_domains: Domains = self.fetch_domains(
+            nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current
         )
         # update subunit count and refs.domains.current
         # double-check with user if they want to truncate the domains/subunit count
@@ -226,16 +265,15 @@ class DomainsPanel(QWidget):
             confirmation: bool = utils.confirm(
                 self.parent(),
                 "Subunit Count Reduction",
-                f"The prospective subunit count ({self.subunit_count.value()}) is lower than the number of domains in "
-                f"the domains table ({self.table.rowCount()}). \n\nAre you sure you want to truncate the "
+                f"The prospective subunit count ({self.subunit_count.value()}) is "
+                f"lower than the number of domains in the domains table ("
+                f"{self.table.rowCount()}). \n\nAre you sure you want to truncate the "
                 f"domains/subunit count to {self.subunit_count.value()}?",
             )
             if confirmation:
                 logger.info(
                     "User confirmed that they would like the subunit count reduced."
                 )
-                new_domains.subunit.count = self.subunit_count.value()
-                new_domains.symmetry = self.symmetry.value()
                 self.update_table_button.setStyleSheet(
                     f"background-color: rgb{str(settings.colors['success'])}"
                 )
@@ -246,12 +284,13 @@ class DomainsPanel(QWidget):
                         "background-color: light grey",
                     ),
                 )
+                self.dump_domains(new_domains)
         else:
-            new_domains.subunit.count = self.subunit_count.value()
-            new_domains.symmetry = self.symmetry.value()
+            self.dump_domains(old_domains)
 
         # update current domains
-        self.runner.managers.domains.current.update(new_domains)
-
-        # refresh table
-        self.table.dump_domains(self.runner.managers.domains.current)
+        self.runner.managers.domains.current.update(
+            self.fetch_domains(
+                nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current
+            )
+        )

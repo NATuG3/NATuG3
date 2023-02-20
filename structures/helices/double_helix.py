@@ -1,3 +1,7 @@
+from uuid import uuid1
+
+import pandas as pd
+
 from constants.directions import DOWN, UP
 from structures.helices.helix import Helix
 from utils import inverse
@@ -25,9 +29,12 @@ class DoubleHelix:
         right_helix: The helix that is of the direction of the domain's right helical
             joint. This is the helix whose points are lined up to the points that are
             on the helix of the next domain's left helical joint helix.
+
+    Methods:
+        to_csv: Write the double helix to a CSV file.
     """
 
-    __slots__ = "domain", "helices"
+    __slots__ = "domain", "strands", "uuid"
 
     def __init__(
         self,
@@ -50,6 +57,7 @@ class DoubleHelix:
             up_helix or Helix(direction=UP, size=None, double_helix=self),
             down_helix or Helix(direction=DOWN, size=None, double_helix=self),
         )
+        self.uuid = str(uuid1())
 
         # The helices must contain empty arrays of the size that the Domains indicates.
         self.left_helix.data.resize(self.domain.left_helix_count)
@@ -98,3 +106,24 @@ class DoubleHelix:
         The other helix in the same domain as the zeroed helix.
         """
         return self.helices[inverse(self.domain.left_helix_joint)]
+
+
+def to_df(double_helices) -> pd.DataFrame:
+    """
+    Obtain a pandas dataframe of many double helices.
+
+    Returns:
+        A pandas dataframe containing many double helices.
+    """
+    data = {"uuid": [], "data:domain": [], "data:up_helix": [], "data:down_helix": []}
+
+    for double_helices in double_helices:
+        up_helix = "; ".join(item.uuid for item in double_helices.up_helix)
+        down_helix = "; ".join(item.uuid for item in double_helices.down_helix)
+
+        data["uuid"].append(double_helices.uuid)
+        data["data:domain"].append(double_helices.domain.uuid)
+        data["data:up_helix"].append(up_helix)
+        data["data:down_helix"].append(down_helix)
+
+    return pd.DataFrame(data)

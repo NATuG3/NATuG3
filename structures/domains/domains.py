@@ -42,8 +42,8 @@ class Domains:
         subunits: Returns a list of subunits.
         closed: Whether the tube is closed or not.
         update: Update the domains object in place.
-        to_file: Write the domains to a file.
-        from_file: Load a domains object from a file.
+        to_df: Export the domains to a dataframe.
+        from_df: Import the domains from a dataframe.
         write_worksheet: Write the domains to a tab in an Excel document.
     """
 
@@ -110,11 +110,11 @@ class Domains:
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
-    def to_file(self, filepath: str) -> None:
+    def to_df(self) -> pd.DataFrame:
         """
-        Export all the current domains as a csv.
+        Export all the current domains as a pandas dataframe.
 
-        Creates a csv file from self.domains() with the following columns:
+        Creates a pandas dataframe representing the Domains with the following columns:
             Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
             Right Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
             Left Helix Count ("int:int:int"): The number of NEMids to add to the bottom
@@ -127,19 +127,12 @@ class Domains:
             Symmetry (int): The symmetry type
             Antiparallel ("true" or "false"): Whether the domains are antiparallel
 
-        Args:
-            filepath: The filepath to export to.
-
-        Raises:
-            ValueError: If the mode is not an allowed mode or if the filepath contains
-            an extension.
-
-        Notes:
-            - Filetype is determined by the extension.
-            - Supported filetypes: csv
+        Returns:
+            A pandas dataframe containing the domains data.
         """
-        # extract all the data to references
+        # extract all the data and compile it into lists
         domains = self.subunit.domains
+        uuids = [domain.uuid for domain in domains]
         left_helix_joints = [
             "UP" if domain.left_helix_joint == UP else "DOWN" for domain in domains
         ]
@@ -157,70 +150,57 @@ class Domains:
         ]
 
         # create a pandas dataframe with the columns above
-        data = pd.DataFrame(
+        return pd.DataFrame(
             {
-                "m": theta_m_multiples,
-                "Left Helix Joints": left_helix_joints,
-                "Right Helix Joints": right_helix_joints,
-                "Left Helix Count": left_helix_count,
-                "Other Helix Count": other_helix_count,
-                "Symmetry": symmetry,
-                "Antiparallel": antiparallel,
+                "uuid": uuids,
+                "data:m": theta_m_multiples,
+                "data:left_helix_joints": left_helix_joints,
+                "data:right_helix_joints": right_helix_joints,
+                "data:left_helix_count": left_helix_count,
+                "data:other_helix_count": other_helix_count,
+                "data:symmetry": symmetry,
+                "data:antiparallel": antiparallel,
             },
         )
 
-        # based on the mode chosen by the user, export the data to a file
-        if filepath.endswith("csv"):
-            data.to_csv(filepath, index=False)
-        else:  # if the mode is not one that is allowed, raise an error
-            raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")
-
     @classmethod
-    def from_file(
+    def from_df(
         cls,
-        filepath: str,
+        df: pd.DataFrame,
         nucleic_acid_profile: NucleicAcidProfile,
     ):
         """
-        Import domains from a csv. Must be a csv in the format of self.to_file().
+        Import domains from a pandas dataframe. The dataframe must match the format
+        of the dataframe created by the to_df method.
 
         Args:
-            filepath: The filepath to import from.
-            nucleic_acid_profile: The nucleic acid configuration.
+            df: The dataframe to import from.
+            nucleic_acid_profile: The nucleic acid configuration to load into the
+                newly created Domains object.
 
         Returns:
             A Domains object.
-
-        Notes:
-            - Filetype is determined by the extension.
         """
-        # read the file based on the mode
-        if filepath.endswith("csv"):
-            data = pd.read_csv(filepath)
-        # if the mode is not one that is allowed, raise an error
-        else:
-            raise ValueError(f"Invalid mode: {filepath[filepath.find('.'):]}")
-
         # extract the data
         left_helix_joints = [
             UP if direction == "UP" else DOWN
-            for direction in data["Left Helix Joints"].to_list()
+            for direction in df["data:left_helix_joints"].to_list()
         ]
         right_helix_joints = [
             UP if direction == "UP" else DOWN
-            for direction in data["Right Helix Joints"].to_list()
+            for direction in df["data:right_helix_joints"].to_list()
         ]
-        m = [int(m) for m in data["m"].to_list()]
+        m = [int(m) for m in df["data:m"].to_list()]
         left_helix_count = [
             tuple(map(int, count.split("-")))
-            for count in data["Left Helix Count"].to_list()
+            for count in df["data:left_helix_count"].to_list()
         ]
         other_helix_count = [
             tuple(map(int, count.split("-")))
-            for count in data["Other Helix Count"].to_list()
+            for count in df["data:other_helix_count"].to_list()
         ]
-        symmetry = int(data["Symmetry"].to_list()[0])
-        antiparallel = data["Antiparallel"].to_list()[0]
+        symmetry = int(df["data:symmetry"].to_list()[0])
+        antiparallel = df["data:antiparallel"].to_list()[0]
 
         # create a list of domains
         domains = []

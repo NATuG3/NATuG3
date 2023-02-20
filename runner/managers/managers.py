@@ -19,3 +19,17 @@ class Managers:
         # Load in other data managers
         self.toolbar = ToolbarManager(self.runner)
         self.misc = MiscManager()
+
+    def setup(self):
+        """
+        Calls the setup methods of the various managers.
+
+        The order in which managers are set up is very important, since some rely on
+        others being already set up (for example, we can't load the strands manager
+        until the nucleic acid profile manager has been loaded).
+        """
+        self.nucleic_acid_profile.setup()
+        self.domains.setup()
+        self.strands.setup()
+        self.toolbar.setup()
+        # self.misc doesn't require setup()

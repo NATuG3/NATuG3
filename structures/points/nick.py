@@ -1,9 +1,13 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Iterable
+from uuid import uuid1
+
+import pandas as pd
 
 from structures.points.point import Point
 
 
-@dataclass(slots=True, frozen=True)
+@dataclass(slots=True)
 class Nick:
     """
     A Nick object.
@@ -16,6 +20,7 @@ class Nick:
     object.
 
     Attributes:
+        uuid: The unique identifier of the nick.
         previous_item: The NEMid object in the same strand as the original_NEMid.
         original_item: The NEMid object that was transformed into a nick.
     """
@@ -23,6 +28,8 @@ class Nick:
     original_item: Point
     previous_item: Point
     next_item: Point
+
+    uuid: str = field(default_factory=lambda: str(uuid1()))
 
     def __getattr__(self, key: str) -> object:
         """
@@ -34,3 +41,25 @@ class Nick:
     def __repr__(self) -> str:
         """Determine what to print when instance is printed directly."""
         return f"Nick@{round(self.x_coord, 4), round(self.z_coord, 4)}"
+
+
+def to_df(nicks: Iterable[Nick]) -> pd.DataFrame:
+    """
+    Export many Nicks as either a pandas dataframe or a csv file.
+
+    Args:
+        nicks: The Nicks to export.
+
+    Returns:
+        A pandas dataframe with all the Nick data.
+
+    Notes:
+        The original NEMid objects are referenced by uuid.
+    """
+    data = {
+        "uuid": [nick.uuid for nick in nicks],
+        "data:original_item": [nick.original_item.uuid for nick in nicks],
+        "data:previous_item": [nick.previous_item.uuid for nick in nicks],
+        "data:next_item": [nick.next_item.uuid for nick in nicks],
+    }
+    return pd.DataFrame(data)

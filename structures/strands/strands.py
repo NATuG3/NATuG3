@@ -2,7 +2,8 @@ import logging
 from contextlib import suppress
 from copy import deepcopy
 from functools import partial
-from typing import List, Tuple, Iterable
+from typing import List, Tuple, Iterable, Generator
+from uuid import uuid1
 
 import pandas as pd
 from PyQt6.QtCore import QTimer
@@ -39,6 +40,7 @@ class Strands:
             strands from when the object is loaded with the from_package class method.
         size: The width and height of the domains when they are all layed next to one
             another.
+        uuid: A unique identifier for the strands object. Automatically generated.
 
     Methods:
         randomize_sequences: Randomize the sequences for all strands.
@@ -56,6 +58,9 @@ class Strands:
         extend: Append multiple strands to the container.
         remove: Remove a strand from the container.
         write_worksheets: Write the strands to a tab in an Excel document.
+        points: Obtain a generator of all points in the container.
+        to_json: Obtain a dict representation of the strands object.
+        update: Update the strands object in place.
     """
 
     def __init__(
@@ -63,6 +68,7 @@ class Strands:
         nucleic_acid_profile: NucleicAcidProfile,
         strands: Iterable[Strand],
         name: str = "Strands",
+        uuid: str = None,
     ) -> None:
         """
         Initialize an instance of Strands.
@@ -71,9 +77,12 @@ class Strands:
             nucleic_acid_profile: The nucleic acid settings for the strands container.
             strands: A list of strands to create a Strands object from.
             name: The name of the strands object. Used when exporting the strands object.
+            uuid: A unique identifier for the strands object. Automatically generated,
+                but can be provided.
         """
         # Store various attributes
         self.name = name
+        self.uuid = uuid or str(uuid1())
         self.nucleic_acid_profile = nucleic_acid_profile
         self.strands = list(strands)
 
@@ -118,9 +127,36 @@ class Strands:
         """Iterate over all strands."""
         return iter(self.strands)
 
-    def points(self) -> List[Point]:
-        """Obtain a list of all points in the container."""
-        return [point for strand in self.strands for point in strand]
+    def update(self, other: "Strands") -> None:
+        """
+        Update the strands object in place.
+
+        Args:
+            other: The other strands object to update from.
+        """
+        # Update the nucleic acid profile
+        self.nucleic_acid_profile = other.nucleic_acid_profile
+
+        self.strands = other.strands
+        for strand in self.strands:
+            strand.strands = self
+
+    def items(self, type_restriction=object) -> Generator:
+        """
+        Obtain a list of all points in the container.
+
+        Args:
+            type_restriction: The type of points to yield. Defaults to object,
+                which includes all types of points. To only yield NEMids, use NEMid.
+                To yield both NEMids and Nicks, but not Nucleosides/other types, use
+                (NEMid, Nick), for example.
+
+        Yields:
+            All points in the container.
+        """
+        for strand in self.strands:
+            for item in strand.items.by_type(type_restriction):
+                yield item
 
     def nick(self, point: Point) -> None:
         """
@@ -685,6 +721,23 @@ class Strands:
                     z_coords.append(item.z_coord)
 
         return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
+
+    def to_json(self) -> dict:
+        """
+        Convert the domain to a JSON serializable dictionary.
+
+        All the strands and nicks are referenced by their uuids. The ordering of
+        strands and nicks is preserved.
+
+        Returns:
+            dict: JSON serializable dictionary
+        """
+        return {
+            "name": self.name,
+            "uuid": self.uuid,
+            "data:strands": [strand.uuid for strand in self],
+            "data:nicks": [nick.uuid for nick in self.nicks],
+        }
 
     def write_worksheets(
         self,

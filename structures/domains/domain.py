@@ -1,4 +1,5 @@
 from typing import Tuple
+from uuid import uuid1
 
 from constants.directions import *
 from structures.points.point import x_coord_from_angle
@@ -122,6 +123,7 @@ class Domain:
             count[2] NEMids are added to the top of the strand.
         other_helix_count: Number of initial NEMids/strand and excess NEMids/strand to
             generate for the other helix.
+        uuid: The unique identifier for the domain. This is automatically generated.
     """
 
     def __init__(
@@ -192,6 +194,9 @@ class Domain:
         # set the index of the domain
         self.index = index
 
+        # set the uuid
+        self.uuid = str(uuid1())
+
     def angles(self, start=0):
         """
         Obtain the angles of the NEMids of the Domain.
@@ -242,7 +247,7 @@ class Domain:
         if self.parent is None or self.parent.strands:
             return None
         else:
-            return Strand(self.parent.strands.points()[self.index][RIGHT])
+            return Strand(self.parent.strands.items()[self.index][RIGHT])
 
     @property
     def right_strand(self) -> Strand | None:
@@ -260,7 +265,7 @@ class Domain:
         if self.parent is None:
             return None
         else:
-            return Strand(self.parent.strands.points()[self.index][RIGHT])
+            return Strand(self.parent.strands.items()[self.index][RIGHT])
 
     @property
     def theta_s_multiple(self) -> int:

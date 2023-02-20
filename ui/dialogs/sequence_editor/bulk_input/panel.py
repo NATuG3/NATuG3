@@ -34,7 +34,7 @@ class BulkInputSequenceEditor(QWidget):
             filepath = QFileDialog.getOpenFileName(
                 self,
                 "Choose File Location",
-                directory=f"{os.getcwd()}\\saves\\sequencing\\presets\\",
+                directory=f"{os.getcwd()}/saves/sequencing/presets/",
                 filter="*.txt",
             )[0]
             # open and load file

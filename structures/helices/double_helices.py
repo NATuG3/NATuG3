@@ -7,11 +7,13 @@ from numpy import argmax
 from constants.directions import DOWN
 from structures.points import NEMid
 from structures.points.point import x_coord_from_angle
+from typing import List
+from uuid import uuid1
 
 
 class DoubleHelices:
     """
-    A container for multiple double helices.
+    A container for multiple double helix objects.
 
     A Helix's parent is a DoubleHelix. A DoubleHelix's parent is a DoubleHelices.
 
@@ -27,6 +29,8 @@ class DoubleHelices:
             order.
         compute: Compute the point data for each helix. The data will be stored in the
             helices respective x coord, z coord, and angle arrays.
+        double_helices (list): A list of DoubleHelix objects.
+        uuid (str): A unique identifier for the double helices. Automatically generated.
     """
 
     __slots__ = "double_helices", "nucleic_acid_profile"
@@ -49,6 +53,8 @@ class DoubleHelices:
         self.double_helices = [DoubleHelix(domain) for domain in domains.domains()]
         self.nucleic_acid_profile = nucleic_acid_profile
 
+        self.uuid = str(uuid1())
+
     def __len__(self) -> int:
         return len(self.double_helices)
 
@@ -60,6 +66,18 @@ class DoubleHelices:
 
     def __iter__(self) -> Iterator["DoubleHelix"]:
         return iter(self.double_helices)
+
+    def to_json(self) -> dict:
+        """
+        Convert the double helices to a JSON object.
+
+        Returns:
+            A JSON representation of the double helices.
+        """
+        return {
+            "uuid": self.uuid,
+            "items": [item.uuid for item in self],
+        }
 
     def domains(self) -> List["Domain"]:
         """

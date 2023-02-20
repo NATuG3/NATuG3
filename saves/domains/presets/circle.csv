@@ -1,8 +1,8 @@
-m,Left Helix Joints,Right Helix Joints,Left Helix Count,Other Helix Count,Symmetry,Antiparallel
-9,UP,UP,0-60-0,0-60-0,2.0,True
-9,DOWN,DOWN,0-60-0,0-60-0,,
-9,UP,UP,0-60-0,0-60-0,,
-9,DOWN,DOWN,0-60-0,0-60-0,,
-9,UP,UP,0-60-0,0-60-0,,
-9,DOWN,DOWN,0-60-0,0-60-0,,
-9,UP,UP,0-60-0,0-60-0,,
+uuid,data:m,data:left_helix_joints,data:right_helix_joints,data:left_helix_count,data:other_helix_count,data:symmetry,data:antiparallel
+e1999e95-b08e-11ed-a54f-2a8088df4c09,9,UP,UP,0-60-0,0-60-0,2.0,True
+e199c5ad-b08e-11ed-9551-2a8088df4c09,9,DOWN,DOWN,0-60-0,0-60-0,,
+e199c5ae-b08e-11ed-a0e0-2a8088df4c09,9,UP,UP,0-60-0,0-60-0,,
+e199c5af-b08e-11ed-8961-2a8088df4c09,9,DOWN,DOWN,0-60-0,0-60-0,,
+e199c5b0-b08e-11ed-8006-2a8088df4c09,9,UP,UP,0-60-0,0-60-0,,
+e199c5b1-b08e-11ed-b85a-2a8088df4c09,9,DOWN,DOWN,0-60-0,0-60-0,,
+e199c5b2-b08e-11ed-8014-2a8088df4c09,9,UP,UP,0-60-0,0-60-0,,
