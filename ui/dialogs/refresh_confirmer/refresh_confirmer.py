@@ -97,9 +97,7 @@ class RefreshConfirmer(QDialog):
         self.filepath = f"saves/{timestamp}_{counter}.{settings.extension}"
 
         # create default filepath
-        self.location.setText(
-            f"NATuG/saves/{timestamp}_{counter}.{settings.extension}"
-        )
+        self.location.setText(f"NATuG/saves/{timestamp}_{counter}.{settings.extension}")
 
     def _prettify(self):
         """Set the styles of the dialog."""

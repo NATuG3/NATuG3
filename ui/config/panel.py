@@ -133,5 +133,3 @@ class Panel(QWidget):
             self.runner.managers.toolbar.actions.buttons[NICKER].setEnabled(False)
             self.runner.managers.toolbar.actions.buttons[LINKER].setEnabled(False)
             self.runner.managers.toolbar.actions.buttons[JUNCTER].setEnabled(False)
-
-

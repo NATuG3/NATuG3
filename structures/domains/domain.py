@@ -83,9 +83,7 @@ class GenerationCount:
             raise IndexError("Index out of range.")
 
     def __repr__(self):
-        return (
-            f"GenCount({self.bottom_count}, {self.body_count}, {self.top_count})"
-        )
+        return f"GenCount({self.bottom_count}, {self.body_count}, {self.top_count})"
 
 
 class Domain:

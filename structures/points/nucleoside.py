@@ -60,9 +60,7 @@ class Nucleoside(Point):
         )
 
 
-def to_df(
-    nucleosides: Iterable[Nucleoside]
-) -> None | pd.DataFrame:
+def to_df(nucleosides: Iterable[Nucleoside]) -> None | pd.DataFrame:
     """
     Export the Nucleoside data to a pandas dataframe.
 

@@ -1,12 +1,11 @@
 import json
-from dataclasses import dataclass, field, asdict
-from typing import Type, List, Iterable
+from dataclasses import dataclass
+from dataclasses import field, asdict
+from typing import Iterable
+from typing import Type, List
 from uuid import uuid1
 
 import pandas as pd
-from dataclasses import dataclass
-from typing import Type, List
-
 from openpyxl.worksheet.worksheet import Worksheet as pyxlWorksheet
 from xlsxwriter.utility import xl_col_to_name
 
@@ -211,10 +210,7 @@ class NucleicAcidProfile:
         if not isinstance(other, NucleicAcidProfile):
             return False
 
-        return all(
-            getattr(self, attr) == getattr(other, attr)
-            for attr in asdict(self)
-        )
+        return all(getattr(self, attr) == getattr(other, attr) for attr in asdict(self))
 
 
 def to_df(nucleic_acid_profiles: Iterable[NucleicAcidProfile]) -> pd.DataFrame:
