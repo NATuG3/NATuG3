@@ -1,6 +1,7 @@
 import logging
 
 from PyQt6 import uic
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 from constants.tabs import *
@@ -41,7 +42,7 @@ class Panel(QWidget):
 
         # Set up tabs and hook signals
         self._tabs()
-        self._signals()
+        self._hook_signals()
 
     def _tabs(self):
         """Set up all tabs for config panel."""
@@ -64,21 +65,29 @@ class Panel(QWidget):
         self.sequencing_tab.setLayout(QVBoxLayout())
         self.sequencing_tab.layout().addWidget(self.sequencing)
 
-    def _signals(self):
-        """Setup signals."""
+    def _hook_signals(self):
+        """
+        Set up all signals for the configuration panel.
 
-        def tab_updated():
-            """Worker for when a tab is updated and wants to call a function"""
-            self.runner.managers.strands.recompute()
-            if self.auto_update_side_view.isChecked():
-                self.runner.window.side_view.refresh()
-            if self.auto_update_top_view.isChecked():
-                self.runner.window.top_view.refresh()
-
-        self.domains.updated.connect(tab_updated)
-        self.nucleic_acid.updated.connect(tab_updated)
+        Sets up the following signals:
+            self.domains.updated: When the domains tab has been updated.
+            self.nucleic_acid.updated: When the nucleic acid tab has been updated.
+            self.tab_area.currentChanged: When the current tab has been changed.
+        """
+        self.domains.updated.connect(self._on_tab_update)
+        self.nucleic_acid.updated.connect(self._on_tab_update)
         self.tab_area.currentChanged.connect(self._on_tab_change)
 
+    @pyqtSlot()
+    def _on_tab_update(self):
+        """Worker for when a tab is updated and wants to call a function"""
+        self.runner.managers.strands.recompute()
+        if self.auto_update_side_view.isChecked():
+            self.runner.window.side_view.refresh()
+        if self.auto_update_top_view.isChecked():
+            self.runner.window.top_view.refresh()
+
+    @pyqtSlot()
     def _on_tab_change(self, index: int):
         """
         Update the plotting mode based on the currently opened tab.
