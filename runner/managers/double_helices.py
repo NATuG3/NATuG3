@@ -1,4 +1,8 @@
+import logging
+
 from structures.helices import DoubleHelices
+
+logger = logging.getLogger(__name__)
 
 
 class DoubleHelicesManager:
@@ -40,4 +44,9 @@ class DoubleHelicesManager:
         Notes:
             This is a very expensive operation.
         """
+        self.current = DoubleHelices(
+            domains=self.runner.managers.domains.current,
+            nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
+        )
         self.current.compute()
+        logger.info("Recomputed double helices.")

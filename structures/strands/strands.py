@@ -385,7 +385,6 @@ class Strands:
         Args:
             skip_checks: Whether to skip checks for strand direction consistency.
         """
-        logger.debug("Recomputing strand styles...")
         for strand in self.strands:
             if strand.styles.thickness.automatic:
                 if strand.interdomain():
@@ -423,6 +422,7 @@ class Strands:
             # Set the styles of each point based off new strand styles
             for item in strand.items.by_type(Point):
                 item.styles.change_state("default")
+        logger.debug("Recomputed strand styles.")
 
     def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """

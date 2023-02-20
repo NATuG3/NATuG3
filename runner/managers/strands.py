@@ -1,4 +1,8 @@
+import logging
+
 from structures.strands.strands import Strands
+
+logger = logging.getLogger(__name__)
 
 
 class StrandsManager:
@@ -36,4 +40,5 @@ class StrandsManager:
         """
         self.runner.managers.double_helices.recompute()
         self.current = self.runner.managers.double_helices.current.strands()
+        logger.info("Recomputed strands.")
         return self.current
