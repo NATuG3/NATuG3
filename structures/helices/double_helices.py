@@ -1,5 +1,7 @@
 from math import ceil
-from typing import List, Iterator
+from typing import Iterator
+from typing import List
+from uuid import uuid1
 
 import numpy as np
 from numpy import argmax
@@ -7,8 +9,6 @@ from numpy import argmax
 from constants.directions import DOWN
 from structures.points import NEMid
 from structures.points.point import x_coord_from_angle
-from typing import List
-from uuid import uuid1
 
 
 class DoubleHelices:
@@ -33,7 +33,7 @@ class DoubleHelices:
         uuid (str): A unique identifier for the double helices. Automatically generated.
     """
 
-    __slots__ = "double_helices", "nucleic_acid_profile"
+    __slots__ = "double_helices", "nucleic_acid_profile", "uuid"
 
     def __init__(self, domains: "Domains", nucleic_acid_profile) -> None:
         """

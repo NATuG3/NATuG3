@@ -34,7 +34,7 @@ class DoubleHelix:
         to_csv: Write the double helix to a CSV file.
     """
 
-    __slots__ = "domain", "strands", "uuid"
+    __slots__ = "domain", "helices", "uuid"
 
     def __init__(
         self,
