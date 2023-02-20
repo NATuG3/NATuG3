@@ -4,7 +4,7 @@ from functools import partial
 
 import pandas as pd
 from PyQt6 import uic
-from PyQt6.QtCore import QTimer, pyqtSignal
+from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
@@ -46,8 +46,6 @@ class DomainsPanel(QWidget):
         # run setup functions
         self._signals()
         self._prettify()
-
-        self._processing_updates = False
 
         self.dump_domains(self.runner.managers.domains.current)
 
@@ -144,11 +142,6 @@ class DomainsPanel(QWidget):
         Warn the user if they are about to overwrite strand data, and if they are
         okay with that, then update the domains. Otherwise, revert to the old domains.
         """
-        print("Processing updates")
-        if self._processing_updates:
-            return
-
-        self._processing_updates = True
         if RefreshConfirmer.run(self.runner):
             self.runner.managers.domains.current.update(
                 self.fetch_domains(self.runner.managers.nucleic_acid_profile.current)
@@ -159,48 +152,6 @@ class DomainsPanel(QWidget):
         else:
             self.dump_domains(self.runner.managers.domains.current)
             logger.debug("Did not update domains because user chose not to.")
-        self._processing_updates = False
-
-    def _on_table_update_button_clicked(self):
-        new_table_domains = copy(self.runner.managers.domains.current)
-        new_table_domains.subunit.count = self.subunit_count.value()
-        self.table.dump_domains(new_table_domains.subunit.domains)
-        self._process_updates()
-
-    def _on_helix_joint_updated(self):
-        self.auto_antiparallel.setChecked(False)
-
-    def _on_save_button_clicked(self):
-        """Save domains to file."""
-        filepath = QFileDialog.getSaveFileName(
-            parent=self,
-            caption="Domains Save File Location Chooser",
-            filter="*.csv",
-        )[0]
-        if len(filepath) > 0:
-            logger.info(
-                f"Saving domains to {filepath}."
-                f"\nDomains being saved: {self.runner.managers.domains.current}"
-            )
-            domains_df = self.runner.managers.domains.current.to_df()
-            domains_df.to_csv(filepath, index=False)
-
-    def _on_load_button_clicked(self):
-        """Load domains from file."""
-        filepath = QFileDialog.getOpenFileName(
-            parent=self,
-            caption="Domains Import File Location Chooser",
-            directory=f"saves/domains/presets",
-            filter="*.csv",
-        )[0]
-        if filepath:
-            new_domains = Domains.from_df(
-                df=pd.read_csv(filepath),
-                nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
-            )
-            self.dump_domains(new_domains)
-            self._process_updates()
-            self.updated.emit()
 
     def _update_total_domain_box(self):
         """Update the total domain count box."""
@@ -227,6 +178,52 @@ class DomainsPanel(QWidget):
         self.save_domains_button.clicked.connect(self._on_save_button_clicked)
         self.load_domains_button.clicked.connect(self._on_load_button_clicked)
 
+    @pyqtSlot()
+    def _on_table_update_button_clicked(self):
+        new_table_domains = copy(self.runner.managers.domains.current)
+        new_table_domains.subunit.count = self.subunit_count.value()
+        self.table.dump_domains(new_table_domains.subunit.domains)
+        self._process_updates()
+
+    @pyqtSlot()
+    def _on_helix_joint_updated(self):
+        self.auto_antiparallel.setChecked(False)
+
+    @pyqtSlot()
+    def _on_save_button_clicked(self):
+        """Save domains to file."""
+        filepath = QFileDialog.getSaveFileName(
+            parent=self,
+            caption="Domains Save File Location Chooser",
+            filter="*.csv",
+        )[0]
+        if len(filepath) > 0:
+            logger.info(
+                f"Saving domains to {filepath}."
+                f"\nDomains being saved: {self.runner.managers.domains.current}"
+            )
+            domains_df = self.runner.managers.domains.current.to_df()
+            domains_df.to_csv(filepath, index=False)
+
+    @pyqtSlot()
+    def _on_load_button_clicked(self):
+        """Load domains from file."""
+        filepath = QFileDialog.getOpenFileName(
+            parent=self,
+            caption="Domains Import File Location Chooser",
+            directory=f"saves/domains/presets",
+            filter="*.csv",
+        )[0]
+        if filepath:
+            new_domains = Domains.from_df(
+                df=pd.read_csv(filepath),
+                nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
+            )
+            self.dump_domains(new_domains)
+            self._process_updates()
+            self.updated.emit()
+
+    @pyqtSlot()
     def _on_settings_panel_update(self):
         """Refresh panel settings/domain table."""
         logger.info("Refreshing domains table.")
