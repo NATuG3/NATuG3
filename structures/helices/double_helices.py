@@ -1,13 +1,12 @@
 from math import ceil
+from time import time
 from typing import Iterator
-from typing import List
 from uuid import uuid1
 
 import numpy as np
 from numpy import argmax
 
 from constants.directions import DOWN
-from structures.points import NEMid
 from structures.points.point import x_coord_from_angle
 
 
@@ -33,7 +32,7 @@ class DoubleHelices:
         uuid (str): A unique identifier for the double helices. Automatically generated.
     """
 
-    __slots__ = "double_helices", "nucleic_acid_profile", "uuid"
+    __slots__ = "double_helices", "nucleic_acid_profile", "uuid", "_domains"
 
     def __init__(self, domains: "Domains", nucleic_acid_profile) -> None:
         """
@@ -44,8 +43,7 @@ class DoubleHelices:
 
         Args:
             domains: A Domains object containing the domains for the creation of the
-                double helices. Each domain will be used to create a double helix,
-                and the .domains() method will be used to fetch all the domains.
+                double helices. Each domain will be used to create a double helix.
             nucleic_acid_profile: The nucleic acid profile to use for computations.
         """
         from structures.helices import DoubleHelix
@@ -53,6 +51,7 @@ class DoubleHelices:
         self.double_helices = [DoubleHelix(domain) for domain in domains.domains()]
         self.nucleic_acid_profile = nucleic_acid_profile
 
+        self._domains = domains
         self.uuid = str(uuid1())
 
     def __len__(self) -> int:
@@ -67,6 +66,26 @@ class DoubleHelices:
     def __iter__(self) -> Iterator["DoubleHelix"]:
         return iter(self.double_helices)
 
+    @property
+    def domains(self) -> "Domains":
+        return self._domains
+
+    @domains.setter
+    def domains(self, new_domains: "Domains"):
+        """
+        Set new domains for all the double helices.
+
+        Automatically updates the domains of each of the child helices and double
+        helices.
+
+        Args:
+            new_domains: The new domains to use.
+        """
+        new_domains_listed = new_domains.domains()
+        for i, double_helix in enumerate(self):
+            double_helix.domain = new_domains_listed[i]
+        self._domains = new_domains
+
     def to_json(self) -> dict:
         """
         Convert the double helices to a JSON object.
@@ -78,15 +97,6 @@ class DoubleHelices:
             "uuid": self.uuid,
             "items": [item.uuid for item in self],
         }
-
-    def domains(self) -> List["Domain"]:
-        """
-        Obtain all the domains of all the double helices in their respective order.
-
-        Returns:
-            A list of all the domains.
-        """
-        return [domain for domain in self.double_helices]
 
     def strands(self) -> "Strands":
         """
@@ -113,6 +123,7 @@ class DoubleHelices:
             )
             double_helices.append((up_helix, down_helix))
 
+        start = time()
         # Assign junctability to each NEMid that superposes a NEMid in a helix of the
         # subsequent double helix.
         for index, double_helix in enumerate(double_helices):
@@ -127,13 +138,23 @@ class DoubleHelices:
             # the points in both helices.
             for helix1 in double_helix:
                 for helix2 in next_double_helix:
-                    for point1 in helix1.items.by_type(NEMid):
-                        for point2 in helix2.items.by_type(NEMid):
-                            if point1.overlaps(point2, width=len(self.domains())):
-                                point1.junctable = True
-                                point1.juncmate = point2
-                                point2.junctable = True
-                                point2.juncmate = point1
+                    for point1 in helix1.items[1::2]:
+                        for point2 in helix2.items[1::2]:
+                            # We know that all overlaps are going to be on the
+                            # integer line, so we only need to check points that are
+                            # on the integer line. True, the following implementation
+                            # may sometimes check points that happen to have the same
+                            # decimal value by chance, but we will then run the full
+                            # on overlaps() method afterwards anyway. Comparing the
+                            # decimal value once is much faster than checking to see if
+                            # the %1=0 two times (~2x as fast).
+                            if point1.x_coord % 1 == point2.x_coord % 1:
+                                if point1.overlaps(point2, width=self.domains.count):
+                                    point1.junctable = True
+                                    point1.juncmate = point2
+                                    point2.junctable = True
+                                    point2.juncmate = point1
+        print(f"Junctability assignment took {time() - start:.2f} seconds.")
 
         strands = [helix for double_helix in double_helices for helix in double_helix]
         strands = Strands(

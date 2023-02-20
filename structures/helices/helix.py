@@ -141,8 +141,8 @@ class Helix:
         ):
             yield cls(  # type: ignore
                 angle=angle,
-                x_coord=x_coord,
-                z_coord=z_coord,
+                x_coord=round(x_coord, 5),
+                z_coord=round(z_coord, 5),
                 direction=self.direction,
                 domain=domain,
             )
