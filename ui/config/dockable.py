@@ -41,6 +41,6 @@ class Dockable(QDockWidget):
             floating (bool): Whether the dock widget is floating.
         """
         qr = self.frameGeometry()
-        cp = runner.constructor.geometry().center()
+        cp = self.runner.window.geometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
