@@ -39,12 +39,15 @@ class DomainsPanel(QWidget):
         super().__init__(parent)
         uic.loadUi("ui/config/tabs/domains/panel.ui", self)
 
+        # Define internal attributes
+        self._pushing_updates = False
+
         # create domains editor table and append it to the bottom of the domains panel
         self.table = Table(self, self.runner.managers.nucleic_acid_profile.current)
         self.layout().addWidget(self.table)
 
         # run setup functions
-        self._signals()
+        self._hook_signals()
         self._prettify()
 
         self.dump_domains(self.runner.managers.domains.current)
@@ -137,11 +140,16 @@ class DomainsPanel(QWidget):
         config_size_policy.setHorizontalPolicy(QSizePolicy.Policy.Expanding)
         self.config.setSizePolicy(config_size_policy)
 
-    def _process_updates(self):
+    def _push_updates(self):
         """
         Warn the user if they are about to overwrite strand data, and if they are
         okay with that, then update the domains. Otherwise, revert to the old domains.
         """
+        if self._pushing_updates:
+            return
+        self._pushing_updates = True
+        # Warn the user if they are about to overwrite strand data, and give them the
+        # opportunity to save the current state and then update the domains.
         if RefreshConfirmer.run(self.runner):
             self.runner.managers.domains.current.update(
                 self.fetch_domains(self.runner.managers.nucleic_acid_profile.current)
@@ -149,22 +157,31 @@ class DomainsPanel(QWidget):
             self.dump_domains(self.runner.managers.domains.current)
             self.updated.emit()
             logger.debug("Updated domains.")
+        # They rather not update the domains, so revert to the old domains.
         else:
             self.dump_domains(self.runner.managers.domains.current)
             logger.debug("Did not update domains because user chose not to.")
+        self._pushing_updates = False
 
-    def _update_total_domain_box(self):
-        """Update the total domain count box."""
-        self.total_count.setValue(self.symmetry.value() * self.subunit_count.value())
+    def _hook_signals(self):
+        """
+        Hook all signals to their respective slots.
 
-    def _signals(self):
-        """Set up panel signals."""
-        self.table.cell_widget_updated.connect(self._process_updates)
-        self.table.helix_joint_updated.connect(self._process_updates)
+        Hooks the following signals:
+            - table.cell_widget_updated
+            - table.helix_joint_updated
+            - symmetry.valueChanged
+            - subunit_count.valueChanged
+            - update_table_button.clicked
+            - table.helix_joint_updated
+            - auto_antiparallel_button.clicked
+        """
+        self.table.cell_widget_updated.connect(self._push_updates)
+        self.table.helix_joint_updated.connect(self._push_updates)
 
         # Make sure that the total domain count is updated as the summands are changed.
-        self.symmetry.valueChanged.connect(self._update_total_domain_box)
-        self.subunit_count.valueChanged.connect(self._update_total_domain_box)
+        self.symmetry.valueChanged.connect(self._on_symmetry_setting_change)
+        self.subunit_count.valueChanged.connect(self._on_symmetry_setting_change)
 
         # Read the settings area when the update table button is clicked.
         self.update_table_button.clicked.connect(self._on_table_update_button_clicked)
@@ -172,18 +189,23 @@ class DomainsPanel(QWidget):
         # Reset the checked button when a helix joint is updated because the user has
         # opted out of the auto-antiparallel feature by changing the helix joint
         self.table.helix_joint_updated.connect(self._on_helix_joint_updated)
-        self.auto_antiparallel.stateChanged.connect(self._process_updates)
+        self.auto_antiparallel.stateChanged.connect(self._push_updates)
 
         # Set up the save/load buttons slots.
         self.save_domains_button.clicked.connect(self._on_save_button_clicked)
         self.load_domains_button.clicked.connect(self._on_load_button_clicked)
 
     @pyqtSlot()
+    def _on_symmetry_setting_change(self):
+        """Update the total domain count box."""
+        self.total_count.setValue(self.symmetry.value() * self.subunit_count.value())
+
+    @pyqtSlot()
     def _on_table_update_button_clicked(self):
         new_table_domains = copy(self.runner.managers.domains.current)
         new_table_domains.subunit.count = self.subunit_count.value()
         self.table.dump_domains(new_table_domains.subunit.domains)
-        self._process_updates()
+        self._push_updates()
 
     @pyqtSlot()
     def _on_helix_joint_updated(self):
@@ -220,7 +242,7 @@ class DomainsPanel(QWidget):
                 nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
             )
             self.dump_domains(new_domains)
-            self._process_updates()
+            self._push_updates()
             self.updated.emit()
 
     @pyqtSlot()
