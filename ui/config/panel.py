@@ -73,10 +73,20 @@ class Panel(QWidget):
             self.domains.updated: When the domains tab has been updated.
             self.nucleic_acid.updated: When the nucleic acid tab has been updated.
             self.tab_area.currentChanged: When the current tab has been changed.
+            self.update_graphs.clicked: When the update graphs button has been clicked.
         """
         self.domains.updated.connect(self._on_tab_update)
         self.nucleic_acid.updated.connect(self._on_tab_update)
         self.tab_area.currentChanged.connect(self._on_tab_change)
+        self.update_graphs.clicked.connect(self._on_update_graphs)
+
+    @pyqtSlot()
+    def _on_update_graphs(self):
+        """Update the graphs and recompute the helix graph."""
+        self.runner.window.side_view.refresh()
+        self.runner.window.top_view.refresh()
+        self.runner.window.side_view.refresh()
+        self.runner.window.top_view.refresh()
 
     @pyqtSlot()
     def _on_tab_update(self):
