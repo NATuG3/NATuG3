@@ -12,7 +12,6 @@ from xlsxwriter import Workbook
 
 import settings
 from constants.directions import DOWN, UP
-from structures.helices import DoubleHelices
 from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.points.point import Point
@@ -50,7 +49,6 @@ class Strands:
         connect: Bind two arbitrary NEMids together.
         disconnect: Unbind two arbitrary NEMids.
         nick: Nicks the strands at the given point (splits the strand into two).
-        from_double_helices: Create a Strands object from a DoubleHelices object.
         assign_junctability: Assigns the junctability of all NEMids in all strands.
         up_strands, down_strands: Obtain all up or down strands.
         recompute, recolor: Recompute or recolor all strands.
@@ -232,40 +230,6 @@ class Strands:
         self.nicks.remove(nick)
 
         self.style()
-
-    @classmethod
-    def from_double_helices(
-        cls,
-        nucleic_acid_profile: NucleicAcidProfile,
-        double_helices: DoubleHelices,
-        name: str = "Strands",
-    ):
-        """
-        Load a Strands object from a double_helices of up and down strands.
-
-        This double_helices is saved under self.double_helices, and is used primarily
-        for determining matching NEMids and Nucleosides.
-
-        This method automatically stores the Strands object in self.double_helices,
-        and unpacks the strands (helices) from each double helix into self.strands.
-
-        Args:
-            nucleic_acid_profile: The nucleic acid settings for the strands container.
-            double_helices: The double_helices to load from. This is a DoubleHelices
-                object.
-            name: The name of the strands object. Used when exporting the strands
-                object.
-        """
-        strands: List[Strand] = []
-        for double_helix in double_helices:
-            for helix in double_helix:
-                strands.append(helix)
-
-        strands: "Strands" = cls(nucleic_acid_profile, strands, name)
-        strands.double_helices = double_helices
-        strands.style()
-
-        return strands
 
     def to_file(self, filepath: str, open_in_file_explorer: bool = True) -> None:
         """
