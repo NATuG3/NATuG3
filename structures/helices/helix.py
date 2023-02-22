@@ -1,6 +1,7 @@
 import itertools
-from dataclasses import dataclass
-from typing import Literal, Type
+from dataclasses import dataclass, field
+from types import NoneType
+from typing import Literal, Type, Iterable
 
 import numpy as np
 
@@ -16,30 +17,54 @@ class HelixData:
     A container for the data of a helix.
 
     Attributes:
+        helix: The helix that this data belongs to.
         x_coords: The x-coordinates of the points in the helix.
         z_coords: The z-coordinates of the points in the helix.
         angles: The angles of the points in the helix.
     """
 
-    x_coords: np.ndarray | None
-    z_coords: np.ndarray | None
-    angles: np.ndarray | None
+    helix: Type["Helix"] | None = None
 
-    def __init__(self, size: int | None):
-        """
-        Initialize a container for the data of a helix.
+    x_coords: np.ndarray | None = None
+    z_coords: np.ndarray | None = None
+    angles: np.ndarray | None = None
 
-        Args:
-            size: The number of points in the helix.
+    _data_arrays = ("x_coords", "z_coords", "angles")
+
+    def __setattr__(self, key, value):
         """
-        if size is None:
-            self.x_coords = None
-            self.z_coords = None
-            self.angles = None
+        Set an attribute of the helix data.
+
+        When a data array is set up, the parent helix's sequence is set to an empty
+        array of the same size as the data array.
+        """
+        # Perform special processing if they are setting a data array.
+        if key in self._data_arrays:
+            # In initialization of the data arrays they are set to None, so we must
+            # allow it.
+            if value is None:
+                super(HelixData, self).__setattr__(key, value)
+            # If the value is a numpy array, we will set the sequence of the helix to
+            # an array of the same size as the data array.
+            else:
+                if isinstance(value, np.ndarray):
+                    self.helix.sequence = np.full(len(value), "X")
+                    super(HelixData, self).__setattr__(key, value)
+                else:
+                    raise TypeError("The data arrays must be numpy arrays.")
+        # Otherwise, just set the attribute.
         else:
-            self.x_coords = np.zeros(size)
-            self.z_coords = np.zeros(size)
-            self.angles = np.zeros(size)
+            super(HelixData, self).__setattr__(key, value)
+
+    def size(self) -> int:
+        """
+        Get the size of the helix.
+
+        Returns:
+            The size of the helix.
+        """
+        assert len(self.x_coords) == len(self.z_coords) == len(self.angles)
+        return len(self.x_coords)
 
     def resize(self, size: int):
         """
@@ -67,30 +92,19 @@ class Helix:
         domain: The domain that this helix lies within.
         data: The data of the helix. This is a HelixData object, and contains the
             x-coordinates, z-coordinates, and angles of the points in the helix.
+        sequence: The sequence of the nucleosides of the helix. This starts out as
+            None, and is automatically made an empty numpy array of the same size as
+            the data arrays when the data arrays are set.
     """
 
     direction: Literal[UP, DOWN]
     double_helix: Type["DoubleHelix"] | None
-    data: HelixData
+    data: HelixData = field(default_factory=HelixData)
 
-    def __init__(
-        self,
-        direction: Literal[UP, DOWN],
-        size: int | None,
-        double_helix: Type["DoubleHelix"] | None = None,
-    ):
-        """
-        Initialize a helix.
+    _sequence: np.ndarray = field(default=None, init=False)
 
-        Args:
-            direction: The direction of the helix. Either UP or DOWN.
-            size: The number of points in the helix. If None, the size can be set
-                later with the resize method.
-            double_helix: The double helix that this helix belongs to.
-        """
-        self.direction = direction
-        self.double_helix = double_helix
-        self.data = HelixData(size)
+    def __post_init__(self):
+        self.data.helix = self
 
     def __len__(self):
         """Return the number of points in the helix."""
@@ -98,6 +112,40 @@ class Helix:
             len(self.data.x_coords) == len(self.data.z_coords) == len(self.data.angles)
         )
         return len(self.data.angles)
+
+    @property
+    def sequence(self) -> np.ndarray | None:
+        """
+        The sequence of the nucleosides of the helix.
+
+        This starts out as None, and is automatically made an empty numpy array of
+        the same size as the data arrays when the data arrays are set. The empty
+        array uses the letter "X" to represent unset bases.
+        """
+        return self._sequence
+
+    @sequence.setter
+    def sequence(self, value: Iterable[str] | None):
+        """
+        Set the sequence of the helix or clear the sequence.
+
+        Args:
+            value: The sequence of the helix. This must be an iterable of capital
+                valid base strings or None. If None, the sequence is cleared.
+
+        Raises:
+            TypeError: If the sequence is not an iterable or None.
+        """
+        if not isinstance(value, (Iterable, NoneType)):
+            raise TypeError("The sequence must be an iterable or None.")
+
+        if value is None:
+            self._sequence = np.full(self.data.size(), "X")
+        else:
+            if isinstance(value, np.ndarray):
+                self._sequence = value
+            else:
+                self._sequence = np.array(value)
 
     @property
     def domain(self):
@@ -131,7 +179,8 @@ class Helix:
             Nucleoside or NEMid: The next item in the strand.
         """
         domain = self.double_helix.domain if self.double_helix else None
-        for cls, angle, x_coord, z_coord in zip(
+        for index, cls, angle, x_coord, z_coord in zip(
+            itertools.count(),
             itertools.cycle(
                 (NEMid, Nucleoside) if begin == NEMid else (Nucleoside, NEMid)
             ),
@@ -145,7 +194,8 @@ class Helix:
                 z_coord=round(z_coord, 5),
                 direction=self.direction,
                 domain=domain,
-                helix=self
+                helix=self,
+                helical_index=index,
             )
 
     def strand(

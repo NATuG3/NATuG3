@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass, field
 from math import dist
-from typing import Tuple, Type, List, Iterable
+from typing import Tuple, Type, Iterable
 from uuid import uuid1
 
 import pandas as pd
@@ -187,6 +187,8 @@ class Point:
             strand, but does not traverse domains. It represents the original strand
             that the point started out in. The helix is used to identify the
             complementary nucleoside, if the point is a nucleoside.
+        helical_index: The index of the point within its helix. None if the point's
+            helix is None. Automatically set by points yielded from helix.points().
         linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
         styles: The styles of the point.
@@ -210,6 +212,7 @@ class Point:
     direction: int = None
     strand: Type["Strand"] = field(default=None, repr=False)
     helix: Type["Helix"] = field(default=None, repr=False)
+    helical_index: int = field(default=None, repr=False)
     linkage: Type["Linkage"] = None
     domain: Type["Domain"] = None
 
@@ -304,52 +307,37 @@ class Point:
         """
         Obtain the matching point.
 
-        The matching point is determined based off of the strands strand's .double_helices.
-        .double_helices is a formatted list of domains' up and down strands. We will use this
-        to determine the matching point on the other strand of ours.
+        The matching point is determined based off of the strands strand's .helix.
+        If .helix is None, None is returned. The matching point is the point at the
+        same index as the current point in the other helix of the same double helix.
 
         Returns:
             Point: The matching point.
             None: There is no matching point. This is the case for closed strands,
-                or for when there is no double_helices within the strands's Strands object.
+                or for when there is no double_helices within the strands's Strands
+                object.
+
+        Raises:
+            ValueError: The point does have a helix, but the helix does not have a
+                double helix parent.
         """
-        # our domain's strands is a subunit; our domain's subunit's strands is a
-        # Domains object we need access to this Domains object in order to locate the
-        # matching point
-        if (
-            self.strand.closed
-            or self.strand is None
-            or self.strand.strands.double_helices is None
-        ):
+        # Ensure that the point has a parent helix, and the parent helix has a parent
+        # double helix.
+        if self.helix is None:
             return None
-        else:
-            # create a reference to the strands double_helices
-            strands: List[Tuple["Strand", "Strand"]]
-            strands = self.strand.strands.double_helices
+        if self.helix.double_helix is None:
+            raise ValueError(
+                "The point does have a helix, but the helix does not have a double "
+                "helix parent. Could not obtain the matching point."
+            )
 
-            # obtain the helix that we are contained in
-            our_helix: "Strand" = strands[self.domain.index][self.direction]
-            # determine our index in our helix
-            our_index = our_helix.index(self)
+        # Obtain the matching point. The matching point is the point at the same
+        # helical index as this point in the other helix.
+        return self.helix.double_helix[inverse(self.helix.direction)].sequence[
+            self.helical_index
+        ]
 
-            # obtain the other helix of our domain
-            other_helix: "Strand" = strands[self.domain.index][inverse(self.direction)]
-            # since the other strand in our domain is going in the other direction,
-            # we reverse the other helix
-            other_helix: Tuple[Point] = tuple(reversed(other_helix.items))
-
-            # obtain the matching point
-            try:
-                matching: Point = other_helix[our_index]
-            except IndexError:
-                return None
-
-            if isinstance(matching, type(self)):
-                return matching
-            else:
-                return None
-
-    def surf_strand(self, dist) -> Type["Point"] | None:
+    def surf_strand(self, dist: int) -> Type["Point"] | None:
         """
         Obtain the point on the point's strand that is dist away from this point.
 

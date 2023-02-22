@@ -96,37 +96,47 @@ class Panel(QWidget):
             self.runner.window.top_view.refresh()
 
     @pyqtSlot()
-    def _on_tab_change(self, index: int):
+    def _on_tab_change(self):
         """
-        Update the plotting mode based on the currently opened tab.
+        Worker for when the current config tab is changed.
 
-        Args:
-            index (int): The index of the tab that is currently open (the tab
-                that has been changed to).
-
-        Performs the following actions:
-            1) Updates the plotting mode and the enabled status of the buttons in
-                the toolbar.
+        Updates the plotting mode and the enabled status of the buttons in
+        the toolbar.
         """
+        index = self.tab_area.currentIndex()
+
         # First set the toolbar and current plotting mode
         if index in (
             NUCLEIC_ACID,
             DOMAINS,
         ):
-            # if the plot mode was not already NEMid make it NEMid
+            logger.info("The current tab has been changed to Nucleic Acid or Domains")
+
+            # If the plot mode was not already NEMid make it NEMid
             if self.runner.managers.misc.plot_mode != "NEMid":
                 self.runner.managers.misc.plot_mode = "NEMid"
-                self.runner.window.side_view.refresh()
+                self.runner.window.side_view.refresh()  # Refresh the side view to
+                # ensure that it displays the correct type of point
+
+            # Enable all the potential modes for the toolbar
             self.runner.managers.toolbar.actions.buttons[INFORMER].setEnabled(True)
             self.runner.managers.toolbar.actions.buttons[NICKER].setEnabled(True)
             self.runner.managers.toolbar.actions.buttons[LINKER].setEnabled(True)
             self.runner.managers.toolbar.actions.buttons[JUNCTER].setEnabled(True)
+
         elif index in (STRANDS,):
-            # if the plot mode was not already nucleoside make it nucleoside
+            logger.info("The current tab has been changed to Strands")
+
+            # If the plot mode was not already nucleoside make it nucleoside
             if self.runner.managers.misc.plot_mode != "nucleoside":
                 self.runner.managers.misc.plot_mode = "nucleoside"
-                self.runner.window.side_view.refresh()
+                self.runner.window.side_view.refresh()  # Refresh the side view to
+                # ensure that it displays the correct type of point
+
+            # Change the current interaction mode to informer mode.
             self.runner.managers.toolbar.current = INFORMER
+
+            # Enable all the potential modes for the toolbar
             self.runner.managers.toolbar.actions.buttons[INFORMER].setEnabled(True)
             self.runner.managers.toolbar.actions.buttons[NICKER].setEnabled(False)
             self.runner.managers.toolbar.actions.buttons[LINKER].setEnabled(False)

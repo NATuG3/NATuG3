@@ -29,6 +29,8 @@ class DoubleHelix:
         right_helix: The helix that is of the direction of the domain's right helical
             joint. This is the helix whose points are lined up to the points that are
             on the helix of the next domain's left helical joint helix.
+        uuid: The UUID of the double helix. This is automatically generated when the
+            double helix is created.
 
     Methods:
         to_csv: Write the double helix to a CSV file.
@@ -41,6 +43,7 @@ class DoubleHelix:
         domain: "Domain",
         up_helix: Helix | None = None,
         down_helix: Helix | None = None,
+        uuid: str | None = None,
     ) -> None:
         """
         Initialize a double helix.
@@ -51,17 +54,45 @@ class DoubleHelix:
                 None, a new and empty helix will be created.
             down_helix: The helix that progresses downwards from its 5' to 3' end. If
                 None, a new and empty helix will be created.
+            uuid: The UUID of the double helix. If None, a new UUID will be created.
         """
         self.domain = domain
-        self.helices = (
-            up_helix or Helix(direction=UP, size=None, double_helix=self),
-            down_helix or Helix(direction=DOWN, size=None, double_helix=self),
-        )
-        self.uuid = str(uuid1())
+        self.helices = [None, None]
+        self.uuid = uuid or str(uuid1())
+
+        if up_helix is not None:
+            if up_helix.direction != UP:
+                raise ValueError("The up helix must be of the UP direction.")
+            self.helices[UP] = up_helix
+            self.helices[UP].double_helix = self
+        else:
+            self.helices[UP] = Helix(direction=UP, double_helix=self)
+
+        if down_helix is not None:
+            if down_helix.direction != DOWN:
+                raise ValueError("The down helix must be of the DOWN direction.")
+            self.helices[DOWN] = down_helix
+            self.helices[DOWN].double_helix = self
+        else:
+            self.helices[DOWN] = Helix(direction=DOWN, double_helix=self)
 
         # The helices must contain empty arrays of the size that the Domains indicates.
         self.left_helix.data.resize(self.domain.left_helix_count)
         self.other_helix.data.resize(self.domain.other_helix_count)
+
+    def __getitem__(self, index: int) -> Helix:
+        """
+        Get a helix in the double helix.
+
+        Args:
+            index: The index of the helix to get. This can be either UP or DOWN. UP
+                or DOWN are constants that are defined in the constants.directions
+                module, and are 0 and 1, respectively.
+
+        Returns:
+            The helix at the given index.
+        """
+        return self.helices[index]
 
     @property
     def left_helix(self) -> Helix:
