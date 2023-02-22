@@ -3,7 +3,7 @@ import random
 from collections import deque
 from copy import deepcopy, copy
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, List, Type, Set
+from typing import Tuple, Iterable, List, Type, Set, Deque
 from uuid import uuid1
 
 import numpy as np
@@ -123,10 +123,19 @@ class StrandItems(deque):
         item_types: A list of all the types of items in the StrandItems.
     """
 
-    def __getitem__(self, index: int | slice) -> object:
-        if isinstance(index, slice):
-            return itertools.islice(self, index.start, index.stop, index.step)
-        return super().__getitem__(index)
+    def __getitem__(self, index_or_slice: int | slice) -> object:
+        if isinstance(index_or_slice, slice):
+            if index_or_slice.step < 0:
+                iter_on = reversed(self)
+            else:
+                iter_on = self
+            return itertools.islice(
+                iter_on,
+                index_or_slice.start,
+                index_or_slice.stop,
+                abs(index_or_slice.step),
+            )
+        return super().__getitem__(index_or_slice)
 
     def by_type(self, type_: Type | Tuple[Type]) -> List[object]:
         """
@@ -585,19 +594,21 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        nucleosides = self.items.by_type(Nucleoside)
+        nucleosides: Deque[Nucleoside] = self.items.by_type(Nucleoside)  # type: ignore
+
         if len(new_sequence) == len(self.sequence):
             for index, base in enumerate(new_sequence):
                 our_nucleoside = nucleosides[index]
                 our_nucleoside.base = base
 
-                matching_nucleoside = our_nucleoside.matching()
+                matching_nucleoside = our_nucleoside.matching
                 if matching_nucleoside is not None:
-                    matching_nucleoside.base = our_nucleoside.complement
+                    print("Setting matching nucleoside")
+                    matching_nucleoside.complement = our_nucleoside.base
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
-                + "match number of nucleosides in strand ({len(self)})"
+                + f"match number of nucleosides in strand ({len(self)})"
             )
 
     @staticmethod
@@ -628,9 +639,8 @@ class Strand:
         for nucleoside in self.items.by_type(Nucleoside):
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
-                nucleoside.styles.change_state("default")
-                if (matching := nucleoside.matching()) is not None:
-                    matching.base = nucleoside.complement
+                if nucleoside.matching is not None:
+                    nucleoside.matching.base = nucleoside.complement
 
     def clear_sequence(self, overwrite: bool = False) -> None:
         """
