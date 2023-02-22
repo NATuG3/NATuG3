@@ -8,7 +8,7 @@ import pandas as pd
 
 import settings
 from constants.directions import DOWN, UP
-from utils import inverse, rgb_to_hex
+from utils import rgb_to_hex
 
 logger = logging.getLogger(__name__)
 
@@ -195,7 +195,6 @@ class Point:
         uuid (str): The uuid of the point. This is automatically generated post init.
 
     Methods:
-        matching: Obtain the matching point on the other helix of the same domain.
         x_coord_from_angle: Obtain the x coord of the point from the angle.
         position: Obtain the position of the point as a tuple.
         is_endpoint: Return whether the point is an endpoint in the strand.
@@ -302,40 +301,6 @@ class Point:
             The midpoint location as a tuple.
         """
         return (self.x_coord + point.x_coord) / 2, (self.z_coord + point.z_coord) / 2
-
-    def matching(self) -> Type["Point"] | None:
-        """
-        Obtain the matching point.
-
-        The matching point is determined based off of the strands strand's .helix.
-        If .helix is None, None is returned. The matching point is the point at the
-        same index as the current point in the other helix of the same double helix.
-
-        Returns:
-            Point: The matching point.
-            None: There is no matching point. This is the case for closed strands,
-                or for when there is no double_helices within the strands's Strands
-                object.
-
-        Raises:
-            ValueError: The point does have a helix, but the helix does not have a
-                double helix parent.
-        """
-        # Ensure that the point has a parent helix, and the parent helix has a parent
-        # double helix.
-        if self.helix is None:
-            return None
-        if self.helix.double_helix is None:
-            raise ValueError(
-                "The point does have a helix, but the helix does not have a double "
-                "helix parent. Could not obtain the matching point."
-            )
-
-        # Obtain the matching point. The matching point is the point at the same
-        # helical index as this point in the other helix.
-        return self.helix.double_helix[inverse(self.helix.direction)].sequence[
-            self.helical_index
-        ]
 
     def surf_strand(self, dist: int) -> Type["Point"] | None:
         """
