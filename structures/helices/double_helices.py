@@ -7,7 +7,7 @@ from uuid import uuid1
 import numpy as np
 from numpy import argmax
 
-from constants.directions import DOWN
+from constants.directions import DOWN, UP
 from structures.points.point import x_coord_from_angle
 
 logger = logging.getLogger(__name__)
@@ -158,6 +158,19 @@ class DoubleHelices:
                                     point2.junctable = True
                                     point2.juncmate = point1
         logger.debug(f"Junctability assignment took {time() - start:.2f} seconds.")
+
+        start = time()
+        # Assign .matching to all nucleosides. Each nucleoside's .matching nucleoside
+        # is the nucleoside with the same .helical_index in the other helix of the
+        # same double helix.
+        for double_helix in double_helices:
+            for item1, item2 in zip(
+                double_helix[UP].items[0::2], double_helix[DOWN].items[0::-2]
+            ):
+                if item1 is not None and item2 is not None:
+                    item1.matching = item2
+                    item2.matching = item1
+        logger.debug(f"Base matching assignment took {time() - start:.2f} seconds.")
 
         strands = [helix for double_helix in double_helices for helix in double_helix]
         strands = Strands(
