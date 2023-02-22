@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout
 from constants.tabs import *
 from constants.toolbar import *
 from ui.config.tabs import domains, nucleic_acid, sequencing
+from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
 
 logger = logging.getLogger(__name__)
@@ -83,8 +84,10 @@ class Panel(QWidget):
     @pyqtSlot()
     def _on_update_graphs(self):
         """Update the graphs and recompute the helix graph."""
-        self.runner.window.side_view.refresh()
-        self.runner.window.top_view.refresh()
+        if RefreshConfirmer.run(self.runner):
+            self.runner.managers.strands.recompute()
+            self.runner.window.side_view.refresh()
+            self.runner.window.top_view.refresh()
 
     @pyqtSlot()
     def _on_tab_update(self):
