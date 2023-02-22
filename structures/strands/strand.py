@@ -603,7 +603,6 @@ class Strand:
 
                 matching_nucleoside = our_nucleoside.matching
                 if matching_nucleoside is not None:
-                    print("Setting matching nucleoside")
                     matching_nucleoside.complement = our_nucleoside.base
         else:
             raise ValueError(
