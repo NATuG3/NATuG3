@@ -1,10 +1,11 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Union, Iterable
+from typing import Union, Iterable, Type
 
 import pandas as pd
 
 from constants import bases
+from constants.bases import COMPLEMENTS
 from structures.points.point import Point
 
 
@@ -15,10 +16,21 @@ class Nucleoside(Point):
 
     Attributes:
         base: The base of the nucleoside.
+        matching: The nucleoside on the other helix of the same double helix as this
+            nucleoside that is at the same helical index as this nucleoside.
         complement: The complementary base of the nucleoside.
     """
 
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType] = None
+    matching: Type["Nucleoside"] | None = None
+
+    def __setattr__(self, key, value):
+        """
+        Restyle the nucleoside if a new base is set.
+        """
+        super().__setattr__(key, value)
+        if key == "base" and self.styles is not None:
+            self.styles.reset()
 
     def to_NEMid(self):
         """
@@ -40,15 +52,12 @@ class Nucleoside(Point):
     @property
     def complement(self) -> str:
         """Return the complement of this base"""
+        return COMPLEMENTS[self.base]
 
-        complements = {
-            "A": "T",
-            "T": "A",
-            "C": "G",
-            "G": "C",
-            None: None,
-        }
-        return complements[self.base]
+    @complement.setter
+    def complement(self, value):
+        """Set the complement of this base"""
+        self.base = COMPLEMENTS[value]
 
     def __repr__(self) -> str:
         return (
