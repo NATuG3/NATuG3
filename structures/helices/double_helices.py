@@ -1,3 +1,4 @@
+import logging
 from math import ceil
 from time import time
 from typing import Iterator
@@ -8,6 +9,8 @@ from numpy import argmax
 
 from constants.directions import DOWN
 from structures.points.point import x_coord_from_angle
+
+logger = logging.getLogger(__name__)
 
 
 class DoubleHelices:
@@ -154,7 +157,7 @@ class DoubleHelices:
                                     point1.juncmate = point2
                                     point2.junctable = True
                                     point2.juncmate = point1
-        print(f"Junctability assignment took {time() - start:.2f} seconds.")
+        logger.debug(f"Junctability assignment took {time() - start:.2f} seconds.")
 
         strands = [helix for double_helix in double_helices for helix in double_helix]
         strands = Strands(
