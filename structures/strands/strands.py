@@ -231,7 +231,9 @@ class Strands:
 
         self.style()
 
-    def to_file(self, filepath: str, open_in_file_explorer: bool = True) -> None:
+    def export_sequence(
+        self, filepath: str, open_in_file_explorer: bool = True
+    ) -> None:
         """
         Export all sequences to a file.
 
