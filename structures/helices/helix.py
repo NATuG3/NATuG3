@@ -145,6 +145,7 @@ class Helix:
                 z_coord=round(z_coord, 5),
                 direction=self.direction,
                 domain=domain,
+                helix=self
             )
 
     def strand(

@@ -183,6 +183,10 @@ class Point:
             counterclockwise.
         direction: The direction of the helix at this point.
         strand: The strand that this point belongs to. Can be None.
+        helix: The helix that this point belongs to. Can be None. A helix is like a
+            strand, but does not traverse domains. It represents the original strand
+            that the point started out in. The helix is used to identify the
+            complementary nucleoside, if the point is a nucleoside.
         linkage: The linkage that this point belongs to. Can be None.
         domain: The domain this point belongs to.
         styles: The styles of the point.
@@ -205,6 +209,7 @@ class Point:
     # nucleic acid attributes
     direction: int = None
     strand: Type["Strand"] = field(default=None, repr=False)
+    helix: Type["Helix"] = field(default=None, repr=False)
     linkage: Type["Linkage"] = None
     domain: Type["Domain"] = None
 
