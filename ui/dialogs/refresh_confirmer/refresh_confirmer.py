@@ -49,7 +49,15 @@ class RefreshConfirmer(QDialog):
             **kwargs: Keyword arguments to pass to the dialog.
         """
         for strand in runner.managers.strands.current.strands:
+            needs_confirmation = False
             if strand.interdomain():
+                needs_confirmation = True
+            else:
+                for base in strand.sequence:
+                    if base is not None:
+                        needs_confirmation = True
+
+            if needs_confirmation:
                 dialog = cls(runner)
                 if dialog.exec():
                     pass

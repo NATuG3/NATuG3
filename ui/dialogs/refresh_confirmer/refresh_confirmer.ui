@@ -29,8 +29,8 @@
             <item row="2" column="0" colspan="2">
                 <widget class="QLabel" name="description">
                     <property name="text">
-                        <string>If you proceed to update the graphs all junctions created will be lost. You can save
-                            your current stage and proceed, proceed without saving, or cancel.
+                        <string>
+                            If you proceed to update the graphs all junctions and sequences created will be lost. You can save your current stage and proceed, proceed without saving, or cancel.
                         </string>
                     </property>
                     <property name="alignment">
