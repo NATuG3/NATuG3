@@ -85,8 +85,6 @@ class Panel(QWidget):
         """Update the graphs and recompute the helix graph."""
         self.runner.window.side_view.refresh()
         self.runner.window.top_view.refresh()
-        self.runner.window.side_view.refresh()
-        self.runner.window.top_view.refresh()
 
     @pyqtSlot()
     def _on_tab_update(self):
