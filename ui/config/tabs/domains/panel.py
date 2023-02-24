@@ -68,6 +68,7 @@ class DomainsPanel(QWidget):
             domains=self.table.fetch_domains(),
             symmetry=self.symmetry.value(),
             nucleic_acid_profile=nucleic_acid_profile,
+            antiparallel=self.auto_antiparallel.isChecked(),
         )
 
     def dump_domains(self, domains: Domains) -> None:
@@ -80,12 +81,17 @@ class DomainsPanel(QWidget):
         """
         self.table.blockSignals(True)
         self.symmetry.blockSignals(True)
+        self.auto_antiparallel.blockSignals(True)
 
         # dump the current subunit into the subunit table
         self.table.dump_domains(domains.subunit.domains)
 
+        # set symmetry boxes
         self.subunit_count.setValue(domains.subunit.count)
         self.symmetry.setValue(domains.symmetry)
+
+        # set antiparallel checkbox
+        self.auto_antiparallel.setChecked(domains.antiparallel)
 
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
@@ -126,6 +132,7 @@ class DomainsPanel(QWidget):
 
         self.table.blockSignals(False)
         self.symmetry.blockSignals(False)
+        self.auto_antiparallel.blockSignals(False)
 
     def _prettify(self):
         """Set up styles of panel."""
@@ -177,7 +184,6 @@ class DomainsPanel(QWidget):
             - auto_antiparallel_button.clicked
         """
         self.table.cell_widget_updated.connect(self._push_updates)
-        self.table.helix_joint_updated.connect(self._push_updates)
 
         # Make sure that the total domain count is updated as the summands are changed.
         self.symmetry.valueChanged.connect(self._on_symmetry_setting_change)
