@@ -52,6 +52,8 @@ class DomainsPanel(QWidget):
 
         self.dump_domains(self.runner.managers.domains.current)
 
+        self._on_settings_panel_input_update()
+
         logger.info("Loaded domains tab of config panel.")
 
     def fetch_domains(self, nucleic_acid_profile: NucleicAcidProfile) -> Domains:
@@ -92,6 +94,12 @@ class DomainsPanel(QWidget):
 
         # set antiparallel checkbox
         self.auto_antiparallel.setChecked(domains.antiparallel)
+
+        # clear the prefixes from the settings input boxes. the prefixes indicate the
+        # current state of the settings and what the user is attempting to change
+        # them to, but they now can be made blank since we're setting new settings
+        self.subunit_count.setPrefix("")
+        self.symmetry.setPrefix("")
 
         # set M and target M boxes
         # https://github.com/404Wolf/NATuG3/issues/4
@@ -201,6 +209,10 @@ class DomainsPanel(QWidget):
         self.save_domains_button.clicked.connect(self._on_save_button_clicked)
         self.load_domains_button.clicked.connect(self._on_load_button_clicked)
 
+        # set up settings panel buttons
+        self.subunit_count.valueChanged.connect(self._on_settings_panel_input_update)
+        self.symmetry.valueChanged.connect(self._on_settings_panel_input_update)
+
     @pyqtSlot()
     def _on_symmetry_setting_change(self):
         """Update the total domain count box."""
@@ -252,7 +264,27 @@ class DomainsPanel(QWidget):
             self.updated.emit()
 
     @pyqtSlot()
-    def _on_settings_panel_update(self):
+    def _on_settings_panel_input_update(self):
+        """
+        Add a suffix that indicates the actual domain/subunit count if it differs
+        from the runner's current one.
+        """
+        entered_subunit_count = self.subunit_count.value()
+        current_subunit_count = self.runner.managers.domains.current.subunit.count
+        if entered_subunit_count != self.runner.managers.domains.current.subunit.count:
+            self.subunit_count.setPrefix(f"Old: {current_subunit_count}, New: ")
+        else:
+            self.subunit_count.setPrefix("")
+
+        entered_symmetry = self.symmetry.value()
+        current_symmetry = self.runner.managers.domains.current.symmetry
+        if entered_symmetry != self.runner.managers.domains.current.symmetry:
+            self.symmetry.setPrefix(f"Old: {current_symmetry}, New: ")
+        else:
+            self.symmetry.setPrefix("")
+
+    @pyqtSlot()
+    def _on_settings_panel_update_button_click(self):
         """Refresh panel settings/domain table."""
         logger.info("Refreshing domains table.")
 
