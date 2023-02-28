@@ -16,7 +16,6 @@ from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
-from structures.strands import utils
 from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
 from utils import show_in_file_explorer, rgb_to_hex
@@ -232,7 +231,7 @@ class Strands:
         self.style()
 
     def export_sequence(
-        self, filepath: str, open_in_file_explorer: bool = True
+        self, filepath: str, open_in_file_explorer: bool = True, mode="xlsx"
     ) -> None:
         """
         Export all sequences to a file.
@@ -246,6 +245,7 @@ class Strands:
             filepath: The filepath to export to. Do not include the file suffix.
             open_in_file_explorer: Whether to open the file location in file after
                 exporting.
+            mode: The file format to export to. Currently only supports "xlsx".
         """
         if "." in filepath:
             raise ValueError(
@@ -258,7 +258,7 @@ class Strands:
             # the three columns of the spreadsheet are name, sequence, and color
             name = f"Strand #{index}"
             sequence = "".join(map(str, strand.sequence)).replace("None", "")
-            color = utils.rgb_to_hex(strand.styles.color.value)
+            color = rgb_to_hex(strand.styles.color.value)
             dataset.append(
                 (
                     name,
@@ -275,26 +275,32 @@ class Strands:
         # create an Excel writer object
         writer = ExcelWriter(filepath, engine="openpyxl")
 
-        # export the dataframe to an Excel worksheet
-        sequences.to_excel(writer, sheet_name=self.name, index=False)
+        if mode == "xlsx":
+            filepath += ".xlsx"
 
-        # adjust the widths of the various columns
-        worksheet = writer.sheets[self.name]
-        worksheet.column_dimensions["A"].width = 15
-        worksheet.column_dimensions["B"].width = 50
-        worksheet.column_dimensions["C"].width = 15
-        worksheet.column_dimensions["D"].width = 15
+            # export the dataframe to an Excel worksheet
+            sequences.to_excel(writer, sheet_name=self.name, index=False)
 
-        # Save the workbook
-        workbook = writer.book
-        workbook.save(filepath)
+            # adjust the widths of the various columns
+            worksheet = writer.sheets[self.name]
+            worksheet.column_dimensions["A"].width = 15
+            worksheet.column_dimensions["B"].width = 50
+            worksheet.column_dimensions["C"].width = 15
+            worksheet.column_dimensions["D"].width = 15
 
-        # log
-        logger.info("Exported sequences as excel @ {filepath}")
+            # Save the workbook
+            workbook = writer.book
+            workbook.save(filepath)
 
-        if open_in_file_explorer:
-            QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
-            logger.info(f"Opened export @ {filepath} in file explorer.")
+            # log
+            logger.info("Exported sequences as excel @ {filepath}")
+
+            if open_in_file_explorer:
+                print(filepath)
+                QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
+                logger.info(f"Opened export @ {filepath} in file explorer.")
+        else:
+            raise ValueError(f"Unknown mode: {mode}")
 
     def randomize_sequences(self, overwrite: bool = False):
         """

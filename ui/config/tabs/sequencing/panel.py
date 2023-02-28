@@ -61,7 +61,7 @@ class SequencingPanel(QWidget):
 
         def filetype_updated():
             """Worker for when the filetype is updated."""
-            self.filepath.setText(f"{os.getcwd()}/export{self.filetype.currentText()}")
+            self.filepath.setText(f"{os.getcwd()}{os.path.sep}export{self.filetype.currentText()}")
 
         self.filetype.currentTextChanged.connect(filetype_updated)
 
@@ -77,7 +77,7 @@ class SequencingPanel(QWidget):
                 self.parent(),
                 "Sequence Export Location Chooser",
                 f"{os.getcwd()}/saves/strands/presets/",
-                filter=f"*.{filetype}",
+                filter=f"*.{filetype} (Excel Spreadsheet)",
             )[0]
             if len(filepath) > 0:
                 self.filepath.setText(filepath)
@@ -89,7 +89,6 @@ class SequencingPanel(QWidget):
         def export_sequences_clicked():
             """Worker for when the export sequences button is clicked."""
             filepath = self.filepath.text()[: self.filepath.text().find(".")]
-            mode = self.filetype.currentText().replace(".", "")
-            self.runner.managers.strands.current.to_json(filepath, mode)
+            self.runner.managers.strands.current.export_sequence(filepath)
 
         self.export_sequences.clicked.connect(export_sequences_clicked)
