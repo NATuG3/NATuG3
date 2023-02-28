@@ -44,14 +44,9 @@ class StrandConfig(QDialog):
         self.nucleosides_in_strand.setValue(len(self.strand.items.by_type(Nucleoside)))
         self.closed.setChecked(self.strand.closed)
         self.empty.setChecked(self.strand.empty)
-
-        if self.strand.styles.thickness.value > self.max_thickness:
-            thickness = 99
-        else:
-            thickness = self.strand.styles.thickness.value * 99 / self.max_thickness
-
-        thickness = round(thickness)
-        self.thickness.setValue(thickness)
+        self.thickness.blockSignals(True)
+        self.thickness.setValue(min((self.strand.styles.thickness.value, 99)))
+        self.thickness.blockSignals(False)
 
     def _sequencing(self):
         """Set up the sequencing area."""
@@ -125,6 +120,9 @@ class StrandConfig(QDialog):
             """Map the strand thickness to the thickness slider."""
             return int((self.strand.styles.thickness.value * 99) / self.max_thickness)
 
+        # update the thickness based on the current strand's thickness
+        self.auto_thickness.setChecked(self.strand.styles.thickness.automatic)
+
         def thickness_changed():
             """Worker for when the thickness slider is changed."""
             self.auto_thickness.setChecked(False)
@@ -132,9 +130,6 @@ class StrandConfig(QDialog):
             self.updated.emit()
 
         self.thickness.valueChanged.connect(thickness_changed)
-
-        # update the thickness based on the current strand's thickness
-        self.auto_thickness.setChecked(self.strand.styles.thickness.automatic)
 
         def auto_thickness_checked(checked):
             """Worker for when the auto thickness checkbox is checked."""
