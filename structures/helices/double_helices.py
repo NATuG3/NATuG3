@@ -227,7 +227,11 @@ class DoubleHelices:
                 # aligning process. Note that ALL helices will start and end with a
                 # nucleoside.
                 aligned_z_coord = previous_double_helix.right_helix.data.z_coords[1::2][
-                    argmax(previous_double_helix.right_helix.data.x_coords[1::2])
+                    argmax(
+                        previous_double_helix.right_helix.data.x_coords[
+                            1 : self.nucleic_acid_profile.B * 2 + 1 : 2
+                        ]
+                    )
                 ]
 
                 # Shift down the initial z coord. We can shift it down in increments
@@ -249,7 +253,7 @@ class DoubleHelices:
                 shifts = 0
             else:
                 shifts = int(
-                    np.floor_divide(abs(aligned_z_coord), self.nucleic_acid_profile.Z_b)
+                    round(abs(aligned_z_coord) / self.nucleic_acid_profile.Z_b)
                 )
 
             # Increment the starting z coord by the height between bases times the
