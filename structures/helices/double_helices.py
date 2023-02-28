@@ -13,6 +13,19 @@ from structures.points.point import x_coord_from_angle
 logger = logging.getLogger(__name__)
 
 
+def x_coords_from_angles(angles: np.ndarray, domain: "Domain") -> np.ndarray:
+    """
+    Compute the x coords from the angles.
+
+    Args:
+        angles: The angles to use for the computation.
+
+    Returns:
+        The x coords.
+    """
+    return np.array([x_coord_from_angle(angle, domain) for angle in angles])
+
+
 class DoubleHelices:
     """
     A container for multiple double helix objects.
@@ -180,30 +193,22 @@ class DoubleHelices:
         strands.style()
         return strands
 
-    def compute(self):
+    def compute(self, padding=0.0):
         """
         Compute the point data for each helix.
 
         This computes the x coord, z coord, and angle arrays for each helix. The data
         is stored in the helices respective x coord, z coord, and angle arrays.
+
+        Args:
+            padding: The amount of padding to add to the z coord of each point. This
+                is to overcome the fact that numpy arange() does not include the end
+                point.
         """
-        from structures.domains import Domain
-
-        def x_coords_from_angles(angles: np.ndarray, domain: Domain) -> np.ndarray:
-            """
-            Compute the x coords from the angles.
-
-            Args:
-                angles: The angles to use for the computation.
-
-            Returns:
-                The x coords.
-            """
-            return np.array([x_coord_from_angle(angle, domain) for angle in angles])
-
         for index, double_helix in enumerate(self):
             # Create a reference to the previous double helix
             previous_double_helix = self[index - 1]
+            # Create a reference to the current helical domain
             domain = double_helix.domain
 
             if index == 0:
@@ -215,11 +220,12 @@ class DoubleHelices:
                 # z coordinate of the right-most NEMid of the previous double helix's
                 # right joint helix.
 
-                # We surf the list starting at the first item (which we know is a
+                # We surf the list starting at the second item (which we know is a
                 # NEMid based on how we're constructing the helices), and then
                 # continuing every other item (since every other item is a
                 # nucleoside). This is because we only care about NEMids for the
-                # aligning process.
+                # aligning process. Note that ALL helices will start and end with a
+                # nucleoside.
                 aligned_z_coord = previous_double_helix.right_helix.data.z_coords[1::2][
                     argmax(previous_double_helix.right_helix.data.x_coords[1::2])
                 ]
@@ -255,10 +261,11 @@ class DoubleHelices:
             # Note that the x coordinates are generated based off of the angles,
             # so we don't need to even define an "initial_x_coord" variable.
 
-            # We must take into consideration the bottom_count of the zeroed helix.
-            # The bottom count is how many more shifts down to go, on top of the
-            # shifts that we've already applied. We will apply these shifts to the
-            # initial z coord, and initial angle that we've just computed.
+            # We must take into consideration the "bottom_count" of the zeroed helix.
+            # The bottom count is how many more NEMids down to go, below the "body
+            # count" number of NEMids. It is part of the group of three "count" values.
+            # We will apply these shifts to the initial z coord, and initial angle
+            # that we've just computed.
             increments = double_helix.zeroed_helix.domain.left_helix_count.bottom_count
             initial_z_coord = (
                 aligned_z_coord
@@ -279,10 +286,10 @@ class DoubleHelices:
                 + double_helix.zeroed_helix.domain.left_helix_count.top_count
             )
             final_z_coord = (
-                initial_z_coord + increments * self.nucleic_acid_profile.Z_b
+                initial_z_coord + (increments * self.nucleic_acid_profile.Z_b)
             ) + self.nucleic_acid_profile.Z_b / 2  # Extra nucleoside on top
             final_angle = (
-                initial_angle + increments * self.nucleic_acid_profile.theta_b
+                initial_angle + (increments * self.nucleic_acid_profile.theta_b)
             ) + self.nucleic_acid_profile.theta_b / 2  # Extra nucleoside on top
 
             # Compute the z coord and angle data for the zeroed helix; we will
@@ -293,19 +300,18 @@ class DoubleHelices:
             # the zeroed helix.
             double_helix.zeroed_helix.data.z_coords = np.arange(
                 start=initial_z_coord,
-                stop=final_z_coord,
-                step=self.nucleic_acid_profile.Z_b / 2,
+                stop=final_z_coord + padding,  # Make inclusive w/padding
+                step=self.nucleic_acid_profile.Z_b / 2,  # Nucleosides & NEMids
             )
             double_helix.zeroed_helix.data.angles = np.arange(
                 start=initial_angle,
-                stop=final_angle,
-                step=self.nucleic_acid_profile.theta_b / 2,
+                stop=final_angle + padding,  # Make inclusive w/padding
+                step=self.nucleic_acid_profile.theta_b / 2,  # Nucleosides & NEMids
             )
 
             # The angles are computed based off of the x coords using the predefined
-            # x_coord_from_angle function. The map() function returns a generator
-            # that yields the x_coords_from_angle() function applied to each angle
-            # one by one. Then we convert the generator to a numpy array.
+            # x_coord_from_angles function. The function lives above the
+            # DoubleHelices class in this file.
             double_helix.zeroed_helix.data.x_coords = x_coords_from_angles(
                 double_helix.zeroed_helix.data.angles, domain
             )
@@ -318,17 +324,24 @@ class DoubleHelices:
             # angles, which we must take into account.
 
             modifier = -1 if double_helix.other_helix.direction == DOWN else 1
-            aligned_z_coord += modifier * self.nucleic_acid_profile.Z_mate
-            aligned_angle += -modifier * self.nucleic_acid_profile.g
 
+            # Adjust the aligned z coord and angle since this is for the other helix.
+            # Note that we're overwriting the initial_z_coord and initial_angle,
+            # which is OK since we've already computed the zeroed helix's data and
+            # won't need the previous "initial" values.
             increments = double_helix.zeroed_helix.domain.other_helix_count.bottom_count
-            initial_angle = aligned_angle - (
-                increments * self.nucleic_acid_profile.theta_b
+            initial_angle = (
+                aligned_angle  # The previously aligned angle
+                + (-modifier * self.nucleic_acid_profile.g)  # Helix switch
+                - (increments * self.nucleic_acid_profile.theta_b)
             )
-            initial_z_coord = aligned_z_coord - (
-                increments * self.nucleic_acid_profile.Z_b
+            initial_z_coord = (
+                aligned_z_coord  # The previously aligned z coord
+                + (modifier * self.nucleic_acid_profile.Z_mate)  # Helix switch
+                - (increments * self.nucleic_acid_profile.Z_b)
             )
 
+            # Same procedure as for the zeroed helix.
             increments = (
                 double_helix.zeroed_helix.domain.other_helix_count.body_count
                 + double_helix.zeroed_helix.domain.other_helix_count.top_count
@@ -347,13 +360,13 @@ class DoubleHelices:
             # Compute the z coord and angle data for the other helix.
             double_helix.other_helix.data.z_coords = np.arange(
                 start=initial_z_coord,
-                stop=final_z_coord,
-                step=self.nucleic_acid_profile.Z_b / 2,
+                stop=final_z_coord + padding,  # Make inclusive w/padding
+                step=self.nucleic_acid_profile.Z_b / 2,  # Nucleosides & NEMids
             )
             double_helix.other_helix.data.angles = np.arange(
                 start=initial_angle,
-                stop=final_angle,
-                step=self.nucleic_acid_profile.theta_b / 2,
+                stop=final_angle + padding,  # Make inclusive w/padding
+                step=self.nucleic_acid_profile.theta_b / 2,  # Nucleosides & NEMids
             )
             double_helix.other_helix.data.x_coords = x_coords_from_angles(
                 double_helix.other_helix.data.angles, domain
