@@ -5,7 +5,7 @@ from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor
 from PyQt6.QtWidgets import QDialog, QColorDialog, QGraphicsScene
 
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.strands import Strand
 from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
@@ -41,7 +41,7 @@ class StrandConfig(QDialog):
     def _strand_params(self):
         """Setup parameters based on strand parameters."""
         self.NEMids_in_strand.setValue(len(self.strand.items.by_type(NEMid)))
-        self.nucleosides_in_strand.setValue(len(self.strand.items.by_type(NEMid)))
+        self.nucleosides_in_strand.setValue(len(self.strand.items.by_type(Nucleoside)))
         self.closed.setChecked(self.strand.closed)
         self.empty.setChecked(self.strand.empty)
 
