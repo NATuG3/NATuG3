@@ -306,15 +306,12 @@ class Strands:
         for strand in self.strands:
             strand.randomize_sequence(overwrite)
 
-    def clear_sequences(self, overwrite: bool = False):
+    def clear_sequences(self):
         """
         Clear the sequences for all strands.
-
-        Args:
-            overwrite: Whether to overwrite existing sequences.
         """
         for strand in self.strands:
-            strand.clear_sequence(overwrite)
+            strand.clear_sequence()
 
     @property
     def up_strands(self):

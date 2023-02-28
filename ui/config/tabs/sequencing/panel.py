@@ -4,6 +4,8 @@ import os
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget, QFileDialog, QLineEdit
 
+import utils
+
 logger = logging.getLogger(__name__)
 
 
@@ -46,9 +48,11 @@ class SequencingPanel(QWidget):
                     refresh()
                     logger.info("Cleared all bases in all strands.")
                 elif scope == "Unset Bases":
-                    self.runner.managers.strands.current.clear_sequences(False)
-                    refresh()
-                    logger.info("Cleared all unset bases in all strands.")
+                    utils.warning(
+                        self.runner.window,
+                        "Cannot Clear Bases",
+                        "You cannot clear bases for all bases that have not been set!"
+                    )
 
         self.run_bulk_operation.clicked.connect(run_bulk_operation_clicked)
 

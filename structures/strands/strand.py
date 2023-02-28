@@ -641,18 +641,10 @@ class Strand:
                 if nucleoside.matching is not None:
                     nucleoside.matching.base = nucleoside.complement
 
-    def clear_sequence(self, overwrite: bool = False) -> None:
-        """
-        Clear the sequence of the strand.
-
-        Args:
-            overwrite: Whether to overwrite the current sequence or not. If
-                overwrite is True then all set nucleosides that are set (are not
-                None) will be made None.
-        """
+    def clear_sequence(self) -> None:
+        """Clear the sequence of the strand."""
         for nucleoside in self.items.by_type(Nucleoside):
-            if overwrite or nucleoside.base is not None:
-                nucleoside.base = None
+            nucleoside.base = None
 
     def index(self, item) -> int | None:
         """Determine the index of an item."""
