@@ -433,10 +433,6 @@ class Strands:
                     "NEMids must be at opposite ends of strands to be linked."
                 )
 
-        # Ensure that the NEMids are of different direction
-        if NEMid1.strand.direction == NEMid2.strand.direction:
-            raise ValueError("NEMids must be of different direction to be linked.")
-
         # Force NEMid1 to be the upwards NEMid
         if NEMid1.strand.direction == DOWN:
             NEMid1, NEMid2 = NEMid2, NEMid1

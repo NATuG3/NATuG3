@@ -45,7 +45,7 @@ class StrandConfig(QDialog):
         self.closed.setChecked(self.strand.closed)
         self.empty.setChecked(self.strand.empty)
         self.thickness.blockSignals(True)
-        self.thickness.setValue(min((self.strand.styles.thickness.value, 99)))
+        self.thickness.setValue(round(min((self.strand.styles.thickness.value, 99))))
         self.thickness.blockSignals(False)
 
     def _sequencing(self):

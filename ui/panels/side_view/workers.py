@@ -212,6 +212,14 @@ def linker(
             "please enter nicker mode.",
         )
         return
+    elif not isinstance(point, NEMid):
+        utils.warning(
+            runner.window,
+            error_title,
+            "Linker mode only works on NEMids. Please click on a NEMid to begin "
+            "creating a linkage.",
+        )
+        return
     # Ensure that only endpoints are being selected
     if not point.is_endpoint(of_its_type=True):
         logger.warning("User tried to create a linkage on a non-endpoint.")
@@ -237,34 +245,32 @@ def linker(
     # Store the points that are currently selected
     currently_selected = runner.managers.misc.currently_selected
 
-    # At this point the point should be guaranteed to be a NEMid
-    assert isinstance(point, NEMid)
-
     # If the point was already selected, deselect it.
     if point.styles.is_state("selected"):
         currently_selected.remove(point)
         point.styles.change_state("default")
+
     # If a point is already selected, create a linkage between the previously selected
     # point and the currently selected point.
     elif len(currently_selected) == 1:
-        # Ensure that the direction of the point that we are about to make a linkage
-        # for is different to the direction of the point that is already selected.
-        if currently_selected[0].direction == point.direction:
-            logger.warning(
-                "User tried to create a linkage with two points in the same direction."
-            )
+        point1 = point
+        point2 = currently_selected[0]
+
+        if (point1.is_head(1) and point2.is_tail(1)) or (
+            point1.is_tail(1) and point2.is_head(1)
+        ):
+            strands.link(point1, point2)
+            currently_selected[0].styles.change_state("default")
+            point.styles.change_state("default")
+            currently_selected.clear()
+        else:
             utils.warning(
                 runner.window,
                 error_title,
-                "Linkages must be created across NEMids of differing directions. The "
-                "selected NEMids are not of differing directions.",
+                "Linkages must be created across the head of one strand to the tail "
+                "of another strand.",
             )
-            return
 
-        strands.link(currently_selected[0], point)
-        currently_selected[0].styles.change_state("default")
-        point.styles.change_state("default")
-        currently_selected.clear()
     # If no points are already selected, select the point.
     elif len(currently_selected) == 0:
         currently_selected.append(point)

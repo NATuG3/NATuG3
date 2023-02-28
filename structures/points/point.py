@@ -198,6 +198,8 @@ class Point:
         x_coord_from_angle: Obtain the x coord of the point from the angle.
         position: Obtain the position of the point as a tuple.
         is_endpoint: Return whether the point is an endpoint in the strand.
+        is_head: Whether the point is the last point in the strand.
+        is_tail: Whether the point is the first point in the strand.
         midpoint: Obtain the midpoint between this point and a different point.
         overlaps: Return whether the point overlaps with another point.
     """
@@ -250,6 +252,46 @@ class Point:
             self.styles.change_state("default")
 
         self.styles.reset()
+
+    def is_head(self, tolerance=0) -> bool | None:
+        """
+        Whether the point is the last point in the strand.
+
+        Args:
+            tolerance: The tolerance for the comparison. Defaults to 0. If you want
+                to determine whether the point is the first NEMid in the strand, set
+                tolerance to 1.
+
+        Returns:
+            True: If the point is the last point in the strand.
+            False: If the point is not the last point in the strand.
+            None: If the point has no parent strand.
+        """
+        if self.strand is None:
+            return None
+        for i in range(tolerance + 1):
+            if self.strand[-i - 1] == self:
+                return True
+
+    def is_tail(self, tolerance=0) -> bool | None:
+        """
+        Whether the point is the first point in the strand.
+
+        Args:
+            tolerance: The tolerance for the comparison. Defaults to 0. If you want
+                to determine whether the point is the first NEMid in the strand, set
+                tolerance to 1.
+
+        Returns:
+            True: If the point is the first point in the strand.
+            False: If the point is not the first point in the strand.
+            None: If the point has no parent strand.
+        """
+        if self.strand is None:
+            return None
+        for i in range(tolerance + 1):
+            if self.strand[i] == self:
+                return True
 
     def overlaps(self, point: Type["Point"], width=None) -> bool:
         """

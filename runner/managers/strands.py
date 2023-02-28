@@ -38,6 +38,7 @@ class StrandsManager:
         Notes:
             This is a very expensive operation.
         """
+        self.runner.managers.misc.currently_selected.clear()
         self.runner.managers.double_helices.recompute()
         self.current = self.runner.managers.double_helices.current.strands()
         logger.info("Recomputed strands.")
