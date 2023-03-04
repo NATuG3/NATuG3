@@ -234,7 +234,7 @@ class DoubleHelices:
                         ]
                     )
                 ]
-                #print("aligned_z_coord =", aligned_z_coord)
+                # print("aligned_z_coord =", aligned_z_coord)
 
                 # Shift down the initial z coord. We can shift it down in increments
                 # of Z_b * B, which we will call the "decrease_interval" (the
@@ -249,7 +249,7 @@ class DoubleHelices:
                 #                       * decrease_interval
                 #)
                 aligned_z_coord = aligned_z_coord % decrease_interval   #Bill 3/1/23
-                #print("lowered aligned_z_coord = ", aligned_z_coord)
+                # print("lowered aligned_z_coord = ", aligned_z_coord)
             aligned_angle = 0 #aligned angle is always 0 at left junctable Bill 3/1/23
 
             # Determine how many points (nucleosides/NEMids) the initial z coord
@@ -266,12 +266,12 @@ class DoubleHelices:
             # number of shifts that we must apply to force the initial z coord to be
             # above the x-axis.
             initial_z_coord = aligned_z_coord % self.nucleic_acid_profile.Z_b
-            # print("initial_z_coord = ", initial_z_coord, " aligned_z_coord = ",aligned_z_coord)
+            # print("initial_z_coord (near x-axis) = ", initial_z_coord, " aligned_z_coord = ", aligned_z_coord)
             shifts = round((initial_z_coord - aligned_z_coord) / self.nucleic_acid_profile.Z_b)
             # Since we've shifted the z coord, we must also shift the angle accordingly.
             # print("shifts = ", shifts)
             initial_angle = shifts * self.nucleic_acid_profile.theta_b
-            # print("initial_angle = ",initial_angle)
+            # print("initial_angle (near x-axis) = ", initial_angle)
             # Note that the x coordinates are generated based off of the angles,
             # so we don't need to even define an "initial_x_coord" variable.
 
@@ -281,24 +281,29 @@ class DoubleHelices:
             # We will apply these shifts to the initial z coord, and initial angle
             # that we've just computed.
             increments = double_helix.zeroed_helix.domain.left_helix_count.bottom_count
+            # print("increments = ", increments)
             initial_z_coord = (
                 initial_z_coord
                 - (increments * self.nucleic_acid_profile.Z_b)
                 - (self.nucleic_acid_profile.Z_b / 2)  # Extra nucleoside on bottom
             )
-            #print("last value of initial_z_coord =", initial_z_coord)
+            # print("last value of initial_z_coord =", initial_z_coord)
             initial_angle = (
                 ( initial_angle
                 - (increments * self.nucleic_acid_profile.theta_b)
                 - (self.nucleic_acid_profile.theta_b / 2)  # Extra nucleoside on bottom
-                ) % 360.0 # This makes the initial angle in range [0°,360°) Bill 3/1/23
+                )
             )
+            # print("initial_angle left strand (final value) = ", initial_angle)
+            initial_angle = initial_angle % 360.0
+            # This makes the initial angle in range [0°,360°) Bill 3/1/23
+            # print("initial_angle left strand (moduloed final value) = ", initial_angle)
 
             # Now we can determine the ending z coord and angle for the zeroed helix.
             # It is the domain's body_count plus the domain's top_count number of
             # increments up from the respective initial z coord and angle.
             increments = (
-                0.5 + double_helix.zeroed_helix.domain.left_helix_count.bottom_count   # Bill 3/1
+                -0.5 + double_helix.zeroed_helix.domain.left_helix_count.bottom_count   # Bill 3/1
                 + double_helix.zeroed_helix.domain.left_helix_count.body_count
                 + double_helix.zeroed_helix.domain.left_helix_count.top_count
             )
@@ -315,18 +320,22 @@ class DoubleHelices:
             # defined to be the z coord of the right-most point of the previous
             # double helix's right joint helix, which makes this domain's left helix
             # the zeroed helix.
-
+            padding = -self.nucleic_acid_profile.Z_b / 16
             double_helix.zeroed_helix.data.z_coords = np.arange(
                 start=initial_z_coord,
                 stop=final_z_coord + padding,  # Make inclusive w/padding
                 step=self.nucleic_acid_profile.Z_b / 2,  # Nucleosides & NEMids
             )
+            padding = -self.nucleic_acid_profile.theta_b / 16
+            # print("initial angle passed = ", initial_angle)
             double_helix.zeroed_helix.data.angles = np.arange(
                 start=initial_angle,
                 stop=final_angle + padding,  # Make inclusive w/padding
                 step=self.nucleic_acid_profile.theta_b / 2,  # Nucleosides & NEMids
             )
-
+            # print("double_helix.zeroed_helix.data.z_coords : ")
+            # print(double_helix.zeroed_helix.data.z_coords)
+            # print("double_helix.zeroed_helix.data.angles : ", double_helix.zeroed_helix.data.angles)
             # The angles are computed based off of the x coords using the predefined
             # x_coord_from_angles function. The function lives above the
             # DoubleHelices class in this file.
@@ -342,7 +351,7 @@ class DoubleHelices:
             # angles, which we must take into account.
 
             modifier = -1 if double_helix.other_helix.direction == DOWN else 1
-            #print("modifier = ", modifier, ", index = ", index)
+            # print("modifier = ", modifier, ", index = ", index)
 
             # Adjust the aligned z coord and angle since this is for the other helix.
             # Note that we're overwriting the initial_z_coord and initial_angle,
@@ -366,7 +375,7 @@ class DoubleHelices:
 
             # Same procedure as for the zeroed helix.
             increments = (
-                0.5 + double_helix.zeroed_helix.domain.other_helix_count.bottom_count   # Bill 3/1
+                -0.5 + double_helix.zeroed_helix.domain.other_helix_count.bottom_count   # Bill 3/1
                 + double_helix.zeroed_helix.domain.other_helix_count.body_count
                 + double_helix.zeroed_helix.domain.other_helix_count.top_count
             )
@@ -382,11 +391,13 @@ class DoubleHelices:
             )
 
             # Compute the z coord and angle data for the other helix.
+            padding = -self.nucleic_acid_profile.Z_b / 16
             double_helix.other_helix.data.z_coords = np.arange(
                 start=initial_z_coord,
                 stop=final_z_coord + padding,  # Make inclusive w/padding
                 step=self.nucleic_acid_profile.Z_b / 2,  # Nucleosides & NEMids
             )
+            padding = -self.nucleic_acid_profile.theta_b / 16
             double_helix.other_helix.data.angles = np.arange(
                 start=initial_angle,
                 stop=final_angle + padding,  # Make inclusive w/padding
@@ -405,6 +416,7 @@ class DoubleHelices:
             double_helix.down_helix.data.angles = np.flip(
                 double_helix.down_helix.data.angles
             )
+            # print("double_helix.zeroed_helix.data.angles flipped : ", double_helix.zeroed_helix.data.angles)
             double_helix.down_helix.data.x_coords = np.flip(
                 double_helix.down_helix.data.x_coords
             )
