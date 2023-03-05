@@ -76,6 +76,7 @@ class Domains:
             self.nucleic_acid_profile, domains, template=True, parent=self
         )
         for domain in self.subunit.domains:
+            domain.parent = self.subunit
             assert domain.strands is self.subunit
 
     def __len__(self):

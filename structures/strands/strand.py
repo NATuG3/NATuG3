@@ -137,18 +137,18 @@ class StrandItems(deque):
             )
         return super().__getitem__(index_or_slice)
 
-    def by_type(self, type_: Type | Tuple[Type]) -> List[object]:
+    def by_type(self, *types) -> "StrandItems":
         """
         Obtain a list of all the items of a specific type.
 
         Args:
-            type_: The type(s) of the items to obtain. If multiple types are specified,
-                the items of the types provided will be returned.
-
+            types: The types of items to obtain. If multiple types are specified, the
+                items of the types will be returned. Include types in the
+                function call as arguments.
         Returns:
             list: A list of all the items of the specified type.
         """
-        return [item for item in self if isinstance(item, type_)]
+        return StrandItems((item for item in self if isinstance(item, types)))
 
     def split(self, type_: Type) -> List[List[object]]:
         """

@@ -7,9 +7,7 @@ from typing import List, Tuple, Dict, Literal
 import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal, QTimer
-from PyQt6.QtGui import (
-    QPen,
-)
+from PyQt6.QtGui import QPen, QBrush
 
 import settings
 from structures.points import NEMid, Nucleoside
@@ -179,7 +177,6 @@ class SideViewPlotter(pg.PlotWidget):
             ValueError: If the mode is not of type "nucleoside" or "NEMid".
         """
         from structures.strands.linkage import Linkage
-        from structures.strands.strand import StrandItems
 
         self.plot_data.strands = self.strands
         self.plot_data.mode = self.mode
@@ -191,69 +188,64 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.plotted_strokes.clear()
 
         for strand_index, strand in enumerate(self.plot_data.strands.strands):
-            # create containers for plotting data
-            symbols: List[str] = list()
-            symbol_sizes: List[int] = list()
-            symbol_brushes = list()
-            symbol_pens = list()
-            x_coords: List[float] = list()
-            z_coords: List[float] = list()
+            # First plot all the points
+            to_plot = strand.items.by_type(Point)
 
-            # iterate on the proper type based on toolbar
-            to_plot = strand.items.by_type((Point, Linkage))
+            # create containers for plotting data
+            symbols = np.empty(len(to_plot), dtype=str)
+            symbol_sizes = np.empty(len(to_plot), dtype=int)
+            symbol_brushes = np.empty(len(to_plot), dtype=QBrush)
+            symbol_pens = np.empty(len(to_plot), dtype=QPen)
+            x_coords = np.empty(len(to_plot), dtype=float)
+            z_coords = np.empty(len(to_plot), dtype=float)
 
             # now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                if isinstance(point, Linkage):
-                    continue
+                # Store the point's coordinates.
+                x_coords[point_index] = point.x_coord
+                z_coords[point_index] = point.z_coord
 
-                # store the point's coordinates
-                x_coords.append(point.x_coord)
-                z_coords.append(point.z_coord)
-
-                # update the point mappings (this is a dict that allows us to easily
-                # traverse between a coord and a Point)
+                # Update the point mappings. This is a dict that allows us to map the
+                # location of a given point to the point object itself.
                 self.plot_data.points[(point.x_coord, point.z_coord)] = point
 
-                # based on plot mode, some items may be plotted as small stars:
+                # If the point type is NOT the same as the active point type, use the
+                # current styles of the point. Otherwise, plot a smaller "o" shaped
+                # point to indicate that the point is not the active point type,
+                # but still exists.
                 if (
                     self.plot_data.mode == "NEMid" and isinstance(point, Nucleoside)
                 ) or (self.plot_data.mode == "nucleoside" and isinstance(point, NEMid)):
-                    symbols.append("o")
-                    symbol_sizes.append(2)
-                    symbol_brushes.append(pg.mkBrush(color=(30, 30, 30)))
-                    symbol_pens.append(None)
+                    symbols[point_index] = "o"
+                    symbol_sizes[point_index] = 2
+                    symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
+                    symbol_pens[point_index] = None
                 else:
                     # if the symbol is a custom symbol, use the custom symbol
                     if point.styles.symbol_is_custom():
-                        symbols.append(
-                            custom_symbol(
-                                point.styles.symbol,
-                                flip=False,
-                                rotation=point.styles.rotation,
-                            )
+                        symbols[point_index] = custom_symbol(
+                            point.styles.symbol,
+                            flip=False,
+                            rotation=point.styles.rotation,
                         )
                     else:
-                        symbols.append(point.styles.symbol)
+                        symbols[point_index] = point.styles.symbol
 
-                    # store the symbol size
-                    symbol_sizes.append(point.styles.size)
+                    # Store the symbol size
+                    symbol_sizes[point_index] = point.styles.size
 
-                    # store the symbol brush
-                    symbol_brushes.append(
-                        pg.mkBrush(
-                            color=point.styles.fill, width=point.styles.outline[1]
-                        )
+                    # Create a brush for the symbol, based on the point's styles.
+                    symbol_brushes[point_index] = pg.mkBrush(
+                        color=point.styles.fill, width=point.styles.outline[1]
                     )
 
-                    # store the symbol pen
-                    symbol_pens.append(
-                        pg.mkPen(
-                            color=point.styles.outline[0], width=point.styles.outline[1]
-                        )
+                    # Create a pen for the symbol, based on the point's styles.
+                    symbol_pens[point_index] = pg.mkPen(
+                        color=point.styles.outline[0], width=point.styles.outline[1]
                     )
 
-            # graph the points separately
+            # Graph the plot for the points and for the strokes separately. First we
+            # will plot the points.
             plotted_points = pg.PlotDataItem(
                 x_coords,
                 z_coords,
@@ -264,121 +256,160 @@ class SideViewPlotter(pg.PlotWidget):
                 symbolPen=symbol_pens,  # for the outlines of points
                 pen=None,
             )
+            # When a point is clicked, invoke the _points_clicked method.
             plotted_points.sigPointsClicked.connect(self._points_clicked)
             self.plot_data.plotted_points.append(plotted_points)
 
-            for stroke_segment in StrandItems(to_plot).split(Linkage):
+            # A strand consists of items connected by a visual stroke. However,
+            # linkages receive a special stroke that has a special color, style,
+            # onClick method, and more. So, right now we will split all the strand
+            # items into subunits of points, discluding linkages. These subunits can
+            # be plotted as connected points with a single stroke each.
+            for stroke_segment in strand.items.by_type(Point, Linkage).split(Linkage):
+                # Gather an array of all the x and z coordinates of the points in
+                # the stroke segment.
                 x_coords = [point.x_coord for point in stroke_segment]
                 z_coords = [point.z_coord for point in stroke_segment]
 
-                # if this strand contains a junction then
-                # round the corners of the outline for aesthetics
-                if strand.interdomain():
-                    coords = zip(x_coords, z_coords)
-                    coords = chaikins_corner_cutting(coords, offset=0.4, refinements=1)
-                    coords = list(chaikins_corner_cutting(coords, refinements=1))
+                # Use the first point to fetch the number of total domains that are
+                # currently in existence.
+                domain_count = stroke_segment[0].domain.parent.parent.count
 
-                    connect = []
-                    # in case the junction is a left-to-right side of screen junction
-                    # do not plot the entire connector line going from the left to the
-                    # right of the screen
-                    for point_index, (x_coord, z_coord) in enumerate(coords.copy()):
-                        # if the distance between this x coord and the next one is large
-                        # then add a break in the connector. Note that the "next x coord"
-                        # to check against is typically the next on in the array,
-                        # except when we reach the end of the list, in which case it
-                        # becomes the first one.
-                        if point_index != len(coords) - 1:
-                            next_x_coord = coords[point_index + 1][0]
-                        else:
-                            next_x_coord = coords[0][0]
+                # If the strand is closed, we will be adding a pseudo point to the
+                # end of the stroke segment. If the last point and the first point
+                # are near in x value, then we will connect the last point to
+                # the first point (connect[-1] = True). Otherwise, we will not
+                # connect the last point to the first point (connect[-1] = False).
+                add_pseudo_point = strand.closed and (
+                    abs(stroke_segment[0].domain - stroke_segment[-1].domain)
+                    == domain_count - 1
+                )
 
-                        # if the distance between this x coord and the next one is large
-                        # then don't add a connection. otherwise add a connection.
-                        if abs(x_coord - next_x_coord) > 1:
-                            # do not connect
-                            connect.append(0)
-                        else:
-                            # connect
-                            connect.append(1)
-
-                    # closed strands will have one extra item in the end so that they
-                    # appear connected
-                    if strand.closed:
-                        connect.append(1)
-
-                    connect = np.array(connect)
-                    x_coords = [coord[0] for coord in coords]
-                    z_coords = [coord[1] for coord in coords]
-                else:
+                # If the point that proceeds a given point is in the last domain,
+                # and the point being proceeded is in the first domain, then the
+                # points are indeed continuous, but we don't want a line going across
+                # the screen. If we know that a strand is not interdomain (does not
+                # contain points within different domains, however, we can skip this
+                # check and connect all the points.
+                if not strand.interdomain():
                     connect = "all"
+                else:
+                    if add_pseudo_point:
+                        # If the strand is closed, then we need to add a pseudo point
+                        # to the end of the stroke segment.
+                        connect = np.empty(len(stroke_segment) + 1, dtype=bool)
+                    else:
+                        # If the strand is not closed, then we don't need to add a
+                        # pseudo point to the end of the stroke segment.
+                        connect = np.empty(len(stroke_segment), dtype=bool)
 
-                # if the strand is closed then connect the last point to the first
-                # point
-                if strand.closed:
+                    for index, point in enumerate(stroke_segment[:-1]):
+                        connect[index] = (
+                            abs(point.domain - stroke_segment[index + 1].domain)
+                            != domain_count - 1
+                        )
+
+                # If the strand is closed then connect the last point to the first
+                # point by creating a pseudo-point at the first point's location.
+                # This will give the appearance of a closed strand.
+                if add_pseudo_point:
+                    if strand.closed:
+                        connect[-1] = True
+                    else:
+                        connect[-1] = False
                     x_coords.append(x_coords[0])
                     z_coords.append(z_coords[0])
 
-                # plot the outline
+                # Create the actual plot data item for the stroke segment.
                 plotted_stroke = pg.PlotDataItem(
                     x_coords,
                     z_coords,
-                    pen=pg.mkPen(
+                    pen=pg.mkPen(  # Create a pen for the stroke based on strand styles
                         color=strand.styles.color.value,
                         width=strand.styles.thickness.value,
                     ),
                     connect=connect,
                 )
-
+                # Make it so that the stroke itself can be clicked.
                 plotted_stroke.setCurveClickable(True)
+                # When the stroke is clicked, emit the strand_clicked signal. This
+                # will lead to the creation of a StrandConfig dialog.
                 plotted_stroke.sigClicked.connect(
                     lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)
                 )
+                # Store the stroke plotter object, which will be used later.
                 self.plot_data.plotted_strokes.append(plotted_stroke)
 
-                # Add the linkages to the plot
+                # Now that we've plotted the stroke, we need to plot the linkages. We
+                # will sort out all the linkages in the strand, and then plot them
+                # one by one.
                 for linkage in strand.items.by_type(Linkage):
-                    # obtain the coords of the linkage
+                    # Linkages have a .plot_points attribute that contains three
+                    # points: the first point, the midpoint, and the last point.
                     coords = linkage.plot_points
+                    # Round out the coordinates using Chaikin's Corner Cutting to
+                    # give the appearance of a smooth curve.
                     coords = chaikins_corner_cutting(coords, refinements=9)
+                    # Split the coordinates into x and z coordinate arrays for
+                    # plotting with pyqtgraph.
                     x_coords = [coord[0] for coord in coords]
                     z_coords = [coord[1] for coord in coords]
 
-                    # plot the linkage
+                    # Create the plot data item for the linkage.
                     plotted_linkage = pg.PlotDataItem(
                         x_coords,
                         z_coords,
-                        pen=pg.mkPen(
+                        pen=pg.mkPen(  # Create a pen for the linkage
                             color=linkage.styles.color, width=linkage.styles.thickness
                         ),
                     )
+                    # Make it so that the linkage itself can be clicked.
                     plotted_linkage.setCurveClickable(True)
+                    # When the linkage is clicked, emit the linkage_clicked signal.
+                    # This will lead to the creation of a LinkageConfig dialog when
+                    # invoked.
                     plotted_linkage.sigClicked.connect(
                         lambda *args, to_emit=linkage: self.linkage_clicked.emit(
                             to_emit
                         )
                     )
+                    # Store the linkage plotter object, which will be used for actually
+                    # plotting the linkage later.
                     self.plot_data.plotted_linkages.append(plotted_linkage)
 
-        # Add the nicks to the plot
+        # Now we can add links to the plot. While the nick objects are indeed stored
+        # within each strand's items, they also are stored in the Strands container
+        # object. We will iterate through the nicks through strands.nicks, and then
+        # plot them one by one. Note that nicks do not have strokes, which simplifies
+        # the plotting process.
+
+        # Create a brush for the nick symbols, based on the current color scheme
+        # found in settings.
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
         for nick in self.plot_data.strands.nicks:
             plotted_nick = pg.PlotDataItem(
-                (nick.x_coord,),
-                (nick.z_coord,),
+                (nick.x_coord,),  # Just one point: the nick's x coordinate
+                (nick.z_coord,),  # Just one point: the nick's z coordinate
+                # The same styles for all nicks...
                 symbol="o",
                 symbolSize=8,
-                pxMode=True,
+                pxMode=True,  # means that symbol size doesn't change with zoom
                 symbolBrush=nick_brush,
-                symbolPen=None,
-                pen=None,
+                symbolPen=None,  # No outline for the symbol
+                pen=None,  # No line connecting the points
             )
+            # Store the nick plotter object, which will be used for actually
+            # plotting the nick later.
             self.plot_data.plotted_nicks.append(plotted_nick)
+            # Create a mapping from the nick's coordinates to the nick itself,
+            # so that when it is clicked, we can find the nick object.
             self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
+            # Hook up the nick's onClick method to the _points_clicked method.
             plotted_nick.sigPointsClicked.connect(self._points_clicked)
 
-        # Configure the order to add things to the plot
-        # Note that the lower items are plotted last and therefore are on top
+        # Items will be plotted one layer at a time, from bottom to top. The items
+        # plotted last go on top, since all items before them are plotted first.
+        # Thence, this list is in reverse order of the layers in the plot.
         layers = (
             self.plot_data.plotted_linkages,
             self.plot_data.plotted_strokes,
@@ -391,5 +422,5 @@ class SideViewPlotter(pg.PlotWidget):
             for item in layer:
                 self.addItem(item)
 
-        # Style the plot
+        # Style the plot; automatically adds labels, ticks, etc.
         self._prettify()

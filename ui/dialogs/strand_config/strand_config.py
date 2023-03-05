@@ -91,6 +91,7 @@ class StrandConfig(QDialog):
             self.auto_color.setChecked(False)
             self.strand.styles.color.value = QColorDialog.getColor().getRgb()
             self.strand.styles.color.automatic = False
+            self.strand.strands.style()
             update_color_preview()
             self.updated.emit()
 

@@ -200,6 +200,30 @@ class Domain:
         # set the uuid
         self.uuid = str(uuid1())
 
+    def __sub__(self, other):
+        """
+        Subtract two domains indices.
+
+        Args:
+            other: The other domain to subtract from this one.
+
+        Returns:
+            The difference between the two domains' indices.
+        """
+        return self.index - other.index
+
+    def __add__(self, other):
+        """
+        Add two domains indices.
+
+        Args:
+            other: The other domain to add to this one.
+
+        Returns:
+            The sum of the two domains' indices.
+        """
+        return self.index + other.index
+
     def angles(self, start=0):
         """
         Obtain the angles of the NEMids of the Domain.
