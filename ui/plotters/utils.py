@@ -30,7 +30,7 @@ def brighten_color(color: Iterable[int], factor: float):
 @cache
 def custom_symbol(
     symbol: str,
-    font: QFont = QFont("Ubuntu Mono"),
+    font: QFont = QFont("Courier New"),
     flip=True,
     rotation: float = 0,
     scale: Tuple[float, float] | float = 1,
