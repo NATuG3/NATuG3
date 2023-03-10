@@ -54,7 +54,7 @@ class TableWidgets:
         )
 
 
-class Table(QTableWidget):
+class DomainsAnglesTable(QTableWidget):
     """Nucleic Acid Config Tab."""
 
     helix_joint_updated = pyqtSignal()

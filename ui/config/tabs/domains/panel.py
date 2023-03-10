@@ -8,14 +8,15 @@ from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
-    QFileDialog,
+    QFileDialog, QVBoxLayout,
 )
 
 import settings
 import utils
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
-from ui.config.tabs.domains.table import Table
+from ui.config.tabs.domains.tables.angles import DomainsAnglesTable
+from ui.config.tabs.domains.tables.base import DomainsBaseTable
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
 
@@ -43,8 +44,11 @@ class DomainsPanel(QWidget):
         self._pushing_updates = False
 
         # create domains editor table and append it to the bottom of the domains panel
-        self.table = Table(self, self.runner.managers.nucleic_acid_profile.current)
-        self.layout().addWidget(self.table)
+        self.table = DomainsAnglesTable(self, self.runner.managers.nucleic_acid_profile.current)
+        self.angles_tab.setLayout(QVBoxLayout())
+        self.angles_tab.layout().addWidget(self.table)
+        self.counts_tab.setLayout(QVBoxLayout())
+        self.counts_tab.layout().addWidget(DomainsBaseTable(self, ("Domain", "Count")))
 
         # run setup functions
         self._hook_signals()
