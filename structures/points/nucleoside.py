@@ -51,8 +51,11 @@ class Nucleoside(Point):
 
     @property
     def complement(self) -> str:
-        """Return the complement of this base"""
-        return COMPLEMENTS[self.base]
+        """
+        Return the base of the matching nucleoside. If the matching nucleoside is not
+        set, returns None.
+        """
+        return self.matching and self.matching.base
 
     @complement.setter
     def complement(self, value):

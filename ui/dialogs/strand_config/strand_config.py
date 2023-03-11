@@ -58,7 +58,7 @@ class StrandConfig(QDialog):
         def sequencing_editor_clicked():
             """Worker for when 'sequence editor' is clicked."""
             self.strand.sequence = SequenceEditor.fetch_sequence(
-                self.parent(), self.strand.sequence
+                self.parent(), self.strand.sequence, self.strand.has_complements()
             )
             self.sequence_display.bases = self.strand.sequence
             self.updated.emit()
