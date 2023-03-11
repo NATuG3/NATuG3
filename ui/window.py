@@ -150,7 +150,7 @@ class Window(QMainWindow):
             self.top_view.setMaximumWidth(99999)
         # otherwise it can be resized up to 2/8ths of the screen
         else:
-            self.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
+            self.top_view.setMaximumWidth(round(3 * self.size().width() / 8))
 
         # config resizing...
         # if config is floating make the max size very large and make the tab area go

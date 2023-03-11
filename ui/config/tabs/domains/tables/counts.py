@@ -1,6 +1,7 @@
 import logging
 
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import QHeaderView
 
 from structures.profiles import NucleicAcidProfile
 from ui.config.tabs.domains.tables.base import DomainsBaseTable
@@ -16,3 +17,12 @@ class DomainsCountsTable(DomainsBaseTable):
             parent,
             ["Left Helix Counts", "Right Helix Counts"],
         )
+
+    def _prettify(self):
+        super()._prettify()
+
+        # All columns are stretch sized
+        for index, column in enumerate(range(self.columnCount())):
+            self.horizontalHeader().setSectionResizeMode(
+                index, QHeaderView.ResizeMode.Stretch
+            )
