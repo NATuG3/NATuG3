@@ -7,11 +7,11 @@ from typing import List, Tuple, Dict, Literal
 import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal, QTimer
-from PyQt6.QtGui import QPen, QBrush
+from PyQt6.QtGui import QPen, QBrush, QPainterPath
 
 import settings
 from structures.points import NEMid, Nucleoside
-from structures.points.point import Point
+from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 
@@ -192,7 +192,7 @@ class SideViewPlotter(pg.PlotWidget):
             to_plot = strand.items.by_type(Point)
 
             # create containers for plotting data
-            symbols = np.empty(len(to_plot), dtype=str)
+            symbols = np.empty(len(to_plot), dtype=object)
             symbol_sizes = np.empty(len(to_plot), dtype=int)
             symbol_brushes = np.empty(len(to_plot), dtype=QBrush)
             symbol_pens = np.empty(len(to_plot), dtype=QPen)
@@ -228,7 +228,16 @@ class SideViewPlotter(pg.PlotWidget):
                             flip=False,
                             rotation=point.styles.rotation,
                         )
+                        assert isinstance(symbols[point_index], QPainterPath), (
+                            "Custom symbol must be of type QPainterPath, but is of type"
+                            f" {type(symbols[point_index])}"
+                        )
                     else:
+                        assert point.styles.symbol in PointStyles.all_symbols, (
+                            f"Symbol \"{point.styles.symbol} \"is not a valid symbol. "
+                            "Valid symbols are: "
+                            f"{PointStyles.all_symbols}"
+                        )
                         symbols[point_index] = point.styles.symbol
 
                     # Store the symbol size
@@ -281,8 +290,8 @@ class SideViewPlotter(pg.PlotWidget):
                 # the first point (connect[-1] = True). Otherwise, we will not
                 # connect the last point to the first point (connect[-1] = False).
                 add_connected_pseudo_point = strand.closed and (
-                        abs(stroke_segment[0].domain - stroke_segment[-1].domain)
-                        == domain_count - 1
+                    abs(stroke_segment[0].domain - stroke_segment[-1].domain)
+                    == domain_count - 1
                 )
 
                 # If the point that proceeds a given point is in the last domain,
@@ -308,8 +317,8 @@ class SideViewPlotter(pg.PlotWidget):
 
                     for index, point in enumerate(stroke_segment[:-1]):
                         connect[index] = (
-                                abs(point.domain - stroke_segment[index + 1].domain)
-                                != domain_count - 1
+                            abs(point.domain - stroke_segment[index + 1].domain)
+                            != domain_count - 1
                         )
 
                 # If the strand is closed then connect the last point to the first
