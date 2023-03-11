@@ -125,7 +125,8 @@ class StrandItems(deque):
 
     def __getitem__(self, index_or_slice: int | slice) -> object:
         if isinstance(index_or_slice, slice):
-            if index_or_slice.step < 0:
+            step = index_or_slice.step or 1
+            if step < 0:
                 iter_on = reversed(self)
             else:
                 iter_on = self
@@ -133,7 +134,7 @@ class StrandItems(deque):
                 iter_on,
                 index_or_slice.start,
                 index_or_slice.stop,
-                abs(index_or_slice.step),
+                abs(step),
             )
         return super().__getitem__(index_or_slice)
 
@@ -218,6 +219,8 @@ class Strand:
             the strand represents a helix.
         strands: The container that this strand is in. Can be None. Is automatically
             set when the strand is added to a Strands container.
+        helix: The helix that the strand was generated from. Can be None if the strand
+            was not generated from a helix.
         uuid (str): The unique identifier of the strand. This is automatically
         generated.
 
@@ -255,12 +258,14 @@ class Strand:
         nucleic_acid_profile: NucleicAcidProfile = None,
         direction=None,
         strands=None,
+        helix=None,
         uuid: str = None,
     ):
         self.name = name
         self.uuid = uuid or str(uuid1())
         self.items = StrandItems() if items is None else StrandItems(items)
         self.closed = closed
+        self.helix = helix
         self.styles = styles or StrandStyles(self)
         self.nucleic_acid_profile = (
             NucleicAcidProfile()
