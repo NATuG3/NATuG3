@@ -13,10 +13,13 @@ class UserInputSequenceEditor(QWidget):
     base_unset: pyqtSignal
     base_set: pyqtSignal
 
-    def __init__(self, parent, bases: Iterable):
+    def __init__(
+        self, parent, bases: Iterable[str | None], complements: Iterable[str | None]
+    ):
         super().__init__(parent)
         self.setWindowTitle("Sequence Editor")
         self._bases = list(bases)
+        self._complements = list(complements)
 
         if len(self.bases) > 1000:
             raise OverflowError("Too many bases for manual input sequence editor!")
@@ -42,6 +45,16 @@ class UserInputSequenceEditor(QWidget):
     @bases.setter
     def bases(self, bases):
         self._bases = bases
+        self.refresh()
+
+    @property
+    def complements(self):
+        """Obtain all complements contained within."""
+        return self._complements
+
+    @complements.setter
+    def complements(self, complements):
+        self._complements = complements
         self.refresh()
 
     def refresh(self):
@@ -80,7 +93,7 @@ class UserInputSequenceEditor(QWidget):
 
     def _editor_area(self):
         """Create the base editor area."""
-        self.editor_area = SequenceEditorArea(self, self.bases)
+        self.editor_area = SequenceEditorArea(self, self.bases, self.complements)
 
         self.scrollable_editor_area = QScrollArea()
         self.scrollable_editor_area.setWidget(self.editor_area)

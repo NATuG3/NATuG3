@@ -619,13 +619,30 @@ class Strand:
                 matching_nucleoside = our_nucleoside.matching
                 if matching_nucleoside is not None:
                     matching_nucleoside.complement = our_nucleoside.base
-                else:
-                    print("No matching nucleoside found for", our_nucleoside)
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
                 + f"match number of nucleosides in strand ({len(self)})"
             )
+
+    @property
+    def complements(self):
+        output = [
+            nucleoside.matching.base if nucleoside.matching is not None else None
+            for nucleoside in StrandItems(self.items.unpacked()).by_type(Nucleoside)
+        ]
+        print(StrandItems(self.items.unpacked()).by_type(Nucleoside))
+        return output
+
+    def has_complements(self):
+        """
+        Return a list of bools that indicate whether the mate of each nucleoside
+        is present (True) or not (False).
+        """
+        return [
+            nucleoside.matching is not None
+            for nucleoside in StrandItems(self.items.unpacked()).by_type(Nucleoside)
+        ]
 
     @staticmethod
     def random_sequence(length: int) -> List[str]:

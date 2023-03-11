@@ -58,7 +58,7 @@ class LinkageConfig(QDialog):
         def sequencing_editor_clicked():
             """Worker for when 'sequence editor' is clicked."""
             self.linkage.sequence = SequenceEditor.fetch_sequence(
-                self.parent(), self.linkage.sequence
+                self.parent(), self.linkage.sequence, [None] * len(self.linkage)
             )
             self.sequence_display.bases = self.linkage.sequence
             self.updated.emit()

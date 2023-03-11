@@ -63,19 +63,30 @@ class SequenceEditorArea(QWidget):
         int, arguments=("Index",)
     )  # when a blank box is made nonblank
 
-    def __init__(self, parent, bases: Iterable[str | None], selected: int = 0):
+    def __init__(
+        self,
+        parent,
+        bases: Iterable[str | None],
+        has_complements: Iterable[bool],
+        selected: int = 0,
+    ):
         """
         Initialize the editor area.
 
         Args:
             parent: The strands widget.
             bases: The bases for the editor area.
+            complements: Whether each base has a complement that can be set. Must be
+                the same length as bases.
             selected: The currently selected base.
         """
         super().__init__(parent)
         self._selected: int = selected
         self.setLayout(QHBoxLayout(self))
         self.layout().setSpacing(0)
+
+        self.has_complements = tuple(has_complements)
+        assert len(bases) == len(has_complements)
 
         self.widgets: List[BaseEntryBox] = []
         if len(bases) <= 0:
@@ -181,7 +192,7 @@ class SequenceEditorArea(QWidget):
             # new index will be one after the end of the bases list
             index = len(self)
 
-        new_base = BaseEntryBox(self, base, index)
+        new_base = BaseEntryBox(self, base, self.has_complements[index], index)
         new_base.base_area.textChanged.connect(
             lambda: self.base_text_changed(new_base.base_area.text(), new_base.index)
         )
