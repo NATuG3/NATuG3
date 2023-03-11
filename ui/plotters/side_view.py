@@ -280,9 +280,9 @@ class SideViewPlotter(pg.PlotWidget):
                 # are near in x value, then we will connect the last point to
                 # the first point (connect[-1] = True). Otherwise, we will not
                 # connect the last point to the first point (connect[-1] = False).
-                add_pseudo_point = strand.closed and (
-                    abs(stroke_segment[0].domain - stroke_segment[-1].domain)
-                    == domain_count - 1
+                add_connected_pseudo_point = strand.closed and (
+                        abs(stroke_segment[0].domain - stroke_segment[-1].domain)
+                        == domain_count - 1
                 )
 
                 # If the point that proceeds a given point is in the last domain,
@@ -294,9 +294,12 @@ class SideViewPlotter(pg.PlotWidget):
                 if not strand.interdomain():
                     connect = "all"
                 else:
-                    if add_pseudo_point:
-                        # If the strand is closed, then we need to add a pseudo point
-                        # to the end of the stroke segment.
+                    # If the strand is closed, a pseudo point will be added to the
+                    # end of the stroke segment. Whether this point gets a connection
+                    # depends on the "add_connected_pseudo_point" variable.
+                    if strand.closed:
+                        # If the strand is closed, then we need to add a pseudo
+                        # point to the end of the stroke segment.
                         connect = np.empty(len(stroke_segment) + 1, dtype=bool)
                     else:
                         # If the strand is not closed, then we don't need to add a
@@ -305,18 +308,15 @@ class SideViewPlotter(pg.PlotWidget):
 
                     for index, point in enumerate(stroke_segment[:-1]):
                         connect[index] = (
-                            abs(point.domain - stroke_segment[index + 1].domain)
-                            != domain_count - 1
+                                abs(point.domain - stroke_segment[index + 1].domain)
+                                != domain_count - 1
                         )
 
                 # If the strand is closed then connect the last point to the first
                 # point by creating a pseudo-point at the first point's location.
                 # This will give the appearance of a closed strand.
-                if add_pseudo_point:
-                    if strand.closed:
-                        connect[-1] = True
-                    else:
-                        connect[-1] = False
+                if strand.closed:
+                    connect[-1] = add_connected_pseudo_point
                     x_coords.append(x_coords[0])
                     z_coords.append(z_coords[0])
 
@@ -377,14 +377,14 @@ class SideViewPlotter(pg.PlotWidget):
                     # plotting the linkage later.
                     self.plot_data.plotted_linkages.append(plotted_linkage)
 
-        # Now we can add links to the plot. While the nick objects are indeed stored
-        # within each strand's items, they also are stored in the Strands container
-        # object. We will iterate through the nicks through strands.nicks, and then
-        # plot them one by one. Note that nicks do not have strokes, which simplifies
-        # the plotting process.
+            # Now we can add links to the plot. While the nick objects are indeed stored
+            # within each strand's items, they also are stored in the Strands container
+            # object. We will iterate through the nicks through strands.nicks, and then
+            # plot them one by one. Note that nicks do not have strokes, which simplifies
+            # the plotting process.
 
-        # Create a brush for the nick symbols, based on the current color scheme
-        # found in settings.
+            # Create a brush for the nick symbols, based on the current color scheme
+            # found in settings.
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
         for nick in self.plot_data.strands.nicks:
             plotted_nick = pg.PlotDataItem(
