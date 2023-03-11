@@ -8,7 +8,8 @@ from PyQt6.QtCore import QTimer, pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
-    QFileDialog, QVBoxLayout,
+    QFileDialog,
+    QVBoxLayout,
 )
 
 import settings
@@ -17,6 +18,7 @@ from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
 from ui.config.tabs.domains.tables.angles import DomainsAnglesTable
 from ui.config.tabs.domains.tables.base import DomainsBaseTable
+from ui.config.tabs.domains.tables.panel import DomainsTablesArea
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
 
@@ -43,14 +45,13 @@ class DomainsPanel(QWidget):
         # Define internal attributes
         self._pushing_updates = False
 
-        # create domains editor table and append it to the bottom of the domains panel
-        self.table = DomainsAnglesTable(self, self.runner.managers.nucleic_acid_profile.current)
-        self.angles_tab.setLayout(QVBoxLayout())
-        self.angles_tab.layout().addWidget(self.table)
-        self.counts_tab.setLayout(QVBoxLayout())
-        self.counts_tab.layout().addWidget(DomainsBaseTable(self, ("Domain", "Count")))
+        # Add the main table areas
+        self.tables = DomainsTablesArea(
+            self, self.runner.managers.nucleic_acid_profile.current
+        )
+        self.layout().addWidget(self.tables)
 
-        # run setup functions
+        # Run setup functions
         self._hook_signals()
         self._prettify()
 
@@ -71,7 +72,7 @@ class DomainsPanel(QWidget):
             The domains object.
         """
         return Domains(
-            domains=self.table.fetch_domains(),
+            domains=self.tables.fetch_domains(),
             symmetry=self.symmetry.value(),
             nucleic_acid_profile=nucleic_acid_profile,
             antiparallel=self.auto_antiparallel.isChecked(),
@@ -85,12 +86,12 @@ class DomainsPanel(QWidget):
         Args:
             domains: The Domains object to dump.
         """
-        self.table.blockSignals(True)
+        self.tables.blockSignals(True)
         self.symmetry.blockSignals(True)
         self.auto_antiparallel.blockSignals(True)
 
         # dump the current subunit into the subunit table
-        self.table.dump_domains(domains.subunit.domains)
+        self.tables.dump_domains(domains.subunit.domains)
 
         # set symmetry boxes
         self.subunit_count.setValue(domains.subunit.count)
@@ -142,7 +143,7 @@ class DomainsPanel(QWidget):
         self.M_over_R.setStyleSheet(style)
         self.target_M_over_R.setStyleSheet(style)
 
-        self.table.blockSignals(False)
+        self.tables.blockSignals(False)
         self.symmetry.blockSignals(False)
         self.auto_antiparallel.blockSignals(False)
 
@@ -195,7 +196,7 @@ class DomainsPanel(QWidget):
             - table.helix_joint_updated
             - auto_antiparallel_button.clicked
         """
-        self.table.cell_widget_updated.connect(self._push_updates)
+        self.tables.cell_widget_updated.connect(self._push_updates)
 
         # Make sure that the total domain count is updated as the summands are changed.
         self.symmetry.valueChanged.connect(self._on_symmetry_setting_change)
@@ -206,14 +207,14 @@ class DomainsPanel(QWidget):
 
         # Reset the checked button when a helix joint is updated because the user has
         # opted out of the auto-antiparallel feature by changing the helix joint
-        self.table.helix_joint_updated.connect(self._on_helix_joint_updated)
+        self.tables.helix_joint_updated.connect(self._on_helix_joint_updated)
         self.auto_antiparallel.stateChanged.connect(self._push_updates)
 
         # Set up the save/load buttons slots.
         self.save_domains_button.clicked.connect(self._on_save_button_clicked)
         self.load_domains_button.clicked.connect(self._on_load_button_clicked)
 
-        # set up settings panel buttons
+        # Set up settings panel buttons
         self.subunit_count.valueChanged.connect(self._on_settings_panel_input_update)
         self.symmetry.valueChanged.connect(self._on_settings_panel_input_update)
 
@@ -226,7 +227,7 @@ class DomainsPanel(QWidget):
     def _on_table_update_button_clicked(self):
         new_table_domains = copy(self.runner.managers.domains.current)
         new_table_domains.subunit.count = self.subunit_count.value()
-        self.table.dump_domains(new_table_domains.subunit.domains)
+        self.tables.dump_domains(new_table_domains.subunit.domains)
         self._push_updates()
 
     @pyqtSlot()
@@ -309,8 +310,8 @@ class DomainsPanel(QWidget):
                 "Subunit Count Reduction",
                 f"The prospective subunit count ({self.subunit_count.value()}) is "
                 f"lower than the number of domains in the domains table ("
-                f"{self.table.rowCount()}). \n\nAre you sure you want to truncate the "
-                f"domains/subunit count to {self.subunit_count.value()}?",
+                f"{len(self.tables.rows)}). \n\nAre you sure you want to "
+                f"truncate the domains/subunit count to {self.subunit_count.value()}?",
             )
             if confirmation:
                 logger.info(

@@ -163,8 +163,8 @@ class Window(QMainWindow):
         else:
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
             if self.config.panel.sequencing.isVisible():
-                self.config.setFixedWidth(255)
+                self.config.setFixedWidth(260)
             elif self.config.panel.domains.isVisible():
-                self.config.setFixedWidth(450)
+                self.config.setFixedWidth(340)
             elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

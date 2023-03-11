@@ -1,5 +1,4 @@
 import logging
-from math import ceil
 from time import time
 from typing import Iterator
 from uuid import uuid1

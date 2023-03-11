@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 
 from PyQt6.QtCore import QEvent, Qt
 from PyQt6.QtGui import QKeyEvent
@@ -86,11 +86,3 @@ class DomainsBaseTable(QTableWidget):
 
         # Enable smooth scrolling
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
-
-        # All columns are statically sized
-        for index, column in enumerate(range(self.columnCount())):
-            self.horizontalHeader().setSectionResizeMode(
-                index, QHeaderView.ResizeMode.ResizeToContents
-            )
-            # Set the column width to the header's length times two in pixels
-            # self.setColumnWidth(index, len(self.top_headers[index])*11)
