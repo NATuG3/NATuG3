@@ -44,7 +44,7 @@ class SequencingPanel(QWidget):
             elif operation == "Clear":
                 logger.debug("Performing clear bulk operation.")
                 if scope == "All Bases":
-                    self.runner.managers.strands.current.clear_sequences(True)
+                    self.runner.managers.strands.current.clear_sequences()
                     refresh()
                     logger.info("Cleared all bases in all strands.")
                 elif scope == "Unset Bases":

@@ -594,7 +594,9 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        nucleosides: Deque[Nucleoside] = self.items.by_type(Nucleoside)  # type: ignore
+        nucleosides: List[Nucleoside] = StrandItems(self.items.unpacked()).by_type(
+            Nucleoside)
+        # type: ignore
 
         if len(new_sequence) == len(self.sequence):
             for index, base in enumerate(new_sequence):
@@ -604,6 +606,8 @@ class Strand:
                 matching_nucleoside = our_nucleoside.matching
                 if matching_nucleoside is not None:
                     matching_nucleoside.complement = our_nucleoside.base
+                else:
+                    print("No matching nucleoside found for", our_nucleoside)
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
