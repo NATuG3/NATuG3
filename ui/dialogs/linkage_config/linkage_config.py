@@ -1,10 +1,15 @@
+import logging
+
 from PyQt6 import uic
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QDialog
 
+import utils
 from structures.strands.linkage import Linkage
 from ui.dialogs.sequence_editor.display_area import SequenceDisplayArea
 from ui.dialogs.sequence_editor.sequence_editor import SequenceEditor
+
+logger = logging.getLogger(__name__)
 
 
 class LinkageConfig(QDialog):
@@ -20,7 +25,9 @@ class LinkageConfig(QDialog):
 
         self._sequencing()
         self._nucleoside_count()
+        self._destroying()
 
+    @pyqtSlot()
     def when_finished(self) -> None:
         self.linkage.styles.thickness -= 5
         self.updated.emit()
@@ -28,6 +35,7 @@ class LinkageConfig(QDialog):
     def _nucleoside_count(self):
         self.nucleoside_count.setValue(len(self.linkage))
 
+        @pyqtSlot()
         def nucleoside_count_changed():
             new_count = self.nucleoside_count.value()
             if new_count > len(self.linkage):
@@ -46,6 +54,7 @@ class LinkageConfig(QDialog):
         self.sequence_display = SequenceDisplayArea(None, self.linkage.sequence)
         self.sequencing_area.layout().insertWidget(0, self.sequence_display)
 
+        @pyqtSlot()
         def sequencing_editor_clicked():
             """Worker for when 'sequence editor' is clicked."""
             self.linkage.sequence = SequenceEditor.fetch_sequence(
@@ -55,3 +64,17 @@ class LinkageConfig(QDialog):
             self.updated.emit()
 
         self.sequence_editor.clicked.connect(sequencing_editor_clicked)
+
+    def _destroying(self):
+        def remove_linkage_clicked():
+            if utils.confirm(
+                self.parent(),
+                "Linkage removal confirmation",
+                "Are you sure you want to remove this linkage?",
+            ):
+                self.linkage.strand.strands.unlink(self.linkage)
+                self.close()
+                self.updated.emit()
+                logger.info("Use removed linkage through linkage dialog.")
+
+        self.remove_linkage.clicked.connect(remove_linkage_clicked)
