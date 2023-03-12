@@ -357,13 +357,24 @@ class Strands:
             - Prevents touching strands from sharing colors.
         """
         for strand in self.strands:
+            interdomain = strand.interdomain()
+
+            # Change all the linkages in the strand to either be pink if the strand
+            # is interdomain, or very dark grey if the strand is not interdomain.
+            if interdomain:
+                for item in strand.items.by_type(Linkage):
+                    item.styles.color = settings.colors["linkages"]["color"]
+            else:
+                for item in strand.items.by_type(Linkage):
+                    item.styles.color = settings.colors["linkages"]["grey"]
+
             if strand.styles.thickness.automatic:
-                if strand.interdomain():
+                if interdomain:
                     strand.styles.thickness.value = 9.5
                 else:
                     strand.styles.thickness.value = 2
             if strand.styles.color.automatic:
-                if strand.interdomain():
+                if interdomain:
                     illegal_colors: List[Tuple[int, int, int]] = []
 
                     for potentially_touching in self.strands:
@@ -509,6 +520,10 @@ class Strands:
         new_strand_two.extend(
             tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
         )
+
+        print(len(new_strand_one))
+        print(len(new_strand_two))
+        print(len(linkage.strand) - 1)
 
         assert len(new_strand_one) + len(new_strand_two) == len(linkage.strand) - 1, (
             "The new strands do not have the same number of items as the old strand "
