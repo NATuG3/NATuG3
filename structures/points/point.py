@@ -380,8 +380,7 @@ class Point:
             bool: Whether the point is an endpoint in the strand. If the point's strand
                 is None then this method returns False.
         """
-        if self.strand is None:
-            return False
+        assert self.strand is not None, "Point has no strand"
 
         if of_its_type:
             items = self.strand.items.by_type(type(self))
