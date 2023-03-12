@@ -129,7 +129,6 @@ class StrandItems(deque):
     def __getitem__(self, index_or_slice: int | slice) -> object:
         if isinstance(index_or_slice, slice):
             step = index_or_slice.step or 1
-
             if step < 0:
                 iter_on = reversed(self)
             else:
