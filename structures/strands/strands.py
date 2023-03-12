@@ -32,32 +32,31 @@ class Strands:
         strands: The actual strands.
         up_strands: All up strands.
         down_strands: All down strands.
-        nicks: All Nick objects.
-        name: The name of the strands object. Used when exporting the strands object.
-        double_helices(List[Tuple[Strand, Strand]]): A list of tuples of up and down
-            strands from when the object is loaded with the from_package class method.
-        size: The width and height of the domains when they are all layed next to one
+        nicks: All Nick objects within the strand. Automatically managed when nicking.
+        name: The user set name of the strands object.
+        size: The width and height of the domains when they are all laid next to one
             another.
         uuid: A unique identifier for the strands object. Automatically generated.
 
     Methods:
-        randomize_sequences: Randomize the sequences for all strands.
-        clear_sequences: Clear the sequences for all strands.
-        assign_junctability: Assigns the junctability of all NEMids in all strands.
-        conjunct: Create a cross-strand exchange (AKA a junction).
-        connect: Bind two arbitrary NEMids together.
-        disconnect: Unbind two arbitrary NEMids.
-        nick: Nicks the strands at the given point (splits the strand into two).
-        assign_junctability: Assigns the junctability of all NEMids in all strands.
-        up_strands, down_strands: Obtain all up or down strands.
-        recompute, recolor: Recompute or recolor all strands.
-        append: Append a strand to the container.
-        extend: Append multiple strands to the container.
-        remove: Remove a strand from the container.
-        write_worksheets: Write the strands to a tab in an Excel document.
-        points: Obtain a generator of all points in the container.
-        to_json: Obtain a dict representation of the strands object.
-        update: Update the strands object in place.
+        update: Update the strands object in-place with another Strands object.
+        items: Obtain a list of all points and linkages in the container.
+        nick: Nick the strands at the given point (split the strand into two).
+        unnick: Unnick the strands at the given nick (merge the two strands).
+        export_sequence: Export the sequence of all the strands to a file.
+        randomize_sequences: Randomize the sequences of all strands.
+        clear_sequences: Clear the sequences of all strands.
+        index: Obtain the index of a strand.
+        append: Append a strand to the strands object.
+        extend: Extend the strands object with a list of new Strands objects.
+        remove: Remove a strand from the strands object.
+        style: Recompute styles for all the strands and items within the strands.
+        link: Create a linkage between two endpoint NEMids.
+        unlink: Remove a linkage between two endpoint NEMids.
+        conjunct: Create a cross-strand or same-strand junction between two NEMids.
+        to_json: Convert the strands object to a JSON serializable dictionary.
+        write_worksheets: Write all the strands and their items to an excel
+            workbook's worksheet.
     """
 
     def __init__(
@@ -126,7 +125,7 @@ class Strands:
 
     def update(self, other: "Strands") -> None:
         """
-        Update the strands object in place.
+        Update the strands object in place with the data of another Strands object.
 
         Args:
             other: The other strands object to update from.
@@ -140,7 +139,7 @@ class Strands:
 
     def items(self, type_restriction=object) -> Generator:
         """
-        Obtain a list of all points in the container.
+        Obtain a list of all points and linkages in the container.
 
         Args:
             type_restriction: The type of points to yield. Defaults to object,
@@ -157,7 +156,7 @@ class Strands:
 
     def nick(self, point: Point) -> None:
         """
-        Nicks the strands at the given point (splits the strand into two).
+        Nick the strands at the given point (split the strand into two).
 
         Args:
             point: The point to create a nick at.
@@ -348,11 +347,14 @@ class Strands:
 
     def style(self) -> None:
         """
-        Recompute colors for all strands contained within.
-        Prevents touching strands from sharing colors.
+        Recompute colors for all strands contained within, and all items within the
+        strands.
 
         Args:
             skip_checks: Whether to skip checks for strand direction consistency.
+
+        Notes:
+            - Prevents touching strands from sharing colors.
         """
         for strand in self.strands:
             if strand.styles.thickness.automatic:
@@ -395,7 +397,7 @@ class Strands:
 
     def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
         """
-        Create a linkage between two end NEMids.
+        Create a linkage between two endpoint NEMids.
 
         This conjoins two different strands, and places a Linkage object in between
         the two strands. The two strands that are being conjoined will be deleted,
@@ -477,9 +479,18 @@ class Strands:
         # Return the linkage
         return linkage
 
+    def unlink(self, linkage: Linkage) -> None:
+        """
+        Split the strand at the site of a given linkage.
+
+        Args:
+            linkage: The linkage to split the strand at.
+        """
+        pass
+
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
-        Add/remove a junction where NEMid1 and NEMid2 overlap.
+        Create a cross-strand or same-strand junction between two NEMids.
 
         Args:
             NEMid1: One NEMid at the junction site.
@@ -492,7 +503,8 @@ class Strands:
         Notes:
             - The order of NEMid1 and NEMid2 is arbitrary.
             - NEMid.juncmate and NEMid.junction may be changed for NEMid1 and/or NEMid2.
-            - NEMid.matching may be changed based on whether the strand is closed or not.
+            - NEMid.matching may be changed based on whether the strand is closed or
+                not.
         """
         if not skip_checks:
             # ensure that both NEMids are junctable
@@ -713,10 +725,11 @@ class Strands:
         point_sheet_color: str = "#00CC99",
     ):
         """
-        Write a worksheet to an Excel spreadsheet for the strands.
+        Write two worksheets to an Excel spreadsheet containing the strands and all
+        of the points and linakges within them.
 
         This method creates two sheets: a "Strands" sheet and a "Points" sheet.
-        The Strands sheet contains information for all of the strands, including a
+        The Strands sheet contains information for all the strands, including a
         list of their items by id, styles and more. The Points sheet contains more
         detailed information about each point, including its coordinates, style,
         and more. The strands sheet's items that reference points by ID are linked
