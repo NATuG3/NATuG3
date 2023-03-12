@@ -73,7 +73,14 @@
             <string>Sequence Editor</string>
            </property>
            <property name="autoDefault">
-            <bool>false</bool>
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="remove_linkage">
+           <property name="text">
+            <string>Remove Linkage</string>
            </property>
           </widget>
          </item>
