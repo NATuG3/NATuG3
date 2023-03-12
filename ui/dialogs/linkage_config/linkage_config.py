@@ -72,6 +72,10 @@ class LinkageConfig(QDialog):
                 "Linkage removal confirmation",
                 "Are you sure you want to remove this linkage?",
             ):
+                assert self.linkage.strand is not None, "Linkage has no strand."
+                assert self.linkage.strand.strands is not None, (
+                    "Strand is not in a Strands container."
+                )
                 self.linkage.strand.strands.unlink(self.linkage)
                 self.close()
                 self.updated.emit()
