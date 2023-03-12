@@ -56,7 +56,7 @@ class Linkage:
             z coord.
         inflection: Whether the linkage is bent upwards or downwards when plotted.
         uuid (str): The unique identifier of the linkage. Automatically generated post
-        init.
+            init.
 
     Methods:
         trim: Trim the linkage to a certain length.
