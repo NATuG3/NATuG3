@@ -6,6 +6,7 @@ from uuid import uuid1
 import numpy as np
 import pandas as pd
 
+import settings
 from constants.directions import UP, DOWN
 from structures.points import Nucleoside
 from ui.plotters.utils import chaikins_corner_cutting
@@ -18,10 +19,12 @@ class LinkageStyles:
     A class to hold the styles for linkages.
 
     Attributes:
+        linkage: The linkage that the styles are for.
         color: The color of the linkage as RGB. In the form (R, G, B).
         thickness: The width of the linkage. This is in pixels.
     """
 
+    linkage: "Linkage" = None
     color: Tuple[int, int, int] = None
     thickness: int = None
 
@@ -34,7 +37,11 @@ class LinkageStyles:
 
         The color is light pink by default; the thickness is 3px.
         """
-        self.color = (255, 192, 203)
+        if self.linkage.strand is not None and self.linkage.strand.interdomain():
+            self.color = settings.colors["linkages"]["color"]
+        else:
+            self.color = settings.colors["linkages"]["grey"]
+
         self.thickness = 3
 
 
@@ -75,8 +82,8 @@ class Linkage:
         styles: LinkageStyles = None,
     ):
         self.inflection = inflection
-        self.styles = styles or LinkageStyles()
         self.strand = strand
+        self.styles = styles or LinkageStyles(linkage=self)
         self.items = items or [Nucleoside() for _ in range(count)]
 
         # Convert the items to a deque if they are not already.
