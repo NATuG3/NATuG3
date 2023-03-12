@@ -287,7 +287,7 @@ class Strand:
 
     def __len__(self) -> int:
         """Obtain number of items in strand."""
-        return len(self.items)
+        return len(self.items.unpacked())
 
     def __contains__(self, item) -> bool:
         """Determine whether item is in strand."""
@@ -598,7 +598,8 @@ class Strand:
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
         nucleosides: List[Nucleoside] = StrandItems(self.items.unpacked()).by_type(
-            Nucleoside)
+            Nucleoside
+        )
         # type: ignore
 
         if len(new_sequence) == len(self.sequence):
@@ -728,12 +729,25 @@ class Strand:
 
     def interdomain(self) -> bool:
         """Whether all the items in this strand belong to the same domain."""
+        from structures.domains import Domain
+
         try:
-            checker = self.items.by_type(Point)[0].domain
+            points = self.items.by_type(Point)
+            checker = None
+
+            # Find the first domain that shows up in the strand to use as a checker
             for item in self.items.by_type(Point):
-                if isinstance(item, Point):
-                    if item.domain is not checker:
-                        return True
+                if isinstance(item.domain, Domain):
+                    checker = item.domain
+                    break
+
+            # Make sure that every other domain is the same as the checker
+            for item in points:
+                if item.domain != checker and item.domain is not None:
+                    print("Interdomain", item, item.domain, checker)
+                    print(item.domain == checker)
+                    print(item.domain.index == checker.index)
+                    return True
         except IndexError:
             return False
 
