@@ -234,7 +234,7 @@ class SideViewPlotter(pg.PlotWidget):
                         )
                     else:
                         assert point.styles.symbol in PointStyles.all_symbols, (
-                            f"Symbol \"{point.styles.symbol} \"is not a valid symbol. "
+                            f'Symbol "{point.styles.symbol} "is not a valid symbol. '
                             "Valid symbols are: "
                             f"{PointStyles.all_symbols}"
                         )
@@ -275,122 +275,131 @@ class SideViewPlotter(pg.PlotWidget):
             # items into subunits of points, discluding linkages. These subunits can
             # be plotted as connected points with a single stroke each.
             for stroke_segment in strand.items.by_type(Point, Linkage).split(Linkage):
-                # Gather an array of all the x and z coordinates of the points in
-                # the stroke segment.
-                x_coords = [point.x_coord for point in stroke_segment]
-                z_coords = [point.z_coord for point in stroke_segment]
+                if len(stroke_segment) > 0:
+                    # Gather an array of all the x and z coordinates of the points in
+                    # the stroke segment.
+                    x_coords = [point.x_coord for point in stroke_segment]
+                    z_coords = [point.z_coord for point in stroke_segment]
 
-                # Use the first point to fetch the number of total domains that are
-                # currently in existence.
-                domain_count = stroke_segment[0].domain.parent.parent.count
+                    # Use the first point to fetch the number of total domains that are
+                    # currently in existence.
+                    domain_count = stroke_segment[0].domain.parent.parent.count
 
-                # If the strand is closed, we will be adding a pseudo point to the
-                # end of the stroke segment. If the last point and the first point
-                # are near in x value, then we will connect the last point to
-                # the first point (connect[-1] = True). Otherwise, we will not
-                # connect the last point to the first point (connect[-1] = False).
-                add_connected_pseudo_point = strand.closed and (
-                    abs(stroke_segment[0].domain - stroke_segment[-1].domain)
-                    == domain_count - 1
-                )
+                    # If the strand is closed, we will be adding a pseudo point to the
+                    # end of the stroke segment. If the last point and the first point
+                    # are near in x value, then we will connect the last point to
+                    # the first point (connect[-1] = True). Otherwise, we will not
+                    # connect the last point to the first point (connect[-1] = False).
+                    add_connected_pseudo_point = strand.closed and (
+                        abs(stroke_segment[0].domain - stroke_segment[-1].domain)
+                        == domain_count - 1
+                    )
 
-                # If the point that proceeds a given point is in the last domain,
-                # and the point being proceeded is in the first domain, then the
-                # points are indeed continuous, but we don't want a line going across
-                # the screen. If we know that a strand is not interdomain (does not
-                # contain points within different domains, however, we can skip this
-                # check and connect all the points.
-                if not strand.interdomain():
-                    connect = "all"
-                else:
-                    # If the strand is closed, a pseudo point will be added to the
-                    # end of the stroke segment. Whether this point gets a connection
-                    # depends on the "add_connected_pseudo_point" variable.
-                    if strand.closed:
-                        # If the strand is closed, then we need to add a pseudo
-                        # point to the end of the stroke segment.
-                        connect = np.empty(len(stroke_segment) + 1, dtype=bool)
+                    # If the point that proceeds a given point is in the last domain,
+                    # and the point being proceeded is in the first domain, then the
+                    # points are indeed continuous, but we don't want a line going
+                    # across the screen. If we know that a strand is not interdomain
+                    # (does not contain points within different domains, however,
+                    # we can skip this check and connect all the points.
+                    if not strand.interdomain():
+                        connect = "all"
                     else:
-                        # If the strand is not closed, then we don't need to add a
-                        # pseudo point to the end of the stroke segment.
-                        connect = np.empty(len(stroke_segment), dtype=bool)
+                        # If the strand is closed, a pseudo point will be added to
+                        # the end of the stroke segment. Whether this point gets a
+                        # connection depends on the "add_connected_pseudo_point"
+                        # variable.
+                        if strand.closed:
+                            # If the strand is closed, then we need to add a pseudo
+                            # point to the end of the stroke segment.
+                            connect = np.empty(len(stroke_segment) + 1, dtype=bool)
+                        else:
+                            # If the strand is not closed, then we don't need to add a
+                            # pseudo point to the end of the stroke segment.
+                            connect = np.empty(len(stroke_segment), dtype=bool)
 
-                    for index, point in enumerate(stroke_segment[:-1]):
-                        connect[index] = (
-                            abs(point.domain - stroke_segment[index + 1].domain)
-                            != domain_count - 1
-                        )
+                        for index, point in enumerate(stroke_segment[:-1]):
+                            connect[index] = (
+                                abs(point.domain - stroke_segment[index + 1].domain)
+                                != domain_count - 1
+                            )
 
-                # If the strand is closed then connect the last point to the first
-                # point by creating a pseudo-point at the first point's location.
-                # This will give the appearance of a closed strand.
-                if strand.closed:
-                    connect[-1] = add_connected_pseudo_point
-                    x_coords.append(x_coords[0])
-                    z_coords.append(z_coords[0])
+                    # If the strand is closed then connect the last point to the first
+                    # point by creating a pseudo-point at the first point's location.
+                    # This will give the appearance of a closed strand.
+                    if strand.closed:
+                        connect[-1] = add_connected_pseudo_point
+                        x_coords.append(x_coords[0])
+                        z_coords.append(z_coords[0])
 
-                # Create the actual plot data item for the stroke segment.
-                plotted_stroke = pg.PlotDataItem(
-                    x_coords,
-                    z_coords,
-                    pen=pg.mkPen(  # Create a pen for the stroke based on strand styles
-                        color=strand.styles.color.value,
-                        width=strand.styles.thickness.value,
-                    ),
-                    connect=connect,
-                )
-                # Make it so that the stroke itself can be clicked.
-                plotted_stroke.setCurveClickable(True)
-                # When the stroke is clicked, emit the strand_clicked signal. This
-                # will lead to the creation of a StrandConfig dialog.
-                plotted_stroke.sigClicked.connect(
-                    lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)
-                )
-                # Store the stroke plotter object, which will be used later.
-                self.plot_data.plotted_strokes.append(plotted_stroke)
-
-                # Now that we've plotted the stroke, we need to plot the linkages. We
-                # will sort out all the linkages in the strand, and then plot them
-                # one by one.
-                for linkage in strand.items.by_type(Linkage):
-                    # Linkages have a .plot_points attribute that contains three
-                    # points: the first point, the midpoint, and the last point.
-                    coords = linkage.plot_points
-                    # Round out the coordinates using Chaikin's Corner Cutting to
-                    # give the appearance of a smooth curve.
-                    coords = chaikins_corner_cutting(coords, refinements=9)
-                    # Split the coordinates into x and z coordinate arrays for
-                    # plotting with pyqtgraph.
-                    x_coords = [coord[0] for coord in coords]
-                    z_coords = [coord[1] for coord in coords]
-
-                    # Create the plot data item for the linkage.
-                    plotted_linkage = pg.PlotDataItem(
+                    # Create the actual plot data item for the stroke segment.
+                    plotted_stroke = pg.PlotDataItem(
                         x_coords,
                         z_coords,
-                        pen=pg.mkPen(  # Create a pen for the linkage
-                            color=linkage.styles.color, width=linkage.styles.thickness
+                        pen=pg.mkPen(  # Create pen for the stroke from strand styles
+                            color=strand.styles.color.value,
+                            width=strand.styles.thickness.value,
                         ),
+                        connect=connect,
                     )
-                    # Make it so that the linkage itself can be clicked.
-                    plotted_linkage.setCurveClickable(True)
-                    # When the linkage is clicked, emit the linkage_clicked signal.
-                    # This will lead to the creation of a LinkageConfig dialog when
-                    # invoked.
-                    plotted_linkage.sigClicked.connect(
-                        lambda *args, to_emit=linkage: self.linkage_clicked.emit(
-                            to_emit
-                        )
+                    # Make it so that the stroke itself can be clicked.
+                    plotted_stroke.setCurveClickable(True)
+                    # When the stroke is clicked, emit the strand_clicked signal. This
+                    # will lead to the creation of a StrandConfig dialog.
+                    plotted_stroke.sigClicked.connect(
+                        lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)
                     )
-                    # Store the linkage plotter object, which will be used for actually
-                    # plotting the linkage later.
-                    self.plot_data.plotted_linkages.append(plotted_linkage)
+                    # Store the stroke plotter object, which will be used later.
+                    self.plot_data.plotted_strokes.append(plotted_stroke)
 
-            # Now we can add links to the plot. While the nick objects are indeed stored
-            # within each strand's items, they also are stored in the Strands container
-            # object. We will iterate through the nicks through strands.nicks, and then
-            # plot them one by one. Note that nicks do not have strokes, which simplifies
-            # the plotting process.
+                    # Now that we've plotted the stroke, we need to plot the
+                    # linkages. We will sort out all the linkages in the strand,
+                    # and then plot them one by one.
+                    for linkage in strand.items.by_type(Linkage):
+                        # Linkages have a .plot_points attribute that contains three
+                        # points: the first point, the midpoint, and the last point.
+                        coords = linkage.plot_points
+                        # Round out the coordinates using Chaikin's Corner Cutting to
+                        # give the appearance of a smooth curve.
+                        coords = chaikins_corner_cutting(coords, refinements=9)
+                        # Split the coordinates into x and z coordinate arrays for
+                        # plotting with pyqtgraph.
+                        x_coords = [coord[0] for coord in coords]
+                        z_coords = [coord[1] for coord in coords]
+
+                        # Create the plot data item for the linkage.
+                        plotted_linkage = pg.PlotDataItem(
+                            x_coords,
+                            z_coords,
+                            pen=pg.mkPen(  # Create a pen for the linkage
+                                color=linkage.styles.color,
+                                width=linkage.styles.thickness,
+                            ),
+                        )
+                        # Make it so that the linkage itself can be clicked.
+                        plotted_linkage.setCurveClickable(True)
+                        # When the linkage is clicked, emit the linkage_clicked signal.
+                        # This will lead to the creation of a LinkageConfig dialog when
+                        # invoked.
+                        plotted_linkage.sigClicked.connect(
+                            lambda *args, to_emit=linkage: self.linkage_clicked.emit(
+                                to_emit
+                            )
+                        )
+                        # Store the linkage plotter object, which will be used for
+                        # actually plotting the linkage later.
+                        self.plot_data.plotted_linkages.append(plotted_linkage)
+                else:
+                    logger.warning(
+                        "Strand %s has a stroke segment that has no items. Skipping "
+                        "plotting",
+                        strand.name,
+                    )
+
+            # Now we can add links to the plot. While the nick objects are indeed
+            # stored within each strand's items, they also are stored in the Strands
+            # container object. We will iterate through the nicks through
+            # strands.nicks, and then plot them one by one. Note that nicks do not
+            # have strokes, which simplifies the plotting process.
 
             # Create a brush for the nick symbols, based on the current color scheme
             # found in settings.
