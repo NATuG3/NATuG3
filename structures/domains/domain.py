@@ -224,6 +224,19 @@ class Domain:
         """
         return self.index + other.index
 
+    def __eq__(self, other):
+        """
+        Check if two domains are equal by comparing their indices within the global
+        domain object.
+
+        Args:
+            other: The other domain to check for equality.
+
+        Returns:
+            True if the domains are equal, False otherwise.
+        """
+        return isinstance(other, Domain) and self.index == other.index
+
     def angles(self, start=0):
         """
         Obtain the angles of the NEMids of the Domain.
