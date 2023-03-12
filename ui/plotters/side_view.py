@@ -323,13 +323,13 @@ class SideViewPlotter(pg.PlotWidget):
                                 != domain_count - 1
                             )
 
-                    # If the strand is closed then connect the last point to the first
-                    # point by creating a pseudo-point at the first point's location.
-                    # This will give the appearance of a closed strand.
-                    if strand.closed:
-                        connect[-1] = add_connected_pseudo_point
-                        x_coords.append(x_coords[0])
-                        z_coords.append(z_coords[0])
+                        # If the strand is closed then connect the last point to the
+                        # first point by creating a pseudo-point at the first point's
+                        # location. This will give the appearance of a closed strand.
+                        if strand.closed:
+                            connect[-1] = add_connected_pseudo_point
+                            x_coords.append(x_coords[0])
+                            z_coords.append(z_coords[0])
 
                     # Create the actual plot data item for the stroke segment.
                     plotted_stroke = pg.PlotDataItem(
