@@ -1,9 +1,9 @@
 import itertools
 import random
 from collections import deque
-from copy import deepcopy, copy
+from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, List, Type, Set, Deque
+from typing import Tuple, Iterable, List, Type, Set
 from uuid import uuid1
 
 import numpy as np
@@ -66,6 +66,9 @@ class StrandStyle:
             self.automatic = False
             self.value = valuemod(string.replace(", auto", ""))
 
+    def __deepcopy__(self, memodict={}):
+        return StrandStyle(self.automatic, deepcopy(self.value, memodict))
+
 
 @dataclass
 class StrandStyles:
@@ -125,7 +128,9 @@ class StrandItems(deque):
 
     def __getitem__(self, index_or_slice: int | slice) -> object:
         if isinstance(index_or_slice, slice):
-            if index_or_slice.step < 0:
+            step = index_or_slice.step or 1
+
+            if step < 0:
                 iter_on = reversed(self)
             else:
                 iter_on = self
@@ -133,7 +138,7 @@ class StrandItems(deque):
                 iter_on,
                 index_or_slice.start,
                 index_or_slice.stop,
-                abs(index_or_slice.step),
+                abs(step),
             )
         return super().__getitem__(index_or_slice)
 
@@ -303,14 +308,13 @@ class Strand:
 
     def __deepcopy__(self, memodict={}):
         """Deepcopy the strand."""
-        copied = Strand(
+        return Strand(
             items=deepcopy(self.items, memodict),
             name=self.name,
             closed=self.closed,
+            styles=deepcopy(self.styles, memodict),
             nucleic_acid_profile=self.nucleic_acid_profile,
         )
-        copied.styles = copy(self.styles)
-        return copied
 
     def clear(self) -> None:
         """Clear the strand."""
