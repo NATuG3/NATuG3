@@ -395,7 +395,7 @@ class Strands:
                 item.styles.change_state("default")
         logger.debug("Recomputed strand styles.")
 
-    def link(self, NEMid1: NEMid, NEMid2: NEMid) -> None:
+    def link(self, NEMid1: NEMid, NEMid2: NEMid) -> Linkage:
         """
         Create a linkage between two endpoint NEMids.
 
@@ -417,23 +417,12 @@ class Strands:
             - The NEMids' parent strands must be in this Strands container.
             - Properties of the longer strand are preserved (styles, etc.).
         """
-        # Check that the NEMids are in the same Strands container
-        if NEMid1.strand.strands != self or NEMid2.strand.strands != self:
-            raise ValueError(
-                "NEMids's strands' Strands container must be in the same. ("
-                f"{NEMid1.strand.strands} != {NEMid2.strand.strands})"
-            )
-
-        # Check that the NEMids are at opposite ends of the strands
-        for NEMid_ in (NEMid1, NEMid2):
-            NEMid_index = NEMid_.strand.items.by_type(NEMid).index(NEMid_)
-            if not (
-                NEMid_index == 0
-                or NEMid_index == len(NEMid_.strand.items.by_type(NEMid)) - 1
-            ):
-                raise ValueError(
-                    "NEMids must be at opposite ends of strands to be linked."
-                )
+        assert (
+            NEMid1.strand.strands == self and NEMid2.strand.strands == self
+        ), "NEMids must be in this container."
+        assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(
+            True
+        ), "NEMids must be at the endpoints of their strands."
 
         # Force NEMid1 to be the upwards NEMid
         if NEMid1.strand.direction == DOWN:
@@ -479,14 +468,66 @@ class Strands:
         # Return the linkage
         return linkage
 
-    def unlink(self, linkage: Linkage) -> None:
+    def unlink(self, linkage: Linkage) -> Tuple[Strand, Strand]:
         """
         Split the strand at the site of a given linkage.
 
         Args:
             linkage: The linkage to split the strand at.
+
+        Returns:
+            The two new strands that were created.
         """
-        pass
+        assert (
+            linkage.strand.strands is self
+        ), "Linkage is not in this Strands container."
+
+        logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
+        logger.debug(f"Linkage is at index {linkage.strand.index(linkage)}.")
+
+        # Create a copy of the strand that has the same styles and nucleic acid profile
+        # as the original strand. The new strands will have the same name, but with
+        # "(1)" and "(2)" at the ends of the names since they are now two distinct
+        # strands.
+        new_strand_one = Strand(
+            name=f"{self.name} (1)",
+            # If the linkage was in a closed strand, breaking the linkage would make
+            # the strand no longer closed.
+            closed=not linkage.strand.closed,
+            styles=deepcopy(linkage.strand.styles),
+            nucleic_acid_profile=self.nucleic_acid_profile,
+        )
+        new_strand_two = deepcopy(new_strand_one)
+        new_strand_two.name = f"{self.name} (2)"
+
+        # Split up the strand items of the linkage, and do not include the linkage
+        print(len(tuple(linkage.strand[: linkage.strand.index(linkage)])))
+
+        new_strand_one.extend(
+            tuple(linkage.strand[: linkage.strand.index(linkage)]),
+        )
+        new_strand_two.extend(
+            tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
+        )
+
+        assert len(new_strand_one) + len(new_strand_two) == len(linkage.strand) - 1, (
+            "The new strands do not have the same number of items as the old strand "
+            f"minus the linkage. ({len(new_strand_one)} + {len(new_strand_two)} != "
+            f"{len(linkage.strand) - 1})"
+        )
+
+        # Add the new strands to the container
+        self.append(new_strand_one)
+        self.append(new_strand_two)
+
+        # Remove the old strand from the container
+        self.remove(linkage.strand)
+
+        # Restyle the strands
+        self.style()
+
+        # Return the new strands
+        return new_strand_one, new_strand_two
 
     def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
         """
