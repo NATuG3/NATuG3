@@ -14,7 +14,7 @@ import settings
 from constants.directions import DOWN, UP
 from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
-from structures.points.point import Point
+from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
@@ -295,7 +295,6 @@ class Strands:
             logger.info("Exported sequences as excel @ {filepath}")
 
             if open_in_file_explorer:
-                print(filepath)
                 QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
                 logger.info(f"Opened export @ {filepath} in file explorer.")
         else:
@@ -428,11 +427,13 @@ class Strands:
             - The NEMids' parent strands must be in this Strands container.
             - Properties of the longer strand are preserved (styles, etc.).
         """
+        assert NEMid1.strand.strands == self and NEMid2.strand.strands == self, (
+            "NEMids must be in this container. "
+            f"(NEMid1 [{NEMid1}] Strands: {NEMid1.strand.strands}, "
+            f"NEMid2 [{NEMid2}] Strands: {NEMid2.strand.strands})"
+        )
         assert (
-            NEMid1.strand.strands == self and NEMid2.strand.strands == self
-        ), "NEMids must be in this container."
-        assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(
-            True
+            NEMid1.is_endpoint(True) and NEMid2.is_endpoint(True),
         ), "NEMids must be at the endpoints of their strands."
 
         # Force NEMid1 to be the upwards NEMid
@@ -466,6 +467,7 @@ class Strands:
             styles=deepcopy(longer_strand.styles),
             nucleic_acid_profile=self.nucleic_acid_profile,
             items=begin_point.strand.items,
+            strands=self,
         )
 
         # Create a linkage. The first coordinate is NEMid1.position(), and the second
@@ -476,8 +478,14 @@ class Strands:
             strand=new_strand,
             inflection=UP,
         )
-        new_strand.append(linkage)
-        new_strand.extend(end_point.strand.items)
+        new_strand.items.append(linkage)
+        new_strand.items.extend(end_point.strand.items)
+        for item in new_strand.items:
+            item.strand = new_strand
+
+        assert [item.strand == new_strand for item in new_strand], (
+            "All items in the new strand must have the new strand as their parent."
+        )
 
         # Add the new strand to the container
         self.append(new_strand)
@@ -516,6 +524,7 @@ class Strands:
             closed=not linkage.strand.closed,
             styles=deepcopy(linkage.strand.styles),
             nucleic_acid_profile=self.nucleic_acid_profile,
+            strands=self,
         )
         new_strand_two = deepcopy(new_strand_one)
         new_strand_two.name = f"{self.name} (2)"
