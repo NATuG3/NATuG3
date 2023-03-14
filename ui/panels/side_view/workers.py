@@ -104,10 +104,12 @@ def informer(
             )
             # highlight the point that was clicked
             point.styles.change_state("highlighted")
+            if point.matching is not None:
+                point.matching.styles.change_state("highlighted")
 
         # if an unsupported type of point is clicked raise an error
         else:
-            logger.warn(
+            logger.warning(
                 "Unsupported point type passed to informer. Point type: %s", type(point)
             )
 
@@ -117,6 +119,8 @@ def informer(
             dialog_.close()
         for point_ in points_:
             point_.styles.change_state("default")
+            if point_.matching is not None:
+                point_.matching.styles.change_state("default")
 
     if len(dialogs) > 0:
         # connect the completed events for all the dialogs

@@ -635,8 +635,6 @@ class Strand:
         """
         Randomize the sequence of the strand.
 
-        Uses self.random_sequence() to compute the random sequence
-
         Args:
             overwrite: Whether to overwrite the current sequence or not. If overwrite
                 is False then all unset nucleosides (ones which are None) will be set

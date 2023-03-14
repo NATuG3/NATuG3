@@ -512,23 +512,11 @@ class Strands:
         new_strand_two.name = f"{self.name} (2)"
 
         # Split up the strand items of the linkage, and do not include the linkage
-        print(len(tuple(linkage.strand[: linkage.strand.index(linkage)])))
-
         new_strand_one.extend(
             tuple(linkage.strand[: linkage.strand.index(linkage)]),
         )
         new_strand_two.extend(
             tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
-        )
-
-        print(len(new_strand_one))
-        print(len(new_strand_two))
-        print(len(linkage.strand) - 1)
-
-        assert len(new_strand_one) + len(new_strand_two) == len(linkage.strand) - 1, (
-            "The new strands do not have the same number of items as the old strand "
-            f"minus the linkage. ({len(new_strand_one)} + {len(new_strand_two)} != "
-            f"{len(linkage.strand) - 1})"
         )
 
         # Add the new strands to the container
