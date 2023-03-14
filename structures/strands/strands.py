@@ -12,7 +12,7 @@ from xlsxwriter import Workbook
 
 import settings
 from constants.directions import DOWN, UP
-from structures.points import NEMid
+from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
@@ -445,15 +445,28 @@ class Strands:
 
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
-        if NEMid1.strand.items.by_type(NEMid)[-1] == NEMid1:
+        if NEMid1.is_tail(True):
             begin_point = NEMid1.strand[-1]
             end_point = NEMid2.strand[0]
         else:
             begin_point = NEMid2.strand[-1]
             end_point = NEMid1.strand[0]
 
-        # Begin building the new strand.
-        new_strand = deepcopy(begin_point.strand)
+        # We will preserve the styles of the longer strand, so determine which strand
+        # is longer
+        if len(NEMid1.strand) > len(NEMid2.strand):
+            longer_strand = NEMid1.strand
+        else:
+            longer_strand = NEMid2.strand
+
+        new_strand = Strand(
+            name=f"{longer_strand.name} (linked)",
+            # The new strand is closed if the strands being linked are the same
+            closed=begin_point.strand == end_point.strand,
+            styles=deepcopy(longer_strand.styles),
+            nucleic_acid_profile=self.nucleic_acid_profile,
+            items=begin_point.strand.items,
+        )
 
         # Create a linkage. The first coordinate is NEMid1.position(), and the second
         # coordinate is NEMid2.position().
@@ -464,11 +477,7 @@ class Strands:
             inflection=UP,
         )
         new_strand.append(linkage)
-
-        new_strand.extend(end_point.strand)
-
-        for item in new_strand:
-            item.strand = new_strand
+        new_strand.extend(end_point.strand.items)
 
         # Add the new strand to the container
         self.append(new_strand)

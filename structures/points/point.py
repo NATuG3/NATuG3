@@ -253,46 +253,6 @@ class Point:
 
         self.styles.reset()
 
-    def is_head(self, tolerance=0) -> bool | None:
-        """
-        Whether the point is the last point in the strand.
-
-        Args:
-            tolerance: The tolerance for the comparison. Defaults to 0. If you want
-                to determine whether the point is the first NEMid in the strand, set
-                tolerance to 1.
-
-        Returns:
-            True: If the point is the last point in the strand.
-            False: If the point is not the last point in the strand.
-            None: If the point has no parent strand.
-        """
-        if self.strand is None:
-            return None
-        for i in range(tolerance + 1):
-            if self.strand[-i - 1] == self:
-                return True
-
-    def is_tail(self, tolerance=0) -> bool | None:
-        """
-        Whether the point is the first point in the strand.
-
-        Args:
-            tolerance: The tolerance for the comparison. Defaults to 0. If you want
-                to determine whether the point is the first NEMid in the strand, set
-                tolerance to 1.
-
-        Returns:
-            True: If the point is the first point in the strand.
-            False: If the point is not the first point in the strand.
-            None: If the point has no parent strand.
-        """
-        if self.strand is None:
-            return None
-        for i in range(tolerance + 1):
-            if self.strand[i] == self:
-                return True
-
     def overlaps(self, point: Type["Point"], width=None) -> bool:
         """
         Return whether the point overlaps with another point.
@@ -387,6 +347,58 @@ class Point:
             return self == items[0] or self == items[-1]
         else:
             return self == self.strand.items[0] or self == self.strand.items[-1]
+
+    def is_tail(self, of_its_type) -> bool:
+        """
+        Return whether the point is the last item in its strand.
+
+        By default, this method returns whether the point is the last item in its strand.
+        If of_its_type is True then this method returns whether the point is the last
+        item of its type in its strand.
+
+        Args:
+            of_its_type: Whether to only consider the point a tail if it is the last of
+                its type (i.e. a Nucleoside or a NEMid). This method obtains a list of
+                all the points of the specific subtype that this point is, and then sees
+                if this point is the last item in that list.
+
+        Returns:
+            bool: Whether the point is a tail in the strand. If the point's strand is
+                None then this method returns False.
+        """
+        assert self.strand is not None, "Point has no strand"
+
+        if of_its_type:
+            items = self.strand.items.by_type(type(self))
+            return self == items[-1]
+        else:
+            return self == self.strand.items[-1]
+
+    def is_head(self, of_its_type) -> bool:
+        """
+        Return whether the point is the first item in its strand.
+
+        By default, this method returns whether the point is the first item in its strand.
+        If of_its_type is True then this method returns whether the point is the first
+        item of its type in its strand.
+
+        Args:
+            of_its_type: Whether to only consider the point a head if it is the first of
+                its type (i.e. a Nucleoside or a NEMid). This method obtains a list of
+                all the points of the specific subtype that this point is, and then sees
+                if this point is the first item in that list.
+
+        Returns:
+            bool: Whether the point is a head in the strand. If the point's strand is
+                None then this method returns False.
+        """
+        assert self.strand is not None, "Point has no strand"
+
+        if of_its_type:
+            items = self.strand.items.by_type(type(self))
+            return self == items[0]
+        else:
+            return self == self.strand.items[0]
 
     @property
     def index(self):
