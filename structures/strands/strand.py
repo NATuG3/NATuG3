@@ -109,6 +109,14 @@ class StrandStyles:
             for point in self.strand.items.by_type(Point):
                 point.styles.size -= 5
 
+    def __deepcopy__(self, memodict={}):
+        return StrandStyles(
+            self.strand,
+            deepcopy(self.thickness, memodict),
+            deepcopy(self.color, memodict),
+            self.highlighted,
+        )
+
 
 class StrandItems(deque):
     """
@@ -313,6 +321,7 @@ class Strand:
             closed=self.closed,
             styles=deepcopy(self.styles, memodict),
             nucleic_acid_profile=self.nucleic_acid_profile,
+            strands=self.strands,
         )
 
     def clear(self) -> None:
@@ -742,9 +751,6 @@ class Strand:
             # Make sure that every other domain is the same as the checker
             for item in points:
                 if item.domain != checker and item.domain is not None:
-                    print("Interdomain", item, item.domain, checker)
-                    print(item.domain == checker)
-                    print(item.domain.index == checker.index)
                     return True
         except IndexError:
             return False
