@@ -199,15 +199,38 @@ class SideViewPlotter(pg.PlotWidget):
             x_coords = np.empty(len(to_plot), dtype=float)
             z_coords = np.empty(len(to_plot), dtype=float)
 
-            # now create the proper plot data for each point one by one
+            # Now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # Store the point's coordinates.
-                x_coords[point_index] = point.x_coord
-                z_coords[point_index] = point.z_coord
+                # For NEMids that are junctable, they will be plotted slightly
+                # differently.
+                if isinstance(point, NEMid) and point.junctable:
+                    # If the point is on the right side of its domain (i.e. the
+                    # point's domain x coord = index + 1) then we will shift it
+                    # slightly to the left so that it is not obscured by the other
+                    # point that is on top of it. Otherwise, we will shift it
+                    # slightly to the right.
+                    if (
+                        # Points that are on the very left (x=0) or the very right (
+                        # x=the number of domains) will not be shifted.
+                        point.x_coord == 0
+                        or point.x_coord == point.domain.parent.parent.count
+                    ):
+                        x_coord = point.x_coord
+                    else:
+                        if point.domain.index == point.x_coord:
+                            x_coord = point.x_coord + 0.04
+                        else:
+                            x_coord = point.x_coord - 0.04
+                else:
+                    x_coord = point.x_coord
+                z_coord = point.z_coord
+
+                x_coords[point_index] = x_coord
+                z_coords[point_index] = z_coord
 
                 # Update the point mappings. This is a dict that allows us to map the
                 # location of a given point to the point object itself.
-                self.plot_data.points[(point.x_coord, point.z_coord)] = point
+                self.plot_data.points[(x_coord, z_coord)] = point
 
                 # If the point type is NOT the same as the active point type, use the
                 # current styles of the point. Otherwise, plot a smaller "o" shaped
@@ -347,7 +370,7 @@ class SideViewPlotter(pg.PlotWidget):
 
                     # If we know that a strand is not interdomain (does not contain
                     # points within different domains, however, we can skip this
-                    # check and connect all the points.
+                    # check and connect all the points).
                     else:
                         x_coords_subarrays = (x_coords,)
                         z_coords_subarrays = (z_coords,)
