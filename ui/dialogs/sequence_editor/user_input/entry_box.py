@@ -10,10 +10,11 @@ from constants.bases import DNA
 
 
 class BaseEntryBox(QWidget):
-    def __init__(self, parent, base: str | None, index: int):
+    def __init__(self, parent, base: str | None, has_complement: bool, index: int):
         super().__init__(parent)
         self._index = index
         self._base = base
+        self.has_complement = has_complement
 
         # set up the index area
         self.index_area = InfoArea(self)
@@ -60,7 +61,9 @@ class BaseEntryBox(QWidget):
         if self._base in (None, " "):
             self.complement_area.setText(" ")
         else:
-            self.complement_area.setText(bases.COMPLEMENTS[self.base])
+            self.complement_area.setText(
+                bases.COMPLEMENTS[self._base] if self.has_complement else " "
+            )
 
     @property
     def index(self):

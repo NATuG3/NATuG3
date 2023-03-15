@@ -62,6 +62,8 @@ class Helix:
 
     Attributes:
         direction: The direction of the helix. Either UP or DOWN.
+        generation_count: The number of points to generate for the helix based off
+            of its domain.
         double_helix: The double helix that this helix belongs to.
         domain: The domain that this helix lies within.
         data: The data of the helix. This is a HelixData object, and contains the
@@ -86,6 +88,18 @@ class Helix:
     def domain(self):
         """The domain that this helix lies within."""
         return self.double_helix.domain
+
+    @property
+    def generation_count(self):
+        """The number of points to generate for the helix based off of its domain."""
+        if self.double_helix.left_helix == self:
+            return self.domain.left_helix_count
+        elif self.double_helix.other_helix == self:
+            return self.domain.other_helix_count
+        else:
+            raise ValueError(
+                "Helix is not the zeroed OR other helix in its double helix."
+            )
 
     def point(self, type_: Literal[Type[Nucleoside], Type[NEMid]] = Nucleoside):
         """
@@ -155,6 +169,8 @@ class Helix:
             Strand: The strand with the data in the arrays. Either a new strand or
                 the strand passed in.
         """
-        strand = strand or Strand(nucleic_acid_profile=nucleic_acid_profile, **kwargs)
+        strand = strand or Strand(
+            nucleic_acid_profile=nucleic_acid_profile, helix=self, **kwargs
+        )
         strand.extend(tuple(self.points(begin=begin)))
         return strand

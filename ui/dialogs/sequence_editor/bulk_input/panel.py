@@ -37,47 +37,49 @@ class BulkInputSequenceEditor(QWidget):
                 directory=f"{os.getcwd()}/saves/sequencing/presets/",
                 filter="*.txt",
             )[0]
-            # open and load file
-            with open(filepath) as file:
-                file_bases = file.read()
-            # remove blank characters
-            file_bases = "".join(file_bases.split())
+            if filepath:
+                # open and load file
+                with open(filepath) as file:
+                    file_bases = file.read()
 
-            # make sure that the file doesn't contain more bases than we are allowed
-            # to have (or if it does get confirmation of user)
-            if len(file_bases) > len(self.bases):
-                difference = len(file_bases) - len(self.bases)
-                confirmed = utils.confirm(
-                    self.parent(),
-                    "Sequence Overload",
-                    f"The chosen file contains {difference} more bases than the "
-                    f"strand allows for. If you proceed the "
-                    f"inputted bases will be truncated to the strand length. \n\n "
-                    f"Would you like to proceed?",
-                )
-                file_bases = file_bases[: len(self.bases)]
-            else:
-                # if the amount of bases in the file is reasonable proceed as normal
-                confirmed = True
+                # remove blank characters
+                file_bases = "".join(file_bases.split())
 
-            # if ready, build the new list of bases
-            if confirmed:
-                bases = []
-                for file_base in file_bases:
-                    if file_base.upper() not in DNA:
-                        # if any base is of the wrong type then cancel the operation
-                        utils.warning(
-                            self.parent(),
-                            "Invalid bases",
-                            "This file contains invalid base characters!\n"
-                            f"The file must only consist of {str(DNA)}.",
-                        )
-                        return
-                    else:
-                        bases.append(file_base.upper())
+                # make sure that the file doesn't contain more bases than we are allowed
+                # to have (or if it does get confirmation of user)
+                if len(file_bases) > len(self.bases):
+                    difference = len(file_bases) - len(self.bases)
+                    confirmed = utils.confirm(
+                        self.parent(),
+                        "Sequence Overload",
+                        f"The chosen file contains {difference} more bases than the "
+                        f"strand allows for. If you proceed the "
+                        f"inputted bases will be truncated to the strand length. \n\n "
+                        f"Would you like to proceed?",
+                    )
+                    file_bases = file_bases[: len(self.bases)]
+                else:
+                    # if the amount of bases in the file is reasonable proceed as normal
+                    confirmed = True
 
-                # update our bases with the new ones loaded from the file
-                self.bases = bases
+                # if ready, build the new list of bases
+                if confirmed:
+                    bases = []
+                    for file_base in file_bases:
+                        if file_base.upper() not in DNA:
+                            # if any base is of the wrong type then cancel the operation
+                            utils.warning(
+                                self.parent(),
+                                "Invalid bases",
+                                "This file contains invalid base characters!\n"
+                                f"The file must only consist of {str(DNA)}.",
+                            )
+                            return
+                        else:
+                            bases.append(file_base.upper())
+
+                    # update our bases with the new ones loaded from the file
+                    self.bases = bases
 
         self.import_file.clicked.connect(from_file_clicked)
 

@@ -1,5 +1,4 @@
 import logging
-from math import ceil
 from time import time
 from typing import Iterator
 from uuid import uuid1
@@ -8,6 +7,7 @@ import numpy as np
 from numpy import argmax
 
 from constants.directions import DOWN, UP
+from structures.points import Nucleoside
 from structures.points.point import x_coord_from_angle
 
 logger = logging.getLogger(__name__)
@@ -177,8 +177,28 @@ class DoubleHelices:
         # is the nucleoside with the same .helical_index in the other helix of the
         # same double helix.
         for double_helix in double_helices:
+            # We have already converted the Helix objects into strands,
+            # so technically, even though these strands are single domain at the
+            # moment, they are indeed mutable Strand objects. "helix.helix" is just
+            # retrieving the original Helix object from the Strand object.
+
+            # To assign the matching nucleosides, we iterate through the nucleosides
+            # in the up helix and the down helix, beginning at the start of the body
+            # area and ending at the end of the body area.
+
             for item1, item2 in zip(
-                double_helix[UP].items[0::2], double_helix[DOWN].items[0::-2]
+                double_helix[UP].items.by_type(Nucleoside)[
+                    double_helix[UP].helix.generation_count.bottom_count : (
+                        double_helix[UP].helix.generation_count.body_count
+                        + double_helix[UP].helix.generation_count.top_count
+                    )
+                ],
+                double_helix[DOWN].items.by_type(Nucleoside)[
+                    double_helix[DOWN].helix.generation_count.bottom_count : (
+                        double_helix[DOWN].helix.generation_count.body_count
+                        + double_helix[DOWN].helix.generation_count.top_count
+                    ) : -1
+                ],
             ):
                 if item1 is not None and item2 is not None:
                     item1.matching = item2
@@ -241,16 +261,16 @@ class DoubleHelices:
                 # interval at which the z coord decreases). This will ensure that all
                 # the aligned z coords are below the x-axis. We will then shift them
                 # upwards later.                   xx   x
-                decrease_interval = abs( # Bill added absolute value function 3/1/23
+                decrease_interval = abs(  # Bill added absolute value function 3/1/23
                     self.nucleic_acid_profile.Z_b * self.nucleic_acid_profile.B
                 )
-                #aligned_z_coord -= (
+                # aligned_z_coord -= (
                 #                    (ceil(aligned_z_coord / decrease_interval) -1)
                 #                       * decrease_interval
-                #)
-                aligned_z_coord = aligned_z_coord % decrease_interval   #Bill 3/1/23
+                # )
+                aligned_z_coord = aligned_z_coord % decrease_interval  # Bill 3/1/23
                 # print("lowered aligned_z_coord = ", aligned_z_coord)
-            aligned_angle = 0 #aligned angle is always 0 at left junctable Bill 3/1/23
+            aligned_angle = 0  # aligned angle is always 0 at left junctable Bill 3/1/23
 
             # Determine how many points (nucleosides/NEMids) the initial z coord
             # is away from the x-axis. We are allowed to shift the z coords so long as
@@ -267,7 +287,9 @@ class DoubleHelices:
             # above the x-axis.
             initial_z_coord = aligned_z_coord % self.nucleic_acid_profile.Z_b
             # print("initial_z_coord (near x-axis) = ", initial_z_coord, " aligned_z_coord = ", aligned_z_coord)
-            shifts = round((initial_z_coord - aligned_z_coord) / self.nucleic_acid_profile.Z_b)
+            shifts = round(
+                (initial_z_coord - aligned_z_coord) / self.nucleic_acid_profile.Z_b
+            )
             # Since we've shifted the z coord, we must also shift the angle accordingly.
             # print("shifts = ", shifts)
             initial_angle = shifts * self.nucleic_acid_profile.theta_b
@@ -289,10 +311,9 @@ class DoubleHelices:
             )
             # print("last value of initial_z_coord =", initial_z_coord)
             initial_angle = (
-                ( initial_angle
+                initial_angle
                 - (increments * self.nucleic_acid_profile.theta_b)
-                - (self.nucleic_acid_profile.theta_b / 2)  # Extra nucleoside on bottom
-                )
+                - (self.nucleic_acid_profile.theta_b / 2)
             )
             # print("initial_angle left strand (final value) = ", initial_angle)
             initial_angle = initial_angle % 360.0
@@ -303,16 +324,17 @@ class DoubleHelices:
             # It is the domain's body_count plus the domain's top_count number of
             # increments up from the respective initial z coord and angle.
             increments = (
-                -0.5 + double_helix.zeroed_helix.domain.left_helix_count.bottom_count   # Bill 3/1
+                -0.5
+                + double_helix.zeroed_helix.domain.left_helix_count.bottom_count  # Bill 3/1
                 + double_helix.zeroed_helix.domain.left_helix_count.body_count
                 + double_helix.zeroed_helix.domain.left_helix_count.top_count
             )
-            final_z_coord = (
-                initial_z_coord + (increments * self.nucleic_acid_profile.Z_b)
-                ) # Extra nucleoside on top
-            final_angle = (
-                initial_angle + (increments * self.nucleic_acid_profile.theta_b)
-                ) # Bill 3/1 + self.nucleic_acid_profile.theta_b / 2  # Extra nucleoside on top
+            final_z_coord = initial_z_coord + (
+                increments * self.nucleic_acid_profile.Z_b
+            )  # Extra nucleoside on top
+            final_angle = initial_angle + (
+                increments * self.nucleic_acid_profile.theta_b
+            )  # Bill 3/1 + self.nucleic_acid_profile.theta_b / 2  # Extra nucleoside on top
 
             # Compute the z coord and angle data for the zeroed helix; we will
             # generate the angles based off of the x coords later. Recall that we're
@@ -360,22 +382,35 @@ class DoubleHelices:
             increments = double_helix.zeroed_helix.domain.other_helix_count.bottom_count
             initial_angle = (
                 aligned_angle  # The previously aligned angle of the left helix
-                + (shifts * self.nucleic_acid_profile.theta_b) # locates angle of NEMid nearest x-axis
-                + (-modifier * self.nucleic_acid_profile.g)  # Helix switch to other helix
+                + (
+                    shifts * self.nucleic_acid_profile.theta_b
+                )  # locates angle of NEMid nearest x-axis
+                + (
+                    -modifier * self.nucleic_acid_profile.g
+                )  # Helix switch to other helix
                 - (increments * self.nucleic_acid_profile.theta_b)
-                - (self.nucleic_acid_profile.theta_b / 2)  # Extra nucleoside on bottom Bill 3/1
+                - (
+                    self.nucleic_acid_profile.theta_b / 2
+                )  # Extra nucleoside on bottom Bill 3/1
             )
             initial_z_coord = (
                 aligned_z_coord  # The previously aligned z coord
-                + (shifts * self.nucleic_acid_profile.Z_b) # locates z of NEMid nearest x-axis
-                + (-modifier * self.nucleic_acid_profile.Z_mate)  # Helix switch Bill Added minus 3/1
+                + (
+                    shifts * self.nucleic_acid_profile.Z_b
+                )  # locates z of NEMid nearest x-axis
+                + (
+                    -modifier * self.nucleic_acid_profile.Z_mate
+                )  # Helix switch Bill Added minus 3/1
                 - (increments * self.nucleic_acid_profile.Z_b)
-                - (self.nucleic_acid_profile.Z_b / 2)  # Extra nucleoside on bottom Bill 3/1
+                - (
+                    self.nucleic_acid_profile.Z_b / 2
+                )  # Extra nucleoside on bottom Bill 3/1
             )
 
             # Same procedure as for the zeroed helix.
             increments = (
-                -0.5 + double_helix.zeroed_helix.domain.other_helix_count.bottom_count   # Bill 3/1
+                -0.5
+                + double_helix.zeroed_helix.domain.other_helix_count.bottom_count  # Bill 3/1
                 + double_helix.zeroed_helix.domain.other_helix_count.body_count
                 + double_helix.zeroed_helix.domain.other_helix_count.top_count
             )

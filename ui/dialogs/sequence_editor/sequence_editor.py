@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
@@ -12,14 +12,26 @@ class SequenceEditor(QDialog):
     sequence_chosen = pyqtSignal(list)
     cancelled = pyqtSignal()
 
-    def __init__(self, parent, sequence):
+    def __init__(
+        self, parent, sequence: Iterable[str | None], has_complements: Iterable[bool]
+    ):
+        """
+        Sequence editor/selector dialog.
+
+        Args:
+            parent: The parent widget.
+            sequence: The sequence to edit.
+            has_complements: Whether each base has a complement that can be set. Must
+                be the same length as sequence.
+        """
+        assert len(sequence) == len(has_complements)
         super().__init__(parent)
         uic.loadUi("ui/dialogs/sequence_editor/sequence_editor.ui", self)
 
         self.bases = sequence
 
         if len(sequence) < 1000:
-            self.manual_input = UserInputSequenceEditor(self, sequence)
+            self.manual_input = UserInputSequenceEditor(self, sequence, has_complements)
             self.manual_input_tab.setLayout(QVBoxLayout())
             self.manual_input_tab.layout().addWidget(self.manual_input)
         else:
@@ -54,8 +66,10 @@ class SequenceEditor(QDialog):
         self.setMinimumWidth(700)
 
     @classmethod
-    def fetch_sequence(cls, parent, sequence: List[str]):
-        sequence_editor = cls(parent, sequence)
+    def fetch_sequence(
+        cls, parent, sequence: Iterable[str | None], has_complements: Iterable[bool]
+    ):
+        sequence_editor = cls(parent, sequence, has_complements)
         sequence_editor.sequence_chosen.connect(sequence_editor.close)
         sequence_editor.cancelled.connect(sequence_editor.close)
 
