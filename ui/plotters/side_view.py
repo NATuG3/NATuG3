@@ -278,8 +278,13 @@ class SideViewPlotter(pg.PlotWidget):
                 if len(stroke_segment) > 0:
                     # Gather an array of all the x and z coordinates of the points in
                     # the stroke segment.
-                    x_coords = [point.x_coord for point in stroke_segment]
-                    z_coords = [point.z_coord for point in stroke_segment]
+                    stroke_length = len(stroke_segment) + int(strand.closed)
+                    x_coords = np.zeros(stroke_length, dtype=float)
+                    z_coords = np.zeros(stroke_length, dtype=float)
+
+                    for point_index, point in enumerate(stroke_segment):
+                        x_coords[point_index] = point.x_coord
+                        z_coords[point_index] = point.z_coord
 
                     # Use the first point to fetch the number of total domains that are
                     # currently in existence.
@@ -295,15 +300,15 @@ class SideViewPlotter(pg.PlotWidget):
                         == domain_count - 1
                     )
 
-                    # If the point that proceeds a given point is in the last domain,
-                    # and the point being proceeded is in the first domain, then the
-                    # points are indeed continuous, but we don't want a line going
-                    # across the screen. If we know that a strand is not interdomain
-                    # (does not contain points within different domains, however,
-                    # we can skip this check and connect all the points.
-                    if not strand.interdomain():
-                        connect = "all"
-                    else:
+                    if interdomain := strand.interdomain():
+                        # If the strand is interdomain, it may also be cross-screen (
+                        # that is, it breaks off on one side of the screen and
+                        # continues on the other). For this reason, we will create an
+                        # array of booleans that indicate where to break apart the
+                        # coordinates into separate strokes. We will plot multiple
+                        # strokes instead of using pyqtgraph's "connect" feature,
+                        # because we will later round the edges of strokes.
+
                         # If the strand is closed, a pseudo point will be added to
                         # the end of the stroke segment. Whether this point gets a
                         # connection depends on the "add_connected_pseudo_point"
@@ -311,45 +316,77 @@ class SideViewPlotter(pg.PlotWidget):
                         if strand.closed:
                             # If the strand is closed, then we need to add a pseudo
                             # point to the end of the stroke segment.
-                            connect = np.empty(len(stroke_segment) + 1, dtype=bool)
+                            split = np.empty(len(stroke_segment) + 1, dtype=bool)
                         else:
                             # If the strand is not closed, then we don't need to add a
                             # pseudo point to the end of the stroke segment.
-                            connect = np.empty(len(stroke_segment), dtype=bool)
+                            split = np.empty(len(stroke_segment), dtype=bool)
 
                         for index, point in enumerate(stroke_segment[:-1]):
-                            connect[index] = (
+                            split[index] = (
                                 abs(point.domain - stroke_segment[index + 1].domain)
-                                != domain_count - 1
+                                == domain_count - 1
                             )
 
                         # If the strand is closed then connect the last point to the
                         # first point by creating a pseudo-point at the first point's
                         # location. This will give the appearance of a closed strand.
                         if strand.closed:
-                            connect[-1] = add_connected_pseudo_point
-                            x_coords.append(x_coords[0])
-                            z_coords.append(z_coords[0])
+                            split[-1] = add_connected_pseudo_point
+                            x_coords[-1] = x_coords[0]
+                            z_coords[-1] = z_coords[0]
 
-                    # Create the actual plot data item for the stroke segment.
-                    plotted_stroke = pg.PlotDataItem(
-                        x_coords,
-                        z_coords,
-                        pen=pg.mkPen(  # Create pen for the stroke from strand styles
-                            color=strand.styles.color.value,
-                            width=strand.styles.thickness.value,
-                        ),
-                        connect=connect,
-                    )
-                    # Make it so that the stroke itself can be clicked.
-                    plotted_stroke.setCurveClickable(True)
-                    # When the stroke is clicked, emit the strand_clicked signal. This
-                    # will lead to the creation of a StrandConfig dialog.
-                    plotted_stroke.sigClicked.connect(
-                        lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)
-                    )
-                    # Store the stroke plotter object, which will be used later.
-                    self.plot_data.plotted_strokes.append(plotted_stroke)
+                        # Use the indices of the split array to split the x and z arrays
+                        # into subarrays, which will be connected.
+                        x_coords_subarrays = np.split(
+                            x_coords, np.nonzero(split)[0] + 1
+                        )
+                        z_coords_subarrays = np.split(
+                            z_coords, np.nonzero(split)[0] + 1
+                        )
+
+                    # If we know that a strand is not interdomain (does not contain
+                    # points within different domains, however, we can skip this
+                    # check and connect all the points.
+                    else:
+                        x_coords_subarrays = (x_coords,)
+                        z_coords_subarrays = (z_coords,)
+
+                    for x_coords_subarray, z_coords_subarray in zip(
+                        x_coords_subarrays, z_coords_subarrays
+                    ):
+                        if len(x_coords_subarray) > 0:
+                            if interdomain:
+                                # Round the subarrays' edges using Chaikin's corner
+                                # cutting algorithm.
+                                rounded_coords = chaikins_corner_cutting(
+                                    np.column_stack(
+                                        (x_coords_subarray, z_coords_subarray)
+                                    ),
+                                    refinements=3,
+                                    offset=0.3,
+                                )
+                                x_coords_subarray = rounded_coords[:, 0]
+                                z_coords_subarray = rounded_coords[:, 1]
+
+                            # Create the actual plot data item for the stroke segment.
+                            plotted_stroke = pg.PlotDataItem(
+                                x_coords_subarray,
+                                z_coords_subarray,
+                                pen=pg.mkPen(  # Create pen from strand styles
+                                    color=strand.styles.color.value,
+                                    width=strand.styles.thickness.value,
+                                ),
+                            )
+                            # Make it so that the stroke itself can be clicked.
+                            plotted_stroke.setCurveClickable(True)
+                            # When the stroke is clicked, emit the strand_clicked signal.
+                            # This will lead to the creation of a StrandConfig dialog.
+                            plotted_stroke.sigClicked.connect(
+                                lambda *args, f=strand: self.strand_clicked.emit(f)
+                            )
+                            # Store the stroke plotter object, which will be used later.
+                            self.plot_data.plotted_strokes.append(plotted_stroke)
 
                     # Now that we've plotted the stroke, we need to plot the
                     # linkages. We will sort out all the linkages in the strand,
@@ -360,7 +397,7 @@ class SideViewPlotter(pg.PlotWidget):
                         coords = linkage.plot_points
                         # Round out the coordinates using Chaikin's Corner Cutting to
                         # give the appearance of a smooth curve.
-                        coords = chaikins_corner_cutting(coords, refinements=9)
+                        coords = chaikins_corner_cutting(coords, refinements=3)
                         # Split the coordinates into x and z coordinate arrays for
                         # plotting with pyqtgraph.
                         x_coords = [coord[0] for coord in coords]
