@@ -103,7 +103,7 @@ class Linkage:
         midpoint = list(np.mean([np.array(coord_one), np.array(coord_two)], axis=0))
         midpoint[1] += 0.2 if inflection == UP else -0.2
         basic_plot_points = [coord_one, midpoint, coord_two]
-        self.plot_points = chaikins_corner_cutting(basic_plot_points, refinements=4)
+        self.plot_points = chaikins_corner_cutting(basic_plot_points, refinements=3)
 
         # Set the uuid of the linkage.
         self.uuid = uuid or str(uuid1())
