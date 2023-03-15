@@ -1,3 +1,4 @@
+import itertools
 import logging
 from contextlib import suppress
 from copy import deepcopy
@@ -12,9 +13,9 @@ from xlsxwriter import Workbook
 
 import settings
 from constants.directions import DOWN, UP
-from structures.points import NEMid, Nucleoside
+from structures.points import NEMid
 from structures.points.nick import Nick
-from structures.points.point import Point, PointStyles
+from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand
@@ -355,6 +356,8 @@ class Strands:
         Notes:
             - Prevents touching strands from sharing colors.
         """
+        strand_colors = itertools.cycle(settings.colors["strands"]["colors"])
+
         for strand in self.strands:
             interdomain = strand.interdomain()
 
@@ -372,28 +375,14 @@ class Strands:
                     strand.styles.thickness.value = 9.5
                 else:
                     strand.styles.thickness.value = 2
+
             if strand.styles.color.automatic:
                 if interdomain:
-                    illegal_colors: List[Tuple[int, int, int]] = []
-
-                    for potentially_touching in self.strands:
-                        if strand.touching(potentially_touching):
-                            illegal_colors.append(
-                                potentially_touching.styles.color.value
-                            )
-
-                    for color in settings.colors["strands"]["colors"]:
-                        if color not in illegal_colors:
-                            strand.styles.color.value = color
-                            break
+                    strand.styles.color.value = next(strand_colors)
                 else:
                     if strand.up_strand():
                         strand.styles.color.value = settings.colors["strands"]["greys"][
                             1
-                        ]
-                    elif strand.down_strand():
-                        strand.styles.color.value = settings.colors["strands"]["greys"][
-                            0
                         ]
                     else:
                         strand.styles.color.value = settings.colors["strands"]["greys"][
@@ -483,9 +472,9 @@ class Strands:
         for item in new_strand.items:
             item.strand = new_strand
 
-        assert [item.strand == new_strand for item in new_strand], (
-            "All items in the new strand must have the new strand as their parent."
-        )
+        assert [
+            item.strand == new_strand for item in new_strand
+        ], "All items in the new strand must have the new strand as their parent."
 
         # Add the new strand to the container
         self.append(new_strand)
