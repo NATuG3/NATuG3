@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass, field
-from math import dist
 from typing import Tuple, Type, Iterable
 from uuid import uuid1
 
@@ -273,7 +272,7 @@ class Point:
         """
         # Return True if the points are within junction_threshold distance of
         # each other
-        if dist(self.position(), point.position()) < settings.junction_threshold:
+        if self.position() == point.position():
             return True
         # If there is a parent strands container for both the points and it is the same
         elif (self.x_coord == 0 or point.x_coord == 0) and (
@@ -287,9 +286,7 @@ class Point:
             )
         ):
             right_side_point = point if self.x_coord == 0 else self
-            if (
-                abs(right_side_point.x_coord - width) < settings.junction_threshold
-            ) and (abs(point.z_coord - self.z_coord) < settings.junction_threshold):
+            if right_side_point.x_coord == width and point.z_coord == self.z_coord:
                 return True
 
     def midpoint(self, point: "Point") -> Tuple[float, float]:
