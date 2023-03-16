@@ -81,6 +81,7 @@ class SideViewPlotter(pg.PlotWidget):
         nucleic_acid_profile: NucleicAcidProfile,
         mode: Literal["nucleoside", "NEMid"],
         printed: bool = False,
+        title: str = "",
     ) -> None:
         """
         Initialize plotter instance.
@@ -92,6 +93,7 @@ class SideViewPlotter(pg.PlotWidget):
             mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
             printed: Whether to plot everything with fixed size for printing. Defaults
                 to False.
+            title: The title of the plot. Defaults to "".
         """
         super().__init__()
 
@@ -101,6 +103,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.nucleic_acid_profile = nucleic_acid_profile
         self.mode = mode
         self.printed = printed
+        self.title = title
         self.plot_data = PlotData()
 
         # plot initial data
@@ -158,24 +161,43 @@ class SideViewPlotter(pg.PlotWidget):
 
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""
-        self.name = "Side View Plot"
+        self.setTitle(self.title) if self.title else None
+
+        # reduce padding for printer mode
+        if self.printed:
+            self.getViewBox().setDefaultPadding(padding=0.01)
+        else:
+            self.getViewBox().setDefaultPadding(padding=0.025)
 
         # clear preexisting plotted_gridlines
-        self.plot_data.plotted_gridlines = []
+        self.plot_data.plotted_gridlines.clear()
 
         # create pen for custom grid
-        grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
+        grid_pen_width = 1 if self.printed else 1.4
+        grid_pen: QPen = pg.mkPen(
+            color=settings.colors["grid_lines"], width=grid_pen_width
+        )
 
         # domain index grid
         for i in range(ceil(self.plot_data.strands.size[0]) + 1):
-            self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
+            self.plot_data.plotted_gridlines.append(
+                self.addLine(
+                    x=i,
+                    pen=grid_pen,
+                )
+            )
+            self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
         # for i in <number of helical twists of the tallest domain>...
         with suppress(ZeroDivisionError):
             for i in range(0, ceil(self.height / self.nucleic_acid_profile.H)):
                 self.plot_data.plotted_gridlines.append(
-                    self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
+                    self.addLine(
+                        y=(i * self.nucleic_acid_profile.H),
+                        pen=grid_pen,
+                    )
                 )
+                self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
         # add axis labels
         self.setLabel("bottom", text="x", units="Helical Diameters")
@@ -203,6 +225,9 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.plotted_linkages.clear()
         self.plot_data.plotted_strokes.clear()
 
+        # Style the plot; automatically adds labels, ticks, etc.
+        self._prettify()
+
         for strand_index, strand in enumerate(self.strands.strands):
             # First plot all the points
             to_plot = strand.items.by_type(Point)
@@ -217,9 +242,9 @@ class SideViewPlotter(pg.PlotWidget):
 
             # Now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # For NEMids that are junctable, they will be plotted slightly
-                # differently.
-                if isinstance(point, NEMid) and point.junctable:
+                # For points that are overlapping on the integrer line, they will be
+                # plotted slightly differently.
+                if point.x_coord % 1 == 0:
                     # If the point is on the right side of its domain (i.e. the
                     # point's domain x coord = index + 1) then we will shift it
                     # slightly to the left so that it is not obscured by the other
@@ -252,9 +277,10 @@ class SideViewPlotter(pg.PlotWidget):
                 # current styles of the point. Otherwise, plot a smaller "o" shaped
                 # point to indicate that the point is not the active point type,
                 # but still exists.
-                if (
-                    self.mode == "NEMid" and isinstance(point, Nucleoside)
-                ) or (self.mode == "nucleoside" and isinstance(point, NEMid)):
+                if not self.printed and (
+                    (self.mode == "NEMid" and isinstance(point, Nucleoside))
+                    or (self.mode == "nucleoside" and isinstance(point, NEMid))
+                ):
                     symbols[point_index] = "o"
                     symbol_sizes[point_index] = 2
                     symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
@@ -280,17 +306,41 @@ class SideViewPlotter(pg.PlotWidget):
                         symbols[point_index] = point.styles.symbol
 
                     # Store the symbol size
-                    symbol_sizes[point_index] = point.styles.size
+                    if (
+                        self.printed
+                        and isinstance(point, Nucleoside)
+                        and point.base is not None
+                    ):
+                        symbol_sizes[point_index] = 4
+                    else:
+                        symbol_sizes[point_index] = point.styles.size
 
                     # Create a brush for the symbol, based on the point's styles.
                     symbol_brushes[point_index] = pg.mkBrush(
                         color=point.styles.fill, width=point.styles.outline[1]
                     )
 
-                    # Create a pen for the symbol, based on the point's styles.
-                    symbol_pens[point_index] = pg.mkPen(
-                        color=point.styles.outline[0], width=point.styles.outline[1]
-                    )
+                    if self.printed:
+                        if isinstance(point, NEMid) and point.junctable:
+                            # Create a pen for the symbol, based on the point's styles.
+                            symbol_pens[point_index] = pg.mkPen(
+                                color=point.styles.outline[0],
+                                width=point.styles.outline[1],
+                            )
+                        else:
+                            symbol_pens[point_index] = None
+                    else:
+                        # Create a pen for the symbol, based on the point's styles.
+                        symbol_pens[point_index] = pg.mkPen(
+                            color=point.styles.outline[0], width=point.styles.outline[1]
+                        )
+
+            # If we are in printed mode, adjust all the points to be sized relative
+            # to self.domains.count (the number of domains used to obtain the current
+            # plot data).
+            if self.printed:
+                symbol_sizes = symbol_sizes.astype(float)
+                symbol_sizes /= self.domains.count * 0.12
 
             # Graph the plot for the points and for the strokes separately. First we
             # will plot the points.
@@ -299,9 +349,9 @@ class SideViewPlotter(pg.PlotWidget):
                 z_coords,
                 symbol=symbols,  # type of symbol (in this case up/down arrow)
                 symbolSize=symbol_sizes,  # size of arrows in px
-                pxMode=True,  # means that symbol size is in px and non-dynamic
+                pxMode=True,
                 symbolBrush=symbol_brushes,  # set color of points to current color
-                symbolPen=symbol_pens,  # for the outlines of points
+                symbolPen=symbol_pens,
                 pen=None,
                 skipFiniteCheck=True,
                 name=f"Strand#{strand_index} Points",
@@ -412,14 +462,23 @@ class SideViewPlotter(pg.PlotWidget):
                                 x_coords_subarray = rounded_coords[:, 0]
                                 z_coords_subarray = rounded_coords[:, 1]
 
+                            if self.printed:
+                                stroke_pen = pg.mkPen(
+                                    color=strand.styles.color.value,
+                                    width=strand.styles.thickness.value
+                                    / (self.domains.count * 0.4),
+                                )
+                            else:
+                                stroke_pen = pg.mkPen(
+                                    color=strand.styles.color.value,
+                                    width=strand.styles.thickness.value,
+                                )
+
                             # Create the actual plot data item for the stroke segment.
                             plotted_stroke = pg.PlotDataItem(
                                 x_coords_subarray,
                                 z_coords_subarray,
-                                pen=pg.mkPen(  # Create pen from strand styles
-                                    color=strand.styles.color.value,
-                                    width=strand.styles.thickness.value,
-                                ),
+                                pen=stroke_pen,
                                 name=f"Strand#{strand_index} Stroke#"
                                 f"{stroke_segment_index}/{len(stroke_segment)}",
                             )
@@ -514,7 +573,7 @@ class SideViewPlotter(pg.PlotWidget):
 
         # Items will be plotted one layer at a time, from bottom to top. The items
         # plotted last go on top, since all items before them are plotted first.
-        # Thence, this list is in reverse order of the layers in the plot.
+        # Thence, this list is Fin reverse order of the layers in the plot.
         layers = (
             self.plot_data.plotted_linkages,
             self.plot_data.plotted_strokes,
@@ -526,6 +585,3 @@ class SideViewPlotter(pg.PlotWidget):
         for layer in layers:
             for item in layer:
                 self.addItem(item)
-
-        # Style the plot; automatically adds labels, ticks, etc.
-        self._prettify()
