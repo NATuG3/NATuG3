@@ -25,6 +25,7 @@ class PlotData:
 
     Attributes:
         strands: The currently plotted strands.
+        domains: The currently plotted domains.
         mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
@@ -36,6 +37,7 @@ class PlotData:
     """
 
     strands: "Strands" = None
+    domains: "Domains" = None
     mode: Literal["nucleoside", "NEMid"] = "NEMid"
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
@@ -52,12 +54,14 @@ class SideViewPlotter(pg.PlotWidget):
 
     Attributes:
         strands: The strands to plot.
+        domains: The domains to use for plotting computations, such as determining
+            the width of the plot.
         nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
             strands to plot.
         plot_data: Currently plotted data.
         width: The width of the plot.
         height: The height of the plot.
-        mode: The plotting toolbar. Either "nucleoside" or "NEMid".
+        mode: The plotting mode. Either "nucleoside" or "NEMid".
 
     Signals:
         points_clicked(tuple of all points clicked): When plotted points are clicked.
@@ -71,6 +75,7 @@ class SideViewPlotter(pg.PlotWidget):
     def __init__(
         self,
         strands: "Strands",
+        domains: "Domains",
         nucleic_acid_profile: NucleicAcidProfile,
         mode: Literal["nucleoside", "NEMid"],
     ) -> None:
@@ -87,6 +92,7 @@ class SideViewPlotter(pg.PlotWidget):
 
         # store config data
         self.strands = strands
+        self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
         self.mode = mode
         self.plot_data = PlotData()
@@ -107,7 +113,7 @@ class SideViewPlotter(pg.PlotWidget):
 
     @property
     def width(self):
-        return self.plot_data.strands.size[0]
+        return self.plot_data.domains.count
 
     def refresh(self):
         """Replot plot data."""
@@ -181,6 +187,7 @@ class SideViewPlotter(pg.PlotWidget):
         from structures.strands.linkage import Linkage
 
         self.plot_data.strands = self.strands
+        self.plot_data.domains = self.domains
         self.plot_data.mode = self.mode
         self.plot_data.points.clear()
         self.plot_data.plotted_labels.clear()
@@ -215,7 +222,7 @@ class SideViewPlotter(pg.PlotWidget):
                         # Points that are on the very left (x=0) or the very right (
                         # x=the number of domains) will not be shifted.
                         point.x_coord == 0
-                        or point.x_coord == point.domain.parent.parent.count
+                        or point.x_coord == self.plot_data.domains.count
                     ):
                         x_coord = point.x_coord
                     else:

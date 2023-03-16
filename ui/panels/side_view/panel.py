@@ -45,6 +45,7 @@ class Panel(QGroupBox):
 
         self.plot = ui.plotters.SideViewPlotter(
             self.runner.managers.strands.current,
+            self.runner.managers.domains.current,
             self.runner.managers.nucleic_acid_profile.current,
             self.runner.managers.misc.plot_mode,
         )
