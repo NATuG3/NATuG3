@@ -146,6 +146,8 @@ class SideViewPlotter(pg.PlotWidget):
 
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""
+        self.name = "Side View Plot"
+
         # clear preexisting plotted_gridlines
         self.plot_data.plotted_gridlines = []
 
@@ -287,6 +289,8 @@ class SideViewPlotter(pg.PlotWidget):
                 symbolBrush=symbol_brushes,  # set color of points to current color
                 symbolPen=symbol_pens,  # for the outlines of points
                 pen=None,
+                skipFiniteCheck=True,
+                name=f"Strand#{strand_index} Points",
             )
             # When a point is clicked, invoke the _points_clicked method.
             plotted_points.sigPointsClicked.connect(self._points_clicked)
@@ -297,7 +301,9 @@ class SideViewPlotter(pg.PlotWidget):
             # onClick method, and more. So, right now we will split all the strand
             # items into subunits of points, discluding linkages. These subunits can
             # be plotted as connected points with a single stroke each.
-            for stroke_segment in strand.items.by_type(Point, Linkage).split(Linkage):
+            for stroke_segment_index, stroke_segment in enumerate(
+                strand.items.by_type(Point, Linkage).split(Linkage)
+            ):
                 if len(stroke_segment) > 0:
                     # Gather an array of all the x and z coordinates of the points in
                     # the stroke segment.
@@ -400,11 +406,14 @@ class SideViewPlotter(pg.PlotWidget):
                                     color=strand.styles.color.value,
                                     width=strand.styles.thickness.value,
                                 ),
+                                name=f"Strand#{strand_index} Stroke#"
+                                f"{stroke_segment_index}/{len(stroke_segment)}",
                             )
                             # Make it so that the stroke itself can be clicked.
                             plotted_stroke.setCurveClickable(True)
-                            # When the stroke is clicked, emit the strand_clicked signal.
-                            # This will lead to the creation of a StrandConfig dialog.
+                            # When the stroke is clicked, emit the strand_clicked
+                            # signal. This will lead to the creation of a
+                            # StrandConfig dialog.
                             plotted_stroke.sigClicked.connect(
                                 lambda *args, f=strand: self.strand_clicked.emit(f)
                             )
@@ -414,7 +423,9 @@ class SideViewPlotter(pg.PlotWidget):
                     # Now that we've plotted the stroke, we need to plot the
                     # linkages. We will sort out all the linkages in the strand,
                     # and then plot them one by one.
-                    for linkage in strand.items.by_type(Linkage):
+                    for linkage_index, linkage in enumerate(
+                        strand.items.by_type(Linkage)
+                    ):
                         # Linkages have a .plot_points attribute that contains three
                         # points: the first point, the midpoint, and the last point.
                         coords = linkage.plot_points
@@ -434,6 +445,7 @@ class SideViewPlotter(pg.PlotWidget):
                                 color=linkage.styles.color,
                                 width=linkage.styles.thickness,
                             ),
+                            name=f"Strand#{strand_index} Linkage#{linkage_index}",
                         )
                         # Make it so that the linkage itself can be clicked.
                         plotted_linkage.setCurveClickable(True)
@@ -464,7 +476,7 @@ class SideViewPlotter(pg.PlotWidget):
             # Create a brush for the nick symbols, based on the current color scheme
             # found in settings.
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
-        for nick in self.plot_data.strands.nicks:
+        for nick_index, nick in enumerate(self.plot_data.strands.nicks):
             plotted_nick = pg.PlotDataItem(
                 (nick.x_coord,),  # Just one point: the nick's x coordinate
                 (nick.z_coord,),  # Just one point: the nick's z coordinate
@@ -475,6 +487,7 @@ class SideViewPlotter(pg.PlotWidget):
                 symbolBrush=nick_brush,
                 symbolPen=None,  # No outline for the symbol
                 pen=None,  # No line connecting the points
+                name=f"Nick#{nick_index}",
             )
             # Store the nick plotter object, which will be used for actually
             # plotting the nick later.
