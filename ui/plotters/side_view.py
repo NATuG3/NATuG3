@@ -27,6 +27,7 @@ class PlotData:
         strands: The currently plotted strands.
         domains: The currently plotted domains.
         mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
+        printed: Whether to plot everything with fixed size for printing.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
         plotted_nicks: The nicks.
@@ -39,6 +40,7 @@ class PlotData:
     strands: "Strands" = None
     domains: "Domains" = None
     mode: Literal["nucleoside", "NEMid"] = "NEMid"
+    printed: bool = False
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
@@ -78,6 +80,7 @@ class SideViewPlotter(pg.PlotWidget):
         domains: "Domains",
         nucleic_acid_profile: NucleicAcidProfile,
         mode: Literal["nucleoside", "NEMid"],
+        printed: bool = False,
     ) -> None:
         """
         Initialize plotter instance.
@@ -87,6 +90,8 @@ class SideViewPlotter(pg.PlotWidget):
             nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
                 strands to plot.
             mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
+            printed: Whether to plot everything with fixed size for printing. Defaults
+                to False.
         """
         super().__init__()
 
@@ -95,6 +100,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
         self.mode = mode
+        self.printed = printed
         self.plot_data = PlotData()
 
         # plot initial data
@@ -189,6 +195,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.strands = self.strands
         self.plot_data.domains = self.domains
         self.plot_data.mode = self.mode
+        self.plot_data.printed = self.printed
         self.plot_data.points.clear()
         self.plot_data.plotted_labels.clear()
         self.plot_data.plotted_points.clear()
