@@ -125,7 +125,7 @@ class PointStyles:
                     )
 
                     # Since there is no base make the symbol an arrow
-                    self.symbol = "t1" if point.direction is UP else "t"
+                    self.symbol = "+" if point.direction is UP else "x"
 
                     # Since there's no base make the point smaller
                     self.size = 7
