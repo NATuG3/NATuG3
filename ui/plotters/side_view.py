@@ -203,7 +203,7 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.plotted_linkages.clear()
         self.plot_data.plotted_strokes.clear()
 
-        for strand_index, strand in enumerate(self.plot_data.strands.strands):
+        for strand_index, strand in enumerate(self.strands.strands):
             # First plot all the points
             to_plot = strand.items.by_type(Point)
 
@@ -229,7 +229,7 @@ class SideViewPlotter(pg.PlotWidget):
                         # Points that are on the very left (x=0) or the very right (
                         # x=the number of domains) will not be shifted.
                         point.x_coord == 0
-                        or point.x_coord == self.plot_data.domains.count
+                        or point.x_coord == self.domains.count
                     ):
                         x_coord = point.x_coord
                     else:
@@ -253,8 +253,8 @@ class SideViewPlotter(pg.PlotWidget):
                 # point to indicate that the point is not the active point type,
                 # but still exists.
                 if (
-                    self.plot_data.mode == "NEMid" and isinstance(point, Nucleoside)
-                ) or (self.plot_data.mode == "nucleoside" and isinstance(point, NEMid)):
+                    self.mode == "NEMid" and isinstance(point, Nucleoside)
+                ) or (self.mode == "nucleoside" and isinstance(point, NEMid)):
                     symbols[point_index] = "o"
                     symbol_sizes[point_index] = 2
                     symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
@@ -490,7 +490,7 @@ class SideViewPlotter(pg.PlotWidget):
             # Create a brush for the nick symbols, based on the current color scheme
             # found in settings.
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
-        for nick_index, nick in enumerate(self.plot_data.strands.nicks):
+        for nick_index, nick in enumerate(self.strands.nicks):
             plotted_nick = pg.PlotDataItem(
                 (nick.x_coord,),  # Just one point: the nick's x coordinate
                 (nick.z_coord,),  # Just one point: the nick's z coordinate
