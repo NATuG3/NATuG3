@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>219</width>
-    <height>211</height>
+    <width>217</width>
+    <height>200</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -169,7 +169,28 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="filetype_dropdown"/>
+         <widget class="QComboBox" name="filetype_dropdown">
+          <item>
+           <property name="text">
+            <string/>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>SVG</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>JPG</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>PNG</string>
+           </property>
+          </item>
+         </widget>
         </item>
        </layout>
       </item>
