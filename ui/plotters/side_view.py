@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
@@ -6,14 +7,17 @@ from typing import List, Tuple, Dict, Literal
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt6.QtCore import pyqtSignal, QTimer
+import pyqtgraph.exporters
+from PyQt6.QtCore import pyqtSignal, QTimer, pyqtSlot, Qt
 from PyQt6.QtGui import QPen, QBrush, QPainterPath
+from PyQt6.QtWidgets import QDialog, QVBoxLayout, QPushButton, QLabel
 
 import settings
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
+from utils import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +86,7 @@ class SideViewPlotter(pg.PlotWidget):
         mode: Literal["nucleoside", "NEMid"],
         printed: bool = False,
         title: str = "",
+        initial_plot: bool = True,
     ) -> None:
         """
         Initialize plotter instance.
@@ -94,6 +99,7 @@ class SideViewPlotter(pg.PlotWidget):
             printed: Whether to plot everything with fixed size for printing. Defaults
                 to False.
             title: The title of the plot. Defaults to "".
+            initial_plot: Whether to plot the initial data. Defaults to True.
         """
         super().__init__()
 
@@ -106,15 +112,12 @@ class SideViewPlotter(pg.PlotWidget):
         self.title = title
         self.plot_data = PlotData()
 
-        # plot initial data
-        self.disableAutoRange()
-        self._plot()
-        self.autoRange()
-        self.setXRange(0, self.width)
-        self._prettify()
-
-        # set up styling
-        self.setWindowTitle("Side View of DNA")  # set the window's title
+        if initial_plot:
+            self.disableAutoRange()
+            self._plot()
+            self.autoRange()
+            self.setXRange(0, self.width)
+            self._prettify()
 
     @property
     def height(self):
@@ -135,6 +138,71 @@ class SideViewPlotter(pg.PlotWidget):
         # so that the plot is cleared after the mouse release event happens
         QTimer.singleShot(0, runner)
         logger.info("Refreshed side view.")
+
+    def export(
+        self,
+        filepath: str,
+    ):
+        """
+        Export the plot to image file.
+
+        Args:
+            filepath: The path to save the image to. Include the file extension.
+                Options are .svg, .png, and .jpg.
+        """
+        # We will create a window for the user to pan and zoom the plot to the
+        # desired range, then export the plot from that window.
+        export_dialog = QDialog()
+        export_dialog.setLayout(QVBoxLayout())
+        export_dialog.setWindowTitle("Export Plot to Image")
+
+        instructions = QLabel("Pan and zoom to desired range.")
+        instructions.setStyleSheet(
+            "font-size: 16px; margin-bottom: 10px; text-align: center;"
+        )
+        instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        export_dialog.layout().addWidget(instructions)
+
+        # Create a copy of the plot to export, so that the original plot is not
+        # affected by the process (putting it into print mode, changing the
+        # x and z ranges, etc.)
+        plot_to_export = type(self)(
+            strands=self.plot_data.strands,
+            domains=self.plot_data.domains,
+            nucleic_acid_profile=self.nucleic_acid_profile,
+            mode=self.mode,
+            printed=True,
+            initial_plot=False,
+        )
+        plot_to_export.disableAutoRange()
+        plot_to_export._plot()
+        plot_to_export.autoRange()
+        export_dialog.layout().addWidget(plot_to_export)
+
+        # Add an export button to the dialog
+        export_button = QPushButton("Finalize Export")
+        export_dialog.layout().addWidget(export_button)
+
+        @pyqtSlot()
+        def _on_export_clicked():
+            """Export the plot when the export button is clicked."""
+            # Export the plot
+            if filepath.endswith(".svg"):
+                exporter = pg.exporters.SVGExporter(plot_to_export.scene())
+            else:
+                exporter = pg.exporters.ImageExporter(plot_to_export.scene())
+
+            # Export the image
+            exporter.export(filepath)
+
+            print(f"Exported image of plot to {filepath}.")
+            show_in_file_explorer(f"{os.getcwd()}\\{filepath}")
+
+            # Close the dialog
+            export_dialog.close()
+
+        export_button.clicked.connect(_on_export_clicked)
+        export_dialog.exec()
 
     def _reset(self, plot_data=None):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""

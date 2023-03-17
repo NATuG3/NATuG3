@@ -2,7 +2,7 @@ import logging
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QWidget, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog
 
 from constants.tabs import *
 from constants.toolbar import *
@@ -80,6 +80,7 @@ class Panel(QWidget):
         self.nucleic_acid.updated.connect(self._on_tab_update)
         self.tab_area.currentChanged.connect(self._on_tab_change)
         self.update_graphs.clicked.connect(self._on_update_graphs)
+        self.export_graphs.clicked.connect(self._on_export_graphs)
 
     @pyqtSlot()
     def _on_update_graphs(self):
@@ -88,6 +89,18 @@ class Panel(QWidget):
             self.runner.managers.strands.recompute()
             self.runner.window.side_view.refresh()
             self.runner.window.top_view.refresh()
+
+    @pyqtSlot()
+    def _on_export_graphs(self):
+        """Export the graphs to a file."""
+        filepath = QFileDialog.getSaveFileName(
+            self.runner.window,
+            "Export Location",
+            "",
+            f"Image or Vector (*.jpg, *.png, *.svg)",
+        )[0]
+        if filepath:
+            self.runner.window.side_view.plot.export(filepath)
 
     @pyqtSlot()
     def _on_tab_update(self):
