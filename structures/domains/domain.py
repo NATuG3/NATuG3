@@ -85,6 +85,29 @@ class GenerationCount:
     def __repr__(self):
         return f"GenCount({self.bottom_count}, {self.body_count}, {self.top_count})"
 
+    def to_str(self):
+        """
+        Get a string representation of the generation count.
+
+        Returns:
+            A string representation of the generation count of the form:
+            "bottom_count-body_count-top_count"
+        """
+        return f"{self.bottom_count}-{self.body_count}-{self.top_count}"
+
+    @classmethod
+    def from_str(cls, string: str):
+        """
+        Get a GenerationCount object from a string representation of the generation
+        count.
+
+        Args:
+            string: A string representation of the generation count of the form:
+                "bottom_count-body_count-top_count"
+        """
+        count = string.split("-")
+        return cls((int(count[0]), int(count[1]), int(count[2])))
+
 
 class Domain:
     """
