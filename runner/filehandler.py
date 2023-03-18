@@ -63,6 +63,9 @@ class FileHandler:
             # Create a reference to the current strands
             strands = self.runner.managers.strands.current
 
+            # Create a reference to the current double helices
+            double_helices = self.runner.managers.double_helices.current
+
             # Sort all the items by type
             items_by_type = {
                 structures.points.Nucleoside: [],
@@ -109,7 +112,7 @@ class FileHandler:
 
             package.mkdir("double_helices")
             # Save the double helices container's data to a file
-            double_helices_json = strands.double_helices.to_json()
+            double_helices_json = double_helices.to_json()
             double_helices_json = json.dumps(double_helices_json, indent=4)
             package.writestr("double_helices/double_helices.json", double_helices_json)
 
