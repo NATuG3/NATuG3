@@ -3,7 +3,7 @@ import os
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
-from typing import List, Tuple, Dict, Literal
+from typing import List, Tuple, Dict, Type
 
 import numpy as np
 import pyqtgraph as pg
@@ -23,6 +23,29 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
+class PlotModifiers:
+    """
+    Various modifiers for the scale of various plot aspects.
+
+    Attributes:
+        nick_mod: The multiplier for the size of nick points.
+        nucleoside_mod: The multiplier for the size of nucleoside points.
+        NEMid_mod: The multiplier for the size of NEMid points.
+        point_outline_mod: The multiplier for the width of point outlines, with the
+            exception of junctable NEMids.
+        stroke_mod: The multiplier for the width of strand strokes.
+        gridline_mod: The multiplier for the width of grid lines.
+    """
+
+    nick_mod: float = 1.0
+    nucleoside_mod: float = 1.0
+    NEMid_mod: float = 1.0
+    point_outline_mod: float = 1.0
+    stroke_mod: float = 1.0
+    gridline_mod: float = 1.0
+
+
+@dataclass(slots=True)
 class PlotData:
     """
     Currently plotted data.
@@ -30,8 +53,8 @@ class PlotData:
     Attributes:
         strands: The currently plotted strands.
         domains: The currently plotted domains.
-        mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
-        printed: Whether to plot everything with fixed size for printing.
+        point_types: The currently plotted point types.
+        modifiers: Various modifiers for the scale of various plot aspects.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
         plotted_nicks: The nicks.
@@ -43,8 +66,8 @@ class PlotData:
 
     strands: "Strands" = None
     domains: "Domains" = None
-    mode: Literal["nucleoside", "NEMid"] = "NEMid"
-    printed: bool = False
+    point_types: Tuple[Type, ...] = field(default_factory=tuple)
+    modifiers: PlotModifiers = field(default_factory=PlotModifiers)
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
@@ -83,8 +106,8 @@ class SideViewPlotter(pg.PlotWidget):
         strands: "Strands",
         domains: "Domains",
         nucleic_acid_profile: NucleicAcidProfile,
-        mode: Literal["nucleoside", "NEMid"],
-        printed: bool = False,
+        point_types: Tuple[Type, ...] = (Point,),
+        modifiers: PlotModifiers = PlotModifiers(),
         title: str = "",
         initial_plot: bool = True,
     ) -> None:
@@ -95,9 +118,9 @@ class SideViewPlotter(pg.PlotWidget):
             strands: The strands to plot.
             nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
                 strands to plot.
-            mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
-            printed: Whether to plot everything with fixed size for printing. Defaults
-                to False.
+            point_types: The types of points to plot. Options are Nucleoside and
+                NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
+            modifiers: Various modifiers for the scale of various plot aspects.
             title: The title of the plot. Defaults to "".
             initial_plot: Whether to plot the initial data. Defaults to True.
         """
@@ -107,8 +130,8 @@ class SideViewPlotter(pg.PlotWidget):
         self.strands = strands
         self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
-        self.mode = mode
-        self.printed = printed
+        self.point_types = point_types
+        self.modifiers = modifiers
         self.title = title
         self.plot_data = PlotData()
 
@@ -232,16 +255,13 @@ class SideViewPlotter(pg.PlotWidget):
         self.setTitle(self.title) if self.title else None
 
         # reduce padding for printer mode
-        if self.printed:
-            self.getViewBox().setDefaultPadding(padding=0.01)
-        else:
-            self.getViewBox().setDefaultPadding(padding=0.025)
+        self.getViewBox().setDefaultPadding(padding=0.025)
 
         # clear preexisting plotted_gridlines
         self.plot_data.plotted_gridlines.clear()
 
         # create pen for custom grid
-        grid_pen_width = 1 if self.printed else 1.4
+        grid_pen_width = 1.4 * self.modifiers.gridline_mod
         grid_pen: QPen = pg.mkPen(
             color=settings.colors["grid_lines"], width=grid_pen_width
         )
@@ -284,8 +304,8 @@ class SideViewPlotter(pg.PlotWidget):
 
         self.plot_data.strands = self.strands
         self.plot_data.domains = self.domains
-        self.plot_data.mode = self.mode
-        self.plot_data.printed = self.printed
+        self.plot_data.point_types = self.point_types
+        self.plot_data.modifiers = self.modifiers
         self.plot_data.points.clear()
         self.plot_data.plotted_labels.clear()
         self.plot_data.plotted_points.clear()
@@ -345,10 +365,7 @@ class SideViewPlotter(pg.PlotWidget):
                 # current styles of the point. Otherwise, plot a smaller "o" shaped
                 # point to indicate that the point is not the active point type,
                 # but still exists.
-                if not self.printed and (
-                    (self.mode == "NEMid" and isinstance(point, Nucleoside))
-                    or (self.mode == "nucleoside" and isinstance(point, NEMid))
-                ):
+                if not isinstance(point, self.point_types):
                     symbols[point_index] = "o"
                     symbol_sizes[point_index] = 2
                     symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
@@ -373,42 +390,39 @@ class SideViewPlotter(pg.PlotWidget):
                         )
                         symbols[point_index] = point.styles.symbol
 
-                    # Store the symbol size
-                    if (
-                        self.printed
-                        and isinstance(point, Nucleoside)
-                        and point.base is not None
-                    ):
-                        symbol_sizes[point_index] = 4
+                    if isinstance(point, NEMid):
+                        symbol_sizes[point_index] = (
+                            point.styles.size * self.modifiers.NEMid_mod
+                        )
+                        if point.junctable:
+                            outline_width = point.styles.outline[1]
+                        else:
+                            outline_width = (
+                                point.styles.outline[1]
+                                * self.modifiers.point_outline_mod
+                            )
+                    elif isinstance(point, Nucleoside):
+                        symbol_sizes[point_index] = (
+                            point.styles.size * self.modifiers.nucleoside_mod
+                        )
+                        outline_width = (
+                            point.styles.outline[1] * self.modifiers.point_outline_mod
+                        )
                     else:
                         symbol_sizes[point_index] = point.styles.size
+                        outline_width = point.styles.outline[1]
 
                     # Create a brush for the symbol, based on the point's styles.
                     symbol_brushes[point_index] = pg.mkBrush(
-                        color=point.styles.fill, width=point.styles.outline[1]
+                        color=point.styles.fill,
+                        width=point.styles.outline[1],
                     )
 
-                    if self.printed:
-                        if isinstance(point, NEMid) and point.junctable:
-                            # Create a pen for the symbol, based on the point's styles.
-                            symbol_pens[point_index] = pg.mkPen(
-                                color=point.styles.outline[0],
-                                width=point.styles.outline[1],
-                            )
-                        else:
-                            symbol_pens[point_index] = None
-                    else:
-                        # Create a pen for the symbol, based on the point's styles.
-                        symbol_pens[point_index] = pg.mkPen(
-                            color=point.styles.outline[0], width=point.styles.outline[1]
-                        )
-
-            # If we are in printed mode, adjust all the points to be sized relative
-            # to self.domains.count (the number of domains used to obtain the current
-            # plot data).
-            if self.printed:
-                symbol_sizes = symbol_sizes.astype(float)
-                symbol_sizes /= self.domains.count * 0.12
+                    # Create a pen for the symbol, based on the point's styles.
+                    symbol_pens[point_index] = pg.mkPen(
+                        color=point.styles.outline[0],
+                        width=outline_width,
+                    )
 
             # Graph the plot for the points and for the strokes separately. First we
             # will plot the points.
@@ -530,17 +544,13 @@ class SideViewPlotter(pg.PlotWidget):
                                 x_coords_subarray = rounded_coords[:, 0]
                                 z_coords_subarray = rounded_coords[:, 1]
 
-                            if self.printed:
-                                stroke_pen = pg.mkPen(
-                                    color=strand.styles.color.value,
-                                    width=strand.styles.thickness.value
-                                    / (self.domains.count * 0.4),
-                                )
-                            else:
-                                stroke_pen = pg.mkPen(
-                                    color=strand.styles.color.value,
-                                    width=strand.styles.thickness.value,
-                                )
+                            stroke_pen = pg.mkPen(
+                                color=strand.styles.color.value,
+                                width=(
+                                    strand.styles.thickness.value
+                                    * self.modifiers.stroke_mod
+                                ),
+                            )
 
                             # Create the actual plot data item for the stroke segment.
                             plotted_stroke = pg.PlotDataItem(
@@ -623,7 +633,7 @@ class SideViewPlotter(pg.PlotWidget):
                 (nick.z_coord,),  # Just one point: the nick's z coordinate
                 # The same styles for all nicks...
                 symbol="o",
-                symbolSize=8,
+                symbolSize=8*self.modifiers.nick_mod,
                 pxMode=True,  # means that symbol size doesn't change with zoom
                 symbolBrush=nick_brush,
                 symbolPen=None,  # No outline for the symbol

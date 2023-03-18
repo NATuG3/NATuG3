@@ -125,10 +125,10 @@ class PointStyles:
                     )
 
                     # Since there is no base make the symbol an arrow
-                    self.symbol = "+" if point.direction is UP else "x"
+                    self.symbol = "t1" if point.direction is UP else "t"
 
                     # Since there's no base make the point smaller
-                    self.size = 7
+                    self.size = 5.5
                 else:
                     # Based nucleosides are dimly colored
                     self.fill = dim_color(strand.styles.color.value, 0.3)

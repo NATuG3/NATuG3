@@ -47,7 +47,7 @@ class Panel(QGroupBox):
             self.runner.managers.strands.current,
             self.runner.managers.domains.current,
             self.runner.managers.nucleic_acid_profile.current,
-            self.runner.managers.misc.plot_mode,
+            self.runner.managers.misc.plot_types,
         )
         self.plot.points_clicked.connect(self.points_clicked)
         self.plot.strand_clicked.connect(self.strand_clicked)
@@ -63,7 +63,7 @@ class Panel(QGroupBox):
         """
         self.plot.strands = self.runner.managers.strands.current
         self.plot.nucleic_acid = self.runner.managers.nucleic_acid_profile.current
-        self.plot.mode = self.runner.managers.misc.plot_mode
+        self.plot.point_types = self.runner.managers.misc.plot_types
         self.plot.refresh()
 
     def linkage_clicked(self, linkage: Linkage) -> None:
