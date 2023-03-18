@@ -44,6 +44,7 @@ class PlotModifiers:
     stroke_mod: float = 1.0
     gridline_mod: float = 1.0
 
+
 @dataclass(slots=True)
 class PlotData:
     """
@@ -561,7 +562,8 @@ class SideViewPlotter(Plotter):
                             z_coords,
                             pen=pg.mkPen(  # Create a pen for the linkage
                                 color=linkage.styles.color,
-                                width=linkage.styles.thickness,
+                                width=linkage.styles.thickness
+                                * self.modifiers.stroke_mod,
                             ),
                             name=f"Strand#{strand_index} Linkage#{linkage_index}",
                         )
