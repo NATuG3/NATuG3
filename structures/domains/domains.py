@@ -111,11 +111,13 @@ class Domains:
         self.antiparallel = domains.antiparallel
         self.subunit = domains.subunit
 
-    def to_df(self) -> pd.DataFrame:
+    def to_df(self, include_uuid: bool = True) -> pd.DataFrame:
         """
         Export all the current domains as a pandas dataframe.
 
         Creates a pandas dataframe representing the Domains with the following columns:
+            uuid: The unique identifier for the domain. Only included if <include_uuid>
+                is True.
             Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
             Right Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
             Left Helix Count ("int:int:int"): The number of NEMids to add to the bottom
@@ -129,7 +131,7 @@ class Domains:
             Antiparallel ("true" or "false"): Whether the domains are antiparallel
 
         Returns:
-            A pandas dataframe containing the domains data.
+            A pandas dataframe containing the domains' data.
         """
         # extract all the data and compile it into lists
         domains = self.subunit.domains
@@ -150,19 +152,21 @@ class Domains:
             "-".join(map(str, domain.other_helix_count)) for domain in domains
         ]
 
-        # create a pandas dataframe with the columns above
-        return pd.DataFrame(
-            {
-                "uuid": uuids,
-                "data:m": theta_m_multiples,
-                "data:left_helix_joints": left_helix_joints,
-                "data:right_helix_joints": right_helix_joints,
-                "data:left_helix_count": left_helix_count,
-                "data:other_helix_count": other_helix_count,
-                "data:symmetry": symmetry,
-                "data:antiparallel": antiparallel,
-            },
-        )
+        # Create a dictionary with the columns above, and the UUIds only if requested
+        data = {
+            "data:m": theta_m_multiples,
+            "data:left_helix_joints": left_helix_joints,
+            "data:right_helix_joints": right_helix_joints,
+            "data:left_helix_count": left_helix_count,
+            "data:other_helix_count": other_helix_count,
+            "data:symmetry": symmetry,
+            "data:antiparallel": antiparallel,
+        }
+        if include_uuid:
+            data["uuid"] = uuids
+
+        # Create a pandas dataframe with the columns above
+        return pd.DataFrame(data)
 
     @classmethod
     def from_df(
@@ -182,7 +186,8 @@ class Domains:
         Returns:
             A Domains object.
         """
-        # extract the data
+        # Extract the data from the dataframe
+        uuids = df["uuid"].to_list() if "uuid" in df.columns else None
         left_helix_joints = [
             UP if direction == "UP" else DOWN
             for direction in df["data:left_helix_joints"].to_list()
@@ -208,6 +213,7 @@ class Domains:
         for i in range(len(left_helix_joints)):
             domains.append(
                 Domain(
+                    uuid=uuids[i] if uuids else None,
                     nucleic_acid_profile=nucleic_acid_profile,
                     theta_m_multiple=m[i],
                     left_helix_joint=left_helix_joints[i],
