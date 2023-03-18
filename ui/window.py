@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QMenuBar,
     QWidget,
-    QTabWidget,
+    QTabWidget, QHBoxLayout, QSplitter,
 )
 
 import settings
@@ -36,8 +36,7 @@ class Window(QMainWindow):
 
     def setup(self):
         # create plot panels
-        self._top_view()
-        self._side_view()
+        self._plots()
 
         # utilize inherited methods to set up the refs window
         self.setWindowTitle(settings.name)
@@ -89,38 +88,31 @@ class Window(QMainWindow):
         # dock the new dockable config widget
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.config)
 
-    def _top_view(self):
-        """Setup top view plot."""
-        from ui.panels.top_view import Dockable
+    def _plots(self):
+        """
+        Setup the central area of the main window.
 
-        self.top_view = Dockable(self, self.runner)
+        The central area is a tab widget that contains the major plots of NATuG: the
+        side view and the top view plot. This method also initializes the plots.
+        """
+        from ui.panels.side_view import SideViewPanel
+        from ui.panels.top_view.panel import TopViewPanel
 
-        # set minimum width for top view
-        self.top_view.setMinimumWidth(150)
+        central_widget = QWidget()
+        central_widget.setLayout(QHBoxLayout())
+        plot_container = QSplitter()
+        plot_container.setHandleWidth(5)
+        central_widget.layout().addWidget(plot_container)
 
-        # top view is only allowed on the sides
-        self.top_view.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
-        )
+        self.top_view = TopViewPanel(self, self.runner)
+        self.side_view = SideViewPanel(self, self.runner)
 
-        # trigger a resize event when the floatingness of the side view panel changes
-        self.top_view.topLevelChanged.connect(self.resizeEvent)
+        plot_container.addWidget(self.top_view)
+        plot_container.addWidget(self.side_view)
+        plot_container.setSizes([250, 520])
+        plot_container.splitterMoved.connect(lambda: print(plot_container.sizes()))
 
-        # dock the new dockable top view widget
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.top_view)
-
-        logger.info("Loaded top view graph.")
-
-    def _side_view(self):
-        """Setup side view plot."""
-        from .panels.side_view import Panel
-
-        self.side_view = Panel(self, self.runner)
-
-        # set the central widget of the window
-        self.setCentralWidget(self.side_view)
-
-        logger.info("Loaded side view graph.")
+        self.setCentralWidget(central_widget)
 
     def _status_bar(self):
         """Setup status bar."""
@@ -140,27 +132,18 @@ class Window(QMainWindow):
 
     def resizeEvent(self, event):
         """Dynamically resize panels."""
-
-        # side view resizing...
-        self.centralWidget().setMinimumWidth(int(4 * self.size().width() / 9))
-
-        # top view resizing...
-        # if the top view plot is floating make the max size very large
-        if self.top_view.isFloating():
-            self.top_view.setMaximumWidth(99999)
-        # otherwise it can be resized up to 2/8ths of the screen
-        else:
-            self.top_view.setMaximumWidth(round(2 * self.size().width() / 8))
-
-        # config resizing...
-        # if config is floating make the max size very large and make the tab area go
-        # on top
+        # Resize the config based on whether it is floating (and thus it can be much
+        # larger) or if it is docked (and thus it must be smaller).
         if self.config.isFloating():
+            # Make the tab titles go on the top of the plot if there is enough
+            # horizontal space
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.North)
             self.config.setMaximumWidth(400)
-        # otherwise check the current tab of the config panel and adjust accordingly
-        # and make the tab area go on the right
         else:
+            # When the config panel is docked we want it to be as small as possible.
+            # So, first we set the tabs to be on the right side (since it takes up
+            # less horizontal space) and then we set the width of the config panel
+            # based on the width that the currently visible panel requires.
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
             if self.config.panel.sequencing.isVisible():
                 self.config.setFixedWidth(255)

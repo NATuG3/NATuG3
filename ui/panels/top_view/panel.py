@@ -1,18 +1,23 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QDockWidget, QSlider, QWidget, QVBoxLayout
+from PyQt6.QtWidgets import (
+    QSlider,
+    QVBoxLayout,
+    QGroupBox,
+)
 
 import ui.plotters
 
 
-class Dockable(QDockWidget):
+class TopViewPanel(QGroupBox):
     """
-    The top view panel.
+    The main top view plot.
 
-    This panel contains a TopViewPlotter with the current domains being plotted and contains a useful refresh() method
-    to update the plot with the most recent domains().
+    The actual DNA/structural information is visually represented via the
+    SideViewPlotter widget, which is NOT what this is. This widget is a container for
+    that widget, and contains the refresh() method to update the plot based on the
+    current program's settings. To access the child widget, use the .plot attribute.
 
     Attributes:
-        body (QWidget): The central body of the dockable. This is where all the widgets live.
         plot (TopViewPlotter): The top view plot.
 
     Methods:
@@ -21,50 +26,43 @@ class Dockable(QDockWidget):
 
     def __init__(self, parent, runner: "runner.Runner"):
         """
-        Initialize the TopView dockable area.
+        Initialize the TopView plot.
 
         Args:
-            parent: The strands widget in which the top view dockable area is
-            contained. Can be None.
+            parent: The main window.
+            runner: NATuG's runner.
         """
         self.runner = runner
         super().__init__(parent)
 
-        # set styles
+        # Set the styles of the widget
         self.setObjectName("Top View")
-        self.setWindowTitle("Top View of Helices")
+        self.setTitle("Top View")
         self.setStatusTip("A plot of the top view of all domains")
 
-        # create the main body
-        self.body = QWidget()
-        self.body.setLayout(QVBoxLayout())
+        # Set the layout of the widget so that we can place the plot inside
+        self.setLayout(QVBoxLayout())
 
-        # set up the plot
+        # Initialize the plot and connect the signals
         self.plot = ui.plotters.TopViewPlotter(
             domains=self.runner.managers.domains.current,
             domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
             rotation=0,
         )
-
         self.plot.domain_clicked.connect(self._domain_clicked)
-        self.body.layout().addWidget(self.plot)
+        self.layout().addWidget(self.plot)
 
         # set up rotation slider
         self.rotation_slider = QSlider(Qt.Orientation.Horizontal, parent=self)
         self.rotation_slider.valueChanged.connect(self.refresh)
-        self.body.layout().addWidget(self.rotation_slider)
-
-        # set body to be central widget
-        self.setWidget(self.body)
-
-        # perform initial refresh
-        self.refresh()
+        self.layout().addWidget(self.rotation_slider)
 
     def refresh(self):
         """
         Update the current plot.
 
-        This updates the plot with the current domains, nucleic acid settings, and rotation.
+        This updates the plot with the current domains, nucleic acid settings, and
+        rotation.
         """
         self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()

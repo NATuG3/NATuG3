@@ -18,31 +18,42 @@ from ui.panels.side_view import workers
 logger = logging.getLogger(__name__)
 
 
-class Panel(QGroupBox):
+class SideViewPanel(QGroupBox):
     """
     The side view panel.
 
-    This panel contains a SideViewPlotter with the current strands being plotted and
-    contains a useful refresh() method to automatically update the plot with the most
-    current strands.
+    The tube shape from a top view is visually represented via the TopViewPlotter
+    widget, which is NOT what this is. This widget is a container for that widget, and
+    contains the refresh() method to update the plot based on the current program's
+    settings. To access the child widget, use the .plot attribute.
+
+    Attributes:
+        plot (TopViewPlotter): The top view plot.
+
+    Methods:
+        refresh()
     """
 
     def __init__(self, parent, runner: "runner.Runner") -> None:
         """
-        Initialize the SideView panel.
+        Initialize the SideView plot.
 
         Args:
-            parent: The strands widget in which the side view panel is contained. Can be None.
+            parent: The main window.
             runner: NATuG's runner.
         """
         self.runner = runner
         super().__init__(parent)
 
+        # Set the styles of the widget
         self.setObjectName("Side View")
-        self.setLayout(QVBoxLayout())
-        self.setTitle("Side View of Helices")
+        self.setTitle("Side View")
         self.setStatusTip("A plot of the side view of all domains")
 
+        # Set the layout of the widget so that we can place the plot inside
+        self.setLayout(QVBoxLayout())
+
+        # Initialize the plot and connect the signals
         self.plot = ui.plotters.SideViewPlotter(
             self.runner.managers.strands.current,
             self.runner.managers.nucleic_acid_profile.current,
