@@ -1,8 +1,10 @@
 import itertools
 from dataclasses import dataclass, field
-from typing import Literal, Type
+from typing import Literal, Type, Iterable
+from uuid import uuid4
 
 import numpy as np
+import pandas as pd
 
 from constants.directions import UP, DOWN
 from structures.points import NEMid, Nucleoside
@@ -68,11 +70,13 @@ class Helix:
         domain: The domain that this helix lies within.
         data: The data of the helix. This is a HelixData object, and contains the
             x-coordinates, z-coordinates, and angles of the points in the helix.
+        uuid: The unique identifier of the helix.
     """
 
     direction: Literal[UP, DOWN]
     double_helix: Type["DoubleHelix"] | None
     data: HelixData = field(default_factory=HelixData)
+    uuid: str = field(default_factory=lambda: str(uuid4()))
 
     def __post_init__(self):
         self.data.helix = self
@@ -174,3 +178,49 @@ class Helix:
         )
         strand.extend(tuple(self.points(begin=begin)))
         return strand
+
+
+def to_df(double_helices: Iterable[Helix]) -> pd.DataFrame:
+    """
+    Export many double helices to a pandas dataframe.
+
+    Data for each double helix is stored in a row. The data for each double helix
+    is stored in the following columns:
+        "uuid": The UUID of the double helix.
+        "data:domain": The UUID of the domain that the double helix lies within.
+        "data:direction": The direction of the double helix. Either UP or DOWN.
+        "data:generation_count": The number of points to generate for the double
+            helix, in the form "bottom-body-top".
+        "data:x_coords": The x-coordinates of the points in the double helix, separated
+            by semicolons.
+        "data:z_coords": The z-coordinates of the points in the double helix, separated
+            by semicolons.
+        "data:angles": The angles of the points in the double helix, separated by
+            semicolons.
+
+    Arguments:
+        double_helices: All the double helices to be exported.
+
+    Returns:
+        A pandas dataframe containing data for many double helices.
+    """
+    count = len(double_helices)  # type: ignore
+    data = {
+        "uuid": np.empty(count, dtype=str),
+        "data:domain": np.empty(count, dtype=str),
+        "data:direction": np.empty(count, dtype=str),
+        "data:generation_count": np.empty(count, dtype=str),
+        "data:x_coords": np.empty(count, dtype=str),
+        "data:z_coords": np.empty(count, dtype=str),
+        "data:angles": np.empty(count, dtype=str),
+    }
+    for i, helix in enumerate(double_helices):
+        data["uuid"][i] = helix.uuid
+        data["data:domain"][i] = helix.domain.uuid
+        data["data:direction"][i] = helix.direction
+        data["data:generation_count"][i] = helix.generation_count.to_str()
+        data["data:x_coords"][i] = np.array2string(helix.data.x_coords, separator=";")
+        data["data:z_coords"][i] = np.array2string(helix.data.z_coords, separator=";")
+        data["data:angles"][i] = np.array2string(helix.data.angles, separator=";")
+
+    return pd.DataFrame(data)
