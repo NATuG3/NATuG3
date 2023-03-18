@@ -139,6 +139,7 @@ class Domain:
         other_helix_count: Tuple[int, int, int],
         parent: "Domains" = None,
         index: int = None,
+        uuid: str = None,
     ):
         """
         Initialize a Domain object.
@@ -168,6 +169,8 @@ class Domain:
                 of the strand.
             parent (Subunit): The strands subunit. Defaults to None.
             index (int): The index of this domain in its strands. Defaults to None.
+            uuid (str): The unique identifier for the domain. This is automatically
+                generated. Defaults to None.
         """
         # store the strands subunit
         self.parent = parent
@@ -198,7 +201,7 @@ class Domain:
         self.index = index
 
         # set the uuid
-        self.uuid = str(uuid1())
+        self.uuid = uuid or str(uuid1())
 
     def __sub__(self, other):
         """
