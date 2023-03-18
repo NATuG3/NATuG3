@@ -1,30 +1,11 @@
-from dataclasses import dataclass
-from typing import Tuple
+from typing import Tuple, Type
 
 from PyQt6 import uic
-from PyQt6.QtWidgets import QDialog
+from PyQt6.QtCore import pyqtSlot
+from PyQt6.QtWidgets import QDialog, QFileDialog
 
-
-@dataclass(slots=True, frozen=True, kw_only=True)
-class PlotExportData:
-    """
-    The data needed to export the top and side view plots.
-
-    Attributes:
-        x_range: The x range that the user wants to export.
-        z_range: The z range that the user wants to export.
-        top_view_filename: The filename of the top view plot image export.
-        side_view_filename: The filename of the side view plot image export.
-        filetype: The filetype of the image export. Must be "PNG," "JPG," or "SVG."
-    """
-
-    x_range: Tuple[float, float] = (0, 0)
-    z_range: Tuple[float, float] = (0, 0)
-    height: float = 450
-    width: float = 900
-    top_view_filename: str = "top-view"
-    side_view_filename: str = "side-view"
-    filetype: str = "SVG"
+from structures.points import Nucleoside, NEMid
+from ui.plotters import SideViewPlotter, side_view, TopViewPlotter
 
 
 class PlotExporter(QDialog):
@@ -33,62 +14,99 @@ class PlotExporter(QDialog):
 
     This dialog allows the user to export the top and side view plots as high resolution
     images (PNG or JPG) or vector graphics (SVG).
+
+    Attributes:
+        runner: NATuG's runner.
+        plot_to_export: The plot to export.
     """
 
-    def __init__(self, parent, x_range, z_range):
+    def __init__(self, runner):
         """
         Initialize the plot exporter dialog.
 
         Args:
-            x_range: The x range of the entire plot.
-            z_range: The z range of the entire plot.
+            runner: NATuG's runner.
         """
-        super().__init__(parent)
+        super().__init__(runner.window)
+        self.runner = runner
+        self.sideview_export_plot = None
+        self.topview_export_plot = None
         uic.loadUi("ui/dialogs/plot_exporter/plot_exporter.ui", self)
-        self.set_data(PlotExportData(x_range=x_range, z_range=z_range))
         self.cancel_export.clicked.connect(self.reject)
         self.export_plots.clicked.connect(self.accept)
 
-    @classmethod
-    def run(cls, parent, x_range, z_range):
-        """
-        Run the plot exporter dialog.
+        self._hook_signals()
+        self._plot_area()
 
-        Returns:
-            The data entered by the user, or None if the user cancelled the dialog.
-        """
-        dialog = cls(parent, x_range, z_range)
-        result = dialog.exec()
-        if result == QDialog.DialogCode.Accepted:
-            return dialog.fetch_data()
-        else:
-            return None
-
-    def _prettify(self):
-        """Prettify the dialog."""
-        self.setFixedWidth(100)
-        self.setFixedHeight(130)
-
-    def fetch_data(self) -> PlotExportData:
-        """Fetch the current data from the dialog."""
-        return PlotExportData(
-            x_range=(self.from_x.value(), self.to_x.value()),
-            z_range=(self.from_z.value(), self.to_z.value()),
-            top_view_filename=self.topview_filename.text(),
-            side_view_filename=self.sideview_filename.text(),
-            filetype=self.filetype_dropdown.currentText(),
-            height=self.image_height.value(),
-            width=self.image_width.value(),
+    def get_sideview_plot_modifiers(self):
+        """Return the plot modifiers."""
+        return side_view.PlotModifiers(
+            nick_mod=self.nick_size_modifier.value(),
+            nucleoside_mod=self.nucleoside_size_modifier.value(),
+            NEMid_mod=self.NEMid_size_modifier.value(),
+            point_outline_mod=self.point_outline_modifier.value(),
+            stroke_mod=self.strand_stroke_modifier.value(),
+            gridline_mod=self.gridline_width_modifier.value(),
         )
 
-    def set_data(self, data: PlotExportData):
-        """Set the current data of the dialog."""
-        self.from_x.setValue(data.x_range[0])
-        self.to_x.setValue(data.x_range[1])
-        self.from_z.setValue(data.z_range[0])
-        self.to_z.setValue(data.z_range[1])
-        self.topview_filename.setText(data.top_view_filename)
-        self.sideview_filename.setText(data.side_view_filename)
-        self.filetype_dropdown.setCurrentText(data.filetype)
-        self.image_height.setValue(data.height)
-        self.image_width.setValue(data.width)
+    def get_sideview_point_types(self) -> Tuple[Type, ...]:
+        """Return the plot types to export."""
+        plot_types = []
+        if self.plot_NEMids.isChecked():
+            plot_types.append(NEMid)
+        if self.plot_nucleosides.isChecked():
+            plot_types.append(Nucleoside)
+        return tuple(plot_types)
+
+    def _plot_area(self):
+        """Set up the preview plot area."""
+        self.sideview_export_plot = SideViewPlotter(
+            strands=self.runner.managers.strands.current,
+            domains=self.runner.managers.domains.current,
+            nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
+            point_types=self.get_sideview_point_types(),
+            modifiers=self.get_sideview_plot_modifiers(),
+            title=self.side_view_plot_title.text(),
+        )
+        self.topview_export_plot = TopViewPlotter(
+            domains=self.runner.managers.domains.current,
+            domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
+            rotation=0,
+        )
+
+        self.side_view_plot_area.layout().insertWidget(0, self.sideview_export_plot)
+        self.top_view_plot_area.layout().insertWidget(0, self.topview_export_plot)
+
+    def _hook_signals(self):
+        self.update_preview.clicked.connect(self._on_update_sideview_preview_clicked)
+        self.export_plots.clicked.connect(self._on_export_plots_clicked)
+        self.cancel_export.clicked.connect(self.reject)
+
+    @pyqtSlot()
+    def _on_update_sideview_preview_clicked(self):
+        """Update the sideview preview plot."""
+        self.sideview_export_plot.modifiers = self.get_sideview_plot_modifiers()
+        self.sideview_export_plot.title = self.side_view_plot_title.text()
+        self.sideview_export_plot.point_types = self.get_sideview_point_types()
+        self.sideview_export_plot.replot()
+
+    @pyqtSlot()
+    def _on_update_topview_preview_clicked(self):
+        """Update the topview preview plot."""
+        self.topview_export_plot.title = self.top_view_plot_title.text()
+        self.topview_export_plot.replot()
+
+    @pyqtSlot()
+    def _on_export_plots_clicked(self):
+        """Export the plots."""
+        filepath = False
+        while not filepath:
+            filepath = QFileDialog.getSaveFileName(
+                self.runner.window,
+                "Export Location",
+                "",
+                f"Image or Vector (*.jpg, *.png, *.svg)",
+            )[0]
+            if filepath:
+                self.sideview_export_plot.export(filepath)
+                break

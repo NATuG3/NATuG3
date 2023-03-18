@@ -2,12 +2,13 @@ import logging
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog
+from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 from constants.tabs import *
 from constants.toolbar import *
 from structures.points import NEMid, Nucleoside
 from ui.config.tabs import domains, nucleic_acid, sequencing
+from ui.dialogs.plot_exporter.plot_exporter import PlotExporter
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
 
@@ -94,14 +95,7 @@ class Panel(QWidget):
     @pyqtSlot()
     def _on_export_graphs(self):
         """Export the graphs to a file."""
-        filepath = QFileDialog.getSaveFileName(
-            self.runner.window,
-            "Export Location",
-            "",
-            f"Image or Vector (*.jpg, *.png, *.svg)",
-        )[0]
-        if filepath:
-            self.runner.window.side_view.plot.export(filepath)
+        PlotExporter(self.runner).show()
 
     @pyqtSlot()
     def _on_tab_update(self):

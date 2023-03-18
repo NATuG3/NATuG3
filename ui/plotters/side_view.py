@@ -8,9 +8,8 @@ from typing import List, Tuple, Dict, Type
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
-from PyQt6.QtCore import pyqtSignal, QTimer, pyqtSlot, Qt
+from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import QPen, QBrush, QPainterPath
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QPushButton, QLabel
 
 import settings
 from structures.points import NEMid, Nucleoside
@@ -43,7 +42,6 @@ class PlotModifiers:
     point_outline_mod: float = 1.0
     stroke_mod: float = 1.0
     gridline_mod: float = 1.0
-
 
 @dataclass(slots=True)
 class PlotData:
@@ -88,9 +86,10 @@ class SideViewPlotter(pg.PlotWidget):
         nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
             strands to plot.
         plot_data: Currently plotted data.
-        width: The width of the plot.
-        height: The height of the plot.
-        mode: The plotting mode. Either "nucleoside" or "NEMid".
+        point_types: The types of points to plot. Options are Nucleoside and
+            NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
+        modifiers: Various modifiers for the scale of various plot aspects.
+        title: The title of the plot.
 
     Signals:
         points_clicked(tuple of all points clicked): When plotted points are clicked.
@@ -165,6 +164,7 @@ class SideViewPlotter(pg.PlotWidget):
     def export(
         self,
         filepath: str,
+        show_after_export: bool = True,
     ):
         """
         Export the plot to image file.
@@ -172,60 +172,28 @@ class SideViewPlotter(pg.PlotWidget):
         Args:
             filepath: The path to save the image to. Include the file extension.
                 Options are .svg, .png, and .jpg.
+            show_after_export: Whether to show the file in the file explorer after
+                exporting. Defaults to True.
         """
-        # We will create a window for the user to pan and zoom the plot to the
-        # desired range, then export the plot from that window.
-        export_dialog = QDialog()
-        export_dialog.setLayout(QVBoxLayout())
-        export_dialog.setWindowTitle("Export Plot to Image")
+        # Create the exporter
+        if filepath.endswith(".svg"):
+            exporter = pg.exporters.SVGExporter(self.scene())
+        else:
+            exporter = pg.exporters.ImageExporter(self.scene())
 
-        instructions = QLabel("Pan and zoom to desired range.")
-        instructions.setStyleSheet(
-            "font-size: 16px; margin-bottom: 10px; text-align: center;"
-        )
-        instructions.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        export_dialog.layout().addWidget(instructions)
+        # Export the image
+        exporter.export(filepath)
 
-        # Create a copy of the plot to export, so that the original plot is not
-        # affected by the process (putting it into print mode, changing the
-        # x and z ranges, etc.)
-        plot_to_export = type(self)(
-            strands=self.plot_data.strands,
-            domains=self.plot_data.domains,
-            nucleic_acid_profile=self.nucleic_acid_profile,
-            mode=self.mode,
-            printed=True,
-            initial_plot=False,
-        )
-        plot_to_export.disableAutoRange()
-        plot_to_export._plot()
-        plot_to_export.autoRange()
-        export_dialog.layout().addWidget(plot_to_export)
-
-        # Add an export button to the dialog
-        export_button = QPushButton("Finalize Export")
-        export_dialog.layout().addWidget(export_button)
-
-        @pyqtSlot()
-        def _on_export_clicked():
-            """Export the plot when the export button is clicked."""
-            # Export the plot
-            if filepath.endswith(".svg"):
-                exporter = pg.exporters.SVGExporter(plot_to_export.scene())
-            else:
-                exporter = pg.exporters.ImageExporter(plot_to_export.scene())
-
-            # Export the image
-            exporter.export(filepath)
-
-            print(f"Exported image of plot to {filepath}.")
+        # Show the file in the file explorer
+        if show_after_export:
             show_in_file_explorer(f"{os.getcwd()}\\{filepath}")
 
-            # Close the dialog
-            export_dialog.close()
+        logger.info(f"Exported side view to {filepath}.")
 
-        export_button.clicked.connect(_on_export_clicked)
-        export_dialog.exec()
+    def replot(self):
+        """Replot plot data."""
+        self._reset()
+        self._plot()
 
     def _reset(self, plot_data=None):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
@@ -390,23 +358,18 @@ class SideViewPlotter(pg.PlotWidget):
                         )
                         symbols[point_index] = point.styles.symbol
 
+                    outline_width = (
+                        point.styles.outline[1] * self.modifiers.point_outline_mod
+                    )
                     if isinstance(point, NEMid):
                         symbol_sizes[point_index] = (
                             point.styles.size * self.modifiers.NEMid_mod
                         )
                         if point.junctable:
                             outline_width = point.styles.outline[1]
-                        else:
-                            outline_width = (
-                                point.styles.outline[1]
-                                * self.modifiers.point_outline_mod
-                            )
                     elif isinstance(point, Nucleoside):
                         symbol_sizes[point_index] = (
                             point.styles.size * self.modifiers.nucleoside_mod
-                        )
-                        outline_width = (
-                            point.styles.outline[1] * self.modifiers.point_outline_mod
                         )
                     else:
                         symbol_sizes[point_index] = point.styles.size
@@ -415,13 +378,16 @@ class SideViewPlotter(pg.PlotWidget):
                     # Create a brush for the symbol, based on the point's styles.
                     symbol_brushes[point_index] = pg.mkBrush(
                         color=point.styles.fill,
-                        width=point.styles.outline[1],
                     )
 
                     # Create a pen for the symbol, based on the point's styles.
-                    symbol_pens[point_index] = pg.mkPen(
-                        color=point.styles.outline[0],
-                        width=outline_width,
+                    symbol_pens[point_index] = (
+                        pg.mkPen(
+                            color=point.styles.outline[0],
+                            width=outline_width,
+                        )
+                        if outline_width > 0
+                        else None
                     )
 
             # Graph the plot for the points and for the strokes separately. First we
@@ -633,7 +599,7 @@ class SideViewPlotter(pg.PlotWidget):
                 (nick.z_coord,),  # Just one point: the nick's z coordinate
                 # The same styles for all nicks...
                 symbol="o",
-                symbolSize=8*self.modifiers.nick_mod,
+                symbolSize=8 * self.modifiers.nick_mod,
                 pxMode=True,  # means that symbol size doesn't change with zoom
                 symbolBrush=nick_brush,
                 symbolPen=None,  # No outline for the symbol
