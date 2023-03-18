@@ -27,6 +27,8 @@ class AdjustablePadding(QWidget):
         self._left_padding = left
         self._right_padding = right
 
+        self._setup_ui()
+
     def change_padding(self, top=None, bottom=None, left=None, right=None) -> None:
         """
         Change the padding around the child widget.
