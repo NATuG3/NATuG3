@@ -38,12 +38,11 @@ class PlotExporter(QDialog):
         self.side_view_export_plot = None
         self.top_view_export_plot = None
         uic.loadUi("ui/dialogs/plot_exporter/plot_exporter.ui", self)
-        self.cancel_export.clicked.connect(self.reject)
-        self.export_plots.clicked.connect(self.accept)
 
         self._hook_signals()
         self._side_view_plot_area()
         self._top_view_plot_area()
+        self._prettify()
 
     def get_sideview_plot_modifiers(self):
         """Return the plot modifiers."""
@@ -64,6 +63,9 @@ class PlotExporter(QDialog):
         if self.plot_nucleosides.isChecked():
             plot_types.append(Nucleoside)
         return tuple(plot_types)
+
+    def _prettify(self):
+        self.showFullScreen()
 
     def _side_view_plot_area(self):
         """Set up the side view preview plot area."""
@@ -101,8 +103,9 @@ class PlotExporter(QDialog):
             self._on_update_topview_preview_clicked
         )
 
-        self.export_plots.clicked.connect(self._on_export_plots_clicked)
         self.cancel_export.clicked.connect(self.reject)
+        self.export_plots.clicked.connect(self.accept)
+        self.accepted.connect(self._on_export_plots_clicked)
 
     @pyqtSlot()
     def _on_update_sideview_preview_clicked(self):
