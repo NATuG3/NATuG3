@@ -1,8 +1,10 @@
+from functools import partial
+from threading import Thread
 from typing import Tuple, Type
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot
-from PyQt6.QtWidgets import QDialog, QFileDialog
+from PyQt6.QtWidgets import QDialog
 
 from structures.points import Nucleoside, NEMid
 from ui.plotters import SideViewPlotter, side_view, TopViewPlotter
@@ -39,9 +41,9 @@ class PlotExporter(QDialog):
         self.top_view_export_plot = None
         uic.loadUi("ui/dialogs/plot_exporter/plot_exporter.ui", self)
 
-        self._hook_signals()
         self._side_view_plot_area()
         self._top_view_plot_area()
+        self._hook_signals()
         self._prettify()
 
     def get_sideview_plot_modifiers(self):
@@ -73,8 +75,8 @@ class PlotExporter(QDialog):
             screen.height(),
         )
         desired_width, desired_height = (
-            round(screen_width * 0.9),
-            round(screen_height * 0.9),
+            round(screen_width * 0.85),
+            round(screen_height * 0.8),
         )
         x, y = (
             round((screen_width - desired_width) / 2),
@@ -93,6 +95,7 @@ class PlotExporter(QDialog):
             point_types=self.get_sideview_point_types(),
             modifiers=self.get_sideview_plot_modifiers(),
             title=self.side_view_plot_title.text(),
+            padding=self.side_view_padding.value(),
         )
         self.side_view_export_plot.setStyleSheet("border: 2px solid black;")
         self.side_view_plot_area.layout().insertWidget(
@@ -113,27 +116,52 @@ class PlotExporter(QDialog):
         )
 
     def _hook_signals(self):
-        self.update_side_view_preview.clicked.connect(
-            self._on_update_sideview_preview_clicked
-        )
-        self.update_top_view_preview.clicked.connect(
-            self._on_update_topview_preview_clicked
-        )
-
+        """Hook all the signals."""
         self.cancel_export.clicked.connect(self.reject)
         self.export_plots.clicked.connect(self.accept)
         self.accepted.connect(self._on_export_plots_clicked)
 
+        # Hook all the side view signals
+        for input_ in (
+            self.nick_size_modifier,
+            self.nucleoside_size_modifier,
+            self.NEMid_size_modifier,
+            self.point_outline_modifier,
+            self.strand_stroke_modifier,
+            self.gridline_width_modifier,
+            self.side_view_padding,
+        ):
+            input_.editingFinished.connect(self.update_side_view_preview)
+
+        for input_ in (
+            self.plot_NEMids,
+            self.plot_nucleosides,
+        ):
+            input_.stateChanged.connect(self.update_side_view_preview)
+
+        self.side_view_plot_title.textChanged.connect(self.update_side_view_preview)
+
+        # When the side view padding is changed re-autorange the plot
+        self.side_view_padding.valueChanged.connect(
+            self.side_view_export_plot.autoRange
+        )
+
+        # Hook all the top view signals
+        self.top_view_rotation.valueChanged.connect(self.update_top_view_preview)
+        self.top_view_numbers.stateChanged.connect(self.update_top_view_preview)
+        self.top_view_plot_title.textChanged.connect(self.update_top_view_preview)
+
     @pyqtSlot()
-    def _on_update_sideview_preview_clicked(self):
+    def update_side_view_preview(self):
         """Update the sideview preview plot."""
         self.side_view_export_plot.modifiers = self.get_sideview_plot_modifiers()
         self.side_view_export_plot.title = self.side_view_plot_title.text()
         self.side_view_export_plot.point_types = self.get_sideview_point_types()
+        self.side_view_export_plot.padding = self.side_view_padding.value()
         self.side_view_export_plot.replot()
 
     @pyqtSlot()
-    def _on_update_topview_preview_clicked(self):
+    def update_top_view_preview(self):
         """Update the topview preview plot."""
         self.top_view_export_plot.title = self.top_view_plot_title.text()
         self.top_view_export_plot.numbers = self.top_view_numbers.isChecked()
@@ -143,19 +171,24 @@ class PlotExporter(QDialog):
     @pyqtSlot()
     def _on_export_plots_clicked(self):
         """Export the plots."""
-        side_view_export = [False, "Side View"]
-        top_view_export = [False, "Top View"]
+        top_view_export_filename = (
+            f"{self.top_view_filename.text()}"
+            f"{self.top_view_filetype.currentText().lower()}"
+        )
+        side_view_export_filename = (
+            f"{self.side_view_filename.text()}"
+            f"{self.side_view_filetype.currentText().lower()}"
+        )
 
-        for export in (side_view_export, top_view_export):
-            while not export[0]:
-                export[0] = QFileDialog.getSaveFileName(
-                    self.runner.window,
-                    f"{export[1]} Export Location",
-                    "",
-                    f"Image or Vector (*.jpg, *.png, *.svg)",
-                )[0]
-                if export[0]:
-                    break
+        side_view_exporter = partial(
+            self.side_view_export_plot.export, side_view_export_filename, False
+        )
+        top_view_exporter = partial(
+            self.top_view_export_plot.export, top_view_export_filename, False
+        )
 
-        self.side_view_export_plot.export(side_view_export[0])
-        self.top_view_export_plot.export(top_view_export[0])
+        threads = (
+            Thread(target=side_view_exporter),
+            Thread(target=top_view_exporter),
+        )
+        [thread.start() for thread in threads]

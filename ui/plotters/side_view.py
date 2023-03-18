@@ -110,6 +110,7 @@ class SideViewPlotter(Plotter):
         point_types: Tuple[Type, ...] = (Point,),
         modifiers: PlotModifiers = PlotModifiers(),
         title: str = "",
+        padding: float = 0.01,
         initial_plot: bool = True,
     ) -> None:
         """
@@ -123,6 +124,7 @@ class SideViewPlotter(Plotter):
                 NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
             modifiers: Various modifiers for the scale of various plot aspects.
             title: The title of the plot. Defaults to "".
+            padding: The padding to add to the plot when auto-ranging. Defaults to 0.01.
             initial_plot: Whether to plot the initial data. Defaults to True.
         """
         super().__init__()
@@ -134,6 +136,7 @@ class SideViewPlotter(Plotter):
         self.point_types = point_types
         self.modifiers = modifiers
         self.title = title
+        self.padding = padding
         self.plot_data = PlotData()
 
         if initial_plot:
@@ -225,7 +228,7 @@ class SideViewPlotter(Plotter):
         self.setTitle(self.title) if self.title else None
 
         # reduce padding for printer mode
-        self.getViewBox().setDefaultPadding(padding=0.025)
+        self.getViewBox().setDefaultPadding(padding=self.padding)
 
         # clear preexisting plotted_gridlines
         self.plot_data.plotted_gridlines.clear()

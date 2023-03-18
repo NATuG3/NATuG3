@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>879</width>
-    <height>661</height>
+    <height>825</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -49,7 +49,7 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>145</width>
+              <width>155</width>
               <height>0</height>
              </size>
             </property>
@@ -60,9 +60,53 @@
              </size>
             </property>
             <property name="title">
-             <string>Plot Options</string>
+             <string/>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="1">
+              <widget class="QComboBox" name="comboBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <item>
+                <property name="text">
+                 <string>.SVG</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>.PNG</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>.JPG</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="19" column="0" colspan="2">
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
              <item row="11" column="1">
               <widget class="QDoubleSpinBox" name="nucleoside_size_modifier">
                <property name="minimumSize">
@@ -73,21 +117,21 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>45</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
                </property>
                <property name="decimals">
-                <number>2</number>
+                <number>3</number>
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
@@ -104,21 +148,21 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>45</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
                </property>
                <property name="decimals">
-                <number>2</number>
+                <number>3</number>
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
@@ -149,21 +193,21 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>45</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
                </property>
                <property name="decimals">
-                <number>2</number>
+                <number>3</number>
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
@@ -180,21 +224,21 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>45</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
                </property>
                <property name="decimals">
-                <number>2</number>
+                <number>3</number>
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
@@ -239,19 +283,6 @@
                </property>
               </widget>
              </item>
-             <item row="17" column="0" colspan="2">
-              <spacer name="verticalSpacer">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
              <item row="10" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
@@ -269,21 +300,21 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>45</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
                </property>
                <property name="decimals">
-                <number>2</number>
+                <number>3</number>
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
@@ -300,21 +331,21 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>45</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
                <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::NoButtons</enum>
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
                </property>
                <property name="decimals">
-                <number>2</number>
+                <number>3</number>
                </property>
                <property name="maximum">
                 <double>200.000000000000000</double>
                </property>
                <property name="singleStep">
-                <double>0.010000000000000</double>
+                <double>0.050000000000000</double>
                </property>
                <property name="value">
                 <double>1.000000000000000</double>
@@ -358,13 +389,6 @@
                </property>
               </widget>
              </item>
-             <item row="18" column="0" colspan="2">
-              <widget class="QPushButton" name="update_side_view_preview">
-               <property name="text">
-                <string>Update Preview</string>
-               </property>
-              </widget>
-             </item>
              <item row="3" column="0" colspan="2">
               <widget class="QLineEdit" name="side_view_plot_title">
                <property name="maximumSize">
@@ -391,33 +415,14 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="comboBox">
-               <property name="maximumSize">
-                <size>
-                 <width>40</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <item>
-                <property name="text">
-                 <string>.SVG</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>.PNG</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>.JPG</string>
-                </property>
-               </item>
-              </widget>
-             </item>
              <item row="0" column="0">
               <widget class="QLineEdit" name="lineEdit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="text">
                 <string>sideView</string>
                </property>
@@ -426,10 +431,47 @@
                </property>
               </widget>
              </item>
+             <item row="18" column="1">
+              <widget class="QDoubleSpinBox" name="side_view_padding">
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="singleStep">
+                <double>0.005000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="18" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Padding</string>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="0" colspan="2">
               <widget class="Line" name="line_3">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="0" colspan="2">
+              <widget class="Line" name="line_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="17" column="0" colspan="2">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Misc</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
               </widget>
              </item>
@@ -453,7 +495,7 @@
             </property>
             <property name="minimumSize">
              <size>
-              <width>145</width>
+              <width>155</width>
               <height>0</height>
              </size>
             </property>
@@ -464,20 +506,13 @@
              </size>
             </property>
             <property name="title">
-             <string>Plot Options</string>
+             <string/>
             </property>
             <layout class="QGridLayout" name="gridLayout_3">
              <item row="4" column="0" colspan="2">
               <widget class="Line" name="line_4">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="9" column="0" colspan="2">
-              <widget class="QPushButton" name="update_top_view_preview">
-               <property name="text">
-                <string>Update Preview</string>
                </property>
               </widget>
              </item>
@@ -557,28 +592,17 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0" colspan="2">
-              <widget class="Line" name="line_5">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLineEdit" name="top_view_filename">
-               <property name="text">
-                <string>topView</string>
-               </property>
-               <property name="placeholderText">
-                <string>File Name</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="top_view_filetype">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="maximumSize">
                 <size>
-                 <width>40</width>
+                 <width>16777215</width>
                  <height>16777215</height>
                 </size>
                </property>
@@ -597,6 +621,29 @@
                  <string>..JPG</string>
                 </property>
                </item>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="Line" name="line_5">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLineEdit" name="top_view_filename">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>topView</string>
+               </property>
+               <property name="placeholderText">
+                <string>File Name</string>
+               </property>
               </widget>
              </item>
             </layout>
@@ -628,6 +675,9 @@
       <widget class="QPushButton" name="export_plots">
        <property name="text">
         <string>Export Plots</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
        </property>
        <property name="default">
         <bool>true</bool>
