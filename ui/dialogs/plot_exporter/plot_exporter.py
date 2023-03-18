@@ -65,7 +65,24 @@ class PlotExporter(QDialog):
         return tuple(plot_types)
 
     def _prettify(self):
-        self.showFullScreen()
+        """Prettify the dialog."""
+        # Get the screen size
+        screen = self.runner.application.primaryScreen().geometry()
+        screen_width, screen_height = (
+            screen.width(),
+            screen.height(),
+        )
+        desired_width, desired_height = (
+            round(screen_width * 0.9),
+            round(screen_height * 0.9),
+        )
+        x, y = (
+            round((screen_width - desired_width) / 2),
+            round((screen_height - desired_height) / 2),
+        )
+
+        # Resize the dialog to fill the screen
+        self.setGeometry(x, y, desired_width, desired_height)
 
     def _side_view_plot_area(self):
         """Set up the side view preview plot area."""
