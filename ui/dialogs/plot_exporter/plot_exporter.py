@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import QDialog, QFileDialog
 
 from structures.points import Nucleoside, NEMid
 from ui.plotters import SideViewPlotter, side_view, TopViewPlotter
+from ui.widgets.adjustable_padding import AdjustablePadding
 
 
 class PlotExporter(QDialog):
@@ -17,7 +18,12 @@ class PlotExporter(QDialog):
 
     Attributes:
         runner: NATuG's runner.
-        plot_to_export: The plot to export.
+        side_view_export_plot: The side view plot to export.
+        top_view_export_plot: The top view plot to export.
+
+    Methods:
+        get_sideview_plot_modifiers: Return the plot modifiers.
+        get_sideview_point_types: Return the plot types to export.
     """
 
     def __init__(self, runner):
@@ -36,7 +42,8 @@ class PlotExporter(QDialog):
         self.export_plots.clicked.connect(self.accept)
 
         self._hook_signals()
-        self._plot_area()
+        self._side_view_plot_area()
+        self._top_view_plot_area()
 
     def get_sideview_plot_modifiers(self):
         """Return the plot modifiers."""
@@ -58,8 +65,8 @@ class PlotExporter(QDialog):
             plot_types.append(Nucleoside)
         return tuple(plot_types)
 
-    def _plot_area(self):
-        """Set up the preview plot area."""
+    def _side_view_plot_area(self):
+        """Set up the side view preview plot area."""
         self.side_view_export_plot = SideViewPlotter(
             strands=self.runner.managers.strands.current,
             domains=self.runner.managers.domains.current,
@@ -68,6 +75,12 @@ class PlotExporter(QDialog):
             modifiers=self.get_sideview_plot_modifiers(),
             title=self.side_view_plot_title.text(),
         )
+        self.side_view_export_plot.setStyleSheet("border: 2px solid black;")
+        self.side_view_plot_area.layout().insertWidget(
+            0, AdjustablePadding(self, self.side_view_export_plot)
+        )
+
+    def _top_view_plot_area(self):
         self.top_view_export_plot = TopViewPlotter(
             domains=self.runner.managers.domains.current,
             domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
@@ -75,9 +88,10 @@ class PlotExporter(QDialog):
             rotation=self.top_view_rotation.value(),
             title=self.top_view_plot_title.text(),
         )
-
-        self.side_view_plot_area.layout().insertWidget(0, self.side_view_export_plot)
-        self.top_view_plot_area.layout().insertWidget(0, self.top_view_export_plot)
+        self.top_view_export_plot.setStyleSheet("border: 2px solid black;")
+        self.top_view_plot_area.layout().insertWidget(
+            0, AdjustablePadding(self, self.top_view_export_plot)
+        )
 
     def _hook_signals(self):
         self.update_side_view_preview.clicked.connect(
