@@ -1,5 +1,5 @@
-uuid,data:m,data:left_helix_joints,data:right_helix_joints,data:left_helix_count,data:other_helix_count,data:symmetry,data:antiparallel
-e19d48f1-b08e-11ed-a29c-2a8088df4c09,10,UP,UP,0-60-0,0-60-0,3.0,True
-e19d48f2-b08e-11ed-bcd6-2a8088df4c09,5,DOWN,DOWN,0-60-0,0-60-0,,
-e19d48f3-b08e-11ed-a466-2a8088df4c09,11,UP,UP,0-60-0,0-60-0,,
-e19d48f4-b08e-11ed-b616-2a8088df4c09,9,DOWN,DOWN,0-60-0,0-60-0,,
+data:m,data:left_helix_joints,data:right_helix_joints,data:left_helix_count,data:other_helix_count,data:symmetry,data:antiparallel
+10,UP,UP,0-60-0,0-60-0,3.0,True
+5,DOWN,DOWN,0-60-0,0-60-0,,
+11,UP,UP,0-60-0,0-60-0,,
+9,DOWN,DOWN,0-60-0,0-60-0,,

@@ -1,7 +1,7 @@
-uuid,data:m,data:left_helix_joints,data:right_helix_joints,data:left_helix_count,data:other_helix_count,data:symmetry,data:antiparallel
-e19b258f-b08e-11ed-a75e-2a8088df4c09,7,UP,UP,0-60-0,0-60-0,1.0,True
-e19b2590-b08e-11ed-b27a-2a8088df4c09,7,DOWN,DOWN,0-60-0,0-60-0,,
-e19b2591-b08e-11ed-809e-2a8088df4c09,7,UP,UP,0-60-0,0-60-0,,
-e19b2592-b08e-11ed-a21b-2a8088df4c09,7,DOWN,DOWN,0-60-0,0-60-0,,
-e19b2593-b08e-11ed-8e87-2a8088df4c09,7,UP,UP,0-60-0,0-60-0,,
-e19b2594-b08e-11ed-a103-2a8088df4c09,7,DOWN,DOWN,0-60-0,0-60-0,,
+data:m,data:left_helix_joints,data:right_helix_joints,data:left_helix_count,data:other_helix_count,data:symmetry,data:antiparallel
+7,UP,UP,0-60-0,0-60-0,1.0,True
+7,DOWN,DOWN,0-60-0,0-60-0,,
+7,UP,UP,0-60-0,0-60-0,,
+7,DOWN,DOWN,0-60-0,0-60-0,,
+7,UP,UP,0-60-0,0-60-0,,
+7,DOWN,DOWN,0-60-0,0-60-0,,
