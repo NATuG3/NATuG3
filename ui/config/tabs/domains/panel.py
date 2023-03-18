@@ -242,7 +242,7 @@ class DomainsPanel(QWidget):
                 f"Saving domains to {filepath}."
                 f"\nDomains being saved: {self.runner.managers.domains.current}"
             )
-            domains_df = self.runner.managers.domains.current.to_df()
+            domains_df = self.runner.managers.domains.current.to_df(include_uuid=False)
             domains_df.to_csv(filepath, index=False)
 
     @pyqtSlot()
