@@ -213,17 +213,12 @@ class DoubleHelices:
         strands.style()
         return strands
 
-    def compute(self, padding=0.0):
+    def compute(self) -> None:
         """
         Compute the point data for each helix.
 
         This computes the x coord, z coord, and angle arrays for each helix. The data
         is stored in the helices respective x coord, z coord, and angle arrays.
-
-        Args:
-            padding: The amount of padding to add to the z coord of each point. This
-                is to overcome the fact that numpy arange() does not include the end
-                point.
         """
         logger.debug("Computing helix data")
         for index, double_helix in enumerate(self):
