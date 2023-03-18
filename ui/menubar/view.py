@@ -31,7 +31,7 @@ class View(QMenu):
 
     def _config(self):
         """Show/hide the config based on whether it is already being shown or not.."""
-        self.config = self.addAction("Config")
+        self.config = self.addAction("Configuration")
         self.config.setStatusTip("Display the config tab menu")
         self.config.setIcon(fetch_icon("eye-outline"))
         self.config.triggered.connect(
