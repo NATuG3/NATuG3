@@ -94,7 +94,7 @@ class Runner:
             filepath (str): The path to the file to save. If None, a file dialog
                 will be opened to select the file to save.
         """
-        if filepath is None:
+        if not filepath:
             filepath = QFileDialog.getSaveFileName(
                 self.window,
                 "Save Program State",
