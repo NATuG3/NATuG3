@@ -22,14 +22,46 @@ class AdjustablePadding(QWidget):
         self.child = child
         self.child.setParent(self)
 
+        self._top_padding = top
+        self._bottom_padding = bottom
+        self._left_padding = left
+        self._right_padding = right
+
+    def change_padding(self, top=None, bottom=None, left=None, right=None) -> None:
+        """
+        Change the padding around the child widget.
+
+        Args:
+            top: Whether to add a dynamic padding slider to the top of the widget.
+            bottom: Whether to add a dynamic padding slider to the bottom of the widget.
+            left: Whether to add a dynamic padding slider to the left of the widget.
+            right: Whether to add a dynamic padding slider to the right of the widget.
+        """
+        if top is not None:
+            self._top_padding = top
+        if bottom is not None:
+            self._bottom_padding = bottom
+        if left is not None:
+            self._left_padding = left
+        if right is not None:
+            self._right_padding = right
+
+        self._clear_ui()
+        self._setup_ui()
+
+    def _clear_ui(self):
+        """Clear the UI."""
+        self.layout().removeWidget(self.vertical_slider)
+
+    def _setup_ui(self):
         # Create the horizontal slider, which contains the child widget and two dummy
         # QWidgets for padding.
         self.horizontal_slider = QSplitter()
         self.horizontal_slider.setOrientation(Qt.Orientation.Horizontal)
-        if left:
+        if self._left_padding:
             self.horizontal_slider.addWidget(QWidget())
         self.horizontal_slider.addWidget(self.child)
-        if right:
+        if self._right_padding:
             self.horizontal_slider.addWidget(QWidget())
         self.horizontal_slider.setSizes((0, 1, 0))
 
@@ -37,10 +69,10 @@ class AdjustablePadding(QWidget):
         # QWidgets for padding. The horizontal slider itself contains the child widget.
         self.vertical_slider = QSplitter()
         self.vertical_slider.setOrientation(Qt.Orientation.Vertical)
-        if top:
+        if self._top_padding:
             self.vertical_slider.addWidget(QWidget())
         self.vertical_slider.addWidget(self.horizontal_slider)
-        if bottom:
+        if self._bottom_padding:
             self.vertical_slider.addWidget(QWidget())
         self.vertical_slider.setSizes((0, 1, 0))
 
