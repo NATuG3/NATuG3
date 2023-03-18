@@ -1,3 +1,4 @@
+import os
 from functools import partial
 from threading import Thread
 from typing import Tuple, Type
@@ -9,6 +10,7 @@ from PyQt6.QtWidgets import QDialog
 from structures.points import Nucleoside, NEMid
 from ui.plotters import SideViewPlotter, side_view, TopViewPlotter
 from ui.widgets.adjustable_padding import AdjustablePadding
+from utils import show_in_file_explorer
 
 
 class PlotExporter(QDialog):
@@ -85,6 +87,8 @@ class PlotExporter(QDialog):
 
         # Resize the dialog to fill the screen
         self.setGeometry(x, y, desired_width, desired_height)
+        self.setFixedWidth(desired_width)
+        self.setFixedHeight(desired_height)
 
     def _side_view_plot_area(self):
         """Set up the side view preview plot area."""
@@ -172,11 +176,11 @@ class PlotExporter(QDialog):
     def _on_export_plots_clicked(self):
         """Export the plots."""
         top_view_export_filename = (
-            f"{self.top_view_filename.text()}"
+            f"saves/{self.top_view_filename.text()}"
             f"{self.top_view_filetype.currentText().lower()}"
         )
         side_view_export_filename = (
-            f"{self.side_view_filename.text()}"
+            f"saves/{self.side_view_filename.text()}"
             f"{self.side_view_filetype.currentText().lower()}"
         )
 
@@ -192,3 +196,5 @@ class PlotExporter(QDialog):
             Thread(target=top_view_exporter),
         )
         [thread.start() for thread in threads]
+        [thread.join() for thread in threads]
+        show_in_file_explorer(f"{os.getcwd()}/saves")
