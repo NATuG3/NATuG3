@@ -29,8 +29,8 @@ class PlotExporter(QDialog):
         """
         super().__init__(runner.window)
         self.runner = runner
-        self.sideview_export_plot = None
-        self.topview_export_plot = None
+        self.side_view_export_plot = None
+        self.top_view_export_plot = None
         uic.loadUi("ui/dialogs/plot_exporter/plot_exporter.ui", self)
         self.cancel_export.clicked.connect(self.reject)
         self.export_plots.clicked.connect(self.accept)
@@ -60,7 +60,7 @@ class PlotExporter(QDialog):
 
     def _plot_area(self):
         """Set up the preview plot area."""
-        self.sideview_export_plot = SideViewPlotter(
+        self.side_view_export_plot = SideViewPlotter(
             strands=self.runner.managers.strands.current,
             domains=self.runner.managers.domains.current,
             nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
@@ -68,45 +68,60 @@ class PlotExporter(QDialog):
             modifiers=self.get_sideview_plot_modifiers(),
             title=self.side_view_plot_title.text(),
         )
-        self.topview_export_plot = TopViewPlotter(
+        self.top_view_export_plot = TopViewPlotter(
             domains=self.runner.managers.domains.current,
             domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
-            rotation=0,
+            numbers=self.top_view_numbers.isChecked(),
+            rotation=self.top_view_rotation.value(),
+            title=self.top_view_plot_title.text(),
         )
 
-        self.side_view_plot_area.layout().insertWidget(0, self.sideview_export_plot)
-        self.top_view_plot_area.layout().insertWidget(0, self.topview_export_plot)
+        self.side_view_plot_area.layout().insertWidget(0, self.side_view_export_plot)
+        self.top_view_plot_area.layout().insertWidget(0, self.top_view_export_plot)
 
     def _hook_signals(self):
-        self.update_preview.clicked.connect(self._on_update_sideview_preview_clicked)
+        self.update_side_view_preview.clicked.connect(
+            self._on_update_sideview_preview_clicked
+        )
+        self.update_top_view_preview.clicked.connect(
+            self._on_update_topview_preview_clicked
+        )
+
         self.export_plots.clicked.connect(self._on_export_plots_clicked)
         self.cancel_export.clicked.connect(self.reject)
 
     @pyqtSlot()
     def _on_update_sideview_preview_clicked(self):
         """Update the sideview preview plot."""
-        self.sideview_export_plot.modifiers = self.get_sideview_plot_modifiers()
-        self.sideview_export_plot.title = self.side_view_plot_title.text()
-        self.sideview_export_plot.point_types = self.get_sideview_point_types()
-        self.sideview_export_plot.replot()
+        self.side_view_export_plot.modifiers = self.get_sideview_plot_modifiers()
+        self.side_view_export_plot.title = self.side_view_plot_title.text()
+        self.side_view_export_plot.point_types = self.get_sideview_point_types()
+        self.side_view_export_plot.replot()
 
     @pyqtSlot()
     def _on_update_topview_preview_clicked(self):
         """Update the topview preview plot."""
-        self.topview_export_plot.title = self.top_view_plot_title.text()
-        self.topview_export_plot.replot()
+        self.top_view_export_plot.title = self.top_view_plot_title.text()
+        self.top_view_export_plot.numbers = self.top_view_numbers.isChecked()
+        self.top_view_export_plot.rotation = self.top_view_rotation.value()
+        self.top_view_export_plot.refresh()
 
     @pyqtSlot()
     def _on_export_plots_clicked(self):
         """Export the plots."""
-        filepath = False
-        while not filepath:
-            filepath = QFileDialog.getSaveFileName(
-                self.runner.window,
-                "Export Location",
-                "",
-                f"Image or Vector (*.jpg, *.png, *.svg)",
-            )[0]
-            if filepath:
-                self.sideview_export_plot.export(filepath)
-                break
+        side_view_export = [False, "Side View"]
+        top_view_export = [False, "Top View"]
+
+        for export in (side_view_export, top_view_export):
+            while not export[0]:
+                export[0] = QFileDialog.getSaveFileName(
+                    self.runner.window,
+                    f"{export[1]} Export Location",
+                    "",
+                    f"Image or Vector (*.jpg, *.png, *.svg)",
+                )[0]
+                if export[0]:
+                    break
+
+        self.side_view_export_plot.export(side_view_export[0])
+        self.top_view_export_plot.export(top_view_export[0])

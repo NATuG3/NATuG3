@@ -15,6 +15,7 @@ import settings
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
+from ui.plotters.plotter import Plotter
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 from utils import show_in_file_explorer
 
@@ -75,7 +76,7 @@ class PlotData:
     plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
 
 
-class SideViewPlotter(pg.PlotWidget):
+class SideViewPlotter(Plotter):
     """
     Side view strands plot widget.
 

@@ -9,6 +9,7 @@ from PyQt6.QtCore import pyqtSignal
 import settings
 import utils
 from ui import plotters
+from ui.plotters.plotter import Plotter
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ class PlotData:
             )
 
 
-class TopViewPlotter(pg.PlotWidget):
+class TopViewPlotter(Plotter):
     """
     The plotter for plotting a top view of domains.
 
@@ -81,6 +82,8 @@ class TopViewPlotter(pg.PlotWidget):
         domains: "Domains",
         domain_radius: int,
         rotation: float = 0,
+        numbers: bool = True,
+        title: str = "",
     ):
         """
         Initialize top view plotter instance.
@@ -90,6 +93,8 @@ class TopViewPlotter(pg.PlotWidget):
             domains: Domains to plot.
             domain_radius: Radius of a given domain.
             rotation: Rotation of the plot. In degrees. Defaults to 0.
+            numbers: Whether to plot the domain numbers. Defaults to True.
+            title: Title of the plot. No title is shown if None. Defaults to None.
         """
 
         super().__init__()
@@ -97,6 +102,8 @@ class TopViewPlotter(pg.PlotWidget):
         self.circle_radius = domain_radius
         self.rotation = rotation
         self.domains = domains
+        self.title = title
+        self.numbers = numbers
         self.plot_data = PlotData()
 
         self.getViewBox().setDefaultPadding(padding=0.18)
@@ -126,6 +133,8 @@ class TopViewPlotter(pg.PlotWidget):
             self.removeItem(number)
 
     def _prettify(self):
+        self.setTitle(self.title) if self.title else None
+
         # set correct range
         self.autoRange()
 
@@ -155,13 +164,16 @@ class TopViewPlotter(pg.PlotWidget):
 
         # plot the data
         self._plot_domains(x_coords, y_coords)
-        self._plot_numbers(x_coords, y_coords)
+        if self.numbers:
+            self._plot_numbers(x_coords, y_coords)
         self._plot_stroke(x_coords, y_coords)
 
         # store current plot data
         self.plot_data.x_coords = y_coords
         self.plot_data.y_coords = y_coords
         self.plot_data.rotation = self.rotation
+
+        self._prettify()
 
     def _plot_domains(self, x_coords: List[float], y_coords: List[float]) -> None:
         """

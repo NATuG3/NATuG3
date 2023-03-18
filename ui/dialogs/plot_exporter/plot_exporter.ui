@@ -59,7 +59,7 @@
       <item>
        <widget class="QTabWidget" name="plot_area">
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="side_view_plot_area">
          <attribute name="title">
@@ -366,7 +366,7 @@
               </widget>
              </item>
              <item row="16" column="0" colspan="2">
-              <widget class="QPushButton" name="update_preview">
+              <widget class="QPushButton" name="update_side_view_preview">
                <property name="text">
                 <string>Update Preview</string>
                </property>
@@ -483,14 +483,14 @@
               </widget>
              </item>
              <item row="7" column="0" colspan="2">
-              <widget class="QPushButton" name="update_preview_2">
+              <widget class="QPushButton" name="update_top_view_preview">
                <property name="text">
                 <string>Update Preview</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0" colspan="2">
-              <widget class="QLineEdit" name="side_view_plot_title_2">
+              <widget class="QLineEdit" name="top_view_plot_title">
                <property name="maximumSize">
                 <size>
                  <width>16777215</width>
@@ -516,12 +516,29 @@
               </widget>
              </item>
              <item row="4" column="0" colspan="2">
-              <widget class="QCheckBox" name="plot_nucleosides_2">
+              <widget class="QCheckBox" name="top_view_numbers">
                <property name="text">
                 <string>Numbers</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QDoubleSpinBox" name="top_view_rotation">
+               <property name="suffix">
+                <string>°</string>
+               </property>
+               <property name="maximum">
+                <double>360.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Rotation</string>
                </property>
               </widget>
              </item>
