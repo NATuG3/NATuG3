@@ -38,14 +38,14 @@ class DoubleHelices:
     Attributes:
         double_helices: A list of DoubleHelix objects.
         nucleic_acid_profile: The nucleic acid profile to use for computations.
+        uuid (str): A unique identifier for the double helices. Automatically generated.
 
     Methods:
         domains: Obtain all the domains of all the double helices in their respective
             order.
         compute: Compute the point data for each helix. The data will be stored in the
             helices respective x coord, z coord, and angle arrays.
-        double_helices (list): A list of DoubleHelix objects.
-        uuid (str): A unique identifier for the double helices. Automatically generated.
+        to_json: Convert the double helices to a JSON serializable dictionary.
     """
 
     __slots__ = "double_helices", "nucleic_acid_profile", "uuid", "_domains"
@@ -111,7 +111,7 @@ class DoubleHelices:
         """
         return {
             "uuid": self.uuid,
-            "items": [item.uuid for item in self],
+            "items": [double_helix.uuid for double_helix in self],
         }
 
     def strands(self) -> "Strands":
