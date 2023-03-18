@@ -418,8 +418,8 @@ class Strands:
             f"(NEMid1 [{NEMid1}] Strands: {NEMid1.strand.strands}, "
             f"NEMid2 [{NEMid2}] Strands: {NEMid2.strand.strands})"
         )
-        assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(
-            True
+        assert (
+            NEMid1.is_endpoint(True) and NEMid2.is_endpoint(True),
         ), "NEMids must be at the endpoints of their strands."
 
         # Force NEMid1 to be the upwards NEMid
@@ -469,9 +469,9 @@ class Strands:
         for item in new_strand.items:
             item.strand = new_strand
 
-        assert [
-            item.strand == new_strand for item in new_strand
-        ], "All items in the new strand must have the new strand as their parent."
+        assert [item.strand == new_strand for item in new_strand], (
+            "All items in the new strand must have the new strand as their parent."
+        )
 
         # Add the new strand to the container
         self.append(new_strand)
@@ -493,7 +493,7 @@ class Strands:
             The two new strands that were created.
         """
         assert (
-            linkage.strand.strands is self
+                linkage.strand.strands is self
         ), "Linkage is not in this Strands container."
 
         logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
@@ -520,7 +520,7 @@ class Strands:
             tuple(linkage.strand[: linkage.strand.index(linkage)]),
         )
         new_strand_two.extend(
-            tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
+            tuple(linkage.strand[linkage.strand.index(linkage) + 1:]),
         )
 
         # Add the new strands to the container
