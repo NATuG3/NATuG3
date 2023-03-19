@@ -764,7 +764,7 @@ class Strand:
             checker = None
 
             # Find the first domain that shows up in the strand to use as a checker
-            for item in self.items.by_type(Point):
+            for item in points:
                 if isinstance(item.domain, Domain):
                     checker = item.domain
                     break
