@@ -206,18 +206,16 @@ def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
     """
     data = {
         "uuid": [],
-        "data:domain": [],
+        "data:double_helix": [],
         "data:direction": [],
-        "data:generation_count": [],
         "data:x_coords": [],
         "data:z_coords": [],
         "data:angles": [],
     }
     for helix in helices:
         data["uuid"].append(helix.uuid)
-        data["data:domain"].append(helix.domain.uuid)
+        data["data:double_helix"].append(helix.double_helix.uuid)
         data["data:direction"].append("UP" if helix.direction == UP else "DOWN")
-        data["data:generation_count"].append(helix.generation_count.to_str())
         data["data:x_coords"].append(";".join(map(str, helix.data.x_coords)))
         data["data:z_coords"].append(";".join(map(str, helix.data.z_coords)))
         data["data:angles"].append(";".join(map(str, helix.data.angles)))
