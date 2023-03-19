@@ -6,6 +6,7 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
+from numpy import isnan
 
 import structures.domains
 import structures.helices
@@ -199,14 +200,13 @@ class FileHandler:
             # Load all the nucleosides
             with package.open("points/nucleosides.csv") as file:
                 df = pd.read_csv(file)
-                df = df.where(pd.notnull(df), None)
                 df["data:direction"] = df["data:direction"].map(
                     {"UP": UP, "DOWN": DOWN}
                 )
 
                 # Build Nucleoside objects from the dataframe rows
                 for index, row in df.iterrows():
-                    base = row["nucleoside:base"] if row["nucleoside:base"] else None
+                    base = row["nucleoside:base"]
                     nucleoside = structures.points.nucleoside.Nucleoside(
                         uuid=row["uuid"],
                         x_coord=row["data:x_coord"],
@@ -214,7 +214,7 @@ class FileHandler:
                         angle=row["data:angle"],
                         direction=row["data:direction"],
                         domain=domains.domains()[row["data:domain"]],
-                        base=base,
+                        base=None if isnan(base) else base,
                         styles=row_to_point_styles(row),
                     )
                     items_by_uuid[row["uuid"]] = nucleoside
@@ -310,13 +310,15 @@ class FileHandler:
                     styles.thickness.from_str(row["style:thickness"], valuemod=float)
                     styles.highlighted = row["style:highlighted"]
 
-                    items_by_uuid[row["uuid"]] = structures.strands.strand.Strand(
+                    strand = structures.strands.strand.Strand(
                         uuid=row["uuid"],
                         items=items,
                         name=row["name"],
                         styles=styles,
                         closed=row["data:closed"],
                     )
+                    strand.styles.strand = strand
+                    items_by_uuid[row["uuid"]] = strand
 
             # Load the Strands container
             with package.open("strands/strands.json") as file:
