@@ -364,7 +364,8 @@ class FileHandler:
                     helix.data.angles = np.array(
                         tuple(map(float, row["data:angles"].split(";"))), dtype=float
                     )
-
+                    assert isinstance(helix.data.x_coords[0], float)
+                    assert len(helix.data.x_coords) > 0
                     items_by_uuid[row["uuid"]] = helix
 
             # Load the double helix objects
@@ -376,6 +377,15 @@ class FileHandler:
                         domain=items_by_uuid[row["data:domain"]],
                         up_helix=items_by_uuid[row["data:up_helix"]],
                         down_helix=items_by_uuid[row["data:down_helix"]],
+                        # Resizing the helices makes them the correct GenerationCount
+                        # size. However, it also wipes all the current data in the
+                        # helices. Since they should be the right size, we can skip
+                        # this on-init resize.
+                        resize_helices=False,
+                    )
+                    assert (
+                        len(double_helix.up_helix.data)
+                        == sum(double_helix.up_helix.generation_count) * 2 - 1
                     )
                     double_helix.up_helix.double_helix = double_helix
                     double_helix.down_helix.double_helix = double_helix
