@@ -53,7 +53,6 @@ class DoubleHelices:
     def __init__(
         self,
         double_helices: Iterable["DoubleHelix"] | None,
-        domains: "Domains",
         nucleic_acid_profile,
         uuid: str | None = None,
     ) -> None:
@@ -64,21 +63,12 @@ class DoubleHelices:
         domains' GenerationCounts.
 
         Args:
-            double_helices: A list of DoubleHelix objects. If None, the double helices
-                will be initialized based on the domains.
-            domains: A Domains object containing the domains for the creation of the
-                double helices. Each domain will be used to create a double helix.
+            double_helices: A list of DoubleHelix objects.
             nucleic_acid_profile: The nucleic acid profile to use for computations.
             uuid: A unique identifier for the double helices. Automatically generated.
         """
-        from structures.helices import DoubleHelix
-
-        self.double_helices = double_helices or [
-            DoubleHelix(domain) for domain in domains.domains()
-        ]
+        self.double_helices = double_helices
         self.nucleic_acid_profile = nucleic_acid_profile
-
-        self._domains = domains
         self.uuid = uuid or str(uuid1())
 
     def __len__(self) -> int:
@@ -92,6 +82,17 @@ class DoubleHelices:
 
     def __iter__(self) -> Iterator["DoubleHelix"]:
         return iter(self.double_helices)
+
+    @classmethod
+    def from_domains(cls, domains: "Domains", nucleic_acid_profile):
+        from structures.helices import DoubleHelix
+
+        double_helices = cls(
+            double_helices=[DoubleHelix(domain) for domain in domains.domains()],
+            nucleic_acid_profile=nucleic_acid_profile,
+        )
+        double_helices._domains = domains
+        return double_helices
 
     @property
     def domains(self) -> "Domains":

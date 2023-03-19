@@ -44,7 +44,7 @@ class DoubleHelicesManager:
         Notes:
             This is a very expensive operation.
         """
-        self.current = DoubleHelices(
+        self.current = DoubleHelices.from_domains(
             domains=self.runner.managers.domains.current,
             nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
         )
