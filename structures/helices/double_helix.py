@@ -148,13 +148,10 @@ def to_df(double_helices) -> pd.DataFrame:
     """
     data = {"uuid": [], "data:domain": [], "data:up_helix": [], "data:down_helix": []}
 
-    for double_helices in double_helices:
-        up_helix = "; ".join(item.uuid for item in double_helices.up_helix)
-        down_helix = "; ".join(item.uuid for item in double_helices.down_helix)
-
-        data["uuid"].append(double_helices.uuid)
-        data["data:domain"].append(double_helices.domain.uuid)
-        data["data:up_helix"].append(up_helix)
-        data["data:down_helix"].append(down_helix)
+    for double_helix in double_helices:
+        data["uuid"].append(double_helix.uuid)
+        data["data:domain"].append(double_helix.domain.uuid)
+        data["data:up_helix"].append(double_helix.up_helix.uuid)
+        data["data:down_helix"].append(double_helix.down_helix.uuid)
 
     return pd.DataFrame(data)
