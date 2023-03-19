@@ -1,3 +1,4 @@
+import logging
 from uuid import uuid1
 
 import pandas as pd
@@ -5,6 +6,8 @@ import pandas as pd
 from constants.directions import DOWN, UP
 from structures.helices.helix import Helix
 from utils import inverse
+
+logger = logging.getLogger(__name__)
 
 
 class DoubleHelix:
@@ -44,6 +47,7 @@ class DoubleHelix:
         up_helix: Helix | None = None,
         down_helix: Helix | None = None,
         uuid: str | None = None,
+        resize_helices: bool = True,
     ) -> None:
         """
         Initialize a double helix.
@@ -55,30 +59,38 @@ class DoubleHelix:
             down_helix: The helix that progresses downwards from its 5' to 3' end. If
                 None, a new and empty helix will be created.
             uuid: The UUID of the double helix. If None, a new UUID will be created.
+            resize_helices: Whether to resize the helices to the size of the domain's
+                GenerationCount.
         """
         self.domain = domain
         self.helices = [None, None]
         self.uuid = uuid or str(uuid1())
 
         if up_helix is not None:
+            logger.debug("Using passed up helix.")
             if up_helix.direction != UP:
                 raise ValueError("The up helix must be of the UP direction.")
             self.helices[UP] = up_helix
             self.helices[UP].double_helix = self
         else:
+            logger.debug("Creating new up helix since None was passed.")
             self.helices[UP] = Helix(direction=UP, double_helix=self)
 
         if down_helix is not None:
+            logger.debug("Using passed down helix.")
             if down_helix.direction != DOWN:
                 raise ValueError("The down helix must be of the DOWN direction.")
             self.helices[DOWN] = down_helix
             self.helices[DOWN].double_helix = self
         else:
+            logger.debug("Creating new down helix since None was passed.")
             self.helices[DOWN] = Helix(direction=DOWN, double_helix=self)
 
-        # The helices must contain empty arrays of the size that the Domains indicates.
-        self.left_helix.data.resize(self.domain.left_helix_count)
-        self.other_helix.data.resize(self.domain.other_helix_count)
+        if resize_helices:
+            # The helices must contain empty arrays of the size that the Domains
+            # indicates.
+            self.left_helix.data.resize(self.domain.left_helix_count)
+            self.other_helix.data.resize(self.domain.other_helix_count)
 
     def __getitem__(self, index: int) -> Helix:
         """
@@ -148,13 +160,10 @@ def to_df(double_helices) -> pd.DataFrame:
     """
     data = {"uuid": [], "data:domain": [], "data:up_helix": [], "data:down_helix": []}
 
-    for double_helices in double_helices:
-        up_helix = "; ".join(item.uuid for item in double_helices.up_helix)
-        down_helix = "; ".join(item.uuid for item in double_helices.down_helix)
-
-        data["uuid"].append(double_helices.uuid)
-        data["data:domain"].append(double_helices.domain.uuid)
-        data["data:up_helix"].append(up_helix)
-        data["data:down_helix"].append(down_helix)
+    for double_helix in double_helices:
+        data["uuid"].append(double_helix.uuid)
+        data["data:domain"].append(double_helix.domain.uuid)
+        data["data:up_helix"].append(double_helix.up_helix.uuid)
+        data["data:down_helix"].append(double_helix.down_helix.uuid)
 
     return pd.DataFrame(data)

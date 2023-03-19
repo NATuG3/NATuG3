@@ -4,7 +4,9 @@ from contextlib import suppress
 from typing import Dict
 from zipfile import ZipFile
 
+import numpy as np
 import pandas as pd
+from numpy import isnan
 
 import structures.domains
 import structures.helices
@@ -63,6 +65,9 @@ class FileHandler:
             # Create a reference to the current strands
             strands = self.runner.managers.strands.current
 
+            # Create a reference to the current double helices
+            double_helices = self.runner.managers.double_helices.current
+
             # Sort all the items by type
             items_by_type = {
                 structures.points.Nucleoside: [],
@@ -105,21 +110,27 @@ class FileHandler:
             strands_json = json.dumps(strands_json, indent=4)
             package.writestr("strands/strands.json", strands_json)
             strands_df = structures.strands.strand.to_df(strands.strands)
-            package.writestr("strands/strands.csv", strands_df.to_csv(index=False))
+            package.writestr(
+                "strands/strands.csv",
+                strands_df.to_csv(index=False),
+            )
 
-            package.mkdir("double_helices")
-            # Save the double helices container's data to a file
-            double_helices_json = strands.double_helices.to_json()
+            package.mkdir("helices")
+            # Repeat the same process that we just did for strands for double helices
+            double_helices_json = double_helices.to_json()
             double_helices_json = json.dumps(double_helices_json, indent=4)
-            package.writestr("double_helices/double_helices.json", double_helices_json)
-
-            # Save the actual double helices's data to a file
+            package.writestr("helices/double_helices.json", double_helices_json)
             double_helices_df = structures.helices.double_helix.to_df(
-                strands.double_helices.double_helices
+                double_helices.double_helices
             )
             package.writestr(
-                "double_helices/double_helices.csv",
+                "helices/double_helices.csv",
                 double_helices_df.to_csv(index=False),
+            )
+            helices_df = structures.helices.helix.to_df(tuple(double_helices.helices()))
+            package.writestr(
+                "helices/helices.csv",
+                helices_df.to_csv(index=False),
             )
 
             logger.info("Saved program state to %s.", filename)
@@ -152,7 +163,6 @@ class FileHandler:
                             B=int(row["data:B"]),
                             Z_c=float(row["data:Z_c"]),
                             Z_mate=float(row["data:Z_mate"]),
-                            theta_s=float(row["data:theta_s"]),
                         )
                     )
                     nucleic_acid_profiles[
@@ -187,15 +197,16 @@ class FileHandler:
                 styles.state = row["style:state"]
                 return styles
 
+            # Load all the nucleosides
             with package.open("points/nucleosides.csv") as file:
                 df = pd.read_csv(file)
-                df = df.where(pd.notnull(df), None)
                 df["data:direction"] = df["data:direction"].map(
                     {"UP": UP, "DOWN": DOWN}
                 )
 
+                # Build Nucleoside objects from the dataframe rows
                 for index, row in df.iterrows():
-                    base = row["nucleoside:base"] if row["nucleoside:base"] else None
+                    base = row["nucleoside:base"]
                     nucleoside = structures.points.nucleoside.Nucleoside(
                         uuid=row["uuid"],
                         x_coord=row["data:x_coord"],
@@ -203,11 +214,12 @@ class FileHandler:
                         angle=row["data:angle"],
                         direction=row["data:direction"],
                         domain=domains.domains()[row["data:domain"]],
-                        base=base,
+                        base=None if isnan(base) else base,
                         styles=row_to_point_styles(row),
                     )
                     items_by_uuid[row["uuid"]] = nucleoside
 
+            # Load all individual NEMids
             with package.open("points/NEMids.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
@@ -221,6 +233,7 @@ class FileHandler:
                 for index, row in df.iterrows():
                     juncmate = row["NEMid:juncmate"] if row["NEMid:juncmate"] else None
 
+                    # Create the NEMid object from the dataframe row
                     NEMid_ = structures.points.nemid.NEMid(
                         uuid=row["uuid"],
                         x_coord=row["data:x_coord"],
@@ -235,6 +248,7 @@ class FileHandler:
                     )
                     items_by_uuid[NEMid_.uuid] = NEMid_
 
+            # Load nick objects
             with package.open("points/nicks.csv") as file:
                 df = pd.read_csv(file)
                 nicks = []
@@ -248,6 +262,7 @@ class FileHandler:
                     items_by_uuid[row["uuid"]] = nick
                     nicks.append(nick)
 
+            # Load the Linkage objects
             with package.open("strands/linkages.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
@@ -262,6 +277,7 @@ class FileHandler:
                     styles = structures.strands.linkage.LinkageStyles(
                         color=hex_to_rgb(row["style:color"]),
                         thickness=row["style:thickness"],
+                        init_reset=False,
                     )
 
                     coord_one = tuple(map(float, row["data:coord_one"].split(", ")))
@@ -275,9 +291,12 @@ class FileHandler:
                         inflection=row["data:inflection"],
                         styles=styles,
                     )
+                    linkage.styles.linkage = linkage
+                    linkage.styles.reset()
 
                     items_by_uuid[row["uuid"]] = linkage
 
+            # Load each individual Strands
             with package.open("strands/strands.csv") as file:
                 df = pd.read_csv(file)
 
@@ -288,17 +307,22 @@ class FileHandler:
 
                     styles = structures.strands.strand.StrandStyles()
                     styles.color.from_str(row["style:color"], valuemod=hex_to_rgb)
-                    styles.thickness.from_str(row["style:thickness"], valuemod=float)
+                    styles.thickness.from_str(
+                        str(row["style:thickness"]), valuemod=float
+                    )
                     styles.highlighted = row["style:highlighted"]
 
-                    items_by_uuid[row["uuid"]] = structures.strands.strand.Strand(
+                    strand = structures.strands.strand.Strand(
                         uuid=row["uuid"],
                         items=items,
                         name=row["name"],
                         styles=styles,
                         closed=row["data:closed"],
                     )
+                    strand.styles.strand = strand
+                    items_by_uuid[row["uuid"]] = strand
 
+            # Load the Strands container
             with package.open("strands/strands.json") as file:
                 loaded = json.load(file)
                 strands = structures.strands.Strands(
@@ -311,6 +335,7 @@ class FileHandler:
                     strand.strands = strands
                 strands.nicks = nicks
 
+            # Build the strand by using the items in the main hash table
             for strand in strands:
                 for item in strand:
                     if isinstance(item, structures.points.point.Point):
@@ -321,6 +346,68 @@ class FileHandler:
                             with suppress(KeyError):
                                 item.juncmate = items_by_uuid[item.juncmate]
 
+            # Load the helices and double helices
+            with package.open("helices/helices.csv") as file:
+                df = pd.read_csv(file)
+                for index, row in df.iterrows():
+                    helix = structures.helices.Helix(
+                        uuid=row["uuid"],
+                        double_helix=row["data:double_helix"],  # Placeholder UUID
+                        direction=UP if row["data:direction"] == "UP" else DOWN,
+                    )
+                    helix.data.x_coords = np.array(
+                        tuple(map(float, row["data:x_coords"].split(";"))), dtype=float
+                    )
+                    helix.data.z_coords = np.array(
+                        tuple(map(float, row["data:z_coords"].split(";"))), dtype=float
+                    )
+                    helix.data.angles = np.array(
+                        tuple(map(float, row["data:angles"].split(";"))), dtype=float
+                    )
+                    assert isinstance(helix.data.x_coords[0], float)
+                    assert len(helix.data.x_coords) > 0
+                    items_by_uuid[row["uuid"]] = helix
+
+            # Load the double helix objects
+            with package.open("helices/double_helices.csv") as file:
+                df = pd.read_csv(file)
+                for index, row in df.iterrows():
+                    double_helix = structures.helices.double_helix.DoubleHelix(
+                        uuid=row["uuid"],
+                        domain=items_by_uuid[row["data:domain"]],
+                        up_helix=items_by_uuid[row["data:up_helix"]],
+                        down_helix=items_by_uuid[row["data:down_helix"]],
+                        # Resizing the helices makes them the correct GenerationCount
+                        # size. However, it also wipes all the current data in the
+                        # helices. Since they should be the right size, we can skip
+                        # this on-init resize.
+                        resize_helices=False,
+                    )
+                    assert (
+                        len(double_helix.up_helix.data)
+                        == sum(double_helix.up_helix.generation_count) * 2 - 1
+                    )
+                    double_helix.up_helix.double_helix = double_helix
+                    double_helix.down_helix.double_helix = double_helix
+                    items_by_uuid[row["uuid"]] = double_helix
+
+            # Load the overall DoubleHelices container for all the DoubleHelixes that
+            # contain Helix objects
+            with package.open("helices/double_helices.json") as file:
+                loaded = json.load(file)
+                listed_double_helices = []
+                for uuid in loaded["items"]:
+                    listed_double_helices.append(items_by_uuid[uuid])
+
+                double_helices = structures.helices.DoubleHelices(
+                    uuid=loaded["uuid"],
+                    nucleic_acid_profile=nucleic_acid_profile,
+                    double_helices=listed_double_helices,
+                )
+                items_by_uuid[loaded["uuid"]] = double_helices
+
+            # Update the currently displayed nucleic acid profile and the possible
+            # nucleic acid profiles to those found in the file
             self.runner.managers.nucleic_acid_profile.current.update(
                 nucleic_acid_profile
             )
@@ -335,9 +422,13 @@ class FileHandler:
             new_profile_name = filename.split("/")[-1]
             profile_manager.profile_chooser.setCurrentText(new_profile_name)
 
+            # Update the program's current domains and strands to those found in the
+            # file
             self.runner.managers.domains.current.update(domains)
             self.runner.managers.strands.current = strands
+            self.runner.managers.double_helices.current = double_helices
             self.runner.window.config.panel.domains.dump_domains(domains)
 
+            # Refresh the side view plot and the top view plot
             self.runner.window.side_view.refresh()
             self.runner.window.top_view.refresh()

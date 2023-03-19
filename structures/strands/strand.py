@@ -635,7 +635,6 @@ class Strand:
             nucleoside.matching.base if nucleoside.matching is not None else None
             for nucleoside in StrandItems(self.items.unpacked()).by_type(Nucleoside)
         ]
-        print(StrandItems(self.items.unpacked()).by_type(Nucleoside))
         return output
 
     def has_complements(self):
@@ -764,7 +763,7 @@ class Strand:
             checker = None
 
             # Find the first domain that shows up in the strand to use as a checker
-            for item in self.items.by_type(Point):
+            for item in points:
                 if isinstance(item.domain, Domain):
                     checker = item.domain
                     break

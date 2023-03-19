@@ -213,6 +213,7 @@ class Domains:
         for i in range(len(left_helix_joints)):
             domains.append(
                 Domain(
+                    index=i,
                     uuid=uuids[i] if uuids else None,
                     nucleic_acid_profile=nucleic_acid_profile,
                     theta_m_multiple=m[i],

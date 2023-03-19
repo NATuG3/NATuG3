@@ -1,5 +1,5 @@
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, InitVar
 from typing import Deque, Literal, Tuple, Iterable, List
 from uuid import uuid1
 
@@ -27,9 +27,11 @@ class LinkageStyles:
     linkage: "Linkage" = None
     color: Tuple[int, int, int] = None
     thickness: int = None
+    init_reset: InitVar[bool] = True
 
-    def __post_init__(self):
-        self.reset()
+    def __post_init__(self, init_reset: bool):
+        if init_reset:
+            self.reset()
 
     def reset(self):
         """

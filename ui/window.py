@@ -110,7 +110,6 @@ class Window(QMainWindow):
         plot_container.addWidget(self.top_view)
         plot_container.addWidget(self.side_view)
         plot_container.setSizes([250, 520])
-        plot_container.splitterMoved.connect(lambda: print(plot_container.sizes()))
 
         self.setCentralWidget(central_widget)
 
