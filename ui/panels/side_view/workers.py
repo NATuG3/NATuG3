@@ -119,7 +119,7 @@ def informer(
             dialog_.close()
         for point_ in points_:
             point_.styles.change_state("default")
-            if point_.matching is not None:
+            if isinstance(point_, Nucleoside) and point_.matching is not None:
                 point_.matching.styles.change_state("default")
 
     if len(dialogs) > 0:
