@@ -6,7 +6,6 @@ from zipfile import ZipFile
 
 import numpy as np
 import pandas as pd
-from numpy import isnan
 
 import structures.domains
 import structures.helices
@@ -214,7 +213,7 @@ class FileHandler:
                         angle=row["data:angle"],
                         direction=row["data:direction"],
                         domain=domains.domains()[row["data:domain"]],
-                        base=None if isnan(base) else base,
+                        base=base if isinstance(base, str) else None,
                         styles=row_to_point_styles(row),
                     )
                     items_by_uuid[row["uuid"]] = nucleoside
