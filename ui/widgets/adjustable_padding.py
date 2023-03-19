@@ -21,6 +21,8 @@ class AdjustablePadding(QWidget):
         super().__init__(parent)
         self.child = child
         self.child.setParent(self)
+        self.vertical_slider = None
+        self.horizontal_slider = None
 
         self._top_padding = top
         self._bottom_padding = bottom
@@ -66,6 +68,9 @@ class AdjustablePadding(QWidget):
         if self._right_padding:
             self.horizontal_slider.addWidget(QWidget())
         self.horizontal_slider.setSizes((0, 1, 0))
+        self.horizontal_slider.setCollapsible(0, False)
+        self.horizontal_slider.setCollapsible(1, False)
+        self.horizontal_slider.setCollapsible(2, False)
 
         # Create the vertical slider, which contains the horizontal slider and two dummy
         # QWidgets for padding. The horizontal slider itself contains the child widget.
@@ -81,3 +86,6 @@ class AdjustablePadding(QWidget):
         # Set a main layout for ourself, and then add the vertical slider to it.
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.vertical_slider)
+        self.vertical_slider.setCollapsible(0, False)
+        self.vertical_slider.setCollapsible(1, False)
+        self.vertical_slider.setCollapsible(2, False)
