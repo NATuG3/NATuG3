@@ -198,7 +198,7 @@ class FileHandler:
                 styles.state = row["style:state"]
                 return styles
 
-            # Load in all the individual nucleosides
+            # Load all the nucleosides
             with package.open("points/nucleosides.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
@@ -221,7 +221,7 @@ class FileHandler:
                     )
                     items_by_uuid[row["uuid"]] = nucleoside
 
-            # Load in all the individual NEMids from the CSV file
+            # Load all individual NEMids
             with package.open("points/NEMids.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
@@ -250,7 +250,7 @@ class FileHandler:
                     )
                     items_by_uuid[NEMid_.uuid] = NEMid_
 
-            # Create nick objects for all the nicks in the CSV file
+            # Load nick objects
             with package.open("points/nicks.csv") as file:
                 df = pd.read_csv(file)
                 nicks = []
@@ -264,7 +264,7 @@ class FileHandler:
                     items_by_uuid[row["uuid"]] = nick
                     nicks.append(nick)
 
-            # Create the Linakge objects from all those in the CSV file
+            # Load the Linkage objects
             with package.open("strands/linkages.csv") as file:
                 df = pd.read_csv(file)
                 df = df.where(pd.notnull(df), None)
@@ -295,8 +295,7 @@ class FileHandler:
 
                     items_by_uuid[row["uuid"]] = linkage
 
-            # Load each individual Strand from the CSV file containing all of the
-            # Strand objects' data
+            # Load each individual Strands
             with package.open("strands/strands.csv") as file:
                 df = pd.read_csv(file)
 
@@ -318,7 +317,7 @@ class FileHandler:
                         closed=row["data:closed"],
                     )
 
-            # Load the Strands container from the JSON file
+            # Load the Strands container
             with package.open("strands/strands.json") as file:
                 loaded = json.load(file)
                 strands = structures.strands.Strands(
