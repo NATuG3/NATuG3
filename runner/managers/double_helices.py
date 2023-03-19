@@ -29,7 +29,7 @@ class DoubleHelicesManager:
         DoubleHelices must be called to obtain actual data, but the StrandsManager
         calls that method automatically.
         """
-        self.current = DoubleHelices(
+        self.current = DoubleHelices.from_domains(
             self.runner.managers.domains.current,
             self.runner.managers.nucleic_acid_profile.current,
         )
