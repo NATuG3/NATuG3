@@ -114,6 +114,14 @@ class DoubleHelices:
             "items": [double_helix.uuid for double_helix in self],
         }
 
+    def helices(self) -> Iterator["Helix"]:
+        """
+        Return all the helices within the double helices within this container.
+        """
+        for double_helix in self:
+            yield double_helix.up_helix
+            yield double_helix.down_helix
+
     def strands(self) -> "Strands":
         """
         Convert all the helices within the double helices within this container to
