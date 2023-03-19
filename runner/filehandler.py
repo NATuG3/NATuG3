@@ -4,6 +4,7 @@ from contextlib import suppress
 from typing import Dict
 from zipfile import ZipFile
 
+import numpy as np
 import pandas as pd
 
 import structures.domains
@@ -125,9 +126,7 @@ class FileHandler:
                 "helices/double_helices.csv",
                 double_helices_df.to_csv(index=False),
             )
-            helices_df = structures.helices.helix.to_df(
-                tuple(double_helices.helices())
-            )
+            helices_df = structures.helices.helix.to_df(tuple(double_helices.helices()))
             package.writestr(
                 "helices/helices.csv",
                 helices_df.to_csv(index=False),
@@ -163,7 +162,6 @@ class FileHandler:
                             B=int(row["data:B"]),
                             Z_c=float(row["data:Z_c"]),
                             Z_mate=float(row["data:Z_mate"]),
-                            theta_s=float(row["data:theta_s"]),
                         )
                     )
                     nucleic_acid_profiles[
@@ -341,6 +339,56 @@ class FileHandler:
                             with suppress(KeyError):
                                 item.juncmate = items_by_uuid[item.juncmate]
 
+            # Load the helices and double helices
+            with package.open("helices/helices.csv") as file:
+                df = pd.read_csv(file)
+                for index, row in df.iterrows():
+                    helix = structures.helices.Helix(
+                        uuid=row["uuid"],
+                        double_helix=row["data:double_helix"],  # Placeholder UUID
+                        direction=UP if row["data:direction"] == "UP" else DOWN,
+                    )
+                    helix.data.x_coords = np.array(
+                        tuple(map(float, row["data:x_coords"].split(";"))), dtype=float
+                    )
+                    helix.data.z_coords = np.array(
+                        tuple(map(float, row["data:z_coords"].split(";"))), dtype=float
+                    )
+                    helix.data.angles = np.array(
+                        tuple(map(float, row["data:angles"].split(";"))), dtype=float
+                    )
+
+                    items_by_uuid[row["uuid"]] = helix
+
+            # Load the double helix objects
+            with package.open("helices/double_helices.csv") as file:
+                df = pd.read_csv(file)
+                for index, row in df.iterrows():
+                    double_helix = structures.helices.double_helix.DoubleHelix(
+                        uuid=row["uuid"],
+                        domain=items_by_uuid[row["data:domain"]],
+                        up_helix=items_by_uuid[row["data:up_helix"]],
+                        down_helix=items_by_uuid[row["data:down_helix"]],
+                    )
+                    double_helix.up_helix.double_helix = double_helix
+                    double_helix.down_helix.double_helix = double_helix
+                    items_by_uuid[row["uuid"]] = double_helix
+
+            # Load the overall DoubleHelices container for all the DoubleHelixes that
+            # contain Helix objects
+            with package.open("helices/double_helices.json") as file:
+                loaded = json.load(file)
+                listed_double_helices = []
+                for uuid in loaded["items"]:
+                    listed_double_helices.append(items_by_uuid[uuid])
+
+                double_helices = structures.helices.DoubleHelices(
+                    uuid=loaded["uuid"],
+                    nucleic_acid_profile=nucleic_acid_profile,
+                    double_helices=listed_double_helices,
+                )
+                items_by_uuid[loaded["uuid"]] = double_helices
+
             # Update the currently displayed nucleic acid profile and the possible
             # nucleic acid profiles to those found in the file
             self.runner.managers.nucleic_acid_profile.current.update(
@@ -361,6 +409,7 @@ class FileHandler:
             # file
             self.runner.managers.domains.current.update(domains)
             self.runner.managers.strands.current = strands
+            self.runner.managers.double_helices.current = double_helices
             self.runner.window.config.panel.domains.dump_domains(domains)
 
             # Refresh the side view plot and the top view plot
