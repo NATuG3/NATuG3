@@ -1,4 +1,5 @@
 import itertools
+import logging
 from dataclasses import dataclass, field
 from typing import Literal, Type, Iterable
 from uuid import uuid1
@@ -10,6 +11,8 @@ from constants.directions import UP, DOWN
 from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(slots=True)
@@ -32,6 +35,9 @@ class HelixData:
 
     _data_arrays = ("x_coords", "z_coords", "angles")
 
+    def __len__(self):
+        return self.size()
+
     def size(self) -> int:
         """
         Get the size of the helix.
@@ -52,6 +58,7 @@ class HelixData:
         Notes:
             This method flushes the data of the helix. Use with caution.
         """
+        logger.debug(f"Resizing helix data to {size} points.")
         self.x_coords = np.zeros(size)
         self.z_coords = np.zeros(size)
         self.angles = np.zeros(size)
@@ -156,7 +163,7 @@ class Helix:
         nucleic_acid_profile: NucleicAcidProfile,
         begin: Literal[Nucleoside, NEMid] = Nucleoside,
         strand: Strand = None,
-        **kwargs
+        **kwargs,
     ) -> Strand:
         """
         Convert the strand builder to a Strand object.
