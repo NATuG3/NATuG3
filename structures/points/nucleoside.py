@@ -29,7 +29,7 @@ class Nucleoside(Point):
         Restyle the nucleoside if a new base is set.
         """
         super().__setattr__(key, value)
-        if key == "base" and self.styles is not None:
+        if key == "base" and self.styles is not None and self.strand is not None:
             self.styles.reset()
 
     def to_NEMid(self):
