@@ -277,6 +277,7 @@ class FileHandler:
                     styles = structures.strands.linkage.LinkageStyles(
                         color=hex_to_rgb(row["style:color"]),
                         thickness=row["style:thickness"],
+                        init_reset=False
                     )
 
                     coord_one = tuple(map(float, row["data:coord_one"].split(", ")))
@@ -290,6 +291,8 @@ class FileHandler:
                         inflection=row["data:inflection"],
                         styles=styles,
                     )
+                    linkage.styles.linkage = linkage
+                    linkage.styles.reset()
 
                     items_by_uuid[row["uuid"]] = linkage
 
