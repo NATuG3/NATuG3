@@ -277,7 +277,7 @@ class FileHandler:
                     styles = structures.strands.linkage.LinkageStyles(
                         color=hex_to_rgb(row["style:color"]),
                         thickness=row["style:thickness"],
-                        init_reset=False
+                        init_reset=False,
                     )
 
                     coord_one = tuple(map(float, row["data:coord_one"].split(", ")))
@@ -307,7 +307,9 @@ class FileHandler:
 
                     styles = structures.strands.strand.StrandStyles()
                     styles.color.from_str(row["style:color"], valuemod=hex_to_rgb)
-                    styles.thickness.from_str(row["style:thickness"], valuemod=float)
+                    styles.thickness.from_str(
+                        str(row["style:thickness"]), valuemod=float
+                    )
                     styles.highlighted = row["style:highlighted"]
 
                     strand = structures.strands.strand.Strand(
