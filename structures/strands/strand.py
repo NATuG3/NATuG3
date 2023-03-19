@@ -182,7 +182,7 @@ class StrandItems(deque):
                 split[-1].append(item)
         return split
 
-    def unpacked(self) -> List[Point]:
+    def unpacked(self) -> "StrandItems":
         """
         Obtain an unpacked version of the items.
 
@@ -199,7 +199,7 @@ class StrandItems(deque):
                 unpacked.extend(item)
             else:
                 unpacked.append(item)
-        return unpacked
+        return StrandItems(unpacked)
 
     def item_types(self) -> Set[Type]:
         """
@@ -610,10 +610,7 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        nucleosides: List[Nucleoside] = StrandItems(self.items.unpacked()).by_type(
-            Nucleoside
-        )
-        # type: ignore
+        nucleosides = self.items.unpacked().by_type(Nucleoside)
 
         if len(new_sequence) == len(self.sequence):
             for index, base in enumerate(new_sequence):
@@ -670,11 +667,11 @@ class Strand:
                 to a random nucleoside. If overwrite is True then all nucleosides
                 will be set to a random nucleoside.
         """
-        for nucleoside in self.items.by_type(Nucleoside):
+        for nucleoside in self.items.unpacked().by_type(Nucleoside):
             if overwrite or nucleoside.base is None:
                 nucleoside.base = random.choice(DNA)
                 if nucleoside.matching is not None:
-                    nucleoside.matching.base = nucleoside.complement
+                    nucleoside.matching.complement = nucleoside.base
 
     def clear_sequence(self) -> None:
         """Clear the sequence of the strand."""
