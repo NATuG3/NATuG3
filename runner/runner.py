@@ -122,7 +122,7 @@ class Runner:
         Notes:
             This will overwrite the current program state.
         """
-        if filepath is None:
+        if not filepath:
             filepath = QFileDialog.getOpenFileName(
                 self.window,
                 "Load Program State",
