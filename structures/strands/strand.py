@@ -635,7 +635,6 @@ class Strand:
             nucleoside.matching.base if nucleoside.matching is not None else None
             for nucleoside in StrandItems(self.items.unpacked()).by_type(Nucleoside)
         ]
-        print(StrandItems(self.items.unpacked()).by_type(Nucleoside))
         return output
 
     def has_complements(self):
