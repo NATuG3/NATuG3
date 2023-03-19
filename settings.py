@@ -5,7 +5,7 @@ debug = True
 
 extension = "natug"
 
-junction_threshold = 0.01
+# Threshold to determine whether a tube is closed.
 closed_threshold = 0.01
 
 colors = {

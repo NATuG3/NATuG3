@@ -1,11 +1,13 @@
 import logging
+import os
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
-from typing import List, Tuple, Dict, Literal
+from typing import List, Tuple, Dict, Type
 
 import numpy as np
 import pyqtgraph as pg
+import pyqtgraph.exporters
 from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import QPen, QBrush, QPainterPath
 
@@ -13,9 +15,34 @@ import settings
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
+from ui.plotters.plotter import Plotter
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
+from utils import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(slots=True)
+class PlotModifiers:
+    """
+    Various modifiers for the scale of various plot aspects.
+
+    Attributes:
+        nick_mod: The multiplier for the size of nick points.
+        nucleoside_mod: The multiplier for the size of nucleoside points.
+        NEMid_mod: The multiplier for the size of NEMid points.
+        point_outline_mod: The multiplier for the width of point outlines, with the
+            exception of junctable NEMids.
+        stroke_mod: The multiplier for the width of strand strokes.
+        gridline_mod: The multiplier for the width of grid lines.
+    """
+
+    nick_mod: float = 1.0
+    nucleoside_mod: float = 1.0
+    NEMid_mod: float = 1.0
+    point_outline_mod: float = 1.0
+    stroke_mod: float = 1.0
+    gridline_mod: float = 1.0
 
 
 @dataclass(slots=True)
@@ -25,7 +52,9 @@ class PlotData:
 
     Attributes:
         strands: The currently plotted strands.
-        mode: The plotting toolbar. Either 'nucleoside' or 'NEMid'.
+        domains: The currently plotted domains.
+        point_types: The currently plotted point types.
+        modifiers: Various modifiers for the scale of various plot aspects.
         points: A mapping of positions of plotted_points to point objects.
         plotted_points: The points.
         plotted_nicks: The nicks.
@@ -36,7 +65,9 @@ class PlotData:
     """
 
     strands: "Strands" = None
-    mode: Literal["nucleoside", "NEMid"] = "NEMid"
+    domains: "Domains" = None
+    point_types: Tuple[Type, ...] = field(default_factory=tuple)
+    modifiers: PlotModifiers = field(default_factory=PlotModifiers)
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
@@ -46,18 +77,21 @@ class PlotData:
     plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
 
 
-class SideViewPlotter(pg.PlotWidget):
+class SideViewPlotter(Plotter):
     """
     Side view strands plot widget.
 
     Attributes:
         strands: The strands to plot.
+        domains: The domains to use for plotting computations, such as determining
+            the width of the plot.
         nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
             strands to plot.
         plot_data: Currently plotted data.
-        width: The width of the plot.
-        height: The height of the plot.
-        mode: The plotting toolbar. Either "nucleoside" or "NEMid".
+        point_types: The types of points to plot. Options are Nucleoside and
+            NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
+        modifiers: Various modifiers for the scale of various plot aspects.
+        title: The title of the plot.
 
     Signals:
         points_clicked(tuple of all points clicked): When plotted points are clicked.
@@ -71,8 +105,13 @@ class SideViewPlotter(pg.PlotWidget):
     def __init__(
         self,
         strands: "Strands",
+        domains: "Domains",
         nucleic_acid_profile: NucleicAcidProfile,
-        mode: Literal["nucleoside", "NEMid"],
+        point_types: Tuple[Type, ...] = (Point,),
+        modifiers: PlotModifiers = PlotModifiers(),
+        title: str = "",
+        padding: float = 0.01,
+        initial_plot: bool = True,
     ) -> None:
         """
         Initialize plotter instance.
@@ -81,25 +120,31 @@ class SideViewPlotter(pg.PlotWidget):
             strands: The strands to plot.
             nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
                 strands to plot.
-            mode: toolbar: The plotting toolbar. Either "nucleoside" or "NEMid".
+            point_types: The types of points to plot. Options are Nucleoside and
+                NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
+            modifiers: Various modifiers for the scale of various plot aspects.
+            title: The title of the plot. Defaults to "".
+            padding: The padding to add to the plot when auto-ranging. Defaults to 0.01.
+            initial_plot: Whether to plot the initial data. Defaults to True.
         """
         super().__init__()
 
         # store config data
         self.strands = strands
+        self.domains = domains
         self.nucleic_acid_profile = nucleic_acid_profile
-        self.mode = mode
+        self.point_types = point_types
+        self.modifiers = modifiers
+        self.title = title
+        self.padding = padding
         self.plot_data = PlotData()
 
-        # plot initial data
-        self.disableAutoRange()
-        self._plot()
-        self.autoRange()
-        self.setXRange(0, self.width)
-        self._prettify()
-
-        # set up styling
-        self.setWindowTitle("Side View of DNA")  # set the window's title
+        if initial_plot:
+            self.disableAutoRange()
+            self._plot()
+            self.autoRange()
+            self.setXRange(0, self.width)
+            self._prettify()
 
     @property
     def height(self):
@@ -107,7 +152,7 @@ class SideViewPlotter(pg.PlotWidget):
 
     @property
     def width(self):
-        return self.plot_data.strands.size[0]
+        return self.plot_data.domains.count
 
     def refresh(self):
         """Replot plot data."""
@@ -120,6 +165,40 @@ class SideViewPlotter(pg.PlotWidget):
         # so that the plot is cleared after the mouse release event happens
         QTimer.singleShot(0, runner)
         logger.info("Refreshed side view.")
+
+    def export(
+        self,
+        filepath: str,
+        show_after_export: bool = True,
+    ):
+        """
+        Export the plot to image file.
+
+        Args:
+            filepath: The path to save the image to. Include the file extension.
+                Options are .svg, .png, and .jpg.
+            show_after_export: Whether to show the file in the file explorer after
+                exporting. Defaults to True.
+        """
+        # Create the exporter
+        if filepath.endswith(".svg"):
+            exporter = pg.exporters.SVGExporter(self.scene())
+        else:
+            exporter = pg.exporters.ImageExporter(self.scene())
+
+        # Export the image
+        exporter.export(filepath)
+
+        # Show the file in the file explorer
+        if show_after_export:
+            show_in_file_explorer(f"{os.getcwd()}\\{filepath}")
+
+        logger.info(f"Exported side view to {filepath}.")
+
+    def replot(self):
+        """Replot plot data."""
+        self._reset()
+        self._plot()
 
     def _reset(self, plot_data=None):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
@@ -146,22 +225,40 @@ class SideViewPlotter(pg.PlotWidget):
 
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""
+        self.setTitle(self.title) if self.title else None
+
+        # reduce padding for printer mode
+        self.getViewBox().setDefaultPadding(padding=self.padding)
+
         # clear preexisting plotted_gridlines
-        self.plot_data.plotted_gridlines = []
+        self.plot_data.plotted_gridlines.clear()
 
         # create pen for custom grid
-        grid_pen: QPen = pg.mkPen(color=settings.colors["grid_lines"], width=1.4)
+        grid_pen_width = 1.4 * self.modifiers.gridline_mod
+        grid_pen: QPen = pg.mkPen(
+            color=settings.colors["grid_lines"], width=grid_pen_width
+        )
 
         # domain index grid
         for i in range(ceil(self.plot_data.strands.size[0]) + 1):
-            self.plot_data.plotted_gridlines.append(self.addLine(x=i, pen=grid_pen))
+            self.plot_data.plotted_gridlines.append(
+                self.addLine(
+                    x=i,
+                    pen=grid_pen,
+                )
+            )
+            self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
         # for i in <number of helical twists of the tallest domain>...
         with suppress(ZeroDivisionError):
             for i in range(0, ceil(self.height / self.nucleic_acid_profile.H)):
                 self.plot_data.plotted_gridlines.append(
-                    self.addLine(y=(i * self.nucleic_acid_profile.H), pen=grid_pen)
+                    self.addLine(
+                        y=(i * self.nucleic_acid_profile.H),
+                        pen=grid_pen,
+                    )
                 )
+                self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
         # add axis labels
         self.setLabel("bottom", text="x", units="Helical Diameters")
@@ -179,7 +276,9 @@ class SideViewPlotter(pg.PlotWidget):
         from structures.strands.linkage import Linkage
 
         self.plot_data.strands = self.strands
-        self.plot_data.mode = self.mode
+        self.plot_data.domains = self.domains
+        self.plot_data.point_types = self.point_types
+        self.plot_data.modifiers = self.modifiers
         self.plot_data.points.clear()
         self.plot_data.plotted_labels.clear()
         self.plot_data.plotted_points.clear()
@@ -187,7 +286,10 @@ class SideViewPlotter(pg.PlotWidget):
         self.plot_data.plotted_linkages.clear()
         self.plot_data.plotted_strokes.clear()
 
-        for strand_index, strand in enumerate(self.plot_data.strands.strands):
+        # Style the plot; automatically adds labels, ticks, etc.
+        self._prettify()
+
+        for strand_index, strand in enumerate(self.strands.strands):
             # First plot all the points
             to_plot = strand.items.by_type(Point)
 
@@ -199,23 +301,44 @@ class SideViewPlotter(pg.PlotWidget):
             x_coords = np.empty(len(to_plot), dtype=float)
             z_coords = np.empty(len(to_plot), dtype=float)
 
-            # now create the proper plot data for each point one by one
+            # Now create the proper plot data for each point one by one
             for point_index, point in enumerate(to_plot):
-                # Store the point's coordinates.
-                x_coords[point_index] = point.x_coord
-                z_coords[point_index] = point.z_coord
+                # For points that are overlapping on the integrer line, they will be
+                # plotted slightly differently.
+                if point.x_coord % 1 == 0:
+                    # If the point is on the right side of its domain (i.e. the
+                    # point's domain x coord = index + 1) then we will shift it
+                    # slightly to the left so that it is not obscured by the other
+                    # point that is on top of it. Otherwise, we will shift it
+                    # slightly to the right.
+                    if (
+                        # Points that are on the very left (x=0) or the very right (
+                        # x=the number of domains) will not be shifted.
+                        point.x_coord == 0
+                        or point.x_coord == self.domains.count
+                    ):
+                        x_coord = point.x_coord
+                    else:
+                        if point.domain.index == point.x_coord:
+                            x_coord = point.x_coord + 0.04
+                        else:
+                            x_coord = point.x_coord - 0.04
+                else:
+                    x_coord = point.x_coord
+                z_coord = point.z_coord
+
+                x_coords[point_index] = x_coord
+                z_coords[point_index] = z_coord
 
                 # Update the point mappings. This is a dict that allows us to map the
                 # location of a given point to the point object itself.
-                self.plot_data.points[(point.x_coord, point.z_coord)] = point
+                self.plot_data.points[(x_coord, z_coord)] = point
 
                 # If the point type is NOT the same as the active point type, use the
                 # current styles of the point. Otherwise, plot a smaller "o" shaped
                 # point to indicate that the point is not the active point type,
                 # but still exists.
-                if (
-                    self.plot_data.mode == "NEMid" and isinstance(point, Nucleoside)
-                ) or (self.plot_data.mode == "nucleoside" and isinstance(point, NEMid)):
+                if not isinstance(point, self.point_types):
                     symbols[point_index] = "o"
                     symbol_sizes[point_index] = 2
                     symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
@@ -240,17 +363,36 @@ class SideViewPlotter(pg.PlotWidget):
                         )
                         symbols[point_index] = point.styles.symbol
 
-                    # Store the symbol size
-                    symbol_sizes[point_index] = point.styles.size
+                    outline_width = (
+                        point.styles.outline[1] * self.modifiers.point_outline_mod
+                    )
+                    if isinstance(point, NEMid):
+                        symbol_sizes[point_index] = (
+                            point.styles.size * self.modifiers.NEMid_mod
+                        )
+                        if point.junctable:
+                            outline_width = point.styles.outline[1]
+                    elif isinstance(point, Nucleoside):
+                        symbol_sizes[point_index] = (
+                            point.styles.size * self.modifiers.nucleoside_mod
+                        )
+                    else:
+                        symbol_sizes[point_index] = point.styles.size
+                        outline_width = point.styles.outline[1]
 
                     # Create a brush for the symbol, based on the point's styles.
                     symbol_brushes[point_index] = pg.mkBrush(
-                        color=point.styles.fill, width=point.styles.outline[1]
+                        color=point.styles.fill,
                     )
 
                     # Create a pen for the symbol, based on the point's styles.
-                    symbol_pens[point_index] = pg.mkPen(
-                        color=point.styles.outline[0], width=point.styles.outline[1]
+                    symbol_pens[point_index] = (
+                        pg.mkPen(
+                            color=point.styles.outline[0],
+                            width=outline_width,
+                        )
+                        if outline_width > 0
+                        else None
                     )
 
             # Graph the plot for the points and for the strokes separately. First we
@@ -260,10 +402,12 @@ class SideViewPlotter(pg.PlotWidget):
                 z_coords,
                 symbol=symbols,  # type of symbol (in this case up/down arrow)
                 symbolSize=symbol_sizes,  # size of arrows in px
-                pxMode=True,  # means that symbol size is in px and non-dynamic
+                pxMode=True,
                 symbolBrush=symbol_brushes,  # set color of points to current color
-                symbolPen=symbol_pens,  # for the outlines of points
+                symbolPen=symbol_pens,
                 pen=None,
+                skipFiniteCheck=True,
+                name=f"Strand#{strand_index} Points",
             )
             # When a point is clicked, invoke the _points_clicked method.
             plotted_points.sigPointsClicked.connect(self._points_clicked)
@@ -274,12 +418,19 @@ class SideViewPlotter(pg.PlotWidget):
             # onClick method, and more. So, right now we will split all the strand
             # items into subunits of points, discluding linkages. These subunits can
             # be plotted as connected points with a single stroke each.
-            for stroke_segment in strand.items.by_type(Point, Linkage).split(Linkage):
+            for stroke_segment_index, stroke_segment in enumerate(
+                strand.items.by_type(Point, Linkage).split(Linkage)
+            ):
                 if len(stroke_segment) > 0:
                     # Gather an array of all the x and z coordinates of the points in
                     # the stroke segment.
-                    x_coords = [point.x_coord for point in stroke_segment]
-                    z_coords = [point.z_coord for point in stroke_segment]
+                    stroke_length = len(stroke_segment) + int(strand.closed)
+                    x_coords = np.zeros(stroke_length, dtype=float)
+                    z_coords = np.zeros(stroke_length, dtype=float)
+
+                    for point_index, point in enumerate(stroke_segment):
+                        x_coords[point_index] = point.x_coord
+                        z_coords[point_index] = point.z_coord
 
                     # Use the first point to fetch the number of total domains that are
                     # currently in existence.
@@ -295,15 +446,15 @@ class SideViewPlotter(pg.PlotWidget):
                         == domain_count - 1
                     )
 
-                    # If the point that proceeds a given point is in the last domain,
-                    # and the point being proceeded is in the first domain, then the
-                    # points are indeed continuous, but we don't want a line going
-                    # across the screen. If we know that a strand is not interdomain
-                    # (does not contain points within different domains, however,
-                    # we can skip this check and connect all the points.
-                    if not strand.interdomain():
-                        connect = "all"
-                    else:
+                    if interdomain := strand.interdomain():
+                        # If the strand is interdomain, it may also be cross-screen (
+                        # that is, it breaks off on one side of the screen and
+                        # continues on the other). For this reason, we will create an
+                        # array of booleans that indicate where to break apart the
+                        # coordinates into separate strokes. We will plot multiple
+                        # strokes instead of using pyqtgraph's "connect" feature,
+                        # because we will later round the edges of strokes.
+
                         # If the strand is closed, a pseudo point will be added to
                         # the end of the stroke segment. Whether this point gets a
                         # connection depends on the "add_connected_pseudo_point"
@@ -311,56 +462,98 @@ class SideViewPlotter(pg.PlotWidget):
                         if strand.closed:
                             # If the strand is closed, then we need to add a pseudo
                             # point to the end of the stroke segment.
-                            connect = np.empty(len(stroke_segment) + 1, dtype=bool)
+                            split = np.empty(len(stroke_segment) + 1, dtype=bool)
                         else:
                             # If the strand is not closed, then we don't need to add a
                             # pseudo point to the end of the stroke segment.
-                            connect = np.empty(len(stroke_segment), dtype=bool)
+                            split = np.empty(len(stroke_segment), dtype=bool)
 
                         for index, point in enumerate(stroke_segment[:-1]):
-                            connect[index] = (
+                            split[index] = (
                                 abs(point.domain - stroke_segment[index + 1].domain)
-                                != domain_count - 1
+                                == domain_count - 1
                             )
 
                         # If the strand is closed then connect the last point to the
                         # first point by creating a pseudo-point at the first point's
                         # location. This will give the appearance of a closed strand.
                         if strand.closed:
-                            connect[-1] = add_connected_pseudo_point
-                            x_coords.append(x_coords[0])
-                            z_coords.append(z_coords[0])
+                            split[-1] = add_connected_pseudo_point
+                            x_coords[-1] = x_coords[0]
+                            z_coords[-1] = z_coords[0]
 
-                    # Create the actual plot data item for the stroke segment.
-                    plotted_stroke = pg.PlotDataItem(
-                        x_coords,
-                        z_coords,
-                        pen=pg.mkPen(  # Create pen for the stroke from strand styles
-                            color=strand.styles.color.value,
-                            width=strand.styles.thickness.value,
-                        ),
-                        connect=connect,
-                    )
-                    # Make it so that the stroke itself can be clicked.
-                    plotted_stroke.setCurveClickable(True)
-                    # When the stroke is clicked, emit the strand_clicked signal. This
-                    # will lead to the creation of a StrandConfig dialog.
-                    plotted_stroke.sigClicked.connect(
-                        lambda *args, to_emit=strand: self.strand_clicked.emit(to_emit)
-                    )
-                    # Store the stroke plotter object, which will be used later.
-                    self.plot_data.plotted_strokes.append(plotted_stroke)
+                        # Use the indices of the split array to split the x and z arrays
+                        # into subarrays, which will be connected.
+                        x_coords_subarrays = np.split(
+                            x_coords, np.nonzero(split)[0] + 1
+                        )
+                        z_coords_subarrays = np.split(
+                            z_coords, np.nonzero(split)[0] + 1
+                        )
+
+                    # If we know that a strand is not interdomain (does not contain
+                    # points within different domains, however, we can skip this
+                    # check and connect all the points).
+                    else:
+                        x_coords_subarrays = (x_coords,)
+                        z_coords_subarrays = (z_coords,)
+
+                    for x_coords_subarray, z_coords_subarray in zip(
+                        x_coords_subarrays, z_coords_subarrays
+                    ):
+                        if len(x_coords_subarray) > 0:
+                            if interdomain:
+                                # Round the subarrays' edges using Chaikin's corner
+                                # cutting algorithm.
+                                rounded_coords = chaikins_corner_cutting(
+                                    np.column_stack(
+                                        (x_coords_subarray, z_coords_subarray)
+                                    ),
+                                    refinements=3,
+                                    offset=0.3,
+                                )
+                                x_coords_subarray = rounded_coords[:, 0]
+                                z_coords_subarray = rounded_coords[:, 1]
+
+                            stroke_pen = pg.mkPen(
+                                color=strand.styles.color.value,
+                                width=(
+                                    strand.styles.thickness.value
+                                    * self.modifiers.stroke_mod
+                                ),
+                            )
+
+                            # Create the actual plot data item for the stroke segment.
+                            plotted_stroke = pg.PlotDataItem(
+                                x_coords_subarray,
+                                z_coords_subarray,
+                                pen=stroke_pen,
+                                name=f"Strand#{strand_index} Stroke#"
+                                f"{stroke_segment_index}/{len(stroke_segment)}",
+                            )
+                            # Make it so that the stroke itself can be clicked.
+                            plotted_stroke.setCurveClickable(True)
+                            # When the stroke is clicked, emit the strand_clicked
+                            # signal. This will lead to the creation of a
+                            # StrandConfig dialog.
+                            plotted_stroke.sigClicked.connect(
+                                lambda *args, f=strand: self.strand_clicked.emit(f)
+                            )
+                            # Store the stroke plotter object, which will be used later.
+                            self.plot_data.plotted_strokes.append(plotted_stroke)
 
                     # Now that we've plotted the stroke, we need to plot the
                     # linkages. We will sort out all the linkages in the strand,
                     # and then plot them one by one.
-                    for linkage in strand.items.by_type(Linkage):
+                    for linkage_index, linkage in enumerate(
+                        strand.items.by_type(Linkage)
+                    ):
                         # Linkages have a .plot_points attribute that contains three
                         # points: the first point, the midpoint, and the last point.
                         coords = linkage.plot_points
                         # Round out the coordinates using Chaikin's Corner Cutting to
                         # give the appearance of a smooth curve.
-                        coords = chaikins_corner_cutting(coords, refinements=9)
+                        coords = chaikins_corner_cutting(coords, refinements=3)
                         # Split the coordinates into x and z coordinate arrays for
                         # plotting with pyqtgraph.
                         x_coords = [coord[0] for coord in coords]
@@ -372,8 +565,10 @@ class SideViewPlotter(pg.PlotWidget):
                             z_coords,
                             pen=pg.mkPen(  # Create a pen for the linkage
                                 color=linkage.styles.color,
-                                width=linkage.styles.thickness,
+                                width=linkage.styles.thickness
+                                * self.modifiers.stroke_mod,
                             ),
+                            name=f"Strand#{strand_index} Linkage#{linkage_index}",
                         )
                         # Make it so that the linkage itself can be clicked.
                         plotted_linkage.setCurveClickable(True)
@@ -404,17 +599,18 @@ class SideViewPlotter(pg.PlotWidget):
             # Create a brush for the nick symbols, based on the current color scheme
             # found in settings.
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
-        for nick in self.plot_data.strands.nicks:
+        for nick_index, nick in enumerate(self.strands.nicks):
             plotted_nick = pg.PlotDataItem(
                 (nick.x_coord,),  # Just one point: the nick's x coordinate
                 (nick.z_coord,),  # Just one point: the nick's z coordinate
                 # The same styles for all nicks...
                 symbol="o",
-                symbolSize=8,
+                symbolSize=8 * self.modifiers.nick_mod,
                 pxMode=True,  # means that symbol size doesn't change with zoom
                 symbolBrush=nick_brush,
                 symbolPen=None,  # No outline for the symbol
                 pen=None,  # No line connecting the points
+                name=f"Nick#{nick_index}",
             )
             # Store the nick plotter object, which will be used for actually
             # plotting the nick later.
@@ -427,7 +623,7 @@ class SideViewPlotter(pg.PlotWidget):
 
         # Items will be plotted one layer at a time, from bottom to top. The items
         # plotted last go on top, since all items before them are plotted first.
-        # Thence, this list is in reverse order of the layers in the plot.
+        # Thence, this list is Fin reverse order of the layers in the plot.
         layers = (
             self.plot_data.plotted_linkages,
             self.plot_data.plotted_strokes,
@@ -439,6 +635,3 @@ class SideViewPlotter(pg.PlotWidget):
         for layer in layers:
             for item in layer:
                 self.addItem(item)
-
-        # Style the plot; automatically adds labels, ticks, etc.
-        self._prettify()

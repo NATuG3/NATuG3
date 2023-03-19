@@ -73,7 +73,7 @@ def custom_symbol(
 
 
 def chaikins_corner_cutting(
-    coords: List[Tuple[float, float]], offset=0.25, refinements=5
+    coords: List[Tuple[float, float]] | np.ndarray, offset=0.25, refinements=5
 ):
     """
     Chaikin's corner cutting algorithm.
@@ -92,8 +92,7 @@ def chaikins_corner_cutting(
         Coords will be mutated
     """
     # https://stackoverflow.com/a/47255374
-    coords = tuple(coords)
-    coords = np.array(coords)
+    coords = np.array(coords) if not isinstance(coords, np.ndarray) else coords
 
     for i in range(refinements):
         L = coords.repeat(2, axis=0)

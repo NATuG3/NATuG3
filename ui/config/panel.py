@@ -6,7 +6,9 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 from constants.tabs import *
 from constants.toolbar import *
+from structures.points import NEMid, Nucleoside
 from ui.config.tabs import domains, nucleic_acid, sequencing
+from ui.dialogs.plot_exporter.plot_exporter import PlotExporter
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
 
@@ -80,6 +82,7 @@ class Panel(QWidget):
         self.nucleic_acid.updated.connect(self._on_tab_update)
         self.tab_area.currentChanged.connect(self._on_tab_change)
         self.update_graphs.clicked.connect(self._on_update_graphs)
+        self.export_graphs.clicked.connect(self._on_export_graphs)
 
     @pyqtSlot()
     def _on_update_graphs(self):
@@ -88,6 +91,11 @@ class Panel(QWidget):
             self.runner.managers.strands.recompute()
             self.runner.window.side_view.refresh()
             self.runner.window.top_view.refresh()
+
+    @pyqtSlot()
+    def _on_export_graphs(self):
+        """Export the graphs to a file."""
+        PlotExporter(self.runner).show()
 
     @pyqtSlot()
     def _on_tab_update(self):
@@ -116,8 +124,8 @@ class Panel(QWidget):
             logger.info("The current tab has been changed to Nucleic Acid or Domains")
 
             # If the plot mode was not already NEMid make it NEMid
-            if self.runner.managers.misc.plot_mode != "NEMid":
-                self.runner.managers.misc.plot_mode = "NEMid"
+            if not isinstance(NEMid, self.runner.managers.misc.plot_types):
+                self.runner.managers.misc.plot_types = (NEMid,)
                 self.runner.window.side_view.refresh()  # Refresh the side view to
                 # ensure that it displays the correct type of point
 
@@ -131,8 +139,8 @@ class Panel(QWidget):
             logger.info("The current tab has been changed to Strands")
 
             # If the plot mode was not already nucleoside make it nucleoside
-            if self.runner.managers.misc.plot_mode != "nucleoside":
-                self.runner.managers.misc.plot_mode = "nucleoside"
+            if not isinstance(Nucleoside, self.runner.managers.misc.plot_types):
+                self.runner.managers.misc.plot_types = (Nucleoside,)
                 self.runner.window.side_view.refresh()  # Refresh the side view to
                 # ensure that it displays the correct type of point
 
