@@ -1,7 +1,8 @@
 import logging
-import os
+from os.path import abspath
 
 import pyqtgraph as pg
+import pyqtgraph.exporters
 
 from utils import show_in_file_explorer
 
@@ -34,6 +35,6 @@ class Plotter(pg.PlotWidget):
 
         # Show the file in the file explorer
         if show_after_export:
-            show_in_file_explorer(f"{os.getcwd()}\\{filepath}")
+            show_in_file_explorer(abspath(filepath))
 
-        logger.info(f"Exported side view to {filepath}.")
+        logger.info(f"Exported plot to {filepath}.")

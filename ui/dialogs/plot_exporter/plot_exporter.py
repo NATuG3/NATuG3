@@ -1,5 +1,6 @@
 import os
 from functools import partial
+from os.path import abspath
 from threading import Thread
 from typing import Tuple, Type
 
@@ -197,4 +198,4 @@ class PlotExporter(QDialog):
         )
         [thread.start() for thread in threads]
         [thread.join() for thread in threads]
-        show_in_file_explorer(f"{os.getcwd()}/saves")
+        show_in_file_explorer(abspath("saves/"))
