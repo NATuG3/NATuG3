@@ -46,8 +46,7 @@ class SideViewPanel(QGroupBox):
         super().__init__(parent)
 
         # Set the styles of the widget
-        self.setObjectName("Side View")
-        self.setTitle("Side View")
+        self.setObjectName("sideView")
         self.setStatusTip("A plot of the side view of all domains")
 
         # Set the layout of the widget so that we can place the plot inside

@@ -36,8 +36,7 @@ class TopViewPanel(QGroupBox):
         super().__init__(parent)
 
         # Set the styles of the widget
-        self.setObjectName("Top View")
-        self.setTitle("Top View")
+        self.setObjectName("topView")
         self.setStatusTip("A plot of the top view of all domains")
 
         # Set the layout of the widget so that we can place the plot inside
