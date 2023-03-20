@@ -101,6 +101,8 @@ class PlotExporter(QDialog):
             modifiers=self.get_sideview_plot_modifiers(),
             title=self.side_view_plot_title.text(),
             padding=self.side_view_padding.value(),
+            dot_hidden_points=False,
+            square_baseless_nucleosides=True
         )
         self.side_view_export_plot.setStyleSheet("border: 2px solid black;")
         self.side_view_plot_area.layout().insertWidget(
@@ -113,6 +115,8 @@ class PlotExporter(QDialog):
             circle_radius=self.runner.managers.nucleic_acid_profile.current.D,
             numbers=self.top_view_numbers.isChecked(),
             rotation=self.top_view_rotation.value(),
+            padding=self.top_view_padding.value(),
+            stroke=self.top_view_stroke.value(),
             title=self.top_view_plot_title.text(),
         )
         self.top_view_export_plot.setStyleSheet("border: 2px solid black;")
@@ -153,10 +157,15 @@ class PlotExporter(QDialog):
         # Hook all the top view signals
         for input_ in (
             self.top_view_rotation,
-            self.top_view_plot_title
+            self.top_view_plot_title,
+            self.top_view_stroke,
+            self.top_view_padding
         ):
             input_.editingFinished.connect(self.update_top_view_preview)
         self.top_view_numbers.stateChanged.connect(self.update_top_view_preview)
+        self.top_view_padding.valueChanged.connect(
+            self.top_view_export_plot.autoRange
+        )
 
     @pyqtSlot()
     def update_side_view_preview(self):
@@ -173,6 +182,8 @@ class PlotExporter(QDialog):
         self.top_view_export_plot.title = self.top_view_plot_title.text()
         self.top_view_export_plot.numbers = self.top_view_numbers.isChecked()
         self.top_view_export_plot.rotation = self.top_view_rotation.value()
+        self.top_view_export_plot.padding = self.top_view_padding.value()
+        self.top_view_export_plot.stroke = self.top_view_stroke.value()
         self.top_view_export_plot.refresh()
 
     @pyqtSlot()

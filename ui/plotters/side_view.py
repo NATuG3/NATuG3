@@ -91,6 +91,8 @@ class SideViewPlotter(Plotter):
         point_types: The types of points to plot. Options are Nucleoside and
             NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
         modifiers: Various modifiers for the scale of various plot aspects.
+        square_baseless_nucleosides: Whether to make baseless nucleosides circles
+            instead of their usual arrows.
         title: The title of the plot.
 
     Signals:
@@ -111,6 +113,8 @@ class SideViewPlotter(Plotter):
         modifiers: PlotModifiers = PlotModifiers(),
         title: str = "",
         padding: float = 0.01,
+        dot_hidden_points: bool = True,
+        square_baseless_nucleosides: bool = False,
         initial_plot: bool = True,
     ) -> None:
         """
@@ -125,6 +129,10 @@ class SideViewPlotter(Plotter):
             modifiers: Various modifiers for the scale of various plot aspects.
             title: The title of the plot. Defaults to "".
             padding: The padding to add to the plot when auto-ranging. Defaults to 0.01.
+            square_baseless_nucleosides: Whether to make baseless nucleosides squares
+                instead of their usual arrows. Defaults to False.
+            dot_hidden_points: Whether to show points that are not being plotted as
+                small circles. Defaults to True.
             initial_plot: Whether to plot the initial data. Defaults to True.
         """
         super().__init__()
@@ -136,6 +144,8 @@ class SideViewPlotter(Plotter):
         self.point_types = point_types
         self.modifiers = modifiers
         self.title = title
+        self.square_baseless_nucleosides = square_baseless_nucleosides
+        self.dot_hidden_points = dot_hidden_points
         self.padding = padding
         self.plot_data = PlotData()
 
@@ -309,11 +319,17 @@ class SideViewPlotter(Plotter):
                 # current styles of the point. Otherwise, plot a smaller "o" shaped
                 # point to indicate that the point is not the active point type,
                 # but still exists.
+                is_baseless_nucleoside = (
+                    self.square_baseless_nucleosides
+                    and isinstance(point, Nucleoside)
+                    and point.base is None
+                )
                 if not isinstance(point, self.point_types):
-                    symbols[point_index] = "o"
-                    symbol_sizes[point_index] = 2
-                    symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
-                    symbol_pens[point_index] = None
+                    if self.dot_hidden_points:
+                        symbols[point_index] = "o"
+                        symbol_sizes[point_index] = 2
+                        symbol_brushes[point_index] = pg.mkBrush(color=(30, 30, 30))
+                        symbol_pens[point_index] = None
                 else:
                     # if the symbol is a custom symbol, use the custom symbol
                     if point.styles.symbol_is_custom():
@@ -365,6 +381,13 @@ class SideViewPlotter(Plotter):
                         if outline_width > 0
                         else None
                     )
+
+                if (
+                    is_baseless_nucleoside
+                    and self.square_baseless_nucleosides
+                    and not self.dot_hidden_points
+                ):
+                    symbols[point_index] = "s"
 
             # Graph the plot for the points and for the strokes separately. First we
             # will plot the points.
