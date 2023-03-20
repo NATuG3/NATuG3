@@ -166,35 +166,6 @@ class SideViewPlotter(Plotter):
         QTimer.singleShot(0, runner)
         logger.info("Refreshed side view.")
 
-    def export(
-        self,
-        filepath: str,
-        show_after_export: bool = True,
-    ):
-        """
-        Export the plot to image file.
-
-        Args:
-            filepath: The path to save the image to. Include the file extension.
-                Options are .svg, .png, and .jpg.
-            show_after_export: Whether to show the file in the file explorer after
-                exporting. Defaults to True.
-        """
-        # Create the exporter
-        if filepath.endswith(".svg"):
-            exporter = pg.exporters.SVGExporter(self.scene())
-        else:
-            exporter = pg.exporters.ImageExporter(self.scene())
-
-        # Export the image
-        exporter.export(filepath)
-
-        # Show the file in the file explorer
-        if show_after_export:
-            show_in_file_explorer(f"{os.getcwd()}\\{filepath}")
-
-        logger.info(f"Exported side view to {filepath}.")
-
     def replot(self):
         """Replot plot data."""
         self._reset()
