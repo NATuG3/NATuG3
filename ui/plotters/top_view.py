@@ -64,7 +64,9 @@ class TopViewPlotter(Plotter):
         circle_radius: Radius of the plotted circles.
         rotation: Rotation of the plot. In degrees.
         domains: Domains to plot.
-        worker: The top view coordinate generator object.
+        title: Title of the plot. No title is shown if None.
+        numbers: Whether to plot the domain numbers.
+        stroke: Stroke width of the plotted stroke.
         plot_data: Currently plotted data.
 
     Signals:
@@ -80,33 +82,38 @@ class TopViewPlotter(Plotter):
     def __init__(
         self,
         domains: "Domains",
-        domain_radius: int,
+        circle_radius: int,
         rotation: float = 0,
         numbers: bool = True,
+        stroke: int = 5,
+        padding: float = 0.15,
         title: str = "",
     ):
         """
         Initialize top view plotter instance.
 
         Args:
-            worker: The top view coordinate generator object.
             domains: Domains to plot.
-            domain_radius: Radius of a given domain.
+            circle_radius: Radius of a given domain.
             rotation: Rotation of the plot. In degrees. Defaults to 0.
             numbers: Whether to plot the domain numbers. Defaults to True.
+            stroke: Stroke width of the plotted stroke. Defaults to 5.
+            padding: Padding of the plot to use when auto-ranging. Defaults to 0.15.
             title: Title of the plot. No title is shown if None. Defaults to None.
         """
 
         super().__init__()
 
-        self.circle_radius = domain_radius
+        self.circle_radius = circle_radius
         self.rotation = rotation
         self.domains = domains
         self.title = title
         self.numbers = numbers
+        self.stroke = stroke
+        self.padding = padding
         self.plot_data = PlotData()
 
-        self.getViewBox().setDefaultPadding(padding=0.18)
+        self.getViewBox().setDefaultPadding(0.18)
         self.disableAutoRange()
 
         self._plot()
@@ -136,6 +143,7 @@ class TopViewPlotter(Plotter):
         self.setTitle(self.title) if self.title else None
 
         # set correct range
+        self.getViewBox().setDefaultPadding(self.padding)
         self.autoRange()
 
         # set axis labels
@@ -207,7 +215,7 @@ class TopViewPlotter(Plotter):
         self.plot_data.plotted_stroke = self.plot(
             x_coords,
             y_coords,
-            pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=7),
+            pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=self.stroke),
             symbol=None,
             pxMode=False,
         )

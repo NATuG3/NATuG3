@@ -199,7 +199,7 @@ class SideViewPlotter(Plotter):
         self.setTitle(self.title) if self.title else None
 
         # reduce padding for printer mode
-        self.getViewBox().setDefaultPadding(padding=self.padding)
+        self.getViewBox().setDefaultPadding(self.padding)
 
         # clear preexisting plotted_gridlines
         self.plot_data.plotted_gridlines.clear()

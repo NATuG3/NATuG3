@@ -45,7 +45,7 @@ class TopViewPanel(QGroupBox):
         # Initialize the plot and connect the signals
         self.plot = ui.plotters.TopViewPlotter(
             domains=self.runner.managers.domains.current,
-            domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
+            circle_radius=self.runner.managers.nucleic_acid_profile.current.D,
             rotation=0,
         )
         self.plot.domain_clicked.connect(self._domain_clicked)

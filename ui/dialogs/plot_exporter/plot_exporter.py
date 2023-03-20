@@ -110,7 +110,7 @@ class PlotExporter(QDialog):
     def _top_view_plot_area(self):
         self.top_view_export_plot = TopViewPlotter(
             domains=self.runner.managers.domains.current,
-            domain_radius=self.runner.managers.nucleic_acid_profile.current.D,
+            circle_radius=self.runner.managers.nucleic_acid_profile.current.D,
             numbers=self.top_view_numbers.isChecked(),
             rotation=self.top_view_rotation.value(),
             title=self.top_view_plot_title.text(),
@@ -135,6 +135,7 @@ class PlotExporter(QDialog):
             self.strand_stroke_modifier,
             self.gridline_width_modifier,
             self.side_view_padding,
+            self.side_view_plot_title
         ):
             input_.editingFinished.connect(self.update_side_view_preview)
 
@@ -144,17 +145,18 @@ class PlotExporter(QDialog):
         ):
             input_.stateChanged.connect(self.update_side_view_preview)
 
-        self.side_view_plot_title.textChanged.connect(self.update_side_view_preview)
-
         # When the side view padding is changed re-autorange the plot
         self.side_view_padding.valueChanged.connect(
             self.side_view_export_plot.autoRange
         )
 
         # Hook all the top view signals
-        self.top_view_rotation.valueChanged.connect(self.update_top_view_preview)
+        for input_ in (
+            self.top_view_rotation,
+            self.top_view_plot_title
+        ):
+            input_.editingFinished.connect(self.update_top_view_preview)
         self.top_view_numbers.stateChanged.connect(self.update_top_view_preview)
-        self.top_view_plot_title.textChanged.connect(self.update_top_view_preview)
 
     @pyqtSlot()
     def update_side_view_preview(self):
