@@ -1,6 +1,5 @@
-from collections import deque
 from dataclasses import dataclass, InitVar
-from typing import Deque, Literal, Tuple, Iterable, List
+from typing import Literal, Tuple, Iterable, List
 from uuid import uuid1
 
 import numpy as np
@@ -88,7 +87,7 @@ class Linkage:
         self.styles = styles or LinkageStyles(linkage=self)
         self.items = items or [Nucleoside() for _ in range(count)]
 
-        # Convert the items to a deque if they are not already.
+        # Convert the items to a list if they are not already.
         self._initial_item_coordinates = tuple(item.position() for item in self.items)
 
         # Ensure all the items are nucleosides
@@ -123,11 +122,9 @@ class Linkage:
                 nucleosides to the right of the linkage.
         """
         if length < 0:
-            for _ in range(-length):
-                self.leftappend(Nucleoside(linkage=self))
+            self.items = [Nucleoside(linkage=self) for _ in range(-length)] + self.items
         else:
-            for _ in range(length):
-                self.append(Nucleoside(linkage=self))
+            self.items += [Nucleoside(linkage=self) for _ in range(length)]
 
     def trim(self, length: int):
         """
@@ -138,9 +135,9 @@ class Linkage:
                 to the left. If positive, trim the linkage to the right.
         """
         if length < 0:
-            self.items = deque(list(self.items)[:length])
+            self.items = list(self.items)[:length]
         else:
-            self.items = deque(list(self.items)[length:])
+            self.items = list(self.items)[length:]
 
     @property
     def sequence(self) -> List[Literal["A", "T", "C", "G"]]:
@@ -188,17 +185,9 @@ class Linkage:
         """Append a point to the linkage."""
         self.items.append(item)
 
-    def leftappend(self, item: Nucleoside):
-        """Append a point to the left of the linkage."""
-        self.items.appendleft(item)
-
-    def extend(self, items: Deque[Nucleoside]):
+    def extend(self, items: List[Nucleoside]):
         """Extend the linkage with a list of points."""
         self.items.extend(items)
-
-    def leftextend(self, items: Deque[Nucleoside]):
-        """Extend the linkage with a list of points to the left."""
-        self.items.extendleft(items)
 
 
 def to_df(linkages: Iterable[Linkage]):

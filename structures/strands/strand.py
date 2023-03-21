@@ -1,12 +1,10 @@
 import itertools
 import random
-from collections import deque
 from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, List, Type, Set
 from uuid import uuid1
 
-import numpy as np
 import pandas as pd
 
 from constants.bases import DNA
@@ -16,7 +14,6 @@ from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
-from structures.utils import converge_point_data
 from utils import rgb_to_hex
 
 
@@ -118,7 +115,7 @@ class StrandStyles:
         )
 
 
-class StrandItems(deque):
+class StrandItems(list):
     """
     A container for the items in a Strand.
 
@@ -416,126 +413,6 @@ class Strand:
 
         # If we get here, then all items match.
         return True
-
-    def trim(self, count: int):
-        """
-        Remove <count> number of items from the strand.
-
-        Removes from the right side of the strand if count is positive, and from the
-        left side of the strand if count is negative.
-
-        Args:
-            count: The number of items to remove.
-        """
-        if count > 0:
-            for i in range(count):
-                self.items.pop().strand = None
-        else:
-            for i in range(abs(count)):
-                self.items.popleft().strand = None
-
-    def generate(self, count: int, domain: "Domain" = None) -> None:
-        """
-        Generate additional NEMids and Nucleosides for the strand.
-
-        If a negative count is given, then NEMids and Nucleosides are generated for
-        and appended to the left side of the strand. Otherwise, they are generated for
-        and appended to the right side of the strand.
-
-        Args:
-            count: The number of additional NEMids to generate. Nucleosides are
-                generated automatically, this is specifically an integer number of
-                NEMids.
-            domain: The domain to use for x coord generation in the NEMid generation
-                process. If this is None the domain of the right most NEMid is used
-                by default if the count is positive, and the domain of the left most
-                NEMid is used by default if the count is negative.
-
-        Raises:
-            ValueError: If the strand is empty we cannot generate additional NEMids.
-        """
-        if self.empty:
-            raise ValueError("Cannot generate for an empty strand.")
-
-        # Compute variables dependent on direction. Edge_NEMid == rightmost or
-        # leftmost NEMid based off of the direction that we're generating NEMids in.
-        # Modifier == whether we are increasing or decreasing angles/z-coords as we
-        # progress. Takes the form of -1 or 1 so that we can multiply it by the
-        # changes.
-        if count > 0:
-            # If we're generating to the right, the edge NEMid is the rightmost NEMid.
-            edge_item = self.items[-1]
-            modifier = 1
-        elif count < 0:
-            # If we're generating to the left, the edge item is the leftmost item.
-            edge_item = self.items[0]
-            modifier = -1
-        else:
-            # If count == 0, then we don't need to do anything.
-            return
-
-        # If they do not pass a Domain object, use the domain of the right most NEMid
-        domain = domain if domain is not None else edge_item.domain
-
-        # Create easy referneces for various nucleic acid setting attributes. This is to
-        # make the code more readable.
-        theta_b = self.nucleic_acid_profile.theta_b
-        Z_b = self.nucleic_acid_profile.Z_b
-
-        # Obtain preliminary data
-        initial_angle = edge_item.angle + ((theta_b / 2) * modifier)
-        initial_z_coord = edge_item.z_coord + ((Z_b / 2) * modifier)
-        final_angle = initial_angle + ((count + 3) * (theta_b * modifier))
-        final_z_coord = initial_z_coord + ((count + 3) * (Z_b * modifier))
-
-        # Generate the angles for the points
-        angles = np.arange(
-            initial_angle,  # when to start generating angles
-            final_angle,  # when to stop generating angles
-            modifier * (theta_b / 2),  # the amount to step by for each angle
-        )
-
-        # Generate additional x coordinates.
-        x_coords = [Point.x_coord_from_angle(angle, domain) for angle in angles]
-        x_coords = np.array(x_coords)
-
-        # Generate the z coords for the points.
-        z_coords = np.arange(
-            initial_z_coord,  # when to start generating z coords
-            final_z_coord,  # when to stop generating z coords
-            modifier * (Z_b / 2),  # the amount to step by for each z coord
-        )
-
-        # Ensure that all the items are the same length
-        greatest_count = min(
-            (
-                len(angles),
-                len(x_coords),
-                len(z_coords),
-            )
-        )
-        angles = angles[:greatest_count]
-        x_coords = x_coords[:greatest_count]
-        z_coords = z_coords[:greatest_count]
-
-        # Converge the newly generated data and add it to the strand
-        new_items = converge_point_data(
-            angles,
-            x_coords,
-            z_coords,
-            initial_type=NEMid if isinstance(edge_item, Nucleoside) else Nucleoside,
-            break_at=abs(count),
-        )
-
-        # Assign domains for all items
-        for item in new_items:
-            item.domain = domain
-            item.direction = edge_item.direction
-
-        if count < 0:
-            self.leftextend(new_items)
-        else:  # direction == RIGHT:
-            self.extend(new_items)
 
     def remove(self, item: Point) -> None:
         """Remove an item from the strand."""
