@@ -1,5 +1,6 @@
 import itertools
 import logging
+from collections import deque
 from contextlib import suppress
 from copy import deepcopy
 from functools import partial
@@ -18,7 +19,7 @@ from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
-from structures.strands.strand import Strand
+from structures.strands.strand import Strand, StrandItems
 from utils import show_in_file_explorer, rgb_to_hex
 
 logger = logging.getLogger(__name__)
@@ -469,9 +470,9 @@ class Strands:
         for item in new_strand.items:
             item.strand = new_strand
 
-        assert [item.strand == new_strand for item in new_strand], (
-            "All items in the new strand must have the new strand as their parent."
-        )
+        assert [
+            item.strand == new_strand for item in new_strand
+        ], "All items in the new strand must have the new strand as their parent."
 
         # Add the new strand to the container
         self.append(new_strand)
@@ -493,7 +494,7 @@ class Strands:
             The two new strands that were created.
         """
         assert (
-                linkage.strand.strands is self
+            linkage.strand.strands is self
         ), "Linkage is not in this Strands container."
 
         logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
@@ -520,7 +521,7 @@ class Strands:
             tuple(linkage.strand[: linkage.strand.index(linkage)]),
         )
         new_strand_two.extend(
-            tuple(linkage.strand[linkage.strand.index(linkage) + 1:]),
+            tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
         )
 
         # Add the new strands to the container
@@ -675,9 +676,19 @@ class Strands:
 
             # if both of the NEMids have closed sequencing
             elif NEMid1.strand.closed and NEMid2.strand.closed:
+                # convert the strands to deques so that they can be rotated
+                NEMid1.strand.items = deque(NEMid1.strand.items)
+                NEMid2.strand.items = deque(NEMid2.strand.items)
+
                 # alternate sequencing that starts and ends at the junction site
                 for NEMid_ in (NEMid1, NEMid2):
-                    NEMid_.strand.items.rotate(len(NEMid_.strand) - 1 - NEMid_.index)
+                    NEMid_.strand.items.rotate(
+                        len(NEMid_.strand) - 1 - NEMid_.index
+                    )
+
+                # convert the strands back to StrandItems
+                NEMid1.strand.items = StrandItems(NEMid1.strand.items)
+                NEMid2.strand.items = StrandItems(NEMid2.strand.items)
 
                 # add the entire first reordered strand to the new strand
                 new_strands[0].items.extend(NEMid1.strand.items)
