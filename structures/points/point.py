@@ -56,14 +56,10 @@ class PointStyles:
         rotation: The rotation of the symbol. This only is checked when the symbol
             isn't a default symbol (is not in all_symbols). This is in degrees.
         fill: The color of the Point. Tuple of (r, g, b) values.
+        font: The font of the Point. This is only checked when the symbol is a custom
+            symbol. This is a str.
         outline: The color of the outline of the Point. Tuple of (color, width).
-
-    Methods:
-        set_defaults: Automatically set the color of the Point.
-        highlight: Highlight the point.
-        select: Select the point.
-        as_str: Return the styles as a string.
-        from_str: Set the styles from a string.
+        state: The state of the Point. This is a str.
     """
 
     point: "Point" = None
@@ -71,6 +67,7 @@ class PointStyles:
     size: int = None
     rotation: float = None
     fill: Tuple[int, int, int] = None
+    font: str = None
     outline: Tuple[Tuple[int, int, int], float] = None, None
     state = "default"
 
@@ -124,11 +121,13 @@ class PointStyles:
                         else ((0, 0, 0), 0.5)
                     )
 
-                    # Since there is no base make the symbol an arrow
-                    self.symbol = "t1" if point.direction is UP else "t"
+                    # Since there is no base make he symbol an arrow
+                    self.symbol = "V"
+                    self.rotation = 0 if point.direction is UP else 180
+                    self.font = "Monaco"
 
                     # Since there's no base make the point smaller
-                    self.size = 5.5
+                    self.size = 8
                 else:
                     # Based nucleosides are dimly colored
                     self.fill = dim_color(strand.styles.color.value, 0.3)
@@ -141,7 +140,7 @@ class PointStyles:
                     self.rotation = -90 if point.direction is UP else 90
 
                     # Since there is a base make it bigger
-                    self.size = 9
+                    self.size = 5
             elif isinstance(point, NEMid):
                 # All NEMids share some common styles
                 self.symbol = "t1" if point.direction is UP else "t"
