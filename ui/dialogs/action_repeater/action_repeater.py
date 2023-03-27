@@ -123,7 +123,7 @@ class ActionRepeater(QDialog):
 
     def _on_cancelled(self):
         """Reset the point's state to normal and close the dialog."""
-        self.point.styles.change_state("normal")
+        self.point.styles.change_state("default")
         self.updated.emit()
         self.close()
 
