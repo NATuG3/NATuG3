@@ -51,7 +51,7 @@ class ActionRepeater(QDialog):
         point: Point,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
-        types_to_run_on: tuple[Type]
+        types_to_run_on: tuple[Type],
     ):
         super(ActionRepeater, self).__init__(parent)
         uic.loadUi("ui/dialogs/action_repeater/action_repeater.ui", self)
@@ -80,9 +80,13 @@ class ActionRepeater(QDialog):
 
     def _set_initial_values(self):
         self.repeat_every.setMaximum(self.point_strand_length)
-        self.repeat_for.setMaximum(
-            self.point_strand_length // self.nucleic_acid_profile.B
-        )
+
+        if self.action == "conjunct":
+            self.repeat_for.setMaximum(
+                self.point_strand_length // self.nucleic_acid_profile.B
+            )
+        else:
+            self.repeat_for.setMaximum(self.point_strand_length)
 
     def _prettify(self):
         """Prettify the ui elements."""
