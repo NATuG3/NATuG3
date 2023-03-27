@@ -16,9 +16,10 @@ class DirectionalButton(QPushButton):
 
     Attributes:
         state (int): The state of the button. Either UP or DOWN. 0 for UP 1 for DOWN.
+        allow_both (bool): Whether to allow the button to be both up and down.
     """
 
-    def __init__(self, parent, state: int):
+    def __init__(self, parent, state: int, allow_both: bool = False):
         super().__init__(parent)
 
         self.state = state
@@ -39,6 +40,11 @@ class DirectionalButton(QPushButton):
             if self.state == UP:
                 self.state = DOWN
             elif self.state == DOWN:
+                if allow_both:
+                    self.state = UP_DOWN
+                else:
+                    self.state = UP
+            elif self.state == UP_DOWN:
                 self.state = UP
             # set the arrow accordingly
             self.text_updater()
@@ -51,3 +57,5 @@ class DirectionalButton(QPushButton):
             self.setIcon(fetch_icon("arrow-up-outline"))
         elif self.state == DOWN:
             self.setIcon(fetch_icon("arrow-down-outline"))
+        elif self.state == UP_DOWN:
+            self.setIcon(fetch_icon("arrow-up-down-outline"))
