@@ -17,6 +17,9 @@ class TripleSpinbox(QWidget):
         self.box1 = QSpinBox()
         self.box2 = QSpinBox()
         self.box3 = QSpinBox()
+        self.box1.setMaximum(99999)
+        self.box2.setMaximum(99999)
+        self.box3.setMaximum(99999)
 
         # Add all the spinboxes to the layout
         self.layout().addWidget(self.box1)
