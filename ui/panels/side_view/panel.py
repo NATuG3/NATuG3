@@ -3,6 +3,7 @@ from functools import partial
 from threading import Thread
 from typing import List
 
+from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 
 import ui.dialogs.informers
@@ -59,24 +60,25 @@ class SideViewPanel(QGroupBox):
             self.runner.managers.nucleic_acid_profile.current,
             self.runner.managers.misc.plot_types,
         )
-        self.plot.points_clicked.connect(self.points_clicked)
-        self.plot.strand_clicked.connect(self.strand_clicked)
-        self.plot.linkage_clicked.connect(self.linkage_clicked)
+        self.plot.points_clicked.connect(self._on_points_clicked)
+        self.plot.strand_clicked.connect(self._on_strand_click)
+        self.plot.linkage_clicked.connect(self._on_linkage_clicked)
         self.layout().addWidget(self.plot)
 
     def refresh(self) -> None:
         """
         Update the current plot.
 
-        This will update the current plot with the most recent strands, domains, nucleic acid, and plot mode. Then
-        the plot will be refreshed.
+        This will update the current plot with the most recent strands, domains,
+        nucleic acid, and plot mode. Then the plot will be refreshed.
         """
         self.plot.strands = self.runner.managers.strands.current
         self.plot.nucleic_acid = self.runner.managers.nucleic_acid_profile.current
         self.plot.point_types = self.runner.managers.misc.plot_types
         self.plot.refresh()
 
-    def linkage_clicked(self, linkage: Linkage) -> None:
+    @pyqtSlot()
+    def _on_linkage_clicked(self, linkage: Linkage) -> None:
         """
         Slot for when a linkage is clicked.
 
@@ -92,7 +94,8 @@ class SideViewPanel(QGroupBox):
 
         logger.info(f"A linkage was clicked.")
 
-    def strand_clicked(self, strand: Strand) -> None:
+    @pyqtSlot()
+    def _on_strand_click(self, strand: Strand) -> None:
         """
         Slot for when a strand is clicked.
 
@@ -108,7 +111,8 @@ class SideViewPanel(QGroupBox):
 
         logger.info(f"Strand #{strand.strands.index(strand)} was clicked.")
 
-    def points_clicked(self, points: List[Point]) -> None:
+    @pyqtSlot()
+    def _on_points_clicked(self, points: List[Point]) -> None:
         """
         Slot for when a point in the plot is clicked.
 
