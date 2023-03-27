@@ -10,6 +10,7 @@ from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.strands import Strands
+from ui.dialogs.action_repeater.action_repeater import ActionRepeater
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,8 @@ def juncter(
     strands: Strands,
     refresh: Callable,
     runner: "runner.Runner",
-    error_title="Invalid Point Clicked",
+    repeat: bool,
+    error_title: str = "Invalid Point Clicked",
 ) -> None:
     """
     Create a junction.
@@ -34,10 +36,24 @@ def juncter(
         runner: NATuG's runner.
         error_title: The title of the error dialog that is shown when the user clicks
             an invalid point.
+        repeat: Whether to create a ActionRepeater dialog to allow the user to repeat
+            the action across the strand.
     """
     if isinstance(point, NEMid) and point.junctable:
-        strands.conjunct(point, point.juncmate)
-        refresh()
+        if repeat:
+            action_repeater = ActionRepeater(
+                runner.window,
+                "conjunct",
+                point,
+                strands,
+                runner.managers.nucleic_acid_profile.current,
+                (NEMid,),
+            )
+            action_repeater.updated.connect(refresh)
+            action_repeater.exec()
+        else:
+            strands.conjunct(point, point.juncmate)
+            refresh()
     else:
         utils.warning(
             runner.window,
@@ -51,7 +67,11 @@ def juncter(
 
 
 def informer(
-    parent, point: Point, strands: Strands, domains: Domains, refresh: Callable
+    parent,
+    point: Point,
+    strands: Strands,
+    domains: Domains,
+    refresh: Callable,
 ) -> None:
     """
     Create an informer for a clicked point and its juncmate (if applicable).
@@ -113,7 +133,7 @@ def informer(
                 "Unsupported point type passed to informer. Point type: %s", type(point)
             )
 
-    def dialog_complete(dialogs_, points_):
+    def dialog_complete(dialogs_, points_) -> None:
         """Worker function to be called when all dialogs are closed."""
         for dialog_ in dialogs_:
             dialog_.close()
@@ -150,7 +170,13 @@ def informer(
     logger.info("Informer mode was run.")
 
 
-def nicker(point: Point, strands: Strands, refresh: Callable) -> None:
+def nicker(
+    point: Point,
+    strands: Strands,
+    runner: "Runner",
+    refresh: Callable,
+    repeat: bool,
+) -> None:
     """
     Create a nick in a strand, or undoes a nick.
 
@@ -159,24 +185,56 @@ def nicker(point: Point, strands: Strands, refresh: Callable) -> None:
             recursively created for all points.
         strands: The strands object containing the points. The nick() method is called
             on this object.
+        runner: NATuG's runner.
         refresh: Function called to refresh plot after nicker mode is run.
+        repeat: Whether to create a ActionRepeater dialog to allow the user to repeat
+            the action across the strand.
     """
     if isinstance(point, Nick):
-        strands.unnick(point)
+        if repeat:
+            ActionRepeater.run(
+                runner.window,
+                "unnick",
+                refresh,
+                point,
+                strands,
+                runner.managers.nucleic_acid_profile.current,
+                point.strand.items.by_type(runner.window.side_view.plot.point_types),
+            )
+        else:
+            strands.unnick(point)
     else:
-        strands.nick(point)
+        if repeat:
+            action_repeater = ActionRepeater(
+                runner.window,
+                "nick",
+                point,
+                strands,
+                runner.managers.nucleic_acid_profile.current,
+                runner.window.side_view.plot.point_types,
+            )
+            action_repeater.updated.connect(refresh)
+            action_repeater.show()
+        else:
+            strands.nick(point)
 
     refresh()
     logger.info("Nicker mode was run.")
 
 
-def highlighter(point: Point, refresh: Callable):
+def highlighter(
+    point: Point,
+    refresh: Callable,
+    repeat: bool,
+) -> None:
     """
     Highlight/un-highlight a series of points based on their current highlighted state.
 
     Args:
         point: The point to highlight.
         refresh: Function called to refresh plot after highlighter mode is run.
+        repeat: Whether to create a ActionRepeater dialog to allow the user to repeat
+            the action across the strand.
     """
     if point.styles.state == "highlighted":
         point.styles.change_state("default")

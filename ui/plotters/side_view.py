@@ -8,7 +8,7 @@ from typing import List, Tuple, Dict, Type
 import numpy as np
 import pyqtgraph as pg
 import pyqtgraph.exporters
-from PyQt6.QtCore import pyqtSignal, QTimer
+from PyQt6.QtCore import pyqtSignal, QTimer, pyqtSlot
 from PyQt6.QtGui import QPen, QBrush, QPainterPath
 
 import settings
@@ -166,14 +166,9 @@ class SideViewPlotter(Plotter):
 
     def refresh(self):
         """Replot plot data."""
-
-        def runner():
-            self._reset()
-            self._plot()
-
         # allow one screen refresh for the mouse to release
         # so that the plot is cleared after the mouse release event happens
-        QTimer.singleShot(0, runner)
+        QTimer.singleShot(1, self.replot)
         logger.info("Refreshed side view.")
 
     def replot(self):
@@ -199,7 +194,8 @@ class SideViewPlotter(Plotter):
             self.removeItem(gridline)
         self.clear()
 
-    def _points_clicked(self, event, points):
+    @pyqtSlot(object, object)
+    def _on_points_clicked(self, event, points):
         """Called when a point on a strand is clicked."""
         position = tuple(points[0].pos())
         self.points_clicked.emit(self.plot_data.points[position])
@@ -404,7 +400,7 @@ class SideViewPlotter(Plotter):
                 name=f"Strand#{strand_index} Points",
             )
             # When a point is clicked, invoke the _points_clicked method.
-            plotted_points.sigPointsClicked.connect(self._points_clicked)
+            plotted_points.sigPointsClicked.connect(self._on_points_clicked)
             self.plot_data.plotted_points.append(plotted_points)
 
             # A strand consists of items connected by a visual stroke. However,
@@ -613,7 +609,7 @@ class SideViewPlotter(Plotter):
             # so that when it is clicked, we can find the nick object.
             self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
             # Hook up the nick's onClick method to the _points_clicked method.
-            plotted_nick.sigPointsClicked.connect(self._points_clicked)
+            plotted_nick.sigPointsClicked.connect(self._on_points_clicked)
 
         # Items will be plotted one layer at a time, from bottom to top. The items
         # plotted last go on top, since all items before them are plotted first.

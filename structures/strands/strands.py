@@ -233,32 +233,33 @@ class Strands:
         items_to_run_on = items_to_run_on or first_point.strand.items
 
         # fmt: off
-        match action:
-            case "nick":
-                def worker(point):
-                    self.nick(point)
-            case "unnick":
-                def worker(point):
-                    self.unnick(point)
-            case "highlight":
-                def worker(point):
-                    point.highlighted = True
-            case "conjunct":
-                def worker(point):
-                    if point.juncmate is not None:
-                        self.conjunct(point, point.juncmate)
-            case _:
-                raise ValueError(f"Unknown action: {action}")
+        if action == "nick":
+            def worker(point):
+                self.nick(point)
+        elif action == "unnick":
+            def worker(point):
+                self.unnick(point)
+        elif action == "highlight":
+            def worker(point):
+                point.highlighted = True
+        elif action == "conjunct":
+            def worker(point):
+                if point.juncmate is not None:
+                    self.conjunct(point, point.juncmate)
+        else:
+            raise ValueError(f"Unknown action: {action}")
         # fmt: on
 
-        # Make the calls
-        for i in itertools.islice(
-            items_to_run_on, first_point.index, repeat_for * repeat_every, repeat_every
+        selected_items = []
+        for i in range(
+            first_point_index := items_to_run_on.index(first_point),
+            first_point_index + repeat_for * repeat_every,
+            repeat_every,
         ):
-            worker(i)
+            selected_items.append(items_to_run_on[i])
 
-        # Restyle the strands based on the new state.
-        self.style()
+        for item in selected_items:
+            worker(item)
 
     def unnick(self, nick: "Nick"):
         """

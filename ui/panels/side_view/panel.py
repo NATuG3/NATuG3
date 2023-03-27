@@ -123,8 +123,8 @@ class SideViewPanel(QGroupBox):
         """
         strands = self.runner.managers.strands.current
         domains = self.runner.managers.domains.current
-        parent = self
-        refresh = self.runner.window.side_view.plot.refresh
+        parent = self.parent()
+        refresh = self.runner.window.side_view.refresh
 
         worker = partial(
             logger.info, "Point was clicked but no worker handled the click"

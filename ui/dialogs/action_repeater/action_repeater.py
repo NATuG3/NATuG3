@@ -1,6 +1,7 @@
-from typing import Literal
+from typing import Literal, Type, Iterable
 
-from PyQt6.QtCore import pyqtSlot
+from PyQt6 import uic
+from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import (
     QDialog,
     QVBoxLayout,
@@ -20,7 +21,7 @@ from structures.profiles import NucleicAcidProfile
 from structures.strands import Strands
 
 
-class ActionRepeaterDialog(QDialog):
+class ActionRepeater(QDialog):
     """
     A dialog for repeating an action over many nucleosides.
 
@@ -30,7 +31,6 @@ class ActionRepeaterDialog(QDialog):
         point_strand_length: The number of nucleosides in the strand that the point is
             in.
         action: The action to enact.
-        replot: The replot function to call for refreshing the plot.
         nucleic_acid_profile: The NucleicAcidProfile to fetch B from.
         main_form: The main form layout that holds all the form elements.
         button_box: The QDialogButtonBox that holds the "OK" and "Cancel" buttons.
@@ -41,35 +41,32 @@ class ActionRepeaterDialog(QDialog):
             which dictates whether to repeat the action forever along the strand.
     """
 
+    updated = pyqtSignal()
     _name = "Action Repeater"
 
     def __init__(
         self,
         parent,
-        action,
-        replot,
-        point,
+        action: Literal["conjunct", "link", "unlink", "highlight"],
+        point: Point,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
+        types_to_run_on: tuple[Type]
     ):
-        super(ActionRepeaterDialog, self).__init__(parent)
+        super(ActionRepeater, self).__init__(parent)
+        uic.loadUi("ui/dialogs/action_repeater/action_repeater.ui", self)
+
         self.action = action
-        self.replot = replot
         self.point = point
-        self.point_strand_length = len(self.point.strand.items.by_type(Nucleoside))
+        self.types_to_run_on = types_to_run_on
+        self.point_strand_length = len(point.strand.items.by_type(types_to_run_on))
         self.strands = strands
         self.nucleic_acid_profile = nucleic_acid_profile
 
         self.point.styles.change_state("highlighted")
-        self.replot()
-
-        self.main_form = None
-        self.button_box = None
-        self.header_label = None
-        self.repeat_for = None
-        self.repeat_forever = None
-
-        self._setup_ui()
+        self._set_initial_values()
+        self._hook_signals()
+        self._prettify()
 
     @classmethod
     def run(cls, *args, **kwargs):
@@ -79,81 +76,68 @@ class ActionRepeaterDialog(QDialog):
         Args:
             *args: The arguments to pass to the dialog.
         """
-        dialog = cls(*args, **kwargs)
-        dialog.exec()
+        cls(*args, **kwargs).exec()
+
+    def _set_initial_values(self):
+        self.repeat_every.setMaximum(self.point_strand_length)
+        self.repeat_for.setMaximum(
+            self.point_strand_length // self.nucleic_acid_profile.B
+        )
 
     def _prettify(self):
         """Prettify the ui elements."""
         self.setWindowTitle(f"{self._name} Dialog")
-
-    def _setup_ui(self):
-        """Set up all the ui elements."""
-        self.setLayout(QVBoxLayout())
-
-        # Create a header label that says what the widget is
-        self.header_label = QLabel(self._name)
-        self.header_label.setStyleSheet("QLabel{font-size: 16px}")
-
-        # Create a layout that will hold the main form elements
-        self.main_form = QVBoxLayout()
-
-        # Create a layout that will hold the repeat count and direction
-        self.repeat_every = QSpinBox()
-        self.repeat_every.setMinimum(1)
-        self.repeat_every.setMaximum(self.point_strand_length)
-        self.repeat_every.setValue(1)
-        self.repeat_every.setSuffix("·B nucleosides")
-        repeat_every_area = QHBoxLayout()
-        repeat_every_area.addWidget(QLabel("Repeat action repeat_every"))
-        repeat_every_area.addWidget(self.repeat_every)
-        self.main_form.addLayout(repeat_every_area)
-
-        # Create the layout that will hold how many repetitions that they want
-        self.repeat_for = QSpinBox()
-        self.repeat_for.setMinimum(1)
-        self.repeat_for.setMaximum(
-            self.point.strand.items.by_type(Point)//self.nucleic_acid_profile.B
-        )
-        repeat_count_area = QHBoxLayout()
-        repeat_count_area.addWidget(QLabel("Repeat action for"))
-
-        # Add a checkbox that lets the user repeat their pattern indefinitely
-        self.repeat_forever = QCheckBox("Repeat forever")
-        self.main_form.addWidget(self.repeat_forever)
-
-        # Add the dialog button box
-        self.button_box = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
+        if self.action == "conjunct":
+            self.repeat_for_label.setText("x B NEMids")
+        else:
+            self.repeat_for_label.setText("NEMids")
 
     def _on_accepted(self):
         """Run the action on the strand based on the dialog's settings."""
-        if self.repeat_forever.isChecked():
-            repeat_every = None
-        else:
-            repeat_every = self.repeat_for.value() * self.nucleic_acid_profile.B
+        match self.action:
+            case "conjunct":
+                repeat_every = self.repeat_every.value() * self.nucleic_acid_profile.B
+            case "nick":
+                repeat_every = self.repeat_every.value()
+            case "unnick":
+                repeat_every = self.repeat_every.value()
+            case "highlight":
+                repeat_every = self.repeat_every.value()
+            case _:
+                raise ValueError(f"Invalid action: {self.action}")
 
+        assert self.point.strand.strands is self.strands
         self.strands.do_many(
             self.action,
             self.point,
             repeat_every,
-            self.repeat_for.value()
+            self.repeat_for.value(),
+            self.point.strand.items.by_type(self.types_to_run_on),
         )
 
+        self.updated.emit()
+
+    def _on_cancelled(self):
+        """Reset the point's state to normal and close the dialog."""
+        self.point.styles.change_state("normal")
+        self.updated.emit()
+        self.close()
+
     def _hook_signals(self):
-        self.repeat_forever.clicked.connect(self._on_repeat_forever_clicked)
+        self.repeat_forever.stateChanged.connect(self._on_repeat_forever_clicked)
         self.repeat_forever.setChecked(True)
         self.repeat_for.editingFinished.connect(self._on_repeat_for_changed)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
         self.accepted.connect(self._on_accepted)
+        self.rejected.connect(self._on_cancelled)
 
     @pyqtSlot()
     def _on_repeat_for_changed(self):
-        self.repeat_every.setMaximum(
-            # When the repeat repeat_every is changed the repeat for becomes the repeat repeat_every
-            self.repeat_for.value()
-        )
+        if self.repeat_for.value() == 1:
+            self.repeat_for.setSuffix(" time")
+        else:
+            self.repeat_for.setSuffix(" times")
 
     @pyqtSlot()
     def _on_repeat_forever_clicked(self):
