@@ -77,7 +77,7 @@ class SideViewPanel(QGroupBox):
         self.plot.point_types = self.runner.managers.misc.plot_types
         self.plot.refresh()
 
-    @pyqtSlot()
+    @pyqtSlot(object)
     def _on_linkage_clicked(self, linkage: Linkage) -> None:
         """
         Slot for when a linkage is clicked.
@@ -94,7 +94,7 @@ class SideViewPanel(QGroupBox):
 
         logger.info(f"A linkage was clicked.")
 
-    @pyqtSlot()
+    @pyqtSlot(object)
     def _on_strand_click(self, strand: Strand) -> None:
         """
         Slot for when a strand is clicked.
@@ -111,8 +111,8 @@ class SideViewPanel(QGroupBox):
 
         logger.info(f"Strand #{strand.strands.index(strand)} was clicked.")
 
-    @pyqtSlot()
-    def _on_points_clicked(self, points: List[Point]) -> None:
+    @pyqtSlot(object)
+    def _on_points_clicked(self, points) -> None:
         """
         Slot for when a point in the plot is clicked.
 
@@ -129,17 +129,51 @@ class SideViewPanel(QGroupBox):
         worker = partial(
             logger.info, "Point was clicked but no worker handled the click"
         )
+
+        repeat = self.runner.window.toolbar.repeat.isChecked()
+
         if self.runner.managers.toolbar.current == INFORMER:
             worker = partial(
-                workers.informer, parent, points, strands, domains, refresh
+                workers.informer,
+                parent,
+                points,
+                strands,
+                domains,
+                refresh,
             )
         elif self.runner.managers.toolbar.current == LINKER:
-            worker = partial(workers.linker, points, strands, refresh, self.runner)
+            worker = partial(
+                workers.linker,
+                points,
+                strands,
+                refresh,
+                self.runner,
+            )
         elif self.runner.managers.toolbar.current == JUNCTER:
-            worker = partial(workers.juncter, points, strands, refresh, self.runner)
+            worker = partial(
+                workers.juncter,
+                points,
+                strands,
+                refresh,
+                self.runner,
+                repeat,
+            )
         elif self.runner.managers.toolbar.current == NICKER:
-            worker = partial(workers.nicker, points, strands, refresh)
+            worker = partial(
+                workers.nicker,
+                points,
+                strands,
+                self.runner,
+                refresh,
+                repeat,
+            )
         elif self.runner.managers.toolbar.current == HIGHLIGHTER:
-            worker = partial(workers.highlighter, points, refresh)
+            worker = partial(
+                workers.highlighter,
+                points,
+                refresh,
+                repeat,
+            )
+
         thread = Thread(target=worker)
         thread.run()
