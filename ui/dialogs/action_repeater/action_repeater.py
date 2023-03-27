@@ -21,6 +21,7 @@ class ActionRepeaterDialog(QDialog):
     ):
         super(ActionRepeaterDialog, self).__init__(parent)
         self.strands = strands
+        self.nucleic_acid_profile = nucleic_acid_profile
 
         self.main_form = None
         self.button_box = None
@@ -29,9 +30,10 @@ class ActionRepeaterDialog(QDialog):
         self.repeat_forever = None
 
         self._setup_ui()
-        self.repeat_forever.setChecked(True)
-        self.button_box.accepted.connect(self.accept)
-        self.button_box.rejected.connect(self.reject)
+
+    def _prettify(self):
+        """Prettify the ui elements."""
+        self.setWindowTitle(f"{self._name} Dialog")
 
     def _setup_ui(self):
         """Set up all the ui elements."""
@@ -61,6 +63,9 @@ class ActionRepeaterDialog(QDialog):
 
     def _hook_signals(self):
         self.repeat_forever.clicked.connect(self._on_repeat_forever_clicked)
+        self.repeat_forever.setChecked(True)
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
 
     @pyqtSlot()
     def _on_repeat_forever_clicked(self):
