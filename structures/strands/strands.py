@@ -4,7 +4,7 @@ from collections import deque
 from contextlib import suppress
 from copy import deepcopy
 from functools import partial
-from typing import List, Tuple, Iterable, Generator
+from typing import List, Tuple, Iterable, Generator, Literal
 from uuid import uuid1
 
 import pandas as pd
@@ -13,13 +13,14 @@ from pandas import ExcelWriter
 from xlsxwriter import Workbook
 
 import settings
-from constants.directions import DOWN, UP
+from constants.directions import UP, DOWN, UP_DOWN
 from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand, StrandItems
+from structures.strands.utils import attempt
 from utils import show_in_file_explorer, rgb_to_hex
 
 logger = logging.getLogger(__name__)
@@ -195,6 +196,69 @@ class Strands:
         # Add the two new strands
         self.extend(new_strands)
 
+        self.style()
+
+    def do_many(
+        self,
+        action: Literal["nick", "unnick", "highlight", "conjunct"],
+        first_point: Point,
+        repeat_every: int,
+        repeat_for: int,
+        items_to_run_on: Iterable = None,
+    ) -> None:
+        """
+        Run an action on many points by surfing a given array or the point's strand.
+
+        Args:
+            action: The action to run on many points.
+            first_point: The point to run an action on first and then surf from.
+            repeat_every: The number of nucleosides between each action call.
+            repeat_for: The number of steps of repeat_every to take.
+            items_to_run_on: The items to run the action on. Defaults to all Point
+                objects in the strand of the point are run on, but this can be changed
+                to only run on certain types of points, or a certain collection of
+                points.
+
+        Raises:
+            ValueError: If the point's strand is not a strand of ours, or the point does
+                not have a strand assigned.
+        """
+        # Check if the strand is in this container.
+        if (first_point.strand is None) and (first_point.strand not in self.strands):
+            raise ValueError(
+                f"The point's strand is not a strand of ours. "
+                f"Point: {first_point}, Strand: {first_point.strand}"
+            )
+
+        # Determine the items that we will surf along.
+        items_to_run_on = items_to_run_on or first_point.strand.items
+
+        # fmt: off
+        match action:
+            case "nick":
+                def worker(point):
+                    self.nick(point)
+            case "unnick":
+                def worker(point):
+                    self.unnick(point)
+            case "highlight":
+                def worker(point):
+                    point.highlighted = True
+            case "conjunct":
+                def worker(point):
+                    if point.juncmate is not None:
+                        self.conjunct(point, point.juncmate)
+            case _:
+                raise ValueError(f"Unknown action: {action}")
+        # fmt: on
+
+        # Make the calls
+        for i in itertools.islice(
+            items_to_run_on, first_point.index, repeat_for * repeat_every, repeat_every
+        ):
+            worker(i)
+
+        # Restyle the strands based on the new state.
         self.style()
 
     def unnick(self, nick: "Nick"):
@@ -682,9 +746,7 @@ class Strands:
 
                 # alternate sequencing that starts and ends at the junction site
                 for NEMid_ in (NEMid1, NEMid2):
-                    NEMid_.strand.items.rotate(
-                        len(NEMid_.strand) - 1 - NEMid_.index
-                    )
+                    NEMid_.strand.items.rotate(len(NEMid_.strand) - 1 - NEMid_.index)
 
                 # convert the strands back to StrandItems
                 NEMid1.strand.items = StrandItems(NEMid1.strand.items)
