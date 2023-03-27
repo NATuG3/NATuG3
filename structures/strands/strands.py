@@ -20,7 +20,6 @@ from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.strand import Strand, StrandItems
-from structures.strands.utils import attempt
 from utils import show_in_file_explorer, rgb_to_hex
 
 logger = logging.getLogger(__name__)
