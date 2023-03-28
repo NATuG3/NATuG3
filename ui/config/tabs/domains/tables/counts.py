@@ -15,7 +15,7 @@ class DomainsCountsTable(DomainsBaseTable):
     def __init__(self, parent) -> None:
         super().__init__(
             parent,
-            ["Left Helix Counts", "Right Helix Counts"],
+            ["Up Helix Counts", "Down Helix Counts"],
         )
 
     def _prettify(self):

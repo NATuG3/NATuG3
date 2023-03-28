@@ -119,13 +119,10 @@ class Domain:
             "right" indicates that the right side of this domain will be lined up to
             the left helix joint of the next domain. Uses the constant 0 for up and 1
             for down.
-        left_helix_count: Number of initial NEMids/strand to generate for the left
-            helix joint direction helix. This is a list of bottom-count, body-count,
-            and top-count. The number of NEMids in the domains' is determined by
-            count[1], and then count[0] NEMids are added to the bottom strand and
-            count[2] NEMids are added to the top of the strand.
-        other_helix_count: Number of initial NEMids/strand and excess NEMids/strand to
-            generate for the other helix.
+        up_helix_count (GenerationCount): The number of nucleosides to initially
+            generate for the up helix of the domain.
+        down_helix_count (GenerationCount): The number of nucleosides to initially
+            generate for the up helix of the domain.
         uuid: The unique identifier for the domain. This is automatically generated.
     """
 
@@ -135,8 +132,8 @@ class Domain:
         theta_m_multiple: int,
         left_helix_joint: int,
         right_helix_joint: int,
-        left_helix_count: Tuple[int, int, int],
-        other_helix_count: Tuple[int, int, int],
+        up_helix_count: Tuple[int, int, int],
+        down_helix_count: Tuple[int, int, int],
         parent: "Domains" = None,
         index: int = None,
     ):
@@ -155,17 +152,14 @@ class Domain:
                 "right" indicates that the right side of this domain will be lined up to
                 the left helix joint of the next domain. Uses the constant 0 for up and
                 1 for down.
-            left_helix_count: Number of initial NEMids/strand to generate. This is a
-                list of bottom-count, body-count, and top-count. The number of NEMids
-                in the domains' is determined by count[1], and then count[0] NEMids are
-                added to the bottom strand and count[2] NEMids are added to the top of
-                the strand.
-            other_helix_count: Number of initial NEMids/strand to generate for the
-            non-left helix. This is a list of
-                bottom-count, body-count, and top-count. The number of NEMids in the
-                domains' is determined by count[1], and then count[0] NEMids are
-                added to the bottom strand and count[2] NEMids are added to the top
-                of the strand.
+            up_helix_count: The number of nucleosides to initially
+                generate for the up helix of the domain. This should be passed as a
+                tuple of three integers, and will be converted to a GenerationCount
+                object.
+            down_helix_count: The number of nucleosides to initially
+                generate for the up helix of the domain. This should be passed as a
+                tuple of three integers, and will be converted to a GenerationCount
+                object.
             parent (Subunit): The strands subunit. Defaults to None.
             index (int): The index of this domain in its strands. Defaults to None.
         """
@@ -185,14 +179,12 @@ class Domain:
         assert self.right_helix_joint in [0, 1]
 
         # the number of NEMids to generate for the left and right helices
-        self.left_helix_count = GenerationCount(
-            left_helix_count, direction=lambda: self.left_helix_joint
+        self.up_helix_count = GenerationCount(
+            up_helix_count, direction=lambda: self.left_helix_joint
         )
-        self.other_helix_count = GenerationCount(
-            other_helix_count, direction=lambda: self.right_helix_joint
+        self.down_helix_count = GenerationCount(
+            down_helix_count, direction=lambda: self.right_helix_joint
         )
-        assert len(self.left_helix_count) == 3
-        assert len(self.other_helix_count) == 3
 
         # set the index of the domain
         self.index = index
@@ -318,8 +310,8 @@ class Domain:
             f"m={self.theta_m_multiple}, "
             f"left_joint={self.left_helix_joint}, "
             f"right_joint={self.right_helix_joint}, "
-            f"left_count={self.left_helix_count}, "
-            f"other_count={self.other_helix_count}, "
+            f"up_count={self.up_helix_count}, "
+            f"down_count={self.down_helix_count}, "
             f"index={self.index}"
             f")"
         )

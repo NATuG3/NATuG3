@@ -5,6 +5,7 @@ from typing import Literal, Type
 import numpy as np
 
 from constants.directions import UP, DOWN
+from structures.domains.domain import GenerationCount
 from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
@@ -66,6 +67,14 @@ class Helix:
         domain: The domain that this helix lies within.
         data: The data of the helix. This is a HelixData object, and contains the
             x-coordinates, z-coordinates, and angles of the points in the helix.
+
+    Properties:
+        domain: The domain that the helix belongs to.
+        counts: The generation count of the helix, which is stored in the parent domain.
+        direction: The direction of the helix. Either UP or DOWN.
+        double_helix: The parent DoubleHelix object.
+        data: The data for the helix. This is a HelixData object that stores the
+            actual positional and angle datapoints of all Points within the helix.
     """
 
     direction: Literal[UP, DOWN]
@@ -86,6 +95,19 @@ class Helix:
     def domain(self):
         """The domain that this helix lies within."""
         return self.double_helix.domain
+
+    @property
+    def counts(self) -> GenerationCount:
+        """
+        The helix count for the given helix.
+
+        This is a wrapper that returns either the domain's up_helix_count or
+        down_helix_count.
+        """
+        if self.direction == UP:
+            return self.domain.up_helix_count
+        else:
+            return self.domain.down_helix_count
 
     def point(self, type_: Literal[Type[Nucleoside], Type[NEMid]] = Nucleoside):
         """

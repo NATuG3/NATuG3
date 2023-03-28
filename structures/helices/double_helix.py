@@ -77,8 +77,8 @@ class DoubleHelix:
             self.helices[DOWN] = Helix(direction=DOWN, double_helix=self)
 
         # The helices must contain empty arrays of the size that the Domains indicates.
-        self.left_helix.data.resize(self.domain.left_helix_count)
-        self.other_helix.data.resize(self.domain.other_helix_count)
+        self.up_helix.data.resize(self.domain.up_helix_count)
+        self.down_helix.data.resize(self.domain.down_helix_count)
 
     def __getitem__(self, index: int) -> Helix:
         """

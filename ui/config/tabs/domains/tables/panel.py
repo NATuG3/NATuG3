@@ -34,8 +34,8 @@ class RowWidgets:
     theta_s_multiple: TableIntegerBox = None
     left_helix_joint: DirectionalButton = None
     right_helix_joint: DirectionalButton = None
-    left_helix_count: TripleSpinbox = None
-    other_helix_count: TripleSpinbox = None
+    up_helix_count: TripleSpinbox = None
+    down_helix_count: TripleSpinbox = None
 
     def to_domain(self, nucleic_acid_profile: NucleicAcidProfile):
         """Obtain a domain object from the data in the RowWidgets."""
@@ -44,8 +44,8 @@ class RowWidgets:
             theta_m_multiple=self.theta_m_multiple.value(),
             left_helix_joint=self.left_helix_joint.state,
             right_helix_joint=self.right_helix_joint.state,
-            left_helix_count=self.left_helix_count.values(),
-            other_helix_count=self.other_helix_count.values(),
+            up_helix_count=self.up_helix_count.values(),
+            down_helix_count=self.down_helix_count.values(),
         )
 
 
@@ -187,14 +187,14 @@ class DomainsTablesArea(QTabWidget):
             self.angles_table.setCellWidget(index, 4, row.theta_m)
 
             # Counts Table, Column 0 - initial NEMid count for the up helix
-            row.left_helix_count = TripleSpinbox(domain.left_helix_count)
-            row.left_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
-            self.counts_table.setCellWidget(index, 0, row.left_helix_count)
+            row.up_helix_count = TripleSpinbox(domain.up_helix_count)
+            row.up_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
+            self.counts_table.setCellWidget(index, 0, row.up_helix_count)
 
             # Counts Table, Column 1 - initial NEMid count for the down helix
-            row.other_helix_count = TripleSpinbox(domain.other_helix_count)
-            row.other_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
-            self.counts_table.setCellWidget(index, 1, row.other_helix_count)
+            row.down_helix_count = TripleSpinbox(domain.down_helix_count)
+            row.down_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
+            self.counts_table.setCellWidget(index, 1, row.down_helix_count)
 
             # Store the index label that will be added to the left labels later
             side_headers.append(f"#{index + 1}")
