@@ -250,10 +250,16 @@ class Strands:
             raise ValueError(f"Unknown action: {action}")
         # fmt: on
 
+        start_at = items_to_run_on.index(first_point)
+        if repeat_for is None:
+            end_at = len(items_to_run_on)
+        else:
+            end_at = start_at + repeat_for * repeat_every
+
         selected_items = []
         for i in range(
-            first_point_index := items_to_run_on.index(first_point),
-            first_point_index + repeat_for * repeat_every,
+            start_at,
+            end_at,
             repeat_every,
         ):
             selected_items.append(items_to_run_on[i])

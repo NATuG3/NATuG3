@@ -110,12 +110,17 @@ class ActionRepeater(QDialog):
             case _:
                 raise ValueError(f"Invalid action: {self.action}")
 
+        if self.repeat_forever.isChecked():
+            repeat_for = None
+        else:
+            repeat_for = self.repeat_for.value()
+
         assert self.point.strand.strands is self.strands
         self.strands.do_many(
             self.action,
             self.point,
             repeat_every,
-            self.repeat_for.value(),
+            repeat_for,
             self.point.strand.items.by_type(self.types_to_run_on),
         )
 
