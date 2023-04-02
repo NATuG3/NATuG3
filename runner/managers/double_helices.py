@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 
 from structures.helices import DoubleHelices
 
@@ -44,6 +45,9 @@ class DoubleHelicesManager:
         Notes:
             This is a very expensive operation.
         """
+        with suppress(AttributeError):
+            self.runner.window.toolbar.repeat.setChecked(False)
+            self.runner.window.toolbar.repeat.clicked.emit()
         self.current = DoubleHelices.from_domains(
             domains=self.runner.managers.domains.current,
             nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,

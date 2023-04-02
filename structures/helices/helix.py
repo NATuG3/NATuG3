@@ -47,12 +47,6 @@ class HelixData:
         Returns:
             The size of the helix.
         """
-        assert (
-            len(self.x_coords)
-            == len(self.z_coords)
-            == len(self.angles)
-            == len(self.points)
-        )
         return len(self.x_coords)
 
     def resize(self, size: int):
