@@ -9,8 +9,8 @@ from structures.domains import Domains
 from structures.points import NEMid, Nucleoside
 from structures.points.nick import Nick
 from structures.points.point import Point
+from structures.profiles.action_repeater_profile import ActionRepeaterProfile
 from structures.strands import Strands
-from ui.dialogs.action_repeater.action_repeater import ActionRepeater
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ def juncter(
     strands: Strands,
     refresh: Callable,
     runner: "runner.Runner",
-    repeat: bool,
+    repeat: ActionRepeaterProfile,
     error_title: str = "Invalid Point Clicked",
 ) -> None:
     """
@@ -41,16 +41,7 @@ def juncter(
     """
     if isinstance(point, NEMid) and point.junctable:
         if repeat:
-            action_repeater = ActionRepeater(
-                runner.window,
-                "conjunct",
-                point,
-                strands,
-                runner.managers.nucleic_acid_profile.current,
-                (NEMid,),
-            )
-            action_repeater.updated.connect(refresh)
-            action_repeater.exec()
+            repeat.run(point, "conjunct")
         else:
             strands.conjunct(point, point.juncmate)
             refresh()
@@ -112,7 +103,7 @@ def informer(
             # highlight the point that was clicked
             point.styles.change_state("highlighted")
 
-        # if a Nucleoside was clicked create a NucleosideInformer objcet
+        # if a Nucleoside was clicked create a NucleosideInformer object
         elif isinstance(point, Nucleoside):
             dialogs.append(
                 ui.dialogs.informers.NucleosideInformer(
@@ -175,7 +166,7 @@ def nicker(
     strands: Strands,
     runner: "Runner",
     refresh: Callable,
-    repeat: bool,
+    repeat: ActionRepeaterProfile,
 ) -> None:
     """
     Create a nick in a strand, or undoes a nick.
@@ -192,29 +183,12 @@ def nicker(
     """
     if isinstance(point, Nick):
         if repeat:
-            ActionRepeater.run(
-                runner.window,
-                "unnick",
-                refresh,
-                point,
-                strands,
-                runner.managers.nucleic_acid_profile.current,
-                point.strand.items.by_type(runner.window.side_view.plot.point_types),
-            )
+            repeat.run(point, "nick")
         else:
             strands.unnick(point)
     else:
         if repeat:
-            action_repeater = ActionRepeater(
-                runner.window,
-                "nick",
-                point,
-                strands,
-                runner.managers.nucleic_acid_profile.current,
-                runner.window.side_view.plot.point_types,
-            )
-            action_repeater.updated.connect(refresh)
-            action_repeater.show()
+            repeat.run(point, "nick")
         else:
             strands.nick(point)
 

@@ -1,7 +1,6 @@
 import logging
 from functools import partial
 from threading import Thread
-from typing import List
 
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
@@ -9,7 +8,6 @@ from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
 import ui.dialogs.informers
 import ui.plotters
 from constants.toolbar import *
-from structures.points.point import Point
 from structures.strands import Strand
 from structures.strands.linkage import Linkage
 from ui.dialogs.linkage_config.linkage_config import LinkageConfig
@@ -130,7 +128,10 @@ class SideViewPanel(QGroupBox):
             logger.info, "Point was clicked but no worker handled the click"
         )
 
-        repeat = self.runner.window.toolbar.repeat.isChecked()
+        if self.runner.window.toolbar.repeat.isChecked():
+            repeat = self.runner.managers.misc.action_repeater
+        else:
+            repeat = None
 
         if self.runner.managers.toolbar.current == INFORMER:
             worker = partial(
