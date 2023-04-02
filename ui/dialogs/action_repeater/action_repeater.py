@@ -6,7 +6,6 @@ from PyQt6.QtWidgets import (
     QDialog,
 )
 
-from structures.points.point import Point
 from structures.profiles import NucleicAcidProfile
 from structures.profiles.action_repeater_profile import ActionRepeaterProfile
 from structures.strands import Strands
@@ -37,7 +36,6 @@ class ActionRepeaterDialog(QDialog):
     def __init__(
         self,
         parent,
-        point: Point,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
         types_to_run_on: tuple[Type],
@@ -47,7 +45,6 @@ class ActionRepeaterDialog(QDialog):
 
         Args:
             parent: The parent widget.
-            point: The point to start the action on.
             strands: The Strands container that the actions will be enacted on.
             nucleic_acid_profile: The NucleicAcidProfile to fetch B from.
             types_to_run_on: The types of Point objects to run the action on.
@@ -55,13 +52,10 @@ class ActionRepeaterDialog(QDialog):
         super(ActionRepeaterDialog, self).__init__(parent)
         uic.loadUi("ui/dialogs/action_repeater/action_repeater.ui", self)
 
-        self.point = point
         self.types_to_run_on = types_to_run_on
-        self.point_strand_length = len(point.strand.items.by_type(types_to_run_on))
         self.strands = strands
         self.nucleic_acid_profile = nucleic_acid_profile
 
-        self.point.styles.change_state("highlighted")
         self._set_initial_values()
         self._hook_signals()
         self._prettify()
@@ -93,8 +87,6 @@ class ActionRepeaterDialog(QDialog):
         else:
             repeat_for = self.repeat_for.value()
 
-        assert self.point.strand.strands is self.strands
-
         return ActionRepeaterProfile(
             repeat_every,
             repeat_for,
@@ -115,24 +107,9 @@ class ActionRepeaterDialog(QDialog):
         self.bidirectional.setChecked(profile.bidirectional)
         self.repeat_forever.setChecked(profile.repeat_for is None)
 
-    def _set_initial_values(self) -> None:
-        self.repeat_every.setMaximum(self.point_strand_length)
-
-        if self.repeat_every_unit.currentText() == "⋅B NEMids":
-            self.repeat_for.setMaximum(
-                self.point_strand_length // self.nucleic_acid_profile.B
-            )
-        else:
-            self.repeat_for.setMaximum(self.point_strand_length)
-
     def _prettify(self) -> None:
         """Prettify the ui elements."""
         self.setWindowTitle(f"{self._name} Dialog")
-
-    @pyqtSlot()
-    def _on_completed(self) -> None:
-        """Reset the point's state to normal and close the dialog."""
-        self.point.styles.change_state("default")
 
     def _hook_signals(self) -> None:
         self.repeat_forever.stateChanged.connect(self._on_repeat_forever_clicked)
