@@ -1,4 +1,4 @@
-from typing import Literal, Type
+from typing import Type
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
@@ -21,7 +21,6 @@ class ActionRepeaterDialog(QDialog):
         point: The point to enact the action on and continue onwards within its strand.
         point_strand_length: The number of nucleosides in the strand that the point is
             in.
-        action: The action to enact.
         nucleic_acid_profile: The NucleicAcidProfile to fetch B from.
         main_form: The main form layout that holds all the form elements.
         button_box: The QDialogButtonBox that holds the "OK" and "Cancel" buttons.
@@ -38,7 +37,6 @@ class ActionRepeaterDialog(QDialog):
     def __init__(
         self,
         parent,
-        action: Literal["conjunct", "link", "unlink", "highlight"],
         point: Point,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
@@ -49,7 +47,6 @@ class ActionRepeaterDialog(QDialog):
 
         Args:
             parent: The parent widget.
-            action: The action to repeat.
             point: The point to start the action on.
             strands: The Strands container that the actions will be enacted on.
             nucleic_acid_profile: The NucleicAcidProfile to fetch B from.
@@ -58,7 +55,6 @@ class ActionRepeaterDialog(QDialog):
         super(ActionRepeaterDialog, self).__init__(parent)
         uic.loadUi("ui/dialogs/action_repeater/action_repeater.ui", self)
 
-        self.action = action
         self.point = point
         self.types_to_run_on = types_to_run_on
         self.point_strand_length = len(point.strand.items.by_type(types_to_run_on))
@@ -87,7 +83,7 @@ class ActionRepeaterDialog(QDialog):
         Returns:
             The profile.
         """
-        if self.action == "conjunct":
+        if self.repeat_every_unit.currentText() == "⋅B NEMids":
             repeat_every = self.repeat_every.value() * self.nucleic_acid_profile.B * 2
         else:
             repeat_every = self.repeat_every.value()
@@ -122,7 +118,7 @@ class ActionRepeaterDialog(QDialog):
     def _set_initial_values(self) -> None:
         self.repeat_every.setMaximum(self.point_strand_length)
 
-        if self.action == "conjunct":
+        if self.repeat_every_unit.currentText() == "⋅B NEMids":
             self.repeat_for.setMaximum(
                 self.point_strand_length // self.nucleic_acid_profile.B
             )
@@ -132,10 +128,6 @@ class ActionRepeaterDialog(QDialog):
     def _prettify(self) -> None:
         """Prettify the ui elements."""
         self.setWindowTitle(f"{self._name} Dialog")
-        if self.action == "conjunct":
-            self.repeat_every_label.setText("x B NEMids")
-        else:
-            self.repeat_every_label.setText("NEMids")
 
     @pyqtSlot()
     def _on_completed(self) -> None:

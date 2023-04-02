@@ -76,13 +76,6 @@
      </property>
     </widget>
    </item>
-   <item row="2" column="3">
-    <widget class="QCheckBox" name="repeat_forever">
-     <property name="text">
-      <string>To end</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0" colspan="4">
     <widget class="QDialogButtonBox" name="button_box">
      <property name="orientation">
@@ -90,6 +83,13 @@
      </property>
      <property name="standardButtons">
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QCheckBox" name="repeat_forever">
+     <property name="text">
+      <string>To end</string>
      </property>
     </widget>
    </item>
@@ -109,10 +109,17 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="repeat_every_label">
-       <property name="text">
-        <string/>
-       </property>
+      <widget class="QComboBox" name="repeat_every_unit">
+       <item>
+        <property name="text">
+         <string>⋅B NEMids</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NEMids</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
