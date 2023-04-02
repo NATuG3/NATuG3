@@ -133,6 +133,21 @@ class Window(QMainWindow):
         """Dynamically resize panels."""
         # Resize the config based on whether it is floating (and thus it can be much
         # larger) or if it is docked (and thus it must be smaller).
+
+        # Side view resizing...
+        self.centralWidget().setMinimumWidth(int(4 * self.size().width() / 9))
+
+        # Top view resizing...
+        # if the top view plot is floating make the max size very large
+        if self.top_view.isFloating():
+            self.top_view.setMaximumWidth(99999)
+        # otherwise it can be resized up to 2/8ths of the screen
+        else:
+            self.top_view.setMaximumWidth(round(3 * self.size().width() / 8))
+
+        # Config resizing...
+        # if config is floating make the max size very large and make the tab area go
+        # on top
         if self.config.isFloating():
             # Make the tab titles go on the top of the plot if there is enough
             # horizontal space
@@ -145,8 +160,8 @@ class Window(QMainWindow):
             # based on the width that the currently visible panel requires.
             self.config.tab_area.setTabPosition(QTabWidget.TabPosition.East)
             if self.config.panel.sequencing.isVisible():
-                self.config.setFixedWidth(255)
+                self.config.setFixedWidth(260)
             elif self.config.panel.domains.isVisible():
-                self.config.setFixedWidth(450)
+                self.config.setFixedWidth(340)
             elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)

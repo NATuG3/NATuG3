@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 
 from constants.directions import UP, DOWN
+from structures.domains.domain import GenerationCount
 from structures.points import NEMid, Nucleoside
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
@@ -70,13 +71,12 @@ class Helix:
     A singular helix in a double helix.
 
     Attributes:
+        domain: The domain that the helix belongs to.
+        counts: The generation count of the helix, which is stored in the parent domain.
         direction: The direction of the helix. Either UP or DOWN.
-        generation_count: The number of points to generate for the helix based off
-            of its domain.
-        double_helix: The double helix that this helix belongs to.
-        domain: The domain that this helix lies within.
-        data: The data of the helix. This is a HelixData object, and contains the
-            x-coordinates, z-coordinates, and angles of the points in the helix.
+        double_helix: The parent DoubleHelix object.
+        data: The data for the helix. This is a HelixData object that stores the
+            actual positional and angle datapoints of all Points within the helix.
         uuid: The unique identifier of the helix.
     """
 
@@ -101,16 +101,17 @@ class Helix:
         return self.double_helix.domain
 
     @property
-    def generation_count(self):
-        """The number of points to generate for the helix based off of its domain."""
-        if self.double_helix.left_helix == self:
-            return self.domain.left_helix_count
-        elif self.double_helix.other_helix == self:
-            return self.domain.other_helix_count
+    def counts(self) -> GenerationCount:
+        """
+        The helix count for the given helix.
+
+        This is a wrapper that returns either the domain's up_helix_count or
+        down_helix_count.
+        """
+        if self.direction == UP:
+            return self.domain.up_helix_count
         else:
-            raise ValueError(
-                "Helix is not the zeroed OR other helix in its double helix."
-            )
+            return self.domain.down_helix_count
 
     def point(self, type_: Literal[Type[Nucleoside], Type[NEMid]] = Nucleoside):
         """

@@ -312,7 +312,7 @@ class DoubleHelices:
             # count" number of NEMids. It is part of the group of three "count" values.
             # We will apply these shifts to the initial z coord, and initial angle
             # that we've just computed.
-            increments = double_helix.zeroed_helix.domain.left_helix_count.bottom_count
+            increments = double_helix.zeroed_helix.counts.bottom_count
             logger.debug("Increments = %s", increments)
             initial_z_coord = (
                 initial_z_coord
@@ -337,16 +337,16 @@ class DoubleHelices:
             # increments up from the respective initial z coord and angle.
             increments = (
                 -0.5
-                + double_helix.zeroed_helix.domain.left_helix_count.bottom_count
-                + double_helix.zeroed_helix.domain.left_helix_count.body_count
-                + double_helix.zeroed_helix.domain.left_helix_count.top_count
+                + double_helix.zeroed_helix.counts.bottom_count
+                + double_helix.zeroed_helix.counts.body_count
+                + double_helix.zeroed_helix.counts.top_count
             )
-            final_z_coord = initial_z_coord + (
-                increments * self.nucleic_acid_profile.Z_b
-            )  # Extra nucleoside on top
-            final_angle = initial_angle + (
-                increments * self.nucleic_acid_profile.theta_b
-            )  # Extra nucleoside on top
+            final_z_coord = (
+                initial_z_coord + (increments * self.nucleic_acid_profile.Z_b)
+                ) # Extra nucleoside on top
+            final_angle = (
+                initial_angle + (increments * self.nucleic_acid_profile.theta_b)
+                )
 
             # Compute the z coord and angle data for the zeroed helix; we will
             # generate the angles based off of the x coords later. Recall that we're
@@ -375,8 +375,8 @@ class DoubleHelices:
             )
 
             # Repeat the same process that we used for the zeroed strand of computing
-            # the arange start and stop values based on domain's left_helix_count and
-            # other_helix_count.
+            # the arange start and stop values based on domain's helices' generation
+            # counts.
 
             # However, note that there is an offset this time for the z coords and
             # angles, which we must take into account.
@@ -388,7 +388,7 @@ class DoubleHelices:
             # Note that we're overwriting the initial_z_coord and initial_angle,
             # which is OK since we've already computed the zeroed helix's data and
             # won't need the previous "initial" values.
-            increments = double_helix.zeroed_helix.domain.other_helix_count.bottom_count
+            increments = double_helix.other_helix.counts.bottom_count
             initial_angle = (
                 aligned_angle  # The previously aligned angle of the left helix
                 + (
@@ -419,9 +419,9 @@ class DoubleHelices:
             # Same procedure as for the zeroed helix.
             increments = (
                 -0.5
-                + double_helix.zeroed_helix.domain.other_helix_count.bottom_count
-                + double_helix.zeroed_helix.domain.other_helix_count.body_count
-                + double_helix.zeroed_helix.domain.other_helix_count.top_count
+                + double_helix.zeroed_helix.counts.bottom_count
+                + double_helix.zeroed_helix.counts.body_count
+                + double_helix.zeroed_helix.counts.top_count
             )
             final_angle = (
                 initial_angle

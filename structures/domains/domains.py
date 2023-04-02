@@ -116,19 +116,18 @@ class Domains:
         Export all the current domains as a pandas dataframe.
 
         Creates a pandas dataframe representing the Domains with the following columns:
-            uuid: The unique identifier for the domain. Only included if <include_uuid>
-                is True.
-            Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
-            Right Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
-            Left Helix Count ("int:int:int"): The number of NEMids to add to the bottom
-                of the left helix, followed by the number of NEMids to compute
-                initially for the left helix, followed by the number of NEMids to add
-                to the top of the left helix.
-            Other Helix Count ("int:int:int"): Same as above but for the other helix.
-            s: Which is based off left and right helix joints
-            m: Interior angle multiple
-            Symmetry (int): The symmetry type
-            Antiparallel ("true" or "false"): Whether the domains are antiparallel
+            * uuid: The unique identifier for the domain. Only included if
+                <include_uuid> is True.
+            * Left Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
+            * Right Helix Joint ("UP" or "DOWN"): If 0 then "UP" if 1 then "DOWN"
+            * Up helix count ("int:int:int"): The amount of initial Nucleosides to
+                generate for the up helix of a given domain.
+            * Down helix count ("int:int:int"): The amount of initial Nucleosides to
+                generate for the up helix of a given domain.
+            * s: Which is based off left and right helix joints
+            * m: Interior angle multiple
+            * Symmetry (int): The symmetry type
+            * Antiparallel ("true" or "false"): Whether the domains are antiparallel
 
         Returns:
             A pandas dataframe containing the domains' data.
@@ -145,11 +144,11 @@ class Domains:
         theta_m_multiples = [domain.theta_m_multiple for domain in domains]
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
-        left_helix_count = [
-            "-".join(map(str, domain.left_helix_count)) for domain in domains
+        up_helix_counts = [
+            "-".join(map(str, domain.up_helix_count)) for domain in domains
         ]
-        other_helix_count = [
-            "-".join(map(str, domain.other_helix_count)) for domain in domains
+        down_helix_counts = [
+            "-".join(map(str, domain.down_helix_count)) for domain in domains
         ]
 
         # Create a dictionary with the columns above, and the UUIds only if requested
@@ -157,8 +156,8 @@ class Domains:
             "data:m": theta_m_multiples,
             "data:left_helix_joints": left_helix_joints,
             "data:right_helix_joints": right_helix_joints,
-            "data:left_helix_count": left_helix_count,
-            "data:other_helix_count": other_helix_count,
+            "data:left_helix_counts": up_helix_counts,
+            "data:other_helix_counts": down_helix_counts,
             "data:symmetry": symmetry,
             "data:antiparallel": antiparallel,
         }
@@ -197,13 +196,13 @@ class Domains:
             for direction in df["data:right_helix_joints"].to_list()
         ]
         m = [int(m) for m in df["data:m"].to_list()]
-        left_helix_count = [
+        up_helix_counts = [
             tuple(map(int, count.split("-")))
-            for count in df["data:left_helix_count"].to_list()
+            for count in df["data:up_helix_counts"].to_list()
         ]
-        other_helix_count = [
+        down_helix_counts = [
             tuple(map(int, count.split("-")))
-            for count in df["data:other_helix_count"].to_list()
+            for count in df["data:down_helix_counts"].to_list()
         ]
         symmetry = int(df["data:symmetry"].to_list()[0])
         antiparallel = df["data:antiparallel"].to_list()[0]
@@ -219,8 +218,8 @@ class Domains:
                     theta_m_multiple=m[i],
                     left_helix_joint=left_helix_joints[i],
                     right_helix_joint=right_helix_joints[i],
-                    left_helix_count=left_helix_count[i],  # type: ignore
-                    other_helix_count=other_helix_count[i],  # type: ignore
+                    up_helix_counts=up_helix_counts[i],  # type: ignore
+                    down_helix_count=down_helix_counts[i],  # type: ignore
                 )
             )
 
@@ -254,12 +253,12 @@ class Domains:
         sheet.write(0, 1, "m")
         sheet.write(0, 2, "Left Helix Joints")
         sheet.write(0, 3, "Right Helix Joints")
-        sheet.write(0, 4, "Left Helix Count (bottom)")
-        sheet.write(0, 5, "Left Helix Count (initial)")
-        sheet.write(0, 6, "Left Helix Count (top)")
-        sheet.write(0, 7, "Other Helix Count (bottom)")
-        sheet.write(0, 8, "Other Helix Count (initial)")
-        sheet.write(0, 9, "Other Helix Count (top)")
+        sheet.write(0, 4, "Up Helix Count (bottom)")
+        sheet.write(0, 5, "Up Helix Count (initial)")
+        sheet.write(0, 6, "Up Helix Count (top)")
+        sheet.write(0, 7, "Down Helix Count (bottom)")
+        sheet.write(0, 8, "Down Helix Count (initial)")
+        sheet.write(0, 9, "Down Helix Count (top)")
         sheet.write(0, 10, "Symmetry")
         sheet.write(0, 11, "Antiparallel")
 
@@ -269,12 +268,12 @@ class Domains:
             sheet.write(i, 1, domain.theta_m_multiple)
             sheet.write(i, 2, "UP" if domain.left_helix_joint == UP else "DOWN")
             sheet.write(i, 3, "UP" if domain.right_helix_joint == UP else "DOWN")
-            sheet.write(i, 4, domain.left_helix_count[0])
-            sheet.write(i, 5, domain.left_helix_count[1])
-            sheet.write(i, 6, domain.left_helix_count[2])
-            sheet.write(i, 7, domain.other_helix_count[0])
-            sheet.write(i, 8, domain.other_helix_count[1])
-            sheet.write(i, 9, domain.other_helix_count[2])
+            sheet.write(i, 4, domain.up_helix_count[0])
+            sheet.write(i, 5, domain.up_helix_count[1])
+            sheet.write(i, 6, domain.up_helix_count[2])
+            sheet.write(i, 7, domain.down_helix_count[0])
+            sheet.write(i, 8, domain.down_helix_count[1])
+            sheet.write(i, 9, domain.down_helix_count[2])
 
         # Symmetry and Antiparallelity have their own columns, but they only take up
         # one row.
