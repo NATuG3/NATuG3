@@ -12,7 +12,7 @@ from structures.profiles.action_repeater_profile import ActionRepeaterProfile
 from structures.strands import Strands
 
 
-class ActionRepeater(QDialog):
+class ActionRepeaterDialog(QDialog):
     """
     A dialog for repeating an action over many nucleosides.
 
@@ -41,7 +41,6 @@ class ActionRepeater(QDialog):
         action: Literal["conjunct", "link", "unlink", "highlight"],
         point: Point,
         strands: Strands,
-        runner,
         nucleic_acid_profile: NucleicAcidProfile,
         types_to_run_on: tuple[Type],
     ) -> None:
@@ -53,18 +52,16 @@ class ActionRepeater(QDialog):
             action: The action to repeat.
             point: The point to start the action on.
             strands: The Strands container that the actions will be enacted on.
-            runner: NATuG's runner.
             nucleic_acid_profile: The NucleicAcidProfile to fetch B from.
             types_to_run_on: The types of Point objects to run the action on.
         """
-        super(ActionRepeater, self).__init__(parent)
+        super(ActionRepeaterDialog, self).__init__(parent)
         uic.loadUi("ui/dialogs/action_repeater/action_repeater.ui", self)
 
         self.action = action
         self.point = point
         self.types_to_run_on = types_to_run_on
         self.point_strand_length = len(point.strand.items.by_type(types_to_run_on))
-        self.runner = runner
         self.strands = strands
         self.nucleic_acid_profile = nucleic_acid_profile
 
@@ -141,17 +138,9 @@ class ActionRepeater(QDialog):
             self.repeat_every_label.setText("NEMids")
 
     @pyqtSlot()
-    def _on_accepted(self) -> None:
-        """Run the action on the strand based on the dialog's settings."""
-        self.runner.managers.misc.action_repeater = self.fetch_profile()
-        self.updated.emit()
-
-    @pyqtSlot()
-    def _on_cancelled(self) -> None:
+    def _on_completed(self) -> None:
         """Reset the point's state to normal and close the dialog."""
         self.point.styles.change_state("default")
-        self.updated.emit()
-        self.close()
 
     def _hook_signals(self) -> None:
         self.repeat_forever.stateChanged.connect(self._on_repeat_forever_clicked)
@@ -160,8 +149,7 @@ class ActionRepeater(QDialog):
         self.repeat_for.editingFinished.connect(self._on_repeat_for_changed)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
-        self.accepted.connect(self._on_accepted)
-        self.rejected.connect(self._on_cancelled)
+        self.finished.connect(self._on_completed)
 
     @pyqtSlot()
     def _on_repeat_for_changed(self) -> None:
