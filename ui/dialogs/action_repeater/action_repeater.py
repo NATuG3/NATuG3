@@ -92,23 +92,17 @@ class ActionRepeater(QDialog):
         """Prettify the ui elements."""
         self.setWindowTitle(f"{self._name} Dialog")
         if self.action == "conjunct":
-            self.repeat_for_label.setText("x B NEMids")
+            self.repeat_every_label.setText("x B NEMids")
         else:
-            self.repeat_for_label.setText("NEMids")
+            self.repeat_every_label.setText("NEMids")
 
+    @pyqtSlot()
     def _on_accepted(self):
         """Run the action on the strand based on the dialog's settings."""
-        match self.action:
-            case "conjunct":
-                repeat_every = self.repeat_every.value() * self.nucleic_acid_profile.B
-            case "nick":
-                repeat_every = self.repeat_every.value()
-            case "unnick":
-                repeat_every = self.repeat_every.value()
-            case "highlight":
-                repeat_every = self.repeat_every.value()
-            case _:
-                raise ValueError(f"Invalid action: {self.action}")
+        if self.action == "conjunct":
+            repeat_every = self.repeat_every.value() * self.nucleic_acid_profile.B * 2
+        else:
+            repeat_every = self.repeat_every.value()
 
         if self.repeat_forever.isChecked():
             repeat_for = None
@@ -116,16 +110,19 @@ class ActionRepeater(QDialog):
             repeat_for = self.repeat_for.value()
 
         assert self.point.strand.strands is self.strands
+
         self.strands.do_many(
             self.action,
             self.point,
             repeat_every,
             repeat_for,
-            self.point.strand.items.by_type(self.types_to_run_on),
+            self.bidirectional.isChecked(),
+            self.point.strand.items,
         )
 
         self.updated.emit()
 
+    @pyqtSlot()
     def _on_cancelled(self):
         """Reset the point's state to normal and close the dialog."""
         self.point.styles.change_state("default")
@@ -135,6 +132,7 @@ class ActionRepeater(QDialog):
     def _hook_signals(self):
         self.repeat_forever.stateChanged.connect(self._on_repeat_forever_clicked)
         self.repeat_forever.setChecked(True)
+        self.bidirectional.stateChanged.connect(self._on_bidirectional_clicked)
         self.repeat_for.editingFinished.connect(self._on_repeat_for_changed)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
@@ -155,3 +153,10 @@ class ActionRepeater(QDialog):
             self.repeat_for.setStatusTip("Disabled when repeating forever is checked")
         else:
             self.repeat_for.setEnabled(True)
+
+    @pyqtSlot()
+    def _on_bidirectional_clicked(self):
+        if self.bidirectional.isChecked():
+            self.repeat_forever.setText("To ends")
+        else:
+            self.repeat_forever.setText("To end")

@@ -203,6 +203,7 @@ class Strands:
         first_point: Point,
         repeat_every: int,
         repeat_for: int,
+        bidirectional: bool,
         items_to_run_on: Iterable = None,
     ) -> None:
         """
@@ -213,6 +214,8 @@ class Strands:
             first_point: The point to run an action on first and then surf from.
             repeat_every: The number of nucleosides between each action call.
             repeat_for: The number of steps of repeat_every to take.
+            bidirectional: Whether to repeat the bulk action going in both directions,
+                as opposed to only in the direction of the point starting at the point.
             items_to_run_on: The items to run the action on. Defaults to all Point
                 objects in the strand of the point are run on, but this can be changed
                 to only run on certain types of points, or a certain collection of
@@ -250,22 +253,35 @@ class Strands:
             raise ValueError(f"Unknown action: {action}")
         # fmt: on
 
-        start_at = items_to_run_on.index(first_point)
+        first_point_index = items_to_run_on.index(first_point)
+
         if repeat_for is None:
             end_at = len(items_to_run_on)
         else:
-            end_at = start_at + repeat_for * repeat_every
+            end_at = first_point_index + repeat_for * repeat_every
 
-        selected_items = []
+        if bidirectional:
+            if first_point_index - end_at > 0:
+                start_at = first_point_index - end_at
+            else:
+                start_at = int(action == "conjunct")
+        else:
+            start_at = first_point_index
+
+        logger.debug(
+            "Running action %s, starting at item %s to item %s, every %s items.",
+            action,
+            start_at,
+            end_at,
+            repeat_every
+        )
+
         for i in range(
             start_at,
             end_at,
             repeat_every,
         ):
-            selected_items.append(items_to_run_on[i])
-
-        for item in selected_items:
-            worker(item)
+            worker(items_to_run_on[i])
 
     def unnick(self, nick: "Nick"):
         """

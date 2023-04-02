@@ -24,8 +24,8 @@ def main():
                     "m": "data:m",
                     "Left Helix Joints": "data:left_helix_joints",
                     "Right Helix Joints": "data:right_helix_joints",
-                    "Left Helix Count": "data:left_helix_count",
-                    "Other Helix Count": "data:other_helix_count",
+                    "data:left_helix_counts": "data:left_helix_count",
+                    "data:other_helix_counts": "data:other_helix_count",
                     "Symmetry": "data:symmetry",
                     "Antiparallel": "data:antiparallel",
                 }
@@ -34,7 +34,7 @@ def main():
             # Remove the old uuid column if it exists and add a new one no matter what
             with suppress(KeyError):
                 del df["uuid"]
-            df.insert(0, "uuid", [uuid1() for _ in range(len(df))])  # type: ignore
+            # df.insert(0, "uuid", [uuid1() for _ in range(len(df))])  # type: ignore
 
             # Save the dataframe as a csv file with the same name as the original file
             df.to_csv(file, index=False)
