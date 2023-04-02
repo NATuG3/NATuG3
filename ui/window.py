@@ -59,7 +59,7 @@ class Window(QMainWindow):
         # import the needed panel
         from ui.toolbar import Toolbar
 
-        self.toolbar = Toolbar(self)
+        self.toolbar = Toolbar(self, self.runner)
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
 
     def _config(self):
