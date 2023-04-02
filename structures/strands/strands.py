@@ -204,7 +204,7 @@ class Strands:
         repeat_every: int,
         repeat_for: int,
         bidirectional: bool,
-        items_to_run_on: Iterable = None,
+        items_to_run_on: Iterable,
     ) -> None:
         """
         Run an action on many points by surfing a given array or the point's strand.
@@ -216,10 +216,7 @@ class Strands:
             repeat_for: The number of steps of repeat_every to take.
             bidirectional: Whether to repeat the bulk action going in both directions,
                 as opposed to only in the direction of the point starting at the point.
-            items_to_run_on: The items to run the action on. Defaults to all Point
-                objects in the strand of the point are run on, but this can be changed
-                to only run on certain types of points, or a certain collection of
-                points.
+            items_to_run_on: The iterable of Points to run the action along.
 
         Raises:
             ValueError: If the point's strand is not a strand of ours, or the point does
@@ -231,9 +228,6 @@ class Strands:
                 f"The point's strand is not a strand of ours. "
                 f"Point: {first_point}, Strand: {first_point.strand}"
             )
-
-        # Determine the items that we will surf along.
-        items_to_run_on = items_to_run_on or first_point.strand.items
 
         # fmt: off
         if action == "nick":
@@ -253,7 +247,7 @@ class Strands:
             raise ValueError(f"Unknown action: {action}")
         # fmt: on
 
-        first_point_index = items_to_run_on.index(first_point)
+        first_point_index = tuple(items_to_run_on).index(first_point)
 
         if repeat_for is None:
             end_at = len(items_to_run_on)
@@ -261,10 +255,25 @@ class Strands:
             end_at = first_point_index + repeat_for * repeat_every
 
         if bidirectional:
-            if first_point_index - end_at > 0:
-                start_at = first_point_index - end_at
-            else:
-                start_at = int(action == "conjunct")
+            logger.debug("Running action %s bidirectionally.", action)
+            start_at = first_point_index - end_at
+
+            # If the action is conjunct, we assume that the user only wants to make
+            # junctions for NEMids that have the same x coord as the first point
+            # starting at the first junctable point, or symmetrically (which is why
+            # we check whether the start_at is less than 1).
+            if start_at < 1:
+                if action == "conjunct":
+                    for index, item in enumerate(items_to_run_on):
+                        if (
+                            isinstance(item, NEMid)
+                            and item.junctable
+                            and round(item.x_coord) == round(first_point.x_coord)
+                        ):
+                            start_at = index
+                            break
+                else:
+                    start_at = 1
         else:
             start_at = first_point_index
 
@@ -273,15 +282,12 @@ class Strands:
             action,
             start_at,
             end_at,
-            repeat_every
+            repeat_every,
         )
 
-        for i in range(
-            start_at,
-            end_at,
-            repeat_every,
-        ):
-            worker(items_to_run_on[i])
+        for item in itertools.islice(items_to_run_on, start_at, end_at, repeat_every):
+            print(item)
+            worker(item)
 
         self.style()
 

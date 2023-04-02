@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Type, Tuple, Literal
+from typing import Literal
 
 from structures.points.nick import Nick
 from structures.points.point import Point
@@ -18,8 +18,6 @@ class ActionRepeaterProfile:
         bidirectional: Whether to repeat the action in both directions.
         strands: The Strands container containing all strands that the bulk actions
             will be run on.
-        types_to_run_on: The types of Point objects to run the action on. None to
-            allow all types.
     """
 
     repeat_every: int
@@ -27,7 +25,6 @@ class ActionRepeaterProfile:
     repeat_for: int | None
     bidirectional: bool
     strands: Strands
-    types_to_run_on: Tuple[Type, ...] | None = None
 
     def run(
         self,
@@ -35,10 +32,10 @@ class ActionRepeaterProfile:
         action: Literal["nick", "unnick", "highlight", "conjunct"],
     ) -> None:
         """
-        Run an action with the current settings along a strand beginning at a point.
+        Run an action with the current settings along a helix beginning at a point.
 
         Args:
-            point: The point to start the action at.
+            point: The point to start the action at. Must have a "helix" attribute.
             action: The action to run.
         """
         self.strands.do_many(
@@ -47,5 +44,5 @@ class ActionRepeaterProfile:
             self.repeat_every * self.repeat_every_multiplier,
             self.repeat_for,
             self.bidirectional,
-            self.types_to_run_on and point.strand.items.by_type(self.types_to_run_on),
+            point.helix.data.points,
         )
