@@ -208,15 +208,15 @@ class DoubleHelices:
 
             for item1, item2 in zip(
                 double_helix[UP].items.by_type(Nucleoside)[
-                    double_helix[UP].helix.generation_count.bottom_count : (
-                        double_helix[UP].helix.generation_count.body_count
-                        + double_helix[UP].helix.generation_count.top_count
+                    double_helix[UP].helix.counts.bottom_count : (
+                        double_helix[UP].helix.counts.body_count
+                        + double_helix[UP].helix.counts.top_count
                     )
                 ],
                 double_helix[DOWN].items.by_type(Nucleoside)[
-                    double_helix[DOWN].helix.generation_count.bottom_count : (
-                        double_helix[DOWN].helix.generation_count.body_count
-                        + double_helix[DOWN].helix.generation_count.top_count
+                    double_helix[DOWN].helix.counts.bottom_count : (
+                        double_helix[DOWN].helix.counts.body_count
+                        + double_helix[DOWN].helix.counts.top_count
                     ) : -1
                 ],
             ):

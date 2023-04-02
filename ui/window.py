@@ -137,14 +137,6 @@ class Window(QMainWindow):
         # Side view resizing...
         self.centralWidget().setMinimumWidth(int(4 * self.size().width() / 9))
 
-        # Top view resizing...
-        # if the top view plot is floating make the max size very large
-        if self.top_view.isFloating():
-            self.top_view.setMaximumWidth(99999)
-        # otherwise it can be resized up to 2/8ths of the screen
-        else:
-            self.top_view.setMaximumWidth(round(3 * self.size().width() / 8))
-
         # Config resizing...
         # if config is floating make the max size very large and make the tab area go
         # on top

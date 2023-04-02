@@ -156,8 +156,8 @@ class Domains:
             "data:m": theta_m_multiples,
             "data:left_helix_joints": left_helix_joints,
             "data:right_helix_joints": right_helix_joints,
-            "data:left_helix_counts": up_helix_counts,
-            "data:other_helix_counts": down_helix_counts,
+            "data:up_helix_counts": up_helix_counts,
+            "data:down_helix_counts": down_helix_counts,
             "data:symmetry": symmetry,
             "data:antiparallel": antiparallel,
         }
@@ -218,7 +218,7 @@ class Domains:
                     theta_m_multiple=m[i],
                     left_helix_joint=left_helix_joints[i],
                     right_helix_joint=right_helix_joints[i],
-                    up_helix_counts=up_helix_counts[i],  # type: ignore
+                    up_helix_count=up_helix_counts[i],  # type: ignore
                     down_helix_count=down_helix_counts[i],  # type: ignore
                 )
             )

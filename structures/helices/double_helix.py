@@ -89,8 +89,8 @@ class DoubleHelix:
         if resize_helices:
             # The helices must contain empty arrays of the size that the Domains
             # indicates.
-            self.up_helix.data.resize(self.domain.up_helix_count)
-            self.down_helix.data.resize(self.domain.down_helix_count)
+            self.up_helix.data.resize(sum(self.domain.up_helix_count))
+            self.down_helix.data.resize(sum(self.domain.down_helix_count))
 
     def __getitem__(self, index: int) -> Helix:
         """
