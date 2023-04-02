@@ -44,7 +44,7 @@ def juncter(
             repeat.run(point, "conjunct")
         else:
             strands.conjunct(point, point.juncmate)
-            refresh()
+        refresh()
     else:
         utils.warning(
             runner.window,

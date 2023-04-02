@@ -13,7 +13,7 @@ from pandas import ExcelWriter
 from xlsxwriter import Workbook
 
 import settings
-from constants.directions import UP, DOWN, UP_DOWN
+from constants.directions import UP, DOWN
 from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.points.point import Point
@@ -282,6 +282,8 @@ class Strands:
             repeat_every,
         ):
             worker(items_to_run_on[i])
+
+        self.style()
 
     def unnick(self, nick: "Nick"):
         """

@@ -1,5 +1,3 @@
-from typing import Type
-
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -38,7 +36,6 @@ class ActionRepeaterDialog(QDialog):
         parent,
         strands: Strands,
         nucleic_acid_profile: NucleicAcidProfile,
-        types_to_run_on: tuple[Type],
     ) -> None:
         """
         Initialize the dialog.
@@ -47,16 +44,13 @@ class ActionRepeaterDialog(QDialog):
             parent: The parent widget.
             strands: The Strands container that the actions will be enacted on.
             nucleic_acid_profile: The NucleicAcidProfile to fetch B from.
-            types_to_run_on: The types of Point objects to run the action on.
         """
         super(ActionRepeaterDialog, self).__init__(parent)
         uic.loadUi("ui/dialogs/action_repeater/action_repeater.ui", self)
 
-        self.types_to_run_on = types_to_run_on
         self.strands = strands
         self.nucleic_acid_profile = nucleic_acid_profile
 
-        self._set_initial_values()
         self._hook_signals()
         self._prettify()
 
@@ -77,10 +71,10 @@ class ActionRepeaterDialog(QDialog):
         Returns:
             The profile.
         """
-        if self.repeat_every_unit.currentText() == "⋅B NEMids":
-            repeat_every = self.repeat_every.value() * self.nucleic_acid_profile.B * 2
+        if self.repeat_every_unit.currentText() == "xB NEMids":
+            repeat_every_multiplier = self.nucleic_acid_profile.B * 2
         else:
-            repeat_every = self.repeat_every.value()
+            repeat_every_multiplier = 1
 
         if self.repeat_forever.isChecked():
             repeat_for = None
@@ -88,11 +82,11 @@ class ActionRepeaterDialog(QDialog):
             repeat_for = self.repeat_for.value()
 
         return ActionRepeaterProfile(
-            repeat_every,
-            repeat_for,
-            self.bidirectional.isChecked(),
-            self.types_to_run_on,
-            self.strands
+            repeat_every=self.repeat_every.value(),
+            repeat_every_multiplier=repeat_every_multiplier,
+            repeat_for=repeat_for,
+            bidirectional=self.bidirectional.isChecked(),
+            strands=self.strands
         )
 
     def dump_profile(self, profile: ActionRepeaterProfile) -> None:
@@ -118,7 +112,6 @@ class ActionRepeaterDialog(QDialog):
         self.repeat_for.editingFinished.connect(self._on_repeat_for_changed)
         self.button_box.accepted.connect(self.accept)
         self.button_box.rejected.connect(self.reject)
-        self.finished.connect(self._on_completed)
 
     @pyqtSlot()
     def _on_repeat_for_changed(self) -> None:
