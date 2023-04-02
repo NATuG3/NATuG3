@@ -4,7 +4,7 @@ from collections import deque
 from contextlib import suppress
 from copy import deepcopy
 from functools import partial
-from typing import List, Tuple, Iterable, Generator
+from typing import List, Tuple, Iterable, Generator, Literal
 from uuid import uuid1
 
 import pandas as pd
@@ -13,7 +13,7 @@ from pandas import ExcelWriter
 from xlsxwriter import Workbook
 
 import settings
-from constants.directions import DOWN, UP
+from constants.directions import UP, DOWN
 from structures.points import NEMid
 from structures.points.nick import Nick
 from structures.points.point import Point
@@ -194,6 +194,100 @@ class Strands:
 
         # Add the two new strands
         self.extend(new_strands)
+
+        self.style()
+
+    def do_many(
+        self,
+        action: Literal["nick", "unnick", "highlight", "conjunct"],
+        first_point: Point,
+        repeat_every: int,
+        repeat_for: int,
+        bidirectional: bool,
+        items_to_run_on: Iterable,
+    ) -> None:
+        """
+        Run an action on many points by surfing a given array or the point's strand.
+
+        Args:
+            action: The action to run on many points.
+            first_point: The point to run an action on first and then surf from.
+            repeat_every: The number of nucleosides between each action call.
+            repeat_for: The number of steps of repeat_every to take.
+            bidirectional: Whether to repeat the bulk action going in both directions,
+                as opposed to only in the direction of the point starting at the point.
+            items_to_run_on: The iterable of Points to run the action along.
+
+        Raises:
+            ValueError: If the point's strand is not a strand of ours, or the point does
+                not have a strand assigned.
+        """
+        # Check if the strand is in this container.
+        if (first_point.strand is None) and (first_point.strand not in self.strands):
+            raise ValueError(
+                f"The point's strand is not a strand of ours. "
+                f"Point: {first_point}, Strand: {first_point.strand}"
+            )
+
+        # fmt: off
+        if action == "nick":
+            def worker(point):
+                self.nick(point)
+        elif action == "unnick":
+            def worker(point):
+                self.unnick(point)
+        elif action == "highlight":
+            def worker(point):
+                point.highlighted = True
+        elif action == "conjunct":
+            def worker(point):
+                if point.juncmate is not None:
+                    self.conjunct(point, point.juncmate)
+        else:
+            raise ValueError(f"Unknown action: {action}")
+        # fmt: on
+
+        first_point_index = tuple(items_to_run_on).index(first_point)
+
+        if repeat_for is None:
+            end_at = len(items_to_run_on)
+        else:
+            end_at = first_point_index + repeat_for * repeat_every
+
+        if bidirectional:
+            logger.debug("Running action %s bidirectionally.", action)
+            start_at = first_point_index - end_at
+
+            # If the action is conjunct, we assume that the user only wants to make
+            # junctions for NEMids that have the same x coord as the first point
+            # starting at the first junctable point, or symmetrically (which is why
+            # we check whether the start_at is less than 1).
+            if start_at < 1:
+                if action == "conjunct":
+                    for index, item in enumerate(items_to_run_on):
+                        if (
+                            isinstance(item, NEMid)
+                            and item.junctable
+                            and round(item.x_coord) == round(first_point.x_coord)
+                        ):
+                            start_at = index
+                            break
+                else:
+                    start_at = 1
+        else:
+            start_at = first_point_index
+
+        logger.debug(
+            "Running action %s, starting at item %s to item %s, every %s items.",
+            action,
+            start_at,
+            end_at,
+            repeat_every,
+        )
+
+        for item in itertools.islice(items_to_run_on, start_at, end_at, repeat_every):
+            print(item)
+            worker(item)
 
         self.style()
 
@@ -682,9 +776,7 @@ class Strands:
 
                 # alternate sequencing that starts and ends at the junction site
                 for NEMid_ in (NEMid1, NEMid2):
-                    NEMid_.strand.items.rotate(
-                        len(NEMid_.strand) - 1 - NEMid_.index
-                    )
+                    NEMid_.strand.items.rotate(len(NEMid_.strand) - 1 - NEMid_.index)
 
                 # convert the strands back to StrandItems
                 NEMid1.strand.items = StrandItems(NEMid1.strand.items)

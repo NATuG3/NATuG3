@@ -26,6 +26,7 @@ class HelixData:
         x_coords: The x-coordinates of the points in the helix.
         z_coords: The z-coordinates of the points in the helix.
         angles: The angles of the points in the helix.
+        points: References to Point objects in the strand derived from this data.
     """
 
     helix: Type["Helix"] | None = None
@@ -33,8 +34,9 @@ class HelixData:
     x_coords: np.ndarray | None = None
     z_coords: np.ndarray | None = None
     angles: np.ndarray | None = None
+    points: np.ndarray | None = None
 
-    _data_arrays = ("x_coords", "z_coords", "angles")
+    _data_arrays = ("x_coords", "z_coords", "angles", "points")
 
     def __len__(self):
         return self.size()
@@ -46,7 +48,6 @@ class HelixData:
         Returns:
             The size of the helix.
         """
-        assert len(self.x_coords) == len(self.z_coords) == len(self.angles)
         return len(self.x_coords)
 
     def resize(self, size: int):
@@ -63,6 +64,7 @@ class HelixData:
         self.x_coords = np.zeros(size)
         self.z_coords = np.zeros(size)
         self.angles = np.zeros(size)
+        self.points = np.zeros(size * 2, dtype=object)
 
 
 @dataclass(slots=True)
@@ -149,7 +151,7 @@ class Helix:
             self.data.x_coords,
             self.data.z_coords,
         ):
-            yield cls(  # type: ignore
+            point = cls(  # type: ignore
                 angle=angle,
                 x_coord=round(x_coord, 5),
                 z_coord=round(z_coord, 5),
@@ -158,6 +160,8 @@ class Helix:
                 helix=self,
                 helical_index=index,
             )
+            self.data.points[index] = point
+            yield point
 
     def strand(
         self,
