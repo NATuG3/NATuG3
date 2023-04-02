@@ -1,8 +1,11 @@
 from dataclasses import dataclass
-from typing import List, Callable
+from typing import List, Callable, Tuple
 
 from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import QTabWidget, QVBoxLayout, QWidget, QSpinBox, QDoubleSpinBox
+from PyQt6.QtWidgets import (
+    QTabWidget,
+    QDoubleSpinBox,
+)
 
 from structures.domains import Domain
 from structures.profiles import NucleicAcidProfile
@@ -105,9 +108,16 @@ class DomainsTablesArea(QTabWidget):
 
     Attributes:
         nucleic_acid_profile (NucleicAcidProfile): The nucleic acid profile to use.
+
+    Signals:
+        cell_widget_updated: A signal to release when a cell widget is updated.
+        helix_joint_updated: A signal to release when a helix joint is updated.
+        triple_spinbox_updated: A signal to release when a triple spinbox is updated.
     """
+
     cell_widget_updated = pyqtSignal()
     helix_joint_updated = pyqtSignal()
+    triple_spinbox_updated = pyqtSignal(tuple)
 
     def __init__(self, parent, nucleic_acid_profile: NucleicAcidProfile) -> None:
         super().__init__(parent)
@@ -121,6 +131,8 @@ class DomainsTablesArea(QTabWidget):
         self.counts_table = None
         self.counts_tab = None
         self._counts_tab()
+
+        self._hook_signals()
 
     def dump_domains(self, domains: List[Domain]) -> None:
         """
@@ -188,11 +200,21 @@ class DomainsTablesArea(QTabWidget):
 
             # Counts Table, Column 0 - initial NEMid count for the up helix
             row.up_helix_count = TripleSpinbox(domain.up_helix_count)
+            row.up_helix_count.editingFinished.connect(
+                lambda widget=row.up_helix_count: self.triple_spinbox_updated.emit(
+                    widget.values()
+                )
+            )
             row.up_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
             self.counts_table.setCellWidget(index, 0, row.up_helix_count)
 
             # Counts Table, Column 1 - initial NEMid count for the down helix
             row.down_helix_count = TripleSpinbox(domain.down_helix_count)
+            row.down_helix_count.editingFinished.connect(
+                lambda widget=row.down_helix_count: self.triple_spinbox_updated.emit(
+                    widget.values()
+                )
+            )
             row.down_helix_count.editingFinished.connect(self.cell_widget_updated.emit)
             self.counts_table.setCellWidget(index, 1, row.down_helix_count)
 
@@ -231,6 +253,10 @@ class DomainsTablesArea(QTabWidget):
             domains.append(row.to_domain(self.nucleic_acid_profile))
         return domains
 
+    def _hook_signals(self):
+        """Hook up signals to slots."""
+        self.triple_spinbox_updated.connect(self._on_triple_spinbox_updated)
+
     def _angles_tab(self):
         """Set up the angles tab."""
         self.angles_table = DomainsAnglesTable(self, self.nucleic_acid_profile)
@@ -240,3 +266,20 @@ class DomainsTablesArea(QTabWidget):
         """Set up the counts tab."""
         self.counts_table = DomainsCountsTable(self)
         self.counts_tab = self.addTab(self.counts_table, "Counts")
+
+    def _on_triple_spinbox_updated(self, values: Tuple[int, int, int]):
+        """
+        If a helix count triple spinbox is updated, update all other selected
+        cells' values to match.
+        """
+        selected_triple_spinboxes = []
+        ranges = self.counts_table.selectedRanges()
+        for r in ranges:
+            for row in range(r.topRow(), r.bottomRow() + 1):
+                for col in range(r.leftColumn(), r.rightColumn() + 1):
+                    item = self.counts_table.cellWidget(row, col)
+                    if item is not None:
+                        selected_triple_spinboxes.append(item)
+        print(values)
+        for triple_spinbox in selected_triple_spinboxes:
+            triple_spinbox.setValues(values)
