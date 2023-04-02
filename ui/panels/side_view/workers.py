@@ -20,7 +20,7 @@ def juncter(
     strands: Strands,
     refresh: Callable,
     runner: "runner.Runner",
-    repeat: ActionRepeaterProfile,
+    repeat: ActionRepeaterProfile | None,
     error_title: str = "Invalid Point Clicked",
 ) -> None:
     """
@@ -36,8 +36,8 @@ def juncter(
         runner: NATuG's runner.
         error_title: The title of the error dialog that is shown when the user clicks
             an invalid point.
-        repeat: Whether to create a ActionRepeater dialog to allow the user to repeat
-            the action across the strand.
+        repeat: The action repeater profile to use for repeating the action, or None
+            to not repeat the action.
     """
     if isinstance(point, NEMid) and point.junctable:
         if repeat:
@@ -178,8 +178,8 @@ def nicker(
             on this object.
         runner: NATuG's runner.
         refresh: Function called to refresh plot after nicker mode is run.
-        repeat: Whether to create a ActionRepeater dialog to allow the user to repeat
-            the action across the strand.
+        repeat: The action repeater profile to use for repeating the action, or None
+            to not repeat the action.
     """
     if isinstance(point, Nick):
         if repeat:
@@ -207,8 +207,8 @@ def highlighter(
     Args:
         point: The point to highlight.
         refresh: Function called to refresh plot after highlighter mode is run.
-        repeat: Whether to create a ActionRepeater dialog to allow the user to repeat
-            the action across the strand.
+        repeat: The action repeater profile to use for repeating the action, or None
+            to not repeat the action.
     """
     if point.styles.state == "highlighted":
         point.styles.change_state("default")
