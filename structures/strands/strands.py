@@ -156,16 +156,19 @@ class Strands:
             for item in strand.items.by_type(type_restriction):
                 yield item
 
-    def nick(self, point: Point) -> None:
+    def nick(self, point: Point, style: bool = True) -> None:
         """
         Nick the strands at the given point (split the strand into two).
 
         Args:
             point: The point to create a nick at.
+            style: Whether to recompute the styles of the container.
 
         Raises:
             ValueError: If the point's strands strand is not a strand of ours.
         """
+        assert isinstance(point, Point), f"Point must be a Point object. Got: {point}"
+
         # Obtain the strand
         strand = point.strand
 
@@ -195,7 +198,60 @@ class Strands:
         # Add the two new strands
         self.extend(new_strands)
 
-        self.style()
+        # Change the NEMid in the helix to a nick
+        point.helix.data.points[point.helical_index] = nick
+
+        if style:
+            self.style()
+
+    def unnick(self, nick: "Nick", style: bool = True) -> None:
+        """
+        Recombine a strand and remove a nick.
+
+        The attributes of the longer strand are preserved.
+
+        Args:
+            nick: The nick to remove.
+            style: Whether to style the container after the unnick.
+
+        Raises:
+            IndexError: If the nick is not in the container.
+        """
+        # Obtain the original point that the nick is replacing.
+        point = nick.original_item
+
+        # Ensure the nick is in the container.
+        if nick not in self.nicks:
+            raise IndexError(f"Nick {nick} is not in this container.")
+
+        # Obtain the strands that are before and after the nick.
+        strand1 = nick.previous_item.strand
+        strand2 = nick.next_item.strand
+
+        # Then build the new strand.
+        new_strand = deepcopy(strand1)
+        new_strand.append(point)
+        new_strand.extend(strand2)
+
+        # Remove the two strands and add the new strand.
+        with suppress(ValueError):
+            self.remove(strand1)
+        with suppress(ValueError):
+            self.remove(strand2)
+        self.append(new_strand)
+
+        # Remove the nick.
+        self.nicks.remove(nick)
+
+        # Replace the slot in the helix's points with the original point.
+        point.helix.data.points[point.helical_index] = point
+
+        # Parent the new strand
+        point.strand = new_strand
+        new_strand.strands = self
+
+        if style:
+            self.style()
 
     def do_many(
         self,
@@ -232,17 +288,19 @@ class Strands:
         # fmt: off
         if action == "nick":
             def worker(point):
-                self.nick(point)
+                if isinstance(point, NEMid):
+                    self.nick(point, style=False)
         elif action == "unnick":
             def worker(point):
-                self.unnick(point)
+                if isinstance(point, Nick):
+                    self.unnick(point, style=False)
         elif action == "highlight":
             def worker(point):
                 point.highlighted = True
         elif action == "conjunct":
             def worker(point):
-                if point.juncmate is not None:
-                    self.conjunct(point, point.juncmate)
+                if isinstance(point, NEMid) and point.juncmate is not None:
+                    self.conjunct(point, point.juncmate, style=False)
         else:
             raise ValueError(f"Unknown action: {action}")
         # fmt: on
@@ -287,40 +345,6 @@ class Strands:
 
         for item in itertools.islice(items_to_run_on, start_at, end_at, repeat_every):
             worker(item)
-
-        self.style()
-
-    def unnick(self, nick: "Nick"):
-        """
-        Recombine a strand and remove a nick.
-
-        The attributes of the longer strand are preserved.
-
-        Raises:
-            IndexError: If the nick is not in the container.
-        """
-        # Ensure the nick is in the container.
-        if nick not in self.nicks:
-            raise IndexError(f"Nick {nick} is not in this container.")
-
-        # Obtain the strands that are before and after the nick.
-        strand1 = nick.previous_item.strand
-        strand2 = nick.next_item.strand
-
-        # Then build the new strand.
-        new_strand = deepcopy(strand1)
-        new_strand.append(nick.original_item)
-        new_strand.extend(strand2)
-
-        # Remove the two strands and add the new strand.
-        with suppress(ValueError):
-            self.remove(strand1)
-        with suppress(ValueError):
-            self.remove(strand2)
-        self.append(new_strand)
-
-        # Remove the nick.
-        self.nicks.remove(nick)
 
         self.style()
 
@@ -512,9 +536,9 @@ class Strands:
             f"(NEMid1 [{NEMid1}] Strands: {NEMid1.strand.strands}, "
             f"NEMid2 [{NEMid2}] Strands: {NEMid2.strand.strands})"
         )
-        assert (
-            NEMid1.is_endpoint(True) and NEMid2.is_endpoint(True),
-        ), "NEMids must be at the endpoints of their strands."
+        assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(True), (
+            "NEMids must be at the endpoints of their strands."
+        )
 
         # Force NEMid1 to be the upwards NEMid
         if NEMid1.strand.direction == DOWN:
@@ -630,7 +654,13 @@ class Strands:
         # Return the new strands
         return new_strand_one, new_strand_two
 
-    def conjunct(self, NEMid1: NEMid, NEMid2: NEMid, skip_checks: bool = False) -> None:
+    def conjunct(
+        self,
+        NEMid1: NEMid,
+        NEMid2: NEMid,
+        skip_checks: bool = False,
+        style: bool = True,
+    ) -> None:
         """
         Create a cross-strand or same-strand junction between two NEMids.
 
@@ -638,6 +668,7 @@ class Strands:
             NEMid1: One NEMid at the junction site.
             NEMid2: Another NEMid at the junction site.
             skip_checks: Whether to skip checks for whether the junction is valid.
+            style: Whether to restyle the strands after the junction is made.
 
         Raises:
             ValueError: NEMids are ineligible to be made into a junction.
@@ -827,7 +858,8 @@ class Strands:
         NEMid1.juncmate = NEMid2
         NEMid2.juncmate = NEMid1
 
-        self.style()
+        if style:
+            self.style()
 
     @property
     def size(self) -> Tuple[float, float]:

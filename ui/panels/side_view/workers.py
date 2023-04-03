@@ -183,7 +183,7 @@ def nicker(
     """
     if isinstance(point, Nick):
         if repeat:
-            repeat.run(point, "nick")
+            repeat.run(point, "unnick")
         else:
             strands.unnick(point)
     else:

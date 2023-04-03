@@ -1,4 +1,5 @@
 import logging
+from math import ceil
 
 from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtWidgets import (
@@ -121,6 +122,7 @@ class Toolbar(QToolBar):
                 self.runner.managers.misc.action_repeater = profile = (
                     action_repeater.fetch_profile()
                 )
+                logger.debug("Action repeater profile fetched: %s.", profile)
                 # fmt: on
 
                 if profile.repeat_for is None:
@@ -129,7 +131,7 @@ class Toolbar(QToolBar):
                     times = f"{profile.repeat_for} times"
                 self.repeat.setText(
                     f"Repeating action every {profile.repeat_every}x"
-                    f"{profile.repeat_every_multiplier//2} NEMids,"
+                    f"{ceil(profile.repeat_every_multiplier/2)} NEMids,"
                     f" {times}, "
                     f"{profile.bidirectional and 'bidirectionally' or 'unidirectionally'}"
                 )
