@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt6.QtCore import QEvent, Qt
 from PyQt6.QtGui import QKeyEvent
-from PyQt6.QtWidgets import QTableWidget, QHeaderView, QAbstractItemView, QApplication
+from PyQt6.QtWidgets import QTableWidget, QAbstractItemView, QApplication
 
 
 class DomainsBaseTable(QTableWidget):
@@ -32,7 +32,7 @@ class DomainsBaseTable(QTableWidget):
                 row += 1
             else:
                 row -= 1
-            if row == len(self.rows):
+            if row == self.rowCount():
                 row = 0
 
             # Ensure that the previous widget's data is saved
