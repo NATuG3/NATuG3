@@ -286,7 +286,6 @@ class Strands:
         )
 
         for item in itertools.islice(items_to_run_on, start_at, end_at, repeat_every):
-            print(item)
             worker(item)
 
         self.style()

@@ -280,6 +280,5 @@ class DomainsTablesArea(QTabWidget):
                     item = self.counts_table.cellWidget(row, col)
                     if item is not None:
                         selected_triple_spinboxes.append(item)
-        print(values)
         for triple_spinbox in selected_triple_spinboxes:
             triple_spinbox.setValues(values)

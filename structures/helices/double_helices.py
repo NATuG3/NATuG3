@@ -361,7 +361,6 @@ class DoubleHelices:
                 step=self.nucleic_acid_profile.Z_b / 2,  # Nucleosides & NEMids
             )
             padding = -self.nucleic_acid_profile.theta_b / 16
-            # print("initial angle passed = ", initial_angle)
             double_helix.zeroed_helix.data.angles = np.arange(
                 start=initial_angle,
                 stop=final_angle + padding,  # Make inclusive w/padding
