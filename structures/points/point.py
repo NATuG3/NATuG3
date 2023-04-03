@@ -127,7 +127,7 @@ class PointStyles:
                     self.font = "Monaco"
 
                     # Since there's no base make the point smaller
-                    self.size = 8
+                    self.size = 6.4
                 else:
                     # Based nucleosides are dimly colored
                     self.fill = dim_color(strand.styles.color.value, 0.3)
@@ -140,7 +140,7 @@ class PointStyles:
                     self.rotation = -90 if point.direction is UP else 90
 
                     # Since there is a base make it bigger
-                    self.size = 5
+                    self.size = 6
             elif isinstance(point, NEMid):
                 # All NEMids share some common styles
                 self.symbol = "t1" if point.direction is UP else "t"
