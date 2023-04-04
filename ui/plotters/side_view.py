@@ -1,5 +1,4 @@
 import logging
-import os
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
@@ -7,9 +6,8 @@ from typing import List, Tuple, Dict, Type
 
 import numpy as np
 import pyqtgraph as pg
-import pyqtgraph.exporters
 from PyQt6.QtCore import pyqtSignal, QTimer
-from PyQt6.QtGui import QPen, QBrush, QPainterPath
+from PyQt6.QtGui import QPen, QBrush, QPainterPath, QFont
 
 import settings
 from structures.points import NEMid, Nucleoside
@@ -17,7 +15,6 @@ from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
 from ui.plotters.plotter import Plotter
 from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
-from utils import show_in_file_explorer
 
 logger = logging.getLogger(__name__)
 
@@ -91,8 +88,6 @@ class SideViewPlotter(Plotter):
         point_types: The types of points to plot. Options are Nucleoside and
             NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
         modifiers: Various modifiers for the scale of various plot aspects.
-        square_baseless_nucleosides: Whether to make baseless nucleosides circles
-            instead of their usual arrows.
         title: The title of the plot.
 
     Signals:
@@ -114,7 +109,6 @@ class SideViewPlotter(Plotter):
         title: str = "",
         padding: float = 0.01,
         dot_hidden_points: bool = True,
-        square_baseless_nucleosides: bool = False,
         initial_plot: bool = True,
     ) -> None:
         """
@@ -129,8 +123,6 @@ class SideViewPlotter(Plotter):
             modifiers: Various modifiers for the scale of various plot aspects.
             title: The title of the plot. Defaults to "".
             padding: The padding to add to the plot when auto-ranging. Defaults to 0.01.
-            square_baseless_nucleosides: Whether to make baseless nucleosides squares
-                instead of their usual arrows. Defaults to False.
             dot_hidden_points: Whether to show points that are not being plotted as
                 small circles. Defaults to True.
             initial_plot: Whether to plot the initial data. Defaults to True.
@@ -144,7 +136,6 @@ class SideViewPlotter(Plotter):
         self.point_types = point_types
         self.modifiers = modifiers
         self.title = title
-        self.square_baseless_nucleosides = square_baseless_nucleosides
         self.dot_hidden_points = dot_hidden_points
         self.padding = padding
         self.plot_data = PlotData()
@@ -319,11 +310,6 @@ class SideViewPlotter(Plotter):
                 # current styles of the point. Otherwise, plot a smaller "o" shaped
                 # point to indicate that the point is not the active point type,
                 # but still exists.
-                is_baseless_nucleoside = (
-                    self.square_baseless_nucleosides
-                    and isinstance(point, Nucleoside)
-                    and point.base is None
-                )
                 if not isinstance(point, self.point_types):
                     if self.dot_hidden_points:
                         symbols[point_index] = "o"
@@ -333,11 +319,19 @@ class SideViewPlotter(Plotter):
                 else:
                     # if the symbol is a custom symbol, use the custom symbol
                     if point.styles.symbol_is_custom():
-                        symbols[point_index] = custom_symbol(
-                            point.styles.symbol,
-                            flip=False,
-                            rotation=point.styles.rotation,
-                        )
+                        if point.styles.font is None:
+                            symbols[point_index] = custom_symbol(
+                                point.styles.symbol,
+                                flip=False,
+                                rotation=point.styles.rotation,
+                            )
+                        else:
+                            symbols[point_index] = custom_symbol(
+                                point.styles.symbol,
+                                flip=False,
+                                rotation=point.styles.rotation,
+                                font=QFont(point.styles.font),
+                            )
                         assert isinstance(symbols[point_index], QPainterPath), (
                             "Custom symbol must be of type QPainterPath, but is of type"
                             f" {type(symbols[point_index])}"
@@ -381,13 +375,6 @@ class SideViewPlotter(Plotter):
                         if outline_width > 0
                         else None
                     )
-
-                if (
-                    is_baseless_nucleoside
-                    and self.square_baseless_nucleosides
-                    and not self.dot_hidden_points
-                ):
-                    symbols[point_index] = "s"
 
             # Graph the plot for the points and for the strokes separately. First we
             # will plot the points.

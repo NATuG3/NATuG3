@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>304</width>
-    <height>204</height>
+    <width>423</width>
+    <height>297</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -81,7 +81,7 @@
            </sizepolicy>
           </property>
           <property name="statusTip">
-           <string>Number of subunits (type of symmetry)</string>
+           <string>Symmetry factor; number of total subunits of m length</string>
           </property>
           <property name="suffix">
            <string/>
@@ -103,7 +103,7 @@
            </sizepolicy>
           </property>
           <property name="statusTip">
-           <string>Total number of domains</string>
+           <string>Total number of domains, including domains from all subunits</string>
           </property>
           <property name="readOnly">
            <bool>false</bool>
@@ -124,8 +124,14 @@
         </item>
         <item row="0" column="0">
          <widget class="QLabel" name="label_2">
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="statusTip">
+           <string>Number of domains for each subunit of domains</string>
+          </property>
           <property name="text">
-           <string>Domains</string>
+           <string>Domains (C)</string>
           </property>
          </widget>
         </item>
@@ -148,7 +154,7 @@
            </sizepolicy>
           </property>
           <property name="statusTip">
-           <string>Number of domains per subunit</string>
+           <string>Number of domains for each subunit of domains</string>
           </property>
           <property name="suffix">
            <string/>
@@ -163,15 +169,27 @@
         </item>
         <item row="0" column="2">
          <widget class="QLabel" name="label">
+          <property name="toolTip">
+           <string>Symmetry factor</string>
+          </property>
+          <property name="statusTip">
+           <string>Symmetry factor; number of total subunits of m length</string>
+          </property>
           <property name="text">
-           <string>Subunits</string>
+           <string>Subunits (R)</string>
           </property>
          </widget>
         </item>
         <item row="0" column="4">
          <widget class="QLabel" name="label_3">
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="statusTip">
+           <string>Total number of domains, including domains from all subunits</string>
+          </property>
           <property name="text">
-           <string>Total</string>
+           <string>Total (CR)</string>
           </property>
          </widget>
         </item>
@@ -187,7 +205,7 @@
            </sizepolicy>
           </property>
           <property name="statusTip">
-           <string>To create a closed tube M/R must be this</string>
+           <string>The sum the interior angle multiple for all the domains in a given subunit needs to be for the tube to be closed</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>
@@ -208,6 +226,9 @@
         </item>
         <item row="2" column="2">
          <widget class="QLabel" name="label_5">
+          <property name="statusTip">
+           <string>The sum of the interior angle multiple for all the domains in a given subunit</string>
+          </property>
           <property name="text">
            <string>M/R</string>
           </property>
@@ -215,6 +236,9 @@
         </item>
         <item row="2" column="3" colspan="2">
          <widget class="QLabel" name="label_6">
+          <property name="statusTip">
+           <string>The sum the interior angle multiple for all the domains in a given subunit needs to be for the tube to be closed</string>
+          </property>
           <property name="text">
            <string>Target M/R</string>
           </property>
@@ -222,8 +246,11 @@
         </item>
         <item row="2" column="0">
          <widget class="QLabel" name="label_4">
+          <property name="statusTip">
+           <string>The sum of the interior angle multiple for all the domains across all subunits</string>
+          </property>
           <property name="text">
-           <string>M</string>
+           <string>M (Σm)</string>
           </property>
          </widget>
         </item>
@@ -239,7 +266,7 @@
            </sizepolicy>
           </property>
           <property name="statusTip">
-           <string>Sum of all ms from all subunits</string>
+           <string>The sum of the interior angle multiple for all the domains in a given subunit</string>
           </property>
           <property name="styleSheet">
            <string notr="true"/>
@@ -276,7 +303,7 @@
            </sizepolicy>
           </property>
           <property name="statusTip">
-           <string>Sum of all ms across all subunits</string>
+           <string>The sum of the interior angle multiple for all the domains across all subunits</string>
           </property>
           <property name="styleSheet">
            <string notr="true">QSpinBox::disabled{background: rgb(255, 255, 255);

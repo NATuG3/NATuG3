@@ -1,4 +1,3 @@
-import os
 from functools import partial
 from os.path import abspath
 from threading import Thread
@@ -102,7 +101,6 @@ class PlotExporter(QDialog):
             title=self.side_view_plot_title.text(),
             padding=self.side_view_padding.value(),
             dot_hidden_points=False,
-            square_baseless_nucleosides=True
         )
         self.side_view_export_plot.setStyleSheet("border: 2px solid black;")
         self.side_view_plot_area.layout().insertWidget(

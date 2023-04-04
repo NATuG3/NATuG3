@@ -1,6 +1,6 @@
 import itertools
 import random
-from copy import deepcopy
+from copy import deepcopy, copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, List, Type, Set
 from uuid import uuid1
@@ -64,7 +64,7 @@ class StrandStyle:
             self.value = valuemod(string.replace(", auto", ""))
 
     def __deepcopy__(self, memodict={}):
-        return StrandStyle(self.automatic, deepcopy(self.value, memodict))
+        return StrandStyle(self.automatic, deepcopy(self.value))
 
 
 @dataclass
@@ -109,8 +109,8 @@ class StrandStyles:
     def __deepcopy__(self, memodict={}):
         return StrandStyles(
             self.strand,
-            deepcopy(self.thickness, memodict),
-            deepcopy(self.color, memodict),
+            deepcopy(self.thickness),
+            deepcopy(self.color),
             self.highlighted,
         )
 
@@ -317,10 +317,10 @@ class Strand:
     def __deepcopy__(self, memodict={}):
         """Deepcopy the strand."""
         return Strand(
-            items=deepcopy(self.items, memodict),
+            items=copy(self.items),
             name=self.name,
             closed=self.closed,
-            styles=deepcopy(self.styles, memodict),
+            styles=deepcopy(self.styles),
             nucleic_acid_profile=self.nucleic_acid_profile,
             strands=self.strands,
         )
