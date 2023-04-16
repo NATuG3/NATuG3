@@ -801,16 +801,16 @@ class Strands:
             # if both of the NEMids have closed sequencing
             elif NEMid1.strand.closed and NEMid2.strand.closed:
                 # convert the strands to deques so that they can be rotated
-                NEMid1.strand.items = deque(NEMid1.strand.items)
-                NEMid2.strand.items = deque(NEMid2.strand.items)
+                NEMid1_strand_items_deque = deque(NEMid1.strand.items)
+                NEMid2_strand_items_deque = deque(NEMid2.strand.items)
 
                 # alternate sequencing that starts and ends at the junction site
-                for NEMid_ in (NEMid1, NEMid2):
-                    NEMid_.strand.items.rotate(len(NEMid_.strand) - 1 - NEMid_.index)
+                NEMid1_strand_items_deque.rotate(len(NEMid1.strand) - 1 - NEMid1.index)
+                NEMid2_strand_items_deque.rotate(len(NEMid2.strand) - 1 - NEMid2.index)
 
                 # convert the strands back to StrandItems
-                NEMid1.strand.items = StrandItems(NEMid1.strand.items)
-                NEMid2.strand.items = StrandItems(NEMid2.strand.items)
+                NEMid1.strand.items = StrandItems(NEMid1_strand_items_deque)
+                NEMid2.strand.items = StrandItems(NEMid2_strand_items_deque)
 
                 # add the entire first reordered strand to the new strand
                 new_strands[0].items.extend(NEMid1.strand.items)
