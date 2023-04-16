@@ -90,6 +90,17 @@ class SnapshotsPanel(QWidget):
             else:
                 return self.snapshots[0]
 
+    def next_snapshot(self) -> Snapshot:
+        """
+        Obtain the next version in the list.
+        """
+        if self.current_snapshot:
+            index = self.snapshots.index(self.current_snapshot)
+            if index != len(self.snapshots) - 1:
+                return self.snapshots[index + 1]
+            else:
+                return self.snapshots[-1]
+
     def snapshot_widget(self, filename: str) -> Snapshot | None:
         """
         Get the version widget given its filename.
@@ -154,12 +165,15 @@ class SnapshotsPanel(QWidget):
         self.loader(f"{self.root_path}/{filename}.{settings.extension}")
         self.current_snapshot = self.snapshot_widget(filename)
 
-    def recover_snapshot(self) -> None:
-        """
-        Recover the latest snapshot.
-        """
+    def switch_to_previous(self) -> None:
+        """Switch to the prior snapshot."""
         if self.snapshots.index(self.current_snapshot) != 0:
             self.load_snapshot(self.previous_snapshot().filename)
+
+    def switch_to_next(self) -> None:
+        """Switch to the next snapshot."""
+        if self.snapshots.index(self.current_snapshot) != len(self.snapshots) - 1:
+            self.load_snapshot(self.next_snapshot().filename)
 
     def _hook_signals(self):
         self.take_snapshot_button.clicked.connect(self._take_snapshot_clicked)

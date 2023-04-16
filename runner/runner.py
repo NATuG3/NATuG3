@@ -158,7 +158,8 @@ class Runner:
 
     def _event_filters(self):
         take_snapshot = self.window.config.panel.snapshots.take_snapshot
-        recover_snapshot = self.window.config.panel.snapshots.recover_snapshot
+        switch_to_next = self.window.config.panel.snapshots.switch_to_next
+        switch_to_previous = self.window.config.panel.snapshots.switch_to_previous
 
         class EventFilters(QObject):
             def eventFilter(self, obj, event):
@@ -169,10 +170,17 @@ class Runner:
                 # Check if the event is a key press event
                 if event.type() == QEvent.Type.KeyRelease:
                     logger.debug("Key pressed, checking if it's Ctrl+Z.")
-                    # Check if the key pressed is 'Z' and the Control modifier is pressed
+                    # Check if the key pressed is 'Z' and the Control modifier is
+                    # pressed
                     if event.key() == Qt.Key.Key_Z:
                         if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-                            recover_snapshot()
+                            switch_to_previous()
+                        elif (
+                            event.modifiers()
+                            == Qt.KeyboardModifier.ShiftModifier
+                            | Qt.KeyboardModifier.ControlModifier
+                        ):
+                            switch_to_next()
 
                 return super().eventFilter(obj, event)
 
