@@ -157,3 +157,5 @@ class Window(QMainWindow):
                 self.config.setFixedWidth(340)
             elif self.config.panel.nucleic_acid.isVisible():
                 self.config.setFixedWidth(220)
+            elif self.config.panel.snapshots.isVisible():
+                self.config.setFixedWidth(230)

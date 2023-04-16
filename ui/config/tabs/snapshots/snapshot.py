@@ -16,10 +16,12 @@ class Snapshot(QWidget):
             filename (str): The name of the snapshot file. Not an absolute path,
                 but rather the filename only.
         """
-        super().__init__(parent)
+        super().__init__()
         uic.loadUi('ui/config/tabs/snapshots/snapshot.ui', self)
+        self.parent = parent
         self.filename = filename
         self._prettify()
+        self._hook_signals()
 
     @property
     def root_path(self):
@@ -27,20 +29,20 @@ class Snapshot(QWidget):
 
     def _prettify(self):
         self.remove_button.setIcon(fetch_icon('trash-outline'))
-        self.remove_button.clicked.connect(self._remove_snapshot_clicked)
-
         self.open_button.setIcon(fetch_icon("download-outline"))
-        self.open_button.clicked.connect(self._open_snapshot_clicked)
-
         self.snapshot_name.setText(self.filename)
+
+    def _hook_signals(self):
         self.snapshot_name.textChanged.connect(self._snapshot_name_changed)
+        self.remove_button.clicked.connect(self._remove_snapshot_clicked)
+        self.open_button.clicked.connect(self._open_snapshot_clicked)
 
     def _snapshot_name_changed(self):
         os.rename(f"{self.root_path}/{self.filename}", self.snapshot_name.text())
         self.filename = self.snapshot_name.text()
 
     def _remove_snapshot_clicked(self):
-        self.parent().remove_snapshot(self.filename)
+        self.parent.remove_snapshot(self.filename)
 
     def _open_snapshot_clicked(self):
-        self.parent().load_snapshot(self.filename)
+        self.parent.load_snapshot(self.filename)
