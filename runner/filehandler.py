@@ -372,6 +372,9 @@ class FileHandler:
                         ),
                         dtype=object,
                     )
+                    for i, point in enumerate(helix.data.points):
+                        point.helix = helix
+                        point.helical_index = i
                     assert isinstance(helix.data.x_coords[0], float)
                     assert len(helix.data.x_coords) > 0
                     items_by_uuid[row["uuid"]] = helix
