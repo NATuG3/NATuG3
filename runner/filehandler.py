@@ -363,6 +363,15 @@ class FileHandler:
                     helix.data.angles = np.array(
                         tuple(map(float, row["data:angles"].split(";"))), dtype=float
                     )
+                    helix.data.points = np.array(
+                        tuple(
+                            map(
+                                lambda point: items_by_uuid[point],
+                                row["data:points"].split(";"),
+                            )
+                        ),
+                        dtype=object,
+                    )
                     assert isinstance(helix.data.x_coords[0], float)
                     assert len(helix.data.x_coords) > 0
                     items_by_uuid[row["uuid"]] = helix

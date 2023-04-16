@@ -35,11 +35,17 @@ def main():
             with suppress(FileNotFoundError):
                 os.remove(filepath)
 
-    # create needed files
-    with suppress(FileExistsError):
-        os.mkdir(f"{os.getcwd()}/saves/nucleic_acid")
-        os.mkdir(f"{os.getcwd()}/saves/domains")
-        os.mkdir(f"{os.getcwd()}/saves/strands")
+        for snapshot in os.listdir("saves/snapshots"):
+            os.remove(f"saves/snapshots/{snapshot}")
+
+        for directory in (
+            f"saves/domains",
+            f"saves/strands",
+            f"saves/nucleic_acid",
+            f"saves/snapshots",
+        ):
+            with suppress(FileExistsError):
+                os.mkdir(directory)
 
     logger.debug(f"Booting @ {time()}")
 
