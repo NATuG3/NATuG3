@@ -384,7 +384,7 @@ class FileHandler:
                     )
                     assert (
                         len(double_helix.up_helix.data)
-                        == sum(double_helix.up_helix.generation_count) * 2 - 1
+                        == sum(double_helix.up_helix.counts) * 2 - 1
                     )
                     double_helix.up_helix.double_helix = double_helix
                     double_helix.down_helix.double_helix = double_helix
