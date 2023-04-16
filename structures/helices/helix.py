@@ -64,7 +64,7 @@ class HelixData:
         self.x_coords = np.zeros(size)
         self.z_coords = np.zeros(size)
         self.angles = np.zeros(size)
-        self.points = np.zeros(size * 2, dtype=object)
+        self.points = np.zeros(size, dtype=object)
 
 
 @dataclass(slots=True)
@@ -209,6 +209,8 @@ def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
             by semicolons.
         "data:angles": The angles of the points in the helix, separated by
             semicolons.
+        "data:points": The UUIDs of the points in the helix, separated by
+            semicolons.
 
     Arguments:
         helices: All the double helices to be exported.
@@ -223,6 +225,7 @@ def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
         "data:x_coords": [],
         "data:z_coords": [],
         "data:angles": [],
+        "data:points": []
     }
     for helix in helices:
         data["uuid"].append(helix.uuid)
@@ -231,5 +234,18 @@ def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
         data["data:x_coords"].append(";".join(map(str, helix.data.x_coords)))
         data["data:z_coords"].append(";".join(map(str, helix.data.z_coords)))
         data["data:angles"].append(";".join(map(str, helix.data.angles)))
+
+        print(len(helix.data.points), len(helix.data.angles))
+        points = []
+        for i, point in enumerate(helix.data.points):
+            try:
+                points.append(point.uuid)
+            except:
+                print(i, point)
+                exit()
+
+        data["data:points"].append(";".join(points))
+
+        # data["data:points"].append(";".join(map(lambda point: point.uuid, helix.data.points)))
 
     return pd.DataFrame(data)
