@@ -29,7 +29,7 @@ class SnapshotsPanel(QWidget):
 
     def __init__(
         self,
-        parent: QWidget,
+        parent: QWidget | None,
         loader: callable,
         dumper: callable,
         root_path: str = "saves/snapshots",
@@ -51,13 +51,6 @@ class SnapshotsPanel(QWidget):
 
         self._hook_signals()
         self._prettify()
-
-        for snapshot in os.listdir(root_path):
-            if snapshot.endswith(f".{settings.extension}"):
-                snapshot = snapshot.split(f".{settings.extension}")[0]
-                self.snapshots_list.addWidget(snapshot := Snapshot(self, snapshot))
-                self.snapshots.append(snapshot)
-        self.take_snapshot()
 
     @property
     def current_snapshot(self) -> Snapshot | None:
@@ -84,6 +77,7 @@ class SnapshotsPanel(QWidget):
         """
         Obtain the previous version in the list.
         """
+        logger.debug("Obtaining previous snapshot.")
         if self.current_snapshot:
             index = self.snapshots.index(self.current_snapshot)
             if index != 0:
@@ -95,6 +89,7 @@ class SnapshotsPanel(QWidget):
         """
         Obtain the next version in the list.
         """
+        logger.debug("Obtaining next snapshot.")
         if self.current_snapshot:
             index = self.snapshots.index(self.current_snapshot)
             if index != len(self.snapshots) - 1:

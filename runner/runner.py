@@ -2,7 +2,7 @@ import logging
 import sys
 
 import pyqtgraph as pg
-from PyQt6.QtCore import QEvent, QObject, Qt
+from PyQt6.QtGui import QKeySequence, QAction
 from PyQt6.QtWidgets import QFileDialog
 
 import settings
@@ -34,10 +34,11 @@ class Runner:
     def __init__(self):
         from runner.application import Application
 
-        self.application = Application()
+        self.application = Application(self)
         self.window = None
         self.managers = None
         self.filehandler = None
+        self.booted = False
 
     def setup(self):
         """
@@ -50,11 +51,20 @@ class Runner:
             the application, such as high DPI dynamic scaling.
         3) Create the main window. This is the main window of the application, and
             is the parent of all other windows.
+        4) Set up the application. This step sets up the application event loop,
+            and connects the application to the main window.
+        5) Set up the keyboard shortcuts. This step sets up the keyboard shortcuts
+            for the application.
         """
         # set up pyqtgraph
         pg.setConfigOptions(
             useOpenGL=True, antialias=False, background=pg.mkColor(255, 255, 255)
         )
+
+        # Create an instance of a filehandler, for saving/loading on the fly.
+        from runner.filehandler import FileHandler
+
+        self.filehandler = FileHandler(self)
 
         # Load in all the managers
         from runner.managers import Managers
@@ -69,12 +79,8 @@ class Runner:
         self.managers.domains.setup()
         self.managers.double_helices.setup()
         self.managers.strands.setup()
+        self.managers.snapshots.setup()
         logger.debug("Managers loaded.")
-
-        # Create an instance of a filehandler, for saving/loading on the fly.
-        from runner.filehandler import FileHandler
-
-        self.filehandler = FileHandler(self)
 
         # Create a main window instance
         self.window = ui.Window(self)
@@ -83,6 +89,14 @@ class Runner:
         # toolbar requires the main window to be created first.
         self.managers.toolbar.setup()
         logger.debug("Main window created.")
+
+        # Set up the application
+        self.application.setup()
+
+        # Set up the keyboard shortcuts
+        self._setup_shortcuts()
+
+        self.booted = True
 
     def save(self, filepath: str | None = None):
         """
@@ -146,7 +160,6 @@ class Runner:
             main window is properly sized on launch.
         3) Begin the application event loop.
         """
-        self._event_filters()
         self.window.show()
 
         self.window.resizeEvent(None)  # trigger initial resize event
@@ -156,32 +169,28 @@ class Runner:
         logger.debug("Beginning event loop...")
         sys.exit(self.application.exec())
 
-    def _event_filters(self):
-        take_snapshot = self.window.config.panel.snapshots.take_snapshot
-        switch_to_next = self.window.config.panel.snapshots.switch_to_next
-        switch_to_previous = self.window.config.panel.snapshots.switch_to_previous
+    def snapshot(self):
+        """
+        Take a snapshot of the current state of the program.
+        """
+        if self.booted:
+            self.managers.snapshots.current.take_snapshot()
 
-        class EventFilters(QObject):
-            def eventFilter(self, obj, event):
-                if event.type() == QEvent.Type.MouseButtonPress:
-                    logger.debug("Mouse button pressed, taking snapshot.")
-                    take_snapshot()
+    def _setup_shortcuts(self):
+        action = QAction(self.window)
+        action.setShortcut(QKeySequence("Ctrl+Z"))
+        action.triggered.connect(
+            lambda: self.managers.snapshots.current.load_snapshot(
+                self.managers.snapshots.current.previous_snapshot().filename
+            )
+        )
+        self.window.addAction(action)
 
-                # Check if the event is a key press event
-                if event.type() == QEvent.Type.KeyRelease:
-                    logger.debug("Key pressed, checking if it's Ctrl+Z.")
-                    # Check if the key pressed is 'Z' and the Control modifier is
-                    # pressed
-                    if event.key() == Qt.Key.Key_Z:
-                        if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
-                            switch_to_previous()
-                        elif (
-                            event.modifiers()
-                            == Qt.KeyboardModifier.ShiftModifier
-                            | Qt.KeyboardModifier.ControlModifier
-                        ):
-                            switch_to_next()
-
-                return super().eventFilter(obj, event)
-
-        self.window.installEventFilter(EventFilters(self.window))
+        action = QAction(self.window)
+        action.setShortcut(QKeySequence("Ctrl+Shift+Z"))
+        action.triggered.connect(
+            lambda: self.managers.snapshots.current.load_snapshot(
+                self.managers.snapshots.current.next_snapshot().filename
+            )
+        )
+        self.window.addAction(action)

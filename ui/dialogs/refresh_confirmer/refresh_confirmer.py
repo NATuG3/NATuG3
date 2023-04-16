@@ -128,8 +128,9 @@ class RefreshConfirmer(QDialog):
 
         1) Closes the dialog.
         """
-        self.refreshed = True
         self.close()
+        self.refreshed = True
+        self.runner.snapshot()
 
     def _save_and_refresh_button_clicked(self):
         """
@@ -141,6 +142,7 @@ class RefreshConfirmer(QDialog):
         """
         self.close()
         self.refreshed = True
+        self.runner.snapshot()
 
     def _change_location_button_clicked(self):
         """

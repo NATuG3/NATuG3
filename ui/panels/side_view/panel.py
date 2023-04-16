@@ -1,6 +1,5 @@
 import logging
 from functools import partial
-from threading import Thread
 
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QGroupBox, QVBoxLayout
@@ -87,6 +86,7 @@ class SideViewPanel(QGroupBox):
         """
         dialog = LinkageConfig(self.parent(), linkage)
         dialog.updated.connect(self.refresh)
+        dialog.updated.connect(self.runner.snapshot)
         dialog.show()
         self.refresh()
 
@@ -104,6 +104,7 @@ class SideViewPanel(QGroupBox):
         """
         dialog = StrandConfig(self.parent(), strand=strand)
         dialog.updated.connect(self.refresh)
+        dialog.updated.connect(self.runner.snapshot)
         dialog.show()
         self.refresh()
 
@@ -124,57 +125,48 @@ class SideViewPanel(QGroupBox):
         parent = self.parent()
         refresh = self.runner.window.side_view.refresh
 
-        worker = partial(
-            logger.info, "Point was clicked but no worker handled the click"
-        )
-
         if self.runner.window.toolbar.repeat.isChecked():
             repeat = self.runner.managers.misc.action_repeater
         else:
             repeat = None
 
-        if self.runner.managers.toolbar.current == INFORMER:
-            worker = partial(
+        {
+            INFORMER: partial(
                 workers.informer,
                 parent,
                 points,
                 strands,
                 domains,
                 refresh,
-            )
-        elif self.runner.managers.toolbar.current == LINKER:
-            worker = partial(
+            ),
+            LINKER: partial(
                 workers.linker,
                 points,
                 strands,
                 refresh,
                 self.runner,
-            )
-        elif self.runner.managers.toolbar.current == JUNCTER:
-            worker = partial(
+            ),
+            JUNCTER: partial(
                 workers.juncter,
                 points,
                 strands,
                 refresh,
                 self.runner,
                 repeat,
-            )
-        elif self.runner.managers.toolbar.current == NICKER:
-            worker = partial(
+            ),
+            NICKER: partial(
                 workers.nicker,
                 points,
                 strands,
                 self.runner,
                 refresh,
                 repeat,
-            )
-        elif self.runner.managers.toolbar.current == HIGHLIGHTER:
-            worker = partial(
+            ),
+            HIGHLIGHTER: partial(
                 workers.highlighter,
                 points,
                 refresh,
                 repeat,
-            )
-
-        thread = Thread(target=worker)
-        thread.run()
+            ),
+        }[self.runner.managers.toolbar.current]()
+        self.runner.snapshot()

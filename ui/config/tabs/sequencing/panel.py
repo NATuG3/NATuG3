@@ -54,6 +54,8 @@ class SequencingPanel(QWidget):
                         "You cannot clear bases for all bases that have not been set!"
                     )
 
+            self.runner.snapshot()
+
         self.run_bulk_operation.clicked.connect(run_bulk_operation_clicked)
 
     def _configuration(self):

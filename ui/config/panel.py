@@ -4,11 +4,10 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
-import settings
 from constants.tabs import *
 from constants.toolbar import *
 from structures.points import NEMid, Nucleoside
-from ui.config.tabs import domains, nucleic_acid, sequencing, snapshots
+from ui.config.tabs import domains, nucleic_acid, sequencing
 from ui.dialogs.plot_exporter.plot_exporter import PlotExporter
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
@@ -57,12 +56,8 @@ class Panel(QWidget):
         )
         self.domains = domains.DomainsPanel(self, self.runner)
         self.sequencing = sequencing.SequencingPanel(self, self.runner)
-        self.snapshots = snapshots.SnapshotsPanel(
-            self,
-            self.runner.load,
-            self.runner.save,
-            settings.snapshot_path,
-        )
+        self.snapshots = self.runner.managers.snapshots.current
+        self.snapshots.setParent(self)
 
         # set the nucleic acid tab
         self.nucleic_acid_tab.setLayout(QVBoxLayout())

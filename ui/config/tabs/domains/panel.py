@@ -9,15 +9,12 @@ from PyQt6.QtWidgets import (
     QWidget,
     QSizePolicy,
     QFileDialog,
-    QVBoxLayout,
 )
 
 import settings
 import utils
 from structures.domains import Domains
 from structures.profiles import NucleicAcidProfile
-from ui.config.tabs.domains.tables.angles import DomainsAnglesTable
-from ui.config.tabs.domains.tables.base import DomainsBaseTable
 from ui.config.tabs.domains.tables.panel import DomainsTablesArea
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
@@ -146,6 +143,8 @@ class DomainsPanel(QWidget):
         self.tables.blockSignals(False)
         self.symmetry.blockSignals(False)
         self.auto_antiparallel.blockSignals(False)
+
+        self.runner.snapshot()
 
     def _prettify(self):
         """Set up styles of panel."""

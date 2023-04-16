@@ -2,6 +2,7 @@ from runner.managers.domains import DomainsManager
 from runner.managers.double_helices import DoubleHelicesManager
 from runner.managers.misc import MiscManager
 from runner.managers.nucleic_acid_profile import NucleicAcidProfileManager
+from runner.managers.snapshots import SnapshotsManager
 from runner.managers.strands import StrandsManager
 from runner.managers.toolbar import ToolbarManager
 
@@ -15,6 +16,7 @@ class Managers:
         self.domains = DomainsManager(self.runner)
         self.double_helices = DoubleHelicesManager(self.runner)
         self.strands = StrandsManager(self.runner)
+        self.snapshots = SnapshotsManager(self.runner)
 
         # Load in other data managers
         self.toolbar = ToolbarManager(self.runner)
@@ -32,4 +34,4 @@ class Managers:
         self.domains.setup()
         self.strands.setup()
         self.toolbar.setup()
-        # self.misc doesn't require setup()
+        self.snapshots.setup()

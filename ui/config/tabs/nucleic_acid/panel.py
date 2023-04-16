@@ -75,6 +75,7 @@ class NucleicAcidPanel(QWidget):
             self.Z_mate.setValue(profile.Z_mate)
             self.theta_b.setValue(profile.theta_b)
             self.theta_c.setValue(profile.theta_c)
+            self.runner.snapshot()
 
     def fetch_nucleic_acid_profile(self) -> NucleicAcidProfile:
         """Fetch a profiles object with all current nucleic acid settings from
