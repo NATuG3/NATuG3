@@ -7,7 +7,7 @@ from time import time
 from runner import Runner
 from ui.splash_screen import SplashScreen
 
-RESET = True
+RESET = False
 
 # refs script logger object
 logger = logging.getLogger(__name__)
