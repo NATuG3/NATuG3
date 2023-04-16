@@ -29,6 +29,8 @@ class Runner:
             saving upon exit/boot.
         filehandler (logging.FileHandler): The file handler for the logger. This
             is used to save and load the program state at the request of the user.
+        booted (bool): Whether or not the program has been booted.
+        block_snapshots (bool): Whether or not to block snapshots from being taken.
     """
 
     def __init__(self):
@@ -39,6 +41,7 @@ class Runner:
         self.managers = None
         self.filehandler = None
         self.booted = False
+        self.block_snapshots = False
 
     def setup(self):
         """
@@ -173,24 +176,30 @@ class Runner:
         """
         Take a snapshot of the current state of the program.
         """
-        if self.booted:
+        if self.booted and not self.block_snapshots:
             self.managers.snapshots.current.take_snapshot()
 
     def _setup_shortcuts(self):
-        action = QAction(self.window)
-        action.setShortcut(QKeySequence("Ctrl+Z"))
-        action.triggered.connect(
-            lambda: self.managers.snapshots.current.load_snapshot(
+        def on_undo():
+            self.block_snapshots = True
+            self.managers.snapshots.current.load_snapshot(
                 self.managers.snapshots.current.previous_snapshot().filename
             )
-        )
+            self.block_snapshots = False
+
+        action = QAction(self.window)
+        action.setShortcut(QKeySequence("Ctrl+Z"))
+        action.triggered.connect(on_undo)
         self.window.addAction(action)
+
+        def on_redo():
+            self.block_snapshots = True
+            self.managers.snapshots.current.load_snapshot(
+                self.managers.snapshots.current.next_snapshot().filename
+            )
+            self.block_snapshots = False
 
         action = QAction(self.window)
         action.setShortcut(QKeySequence("Ctrl+Shift+Z"))
-        action.triggered.connect(
-            lambda: self.managers.snapshots.current.load_snapshot(
-                self.managers.snapshots.current.next_snapshot().filename
-            )
-        )
+        action.triggered.connect(on_redo)
         self.window.addAction(action)

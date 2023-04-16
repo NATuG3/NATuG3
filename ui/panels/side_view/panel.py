@@ -86,7 +86,7 @@ class SideViewPanel(QGroupBox):
         """
         dialog = LinkageConfig(self.parent(), linkage)
         dialog.updated.connect(self.refresh)
-        dialog.updated.connect(self.runner.snapshot)
+        dialog.finished.connect(self.runner.snapshot)
         dialog.show()
         self.refresh()
 
@@ -104,7 +104,7 @@ class SideViewPanel(QGroupBox):
         """
         dialog = StrandConfig(self.parent(), strand=strand)
         dialog.updated.connect(self.refresh)
-        dialog.updated.connect(self.runner.snapshot)
+        dialog.finished.connect(self.runner.snapshot)
         dialog.show()
         self.refresh()
 
