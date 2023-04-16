@@ -45,6 +45,7 @@ def juncter(
         else:
             strands.conjunct(point, point.juncmate)
         refresh()
+        runner.snapshot()
     else:
         utils.warning(
             runner.window,
@@ -192,6 +193,7 @@ def nicker(
         else:
             strands.nick(point)
 
+    runner.snapshot()
     refresh()
     logger.info("Nicker mode was run.")
 
@@ -215,6 +217,7 @@ def highlighter(
     else:
         point.styles.change_state("highlighted")
 
+    runner.snapshot()
     refresh()
     logger.info("Highlighter mode was run.")
 
@@ -299,6 +302,7 @@ def linker(
             currently_selected[0].styles.change_state("default")
             point.styles.change_state("default")
             currently_selected.clear()
+            runner.snapshot()
         else:
             utils.warning(
                 runner.window,

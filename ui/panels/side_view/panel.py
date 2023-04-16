@@ -169,4 +169,3 @@ class SideViewPanel(QGroupBox):
                 repeat,
             ),
         }[self.runner.managers.toolbar.current]()
-        self.runner.snapshot()
