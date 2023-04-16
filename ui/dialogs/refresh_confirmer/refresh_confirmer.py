@@ -142,6 +142,7 @@ class RefreshConfirmer(QDialog):
         """
         self.close()
         self.refreshed = True
+        self.runner.save(self.filepath)
         self.runner.snapshot()
 
     def _change_location_button_clicked(self):
