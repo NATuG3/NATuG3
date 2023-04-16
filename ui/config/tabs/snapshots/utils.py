@@ -21,4 +21,4 @@ def generate_snapshot_name(root_path) -> str:
         with suppress(ValueError):
             snapshot_ids.append(int(snapshot_name.split(f".{settings.extension}")[0]))
 
-    return f"{str(max(snapshot_ids)+1).zfill(4)}.{settings.extension}"
+    return f"{str(max(snapshot_ids)+1).zfill(6)}"

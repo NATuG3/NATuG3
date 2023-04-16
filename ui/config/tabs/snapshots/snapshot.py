@@ -3,6 +3,7 @@ import os
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 
+import settings
 from ui.resources import fetch_icon
 
 
@@ -25,7 +26,7 @@ class Snapshot(QWidget):
 
     @property
     def root_path(self):
-        return self.parent().root_path
+        return self.parent.root_path
 
     def _prettify(self):
         self.remove_button.setIcon(fetch_icon('trash-outline'))
@@ -38,7 +39,10 @@ class Snapshot(QWidget):
         self.open_button.clicked.connect(self._open_snapshot_clicked)
 
     def _snapshot_name_changed(self):
-        os.rename(f"{self.root_path}/{self.filename}", self.snapshot_name.text())
+        os.rename(
+            f"{self.root_path}/{self.filename}.{settings.extension}",
+            f"{self.root_path}/{self.snapshot_name.text()}.{settings.extension}"
+        )
         self.filename = self.snapshot_name.text()
 
     def _remove_snapshot_clicked(self):

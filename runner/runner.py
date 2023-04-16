@@ -2,10 +2,12 @@ import logging
 import sys
 
 import pyqtgraph as pg
+from PyQt6.QtCore import QEvent, QObject, Qt
 from PyQt6.QtWidgets import QFileDialog
 
 import settings
 import ui
+from runner import Application
 
 logger = logging.getLogger(__name__)
 
@@ -144,6 +146,7 @@ class Runner:
             main window is properly sized on launch.
         3) Begin the application event loop.
         """
+        self._event_filters()
         self.window.show()
 
         self.window.resizeEvent(None)  # trigger initial resize event
@@ -152,3 +155,25 @@ class Runner:
         # begin app event loop
         logger.debug("Beginning event loop...")
         sys.exit(self.application.exec())
+
+    def _event_filters(self):
+        take_snapshot = self.window.config.panel.snapshots.take_snapshot
+        recover_snapshot = self.window.config.panel.snapshots.recover_snapshot
+
+        class EventFilters(QObject):
+            def eventFilter(self, obj, event):
+                if event.type() == QEvent.Type.MouseButtonPress:
+                    logger.debug("Mouse button pressed, taking snapshot.")
+                    take_snapshot()
+
+                # Check if the event is a key press event
+                if event.type() == QEvent.Type.KeyRelease:
+                    logger.debug("Key pressed, checking if it's Ctrl+Z.")
+                    # Check if the key pressed is 'Z' and the Control modifier is pressed
+                    if event.key() == Qt.Key.Key_Z:
+                        if event.modifiers() == Qt.KeyboardModifier.ControlModifier:
+                            recover_snapshot()
+
+                return super().eventFilter(obj, event)
+
+        self.window.installEventFilter(EventFilters(self.window))
