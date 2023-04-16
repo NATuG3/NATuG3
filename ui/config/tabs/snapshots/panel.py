@@ -57,6 +57,7 @@ class SnapshotsPanel(QWidget):
                 snapshot = snapshot.split(f".{settings.extension}")[0]
                 self.snapshots_list.addWidget(snapshot := Snapshot(self, snapshot))
                 self.snapshots.append(snapshot)
+        self.take_snapshot()
 
     @property
     def current_snapshot(self) -> Snapshot | None:
@@ -143,7 +144,7 @@ class SnapshotsPanel(QWidget):
             filename (str): The name of the version file. Not an absolute path,
                 but rather the filename only.
         """
-        logger.debug(f"Removing snapshot: {self.root_path}/{filename}")
+        logger.debug(f"Removing snapshot: {self.root_path}/{filename}.{settings.extension}")
         for index, snapshot in enumerate(self.snapshots):
             if snapshot.filename == filename:
                 if self.current_snapshot == snapshot:
