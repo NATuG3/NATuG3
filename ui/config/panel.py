@@ -4,10 +4,11 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSlot
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
+import settings
 from constants.tabs import *
 from constants.toolbar import *
 from structures.points import NEMid, Nucleoside
-from ui.config.tabs import domains, nucleic_acid, sequencing
+from ui.config.tabs import domains, nucleic_acid, sequencing, snapshots
 from ui.dialogs.plot_exporter.plot_exporter import PlotExporter
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.resources import fetch_icon
@@ -33,11 +34,12 @@ class Panel(QWidget):
     ) -> None:
         super().__init__(parent)
         self.runner = runner
-        self.auto_updating_plots = False
 
         # Create placeholders for tabs
         self.nucleic_acid = None
         self.domains = None
+        self.sequencing = None
+        self.snapshots = None
 
         # Load the panel
         uic.loadUi("ui/config/panel.ui", self)
@@ -55,6 +57,12 @@ class Panel(QWidget):
         )
         self.domains = domains.DomainsPanel(self, self.runner)
         self.sequencing = sequencing.SequencingPanel(self, self.runner)
+        self.snapshots = snapshots.SnapshotsPanel(
+            self,
+            self.runner.load,
+            self.runner.save,
+            settings.snapshot_path,
+        )
 
         # set the nucleic acid tab
         self.nucleic_acid_tab.setLayout(QVBoxLayout())
@@ -67,6 +75,10 @@ class Panel(QWidget):
         # set the strands tab
         self.sequencing_tab.setLayout(QVBoxLayout())
         self.sequencing_tab.layout().addWidget(self.sequencing)
+
+        # set the snapshots tab
+        self.snapshots_tab.setLayout(QVBoxLayout())
+        self.snapshots_tab.layout().addWidget(self.snapshots)
 
     def _hook_signals(self):
         """
@@ -120,6 +132,7 @@ class Panel(QWidget):
         if index in (
             NUCLEIC_ACID,
             DOMAINS,
+            SNAPSHOTS
         ):
             logger.info("The current tab has been changed to Nucleic Acid or Domains")
 

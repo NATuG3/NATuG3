@@ -4,6 +4,7 @@ github = "https://github.com/404Wolf/NATuG"
 debug = True
 
 extension = "natug"
+snapshot_path = "saves/snapshots"
 
 # Threshold to determine whether a tube is closed.
 closed_threshold = 0.01

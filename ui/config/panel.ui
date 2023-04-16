@@ -76,6 +76,11 @@
        <string>Sequencing</string>
       </attribute>
      </widget>
+     <widget class="QWidget" name="snapshots_tab">
+      <attribute name="title">
+       <string>Snapshots</string>
+      </attribute>
+     </widget>
     </widget>
    </item>
    <item>

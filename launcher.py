@@ -29,8 +29,8 @@ def main():
 
     if RESET:
         for filepath in (
-            f"saves/domains/restored.nano",
-            f"saves/strands/restored.nano",
+            f"saves/domains/restored.csv",
+            f"saves/strands/restored.csv",
         ):
             with suppress(FileNotFoundError):
                 os.remove(filepath)
