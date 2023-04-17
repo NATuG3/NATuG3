@@ -113,6 +113,11 @@ class DomainsPanel(QWidget):
         M_over_R = M / R
         self.M.setValue(M)
 
+        # enable/disable the close tube button based on whether it can be autoclosed
+        self.close_tube_button.setEnabled(
+            domains.symmetry > 0 and target_M_over_R % 2 == 1
+        )
+
         # remove trailing zeros if target_M_over_R is an int
         if target_M_over_R == round(target_M_over_R):
             self.target_M_over_R.setDecimals(0)
@@ -194,6 +199,7 @@ class DomainsPanel(QWidget):
             - update_table_button.clicked
             - table.helix_joint_updated
             - auto_antiparallel_button.clicked
+            - close_tube_button.clicked
         """
         self.tables.cell_widget_updated.connect(self._push_updates)
 
@@ -216,6 +222,9 @@ class DomainsPanel(QWidget):
         # Set up settings panel buttons
         self.subunit_count.valueChanged.connect(self._on_settings_panel_input_update)
         self.symmetry.valueChanged.connect(self._on_settings_panel_input_update)
+
+        # Set up the close tube button
+        self.close_tube_button.clicked.connect(self._on_close_tube_button_clicked)
 
     @pyqtSlot()
     def _on_symmetry_setting_change(self):
@@ -336,3 +345,8 @@ class DomainsPanel(QWidget):
                 nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current
             )
         )
+
+    def _on_close_tube_button_clicked(self):
+        """Close the tube by setting the symmetry to 1."""
+        self.symmetry.setValue(1)
+        self._push_updates()

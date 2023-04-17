@@ -334,6 +334,24 @@ class Domains:
 
         return list(zip(u_coords, v_coords))
 
+    def close(self):
+        """
+        Automatically close the tube if possible.
+
+        Close the nanotube if possible. This is only possible if (B * (N - 2)) / (2 *
+        R) is an even integer and the symmetry factor is greater than 0.
+
+        Raises:
+            ValueError: If the tube cannot be closed.
+        """
+        target_M_over_R = (self.nucleic_acid_profile.B * (self.count - 2)) / (
+            2 * self.symmetry
+        )
+
+        default_theta_interior_multiple = self.count // self.symmetry
+        for domain in self.domains():
+            domain.theta_m_multiple = default_theta_interior_multiple
+
     def closed(self):
         """
         Whether the Domains object is closed.

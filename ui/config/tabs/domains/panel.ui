@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>423</width>
-    <height>297</height>
+    <height>184</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,16 +44,6 @@
       <string>Settings</string>
      </property>
      <layout class="QGridLayout" name="settings_area">
-      <item row="2" column="5">
-       <widget class="QCheckBox" name="auto_antiparallel">
-        <property name="text">
-         <string>Auto Antiparallel</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="5">
        <layout class="QGridLayout" name="gridLayout">
         <property name="sizeConstraint">
@@ -355,6 +345,27 @@
          <widget class="QPushButton" name="load_domains_button">
           <property name="text">
            <string/>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="5">
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QCheckBox" name="auto_antiparallel">
+          <property name="text">
+           <string>Auto Antiparallel</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="close_tube_button">
+          <property name="text">
+           <string>Close Tube</string>
           </property>
          </widget>
         </item>
