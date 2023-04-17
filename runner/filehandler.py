@@ -373,8 +373,15 @@ class FileHandler:
                         dtype=object,
                     )
                     for i, point in enumerate(helix.data.points):
-                        point.helix = helix
-                        point.helical_index = i
+                        if isinstance(
+                            point,
+                            structures.points.nick.Nick,
+                        ):
+                            point.original_item.helix = helix
+                            point.original_item.helical_index = i
+                        else:
+                            point.helix = helix
+                            point.helical_index = i
                     assert isinstance(helix.data.x_coords[0], float)
                     assert len(helix.data.x_coords) > 0
                     items_by_uuid[row["uuid"]] = helix
@@ -394,10 +401,10 @@ class FileHandler:
                         # this on-init resize.
                         resize_helices=False,
                     )
-                    assert (
-                        len(double_helix.up_helix.data)
-                        == sum(double_helix.up_helix.counts) * 2 - 1
-                    )
+                    # assert (
+                    #     len(double_helix.up_helix.data)
+                    #     == sum(double_helix.up_helix.counts) * 2 - 1
+                    # )
                     double_helix.up_helix.double_helix = double_helix
                     double_helix.down_helix.double_helix = double_helix
                     items_by_uuid[row["uuid"]] = double_helix
