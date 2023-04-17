@@ -64,17 +64,17 @@ class SnapshotsPanel(QWidget):
 
     @current_snapshot.setter
     def current_snapshot(self, snapshot: Snapshot | None) -> None:
+        current_snapshot_styles = (
+            f"QFrame{{background-color: rgb{settings.colors['success']}}}; "
+            f"margin: 1px;}}"
+        )
+
         if snapshot:
             if self._current_snapshot:
                 self._current_snapshot.main_area.setStyleSheet("QFrame{margin: 1px;}")
 
             self._current_snapshot = snapshot
-            snapshot.main_area.setStyleSheet(
-                f"QFrame{{background-color: rgb{settings.colors['success']}}}; "
-                f"margin: 1px;}}"
-            )
-        else:
-            self._current_snapshot = None
+            snapshot.main_area.setStyleSheet(current_snapshot_styles)
 
     def previous_snapshot(self) -> Snapshot:
         """
@@ -142,7 +142,9 @@ class SnapshotsPanel(QWidget):
             filename (str): The name of the version file. Not an absolute path,
                 but rather the filename only.
         """
-        logger.debug(f"Removing snapshot: {self.root_path}/{filename}.{settings.extension}")
+        logger.debug(
+            f"Removing snapshot: {self.root_path}/{filename}.{settings.extension}"
+        )
         for index, snapshot in enumerate(self.snapshots):
             if snapshot.filename == filename:
                 if self.current_snapshot == snapshot:

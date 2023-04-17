@@ -43,7 +43,7 @@ class SnapshotsManager:
             if snapshot.endswith(f".{settings.extension}"):
                 snapshot = snapshot.split(f".{settings.extension}")[0]
                 self.current.snapshots_list.addWidget(
-                    snapshot := Snapshot(self, snapshot)
+                    snapshot := Snapshot(self.current, snapshot)
                 )
                 self.current.snapshots.append(snapshot)
         self.current.capacity.setValue(
