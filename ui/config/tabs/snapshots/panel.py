@@ -52,6 +52,9 @@ class SnapshotsPanel(QWidget):
         self._hook_signals()
         self._prettify()
 
+    def __len__(self):
+        return len(self.snapshots)
+
     @property
     def current_snapshot(self) -> Snapshot | None:
         """

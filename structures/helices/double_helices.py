@@ -85,6 +85,7 @@ class DoubleHelices:
 
     @classmethod
     def from_domains(cls, domains: "Domains", nucleic_acid_profile):
+        print(domains.domains()[0])
         from structures.helices import DoubleHelix
 
         double_helices = cls(

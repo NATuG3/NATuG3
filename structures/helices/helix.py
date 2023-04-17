@@ -141,6 +141,7 @@ class Helix:
         Yields:
             Nucleoside or NEMid: The next item in the strand.
         """
+        self.data.points = np.zeros(len(self.data.angles), dtype=object)
         domain = self.double_helix.domain if self.double_helix else None
         for index, cls, angle, x_coord, z_coord in zip(
             itertools.count(),

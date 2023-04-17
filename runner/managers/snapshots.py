@@ -39,11 +39,15 @@ class SnapshotsManager:
         self.current = SnapshotsPanel(
             None, self.runner.load, self.runner.save, self.filepath
         )
-        for snapshot in os.listdir(self.filepath):
+        for snapshot in (snapshot_files := os.listdir(self.filepath)):
             if snapshot.endswith(f".{settings.extension}"):
                 snapshot = snapshot.split(f".{settings.extension}")[0]
                 self.current.snapshots_list.addWidget(
                     snapshot := Snapshot(self, snapshot)
                 )
                 self.current.snapshots.append(snapshot)
+        self.current.capacity.setValue(
+            len(snapshot_files) + 6 if len(snapshot_files) > 12 else
+            settings.default_snapshot_max_capacity
+        )
         self.current.take_snapshot()
