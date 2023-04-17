@@ -177,7 +177,6 @@ class FileHandler:
                 )
                 for domain in domains.domains():
                     items_by_uuid[domain.uuid] = domain
-                    print(domain.uuid)
 
             def row_to_point_styles(row: pd.Series) -> PointStyles:
                 """
