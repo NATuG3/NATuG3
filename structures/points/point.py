@@ -123,7 +123,7 @@ class PointStyles:
 
                     # Since there is no base make he symbol an arrow
                     self.symbol = "V"
-                    self.rotation = 0 if point.direction is UP else 180
+                    self.rotation = {UP: 180, DOWN: 0}[point.direction]
                     self.font = "Monaco"
 
                     # Since there's no base make the point smaller
