@@ -127,26 +127,15 @@ class StrandConfig(QDialog):
         def thickness_changed():
             """Worker for when the thickness slider is changed."""
             self.auto_thickness.setChecked(False)
-            self.strand.thickness = slider_to_thickness()
+            self.strand.styles.thickness.value = slider_to_thickness()
             self.updated.emit()
 
+        self.thickness.setValue(thickness_to_slider())
         self.thickness.valueChanged.connect(thickness_changed)
 
         def auto_thickness_checked(checked):
             """Worker for when the auto thickness checkbox is checked."""
-            if checked:
-                self.strand.styles.thickness.automatic = True
-            else:
-                self.strand.thickness = slider_to_thickness()
+            self.strand.styles.thickness.automatic = checked
             self.updated.emit()
 
         self.auto_thickness.stateChanged.connect(auto_thickness_checked)
-
-        def auto_thickness_updater():
-            self.thickness.blockSignals(True)
-            self.thickness.setValue(thickness_to_slider())
-            self.thickness.blockSignals(False)
-
-        update_thickness_looper = QTimer(self)
-        update_thickness_looper.timeout.connect(auto_thickness_updater)
-        update_thickness_looper.start(100)

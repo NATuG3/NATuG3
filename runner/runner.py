@@ -181,11 +181,12 @@ class Runner:
 
     def _setup_shortcuts(self):
         def on_undo():
-            self.block_snapshots = True
-            self.managers.snapshots.current.load_snapshot(
-                self.managers.snapshots.current.previous_snapshot().filename
-            )
-            self.block_snapshots = False
+            if self.managers.snapshots.current.previous_snapshot():
+                self.block_snapshots = True
+                self.managers.snapshots.current.load_snapshot(
+                    self.managers.snapshots.current.previous_snapshot().filename
+                )
+                self.block_snapshots = False
 
         action = QAction(self.window)
         action.setShortcut(QKeySequence("Ctrl+Z"))
@@ -193,11 +194,12 @@ class Runner:
         self.window.addAction(action)
 
         def on_redo():
-            self.block_snapshots = True
-            self.managers.snapshots.current.load_snapshot(
-                self.managers.snapshots.current.next_snapshot().filename
-            )
-            self.block_snapshots = False
+            if self.managers.snapshots.current.next_snapshot():
+                self.block_snapshots = True
+                self.managers.snapshots.current.load_snapshot(
+                    self.managers.snapshots.current.next_snapshot().filename
+                )
+                self.block_snapshots = False
 
         action = QAction(self.window)
         action.setShortcut(QKeySequence("Ctrl+Shift+Z"))
