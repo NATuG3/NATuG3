@@ -177,6 +177,7 @@ class FileHandler:
                 )
                 for domain in domains.domains():
                     items_by_uuid[domain.uuid] = domain
+                    print(domain.uuid)
 
             def row_to_point_styles(row: pd.Series) -> PointStyles:
                 """
@@ -385,7 +386,7 @@ class FileHandler:
                 for index, row in df.iterrows():
                     double_helix = structures.helices.double_helix.DoubleHelix(
                         uuid=row["uuid"],
-                        domain=items_by_uuid[row["data:domain"]],
+                        domain=domains.domains()[row["data:domain"]],
                         up_helix=items_by_uuid[row["data:up_helix"]],
                         down_helix=items_by_uuid[row["data:down_helix"]],
                         # Resizing the helices makes them the correct GenerationCount

@@ -18,6 +18,9 @@ class DoubleHelix:
     direction (up or down), or domain helical joint (left or right).
 
     Attributes:
+        domain: The domain that the double helix is in.
+        helices: A list of the two helices in the double helix. The first element is the
+            up helix, and the second element is the down helix.
         zeroed_helix: The helix that is lined up with the previous double helix on
             the left side. The opposite helix is the "other helix".
         other_helix: The other helix in the same domain as the zeroed helix. This is,
@@ -162,7 +165,7 @@ def to_df(double_helices) -> pd.DataFrame:
 
     for double_helix in double_helices:
         data["uuid"].append(double_helix.uuid)
-        data["data:domain"].append(double_helix.domain.uuid)
+        data["data:domain"].append(double_helix.domain.index)
         data["data:up_helix"].append(double_helix.up_helix.uuid)
         data["data:down_helix"].append(double_helix.down_helix.uuid)
 
