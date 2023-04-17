@@ -181,7 +181,7 @@ class Runner:
 
     def _setup_shortcuts(self):
         def on_undo():
-            if self.managers.snapshots.current.previous_snapshot():
+            if len(self.managers.snapshots.current) > 1:
                 self.block_snapshots = True
                 self.managers.snapshots.current.load_snapshot(
                     self.managers.snapshots.current.previous_snapshot().filename
@@ -194,7 +194,7 @@ class Runner:
         self.window.addAction(action)
 
         def on_redo():
-            if self.managers.snapshots.current.next_snapshot():
+            if len(self.managers.snapshots.current) > 1:
                 self.block_snapshots = True
                 self.managers.snapshots.current.load_snapshot(
                     self.managers.snapshots.current.next_snapshot().filename
