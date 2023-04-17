@@ -71,7 +71,12 @@ class SnapshotsPanel(QWidget):
 
         if snapshot:
             if self._current_snapshot:
-                self._current_snapshot.main_area.setStyleSheet("QFrame{margin: 1px;}")
+                try:
+                    self._current_snapshot.main_area.setStyleSheet(
+                        "QFrame{margin: 1px;}"
+                    )
+                except RuntimeError:
+                    pass
 
             self._current_snapshot = snapshot
             snapshot.main_area.setStyleSheet(current_snapshot_styles)
@@ -83,10 +88,10 @@ class SnapshotsPanel(QWidget):
         logger.debug("Obtaining previous snapshot.")
         if self.current_snapshot:
             index = self.snapshots.index(self.current_snapshot)
-            if index != 0:
+            if index < len(self) - 1:
                 return self.snapshots[index - 1]
             else:
-                return self.snapshots[0]
+                return self.snapshots[-1]
 
     def next_snapshot(self) -> Snapshot:
         """
@@ -95,7 +100,7 @@ class SnapshotsPanel(QWidget):
         logger.debug("Obtaining next snapshot.")
         if self.current_snapshot:
             index = self.snapshots.index(self.current_snapshot)
-            if index != len(self.snapshots) - 1:
+            if index < len(self.snapshots) - 1:
                 return self.snapshots[index + 1]
             else:
                 return self.snapshots[-1]
@@ -148,7 +153,10 @@ class SnapshotsPanel(QWidget):
         for index, snapshot in enumerate(self.snapshots):
             if snapshot.filename == filename:
                 if self.current_snapshot == snapshot:
-                    self.current_snapshot = None
+                    self.current_snapshot = self.snapshots[
+                        (self.snapshots.index(self.current_snapshot) + 1)
+                        % (len(self.snapshots) - 1)
+                    ]
                 self.snapshots_list.removeWidget(snapshot)
                 snapshot.deleteLater()
                 del self.snapshots[index]
