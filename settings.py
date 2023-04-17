@@ -5,7 +5,7 @@ debug = True
 
 extension = "natug"
 snapshot_path = "saves/snapshots"
-default_snapshot_max_capacity = 12
+default_snapshot_max_capacity = 16
 
 # Threshold to determine whether a tube is closed.
 closed_threshold = 0.01
