@@ -83,6 +83,13 @@ class SnapshotsPanel(QWidget):
                 f"margin: 1px;}}"
             )
 
+    @property
+    def snapshot_filenames(self) -> list[str]:
+        """
+        A list of all the version filenames.
+        """
+        return [snapshot.filename for snapshot in self.snapshots]
+
     def previous_snapshot(self) -> Snapshot:
         """
         Obtain the previous version in the list.

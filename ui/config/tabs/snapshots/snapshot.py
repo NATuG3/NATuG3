@@ -4,6 +4,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
 
 import settings
+import utils
 from ui.resources import fetch_icon
 
 
@@ -18,7 +19,7 @@ class Snapshot(QWidget):
                 but rather the filename only.
         """
         super().__init__()
-        uic.loadUi('ui/config/tabs/snapshots/snapshot.ui', self)
+        uic.loadUi("ui/config/tabs/snapshots/snapshot.ui", self)
         self.parent = parent
         self.filename = filename
         self._prettify()
@@ -29,21 +30,31 @@ class Snapshot(QWidget):
         return self.parent.root_path
 
     def _prettify(self):
-        self.remove_button.setIcon(fetch_icon('trash-outline'))
+        self.remove_button.setIcon(fetch_icon("trash-outline"))
         self.open_button.setIcon(fetch_icon("download-outline"))
         self.snapshot_name.setText(self.filename)
 
     def _hook_signals(self):
-        self.snapshot_name.textChanged.connect(self._snapshot_name_changed)
+        self.snapshot_name.editingFinished.connect(self._snapshot_name_changed)
         self.remove_button.clicked.connect(self._remove_snapshot_clicked)
         self.open_button.clicked.connect(self._open_snapshot_clicked)
 
     def _snapshot_name_changed(self):
-        os.rename(
-            f"{self.root_path}/{self.filename}.{settings.extension}",
-            f"{self.root_path}/{self.snapshot_name.text()}.{settings.extension}"
-        )
-        self.filename = self.snapshot_name.text()
+        if self.snapshot_name.text() not in self.parent.snapshot_filenames:
+            os.rename(
+                f"{self.root_path}/{self.filename}.{settings.extension}",
+                f"{self.root_path}/{self.snapshot_name.text()}.{settings.extension}",
+            )
+            self.filename = self.snapshot_name.text()
+        else:
+            self.snapshot_name.blockSignals(True)
+            utils.warning(
+                self,
+                "Snapshot name exists",
+                "A snapshot with that name already exists. Please choose another name.",
+            )
+            self.snapshot_name.setText(f"{self.filename}")
+            self.snapshot_name.blockSignals(False)
 
     def _remove_snapshot_clicked(self):
         self.parent.remove_snapshot(self.filename)
