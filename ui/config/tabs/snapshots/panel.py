@@ -194,19 +194,13 @@ class SnapshotsPanel(QWidget):
         """Switch to the prior snapshot."""
         logger.info("Switching to previous snapshot.")
         if self.current_snapshot:
-            if self.snapshots.index(self.current_snapshot) != 0:
-                self.load_snapshot(self.previous_snapshot().filename)
-            else:
-                self.load_snapshot(self.snapshots[0].filename)
+            self.load_snapshot(self.previous_snapshot().filename)
 
     def switch_to_next(self) -> None:
         """Switch to the next snapshot."""
         logger.info("Switching to next snapshot.")
         if self.current_snapshot:
-            if self.snapshots.index(self.current_snapshot) != len(self.snapshots) - 1:
-                self.load_snapshot(self.next_snapshot().filename)
-            else:
-                self.load_snapshot(self.snapshots[-1].filename)
+            self.load_snapshot(self.next_snapshot().filename)
 
     def _hook_signals(self):
         self.take_snapshot_button.clicked.connect(self._take_snapshot_clicked)
