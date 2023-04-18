@@ -1,5 +1,6 @@
 import logging
 import os
+from contextlib import suppress
 
 from PyQt6 import uic
 from PyQt6.QtWidgets import QWidget
@@ -75,7 +76,10 @@ class SnapshotsPanel(QWidget):
         """
         if snapshot:
             if self._current_snapshot:
-                self._current_snapshot.main_area.setStyleSheet("QFrame{margin: 1px;}")
+                with suppress(RuntimeError):
+                    self._current_snapshot.main_area.setStyleSheet(
+                        "QFrame{margin: 1px;}"
+                    )
 
             self._current_snapshot = snapshot
             snapshot.main_area.setStyleSheet(
