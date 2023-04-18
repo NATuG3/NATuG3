@@ -37,7 +37,10 @@ class SnapshotsManager:
     def setup(self):
         """Set up the snapshots module."""
         self.current = SnapshotsPanel(
-            None, self.runner.load, self.runner.save, self.filepath
+            None,
+            self.runner.load,
+            self.runner.save,
+            self.filepath,
         )
         for snapshot in (snapshot_files := os.listdir(self.filepath)):
             if snapshot.endswith(f".{settings.extension}"):
@@ -47,7 +50,9 @@ class SnapshotsManager:
                 )
                 self.current.snapshots.append(snapshot)
         self.current.capacity.setValue(
-            len(snapshot_files) + 6 if len(snapshot_files) > 12 else
-            settings.default_snapshot_max_capacity
+            len(snapshot_files) + 6
+            if len(snapshot_files) > 12
+            else settings.default_snapshot_max_capacity
         )
         self.current.take_snapshot()
+        self.current.current_snapshot = self.current.snapshots[-1]

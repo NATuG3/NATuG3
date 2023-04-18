@@ -38,6 +38,11 @@ class SnapshotsPanel(QWidget):
         Initialize the version panel.
 
         Args:
+            parent (QWidget): The parent widget.
+            loader (callable): The function to call when a version is loaded. The
+                filepath to the save file is passed as the only argument.
+            dumper (callable): The function to call when a version is saved. The
+                filepath to the save file is passed as the only argument.
             root_path (str): The root path of the version save files.
         """
         super().__init__(parent)
@@ -45,6 +50,7 @@ class SnapshotsPanel(QWidget):
 
         self.snapshots = []
         self._current_snapshot = None
+        self.block_snapshots = False
         self.root_path = root_path
         self.loader = loader
         self.dumper = dumper
@@ -64,22 +70,18 @@ class SnapshotsPanel(QWidget):
 
     @current_snapshot.setter
     def current_snapshot(self, snapshot: Snapshot | None) -> None:
-        current_snapshot_styles = (
-            f"QFrame{{background-color: rgb{settings.colors['success']}}}; "
-            f"margin: 1px;}}"
-        )
-
+        """
+        Set the currently selected version.
+        """
         if snapshot:
             if self._current_snapshot:
-                try:
-                    self._current_snapshot.main_area.setStyleSheet(
-                        "QFrame{margin: 1px;}"
-                    )
-                except RuntimeError:
-                    pass
+                self._current_snapshot.main_area.setStyleSheet("QFrame{margin: 1px;}")
 
             self._current_snapshot = snapshot
-            snapshot.main_area.setStyleSheet(current_snapshot_styles)
+            snapshot.main_area.setStyleSheet(
+                f"QFrame{{background-color: rgb{settings.colors['success']}}}; "
+                f"margin: 1px;}}"
+            )
 
     def previous_snapshot(self) -> Snapshot:
         """
@@ -88,7 +90,7 @@ class SnapshotsPanel(QWidget):
         logger.debug("Obtaining previous snapshot.")
         if self.current_snapshot:
             index = self.snapshots.index(self.current_snapshot)
-            if index < len(self) - 1:
+            if index > 0:
                 return self.snapshots[index - 1]
             else:
                 return self.snapshots[-1]
@@ -128,16 +130,19 @@ class SnapshotsPanel(QWidget):
             filename (str): The name of the version file. Not an absolute path,
                 but rather the filename only. If None, a name will be generated.
         """
+        if self.block_snapshots:
+            return
+
         filename = filename or generate_snapshot_name(self.root_path)
         logger.debug(f"Taking snapshot: {self.root_path}/{filename}")
         if self.capacity.value() == len(self.snapshots):
             self.remove_snapshot(self.snapshots[0].filename)
 
         self.dumper(f"{self.root_path}/{filename}.{settings.extension}")
-        self.snapshots_list.insertWidget(0, Snapshot(self, filename))
+        self.snapshots_list.insertWidget(0, snapshot := Snapshot(self, filename))
 
-        self.snapshots.append(self.snapshots_list.itemAt(0).widget())
-        self.current_snapshot = self.snapshots[-1]
+        self.snapshots.append(snapshot)
+        self.current_snapshot = snapshot
 
     def remove_snapshot(self, filename: str) -> None:
         """
@@ -152,11 +157,8 @@ class SnapshotsPanel(QWidget):
         )
         for index, snapshot in enumerate(self.snapshots):
             if snapshot.filename == filename:
-                if self.current_snapshot == snapshot:
-                    self.current_snapshot = self.snapshots[
-                        (self.snapshots.index(self.current_snapshot) + 1)
-                        % (len(self.snapshots) - 1)
-                    ]
+                if self.current_snapshot == self.snapshot_widget(snapshot):
+                    self.current_snapshot = None
                 self.snapshots_list.removeWidget(snapshot)
                 snapshot.deleteLater()
                 del self.snapshots[index]
@@ -171,18 +173,27 @@ class SnapshotsPanel(QWidget):
             filename (str): The name of the version file. Not an absolute path,
                 but rather the filename only.
         """
+        logger.debug(f"Loading snapshot: {self.root_path}/{filename}")
+        self.block_snapshots = True
         self.loader(f"{self.root_path}/{filename}.{settings.extension}")
         self.current_snapshot = self.snapshot_widget(filename)
+        self.block_snapshots = False
 
     def switch_to_previous(self) -> None:
         """Switch to the prior snapshot."""
+        logger.info("Switching to previous snapshot.")
         if self.snapshots.index(self.current_snapshot) != 0:
             self.load_snapshot(self.previous_snapshot().filename)
+        else:
+            self.load_snapshot(self.snapshots[0].filename)
 
     def switch_to_next(self) -> None:
         """Switch to the next snapshot."""
+        logger.info("Switching to next snapshot.")
         if self.snapshots.index(self.current_snapshot) != len(self.snapshots) - 1:
             self.load_snapshot(self.next_snapshot().filename)
+        else:
+            self.load_snapshot(self.snapshots[-1].filename)
 
     def _hook_signals(self):
         self.take_snapshot_button.clicked.connect(self._take_snapshot_clicked)
