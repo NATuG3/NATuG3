@@ -47,14 +47,12 @@ class Snapshot(QWidget):
             )
             self.filename = self.snapshot_name.text()
         else:
-            self.snapshot_name.blockSignals(True)
+            self.snapshot_name.setText(self.filename)
             utils.warning(
                 self,
                 "Snapshot name exists",
                 "A snapshot with that name already exists. Please choose another name.",
             )
-            self.snapshot_name.setText(f"{self.filename}")
-            self.snapshot_name.blockSignals(False)
 
     def _remove_snapshot_clicked(self):
         self.parent.remove_snapshot(self.filename)
