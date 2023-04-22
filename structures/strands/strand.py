@@ -96,15 +96,12 @@ class StrandStyles:
     def highlight(self):
         """Highlight the strand."""
         self.highlighted = True
-        for point in self.strand.items.by_type(Point):
-            point.styles.size += 5
+        self.strand.strands.style()
 
     def reset(self):
         """Reset the strand to its default state."""
-        if self.highlighted:
-            self.highlighted = False
-            for point in self.strand.items.by_type(Point):
-                point.styles.size -= 5
+        self.highlighted = False
+        self.strand.strands.style()
 
     def __deepcopy__(self, memodict={}):
         return StrandStyles(

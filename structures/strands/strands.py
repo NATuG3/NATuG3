@@ -544,9 +544,11 @@ class Strands:
         if NEMid1.strand.direction == DOWN:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
-        # Remove the old strands from the container
+        # If a closed linkage is being created then the strands are the same and we
+        # only need to remove one of them
         self.remove(NEMid1.strand)
-        self.remove(NEMid2.strand)
+        if NEMid1.strand is not NEMid2.strand:
+            self.remove(NEMid2.strand)
 
         # Determine the strand that begins with NEMid1 and the strand that begins with
         # NEMid2
@@ -573,6 +575,7 @@ class Strands:
             items=begin_point.strand.items,
             strands=self,
         )
+        new_strand.styles.strand = new_strand
 
         # Create a linkage. The first coordinate is NEMid1.position(), and the second
         # coordinate is NEMid2.position().

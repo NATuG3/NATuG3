@@ -32,7 +32,6 @@ class StrandConfig(QDialog):
         self.strand.styles.highlight()
 
         self.finished.connect(self.when_finished)
-        atexit.register(self.when_finished)
 
     def when_finished(self) -> None:
         self.strand.styles.reset()

@@ -164,7 +164,7 @@ class PointStyles:
 
             # Enlarge the point if the strands strand exists and is highlighted
             if strand is not None and strand.styles.highlighted:
-                self.size += 5
+                self.size *= 2
 
 
 @dataclass(kw_only=True, slots=True)

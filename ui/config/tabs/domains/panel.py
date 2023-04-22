@@ -150,7 +150,7 @@ class DomainsPanel(QWidget):
         """Set up styles of panel."""
         # set panel widget buttons
         self.update_table_button.setIcon(fetch_icon("checkmark-outline"))
-        self.load_domains_button.setIcon(fetch_icon("download-outline"))
+        self.load_domains_button.setIcon(fetch_icon("open-outline"))
         self.save_domains_button.setIcon(fetch_icon("save-outline"))
 
         # set scaling settings for config and table
