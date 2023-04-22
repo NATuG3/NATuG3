@@ -634,6 +634,7 @@ class Strands:
             strands=self,
         )
         new_strand_two = deepcopy(new_strand_one)
+        new_strand_two.styles.strand = new_strand_two
         new_strand_two.name = f"{self.name} (2)"
 
         # Split up the strand items of the linkage, and do not include the linkage
