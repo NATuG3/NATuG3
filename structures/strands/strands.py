@@ -628,11 +628,12 @@ class Strands:
             name=f"{self.name} (1)",
             # If the linkage was in a closed strand, breaking the linkage would make
             # the strand no longer closed.
-            closed=not linkage.strand.closed,
+            closed=linkage.strand.closed,
             styles=deepcopy(linkage.strand.styles),
             nucleic_acid_profile=self.nucleic_acid_profile,
             strands=self,
         )
+        new_strand_one.styles.strand = new_strand_one
         new_strand_two = deepcopy(new_strand_one)
         new_strand_two.styles.strand = new_strand_two
         new_strand_two.name = f"{self.name} (2)"

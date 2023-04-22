@@ -38,14 +38,14 @@ def main():
         for snapshot in os.listdir("saves/snapshots"):
             os.remove(f"saves/snapshots/{snapshot}")
 
-        for directory in (
-            f"saves/domains",
-            f"saves/strands",
-            f"saves/nucleic_acid",
-            f"saves/snapshots",
-        ):
-            with suppress(FileExistsError):
-                os.mkdir(directory)
+    for directory in (
+        f"saves/domains",
+        f"saves/strands",
+        f"saves/nucleic_acid",
+        f"saves/snapshots",
+    ):
+        with suppress(FileExistsError):
+            os.mkdir(directory)
 
     logger.debug(f"Booting @ {time()}")
 
