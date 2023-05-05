@@ -579,21 +579,7 @@ class SideViewPlotter(Plotter):
                         # Store the linkage plotter object, which will be used for
                         # actually plotting the linkage later.
                         self.plot_data.plotted_linkages.append(plotted_linkage)
-                else:
-                    logger.warning(
-                        "Strand %s has a stroke segment that has no items. Skipping "
-                        "plotting",
-                        strand.name,
-                    )
 
-            # Now we can add links to the plot. While the nick objects are indeed
-            # stored within each strand's items, they also are stored in the Strands
-            # container object. We will iterate through the nicks through
-            # strands.nicks, and then plot them one by one. Note that nicks do not
-            # have strokes, which simplifies the plotting process.
-
-            # Create a brush for the nick symbols, based on the current color scheme
-            # found in settings.
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
         for nick_index, nick in enumerate(self.strands.nicks):
             plotted_nick = pg.PlotDataItem(
