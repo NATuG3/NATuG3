@@ -539,6 +539,9 @@ class Strands:
         assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(True), (
             "NEMids must be at the endpoints of their strands."
         )
+        assert isinstance(NEMid1, NEMid) and isinstance(NEMid2, NEMid), (
+            "The input points must be NEMids."
+        )
 
         # Force NEMid1 to be the upwards NEMid
         if NEMid1.strand.direction == DOWN:
