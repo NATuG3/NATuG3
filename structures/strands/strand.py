@@ -159,7 +159,7 @@ class StrandItems(list):
                 split.append([])
             else:
                 split[-1].append(item)
-        return split
+        return split[:-1] if split[-1] == [] else split
 
     def unpacked(self) -> "StrandItems":
         """
