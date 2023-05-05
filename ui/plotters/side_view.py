@@ -394,134 +394,148 @@ class SideViewPlotter(Plotter):
             plotted_points.sigPointsClicked.connect(self._points_clicked)
             self.plot_data.plotted_points.append(plotted_points)
 
+            strand_with_linkage = strand.has_linkage()
+
             # A strand consists of items connected by a visual stroke. However,
             # linkages receive a special stroke that has a special color, style,
             # onClick method, and more. So, right now we will split all the strand
             # items into subunits of points, discluding linkages. These subunits can
             # be plotted as connected points with a single stroke each.
             for stroke_segment_index, stroke_segment in enumerate(
-                strand.items.by_type(Point, Linkage).split(Linkage)
+                stroke_segments
             ):
-                if len(stroke_segment) > 0:
-                    # Gather an array of all the x and z coordinates of the points in
-                    # the stroke segment.
-                    stroke_length = len(stroke_segment) + int(strand.closed)
-                    x_coords = np.zeros(stroke_length, dtype=float)
-                    z_coords = np.zeros(stroke_length, dtype=float)
+                # The strand will need an extra point to give the appearance of closure
+                # if the strand is closed. However, if the strand has at least one linkage
+                # and is closed then the linkages should hide the gap.
 
-                    for point_index, point in enumerate(stroke_segment):
-                        x_coords[point_index] = point.x_coord
-                        z_coords[point_index] = point.z_coord
+                # Gather an array of all the x and z coordinates of the points in
+                # the stroke segment.
+                if (not strand_with_linkage) and strand.closed:
+                    stroke_length = len(stroke_segment) + 1
+                else:
+                    stroke_length = len(stroke_segment)
+                x_coords = np.zeros(stroke_length, dtype=float)
+                z_coords = np.zeros(stroke_length, dtype=float)
 
-                    # Use the first point to fetch the number of total domains that are
-                    # currently in existence.
-                    domain_count = stroke_segment[0].domain.parent.parent.count
+                for point_index, point in enumerate(stroke_segment):
+                    x_coords[point_index] = point.x_coord
+                    z_coords[point_index] = point.z_coord
 
-                    # If the strand is closed, we will be adding a pseudo point to the
-                    # end of the stroke segment. If the last point and the first point
-                    # are near in x value, then we will connect the last point to
-                    # the first point (connect[-1] = True). Otherwise, we will not
-                    # connect the last point to the first point (connect[-1] = False).
-                    add_connected_pseudo_point = strand.closed and (
-                        abs(stroke_segment[0].domain - stroke_segment[-1].domain)
-                        == domain_count - 1
+                # Use the first point to fetch the number of total domains that are
+                # currently in existence.
+                domain_count = stroke_segment[0].domain.parent.parent.count
+
+                # If the strand is closed, we will be adding a pseudo point to the
+                # end of the stroke segment. If the last point and the first point
+                # are near in x value, then we will connect the last point to
+                # the first point (connect[-1] = True). Otherwise, we will not
+                # connect the last point to the first point (connect[-1] = False).
+                add_connected_pseudo_point = strand.closed and (
+                    abs(stroke_segment[0].domain - stroke_segment[-1].domain)
+                    == domain_count - 1
+                )
+
+                if interdomain := strand.interdomain():
+                    # If the strand is interdomain, it may also be cross-screen (
+                    # that is, it breaks off on one side of the screen and
+                    # continues on the other). For this reason, we will create an
+                    # array of booleans that indicate where to break apart the
+                    # coordinates into separate strokes. We will plot multiple
+                    # stroke segments separately instead of using pyqtgraph's
+                    # "connect" feature, because we will later round the edges of
+                    # strokes.
+
+                    # If the strand is closed, a pseudo point will be added to
+                    # the end of the stroke segment. Whether this point gets a
+                    # connection depends on the "add_connected_pseudo_point"
+                    # variable.
+                    if strand.closed and not strand_with_linkage:
+                        # If the strand is closed, then we need to add a pseudo
+                        # point to the end of the stroke segment.
+                        split = np.empty(len(stroke_segment) + 1, dtype=bool)
+                    else:
+                        # If the strand is not closed, then we don't need to add a
+                        # pseudo point to the end of the stroke segment.
+                        split = np.empty(len(stroke_segment), dtype=bool)
+
+                    for index, point in enumerate(stroke_segment[:-1]):
+                        # We will be looking ahead to the next point to determine whether
+                        # we have crossed the screen, so we will skip the last point and worry
+                        # about it later.
+                        split[index] = (
+                            abs(point.domain - stroke_segment[index + 1].domain)
+                            == domain_count - 1
+                        )
+
+                    # If the strand is closed then connect the last point to the
+                    # first point by creating a pseudo-point at the first point's
+                    # location. This will give the appearance of a closed strand.
+                    if strand.closed and not strand_with_linkage:
+                        split[-1] = add_connected_pseudo_point
+                        x_coords[-1] = x_coords[0]
+                        z_coords[-1] = z_coords[0]
+                    else:
+                        split[-1] = False
+
+                    # Use the indices of the split array to split the x and z arrays
+                    # into subarrays, which will be connected.
+                    x_coords_subarrays = np.split(
+                        x_coords, np.nonzero(split)[0] + 1
+                    )
+                    z_coords_subarrays = np.split(
+                        z_coords, np.nonzero(split)[0] + 1
                     )
 
-                    if interdomain := strand.interdomain():
-                        # If the strand is interdomain, it may also be cross-screen (
-                        # that is, it breaks off on one side of the screen and
-                        # continues on the other). For this reason, we will create an
-                        # array of booleans that indicate where to break apart the
-                        # coordinates into separate strokes. We will plot multiple
-                        # strokes instead of using pyqtgraph's "connect" feature,
-                        # because we will later round the edges of strokes.
+                # If we know that a strand is not interdomain (does not contain
+                # points within different domains, however, we can skip this
+                # check and connect all the points).
+                else:
+                    x_coords_subarrays = (x_coords,)
+                    z_coords_subarrays = (z_coords,)
 
-                        # If the strand is closed, a pseudo point will be added to
-                        # the end of the stroke segment. Whether this point gets a
-                        # connection depends on the "add_connected_pseudo_point"
-                        # variable.
-                        if strand.closed:
-                            # If the strand is closed, then we need to add a pseudo
-                            # point to the end of the stroke segment.
-                            split = np.empty(len(stroke_segment) + 1, dtype=bool)
-                        else:
-                            # If the strand is not closed, then we don't need to add a
-                            # pseudo point to the end of the stroke segment.
-                            split = np.empty(len(stroke_segment), dtype=bool)
-
-                        for index, point in enumerate(stroke_segment[:-1]):
-                            split[index] = (
-                                abs(point.domain - stroke_segment[index + 1].domain)
-                                == domain_count - 1
-                            )
-
-                        # If the strand is closed then connect the last point to the
-                        # first point by creating a pseudo-point at the first point's
-                        # location. This will give the appearance of a closed strand.
-                        if strand.closed:
-                            split[-1] = add_connected_pseudo_point
-                            x_coords[-1] = x_coords[0]
-                            z_coords[-1] = z_coords[0]
-
-                        # Use the indices of the split array to split the x and z arrays
-                        # into subarrays, which will be connected.
-                        x_coords_subarrays = np.split(
-                            x_coords, np.nonzero(split)[0] + 1
-                        )
-                        z_coords_subarrays = np.split(
-                            z_coords, np.nonzero(split)[0] + 1
-                        )
-
-                    # If we know that a strand is not interdomain (does not contain
-                    # points within different domains, however, we can skip this
-                    # check and connect all the points).
-                    else:
-                        x_coords_subarrays = (x_coords,)
-                        z_coords_subarrays = (z_coords,)
-
-                    for x_coords_subarray, z_coords_subarray in zip(
-                        x_coords_subarrays, z_coords_subarrays
-                    ):
-                        if len(x_coords_subarray) > 0:
-                            if interdomain:
-                                # Round the subarrays' edges using Chaikin's corner
-                                # cutting algorithm.
-                                rounded_coords = chaikins_corner_cutting(
-                                    np.column_stack(
-                                        (x_coords_subarray, z_coords_subarray)
-                                    ),
-                                    refinements=3,
-                                    offset=0.3,
-                                )
-                                x_coords_subarray = rounded_coords[:, 0]
-                                z_coords_subarray = rounded_coords[:, 1]
-
-                            stroke_pen = pg.mkPen(
-                                color=strand.styles.color.value,
-                                width=(
-                                    strand.styles.thickness.value
-                                    * self.modifiers.stroke_mod
+                for x_coords_subarray, z_coords_subarray in zip(
+                    x_coords_subarrays, z_coords_subarrays
+                ):
+                    if len(x_coords_subarray) > 0:
+                        if interdomain:
+                            # Round the subarrays' edges using Chaikin's corner
+                            # cutting algorithm.
+                            rounded_coords = chaikins_corner_cutting(
+                                np.column_stack(
+                                    (x_coords_subarray, z_coords_subarray)
                                 ),
+                                refinements=3,
+                                offset=0.3,
                             )
+                            x_coords_subarray = rounded_coords[:, 0]
+                            z_coords_subarray = rounded_coords[:, 1]
 
-                            # Create the actual plot data item for the stroke segment.
-                            plotted_stroke = pg.PlotDataItem(
-                                x_coords_subarray,
-                                z_coords_subarray,
-                                pen=stroke_pen,
-                                name=f"Strand#{strand_index} Stroke#"
-                                f"{stroke_segment_index}/{len(stroke_segment)}",
-                            )
-                            # Make it so that the stroke itself can be clicked.
-                            plotted_stroke.setCurveClickable(True)
-                            # When the stroke is clicked, emit the strand_clicked
-                            # signal. This will lead to the creation of a
-                            # StrandConfig dialog.
-                            plotted_stroke.sigClicked.connect(
-                                lambda *args, f=strand: self.strand_clicked.emit(f)
-                            )
-                            # Store the stroke plotter object, which will be used later.
-                            self.plot_data.plotted_strokes.append(plotted_stroke)
+                        stroke_pen = pg.mkPen(
+                            color=strand.styles.color.value,
+                            width=(
+                                strand.styles.thickness.value
+                                * self.modifiers.stroke_mod
+                            ),
+                        )
+
+                        # Create the actual plot data item for the stroke segment.
+                        plotted_stroke = pg.PlotDataItem(
+                            x_coords_subarray,
+                            z_coords_subarray,
+                            pen=stroke_pen,
+                            name=f"Strand#{strand_index} Stroke#"
+                            f"{stroke_segment_index}/{len(stroke_segment)}",
+                        )
+                        # Make it so that the stroke itself can be clicked.
+                        plotted_stroke.setCurveClickable(True)
+                        # When the stroke is clicked, emit the strand_clicked
+                        # signal. This will lead to the creation of a
+                        # StrandConfig dialog.
+                        plotted_stroke.sigClicked.connect(
+                            lambda *args, f=strand: self.strand_clicked.emit(f)
+                        )
+                        # Store the stroke plotter object, which will be used later.
+                        self.plot_data.plotted_strokes.append(plotted_stroke)
 
                     # Now that we've plotted the stroke, we need to plot the
                     # linkages. We will sort out all the linkages in the strand,
