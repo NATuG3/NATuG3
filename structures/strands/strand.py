@@ -236,6 +236,7 @@ class Strand:
         randomize_sequence(overwrite): Randomize the sequence of the strand.
         startswith(point): Determine whether the strand starts with a point.
         endswith(point): Determine whether the strand ends with a point.
+        has_linkage(): Determine whether the strand has any linkages.
         clear(): Clear the strand.
     """
 
@@ -459,6 +460,13 @@ class Strand:
             A list of nucleosides in the strand.
         """
         return self.items.by_type(Nucleoside)
+
+    def has_linkage(self) -> bool:
+        """Determine whether the strand has any linkages."""
+        for item in self.items:
+            if isinstance(item, Linkage):
+                return True
+        return False
 
     @property
     def sequence(self):
