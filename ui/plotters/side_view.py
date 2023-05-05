@@ -401,6 +401,7 @@ class SideViewPlotter(Plotter):
             # onClick method, and more. So, right now we will split all the strand
             # items into subunits of points, discluding linkages. These subunits can
             # be plotted as connected points with a single stroke each.
+            stroke_segments = strand.items.by_type(Point, Linkage).split(Linkage)
             for stroke_segment_index, stroke_segment in enumerate(
                 stroke_segments
             ):
