@@ -212,7 +212,7 @@ class Strand:
         helix: The helix that the strand was generated from. Can be None if the strand
             was not generated from a helix.
         uuid (str): The unique identifier of the strand. This is automatically
-        generated.
+            generated.
 
     Methods:
         append(item): Add an item to the right of the strand.
