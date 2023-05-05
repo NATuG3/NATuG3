@@ -181,6 +181,9 @@ class Linkage:
     def __delitem__(self, key):
         del self.items[key]
 
+    def position(self):
+        return self.plot_points[1][0], self.plot_points[1][1]
+
     def append(self, item: Nucleoside):
         """Append a point to the linkage."""
         self.items.append(item)
