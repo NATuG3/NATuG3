@@ -569,10 +569,11 @@ class Strands:
         else:
             longer_strand = NEMid2.strand
 
+        closed = begin_point.strand is end_point.strand
         new_strand = Strand(
             name=f"{longer_strand.name} (linked)",
             # The new strand is closed if the strands being linked are the same
-            closed=begin_point.strand == end_point.strand,
+            closed=closed,
             styles=deepcopy(longer_strand.styles),
             nucleic_acid_profile=self.nucleic_acid_profile,
             items=begin_point.strand.items,
@@ -588,8 +589,9 @@ class Strands:
             strand=new_strand,
             inflection=UP,
         )
-        new_strand.items.append(linkage)
-        new_strand.items.extend(end_point.strand.items)
+        new_strand.append(linkage)
+        if not closed:
+            new_strand.items.extend(end_point.strand.items)
         for item in new_strand.items:
             item.strand = new_strand
 
