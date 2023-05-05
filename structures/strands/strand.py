@@ -128,21 +128,6 @@ class StrandItems(list):
         item_types: A list of all the types of items in the StrandItems.
     """
 
-    def __getitem__(self, index_or_slice: int | slice) -> object:
-        if isinstance(index_or_slice, slice):
-            step = index_or_slice.step or 1
-            if step < 0:
-                iter_on = reversed(self)
-            else:
-                iter_on = self
-            return itertools.islice(
-                iter_on,
-                index_or_slice.start,
-                index_or_slice.stop,
-                abs(step),
-            )
-        return super().__getitem__(index_or_slice)
-
     def by_type(self, *types) -> "StrandItems":
         """
         Obtain a list of all the items of a specific type.
