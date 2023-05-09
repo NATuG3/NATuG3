@@ -460,9 +460,9 @@ class SideViewPlotter(Plotter):
                         split = np.empty(len(stroke_segment), dtype=bool)
 
                     for index, point in enumerate(stroke_segment[:-1]):
-                        # We will be looking ahead to the next point to determine whether
-                        # we have crossed the screen, so we will skip the last point and worry
-                        # about it later.
+                        # We will be looking ahead to the next point to determine
+                        # whether we have crossed the screen, so we will skip the last
+                        # point and worry about it later.
                         split[index] = (
                             abs(point.domain - stroke_segment[index + 1].domain)
                             == domain_count - 1
