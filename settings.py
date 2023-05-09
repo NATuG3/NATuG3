@@ -9,6 +9,7 @@ default_snapshot_max_capacity = 16
 
 # Threshold to determine whether a tube is closed.
 closed_threshold = 0.01
+cross_screen_line_length = 0.3
 
 colors = {
     "grid_lines": (220, 220, 220),
