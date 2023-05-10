@@ -199,6 +199,15 @@ class Helix:
         strand.extend(tuple(self.points(begin=begin)))
         return strand
 
+    def other_helix(self) -> "Helix":
+        """
+        Obtain the other helix in the double helix.
+
+        Returns:
+            Helix: The other helix in the double helix.
+        """
+        return self.double_helix[int(not bool(self.direction))]
+
 
 def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
     """
