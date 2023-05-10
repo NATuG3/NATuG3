@@ -80,6 +80,12 @@ class Helix:
         data: The data for the helix. This is a HelixData object that stores the
             actual positional and angle datapoints of all Points within the helix.
         uuid: The unique identifier of the helix.
+
+    Methods:
+        point: Generate a specific point object parented to this helix.
+        points: Generate all the points along the helix.
+        strand: Generate a strand full of points for this helix.
+        other_helix: Obtain the other helix in the double helix.
     """
 
     direction: Literal[UP, DOWN]
