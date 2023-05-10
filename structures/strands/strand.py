@@ -204,13 +204,15 @@ class Strand:
             This is a list of all the bases of all the nucleosides in the strand.
         closed: Whether the strand is closed. Must be manually set.
         empty: Whether the strand is empty. This is equivalent to len(self) == 0.
-        cross_screen: Whether this strand wraps across the screen.
         direction: Whether this is an up or down helix. This is only useful for when
             the strand represents a helix.
         strands: The container that this strand is in. Can be None. Is automatically
             set when the strand is added to a Strands container.
         helix: The helix that the strand was generated from. Can be None if the strand
             was not generated from a helix.
+        cross_screen: Whether the strand wraps around the screen in the side view plot.
+            This is automatically set during plotting with the SideViewPlotter, but can be
+            set manually.
         uuid (str): The unique identifier of the strand. This is automatically
             generated.
 
@@ -250,6 +252,7 @@ class Strand:
         direction=None,
         strands=None,
         helix=None,
+        cross_screen=False,
         uuid: str = None,
     ):
         self.name = name
@@ -259,12 +262,11 @@ class Strand:
         self.helix = helix
         self.styles = styles or StrandStyles(self)
         self.nucleic_acid_profile = (
-            NucleicAcidProfile()
-            if nucleic_acid_profile is None
-            else nucleic_acid_profile
+            NucleicAcidProfile() if nucleic_acid_profile is None else nucleic_acid_profile
         )
         self.direction = direction
         self.strands = strands
+        self.cross_screen = cross_screen
 
     def __post_init__(self):
         self.items = StrandItems(self.items)
@@ -602,21 +604,6 @@ class Strand:
         """Whether the strand is a down strand."""
         checks = [(not bool(NEMid_.direction)) for NEMid_ in self.items.by_type(NEMid)]
         return all(checks)
-
-    def cross_screen(self) -> bool:
-        """
-        Whether the strand wraps across the screen.
-
-        This is determined by checking to see if any active junctions are cross screen.
-
-        Returns:
-            True if the strand wraps across the screen, False otherwise.
-        """
-        junctions = filter(lambda NEMid_: NEMid_.junction, self.items.by_type(NEMid))
-        for junction in junctions:
-            if abs(junction.x_coord - junction.juncmate.x_coord) > 1:
-                return True
-        return False
 
     def interdomain(self) -> bool:
         """Whether all the items in this strand belong to the same domain."""
