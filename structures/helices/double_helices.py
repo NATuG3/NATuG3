@@ -190,45 +190,11 @@ class DoubleHelices:
                                     point1.juncmate = point2
                                     point2.junctable = True
                                     point2.juncmate = point1
+
         logger.debug(f"Junctability assignment took {time() - start:.2f} seconds.")
 
-        start = time()
-        # Assign .matching to all nucleosides. Each nucleoside's .matching nucleoside
-        # is the nucleoside with the same .helical_index in the other helix of the
-        # same double helix.
-        for double_helix in double_helices:
-            # We have already converted the Helix objects into strands,
-            # so technically, even though these strands are single domain at the
-            # moment, they are indeed mutable Strand objects. "helix.helix" is just
-            # retrieving the original Helix object from the Strand object.
-
-            # To assign the matching nucleosides, we iterate through the nucleosides
-            # in the up helix and the down helix, beginning at the start of the body
-            # area and ending at the end of the body area.
-
-            for item1, item2 in zip(
-                double_helix[UP].items.by_type(Nucleoside)[
-                    double_helix[UP].helix.counts.bottom_count : (
-                        double_helix[UP].helix.counts.body_count
-                        + double_helix[UP].helix.counts.top_count
-                    )
-                ],
-                double_helix[DOWN].items.by_type(Nucleoside)[
-                    double_helix[DOWN].helix.counts.bottom_count : (
-                        double_helix[DOWN].helix.counts.body_count
-                        + double_helix[DOWN].helix.counts.top_count
-                    ) : -1
-                ],
-            ):
-                if item1 is not None and item2 is not None:
-                    item1.matching = item2
-                    item2.matching = item1
-        logger.debug(f"Base matching assignment took {time() - start:.2f} seconds.")
-
         strands = [helix for double_helix in double_helices for helix in double_helix]
-        strands = Strands(
-            strands=strands, nucleic_acid_profile=self.nucleic_acid_profile
-        )
+        strands = Strands(strands=strands, nucleic_acid_profile=self.nucleic_acid_profile)
 
         strands.style()
         return strands
@@ -341,12 +307,10 @@ class DoubleHelices:
                 + double_helix.zeroed_helix.counts.body_count
                 + double_helix.zeroed_helix.counts.top_count
             )
-            final_z_coord = (
-                initial_z_coord + (increments * self.nucleic_acid_profile.Z_b)
-                ) # Extra nucleoside on top
-            final_angle = (
-                initial_angle + (increments * self.nucleic_acid_profile.theta_b)
-                )
+            final_z_coord = initial_z_coord + (
+                increments * self.nucleic_acid_profile.Z_b
+            )  # Extra nucleoside on top
+            final_angle = initial_angle + (increments * self.nucleic_acid_profile.theta_b)
 
             # Compute the z coord and angle data for the zeroed helix; we will
             # generate the angles based off of the x coords later. Recall that we're
@@ -393,26 +357,18 @@ class DoubleHelices:
                 + (
                     shifts * self.nucleic_acid_profile.theta_b
                 )  # locates angle of NEMid nearest x-axis
-                + (
-                    -modifier * self.nucleic_acid_profile.g
-                )  # Helix switch to other helix
+                + (-modifier * self.nucleic_acid_profile.g)  # Helix switch to other helix
                 - (increments * self.nucleic_acid_profile.theta_b)
-                - (
-                    self.nucleic_acid_profile.theta_b / 2
-                )  # Extra nucleoside on bottom
+                - (self.nucleic_acid_profile.theta_b / 2)  # Extra nucleoside on bottom
             )
             initial_z_coord = (
                 aligned_z_coord  # The previously aligned z coord
                 + (
                     shifts * self.nucleic_acid_profile.Z_b
                 )  # locates z of NEMid nearest x-axis
-                + (
-                    -modifier * self.nucleic_acid_profile.Z_mate
-                )  # Helix switch
+                + (-modifier * self.nucleic_acid_profile.Z_mate)  # Helix switch
                 - (increments * self.nucleic_acid_profile.Z_b)
-                - (
-                    self.nucleic_acid_profile.Z_b / 2
-                )  # Extra nucleoside on bottom
+                - (self.nucleic_acid_profile.Z_b / 2)  # Extra nucleoside on bottom
             )
 
             # Same procedure as for the zeroed helix.
@@ -422,14 +378,8 @@ class DoubleHelices:
                 + double_helix.zeroed_helix.counts.body_count
                 + double_helix.zeroed_helix.counts.top_count
             )
-            final_angle = (
-                initial_angle
-                + increments * self.nucleic_acid_profile.theta_b
-            )
-            final_z_coord = (
-                initial_z_coord
-                + increments * self.nucleic_acid_profile.Z_b
-            )
+            final_angle = initial_angle + increments * self.nucleic_acid_profile.theta_b
+            final_z_coord = initial_z_coord + increments * self.nucleic_acid_profile.Z_b
 
             # Compute the z coord and angle data for the other helix.
             padding = -self.nucleic_acid_profile.Z_b / 16
