@@ -141,6 +141,11 @@ class StrandItems(list):
         """
         return StrandItems((item for item in self if isinstance(item, types)))
 
+    def __add__(self, other):
+        new_strand_items = self
+        new_strand_items.extend(other)
+        return new_strand_items
+
     def split(self, type_: Type) -> List[List[object]]:
         """
         Split the items into a list of lists. A new list is created whenever an item
