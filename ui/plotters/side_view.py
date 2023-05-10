@@ -477,10 +477,12 @@ class SideViewPlotter(Plotter):
                         # We will be looking ahead to the next point to determine
                         # whether we have crossed the screen, so we will skip the last
                         # point and worry about it later.
-                        splitter[index + 1] = (
+                        if (
                             abs(point.domain - stroke_segment[index + 1].domain)
                             == self.domains.count - 1
-                        )
+                        ):
+                            splitter[index + 1] = True
+                            strand.cross_screen = True
 
                     # If the strand is closed then connect the last point to the
                     # first point by creating a pseudo-point at the first point's
@@ -527,49 +529,46 @@ class SideViewPlotter(Plotter):
                     midpoint = self.width / 2
                     delta = self.width / 2 + settings.cross_screen_line_length
 
-                    print(np.nonzero(splitter))
+                    # We will be crawling along the entire split array (which includes
+                    # False boolean values for every single index of all the coords in
+                    # the x and z subarrays and True boolean values in between them). The
+                    # "cumulative_point_index" lets us keep track of the current index to
+                    # look at of the split array as we traverse the coord subarrays.
                     cumulative_point_index = 0
-                    for subarray_index, (
-                        x_coords_subarray,
-                        z_coords_subarray,
-                    ) in enumerate(zip(x_coords_subarrays, z_coords_subarrays)):
-                        cumulative_point_index += len(x_coords_subarray) + 1
-                        try:
-                            if splitter[cumulative_point_index - len(x_coords_subarray) - 2]:
-                                shift_at = 0
-                                do_shift = True
-                                print("here")
-                            elif splitter[cumulative_point_index - 1]:
-                                shift_at = -1
-                                do_shift = True
-                            else:
-                                do_shift = False
-                                shift_at = None
 
-                            if do_shift:
-                                if round(x_coords_subarray[0]) == 0:
-                                    shift_toward = -1
-                                elif round(x_coords_subarray[0]) == self.width:
-                                    shift_toward = 1
-                                else:
-                                    shift_toward = None
+                    def make_extension(location: int):
+                        """
+                        Obtain the actual plottable coordinate set for an
+                        extension line to the left/right side of the screen.
+                        """
+                        if round(x_coords_subarray[location]) == 0:
+                            shift_toward = -1
+                        elif round(x_coords_subarray[location]) == self.width:
+                            shift_toward = 1
+                        else:
+                            raise ValueError("Must shift either left/right.")
 
-                                if do_shift:
-                                    yield (
-                                        False,
-                                        (
-                                            x_coords_subarray[shift_at],
-                                            midpoint + shift_toward * delta,
-                                        ),
-                                        (
-                                            z_coords_subarray[shift_at],
-                                            z_coords_subarray[shift_at],
-                                        ),
-                                    )
-                        except IndexError:
-                            pass
-                        finally:
-                            yield interdomain, x_coords_subarray, z_coords_subarray
+                        return (
+                            False,
+                            (
+                                x_coords_subarray[location],
+                                midpoint + shift_toward * delta,
+                            ),
+                            (
+                                z_coords_subarray[location],
+                                z_coords_subarray[location],
+                            ),
+                        )
+
+                    for x_coords_subarray, z_coords_subarray in zip(
+                        x_coords_subarrays, z_coords_subarrays
+                    ):
+                        if strand.cross_screen:
+                            if round(x_coords_subarray[0]) in (0, self.domains.count):
+                                yield make_extension(0)
+                            if round(x_coords_subarray[-1]) in (0, self.domains.count):
+                                yield make_extension(-1)
+                        yield interdomain, x_coords_subarray, z_coords_subarray
 
                 for smooth, x_coords_subarray, z_coords_subarray in subarray_yielder():
                     if smooth:
