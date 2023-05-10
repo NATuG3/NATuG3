@@ -221,13 +221,13 @@ class SideViewPlotter(Plotter):
         # Clear preexisting plotted_gridlines
         self.plot_data.plotted_gridlines.clear()
 
-        # create pen for custom grid
+        # Create pen for custom grid
         grid_pen_width = 1.4 * self.modifiers.gridline_mod
         grid_pen: QPen = pg.mkPen(
             color=settings.colors["grid_lines"], width=grid_pen_width
         )
 
-        # domain index grid
+        # For each domain add a grid line
         for i in range(ceil(self.plot_data.strands.size[0]) + 1):
             self.plot_data.plotted_gridlines.append(
                 self.addLine(
@@ -237,7 +237,7 @@ class SideViewPlotter(Plotter):
             )
             self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
-        # for i in <number of helical twists of the tallest domain>...
+        # For i in <number of helical twists of the tallest domain> add grid lines.
         with suppress(ZeroDivisionError):
             for i in range(0, ceil(self.height / self.nucleic_acid_profile.H)):
                 self.plot_data.plotted_gridlines.append(
@@ -248,7 +248,7 @@ class SideViewPlotter(Plotter):
                 )
                 self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
-        # add axis labels
+        # Add axis labels
         self.setLabel("bottom", text="x", units="Helical Diameters")
         self.setLabel("left", text="z", units="Nanometers")
 
