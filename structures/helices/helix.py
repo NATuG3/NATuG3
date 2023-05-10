@@ -242,7 +242,7 @@ def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
         "data:x_coords": [],
         "data:z_coords": [],
         "data:angles": [],
-        "data:points": []
+        "data:points": [],
     }
     for helix in helices:
         data["uuid"].append(helix.uuid)
@@ -251,6 +251,8 @@ def to_df(helices: Iterable[Helix]) -> pd.DataFrame:
         data["data:x_coords"].append(";".join(map(str, helix.data.x_coords)))
         data["data:z_coords"].append(";".join(map(str, helix.data.z_coords)))
         data["data:angles"].append(";".join(map(str, helix.data.angles)))
-        data["data:points"].append(";".join(map(lambda point: point.uuid, helix.data.points)))
+        data["data:points"].append(
+            ";".join(map(lambda point: point.uuid, helix.data.points))
+        )
 
     return pd.DataFrame(data)
