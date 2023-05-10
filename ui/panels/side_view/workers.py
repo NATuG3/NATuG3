@@ -217,7 +217,6 @@ def highlighter(
     else:
         point.styles.change_state("highlighted")
 
-    runner.snapshot()
     refresh()
     logger.info("Highlighter mode was run.")
 
