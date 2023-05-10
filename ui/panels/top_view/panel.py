@@ -77,20 +77,13 @@ class TopViewPanel(QGroupBox):
         Args:
             domain: The index of the domain that was clicked.
         """
-        # create the new active x-range for the plot
-        range = domain - 1, domain + 2
-
-        # store the previous range of the ui
-        previous = self.runner.window.side_view.plot.visibleRange()
-
-        # zoom in on the proper area of the plot
-        self.runner.window.side_view.plot.setXRange(*range)
-        self.runner.window.side_view.plot.setYRange(
-            -1, self.runner.managers.strands.current.size[1] + 1
-        )
-
-        # if the new range is the same as the old range then this means
-        # that the user has clicked on the button a second time and wants
-        # to revert to the auto range of the side view plot
-        if previous == self.runner.window.side_view.plot.visibleRange():
-            self.runner.window.side_view.plot.autoRange()
+        if not self.runner.window.side_view.plot.auto_ranged():
+            self.runner.window.side_view.plot.setRange(
+                xRange=(domain - 1, domain + 2),
+                yRange=(-.5, self.runner.window.side_view.plot.height + .5),
+            )
+        else:
+            # if the new range is the same as the old range then this means
+            # that the user has clicked on the button a second time and wants
+            # to revert to the auto range of the side view plot
+            self.runner.window.side_view.plot.auto_range()
