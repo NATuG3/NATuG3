@@ -147,12 +147,12 @@ class SideViewPlotter(Plotter):
 
         if initial_plot:
             self.plot()
-            self._set_range()
+            self.auto_range()
 
         def enableAutoRange(*args, **kwargs):
             if not self._updating_viewbox:
                 self._updating_viewbox = True
-                self._set_range()
+                self.auto_range()
                 self._updating_viewbox = False
 
         self.getViewBox().enableAutoRange = enableAutoRange
@@ -209,10 +209,19 @@ class SideViewPlotter(Plotter):
         position = tuple(points[0].pos())
         self.points_clicked.emit(self.plot_data.points[position])
 
-    def _set_range(self):
+    def auto_range(self):
         """Configure the range for the plot automatically."""
         self.getViewBox().setXRange(0, self.width, self.padding)
         self.getViewBox().setYRange(0, self.height, self.padding)
+
+    def auto_ranged(self):
+        """Return whether the plot is currently auto-ranged."""
+        return (
+            self.getViewBox().viewRect().left() == 0
+            and self.getViewBox().viewRect().right() == self.width
+            and self.getViewBox().viewRect().top() == 0
+            and self.getViewBox().viewRect().bottom() == self.height
+        )
 
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""
