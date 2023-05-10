@@ -636,44 +636,53 @@ class Strands:
         logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
         logger.debug(f"Linkage is at index {linkage.strand.index(linkage)}.")
 
-        # Create a copy of the strand that has the same styles and nucleic acid profile
-        # as the original strand. The new strands will have the same name, but with
-        # "(1)" and "(2)" at the ends of the names since they are now two distinct
-        # strands.
-        new_strand_one = Strand(
-            name=f"{self.name} (1)",
-            # If the linkage was in a closed strand, breaking the linkage would make
-            # the strand no longer closed.
-            closed=linkage.strand.closed,
-            styles=deepcopy(linkage.strand.styles),
-            nucleic_acid_profile=self.nucleic_acid_profile,
-            strands=self,
-        )
-        new_strand_one.styles.strand = new_strand_one
-        new_strand_two = deepcopy(new_strand_one)
-        new_strand_two.styles.strand = new_strand_two
-        new_strand_two.name = f"{self.name} (2)"
+        if linkage.strand.closed:
+            linkage_index = linkage.strand.index(linkage)
+            linkage.strand.closed = False
+            linkage.strand.items = StrandItems(
+                linkage.strand[0:linkage_index] + linkage.strand[linkage_index:-1]
+            )
+            to_return = (linkage.strand,)
+        else:
+            # Create a copy of the strand that has the same styles and nucleic acid
+            # profile as the original strand. The new strands will have the same name,
+            # but with "(1)" and "(2)" at the ends of the names since they are now two
+            # distinct strands.
+            new_strand_one = Strand(
+                name=f"{self.name} (1)",
+                # If the linkage was in a closed strand, breaking the linkage would make
+                # the strand no longer closed.
+                closed=linkage.strand.closed,
+                styles=deepcopy(linkage.strand.styles),
+                nucleic_acid_profile=self.nucleic_acid_profile,
+                strands=self,
+            )
+            new_strand_one.styles.strand = new_strand_one
+            new_strand_two = deepcopy(new_strand_one)
+            new_strand_two.styles.strand = new_strand_two
+            new_strand_two.name = f"{self.name} (2)"
 
-        # Split up the strand items of the linkage, and do not include the linkage
-        new_strand_one.extend(
-            tuple(linkage.strand[: linkage.strand.index(linkage)]),
-        )
-        new_strand_two.extend(
-            tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
-        )
+            # Split up the strand items of the linkage, and do not include the linkage
+            new_strand_one.extend(
+                tuple(linkage.strand[: linkage.strand.index(linkage)]),
+            )
+            new_strand_two.extend(
+                tuple(linkage.strand[linkage.strand.index(linkage) + 1 :]),
+            )
 
-        # Add the new strands to the container
-        self.append(new_strand_one)
-        self.append(new_strand_two)
+            # Add the new strands to the container
+            self.append(new_strand_one)
+            self.append(new_strand_two)
 
-        # Remove the old strand from the container
-        self.remove(linkage.strand)
+            # Remove the old strand from the container
+            self.remove(linkage.strand)
 
-        # Restyle the strands
+            # Store the two new strands that are to be returned
+            to_return = (new_strand_one, new_strand_two)
+
+        # Restyle the strands and return the new strand(s)
         self.style()
-
-        # Return the new strands
-        return new_strand_one, new_strand_two
+        return to_return
 
     def conjunct(
         self,
