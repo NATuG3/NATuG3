@@ -107,7 +107,7 @@ class SideViewPlotter(Plotter):
         point_types: Tuple[Type, ...] = (Point,),
         modifiers: PlotModifiers = PlotModifiers(),
         title: str = "",
-        padding: float = 0.01,
+        padding: float = 0.025,
         dot_hidden_points: bool = True,
         initial_plot: bool = True,
     ) -> None:
