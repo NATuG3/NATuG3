@@ -18,7 +18,7 @@ class Nucleoside(Point):
         base: The base of the nucleoside.
         matching: The nucleoside on the other helix of the same double helix as this
             nucleoside that is at the same helical index as this nucleoside.
-        complement: The complementary base of the nucleoside.
+        complement: The complementary base of this nucleoside.
     """
 
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType] = None
