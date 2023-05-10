@@ -59,6 +59,9 @@ class Strands:
         to_json: Convert the strands object to a JSON serializable dictionary.
         write_worksheets: Write all the strands and their items to an excel
             workbook's worksheet.
+        cross_screen: Whether at least one strand is cross_screen. This is determined
+            based on the cross_screen attribute of strands, which is automatically set
+            by the SideViewPlotter, but can be set manually for strands.
     """
 
     def __init__(
@@ -124,6 +127,20 @@ class Strands:
     def __iter__(self):
         """Iterate over all strands."""
         return iter(self.strands)
+
+    def cross_screen(self):
+        """
+        Whether at least one strand is cross_screen.
+
+        Determine whether at least one strand's cross_screen attribute is True.
+
+        Returns:
+            bool: Whether at least one strand is cross screen.
+        """
+        for strand in self:
+            if strand.cross_screen:
+                return True
+        return False
 
     def update(self, other: "Strands") -> None:
         """
@@ -496,13 +513,9 @@ class Strands:
                     strand.styles.color.value = next(strand_colors)
                 else:
                     if strand.up_strand():
-                        strand.styles.color.value = settings.colors["strands"]["greys"][
-                            1
-                        ]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][1]
                     else:
-                        strand.styles.color.value = settings.colors["strands"]["greys"][
-                            0
-                        ]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][0]
 
             # Set the styles of each point based off new strand styles
             for item in strand.items.by_type(Point):
@@ -536,12 +549,12 @@ class Strands:
             f"(NEMid1 [{NEMid1}] Strands: {NEMid1.strand.strands}, "
             f"NEMid2 [{NEMid2}] Strands: {NEMid2.strand.strands})"
         )
-        assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(True), (
-            "NEMids must be at the endpoints of their strands."
-        )
-        assert isinstance(NEMid1, NEMid) and isinstance(NEMid2, NEMid), (
-            "The input points must be NEMids."
-        )
+        assert NEMid1.is_endpoint(True) and NEMid2.is_endpoint(
+            True
+        ), "NEMids must be at the endpoints of their strands."
+        assert isinstance(NEMid1, NEMid) and isinstance(
+            NEMid2, NEMid
+        ), "The input points must be NEMids."
 
         # Force NEMid1 to be the upwards NEMid
         if NEMid1.strand.direction == DOWN:
@@ -618,9 +631,7 @@ class Strands:
         Returns:
             The two new strands that were created.
         """
-        assert (
-            linkage.strand.strands is self
-        ), "Linkage is not in this Strands container."
+        assert linkage.strand.strands is self, "Linkage is not in this Strands container."
 
         logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
         logger.debug(f"Linkage is at index {linkage.strand.index(linkage)}.")
@@ -746,9 +757,7 @@ class Strands:
                 if NEMid2.index < NEMid1.index:
                     # crawl from the index of the right NEMid to the index of the
                     # left NEMid
-                    new_strands[0].items.extend(
-                        strand.sliced(NEMid2.index, NEMid1.index)
-                    )
+                    new_strands[0].items.extend(strand.sliced(NEMid2.index, NEMid1.index))
                     # crawl from the beginning of the strand to the index of the
                     # right NEMid
                     new_strands[1].items.extend(strand.sliced(0, NEMid2.index))
@@ -757,9 +766,7 @@ class Strands:
                 elif NEMid1.index < NEMid2.index:
                     # crawl from the index of the left NEMid to the index of the
                     # right NEMid
-                    new_strands[0].items.extend(
-                        strand.sliced(NEMid1.index, NEMid2.index)
-                    )
+                    new_strands[0].items.extend(strand.sliced(NEMid1.index, NEMid2.index))
                     # crawl from the beginning of the strand to the index of the left
                     # NEMid
                     new_strands[1].items.extend(strand.sliced(0, NEMid1.index))
