@@ -174,7 +174,7 @@ class SideViewPlotter(Plotter):
 
         def runner():
             self._reset()
-            self._plot()
+            self.plot()
 
         # allow one screen refresh for the mouse to release
         # so that the plot is cleared after the mouse release event happens
@@ -184,7 +184,7 @@ class SideViewPlotter(Plotter):
     def replot(self):
         """Replot plot data."""
         self._reset()
-        self._plot()
+        self.plot()
 
     def _reset(self, plot_data=None):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
