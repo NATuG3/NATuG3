@@ -170,6 +170,9 @@ class Helix:
             self.data.points[index] = point
             yield point
 
+        if self.direction == DOWN:
+            self.data.points = np.flip(self.data.points)
+
     def strand(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
