@@ -497,8 +497,10 @@ class Strand:
                 our_nucleoside.base = base
 
                 matching_nucleoside = our_nucleoside.matching
-                if matching_nucleoside is not None:
+                print(matching_nucleoside)
+                if matching_nucleoside:
                     matching_nucleoside.base = our_nucleoside.complement
+                print(matching_nucleoside)
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"

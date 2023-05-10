@@ -22,7 +22,14 @@ class Nucleoside(Point):
     """
 
     base: Union[bases.A, bases.T, bases.G, bases.C, bases.U, NoneType] = None
-    matching: Type["Nucleoside"] | None = None
+
+    @property
+    def matching(self):
+        return self.helix.other_helix().data.points[self.helical_index]
+
+    @matching.setter
+    def matching(self, value):
+        self.helix.other_helix().data.points[self.helical_index] = value
 
     def __setattr__(self, key, value):
         """
@@ -52,10 +59,9 @@ class Nucleoside(Point):
     @property
     def complement(self) -> str:
         """
-        Return the base of the matching nucleoside. If the matching nucleoside is not
-        set, returns None.
+        Return the complementary base of this Nucleoside's base.
         """
-        return self.matching and self.matching.base
+        return COMPLEMENTS[self.base]
 
     @complement.setter
     def complement(self, value):
