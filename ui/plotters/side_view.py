@@ -209,6 +209,11 @@ class SideViewPlotter(Plotter):
         position = tuple(points[0].pos())
         self.points_clicked.emit(self.plot_data.points[position])
 
+    def _set_range(self):
+        """Configure the range for the plot automatically."""
+        self.getViewBox().setXRange(0, self.width, self.padding)
+        self.getViewBox().setYRange(0, self.height, self.padding)
+
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""
         self.setTitle(self.title) if self.title else None
