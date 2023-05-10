@@ -147,6 +147,7 @@ class SideViewPlotter(Plotter):
 
         if initial_plot:
             self.plot()
+            self._set_range()
 
         def enableAutoRange(*args, **kwargs):
             logger.debug("Autoranging the side view plot...")
@@ -251,9 +252,6 @@ class SideViewPlotter(Plotter):
         # Add axis labels
         self.setLabel("bottom", text="x", units="Helical Diameters")
         self.setLabel("left", text="z", units="Nanometers")
-
-        # Set the range of the plot
-        self._set_range()
 
     def plot(self):
         """
@@ -675,8 +673,8 @@ class SideViewPlotter(Plotter):
         # plotted last go on top, since all items before them are plotted first.
         # Thence, this list is Fin reverse order of the layers in the plot.
         layers = (
-            self.plot_data.plotted_linkages,
             self.plot_data.plotted_strokes,
+            self.plot_data.plotted_linkages,
             self.plot_data.plotted_nicks,
             self.plot_data.plotted_points,
         )
