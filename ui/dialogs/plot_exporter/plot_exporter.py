@@ -149,7 +149,7 @@ class PlotExporter(QDialog):
 
         # When the side view padding is changed re-autorange the plot
         self.side_view_padding.valueChanged.connect(
-            self.side_view_export_plot.autoRange
+            self.side_view_export_plot.auto_range
         )
 
         # Hook all the top view signals
