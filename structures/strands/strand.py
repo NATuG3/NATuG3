@@ -488,7 +488,7 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        logger.debug(f"Setting sequence of {self} to {new_sequence}")
+        logger.debug(f"Setting sequence of {self.name} to {new_sequence}")
         nucleosides = self.items.unpacked().by_type(Nucleoside)
 
         if len(new_sequence) == len(self.sequence):
