@@ -128,6 +128,7 @@ class SideViewPlotter(Plotter):
             initial_plot: Whether to plot the initial data. Defaults to True.
         """
         super().__init__()
+        self.getViewBox().disableAutoRange()
 
         # store config data
         self.strands = strands
@@ -140,20 +141,33 @@ class SideViewPlotter(Plotter):
         self.padding = padding
         self.plot_data = PlotData()
 
+        # internal variables
+        self._set_dimensions()
+        self._updating_viewbox = False
+
         if initial_plot:
-            self.disableAutoRange()
-            self._plot()
-            self.autoRange()
-            self.setXRange(0, self.width)
-            self._prettify()
+            self.plot()
+
+        def enableAutoRange(*args, **kwargs):
+            logger.debug("Autoranging the side view plot...")
+            if not self._updating_viewbox:
+                self._updating_viewbox = True
+                self._set_range()
+                self._updating_viewbox = False
+
+        self.getViewBox().enableAutoRange = enableAutoRange
 
     @property
     def height(self):
-        return self.plot_data.strands.size[1]
+        return self._height
 
     @property
     def width(self):
-        return self.plot_data.domains.count
+        return self._width
+
+    def _set_dimensions(self):
+        self._width = self.domains.count
+        self._height = self.strands.size[1]
 
     def refresh(self):
         """Replot plot data."""
@@ -199,10 +213,7 @@ class SideViewPlotter(Plotter):
         """Add plotted_gridlines and style the plot."""
         self.setTitle(self.title) if self.title else None
 
-        # reduce padding for printer mode
-        self.getViewBox().setDefaultPadding(self.padding)
-
-        # clear preexisting plotted_gridlines
+        # Clear preexisting plotted_gridlines
         self.plot_data.plotted_gridlines.clear()
 
         # create pen for custom grid
@@ -236,7 +247,10 @@ class SideViewPlotter(Plotter):
         self.setLabel("bottom", text="x", units="Helical Diameters")
         self.setLabel("left", text="z", units="Nanometers")
 
-    def _plot(self):
+        # Set the range of the plot
+        self._set_range()
+
+    def plot(self):
         """
         Plot the side view.
 
@@ -257,9 +271,6 @@ class SideViewPlotter(Plotter):
         self.plot_data.plotted_nicks.clear()
         self.plot_data.plotted_linkages.clear()
         self.plot_data.plotted_strokes.clear()
-
-        # Style the plot; automatically adds labels, ticks, etc.
-        self._prettify()
 
         for strand_index, strand in enumerate(self.strands.strands):
             # First plot all the points
@@ -670,3 +681,9 @@ class SideViewPlotter(Plotter):
         for layer in layers:
             for item in layer:
                 self.addItem(item)
+
+        self._set_dimensions()
+
+        # Style the plot; automatically adds labels, ticks, etc. Also sets the plot's
+        # range.
+        self._prettify()
