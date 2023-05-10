@@ -150,7 +150,6 @@ class SideViewPlotter(Plotter):
             self._set_range()
 
         def enableAutoRange(*args, **kwargs):
-            logger.debug("Autoranging the side view plot...")
             if not self._updating_viewbox:
                 self._updating_viewbox = True
                 self._set_range()
