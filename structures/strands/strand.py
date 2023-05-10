@@ -4,6 +4,7 @@ from copy import deepcopy, copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, List, Type, Set
 from uuid import uuid1
+import logging
 
 import pandas as pd
 
@@ -15,6 +16,9 @@ from structures.profiles import NucleicAcidProfile
 from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
 from utils import rgb_to_hex
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -484,6 +488,7 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
+        logger.debug(f"Setting sequence of {self} to {new_sequence}")
         nucleosides = self.items.unpacked().by_type(Nucleoside)
 
         if len(new_sequence) == len(self.sequence):
@@ -493,7 +498,7 @@ class Strand:
 
                 matching_nucleoside = our_nucleoside.matching
                 if matching_nucleoside is not None:
-                    matching_nucleoside.complement = our_nucleoside.base
+                    matching_nucleoside.base = our_nucleoside.complement
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"
