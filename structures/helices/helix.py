@@ -98,9 +98,7 @@ class Helix:
 
     def __len__(self):
         """Return the number of points in the helix."""
-        assert (
-            len(self.data.x_coords) == len(self.data.z_coords) == len(self.data.angles)
-        )
+        assert len(self.data.x_coords) == len(self.data.z_coords) == len(self.data.angles)
         return len(self.data.angles)
 
     @property
