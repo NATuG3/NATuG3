@@ -1,6 +1,7 @@
 import logging
 from contextlib import suppress
 from dataclasses import dataclass, field
+from functools import partial
 from math import ceil
 from typing import List, Tuple, Dict, Type
 
@@ -10,6 +11,7 @@ from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import QPen, QBrush, QPainterPath, QFont
 
 import settings
+import utils
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
@@ -90,6 +92,10 @@ class SideViewPlotter(Plotter):
         point_types: The types of points to plot. Options are Nucleoside and
             NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
         modifiers: Various modifiers for the scale of various plot aspects.
+        show_instability: Whether to show which helix joints are unstable.
+        dot_hidden_points: Whether to put small dots in place of points that would
+            otherwise not be plotted.
+        padding: Padding to apply around the plot during auto-ranging.
         title: The title of the plot.
 
     Signals:
@@ -112,6 +118,7 @@ class SideViewPlotter(Plotter):
         title: str = "",
         padding: float = 0.025,
         dot_hidden_points: bool = True,
+        show_unstable: bool = True,
         initial_plot: bool = True,
     ) -> None:
         """
@@ -132,6 +139,7 @@ class SideViewPlotter(Plotter):
             dot_hidden_points: Whether to show points that are not being plotted as
                 small circles. Defaults to True.
             initial_plot: Whether to plot the initial data. Defaults to True.
+            show_unstable: Whether to show which helix joints are unstable.
         """
         super().__init__()
         self.getViewBox().disableAutoRange()
@@ -147,6 +155,7 @@ class SideViewPlotter(Plotter):
         self.dot_hidden_points = dot_hidden_points
         self.padding = padding
         self.plot_data = PlotData()
+        self.show_unstable = show_unstable
 
         # internal variables
         self._set_dimensions()
@@ -268,6 +277,43 @@ class SideViewPlotter(Plotter):
         self.setLabel("bottom", text="x", units="Helical Diameters")
         self.setLabel("left", text="z", units="Nanometers")
 
+    def _plot_unstable_indicators(self):
+        """
+        Plot all the small indicators that given helix joints are unstable.
+        """
+        unstable_helix_warning_dialog = partial(
+            utils.warning,
+            self,
+            "Unstable Helix",
+            "The number of junctions between the right joint helix of the domain to "
+            "the left of this warning and the left joint helix of the domain to the "
+            "right of this warning is below 2. That means that it is likely that the "
+            "connection between the two double helices is unstable.",
+        )
+        for index, double_helix in enumerate(self.plot_data.double_helices):
+            if not double_helix.right_helix.stable():
+                plotted_unstable_helix = pg.PlotDataItem(
+                    (index + 1,),
+                    (index + 1,),
+                    symbol=custom_symbol("!", rotation=180),
+                    symbolSize=14,
+                    pxMode=True,
+                    symbolBrush=pg.mkBrush(color=settings.colors["failure"]),
+                    symbolPen=None,  # No outline for the symbol
+                    pen=None,  # No line connecting the points
+                )
+                # Hook the unstable helix up to a dialog that warns the user about
+                # how the helix is not stable.
+                plotted_unstable_helix.sigPointsClicked.connect(
+                    unstable_helix_warning_dialog
+                )
+                # Store the unstable helix plotter object, which will be used for
+                # actually plotting the unstable helix later.
+                self.plot_data.plotted_labels.append(plotted_unstable_helix)
+
+                # Plot the unstable helix.
+                self.addItem(plotted_unstable_helix)
+
     def plot(self):
         """
         Plot the side view.
@@ -281,6 +327,7 @@ class SideViewPlotter(Plotter):
 
         self.plot_data.strands = self.strands
         self.plot_data.domains = self.domains
+        self.plot_data.double_helices = self.double_helices
         self.plot_data.point_types = self.point_types
         self.plot_data.modifiers = self.modifiers
         self.plot_data.points.clear()
@@ -698,6 +745,7 @@ class SideViewPlotter(Plotter):
         for layer in layers:
             for item in layer:
                 self.addItem(item)
+        self._plot_unstable_indicators()
 
         self._set_dimensions()
 
