@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>643</width>
-    <height>521</height>
+    <height>525</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -63,6 +63,13 @@
              <string/>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
+             <item row="15" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Outlines</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="1">
               <widget class="QComboBox" name="side_view_filetype">
                <property name="sizePolicy">
@@ -94,7 +101,7 @@
                </item>
               </widget>
              </item>
-             <item row="19" column="0" colspan="2">
+             <item row="20" column="0" colspan="2">
               <spacer name="verticalSpacer">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -107,14 +114,7 @@
                </property>
               </spacer>
              </item>
-             <item row="14" column="0">
-              <widget class="QLabel" name="label_3">
-               <property name="text">
-                <string>Outlines</string>
-               </property>
-              </widget>
-             </item>
-             <item row="13" column="1">
+             <item row="14" column="1">
               <widget class="QDoubleSpinBox" name="NEMid_size_modifier">
                <property name="minimumSize">
                 <size>
@@ -145,7 +145,7 @@
                </property>
               </widget>
              </item>
-             <item row="12" column="1">
+             <item row="13" column="1">
               <widget class="QDoubleSpinBox" name="nucleoside_size_modifier">
                <property name="minimumSize">
                 <size>
@@ -177,30 +177,20 @@
               </widget>
              </item>
              <item row="16" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Gridlines</string>
-               </property>
-              </widget>
-             </item>
-             <item row="10" column="0" colspan="2">
-              <widget class="QLabel" name="label">
-               <property name="text">
-                <string>Modifiers</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
-             <item row="15" column="0">
               <widget class="QLabel" name="strand_stroke_modifier_2">
                <property name="text">
                 <string>Strands</string>
                </property>
               </widget>
              </item>
-             <item row="15" column="1">
+             <item row="17" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Gridlines</string>
+               </property>
+              </widget>
+             </item>
+             <item row="16" column="1">
               <widget class="QDoubleSpinBox" name="strand_stroke_modifier">
                <property name="minimumSize">
                 <size>
@@ -231,7 +221,17 @@
                </property>
               </widget>
              </item>
-             <item row="14" column="1">
+             <item row="11" column="0" colspan="2">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Modifiers</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="15" column="1">
               <widget class="QDoubleSpinBox" name="point_outline_modifier">
                <property name="minimumSize">
                 <size>
@@ -262,28 +262,28 @@
                </property>
               </widget>
              </item>
-             <item row="9" column="0" colspan="2">
+             <item row="10" column="0" colspan="2">
               <widget class="Line" name="line">
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
               </widget>
              </item>
-             <item row="13" column="0">
+             <item row="14" column="0">
               <widget class="QLabel" name="label_10">
                <property name="text">
                 <string>NEMids</string>
                </property>
               </widget>
              </item>
-             <item row="11" column="0">
+             <item row="12" column="0">
               <widget class="QLabel" name="label_2">
                <property name="text">
                 <string>Nicks</string>
                </property>
               </widget>
              </item>
-             <item row="16" column="1">
+             <item row="17" column="1">
               <widget class="QDoubleSpinBox" name="gridline_width_modifier">
                <property name="minimumSize">
                 <size>
@@ -314,33 +314,6 @@
                </property>
               </widget>
              </item>
-             <item row="12" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>Nucleosides</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <widget class="QCheckBox" name="plot_NEMids">
-               <property name="text">
-                <string>NEMids</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QLabel" name="label_11">
-               <property name="text">
-                <string>Plot Title</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignCenter</set>
-               </property>
-              </widget>
-             </item>
              <item row="5" column="0" colspan="2">
               <widget class="QLabel" name="label_5">
                <property name="text">
@@ -358,7 +331,54 @@
                </property>
               </widget>
              </item>
-             <item row="11" column="1">
+             <item row="13" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>Nucleosides</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QLabel" name="label_11">
+               <property name="text">
+                <string>Plot Title</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
+               </property>
+              </widget>
+             </item>
+             <item row="18" column="0" colspan="2">
+              <widget class="Line" name="line_6">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLineEdit" name="side_view_filename">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text">
+                <string>sideView</string>
+               </property>
+               <property name="placeholderText">
+                <string>File Name</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="Line" name="line_3">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="1">
               <widget class="QDoubleSpinBox" name="nick_size_modifier">
                <property name="minimumSize">
                 <size>
@@ -405,22 +425,6 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="0">
-              <widget class="QLineEdit" name="side_view_filename">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text">
-                <string>sideView</string>
-               </property>
-               <property name="placeholderText">
-                <string>File Name</string>
-               </property>
-              </widget>
-             </item>
              <item row="6" column="0" colspan="2">
               <widget class="QCheckBox" name="plot_nucleosides">
                <property name="text">
@@ -431,28 +435,14 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0" colspan="2">
-              <widget class="Line" name="line_3">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="17" column="0" colspan="2">
-              <widget class="Line" name="line_6">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="8" column="0">
+             <item row="9" column="0">
               <widget class="QLabel" name="label_9">
                <property name="text">
                 <string>Padding</string>
                </property>
               </widget>
              </item>
-             <item row="8" column="1">
+             <item row="9" column="1">
               <widget class="QDoubleSpinBox" name="side_view_padding">
                <property name="decimals">
                 <number>3</number>
@@ -462,6 +452,23 @@
                </property>
                <property name="value">
                 <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0" colspan="2">
+              <widget class="QCheckBox" name="plot_unstable_joint_indicators">
+               <property name="text">
+                <string>Unstable Helix Joints</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0" colspan="2">
+              <widget class="QCheckBox" name="plot_NEMids">
+               <property name="text">
+                <string>NEMids</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
                </property>
               </widget>
              </item>

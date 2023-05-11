@@ -102,6 +102,7 @@ class PlotExporter(QDialog):
             title=self.side_view_plot_title.text(),
             padding=self.side_view_padding.value(),
             dot_hidden_points=False,
+            show_unstable_helix_joints=self.plot_unstable_joint_indicators.isChecked(),
         )
         self.side_view_export_plot.setStyleSheet("border: 2px solid black;")
         self.side_view_plot_area.layout().insertWidget(
@@ -145,6 +146,7 @@ class PlotExporter(QDialog):
         for input_ in (
             self.plot_NEMids,
             self.plot_nucleosides,
+            self.plot_unstable_joint_indicators
         ):
             input_.stateChanged.connect(self.update_side_view_preview)
 
@@ -169,7 +171,7 @@ class PlotExporter(QDialog):
         self.side_view_export_plot.title = self.side_view_plot_title.text()
         self.side_view_export_plot.point_types = self.get_sideview_point_types()
         self.side_view_export_plot.padding = self.side_view_padding.value()
-        self.side_view_export_plot.replot()
+        self.side_view_export_plot.plot()
 
     @pyqtSlot()
     def update_top_view_preview(self):

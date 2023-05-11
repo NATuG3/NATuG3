@@ -118,7 +118,7 @@ class SideViewPlotter(Plotter):
         title: str = "",
         padding: float = 0.025,
         dot_hidden_points: bool = True,
-        show_unstable: bool = True,
+        show_unstable_helix_joints: bool = True,
         initial_plot: bool = True,
     ) -> None:
         """
@@ -139,7 +139,7 @@ class SideViewPlotter(Plotter):
             dot_hidden_points: Whether to show points that are not being plotted as
                 small circles. Defaults to True.
             initial_plot: Whether to plot the initial data. Defaults to True.
-            show_unstable: Whether to show which helix joints are unstable.
+            show_unstable_helix_joints: Whether to show which helix joints are unstable.
         """
         super().__init__()
         self.getViewBox().disableAutoRange()
@@ -155,7 +155,7 @@ class SideViewPlotter(Plotter):
         self.dot_hidden_points = dot_hidden_points
         self.padding = padding
         self.plot_data = PlotData()
-        self.show_unstable = show_unstable
+        self.show_unstable_helix_joints = show_unstable_helix_joints
 
         # internal variables
         self._set_dimensions()
@@ -195,10 +195,6 @@ class SideViewPlotter(Plotter):
         # so that the plot is cleared after the mouse release event happens
         QTimer.singleShot(0, runner)
         logger.info("Refreshed side view.")
-
-    def replot(self):
-        """Replot plot data."""
-        self.plot()
 
     def _reset(self, plot_data=None):
         """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
@@ -809,6 +805,10 @@ class SideViewPlotter(Plotter):
         self._plot_strands()
         self._plot_points()
         self._plot_nicks()
-        self._plot_unstable_indicators()
+        if self.show_unstable_helix_joints:
+            self._plot_unstable_indicators()
+        else:
+            for unstable_indicator in self.plot_data.plotted_unstable_indicators:
+                self.removeItem(unstable_indicator)
         self._set_dimensions()
         self._prettify()
