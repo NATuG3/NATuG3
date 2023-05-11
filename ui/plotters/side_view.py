@@ -49,7 +49,8 @@ class PlotData:
 
     Attributes:
         strands: The currently plotted strands.
-        domains: The currently plotted domains.
+        domains: The domains of the currently plotted strands.
+        double_helices: The double helices underpinning the currently plotted strands.
         point_types: The currently plotted point types.
         modifiers: Various modifiers for the scale of various plot aspects.
         points: A mapping of positions of plotted_points to point objects.
@@ -63,6 +64,7 @@ class PlotData:
 
     strands: "Strands" = None
     domains: "Domains" = None
+    double_helices: "DoubleHelices" = None
     point_types: Tuple[Type, ...] = field(default_factory=tuple)
     modifiers: PlotModifiers = field(default_factory=PlotModifiers)
     points: Dict[Tuple[float, float], "Point"] = field(default_factory=dict)
@@ -102,6 +104,7 @@ class SideViewPlotter(Plotter):
     def __init__(
         self,
         strands: "Strands",
+        double_helices: "DoubleHelices",
         domains: "Domains",
         nucleic_acid_profile: NucleicAcidProfile,
         point_types: Tuple[Type, ...] = (Point,),
@@ -118,6 +121,9 @@ class SideViewPlotter(Plotter):
             strands: The strands to plot.
             nucleic_acid_profile: The nucleic acid nucleic_acid_profile of the
                 strands to plot.
+            double_helices: The double helices that the strands being plotted were derived
+                from.
+            domains: The domains of the strands to plot.
             point_types: The types of points to plot. Options are Nucleoside and
                 NEMid. If Point is passed, both Nucleoside and NEMid will be plotted.
             modifiers: Various modifiers for the scale of various plot aspects.
@@ -133,6 +139,7 @@ class SideViewPlotter(Plotter):
         # store config data
         self.strands = strands
         self.domains = domains
+        self.double_helices = double_helices
         self.nucleic_acid_profile = nucleic_acid_profile
         self.point_types = point_types
         self.modifiers = modifiers

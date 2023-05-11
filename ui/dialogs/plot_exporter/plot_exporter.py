@@ -94,6 +94,7 @@ class PlotExporter(QDialog):
         """Set up the side view preview plot area."""
         self.side_view_export_plot = SideViewPlotter(
             strands=self.runner.managers.strands.current,
+            double_helices=self.runner.managers.double_helices.current,
             domains=self.runner.managers.domains.current,
             nucleic_acid_profile=self.runner.managers.nucleic_acid_profile.current,
             point_types=self.get_sideview_point_types(),

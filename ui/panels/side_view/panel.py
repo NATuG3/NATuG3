@@ -53,6 +53,7 @@ class SideViewPanel(QGroupBox):
         # Initialize the plot and connect the signals
         self.plot = ui.plotters.SideViewPlotter(
             self.runner.managers.strands.current,
+            self.runner.managers.double_helices.current,
             self.runner.managers.domains.current,
             self.runner.managers.nucleic_acid_profile.current,
             self.runner.managers.misc.plot_types,
