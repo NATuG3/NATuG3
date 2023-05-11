@@ -805,10 +805,12 @@ class SideViewPlotter(Plotter):
         self._plot_strands()
         self._plot_points()
         self._plot_nicks()
-        if self.show_unstable_helix_joints:
-            self._plot_unstable_indicators()
-        else:
-            for unstable_indicator in self.plot_data.plotted_unstable_indicators:
-                self.removeItem(unstable_indicator)
+
+        # if self.show_unstable_helix_joints:
+        #     self._plot_unstable_indicators()
+        # else:
+        #     for unstable_indicator in self.plot_data.plotted_unstable_indicators:
+        #         self.removeItem(unstable_indicator)
+
         self._set_dimensions()
         self._prettify()
