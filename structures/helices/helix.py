@@ -86,6 +86,8 @@ class Helix:
         points: Generate all the points along the helix.
         strand: Generate a strand full of points for this helix.
         other_helix: Obtain the other helix in the double helix.
+        stable: Whether the helix is stably affixed to whichever joint it lies on (left/
+            right).
     """
 
     direction: Literal[UP, DOWN]
@@ -100,6 +102,22 @@ class Helix:
         """Return the number of points in the helix."""
         assert len(self.data.x_coords) == len(self.data.z_coords) == len(self.data.angles)
         return len(self.data.angles)
+
+    def stable(self, threshold=4):
+        """
+        Whether the helix is stably affixed to its respective helix joint.
+
+        Args:
+            threshold: The number of junctions along the helical joint required to deem
+                the connection stable.
+        """
+        junctions = 0
+        for point in self.data.points[1::2]:
+            if point.junction:
+                junctions += 1
+                if junctions > threshold:
+                    return True
+        return False
 
     @property
     def domain(self):
