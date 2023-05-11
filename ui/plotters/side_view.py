@@ -59,7 +59,7 @@ class PlotData:
         plotted_points: The points.
         plotted_nicks: The nicks.
         plotted_linkages: The linkages.
-        plotted_labels: All plotted text labels.
+        plotted_unstable_indicators: All plotted unstable indicators.
         plotted_strokes: The strand pen line.
         plotted_gridlines: All the grid lines.
     """
@@ -73,7 +73,7 @@ class PlotData:
     plotted_points: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_nicks: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_linkages: List[pg.PlotDataItem] = field(default_factory=list)
-    plotted_labels: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_unstable_indicators: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_strokes: List[pg.PlotDataItem] = field(default_factory=list)
     plotted_gridlines: List[pg.PlotDataItem] = field(default_factory=list)
 
@@ -189,7 +189,6 @@ class SideViewPlotter(Plotter):
         """Replot plot data."""
 
         def runner():
-            self._reset()
             self.plot()
 
         # allow one screen refresh for the mouse to release
@@ -199,7 +198,6 @@ class SideViewPlotter(Plotter):
 
     def replot(self):
         """Replot plot data."""
-        self._reset()
         self.plot()
 
     def _reset(self, plot_data=None):
@@ -208,14 +206,14 @@ class SideViewPlotter(Plotter):
             plot_data = self.plot_data
         for stroke in plot_data.plotted_strokes:
             self.removeItem(stroke)
+        for unstable_indicator in plot_data.plotted_unstable_indicators:
+            self.removeItem(unstable_indicator)
         for points in plot_data.plotted_points:
             self.removeItem(points)
         for nick in plot_data.plotted_nicks:
             self.removeItem(nick)
         for linkage in plot_data.plotted_linkages:
             self.removeItem(linkage)
-        for labels in plot_data.plotted_labels:
-            self.removeItem(labels)
         for gridline in plot_data.plotted_gridlines:
             self.removeItem(gridline)
         self.clear()
@@ -277,9 +275,17 @@ class SideViewPlotter(Plotter):
         self.setLabel("bottom", text="x", units="Helical Diameters")
         self.setLabel("left", text="z", units="Nanometers")
 
-    def _plot_unstable_indicators(self):
+    def _plot_unstable_indicator(self, x_coord, z_coord) -> pg.PlotItem:
         """
-        Plot all the small indicators that given helix joints are unstable.
+        Place a single unstable warning on the side view plot.
+
+        An unstable warning is a small exclamation mark symbol that is placed above
+        unstable helical joints. The symbol is placed at the x and z coordinates
+        specified by the arguments.
+
+        Args:
+            x_coord: The x coordinate of the unstable warning.
+            z_coord: The z coordinate of the unstable warning.
         """
         unstable_helix_warning_dialog = partial(
             utils.warning,
@@ -290,54 +296,64 @@ class SideViewPlotter(Plotter):
             "right of this warning is below 2. That means that it is likely that the "
             "connection between the two double helices is unstable.",
         )
+
+        plotted_unstable_helix = pg.PlotDataItem(
+            (x_coord,),
+            (z_coord,),
+            symbol=custom_symbol("!", rotation=180),
+            symbolSize=12,
+            pxMode=True,
+            symbolBrush=pg.mkBrush(color=settings.colors["failure"]),
+            symbolPen=None,  # No outline for the symbol
+            pen=None,  # No line connecting the points
+        )
+        # Hook the unstable helix up to a dialog that warns the user about
+        # how the helix is not stable.
+        plotted_unstable_helix.sigPointsClicked.connect(unstable_helix_warning_dialog)
+
+        # Store the unstable helix plotter object, which will be used for
+        # actually plotting the unstable helix later.
+        self.plot_data.plotted_unstable_indicators.append(plotted_unstable_helix)
+
+        # Plot the unstable helix.
+        self.addItem(plotted_unstable_helix)
+
+        # Return the plot item
+        return plotted_unstable_helix
+
+    def _plot_unstable_indicators(self, threshold=3):
+        """
+        Plot all the small indicators that given helix joints are unstable.
+
+        Args:
+            threshold: The minimum number of joints that a helix must have to be
+                considered stable.
+        """
+        for unstable_indicator in self.plot_data.plotted_unstable_indicators:
+            self.removeItem(unstable_indicator)
+        self.plot_data.plotted_unstable_indicators.clear()
+
         for index, double_helix in enumerate(self.plot_data.double_helices):
-            if not double_helix.right_helix.stable():
-                plotted_unstable_helix = pg.PlotDataItem(
-                    (index + 1,),
-                    (index + 1,),
-                    symbol=custom_symbol("!", rotation=180),
-                    symbolSize=14,
-                    pxMode=True,
-                    symbolBrush=pg.mkBrush(color=settings.colors["failure"]),
-                    symbolPen=None,  # No outline for the symbol
-                    pen=None,  # No line connecting the points
+            if not double_helix.right_helix.stable(threshold=3):
+                self.plot_data.plotted_unstable_indicators.append(
+                    self._plot_unstable_indicator(index + 1, self.height + 0.05)
                 )
-                # Hook the unstable helix up to a dialog that warns the user about
-                # how the helix is not stable.
-                plotted_unstable_helix.sigPointsClicked.connect(
-                    unstable_helix_warning_dialog
-                )
-                # Store the unstable helix plotter object, which will be used for
-                # actually plotting the unstable helix later.
-                self.plot_data.plotted_labels.append(plotted_unstable_helix)
 
-                # Plot the unstable helix.
-                self.addItem(plotted_unstable_helix)
+        if not self.double_helices[0].left_helix.stable():
+            self._plot_unstable_indicator(0, self.height + 0.05)
 
-    def plot(self):
+    def _plot_points(self):
         """
-        Plot the side view.
+        Plot all the points that run along the strands.
 
-        All plotted data gets saved in the current plot_data.
-
-        Raises:
-            ValueError: If the mode is not of type "nucleoside" or "NEMid".
+        This method automatically updates plot_data.plotted_points.
         """
-        from structures.strands.linkage import Linkage
-
-        self.plot_data.strands = self.strands
-        self.plot_data.domains = self.domains
-        self.plot_data.double_helices = self.double_helices
-        self.plot_data.point_types = self.point_types
-        self.plot_data.modifiers = self.modifiers
-        self.plot_data.points.clear()
-        self.plot_data.plotted_labels.clear()
+        for points in self.plot_data.plotted_points:
+            self.removeItem(points)
         self.plot_data.plotted_points.clear()
-        self.plot_data.plotted_nicks.clear()
-        self.plot_data.plotted_linkages.clear()
-        self.plot_data.plotted_strokes.clear()
+        self.plot_data.points.clear()
 
-        for strand_index, strand in enumerate(self.strands.strands):
+        for strand_index, strand in enumerate(self.strands):
             # First plot all the points
             to_plot = strand.items.by_type(Point)
 
@@ -470,6 +486,29 @@ class SideViewPlotter(Plotter):
             plotted_points.sigPointsClicked.connect(self._points_clicked)
             self.plot_data.plotted_points.append(plotted_points)
 
+        for points in self.plot_data.plotted_points:
+            self.addItem(points)
+
+    def _plot_strands(self):
+        """
+        Plot all the strands onto the plot.
+
+        Plots the strands themselves, along with linkages that are parts of the strands.
+
+        Notes:
+            - This method does not plot the points that run along the strands. That is
+                done by the _plot_points() method.
+        """
+        for linkage in self.plot_data.plotted_linkages:
+            self.removeItem(linkage)
+        self.plot_data.plotted_linkages.clear()
+
+        for stroke in self.plot_data.plotted_strokes:
+            self.removeItem(stroke)
+        self.plot_data.plotted_strokes.clear()
+        from structures.strands.linkage import Linkage
+
+        for strand_index, strand in enumerate(self.strands.strands):
             strand_with_linkage = strand.has_linkage()
 
             # A strand consists of items connected by a visual stroke. However,
@@ -708,6 +747,24 @@ class SideViewPlotter(Plotter):
                         # actually plotting the linkage later.
                         self.plot_data.plotted_linkages.append(plotted_linkage)
 
+        for stroke in self.plot_data.plotted_strokes:
+            self.addItem(stroke)
+
+        for linkage in self.plot_data.plotted_linkages:
+            self.addItem(linkage)
+
+    def _plot_nicks(self):
+        """
+        Plot all the nicks of all the strands.
+
+        Note that nicks exist outside of strands, but represent the old location of where
+        a point used to be. Because of this, all the nicks are accessed via Strands.nicks,
+        which dynamically keeps track of all the nicks.
+        """
+        for nick in self.plot_data.plotted_nicks:
+            self.removeItem(nick)
+        self.plot_data.plotted_nicks.clear()
+
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
         for nick_index, nick in enumerate(self.strands.nicks):
             plotted_nick = pg.PlotDataItem(
@@ -731,24 +788,27 @@ class SideViewPlotter(Plotter):
             # Hook up the nick's onClick method to the _points_clicked method.
             plotted_nick.sigPointsClicked.connect(self._points_clicked)
 
-        # Items will be plotted one layer at a time, from bottom to top. The items
-        # plotted last go on top, since all items before them are plotted first.
-        # Thence, this list is Fin reverse order of the layers in the plot.
-        layers = (
-            self.plot_data.plotted_strokes,
-            self.plot_data.plotted_linkages,
-            self.plot_data.plotted_nicks,
-            self.plot_data.plotted_points,
-        )
+        for nick in self.plot_data.plotted_nicks:
+            self.addItem(nick)
 
-        # Add the items to the plot
-        for layer in layers:
-            for item in layer:
-                self.addItem(item)
+    def plot(self):
+        """
+        Plot the side view.
+
+        All plotted data gets saved in the current plot_data.
+
+        Raises:
+            ValueError: If the mode is not of type "nucleoside" or "NEMid".
+        """
+        self.plot_data.strands = self.strands
+        self.plot_data.domains = self.domains
+        self.plot_data.double_helices = self.double_helices
+        self.plot_data.point_types = self.point_types
+        self.plot_data.modifiers = self.modifiers
+
+        self._plot_strands()
+        self._plot_points()
+        self._plot_nicks()
         self._plot_unstable_indicators()
-
         self._set_dimensions()
-
-        # Style the plot; automatically adds labels, ticks, etc. Also sets the plot's
-        # range.
         self._prettify()
