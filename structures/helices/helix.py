@@ -115,7 +115,7 @@ class Helix:
         for point in self.data.points[1::2]:
             if point.junction:
                 junctions += 1
-                if junctions > threshold:
+                if junctions >= threshold:
                     return True
         return False
 
