@@ -341,7 +341,7 @@ class FileHandler:
                         # has one
                         if isinstance(item, structures.points.NEMid):
                             with suppress(KeyError):
-                                item.juncmate = items_by_uuid[item.juncmate]
+                                item.juncmate = items_by_uuid[item.juncmate.uuid]
 
             # Load the helices and double helices
             with package.open("helices/helices.csv") as file:
