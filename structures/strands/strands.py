@@ -199,9 +199,11 @@ class Strands:
         nick = Nick(point, previously_closed_strand=strand.closed)
         self.nicks.append(nick)
 
+        # Store the point's index
+        point_index = point.index
+
         if strand.closed:
             # Open up the strand by removing the point and then flagging it as open.
-            point_index = point.index
             new_strand_items = StrandItems()
             new_strand_items.extend(strand.items[point_index+1:])
             new_strand_items.extend(strand.items[:point_index])
@@ -209,8 +211,28 @@ class Strands:
             strand.closed = False
         else:
             # Split the strand into two strands and then remove the old singular strand.
-            self.extend(strand.split(point, style=False))
+            new_strand_template = copy(strand)
+            new_strand_template.items = None
+
+            # The items that are before the nick goes into one strand.
+            new_strand_1 = deepcopy(new_strand_template)
+            new_strand_1.items = StrandItems(strand.items[:point_index])
+
+            # And the rest go into another strand.
+            new_strand_2 = deepcopy(new_strand_template)
+            new_strand_2.items = StrandItems(strand.items[point_index + 1:])
+
+            for new_strand in (new_strand_1, new_strand_2):
+                for item in new_strand.items.by_type(Point):
+                    item.styles = copy(item.styles)
+                    item.styles.strand = new_strand
+                    item.strand = new_strand
+
+            self.append(new_strand_1)
+            self.append(new_strand_2)
             self.remove(strand)
+
+        point.strand = None
 
         # Change the NEMid in the helix to a nick
         point.helix.data.points[point.helical_index] = nick
@@ -238,17 +260,31 @@ class Strands:
         if nick not in self.nicks:
             raise IndexError(f"Nick {nick} is not in this container.")
 
-        original_item_strand = nick.original_item.strand
+        assert (
+            nick.previous_item().strand is nick.next_item().strand
+            if nick.previous_item().strand.closed
+            else True
+        )
+
         previous_item_strand = nick.previous_item().strand
         next_item_strand = nick.next_item().strand
 
-        # Obtain the strands that are before and after the nick.
+        # Add back the point that used to exist instead of the nick to the end of the
+        # strand that comes before the nick
         previous_item_strand.append(nick.original_item)
-        previous_item_strand.extend(nick.next_item().strand.items)
-        self.strands.remove(next_item_strand)
 
-        with suppress(ValueError):
-            self.strands.remove(original_item_strand)
+        # If the strand before the location of the nick is the same as the strand after
+        # the location of the nick then the strand is closed, and we must update the flag.
+        if nick.previous_item().strand is nick.next_item().strand:
+            logger.debug("Performing nick reversal that results in a closed strand.")
+            previous_item_strand.closed = True
+        # Otherwise extend the strand that comes before the nick (after appending the item
+        # that used to exist in place of the nick) the strand of the point that comes
+        # after the nick).
+        else:
+            logger.debug("Performing nick reversal that results in a open strand.")
+            nick.previous_item().strand.extend(next_item_strand.items)
+            self.strands.remove(next_item_strand)
 
         # Remove the nick.
         self.nicks.remove(nick)
