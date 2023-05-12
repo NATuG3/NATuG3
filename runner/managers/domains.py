@@ -3,6 +3,7 @@ import logging
 
 import pandas as pd
 
+import settings
 from structures.domains import Domains
 
 logger = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class DomainsManager:
             logger.info("Restored previous domain editor state.")
         except FileNotFoundError:
             self.current = Domains.from_df(
-                pd.read_csv("saves/domains/presets/circle.csv"),
+                pd.read_csv(f"saves/domains/presets/{settings.default_domain_preset}"),
                 self.runner.managers.nucleic_acid_profile.current,
             )
             logger.warning(
