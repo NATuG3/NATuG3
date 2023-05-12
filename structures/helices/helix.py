@@ -103,6 +103,10 @@ class Helix:
         assert len(self.data.x_coords) == len(self.data.z_coords) == len(self.data.angles)
         return len(self.data.angles)
 
+    def __getitem__(self, index: int) -> None:
+        """Get a point at a given index along the helix."""
+        return self.data.points[index]
+
     def stable(self, threshold=4):
         """
         Whether the helix is stably affixed to its respective helix joint.
