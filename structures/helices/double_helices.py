@@ -374,9 +374,9 @@ class DoubleHelices:
             # Same procedure as for the zeroed helix.
             increments = (
                 -0.5
-                + double_helix.zeroed_helix.counts.bottom_count
-                + double_helix.zeroed_helix.counts.body_count
-                + double_helix.zeroed_helix.counts.top_count
+                + double_helix.other_helix.counts.bottom_count
+                + double_helix.other_helix.counts.body_count
+                + double_helix.other_helix.counts.top_count
             )
             final_angle = initial_angle + increments * self.nucleic_acid_profile.theta_b
             final_z_coord = initial_z_coord + increments * self.nucleic_acid_profile.Z_b
