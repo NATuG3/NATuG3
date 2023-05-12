@@ -310,7 +310,7 @@ class Strand:
 
     def __deepcopy__(self, memodict={}):
         """Deepcopy the strand."""
-        return Strand(
+        new_strand = Strand(
             items=copy(self.items),
             name=self.name,
             closed=self.closed,
@@ -318,6 +318,10 @@ class Strand:
             nucleic_acid_profile=self.nucleic_acid_profile,
             strands=self.strands,
         )
+        new_strand.styles.strand = new_strand
+        for point in new_strand:
+            point.styles = copy(point.styles)
+        return new_strand
 
     def clear(self) -> None:
         """Clear the strand."""
