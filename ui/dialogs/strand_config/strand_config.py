@@ -1,5 +1,3 @@
-import atexit
-
 from PyQt6 import uic
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QBrush, QColor

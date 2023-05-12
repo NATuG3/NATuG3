@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from types import NoneType
-from typing import Union, Iterable, Type
+from typing import Union, Iterable
 
 import pandas as pd
 

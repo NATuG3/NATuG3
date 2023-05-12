@@ -1,7 +1,5 @@
 from functools import cache
-
 from structures.profiles import NucleicAcidProfile
-from tools.closes import closes
 
 C = 8  # number of domains
 R = 1  # symmetry factor

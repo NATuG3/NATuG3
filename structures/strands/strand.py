@@ -1,10 +1,10 @@
 import itertools
+import logging
 import random
 from copy import deepcopy, copy
 from dataclasses import dataclass, field
 from typing import Tuple, Iterable, List, Type, Set
 from uuid import uuid1
-import logging
 
 import pandas as pd
 

@@ -6,8 +6,7 @@ from uuid import uuid1
 import numpy as np
 from numpy import argmax
 
-from constants.directions import DOWN, UP
-from structures.points import Nucleoside
+from constants.directions import DOWN
 from structures.points.point import x_coord_from_angle
 
 logger = logging.getLogger(__name__)

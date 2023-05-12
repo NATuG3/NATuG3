@@ -1,8 +1,7 @@
 import itertools
 import logging
 from collections import deque
-from contextlib import suppress
-from copy import deepcopy
+from copy import deepcopy, copy
 from functools import partial
 from typing import List, Tuple, Iterable, Generator, Literal
 from uuid import uuid1

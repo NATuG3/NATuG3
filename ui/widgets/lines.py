@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QFrame
+from PyQt6.QtWidgets import QFrame
 
 
 class HorizontalLine(QFrame):

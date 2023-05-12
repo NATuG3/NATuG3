@@ -1,9 +1,7 @@
 import logging
 
-from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QHeaderView
 
-from structures.profiles import NucleicAcidProfile
 from ui.config.tabs.domains.tables.base import DomainsBaseTable
 
 logger = logging.getLogger(__name__)

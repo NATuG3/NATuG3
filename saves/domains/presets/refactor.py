@@ -1,6 +1,5 @@
 import os
 from contextlib import suppress
-from uuid import uuid1
 
 import pandas as pd
 
