@@ -49,6 +49,9 @@ class NEMidInformer(QDialog):
             f"NEMid #{NEMid_.strand.items.by_type(NEMid).index(NEMid_) + 1} in {openness} "
             f"strand #{strand_index + 1}"
         )
+        self.helix.setText(
+            f"NEMid {NEMid_.helical_index} of helix {id(NEMid_.helix)}"
+        )
 
         self.original_domain.setText(
             f"domain #{NEMid_.domain.index + 1} of {all_domains.count} domains"

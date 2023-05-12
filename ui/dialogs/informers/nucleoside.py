@@ -50,6 +50,9 @@ class NucleosideInformer(QDialog):
             f"{nucleoside.strand.items.by_type(Nucleoside).index(nucleoside) + 1} in"
             f" {openness} strand #{strand_index + 1}"
         )
+        self.helix.setText(
+            f"nucleoside {nucleoside.helical_index} of helix {id(nucleoside.helix)}"
+        )
 
         self.original_domain.setText(
             f"domain #{nucleoside.domain.index + 1} of {all_domains.count} domains"
