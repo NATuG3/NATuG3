@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, InitVar
 from typing import Iterable
 from uuid import uuid1
 
@@ -12,24 +12,27 @@ class Nick:
     """
     A Nick object.
 
-    Contains the location of where the previous NEMid used to be before a nick was
-    created, and the previous NEMid object (if the user wishes to undo the nick then
-    the nick is converted back into a NEMid and is placed after the previous item).
-
     All attributes of the original NEMid object are directly accessible through this
     object.
 
     Attributes:
         uuid: The unique identifier of the nick.
-        previous_item: The NEMid object in the same strand as the original_NEMid.
         original_item: The NEMid object that was transformed into a nick.
+
+    Methods:
+        next_item: The next item along the helix that this nick is located in.
+        previous_item: The previous item along the helix that this nick is located in.
     """
 
     original_item: Point
-    previous_item: Point
-    next_item: Point
 
     uuid: str = field(default_factory=lambda: str(uuid1()))
+
+    def next_item(self):
+        return self.helix[self.helical_index + 1]
+
+    def previous_item(self):
+        return self.helix[self.helical_index - 1]
 
     def __getattr__(self, key: str) -> object:
         """
@@ -59,7 +62,5 @@ def to_df(nicks: Iterable[Nick]) -> pd.DataFrame:
     data = {
         "uuid": [nick.uuid for nick in nicks],
         "data:original_item": [nick.original_item.uuid for nick in nicks],
-        "data:previous_item": [nick.previous_item.uuid for nick in nicks],
-        "data:next_item": [nick.next_item.uuid for nick in nicks],
     }
     return pd.DataFrame(data)

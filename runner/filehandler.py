@@ -255,8 +255,6 @@ class FileHandler:
                     nick = structures.points.nick.Nick(
                         uuid=row["uuid"],
                         original_item=items_by_uuid[row["data:original_item"]],
-                        previous_item=items_by_uuid[row["data:previous_item"]],
-                        next_item=items_by_uuid[row["data:next_item"]],
                     )
                     items_by_uuid[row["uuid"]] = nick
                     nicks.append(nick)
