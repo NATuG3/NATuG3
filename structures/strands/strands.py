@@ -197,13 +197,13 @@ class Strands:
             )
 
         # Create a nick object from the point
-        nick = Nick(point, point.strand[point.index - 1], point.strand[point.index + 1])
+        nick = Nick(point)
         self.nicks.append(nick)
 
         # Split the strand into two strands.
         new_strands = strand.split(point)
-        nick.previous_item.strand = new_strands[0]
-        nick.next_item.strand = new_strands[1]
+        point.strand[point.index - 1].strand = new_strands[0]
+        point.strand[point.index + 1].strand = new_strands[1]
 
         # Remove the old strand.
         self.remove(strand)
@@ -241,31 +241,23 @@ class Strands:
         if nick not in self.nicks:
             raise IndexError(f"Nick {nick} is not in this container.")
 
+        original_item_strand = nick.original_item.strand
+        previous_item_strand = nick.previous_item().strand
+        next_item_strand = nick.next_item().strand
+
         # Obtain the strands that are before and after the nick.
-        strand1 = nick.previous_item.strand
-        strand2 = nick.next_item.strand
+        previous_item_strand.append(nick.original_item)
+        previous_item_strand.extend(nick.next_item().strand.items)
+        self.strands.remove(next_item_strand)
 
-        # Then build the new strand.
-        new_strand = deepcopy(strand1)
-        new_strand.append(point)
-        new_strand.extend(strand2)
-
-        # Remove the two strands and add the new strand.
         with suppress(ValueError):
-            self.remove(strand1)
-        with suppress(ValueError):
-            self.remove(strand2)
-        self.append(new_strand)
+            self.strands.remove(original_item_strand)
 
         # Remove the nick.
         self.nicks.remove(nick)
 
         # Replace the slot in the helix's points with the original point.
         point.helix.data.points[point.helical_index] = point
-
-        # Parent the new strand
-        point.strand = new_strand
-        new_strand.strands = self
 
         if style:
             self.style()
