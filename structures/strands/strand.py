@@ -17,7 +17,6 @@ from structures.strands.linkage import Linkage
 from structures.strands.utils import shuffled
 from utils import rgb_to_hex
 
-
 logger = logging.getLogger(__name__)
 
 
