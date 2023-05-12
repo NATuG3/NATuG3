@@ -197,23 +197,21 @@ class Strands:
             )
 
         # Create a nick object from the point
-        nick = Nick(point)
+        nick = Nick(point, previously_closed_strand=strand.closed)
         self.nicks.append(nick)
 
-        # Split the strand into two strands.
-        new_strands = strand.split(point)
-        point.strand[point.index - 1].strand = new_strands[0]
-        point.strand[point.index + 1].strand = new_strands[1]
-
-        # Remove the old strand.
-        self.remove(strand)
-
-        # Parent the new strands
-        for strand in new_strands:
-            strand.strands = self
-
-        # Add the two new strands
-        self.extend(new_strands)
+        if strand.closed:
+            # Open up the strand by removing the point and then flagging it as open.
+            point_index = point.index
+            new_strand_items = StrandItems()
+            new_strand_items.extend(strand.items[point_index+1:])
+            new_strand_items.extend(strand.items[:point_index])
+            strand.items = new_strand_items
+            strand.closed = False
+        else:
+            # Split the strand into two strands and then remove the old singular strand.
+            self.extend(strand.split(point, style=False))
+            self.remove(strand)
 
         # Change the NEMid in the helix to a nick
         point.helix.data.points[point.helical_index] = nick

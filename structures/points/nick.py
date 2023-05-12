@@ -18,6 +18,8 @@ class Nick:
     Attributes:
         uuid: The unique identifier of the nick.
         original_item: The NEMid object that was transformed into a nick.
+        previously_closed_strand: Whether the strand the nick used to belong to was
+            closed.
 
     Methods:
         next_item: The next item along the helix that this nick is located in.
@@ -25,6 +27,7 @@ class Nick:
     """
 
     original_item: Point
+    previously_closed_strand: "Strand" = None
 
     uuid: str = field(default_factory=lambda: str(uuid1()))
 
