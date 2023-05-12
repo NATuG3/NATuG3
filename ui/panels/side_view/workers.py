@@ -11,6 +11,7 @@ from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles.action_repeater_profile import ActionRepeaterProfile
 from structures.strands import Strands
+from structures.strands.linkage import Linkage
 
 logger = logging.getLogger(__name__)
 
