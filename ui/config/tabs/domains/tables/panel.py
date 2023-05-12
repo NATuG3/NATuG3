@@ -192,6 +192,7 @@ class DomainsTablesArea(QTabWidget):
 
             # Angles Table, Column 5 - theta interior
             row.theta_m = QDoubleSpinBox()
+            row.theta_m.setRange(0, 9999)
             row.theta_m.setDecimals(2)
             row.theta_m.setValue(domain.theta_m)
             row.theta_m.setEnabled(False)
