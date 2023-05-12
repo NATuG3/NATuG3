@@ -31,10 +31,10 @@ class Nick:
 
     uuid: str = field(default_factory=lambda: str(uuid1()))
 
-    def next_item(self):
+    def next_item(self) -> "Strand":
         return self.helix[self.helical_index + 1]
 
-    def previous_item(self):
+    def previous_item(self) -> "Strand":
         return self.helix[self.helical_index - 1]
 
     def __getattr__(self, key: str) -> object:
