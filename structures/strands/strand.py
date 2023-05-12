@@ -295,9 +295,9 @@ class Strand:
         """Determine whether item is in strand."""
         return item in self.items
 
-    def __getitem__(self, item):
+    def __getitem__(self, index_or_slice):
         """Obtain an item from the strand."""
-        return self.items[item]
+        return self.items[index_or_slice]
 
     def __setitem__(self, key, value):
         """Set an item in the strand."""

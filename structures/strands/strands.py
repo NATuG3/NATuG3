@@ -205,7 +205,7 @@ class Strands:
         if strand.closed:
             # Open up the strand by removing the point and then flagging it as open.
             new_strand_items = StrandItems()
-            new_strand_items.extend(strand.items[point_index+1:])
+            new_strand_items.extend(strand.items[point_index + 1 :])
             new_strand_items.extend(strand.items[:point_index])
             strand.items = new_strand_items
             strand.closed = False
@@ -220,7 +220,7 @@ class Strands:
 
             # And the rest go into another strand.
             new_strand_2 = deepcopy(new_strand_template)
-            new_strand_2.items = StrandItems(strand.items[point_index + 1:])
+            new_strand_2.items = StrandItems(strand.items[point_index + 1 :])
 
             for new_strand in (new_strand_1, new_strand_2):
                 for item in new_strand.items.by_type(Point):
@@ -776,36 +776,36 @@ class Strands:
 
             if strand.closed:
                 # crawl from the beginning of the strand to the junction site
-                new_strands[0].items.extend(strand.sliced(0, NEMid1.index))
+                new_strands[0].items.extend(strand[0, NEMid1.index])
                 # skip over all NEMids between NEMid 1's and NEMid 2's index
                 # and crawl from NEMid 2 to the end of the strand
-                new_strands[0].items.extend(strand.sliced(NEMid2.index, None))
+                new_strands[0].items.extend(strand[NEMid2.index, None])
                 # crawl from one junction site to the other for the other strand
-                new_strands[1].items.extend(strand.sliced(NEMid1.index, NEMid2.index))
+                new_strands[1].items.extend(strand[NEMid1.index, NEMid2.index])
 
                 new_strands[0].closed = True
-                new_strands[1].closed = False
+                new_strands[1].closed = True
 
             elif not strand.closed:
                 # this is the creating a loop strand case
                 if NEMid2.index < NEMid1.index:
                     # crawl from the index of the right NEMid to the index of the
                     # left NEMid
-                    new_strands[0].items.extend(strand.sliced(NEMid2.index, NEMid1.index))
+                    new_strands[0].items.extend(strand[NEMid2.index : NEMid1.index])
                     # crawl from the beginning of the strand to the index of the
                     # right NEMid
-                    new_strands[1].items.extend(strand.sliced(0, NEMid2.index))
+                    new_strands[1].items.extend(strand[0 : NEMid2.index])
                     # crawl from the index of the left NEMid to the end of the strand
-                    new_strands[1].items.extend(strand.sliced(NEMid1.index, None))
+                    new_strands[1].items.extend(strand[NEMid1.index :])
                 elif NEMid1.index < NEMid2.index:
                     # crawl from the index of the left NEMid to the index of the
                     # right NEMid
-                    new_strands[0].items.extend(strand.sliced(NEMid1.index, NEMid2.index))
+                    new_strands[0].items.extend(strand[NEMid1.index : NEMid2.index])
                     # crawl from the beginning of the strand to the index of the left
                     # NEMid
-                    new_strands[1].items.extend(strand.sliced(0, NEMid1.index))
+                    new_strands[1].items.extend(strand[0 : NEMid1.index])
                     # crawl from the index of the right NEMid to the end of the strand
-                    new_strands[1].items.extend(strand.sliced(NEMid2.index, None))
+                    new_strands[1].items.extend(strand[NEMid2.index :])
 
                 new_strands[0].closed = True
                 new_strands[1].closed = False
@@ -824,26 +824,28 @@ class Strands:
                 elif NEMid2.strand.closed:
                     closed_strand_NEMid: NEMid = NEMid2
                     open_strand_NEMid: NEMid = NEMid1
+                else:
+                    raise ValueError("One of the strands should be closed for this case.")
 
                 # crawl from beginning of the open strand to the junction site NEMid
                 # of the open strand
                 new_strands[0].items.extend(
-                    open_strand_NEMid.strand.sliced(0, open_strand_NEMid.index)
+                    open_strand_NEMid.strand[0 : open_strand_NEMid.index]
                 )
                 # crawl from the junction site's closed strand NEMid to the end of
                 # the closed strand
                 new_strands[0].items.extend(
-                    closed_strand_NEMid.strand.sliced(closed_strand_NEMid.index, None)
+                    closed_strand_NEMid.strand[closed_strand_NEMid.index :]
                 )
                 # crawl from the beginning of the closed strand to the junction site
                 # of the closed strand
                 new_strands[0].items.extend(
-                    closed_strand_NEMid.strand.sliced(0, closed_strand_NEMid.index)
+                    closed_strand_NEMid.strand[0 : closed_strand_NEMid.index]
                 )
                 # crawl from the junction site of the open strand to the end of the
                 # open strand
                 new_strands[0].items.extend(
-                    open_strand_NEMid.strand.sliced(open_strand_NEMid.index, None)
+                    open_strand_NEMid.strand[open_strand_NEMid.index :]
                 )
 
                 new_strands[0].closed = False
@@ -874,15 +876,15 @@ class Strands:
             # if neither of the NEMids have closed sequencing
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
-                new_strands[0].items.extend(NEMid1.strand.sliced(0, NEMid1.index))
+                new_strands[0].items.extend(NEMid1.strand[0 : NEMid1.index])
                 # crawl from the junction site on NEMid#2's strand to the end of the
                 # strand
-                new_strands[0].items.extend(NEMid2.strand.sliced(NEMid2.index, None))
+                new_strands[0].items.extend(NEMid2.strand[NEMid2.index :])
 
                 # crawl from the beginning of NEMid#2's strand to the junction site
-                new_strands[1].items.extend(NEMid2.strand.sliced(0, NEMid2.index))
+                new_strands[1].items.extend(NEMid2.strand[0 : NEMid2.index])
                 # crawl from the junction on NEMid #1's strand to the end of the strand
-                new_strands[1].items.extend(NEMid1.strand.sliced(NEMid1.index, None))
+                new_strands[1].items.extend(NEMid1.strand[NEMid1.index :])
 
                 new_strands[0].closed = False
                 new_strands[1].closed = False
