@@ -9,6 +9,23 @@ import constants
 logger = logging.getLogger(__name__)
 
 
+def remove_duplicates(iterable):
+    """
+    Remove duplicates from an iterable.
+
+    Args:
+        iterable: The iterable to remove duplicates from.
+
+    Returns:
+        list: The iterable with duplicates removed.
+    """
+    output = []
+    for item in iterable:
+        if item not in output:
+            output.append(item)
+    return output
+
+
 def rgb_to_hex(rgb):
     """
     Convert an rgb tuple to a hex code.
