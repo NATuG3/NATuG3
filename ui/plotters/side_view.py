@@ -317,26 +317,22 @@ class SideViewPlotter(Plotter):
         # Return the plot item
         return plotted_unstable_helix
 
-    def _plot_unstable_indicators(self, threshold=3):
-        """
-        Plot all the small indicators that given helix joints are unstable.
-
-        Args:
-            threshold: The minimum number of joints that a helix must have to be
-                considered stable.
-        """
+    def _plot_unstable_indicators(self):
+        """Plot all the small indicators that given helix joints are unstable."""
         for unstable_indicator in self.plot_data.plotted_unstable_indicators:
             self.removeItem(unstable_indicator)
         self.plot_data.plotted_unstable_indicators.clear()
 
-        for index, double_helix in enumerate(self.plot_data.double_helices):
-            if not double_helix.right_helix.stable(threshold=3):
+        for index, double_helix in enumerate(self.double_helices):
+            if not double_helix.right_joint_is_stable():
                 self.plot_data.plotted_unstable_indicators.append(
                     self._plot_unstable_indicator(index + 1, self.height + 0.05)
                 )
 
-        if not self.double_helices[0].left_helix.stable():
-            self._plot_unstable_indicator(0, self.height + 0.05)
+        if not self.double_helices[0].left_joint_is_stable():
+            self.plot_data.plotted_unstable_indicators.append(
+                self._plot_unstable_indicator(0, self.height + 0.05)
+            )
 
     def _plot_points(self):
         """
