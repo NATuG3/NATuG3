@@ -777,6 +777,9 @@ class Strands:
             # remove the old strand
             self.remove(strand)
 
+            NEMid1.junction = True
+            NEMid2.junction = True
+
             if strand.closed:
                 if NEMid1_index < NEMid2_index:
                     first_NEMid_index = NEMid1_index
@@ -861,6 +864,9 @@ class Strands:
                 new_strands[0].closed = False
                 new_strands[1].closed = False
 
+                NEMid1.junction = False
+                NEMid2.junction = False
+
             # if both of the NEMids have closed sequencing
             elif NEMid1.strand.closed and NEMid2.strand.closed:
                 # convert the strands to deques so that they can be rotated
@@ -883,6 +889,9 @@ class Strands:
                 new_strands[0].closed = True
                 new_strands[1].closed = None
 
+                NEMid1.junction = True
+                NEMid2.junction = True
+
             # if neither of the NEMids have closed sequencing
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
@@ -899,6 +908,9 @@ class Strands:
                 new_strands[0].closed = False
                 new_strands[1].closed = False
 
+                NEMid1.junction = True
+                NEMid2.junction = True
+
         # recompute data for sequencing and append sequencing to master list
         for new_strand in new_strands:
             if not new_strand.empty:
@@ -908,14 +920,6 @@ class Strands:
         for new_strand in new_strands:
             for item in new_strand.items:
                 item.strand = new_strand
-
-        # if the new strand of NEMid#1 or NEMid#2 doesn't leave its domain
-        # then mark NEMid1 as not-a-junction
-        for NEMid_ in (NEMid1, NEMid2):
-            if NEMid_.strand.interdomain:
-                NEMid_.junction = True
-            else:
-                NEMid_.junction = False
 
         # assign the new juncmates
         NEMid1.juncmate = NEMid2
