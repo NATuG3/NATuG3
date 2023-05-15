@@ -190,6 +190,9 @@ class DoubleHelices:
                                     point2.junctable = True
                                     point2.juncmate = point1
 
+                                    point1.helix.data.right_joint_points.append(point1)
+                                    point2.helix.data.left_joint_points.append(point2)
+
         logger.debug(f"Junctability assignment took {time() - start:.2f} seconds.")
 
         strands = [helix for double_helix in double_helices for helix in double_helix]

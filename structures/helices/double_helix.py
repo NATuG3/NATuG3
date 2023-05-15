@@ -5,7 +5,8 @@ import pandas as pd
 
 from constants.directions import DOWN, UP
 from structures.helices.helix import Helix
-from utils import inverse
+from structures.points import NEMid
+from utils import inverse, remove_duplicates
 
 logger = logging.getLogger(__name__)
 
@@ -35,11 +36,21 @@ class DoubleHelix:
         right_helix: The helix that is of the direction of the domain's right helical
             joint. This is the helix whose points are lined up to the points that are
             on the helix of the next domain's left helical joint helix.
+        left_joint_is_stable: Whether the left helical joint has enough active junctions
+            to be considered stable.
+        right_joint_is_stable: Whether the right helical joint has enough active
+            junctions to be considered stable.
         uuid: The UUID of the double helix. This is automatically generated when the
             double helix is created.
 
     Methods:
         to_csv: Write the double helix to a CSV file.
+        left_helix_joint_points: Get the points of the left helical joint.
+        right_helix_joint_points: Get the points of the right helical joint.
+        left_helix_joint_is_stable: Whether the left helical joint has enough active
+            junctions to be considered stable.
+        right_helix_joint_is_stable: Whether the right helical joint has enough active
+            junctions to be considered stable.
     """
 
     __slots__ = "domain", "helices", "uuid"
@@ -152,6 +163,64 @@ class DoubleHelix:
         The other helix in the same domain as the zeroed helix.
         """
         return self.helices[inverse(self.domain.left_helix_joint)]
+
+    def left_helix_joint_points(self) -> list:
+        """Get a list of all points on the left helix joint."""
+        return remove_duplicates(
+            self.left_helix.data.left_joint_points
+            + self.right_helix.data.left_joint_points
+        )
+
+    def right_helix_joint_points(self) -> list:
+        """Get a list of all points on the right helix joint."""
+        return remove_duplicates(
+            self.left_helix.data.right_joint_points
+            + self.right_helix.data.right_joint_points
+        )
+
+    def _joint_is_stable(self, threshold: int, points: list):
+        """
+        Determine whether a helical joint is stable.
+
+        Args:
+            threshold: The number of active junctions that must be present in order
+                for the joint to be considered stable.
+            points: The points of the helical joint.
+
+        Returns:
+            Whether the helical joint is stable.
+        """
+        active_junctions = 0
+        for point in points:
+            if isinstance(point, NEMid) and point.junction:
+                active_junctions += 1
+        return active_junctions >= threshold
+
+    def left_joint_is_stable(self, threshold: int = 3):
+        """
+        Determine whether the left helical joint is stable.
+
+        Args:
+            threshold: The number of active junctions that must be present in order
+                for the joint to be considered stable.
+
+        Returns:
+            Whether the left helical joint is stable.
+        """
+        return self._joint_is_stable(threshold, self.left_helix_joint_points())
+
+    def right_joint_is_stable(self, threshold: int = 3):
+        """
+        Determine whether the right helical joint is stable.
+
+        Args:
+            threshold: The number of active junctions that must be present in order
+                for the joint to be considered stable.
+
+        Returns:
+            Whether the right helical joint is stable.
+        """
+        return self._joint_is_stable(threshold, self.right_helix_joint_points())
 
 
 def to_df(double_helices) -> pd.DataFrame:
