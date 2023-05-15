@@ -675,7 +675,9 @@ class SideViewPlotter(Plotter):
 
                     stroke_pen = pg.mkPen(
                         color=strand.styles.color.value,
-                        width=(strand.styles.thickness.value * self.modifiers.stroke_mod),
+                        width=(
+                            strand.styles.thickness.value * self.modifiers.stroke_mod
+                        ),
                     )
 
                     # Create the actual plot data item for the stroke segment.
