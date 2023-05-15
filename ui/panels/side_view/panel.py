@@ -71,6 +71,7 @@ class SideViewPanel(QGroupBox):
         nucleic acid, and plot mode. Then the plot will be refreshed.
         """
         self.plot.strands = self.runner.managers.strands.current
+        self.plot.double_helices = self.runner.managers.double_helices.current
         self.plot.nucleic_acid = self.runner.managers.nucleic_acid_profile.current
         self.plot.point_types = self.runner.managers.misc.plot_types
         self.plot.refresh()
