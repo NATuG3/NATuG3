@@ -294,7 +294,7 @@ class Domains:
 
         domains = self.domains()
 
-        theta_deltas = [0.0]
+        absolute_angle = [0.0]
         u_coords = [0.0]
         v_coords = [0.0]
 
@@ -313,13 +313,13 @@ class Domains:
             interior_angle: float = theta_m - theta_s
 
             # append the angle change to "self.angle_deltas"
-            theta_deltas.append(theta_deltas[-1] + 180 - interior_angle)
+            absolute_angle.append(absolute_angle[-1] + 180 - interior_angle)
 
             # append the u cord of the domain to "self.u_coords"
-            u_coords.append(u_coords[-1] + D * math.cos(math.radians(theta_deltas[-1])))
+            u_coords.append(u_coords[-1] + D * math.cos(math.radians(absolute_angle[-1])))
 
             # append the v cord of the domain to "self.v_coords"
-            v_coords.append(v_coords[-1] + D * math.sin(math.radians(theta_deltas[-1])))
+            v_coords.append(v_coords[-1] + D * math.sin(math.radians(absolute_angle[-1])))
 
         logger.info(
             "Performed top view computation in %s seconds.",
