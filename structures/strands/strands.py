@@ -538,9 +538,13 @@ class Strands:
                     strand.styles.color.value = next(strand_colors)
                 else:
                     if strand.up_strand():
-                        strand.styles.color.value = settings.colors["strands"]["greys"][1]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][
+                            1
+                        ]
                     else:
-                        strand.styles.color.value = settings.colors["strands"]["greys"][0]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][
+                            0
+                        ]
 
             # Set the styles of each point based off new strand styles
             for item in strand.items.by_type(Point):
@@ -656,7 +660,9 @@ class Strands:
         Returns:
             The two new strands that were created.
         """
-        assert linkage.strand.strands is self, "Linkage is not in this Strands container."
+        assert (
+            linkage.strand.strands is self
+        ), "Linkage is not in this Strands container."
 
         logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
         logger.debug(f"Linkage is at index {linkage.strand.index(linkage)}.")
@@ -777,9 +783,6 @@ class Strands:
             # remove the old strand
             self.remove(strand)
 
-            NEMid1.junction = True
-            NEMid2.junction = True
-
             if strand.closed:
                 if NEMid1_index < NEMid2_index:
                     first_NEMid_index = NEMid1_index
@@ -787,7 +790,7 @@ class Strands:
                 else:
                     first_NEMid_index = NEMid2_index
                     other_NEMid_index = NEMid1_index
-                
+
                 # crawl from the beginning of the strand to the junction site
                 new_strands[0].items.extend(strand[first_NEMid_index:other_NEMid_index])
                 # skip over all NEMids between NEMid 1's and NEMid 2's index
@@ -804,21 +807,21 @@ class Strands:
                 if NEMid2_index < NEMid1_index:
                     # crawl from the index of the right NEMid to the index of the
                     # left NEMid
-                    new_strands[0].items.extend(strand[NEMid2_index : NEMid1_index])
+                    new_strands[0].items.extend(strand[NEMid2_index:NEMid1_index])
                     # crawl from the beginning of the strand to the index of the
                     # right NEMid
-                    new_strands[1].items.extend(strand[0 : NEMid2_index])
+                    new_strands[1].items.extend(strand[0:NEMid2_index])
                     # crawl from the index of the left NEMid to the end of the strand
-                    new_strands[1].items.extend(strand[NEMid1_index :])
+                    new_strands[1].items.extend(strand[NEMid1_index:])
                 elif NEMid1_index < NEMid2_index:
                     # crawl from the index of the left NEMid to the index of the
                     # right NEMid
-                    new_strands[0].items.extend(strand[NEMid1_index : NEMid2_index])
+                    new_strands[0].items.extend(strand[NEMid1_index:NEMid2_index])
                     # crawl from the beginning of the strand to the index of the left
                     # NEMid
-                    new_strands[1].items.extend(strand[0 : NEMid1_index])
+                    new_strands[1].items.extend(strand[0:NEMid1_index])
                     # crawl from the index of the right NEMid to the end of the strand
-                    new_strands[1].items.extend(strand[NEMid2_index :])
+                    new_strands[1].items.extend(strand[NEMid2_index:])
 
                 new_strands[0].closed = True
                 new_strands[1].closed = False
@@ -838,7 +841,9 @@ class Strands:
                     closed_strand_NEMid: NEMid = NEMid2
                     open_strand_NEMid: NEMid = NEMid1
                 else:
-                    raise ValueError("One of the strands should be closed for this case.")
+                    raise ValueError(
+                        "One of the strands should be closed for this case."
+                    )
 
                 # crawl from beginning of the open strand to the junction site NEMid
                 # of the open strand
@@ -864,9 +869,6 @@ class Strands:
                 new_strands[0].closed = False
                 new_strands[1].closed = False
 
-                NEMid1.junction = False
-                NEMid2.junction = False
-
             # if both of the NEMids have closed sequencing
             elif NEMid1.strand.closed and NEMid2.strand.closed:
                 # convert the strands to deques so that they can be rotated
@@ -889,27 +891,21 @@ class Strands:
                 new_strands[0].closed = True
                 new_strands[1].closed = None
 
-                NEMid1.junction = True
-                NEMid2.junction = True
-
             # if neither of the NEMids have closed sequencing
             elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
                 # crawl from beginning of NEMid#1's strand to the junction site
-                new_strands[0].items.extend(NEMid1.strand[0 : NEMid1_index])
+                new_strands[0].items.extend(NEMid1.strand[0:NEMid1_index])
                 # crawl from the junction site on NEMid#2's strand to the end of the
                 # strand
-                new_strands[0].items.extend(NEMid2.strand[NEMid2_index :])
+                new_strands[0].items.extend(NEMid2.strand[NEMid2_index:])
 
                 # crawl from the beginning of NEMid#2's strand to the junction site
-                new_strands[1].items.extend(NEMid2.strand[0 : NEMid2_index])
+                new_strands[1].items.extend(NEMid2.strand[0:NEMid2_index])
                 # crawl from the junction on NEMid #1's strand to the end of the strand
-                new_strands[1].items.extend(NEMid1.strand[NEMid1_index :])
+                new_strands[1].items.extend(NEMid1.strand[NEMid1_index:])
 
                 new_strands[0].closed = False
                 new_strands[1].closed = False
-
-                NEMid1.junction = True
-                NEMid2.junction = True
 
         # recompute data for sequencing and append sequencing to master list
         for new_strand in new_strands:
@@ -921,9 +917,25 @@ class Strands:
             for item in new_strand.items:
                 item.strand = new_strand
 
-        # assign the new juncmates
-        NEMid1.juncmate = NEMid2
-        NEMid2.juncmate = NEMid1
+        set_juncmates = False
+        for NEMid_ in (NEMid1, NEMid2):
+            for index, item in enumerate(NEMid_.strand):
+                if isinstance(item, NEMid) and item.junctable and (
+                    NEMid_.strand[(index - 1) % len(NEMid_.strand)].domain
+                    != NEMid_.strand[(index + 1) % len(NEMid_.strand)].domain
+                ):
+                    set_juncmates = True
+                    item.junction = True
+                else:
+                    item.junction = False
+
+        # Assign the new juncmates if necessary
+        if set_juncmates:
+            NEMid1.juncmate = NEMid2
+            NEMid2.juncmate = NEMid1
+        else:
+            NEMid1.juncmate = None
+            NEMid2.juncmate = None
 
         if style:
             self.style()
