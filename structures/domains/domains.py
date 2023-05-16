@@ -301,31 +301,25 @@ class Domains:
         # Create references for various nucleic acid settings. This is done to make
         # the code more readable.
         D = self.nucleic_acid_profile.D
-
-        for index, domain in enumerate(domains):
+        for index in range(len(domains) + 1):
+            print(index)
             # locate strand switch angle for the previous domain.
             theta_s: float = domains[index - 1].theta_s
             # locate interior angle for the previous domain.
-            interior_angle_multiple: float = domains[index - 1].theta_m
+            theta_m: float = domains[index - 1].theta_m
 
             # calculate the actual interior angle (with strand switching angle
             # factored in)
-            interior_angle: float = interior_angle_multiple - theta_s
+            interior_angle: float = theta_m - theta_s
 
             # append the angle change to "self.angle_deltas"
             theta_deltas.append(theta_deltas[-1] + 180 - interior_angle)
 
-            # the current angle delta (we will use it to generate the next one)
-            angle_delta: float = theta_deltas[-1]
-            angle_delta: float = math.radians(
-                angle_delta
-            )  # convert to radians (AKA angle_delta*(180/pi))
-
             # append the u cord of the domain to "self.u_coords"
-            u_coords.append(u_coords[-1] + D * math.cos(angle_delta))
+            u_coords.append(u_coords[-1] + D * math.cos(math.radians(theta_deltas[-1])))
 
             # append the v cord of the domain to "self.v_coords"
-            v_coords.append(v_coords[-1] + D * math.sin(angle_delta))
+            v_coords.append(v_coords[-1] + D * math.sin(math.radians(theta_deltas[-1])))
 
         logger.info(
             "Performed top view computation in %s seconds.",

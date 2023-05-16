@@ -200,7 +200,7 @@ class TopViewPlotter(Plotter):
         self.plot_data.plotted_numbers = []
         # We label domain#0 with the domain-count even though it's domain#0 in memory to
         # make it more human-friendly (so it doesn't start at #0)
-        for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
+        for counter, position in enumerate(tuple(zip(x_coords, y_coords))[:], start=0):
             symbol_size = self.circle_radius / 3
             symbol_size *= 1 + (0.255 * (len(str(counter)) - 1))
 
