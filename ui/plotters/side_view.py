@@ -799,6 +799,7 @@ class SideViewPlotter(Plotter):
         self.plot_data.double_helices = self.double_helices
         self.plot_data.point_types = self.point_types
         self.plot_data.modifiers = self.modifiers
+        self._set_dimensions()
 
         self._plot_strands()
         self._plot_points()
@@ -810,5 +811,4 @@ class SideViewPlotter(Plotter):
             for unstable_indicator in self.plot_data.plotted_unstable_indicators:
                 self.removeItem(unstable_indicator)
 
-        self._set_dimensions()
         self._prettify()
