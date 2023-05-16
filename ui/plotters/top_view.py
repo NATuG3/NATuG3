@@ -153,36 +153,6 @@ class TopViewPlotter(Plotter):
         # prevent user from interacting with the graph in certain ways
         self.getViewBox().setAspectLocked(lock=True, ratio=1)
 
-    def _plot(self):
-        """
-        Plot all the data.
-
-        All the plotted data is stored in self.plot_data.
-        """
-        coords = self.domains.top_view()
-        x_coords = [coord[0] for coord in coords]
-        y_coords = [coord[1] for coord in coords]
-
-        # perform rotation if needed
-        if self.rotation != 0:
-            rotation = radians(self.rotation)
-            for index, (x_coord, z_coord) in enumerate(zip(x_coords, y_coords)):
-                x_coords[index] = x_coord * cos(rotation) - z_coord * sin(rotation)
-                y_coords[index] = z_coord * cos(rotation) + x_coord * sin(rotation)
-
-        # plot the data
-        self._plot_domains(x_coords, y_coords)
-        if self.numbers:
-            self._plot_numbers(x_coords, y_coords)
-        self._plot_stroke(x_coords, y_coords)
-
-        # store current plot data
-        self.plot_data.x_coords = y_coords
-        self.plot_data.y_coords = y_coords
-        self.plot_data.rotation = self.rotation
-
-        self._prettify()
-
     def _plot_domains(self, x_coords: List[float], y_coords: List[float]) -> None:
         """
         Plot the domains.
@@ -228,6 +198,8 @@ class TopViewPlotter(Plotter):
         and updates the plot data.
         """
         self.plot_data.plotted_numbers = []
+        # We label domain#0 with the domain-count even though it's domain#0 in memory to
+        # make it more human-friendly (so it doesn't start at #0)
         for counter, position in enumerate(tuple(zip(x_coords, y_coords))[1:], start=1):
             symbol_size = self.circle_radius / 3
             symbol_size *= 1 + (0.255 * (len(str(counter)) - 1))
@@ -258,3 +230,33 @@ class TopViewPlotter(Plotter):
 
             # Add the text to the plot data.
             self.plot_data.plotted_numbers.append(text)
+
+    def _plot(self):
+        """
+        Plot all the data.
+
+        All the plotted data is stored in self.plot_data.
+        """
+        coords = self.domains.top_view()
+        x_coords = [coord[0] for coord in coords]
+        y_coords = [coord[1] for coord in coords]
+
+        # perform rotation if needed
+        if self.rotation != 0:
+            rotation = radians(self.rotation)
+            for index, (x_coord, z_coord) in enumerate(zip(x_coords, y_coords)):
+                x_coords[index] = x_coord * cos(rotation) - z_coord * sin(rotation)
+                y_coords[index] = z_coord * cos(rotation) + x_coord * sin(rotation)
+
+        # plot the data
+        self._plot_domains(x_coords, y_coords)
+        if self.numbers:
+            self._plot_numbers(x_coords, y_coords)
+        self._plot_stroke(x_coords, y_coords)
+
+        # store current plot data
+        self.plot_data.x_coords = y_coords
+        self.plot_data.y_coords = y_coords
+        self.plot_data.rotation = self.rotation
+
+        self._prettify()
