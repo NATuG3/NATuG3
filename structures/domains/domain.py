@@ -362,6 +362,15 @@ class Domain:
         """
         return self.theta_m_multiple * self.nucleic_acid_profile.theta_c
 
+    @property
+    def theta_i(self) -> float:
+        """
+        Obtain the theta interior angle.
+
+        This is equivalent to self.theta_m - self.theta_s.
+        """
+        return self.theta_m - self.theta_s
+
     def __repr__(self):
         """Return a string representation of the Domain object."""
         return (
