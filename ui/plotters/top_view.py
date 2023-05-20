@@ -21,14 +21,14 @@ class PlotData:
 
     Attributes:
         plotted_numbers: The plotted number symbols.
-        x_coords: X coords of plotted data.
-        z_coords: Z coords of plotted data.
+        u_coords: u coords of plotted data.
+        v_coords: v coords of plotted data.
         domains: The currently plotted domain circles.
         rotation: The rotation of the plot.
     """
 
-    x_coords: List[float] = field(default_factory=list)
-    y_coords: List[float] = field(default_factory=list)
+    u_coords: List[float] = field(default_factory=list)
+    v_coords: List[float] = field(default_factory=list)
     rotation: pg.PlotDataItem = 0
     plotted_domains: pg.PlotDataItem = None
     plotted_stroke: pg.PlotDataItem = None
@@ -46,12 +46,12 @@ class PlotData:
             List of plotted coordinates. Each coordinate is a tuple of the form (x, y).
         """
         if round_to is None:
-            return list(zip(self.x_coords, self.y_coords))
+            return list(zip(self.u_coords, self.v_coords))
         else:
             return list(
                 zip(
-                    [round(coord, round_to) for coord in self.x_coords],
-                    [round(coord, round_to) for coord in self.y_coords],
+                    [round(coord, round_to) for coord in self.u_coords],
+                    [round(coord, round_to) for coord in self.v_coords],
                 )
             )
 
@@ -153,44 +153,44 @@ class TopViewPlotter(Plotter):
         # prevent user from interacting with the graph in certain ways
         self.getViewBox().setAspectLocked(lock=True, ratio=1)
 
-    def _plot_domains(self, x_coords: List[float], y_coords: List[float]) -> None:
+    def _plot_domains(self, u_coords: List[float], v_coords: List[float]) -> None:
         """
         Plot the domains.
 
         This plots the domains and stores them in self.plot_data.
 
         Args:
-            x_coords: X coords of the domains.
-            y_coords: Y coords of the domains.
+            u_coords: X coords of the domains.
+            v_coords: Y coords of the domains.
         """
         self.plot_data.plotted_domains = self.plot(
-            x_coords,
-            y_coords,
+            u_coords,
+            v_coords,
             symbol="o",
             symbolSize=self.circle_radius,
             symbolBrush=pg.mkBrush(settings.colors["domains"]["fill"]),
             pxMode=False,
         )
 
-    def _plot_stroke(self, x_coords: List[float], y_coords: List[float]) -> None:
+    def _plot_stroke(self, u_coords: List[float], v_coords: List[float]) -> None:
         """
         Plot the stroke connecting the domain circles.
 
         This plots the stroke and stores it in self.plot_data.
 
         Args:
-            x_coords: X coords of the plotted_stroke.
-            y_coords: Y coords of the plotted_stroke.
+            u_coords: X coords of the plotted_stroke.
+            v_coords: Y coords of the plotted_stroke.
         """
         self.plot_data.plotted_stroke = self.plot(
-            x_coords,
-            y_coords,
+            u_coords,
+            v_coords,
             pen=pg.mkPen(color=settings.colors["domains"]["pen"], width=self.stroke),
             symbol=None,
             pxMode=False,
         )
 
-    def _plot_numbers(self, x_coords: List[float], y_coords: List[float]) -> None:
+    def _plot_numbers(self, u_coords: List[float], v_coords: List[float]) -> None:
         """
         Plot the number labels for the plot.
 
@@ -200,7 +200,7 @@ class TopViewPlotter(Plotter):
         self.plot_data.plotted_numbers = []
         # We label domain#0 with the domain-count even though it's domain#0 in memory to
         # make it more human-friendly (so it doesn't start at #0)
-        for counter, position in enumerate(tuple(zip(x_coords, y_coords))[:], start=0):
+        for counter, position in enumerate(tuple(zip(u_coords, v_coords)), start=0):
             symbol_size = self.circle_radius / 3
             symbol_size *= 1 + (0.255 * (len(str(counter)) - 1))
 
@@ -255,8 +255,8 @@ class TopViewPlotter(Plotter):
         self._plot_stroke(x_coords, y_coords)
 
         # store current plot data
-        self.plot_data.x_coords = y_coords
-        self.plot_data.y_coords = y_coords
+        self.plot_data.u_coords = u_coords
+        self.plot_data.v_coords = v_coords
         self.plot_data.rotation = self.rotation
 
         self._prettify()
