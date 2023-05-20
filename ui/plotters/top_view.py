@@ -238,21 +238,28 @@ class TopViewPlotter(Plotter):
         All the plotted data is stored in self.plot_data.
         """
         coords = self.domains.top_view()
-        x_coords = [coord[0] for coord in coords]
-        y_coords = [coord[1] for coord in coords]
+        coords[0] = (
+            (coords[0][0] + coords[1][0]) / 2,
+            (coords[0][1] + coords[1][1]) / 2,
+        )
+        coords[-1] = (
+            (coords[-2][0] + coords[-1][0]) / 2,
+            (coords[-2][1] + coords[-1][1]) / 2,
+        )
+        u_coords, v_coords = coords[:, 0], coords[:, 1]
 
         # perform rotation if needed
         if self.rotation != 0:
             rotation = radians(self.rotation)
-            for index, (x_coord, z_coord) in enumerate(zip(x_coords, y_coords)):
-                x_coords[index] = x_coord * cos(rotation) - z_coord * sin(rotation)
-                y_coords[index] = z_coord * cos(rotation) + x_coord * sin(rotation)
+            for index, (u_coord, v_coord) in enumerate(zip(u_coords, v_coords)):
+                u_coords[index] = u_coord * cos(rotation) - v_coord * sin(rotation)
+                v_coords[index] = v_coord * cos(rotation) + u_coord * sin(rotation)
 
         # plot the data
-        self._plot_domains(x_coords, y_coords)
+        self._plot_domains(u_coords[1:-1], v_coords[1:-1])
         if self.numbers:
-            self._plot_numbers(x_coords, y_coords)
-        self._plot_stroke(x_coords, y_coords)
+            self._plot_numbers(u_coords[1:-1], v_coords[1:-1])
+        self._plot_stroke(u_coords, v_coords)
 
         # store current plot data
         self.plot_data.u_coords = u_coords
