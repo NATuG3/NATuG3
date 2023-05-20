@@ -114,25 +114,21 @@ class Domain:
     A singular domain object.
 
     Attributes:
-        parent: The strands workers container object. If this is None then index becomes
-            None too.
-        index: The index of this domain in its strands.
-        up_strand (Strand): The up strand of the domain. This is an unparented strand
-            object.
-        down_strand (Strand): The down strand of the domain. This is an unparented
-            strand object.
-        theta_m_multiple: Angle between this and the next workers' line of tangency.
-            Multiple of theta_c. This is the angle between i,i+1's line of tangency
-            and i+1,i+2's line of tangency where i is the index of this domain. This
-            is the theta_m_multiple times the characteristic angle.
-        theta_m: Angle between this and the next workers' line of tangency. In degrees.
-            This is the angle between i,i+1's line of tangency and i+1,i+2's line of
-            tangency where i is the index of this domain. This is the theta_m_multiple
-            times the characteristic angle.
+        parent: The Subunit container object containing the Domain. Domains live in
+            Subunits, which live in Domains.
+        index: The index of this domain in its Subunit's Domain's object. Index-0.
+        theta_m_multiple: Number of characteristic angles (NucleicAcidProfile.theta_c-s)
+            between this and the next domains' line of tangency, not taking into account
+            any switches.
+        theta_m: The actual angle between this and the next domains' line of tangency, in
+            degrees, not taking into account any switches.
         theta_s_multiple: The switch from upness to downness (or lack thereof) of the
-            helix joints.
-            (-1) for up to down switch; (0) for both up/down switch; (1) for down to up
-            switch
+            helix joints. (-1) for up to down switch; (0) for both up/down switch; (1)
+            for down to up switch.
+        theta_s: The actual angle of the switch from upness to downness (or lack thereof),
+            in degrees.
+        theta_i: The angle between this domain and the next domain's line of
+            tangency, in degrees, taking into account any switches.
         nucleic_acid_profile: the nucleic acid configuration for the domain.
         left_helix_joint: The left helix joint's upwardness or downwardness.
             "Left" indicates that the left side of this domain will be lined up to
