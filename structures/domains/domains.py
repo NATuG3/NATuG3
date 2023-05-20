@@ -11,7 +11,7 @@ from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.profiles import NucleicAcidProfile
-from utils import inverse
+from utils import inverse, timer
 
 logger = logging.getLogger(__name__)
 
@@ -280,6 +280,7 @@ class Domains:
         sheet.write(1, 10, self.symmetry)
         sheet.write(1, 11, self.antiparallel)
 
+    @timer(logger=logger, task_name="Domains top view computation")
     def top_view(self) -> List[Tuple[float, float]]:
         """
         Create a set of coordinates that represent the top view of all the domains.
@@ -290,8 +291,6 @@ class Domains:
         Notes:
             - The first element in the list is domain #0.
         """
-        start_time = time()
-
         domains = self.domains()
 
         absolute_angle = [0.0]
@@ -320,11 +319,6 @@ class Domains:
 
             # append the v cord of the domain to "self.v_coords"
             v_coords.append(v_coords[-1] + D * math.sin(math.radians(absolute_angle[-1])))
-
-        logger.info(
-            "Performed top view computation in %s seconds.",
-            round((time() - start_time), 4),
-        )
 
         return list(zip(u_coords, v_coords))
 

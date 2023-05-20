@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import time
 from functools import wraps
 
 from PyQt6.QtWidgets import QMessageBox
@@ -138,3 +139,63 @@ def inverse(integer: int) -> int:
         int: 0 or 1.
     """
     return int(not bool(integer))
+
+
+class Timer:
+    """
+    Context manager to time a task.
+    """
+
+    def __init__(self, task_name="", logger: logging.Logger = None, round_to=3):
+        """
+        Initialize the Timer.
+
+        Args:
+            task_name: The name of the task to log.
+            logger: The logger to log the time to.
+            round_to: The number of decimal places to round the time to.
+        """
+        self.logger = logger
+        self.task_name = task_name
+        self.round_to = round_to
+
+    def __enter__(self):
+        """
+        Start the timer.
+        """
+        self.start = time.time()
+
+    def __exit__(self, *args):
+        """
+        End the timer and log the time.
+        """
+        self.end = time.time()
+        self.duration = self.end - self.start
+        msg = f"{self.task_name} took {round(self.duration, self.round_to)}s."
+
+        try:
+            self.logger.info(msg)
+        except AttributeError:
+            print(msg)
+
+
+def timer(logger: logging.Logger = None, task_name="", round_to=3):
+    """
+    Decorator to time a function.
+
+    Args:
+        func: The function to time.
+        logger: The logger to log the time to.
+        task_name: The name of the task to log.
+        round_to: The number of decimal places to round the time to.
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            with Timer(logger=logger, task_name=task_name, round_to=round_to):
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

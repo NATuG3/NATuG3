@@ -8,6 +8,7 @@ from numpy import argmax
 
 from constants.directions import DOWN
 from structures.points.point import x_coord_from_angle
+from utils import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -158,42 +159,43 @@ class DoubleHelices:
             )
             double_helices.append((up_helix, down_helix))
 
-        start = time()
-        # Assign junctability to each NEMid that superposes a NEMid in a helix of the
-        # subsequent double helix.
-        for index, double_helix in enumerate(double_helices):
-            if index == len(double_helices) - 1:
-                next_double_helix = double_helices[0]
-            else:
-                next_double_helix = double_helices[index + 1]
+        with Timer("Junctability assignment", logger=logger):
+            # Assign junctability to each NEMid that superposes a NEMid in a helix of the
+            # subsequent double helix.
+            for index, double_helix in enumerate(double_helices):
+                if index == len(double_helices) - 1:
+                    next_double_helix = double_helices[0]
+                else:
+                    next_double_helix = double_helices[index + 1]
 
-            # Iterate through all the points in the current double helix, and check
-            # if they superpose with any points in the next double helix. Note that
-            # each double helix contains two helices, so we must iterate through all
-            # the points in both helices.
-            for helix1 in double_helix:
-                for helix2 in next_double_helix:
-                    for point1 in helix1.items[1::2]:
-                        for point2 in helix2.items[1::2]:
-                            # We know that all overlaps are going to be on the
-                            # integer line, so we only need to check points that are
-                            # on the integer line. True, the following implementation
-                            # may sometimes check points that happen to have the same
-                            # decimal value by chance, but we will then run the full
-                            # on overlaps() method afterwards anyway. Comparing the
-                            # decimal value once is much faster than checking to see if
-                            # the %1=0 two times (~2x as fast).
-                            if point1.x_coord % 1 == point2.x_coord % 1:
-                                if point1.overlaps(point2, width=self.domains.count):
-                                    point1.junctable = True
-                                    point1.juncmate = point2
-                                    point2.junctable = True
-                                    point2.juncmate = point1
+                # Iterate through all the points in the current double helix, and check
+                # if they superpose with any points in the next double helix. Note that
+                # each double helix contains two helices, so we must iterate through all
+                # the points in both helices.
+                for helix1 in double_helix:
+                    for helix2 in next_double_helix:
+                        for point1 in helix1.items[1::2]:
+                            for point2 in helix2.items[1::2]:
+                                # We know that all overlaps are going to be on the
+                                # integer line, so we only need to check points that
+                                # are on the integer line. True, the following
+                                # implementation may sometimes check points that happen
+                                # to have the same decimal value by chance, but we will
+                                # then run the full on overlaps() method afterwards
+                                # anyway. Comparing the decimal value once is much
+                                # faster than checking to see if the %1=0 two times (
+                                # ~2x as fast).
+                                if point1.x_coord % 1 == point2.x_coord % 1:
+                                    if point1.overlaps(point2, width=self.domains.count):
+                                        point1.junctable = True
+                                        point1.juncmate = point2
+                                        point2.junctable = True
+                                        point2.juncmate = point1
 
-                                    point1.helix.data.right_joint_points.append(point1)
-                                    point2.helix.data.left_joint_points.append(point2)
-
-        logger.debug(f"Junctability assignment took {time() - start:.2f} seconds.")
+                                        # fmt: off
+                                        point1.helix.data.right_joint_points.append(point1)
+                                        point2.helix.data.left_joint_points.append(point2)
+                                        # fmt: on
 
         strands = [helix for double_helix in double_helices for helix in double_helix]
         strands = Strands(strands=strands, nucleic_acid_profile=self.nucleic_acid_profile)
