@@ -287,14 +287,24 @@ class Domains:
         Create a set of coordinates that represent the top view of all the domains.
 
         Returns:
-            A numpy array of (u, v) coordinates for each domain.
+            A numpy array of (u, v) coordinates for each domain. An additional coordinate
+                is added for a hypothetical self.count+1th domain, so that the direction
+                that the last domain trails off in is accessible. Also, an additional
+                coordinate is prepended to the array to represent the origin entry
+                direction.
         """
         domains = self.domains()
         absolute_angle = 0
-        coords = np.zeros((self.count, 2))
+        coords = np.zeros((self.count + 2, 2))
+        diameter = self.nucleic_acid_profile.D
 
-        for index in range(1, self.count + 1):
-            absolute_angle += 180 - domains[index].theta
+        coords[1] = (diameter, 0)
+        for index in range(1, self.count + 2):
+            absolute_angle += 180 - domains[index % self.count].theta_i
+            coords[index] = (
+                coords[index - 1][0] + diameter * math.cos(math.radians(absolute_angle)),
+                coords[index - 1][1] + diameter * math.sin(math.radians(absolute_angle)),
+            )
 
         return coords
 
