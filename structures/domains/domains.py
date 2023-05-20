@@ -3,6 +3,7 @@ import math
 from time import time
 from typing import List, Iterable, Tuple, Type
 
+import numpy as np
 import pandas as pd
 from xlsxwriter import Workbook
 
@@ -281,46 +282,21 @@ class Domains:
         sheet.write(1, 11, self.antiparallel)
 
     @timer(logger=logger, task_name="Domains top view computation")
-    def top_view(self) -> List[Tuple[float, float]]:
+    def top_view(self) -> np.ndarray:
         """
         Create a set of coordinates that represent the top view of all the domains.
 
         Returns:
-            A list of tuples containing the x and y coordinates of the domains.
-
-        Notes:
-            - The first element in the list is domain #0.
+            A numpy array of (u, v) coordinates for each domain.
         """
         domains = self.domains()
+        absolute_angle = 0
+        coords = np.zeros((self.count, 2))
 
-        absolute_angle = [0.0]
-        u_coords = [0.0]
-        v_coords = [0.0]
+        for index in range(1, self.count + 1):
+            absolute_angle += 180 - domains[index].theta
 
-        # Create references for various nucleic acid settings. This is done to make
-        # the code more readable.
-        D = self.nucleic_acid_profile.D
-        for index in range(len(domains) + 1):
-            print(index)
-            # locate strand switch angle for the previous domain.
-            theta_s: float = domains[index - 1].theta_s
-            # locate interior angle for the previous domain.
-            theta_m: float = domains[index - 1].theta_m
-
-            # calculate the actual interior angle (with strand switching angle
-            # factored in)
-            interior_angle: float = theta_m - theta_s
-
-            # append the angle change to "self.angle_deltas"
-            absolute_angle.append(absolute_angle[-1] + 180 - interior_angle)
-
-            # append the u cord of the domain to "self.u_coords"
-            u_coords.append(u_coords[-1] + D * math.cos(math.radians(absolute_angle[-1])))
-
-            # append the v cord of the domain to "self.v_coords"
-            v_coords.append(v_coords[-1] + D * math.sin(math.radians(absolute_angle[-1])))
-
-        return list(zip(u_coords, v_coords))
+        return coords
 
     def closed(self):
         """
