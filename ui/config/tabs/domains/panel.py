@@ -152,6 +152,8 @@ class DomainsPanel(QWidget):
         self.update_table_button.setIcon(fetch_icon("checkmark-outline"))
         self.load_domains_button.setIcon(fetch_icon("open-outline"))
         self.save_domains_button.setIcon(fetch_icon("save-outline"))
+        self.rotate_up_button.setIcon(fetch_icon("chevron-up-outline"))
+        self.rotate_down_button.setIcon(fetch_icon("chevron-down-outline"))
 
         # set scaling settings for config and table
         config_size_policy = QSizePolicy()
@@ -209,13 +211,45 @@ class DomainsPanel(QWidget):
         self.tables.helix_joint_updated.connect(self._on_helix_joint_updated)
         self.auto_antiparallel.stateChanged.connect(self._push_updates)
 
-        # Set up the save/load buttons slots.
+        # Set up the save/load buttons slots
         self.save_domains_button.clicked.connect(self._on_save_button_clicked)
         self.load_domains_button.clicked.connect(self._on_load_button_clicked)
+
+        # Set up rotate domain table button
+        self.rotate_up_button.clicked.connect(self._on_rotate_up_button_clicked)
+        self.rotate_down_button.clicked.connect(self._on_rotate_down_button_clicked)
 
         # Set up settings panel buttons
         self.subunit_count.valueChanged.connect(self._on_settings_panel_input_update)
         self.symmetry.valueChanged.connect(self._on_settings_panel_input_update)
+
+    @pyqtSlot()
+    def _on_rotate_down_button_clicked(self):
+        """Rotate the domains down by one. Top domain becomes bottom domain."""
+        domains = self.tables.fetch_domains()
+        domains.insert(0, self.tables.fetch_domains().pop())
+        domains = Domains(
+            self.runner.managers.nucleic_acid_profile.current,
+            domains,
+            self.symmetry.value(),
+            self.auto_antiparallel.isChecked(),
+        )
+        self.dump_domains(domains)
+        self.updated.emit()
+
+    @pyqtSlot()
+    def _on_rotate_up_button_clicked(self):
+        """Rotate the domains up by one. Bottom domain becomes top domain."""
+        domains = self.tables.fetch_domains()
+        domains.append(domains.pop(0))
+        domains = Domains(
+            self.runner.managers.nucleic_acid_profile.current,
+            domains,
+            self.symmetry.value(),
+            self.auto_antiparallel.isChecked(),
+        )
+        self.dump_domains(domains)
+        self.updated.emit()
 
     @pyqtSlot()
     def _on_symmetry_setting_change(self):

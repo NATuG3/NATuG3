@@ -44,16 +44,6 @@
       <string>Settings</string>
      </property>
      <layout class="QGridLayout" name="settings_area">
-      <item row="2" column="5">
-       <widget class="QCheckBox" name="auto_antiparallel">
-        <property name="text">
-         <string>Auto Antiparallel</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="5">
        <layout class="QGridLayout" name="gridLayout">
         <property name="sizeConstraint">
@@ -320,6 +310,47 @@
            <number>999</number>
           </property>
          </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="2" column="5">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="auto_antiparallel">
+          <property name="text">
+           <string>Auto Antiparallel</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="rotate_down_button">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="rotate_up_button">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
