@@ -1,4 +1,5 @@
 from functools import cache
+
 from structures.profiles import NucleicAcidProfile
 
 C = 8  # number of domains
