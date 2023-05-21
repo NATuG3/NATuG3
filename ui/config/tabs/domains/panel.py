@@ -227,7 +227,10 @@ class DomainsPanel(QWidget):
     def _on_rotate_down_button_clicked(self):
         """Rotate the domains down by one. Top domain becomes bottom domain."""
         domains = self.tables.fetch_domains()
-        domains.insert(0, self.tables.fetch_domains().pop())
+        domains.insert(0, domains.pop())
+        for index, domain in enumerate(domains):
+            domain.index = index
+
         domains = Domains(
             self.runner.managers.nucleic_acid_profile.current,
             domains,
@@ -242,6 +245,9 @@ class DomainsPanel(QWidget):
         """Rotate the domains up by one. Bottom domain becomes top domain."""
         domains = self.tables.fetch_domains()
         domains.append(domains.pop(0))
+        for index, domain in enumerate(domains):
+            domain.index = index
+
         domains = Domains(
             self.runner.managers.nucleic_acid_profile.current,
             domains,
