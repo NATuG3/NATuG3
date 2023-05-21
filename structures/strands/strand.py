@@ -270,7 +270,9 @@ class Strand:
         self.helix = helix
         self.styles = styles or StrandStyles(self)
         self.nucleic_acid_profile = (
-            NucleicAcidProfile() if nucleic_acid_profile is None else nucleic_acid_profile
+            NucleicAcidProfile()
+            if nucleic_acid_profile is None
+            else nucleic_acid_profile
         )
         self.direction = direction
         self.strands = strands
