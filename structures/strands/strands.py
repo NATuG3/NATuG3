@@ -832,7 +832,7 @@ class Strands:
             self.remove(NEMid2.strand)
 
             # if one of the NEMids has a closed strand:
-            if (NEMid1.strand.closed, NEMid2.strand.closed).count(True) == 1:
+            if NEMid1.strand.closed ^ NEMid2.strand.closed:
                 # create references for the stand that is closed/the strand that is open
                 if NEMid1.strand.closed:
                     closed_strand_NEMid: NEMid = NEMid1
