@@ -940,7 +940,31 @@ class Strands:
         if style:
             self.style()
 
-    @property
+    def y_min(self) -> float:
+        """The minimum z coordinate of the strands container."""
+        return min([strand.y_min() for strand in self.strands])
+
+
+    def y_max(self) -> float:
+        """The maximum z coordinate of the strands container."""
+        return max([strand.y_max() for strand in self.strands])
+
+    def x_min(self) -> float:
+        """The minimum x coordinate of the strands container."""
+        return min([strand.x_min() for strand in self.strands])
+
+    def x_max(self) -> float:
+        """The maximum x coordinate of the strands container."""
+        return max([strand.x_max() for strand in self.strands])
+
+    def height(self):
+        """Obtain the height of the strands container."""
+        return self.y_max() - self.y_min()
+
+    def width(self):
+        """Obtain the width of the strands container."""
+        return self.x_max() - self.x_min()
+
     def size(self) -> Tuple[float, float]:
         """
         Obtain the size of all strands when laid out.

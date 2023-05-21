@@ -643,6 +643,30 @@ class Strand:
 
         return False
 
+    def y_min(self) -> float:
+        """The minimum y-coordinate of the strand."""
+        return min([item.z_coord for item in self.items])
+
+    def y_max(self) -> float:
+        """The maximum y-coordinate of the strand."""
+        return max([item.z_coord for item in self.items])
+
+    def x_min(self) -> float:
+        """The minimum x-coordinate of the strand."""
+        return min([item.x_coord for item in self.items])
+
+    def x_max(self) -> float:
+        """Obtain the maximum x-coordinate of the strand."""
+        return max([item.x_coord for item in self.items])
+
+    def height(self) -> float:
+        """The height of the strand in nanometers."""
+        return self.y_max() - self.y_min()
+
+    def width(self) -> float:
+        """The width of the strand in nanometers."""
+        return self.x_max() - self.x_min()
+
     def size(self) -> Tuple[float, float]:
         """
         The overall size of the strand in nanometers.
