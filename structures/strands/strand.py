@@ -671,18 +671,16 @@ class Strand:
 
     def size(self) -> Tuple[float, float]:
         """
-        The overall size of the strand in nanometers.
+        The size of the strand in nanometers.
 
         Returns:
-            Tuple(width, height): The strand size.
+            The size of the strand.
+
+        Notes:
+            The size is defined as the width and height of the strand. If you don't
+                need both values, use width() or height() instead.
         """
-        width = max([item.x_coord for item in self.items]) - min(
-            [item.x_coord for item in self.items]
-        )
-        height = max([item.z_coord for item in self.items]) - min(
-            [item.z_coord for item in self.items]
-        )
-        return width, height
+        return self.width(), self.height()
 
 
 def to_df(strands: Iterable[Strand]) -> pd.DataFrame:
