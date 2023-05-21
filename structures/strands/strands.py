@@ -967,22 +967,17 @@ class Strands:
 
     def size(self) -> Tuple[float, float]:
         """
-        Obtain the size of all strands when laid out.
+        Obtain the size of the strands container.
 
         Returns:
-            tuple(width, height)
+            Tuple[float, float]: (width, height)
+
+        Notes:
+            This is a convenience method that returns the width and height of the
+                strands container. If you don't need both, it is more efficient to
+                call the width() and height() methods directly.
         """
-        x_coords: List[float] = []
-        z_coords: List[float] = []
-
-        for strand in self.strands:
-            for item in strand.items.by_type(Point):
-                if item.x_coord is not None:
-                    x_coords.append(item.x_coord)
-                if item.z_coord is not None:
-                    z_coords.append(item.z_coord)
-
-        return max(x_coords) - min(x_coords), max(z_coords) - min(z_coords)
+        return self.width(), self.height()
 
     def to_json(self) -> dict:
         """

@@ -153,7 +153,7 @@ class SideViewPlotter(Plotter):
         self.dot_hidden_points = dot_hidden_points
         self.padding = padding
         self.plot_data = PlotData()
-        self.show_unstable_helix_joints = show_unstable_helix_joints
+        self.show_unstable_joints = show_unstable_helix_joints
 
         # Set up slots for dimensions
         self._x_min = 0
@@ -167,6 +167,7 @@ class SideViewPlotter(Plotter):
         # Plot data if requested
         if initial_plot:
             self.plot()
+            self._set_dimensions()
             self.auto_range()
 
         def enableAutoRange(*args, **kwargs):
@@ -178,16 +179,51 @@ class SideViewPlotter(Plotter):
         self.getViewBox().enableAutoRange = enableAutoRange
 
     @property
+    def strands(self):
+        """The strands to plot."""
+        return self._strands
+
+    @strands.setter
+    def strands(self, strands):
+        """Change the current strands to plot. Automatically updates plot dimensions."""
+        self._strands = strands
+        self._set_dimensions()
+
+    @property
+    def y_min(self):
+        """The minimum y value of the plot."""
+        return self._y_min
+
+    @property
+    def y_max(self):
+        """The maximum y value of the plot."""
+        return self._y_max
+
+    @property
+    def x_min(self):
+        """The minimum x value of the plot."""
+        return self._x_min
+
+    @property
+    def x_max(self):
+        """The maximum x value of the plot."""
+        return self._x_max
+
+    @property
     def height(self):
-        return self._height
+        """The height of the plot."""
+        return self.y_max - self.y_min
 
     @property
     def width(self):
-        return self._width
+        """The width of the plot."""
+        return self.x_max - self.x_min
 
     def _set_dimensions(self):
-        self._width = self.domains.count
-        self._height = self.strands.size[1]
+        self._x_min = self.plot_data.strands.x_min()
+        self._x_max = self.plot_data.strands.x_max()
+        self._y_min = self.plot_data.strands.y_min()
+        self._y_max = self.plot_data.strands.y_max()
 
     def refresh(self):
         """Replot plot data."""
@@ -225,8 +261,8 @@ class SideViewPlotter(Plotter):
 
     def auto_range(self):
         """Configure the range for the plot automatically."""
-        self.getViewBox().setXRange(0, self.width, self.padding)
-        self.getViewBox().setYRange(0, self.height, self.padding)
+        self.getViewBox().setXRange(self.x_min, self.x_max, self.padding)
+        self.getViewBox().setYRange(self.y_min, self.y_max, self.padding)
 
     def auto_ranged(self):
         """Return whether the plot is currently auto-ranged."""
@@ -239,104 +275,93 @@ class SideViewPlotter(Plotter):
 
     def _prettify(self):
         """Add plotted_gridlines and style the plot."""
+        # Add title
         self.setTitle(self.title) if self.title else None
-
-        # Clear preexisting plotted_gridlines
-        self.plot_data.plotted_gridlines.clear()
-
-        # Create pen for custom grid
-        grid_pen_width = 1.4 * self.modifiers.gridline_mod
-        grid_pen: QPen = pg.mkPen(
-            color=settings.colors["grid_lines"], width=grid_pen_width
-        )
-
-        # For each domain add a grid line
-        for i in range(ceil(self.plot_data.strands.size[0]) + 1):
-            self.plot_data.plotted_gridlines.append(
-                self.addLine(
-                    x=i,
-                    pen=grid_pen,
-                )
-            )
-            self.plot_data.plotted_gridlines[-1].setZValue(-10)
-
-        # For i in <number of helical twists of the tallest domain> add grid lines.
-        with suppress(ZeroDivisionError):
-            for i in range(0, ceil(self.height / self.nucleic_acid_profile.H)):
-                self.plot_data.plotted_gridlines.append(
-                    self.addLine(
-                        y=(i * self.nucleic_acid_profile.H),
-                        pen=grid_pen,
-                    )
-                )
-                self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
         # Add axis labels
         self.setLabel("bottom", text="x", units="Helical Diameters")
         self.setLabel("left", text="z", units="Nanometers")
 
-    def _plot_unstable_indicator(self, x_coord, z_coord) -> pg.PlotItem:
+    def _fetch_gridline_pen(self, unstable: bool = False):
         """
-        Place a single unstable warning on the side view plot.
-
-        An unstable warning is a small exclamation mark symbol that is placed above
-        unstable helical joints. The symbol is placed at the x and z coordinates
-        specified by the arguments.
+        Fetch the pen to use for gridlines.
 
         Args:
-            x_coord: The x coordinate of the unstable warning.
-            z_coord: The z coordinate of the unstable warning.
+            unstable: Whether the gridline is for an unstable joint. Defaults to False.
+                If True, the pen will be styled slightly differently (red, thicker).
         """
-        unstable_helix_warning_dialog = partial(
-            utils.warning,
-            self,
-            "Unstable Helix",
-            "The number of junctions between the right joint helix of the domain to "
-            "the left of this warning and the left joint helix of the domain to the "
-            "right of this warning is below 2. That means that it is likely that the "
-            "connection between the two double helices is unstable.",
+        if unstable:
+            return pg.mkPen(
+                color=settings.colors["grid_lines"]["unstable"],
+                width=3 + self.modifiers.gridline_mod,
+            )
+        else:
+            return pg.mkPen(
+                color=settings.colors["grid_lines"]["default"],
+                width=self.modifiers.gridline_mod,
+            )
+
+    def _plot_vertical_gridline(self, x: float, unstable: bool = False):
+        """
+        Plot a vertical gridline at a given x coord.
+
+        Args:
+            x: The x coord to plot the gridline at.
+            unstable: Whether the gridline is for an unstable joint. Defaults to False.
+                If True, the pen will be styled slightly differently (red, thicker).
+        """
+        self.plot_data.plotted_gridlines.append(
+            self.addLine(
+                x=x,
+                pen=self._fetch_gridline_pen(unstable=unstable),
+            )
         )
+        self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
-        plotted_unstable_helix = pg.PlotDataItem(
-            (x_coord,),
-            (z_coord,),
-            symbol=custom_symbol("!", rotation=180),
-            symbolSize=12,
-            pxMode=True,
-            symbolBrush=pg.mkBrush(color=settings.colors["failure"]),
-            symbolPen=None,  # No outline for the symbol
-            pen=None,  # No line connecting the points
+    def _plot_horizontal_gridline(self, x: float):
+        """
+        Plot a horizontal gridline at a given y coord.
+
+        Args:
+            y: The y coord to plot the gridline at.
+        """
+        self.plot_data.plotted_gridlines.append(
+            self.addLine(
+                y=x,
+                pen=self._fetch_gridline_pen(),
+            )
         )
-        # Hook the unstable helix up to a dialog that warns the user about
-        # how the helix is not stable.
-        plotted_unstable_helix.sigPointsClicked.connect(unstable_helix_warning_dialog)
+        self.plot_data.plotted_gridlines[-1].setZValue(-10)
 
-        # Store the unstable helix plotter object, which will be used for
-        # actually plotting the unstable helix later.
-        self.plot_data.plotted_unstable_indicators.append(plotted_unstable_helix)
+    def _plot_gridlines(self):
+        """Plot the gridlines."""
+        # Remove the preexisting gridlines
+        for gridline in self.plot_data.plotted_gridlines:
+            self.removeItem(gridline)
 
-        # Plot the unstable helix.
-        self.addItem(plotted_unstable_helix)
-
-        # Return the plot item
-        return plotted_unstable_helix
-
-    def _plot_unstable_indicators(self):
-        """Plot all the small indicators that given helix joints are unstable."""
-        for unstable_indicator in self.plot_data.plotted_unstable_indicators:
-            self.removeItem(unstable_indicator)
-        self.plot_data.plotted_unstable_indicators.clear()
+        # Clear preexisting plotted_gridlines
+        self.plot_data.plotted_gridlines.clear()
 
         for index, double_helix in enumerate(self.double_helices):
-            if not double_helix.right_joint_is_stable():
-                self.plot_data.plotted_unstable_indicators.append(
-                    self._plot_unstable_indicator(index + 1, self.height + 0.05)
+            if double_helix.right_joint_is_stable():
+                self._plot_vertical_gridline(index + 1)
+            else:
+                self._plot_vertical_gridline(
+                    index + 1, unstable=self.show_unstable_joints
                 )
 
-        if not self.double_helices[0].left_joint_is_stable():
-            self.plot_data.plotted_unstable_indicators.append(
-                self._plot_unstable_indicator(0, self.height + 0.05)
-            )
+        # Check if the joint on the very right side of the screen is unstable by
+        # looking at the first domain's left joint.
+        if self.double_helices[0].left_joint_is_stable():
+            self._plot_vertical_gridline(0)
+        else:
+            self._plot_vertical_gridline(0, unstable=self.show_unstable_joints)
+
+        # Plot the horizontal gridlines for each helical twist
+        with suppress(ZeroDivisionError):
+            # For i in <number of helical twists of the tallest domain> add grid lines.
+            for i in range(0, ceil(self.height / self.nucleic_acid_profile.H)):
+                self._plot_horizontal_gridline(i * self.nucleic_acid_profile.H)
 
     def _plot_points(self):
         """
@@ -803,16 +828,9 @@ class SideViewPlotter(Plotter):
         self.plot_data.double_helices = self.double_helices
         self.plot_data.point_types = self.point_types
         self.plot_data.modifiers = self.modifiers
-        self._set_dimensions()
 
         self._plot_strands()
         self._plot_points()
         self._plot_nicks()
-
-        if self.show_unstable_helix_joints:
-            self._plot_unstable_indicators()
-        else:
-            for unstable_indicator in self.plot_data.plotted_unstable_indicators:
-                self.removeItem(unstable_indicator)
-
+        self._plot_gridlines()
         self._prettify()
