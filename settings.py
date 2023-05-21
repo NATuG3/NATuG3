@@ -13,7 +13,10 @@ cross_screen_line_length = 0.3
 default_domain_preset = "hexagon.csv"
 
 colors = {
-    "grid_lines": (220, 220, 220),
+    "grid_lines": {
+        "default": (220, 220, 220),
+        "unstable": (240, 217, 216),
+    },
     "background": (255, 255, 255),
     "nicks": (255, 0, 0),
     "highlighted": (245, 245, 0),
