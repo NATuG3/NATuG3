@@ -1,7 +1,6 @@
 import logging
 import math
-from time import time
-from typing import List, Iterable, Tuple, Type
+from typing import List, Iterable, Type
 
 import numpy as np
 import pandas as pd

@@ -1,5 +1,4 @@
 import logging
-from time import time
 from typing import Iterator, Iterable
 from uuid import uuid1
 

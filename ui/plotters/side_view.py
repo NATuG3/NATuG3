@@ -1,7 +1,6 @@
 import logging
 from contextlib import suppress
 from dataclasses import dataclass, field
-from functools import partial
 from math import ceil
 from typing import List, Tuple, Dict, Type
 
@@ -11,7 +10,6 @@ from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import QPen, QBrush, QPainterPath, QFont
 
 import settings
-import utils
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
