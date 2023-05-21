@@ -196,7 +196,7 @@ class DoubleHelix:
                 active_junctions += 1
         return active_junctions >= threshold
 
-    def left_joint_is_stable(self, threshold: int = 3):
+    def left_joint_is_stable(self, threshold: int = 2):
         """
         Determine whether the left helical joint is stable.
 
@@ -209,7 +209,7 @@ class DoubleHelix:
         """
         return self._joint_is_stable(threshold, self.left_helix_joint_points())
 
-    def right_joint_is_stable(self, threshold: int = 3):
+    def right_joint_is_stable(self, threshold: int = 2):
         """
         Determine whether the right helical joint is stable.
 
