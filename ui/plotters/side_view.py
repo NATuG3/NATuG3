@@ -142,8 +142,8 @@ class SideViewPlotter(Plotter):
         super().__init__()
         self.getViewBox().disableAutoRange()
 
-        # store config data
-        self.strands = strands
+        # Store initialization configurations
+        self._strands = strands
         self.domains = domains
         self.double_helices = double_helices
         self.nucleic_acid_profile = nucleic_acid_profile
@@ -155,10 +155,16 @@ class SideViewPlotter(Plotter):
         self.plot_data = PlotData()
         self.show_unstable_helix_joints = show_unstable_helix_joints
 
-        # internal variables
-        self._set_dimensions()
+        # Set up slots for dimensions
+        self._x_min = 0
+        self._x_max = 0
+        self._y_min = 0
+        self._y_max = 0
+
+        # Misc. internal variables
         self._updating_viewbox = False
 
+        # Plot data if requested
         if initial_plot:
             self.plot()
             self.auto_range()
