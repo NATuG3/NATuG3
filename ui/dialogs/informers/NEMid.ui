@@ -6,20 +6,20 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>241</width>
+    <width>420</width>
     <height>200</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
+    <width>420</width>
     <height>200</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>241</width>
-    <height>200</height>
+    <width>420</width>
+    <height>210</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -103,6 +103,12 @@
      <property name="enabled">
       <bool>false</bool>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit::disabled{
                             color: rgb(0, 0, 0);
@@ -122,6 +128,12 @@
     <widget class="QLineEdit" name="lineEdit_2">
      <property name="enabled">
       <bool>false</bool>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit::disabled{
@@ -143,6 +155,12 @@
      <property name="enabled">
       <bool>false</bool>
      </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
+     </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit::disabled{
                             color: rgb(0, 0, 0);
@@ -162,6 +180,12 @@
     <widget class="QLineEdit" name="lineEdit_5">
      <property name="enabled">
       <bool>false</bool>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit::disabled{
@@ -216,6 +240,12 @@
     <widget class="QLineEdit" name="lineEdit">
      <property name="enabled">
       <bool>false</bool>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit::disabled{
@@ -295,6 +325,12 @@
     <widget class="QLineEdit" name="lineEdit_6">
      <property name="enabled">
       <bool>false</bool>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>140</width>
+       <height>16777215</height>
+      </size>
      </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit::disabled{
