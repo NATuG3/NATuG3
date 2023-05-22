@@ -27,14 +27,11 @@ def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
     """
     # modulo the angle between 0 and 360
     angle %= 360
-    # Bill changed below 2/12/23
-    theta_interior: float = domain.theta_m + domain.theta_s
-    theta_exterior: float = 360 - theta_interior
 
-    if angle < theta_exterior:
-        x_coord = angle / theta_exterior
+    if angle < domain.theta_e:
+        x_coord = angle / domain.theta_e
     else:
-        x_coord = (360 - angle) / theta_interior
+        x_coord = (360 - angle) / domain.theta_i
 
     # domain 0 lies between [0, 1] on the x axis
     # domain 1 lies between [1, 2] on the x axis
