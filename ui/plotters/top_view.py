@@ -200,7 +200,7 @@ class TopViewPlotter(Plotter):
         self.plot_data.plotted_numbers = []
         # We label domain#0 with the domain-count even though it's domain#0 in memory to
         # make it more human-friendly (so it doesn't start at #0)
-        for counter, position in enumerate(tuple(zip(u_coords, v_coords)), start=0):
+        for counter, position in enumerate(tuple(zip(u_coords, v_coords)), start=1):
             symbol_size = self.circle_radius / 3
             symbol_size *= 1 + (0.255 * (len(str(counter)) - 1))
 
@@ -238,10 +238,10 @@ class TopViewPlotter(Plotter):
         All the plotted data is stored in self.plot_data.
         """
         coords = self.domains.top_view()
-        coords[0] = (
-            (coords[0][0] + coords[1][0]) / 2,
-            (coords[0][1] + coords[1][1]) / 2,
-        )
+        # coords[0] = (
+        #     (coords[0][0] + coords[1][0]) / 2,
+        #     (coords[0][1] + coords[1][1]) / 2,
+        # )
         coords[-1] = (
             (coords[-2][0] + coords[-1][0]) / 2,
             (coords[-2][1] + coords[-1][1]) / 2,
@@ -256,9 +256,9 @@ class TopViewPlotter(Plotter):
                 v_coords[index] = v_coord * cos(rotation) + u_coord * sin(rotation)
 
         # plot the data
-        self._plot_domains(u_coords[1:-1], v_coords[1:-1])
+        self._plot_domains(u_coords[:-1], v_coords[:-1])
         if self.numbers:
-            self._plot_numbers(u_coords[1:-1], v_coords[1:-1])
+            self._plot_numbers(u_coords[:-1], v_coords[:-1])
         self._plot_stroke(u_coords, v_coords)
 
         # store current plot data
