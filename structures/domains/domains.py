@@ -293,17 +293,18 @@ class Domains:
                 direction.
         """
         domains = self.domains()
-        absolute_angle = 0
-        coords = np.zeros((self.count + 2, 2))
+        coords = np.zeros((self.count + 1, 2))
         diameter = self.nucleic_acid_profile.D
 
+        # coords[1] = (0, 0) (this is the default)
         coords[1] = (diameter, 0)
-        for index in range(1, self.count + 2):
-            absolute_angle += 180 - domains[index % self.count].theta_i
+        absolute_angle = 180 - domains[1].theta_i
+        for index in range(2, self.count + 1):
             coords[index] = (
                 coords[index - 1][0] + diameter * math.cos(math.radians(absolute_angle)),
                 coords[index - 1][1] + diameter * math.sin(math.radians(absolute_angle)),
             )
+            absolute_angle += 180 - domains[index % self.count].theta_i
 
         return coords
 
