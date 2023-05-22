@@ -129,6 +129,8 @@ class Domain:
             in degrees.
         theta_i: The angle between this domain and the next domain's line of
             tangency, in degrees, taking into account any switches.
+        theta_e: The exterior angle between this domain and the next domain's line of
+            tangency. Equal to 360 - theta_i.
         nucleic_acid_profile: the nucleic acid configuration for the domain.
         left_helix_joint: The left helix joint's upwardness or downwardness.
             "Left" indicates that the left side of this domain will be lined up to
@@ -367,9 +369,18 @@ class Domain:
         """
         Obtain the theta interior angle.
 
-        This is equivalent to self.theta_m - self.theta_s.
+        This is equivalent to self.theta_m + self.theta_s.
         """
-        return self.theta_m - self.theta_s
+        return self.theta_m + self.theta_s
+
+    @property
+    def theta_e(self) -> float:
+        """
+        Obtain the theta exterior angle.
+
+        This is equivalent to 360 - self.theta_i.
+        """
+        return 360 - self.theta_i
 
     def __repr__(self):
         """Return a string representation of the Domain object."""
