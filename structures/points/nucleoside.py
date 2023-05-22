@@ -25,7 +25,10 @@ class Nucleoside(Point):
 
     @property
     def matching(self):
-        return self.helix.other_helix().data.points[self.helical_index]
+        try:
+            return self.helix.other_helix().data.points[self.helical_index]
+        except IndexError:
+            return None
 
     @matching.setter
     def matching(self, value):
