@@ -23,7 +23,7 @@ class RowWidgets:
     Attributes:
         theta_m_multiple: User settable theta m multiple.
         theta_s_multiple: Automatically computed switch angle multiple.
-        theta_m: The actual interior angle. Theta_c * theta_m_multiple.
+        theta_i: The actual interior angle. Theta_c * theta_m_multiple.
         left_helix_joint: User settable left helix joint direction.
         right_helix_joint: User settable right helix joint direction.
         up_helix_count: User settable values for the bottom, middle, and top of the
@@ -33,7 +33,7 @@ class RowWidgets:
     """
 
     theta_m_multiple: TableIntegerBox = None
-    theta_m: QDoubleSpinBox = None
+    theta_i: QDoubleSpinBox = None
     theta_s_multiple: TableIntegerBox = None
     left_helix_joint: DirectionalButton = None
     right_helix_joint: DirectionalButton = None
@@ -191,13 +191,13 @@ class DomainsTablesArea(QTabWidget):
             self.angles_table.setCellWidget(index, 3, row.theta_m_multiple)
 
             # Angles Table, Column 5 - theta interior
-            row.theta_m = QDoubleSpinBox()
-            row.theta_m.setRange(0, 9999)
-            row.theta_m.setDecimals(2)
-            row.theta_m.setValue(domain.theta_m)
-            row.theta_m.setEnabled(False)
-            row.theta_m.setSuffix("°")
-            self.angles_table.setCellWidget(index, 4, row.theta_m)
+            row.theta_i = QDoubleSpinBox()
+            row.theta_i.setRange(0, 9999)
+            row.theta_i.setDecimals(2)
+            row.theta_i.setValue(domain.theta_i)
+            row.theta_i.setEnabled(False)
+            row.theta_i.setSuffix("°")
+            self.angles_table.setCellWidget(index, 4, row.theta_i)
 
             # Counts Table, Column 0 - initial NEMid count for the up helix
             row.up_helix_count = TripleSpinbox(domain.up_helix_count)
