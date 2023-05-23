@@ -238,10 +238,10 @@ class TopViewPlotter(Plotter):
         All the plotted data is stored in self.plot_data.
         """
         coords = self.domains.top_view()
-        # coords[0] = (
-        #     (coords[0][0] + coords[1][0]) / 2,
-        #     (coords[0][1] + coords[1][1]) / 2,
-        # )
+        coords[0] = (
+            (coords[0][0] + coords[1][0]) / 2,
+            (coords[0][1] + coords[1][1]) / 2,
+        )
         coords[-1] = (
             (coords[-2][0] + coords[-1][0]) / 2,
             (coords[-2][1] + coords[-1][1]) / 2,
@@ -255,13 +255,13 @@ class TopViewPlotter(Plotter):
                 u_coords[index] = u_coord * cos(rotation) - v_coord * sin(rotation)
                 v_coords[index] = v_coord * cos(rotation) + u_coord * sin(rotation)
 
-        # plot the data
-        self._plot_domains(u_coords[:-1], v_coords[:-1])
+        # Plot the data
+        self._plot_domains(u_coords[1:-1], v_coords[1:-1])
         if self.numbers:
-            self._plot_numbers(u_coords[:-1], v_coords[:-1])
+            self._plot_numbers(u_coords[1:-1], v_coords[1:-1])
         self._plot_stroke(u_coords, v_coords)
 
-        # store current plot data
+        # Store current plot data
         self.plot_data.u_coords = u_coords
         self.plot_data.v_coords = v_coords
         self.plot_data.rotation = self.rotation

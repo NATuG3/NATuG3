@@ -1,5 +1,6 @@
 import logging
 import math
+from contextlib import suppress
 from typing import List, Iterable, Type
 
 import numpy as np
@@ -293,18 +294,24 @@ class Domains:
                 direction.
         """
         domains = self.domains()
-        coords = np.zeros((self.count + 1, 2))
+        coords = np.zeros((self.count + 2, 2))
         diameter = self.nucleic_acid_profile.D
 
+        coords[0] = (
+            -diameter * math.cos(math.radians(180 + domains[0].theta_i)),
+            -diameter * math.sin(math.radians(180 + domains[0].theta_i))
+        )
         # coords[1] = (0, 0) (this is the default)
-        coords[1] = (diameter, 0)
+        coords[2] = (diameter, 0)
         absolute_angle = 180 - domains[1].theta_i
-        for index in range(2, self.count + 1):
+
+        for index in range(3, self.count + 2):
             coords[index] = (
                 coords[index - 1][0] + diameter * math.cos(math.radians(absolute_angle)),
                 coords[index - 1][1] + diameter * math.sin(math.radians(absolute_angle)),
             )
-            absolute_angle += 180 - domains[index % self.count].theta_i
+            with suppress(IndexError):
+                absolute_angle += 180 - domains[index - 1].theta_i
 
         return coords
 
