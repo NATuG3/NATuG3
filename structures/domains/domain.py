@@ -333,17 +333,18 @@ class Domain:
         This is very computationally inexpensive, so it is a property.
         (self.theta_s_multiple)
         """
-        helix_joints = (self.left_helix_joint, self.right_helix_joint)
-        if helix_joints == (UP, DOWN):
-            return -1
-        elif helix_joints == (UP, UP):
-            return 0
-        elif helix_joints == (DOWN, DOWN):
-            return 0
-        elif helix_joints == (DOWN, UP):
-            return 1
-        else:
-            raise ValueError("Invalid helical joint integer", helix_joints)
+        try:
+            return {
+                (UP, DOWN): -1,
+                (UP, UP): 0,
+                (DOWN, DOWN): 0,
+                (DOWN, UP): 1,
+            }[(self.left_helix_joint, self.right_helix_joint)]
+        except KeyError:
+            raise ValueError(
+                "Invalid helical joint integer",
+                (self.left_helix_joint, self.right_helix_joint)
+            )
 
     @property
     def theta_s(self) -> float:
