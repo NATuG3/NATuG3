@@ -158,15 +158,8 @@ class Helix:
         self.data.points = np.zeros(len(self.data.angles), dtype=object)
         domain = self.double_helix.domain if self.double_helix else None
 
-        if self.direction == DOWN:
-            # Append from the end backwards for down strands
-            counter = itertools.count(len(self.data) - 1, -1)
-        else:
-            # Append from the front forwards for up strands
-            counter = itertools.count()
-
         for index, cls, angle, x_coord, z_coord in zip(
-            counter,
+            itertools.count(),
             itertools.cycle(
                 (NEMid, Nucleoside) if begin == NEMid else (Nucleoside, NEMid)
             ),
