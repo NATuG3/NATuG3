@@ -893,34 +893,19 @@ class Strands:
             # if both of the NEMids are open (and thus are both not closed)
             elif not any((NEMid1.strand.closed, NEMid2.strand.closed)):
                 if NEMid1.strand.interdomain() or NEMid2.strand.interdomain():
-                    if NEMid1.direction == UP:
-                        # crawl from beginning of NEMid#1's strand to the junction site,
-                        # including the junction site
-                        new_strands[0].items.extend(NEMid1.strand[: NEMid1_index + 1])
-                        # crawl from one NEMid after the junction site on NEMid#2's
-                        # strand to the end of the strand
-                        new_strands[0].items.extend(NEMid2.strand[NEMid2_index + 1 :])
+                    # crawl from the beginning of NEMid1's strand up until and
+                    # including the junction site
+                    new_strands[0].items.extend(NEMid1.strand[: NEMid1_index + 1])
+                    # crawl from one NEMid after the junction site on NEMid2's
+                    # strand to the end of the strand
+                    new_strands[0].items.extend(NEMid2.strand[NEMid2_index + 1 :])
 
-                        # crawl from the beginning of NEMid#2's strand to the
-                        # junction site, including the junction site
-                        new_strands[1].items.extend(NEMid2.strand[: NEMid2_index + 1])
-                        # crawl from one NEMid after the junction site on NEMid#1's
-                        # strand to the end of the strand
-                        new_strands[1].items.extend(NEMid1.strand[NEMid1_index + 1 :])
-                    else:
-                        # crawl from the beginning of NEMid1's strand up until and
-                        # including the junction site
-                        new_strands[0].items.extend(NEMid1.strand[: NEMid1_index + 1])
-                        # crawl from one NEMid after the junction site on NEMid2's
-                        # strand to the end of the strand
-                        new_strands[0].items.extend(NEMid2.strand[NEMid2_index + 1 :])
-
-                        # Crawl from the start of NEMid#2's strand up to and including
-                        # the junction site
-                        new_strands[1].items.extend(NEMid2.strand[: NEMid2_index + 1])
-                        # crawl from one NEMid after the junction site on NEMid#1's
-                        # strand to the end of the strand
-                        new_strands[1].items.extend(NEMid1.strand[NEMid1_index + 1 :])
+                    # Crawl from the start of NEMid#2's strand up to and including
+                    # the junction site
+                    new_strands[1].items.extend(NEMid2.strand[: NEMid2_index + 1])
+                    # crawl from one NEMid after the junction site on NEMid#1's
+                    # strand to the end of the strand
+                    new_strands[1].items.extend(NEMid1.strand[NEMid1_index + 1 :])
                 else:
                     # crawl from the beginning of NEMid#1's strand to the junction site,
                     # including the junction site
