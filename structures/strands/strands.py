@@ -827,8 +827,8 @@ class Strands:
                 new_strands[0].closed = True
                 new_strands[1].closed = False
 
-        elif NEMid1.strand is not NEMid2.strand:
-            # remove the old sequencing
+        else:  # NEMid1.strand is not NEMid2.strand:
+            # remove the old strands
             self.remove(NEMid1.strand)
             self.remove(NEMid2.strand)
 
@@ -893,17 +893,35 @@ class Strands:
                 new_strands[1].closed = None
 
             # if neither of the NEMids have closed sequencing
-            elif (not NEMid1.strand.closed) and (not NEMid2.strand.closed):
-                # crawl from beginning of NEMid#1's strand to the junction site
-                new_strands[0].items.extend(NEMid1.strand[0:NEMid1_index])
-                # crawl from the junction site on NEMid#2's strand to the end of the
-                # strand
-                new_strands[0].items.extend(NEMid2.strand[NEMid2_index:])
+            elif not any((NEMid1.strand.closed, NEMid2.strand.closed)):
+                if NEMid1.strand.interdomain():  # implies NEMid2.strand.interdomain()
+                    # crawl from beginning of NEMid#1's strand to the junction site,
+                    # including the junction site
+                    new_strands[0].items.extend(NEMid1.strand[:NEMid1_index+1])
+                    # crawl from one NEMid after the junction site on NEMid#2's strand
+                    # to the end of the strand
+                    new_strands[0].items.extend(NEMid2.strand[NEMid2_index+1:])
 
-                # crawl from the beginning of NEMid#2's strand to the junction site
-                new_strands[1].items.extend(NEMid2.strand[0:NEMid2_index])
-                # crawl from the junction on NEMid #1's strand to the end of the strand
-                new_strands[1].items.extend(NEMid1.strand[NEMid1_index:])
+                    # crawl from the beginning of NEMid#2's strand to the junction site,
+                    # including the junction site
+                    new_strands[1].items.extend(NEMid2.strand[:NEMid2_index+1])
+                    # crawl from one NEMid after the junction site on NEMid#1's strand
+                    # to the end of the strand
+                    new_strands[1].items.extend(NEMid1.strand[NEMid1_index+1:])
+                else:
+                    # crawl from the beginning of NEMid#1's strand to the junction site,
+                    # including the junction site
+                    new_strands[0].items.extend(NEMid1.strand[:NEMid1_index+1])
+                    # crawl from one NEMid after the junction site on NEMid#2's strand
+                    # to the end of the strand
+                    new_strands[0].items.extend(NEMid2.strand[NEMid2_index+1:])
+
+                    # crawl from the beginning of NEMid#2's strand to the junction site,
+                    # including the junction site
+                    new_strands[1].items.extend(NEMid2.strand[:NEMid2_index+1])
+                    # crawl from one NEMid after the junction site on NEMid#1's strand
+                    # to the end of the strand
+                    new_strands[1].items.extend(NEMid1.strand[NEMid1_index+1:])
 
                 new_strands[0].closed = False
                 new_strands[1].closed = False
@@ -918,25 +936,15 @@ class Strands:
             for item in new_strand.items:
                 item.strand = new_strand
 
-        set_juncmates = False
         for NEMid_ in (NEMid1, NEMid2):
             for index, item in enumerate(NEMid_.strand):
                 if isinstance(item, NEMid) and item.junctable and (
                     NEMid_.strand[(index - 1) % len(NEMid_.strand)].domain
                     != NEMid_.strand[(index + 1) % len(NEMid_.strand)].domain
                 ):
-                    set_juncmates = True
                     item.junction = True
                 else:
                     item.junction = False
-
-        # Assign the new juncmates if necessary
-        if set_juncmates:
-            NEMid1.juncmate = NEMid2
-            NEMid2.juncmate = NEMid1
-        else:
-            NEMid1.juncmate = None
-            NEMid2.juncmate = None
 
         if style:
             self.style()
