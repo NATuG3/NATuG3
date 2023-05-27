@@ -43,6 +43,15 @@ def juncter(
         if repeat:
             repeat.run(point, "conjunct")
         else:
+            if not bool(point.juncmate) or not bool(point.juncmate.strand):
+                utils.warning(
+                    runner.window,
+                    "NEMid Juncmate not found",
+                    "The NEMid that was clicked did not have a juncmate and thus a"
+                    "junction could not be created. This is likely because the juncmate"
+                    "is currently nicked out."
+                )
+                return
             strands.conjunct(point, point.juncmate)
         refresh()
         runner.snapshot()
@@ -191,6 +200,14 @@ def nicker(
         if repeat:
             repeat.run(point, "nick")
         else:
+            if isinstance(point, NEMid) and point.junction:
+                utils.warning(
+                    runner.window,
+                    "Active Junction Nicking",
+                    "You cannot nick out one of the two points of an active junction "
+                    "site.",
+                )
+                return
             strands.nick(point)
 
     runner.snapshot()

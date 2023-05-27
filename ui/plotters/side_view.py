@@ -405,9 +405,9 @@ class SideViewPlotter(Plotter):
                         x_coord = point.x_coord
                     else:
                         if point.domain.index == point.x_coord:
-                            x_coord = point.x_coord + 0.04
+                            x_coord = point.x_coord + settings.domain_line_point_shift
                         else:
-                            x_coord = point.x_coord - 0.04
+                            x_coord = point.x_coord - settings.domain_line_point_shift
                 else:
                     x_coord = point.x_coord
                 z_coord = point.z_coord
@@ -790,8 +790,16 @@ class SideViewPlotter(Plotter):
 
         nick_brush = pg.mkBrush(color=settings.colors["nicks"])
         for nick_index, nick in enumerate(self.strands.nicks):
+            if nick.x_coord % 1 == 0:
+                x_coord = (
+                    nick.previous_item().domain.index + settings.domain_line_point_shift
+                )
+            else:
+                x_coord = nick.x_coord
+
+            # Create the plot data item for the nick.
             plotted_nick = pg.PlotDataItem(
-                (nick.x_coord,),  # Just one point: the nick's x coordinate
+                (x_coord,),  # Just one point: the nick's x coordinate
                 (nick.z_coord,),  # Just one point: the nick's z coordinate
                 # The same styles for all nicks...
                 symbol="o",
@@ -807,7 +815,7 @@ class SideViewPlotter(Plotter):
             self.plot_data.plotted_nicks.append(plotted_nick)
             # Create a mapping from the nick's coordinates to the nick itself,
             # so that when it is clicked, we can find the nick object.
-            self.plot_data.points[(nick.x_coord, nick.z_coord)] = nick
+            self.plot_data.points[(x_coord, nick.z_coord)] = nick
             # Hook up the nick's onClick method to the _points_clicked method.
             plotted_nick.sigPointsClicked.connect(self._points_clicked)
 

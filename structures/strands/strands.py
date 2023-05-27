@@ -266,6 +266,7 @@ class Strands:
             else True
         )
 
+        # Assign references to the strands before and after the nick.
         previous_item_strand = nick.previous_item().strand
         next_item_strand = nick.next_item().strand
 

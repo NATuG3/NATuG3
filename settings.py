@@ -10,6 +10,7 @@ default_snapshot_max_capacity = 16
 # Threshold to determine whether a tube is closed.
 closed_threshold = 0.01
 cross_screen_line_length = 0.3
+domain_line_point_shift = 0.04
 default_domain_preset = "hexagon.csv"
 
 colors = {
