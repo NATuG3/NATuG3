@@ -273,14 +273,15 @@ class Strands:
         # strand that comes before the nick
         previous_item_strand.append(nick.original_item)
 
-        # If the strand before the location of the nick is the same as the strand after
-        # the location of the nick then the strand is closed, and we must update the flag.
+        # If the strand before the location of the nick is the same as the strand
+        # after the location of the nick then the strand is closed, and we must
+        # update the flag.
         if nick.previous_item().strand is nick.next_item().strand:
             logger.debug("Performing nick reversal that results in a closed strand.")
             previous_item_strand.closed = True
-        # Otherwise extend the strand that comes before the nick (after appending the item
-        # that used to exist in place of the nick) the strand of the point that comes
-        # after the nick).
+        # Otherwise extend the strand that comes before the nick (after appending the
+        # item that used to exist in place of the nick) the strand of the point that
+        # comes after the nick).
         else:
             logger.debug("Performing nick reversal that results in a open strand.")
             nick.previous_item().strand.extend(next_item_strand.items)
