@@ -1,9 +1,10 @@
 import itertools
 import logging
 import random
+from contextlib import suppress
 from copy import deepcopy, copy
 from dataclasses import dataclass, field
-from typing import Tuple, Iterable, List, Type, Set
+from typing import Tuple, Iterable, List, Type, Set, Iterator
 from uuid import uuid1
 
 import pandas as pd
@@ -19,6 +20,10 @@ from utils import rgb_to_hex
 
 logger = logging.getLogger(__name__)
 
+@dataclass(frozen=True, slots=True)
+class Wrap:
+    direction: WRAPS_LEFT_TO_RIGHT | WRAPS_RIGHT_TO_LEFT
+    point: Point
 
 @dataclass
 class StrandStyle:
@@ -238,6 +243,7 @@ class Strand:
         down_strand(): Whether all items in this strand are downwards pointing.
         NEMids(): Obtain all NEMids in the strand, only.
         nucleosides(): Obtain all nucleosides in the strand, only.
+        junctables(): Obtain all junctable NEMids in the strand, only.
         interdomain(): Whether there are items of differing domains in the strand.
         split(index or NEMid): Split the strand into two strands.
         index(item): Determine the index of an item.
@@ -260,7 +266,7 @@ class Strand:
         direction=None,
         strands=None,
         helix=None,
-        cross_screen=False,
+        cross_screen=None,
         uuid: str = None,
     ):
         self.name = name
@@ -476,6 +482,35 @@ class Strand:
             A list of nucleosides in the strand.
         """
         return self.items.by_type(Nucleoside)
+
+    def junctables(self) -> Iterator["NEMid"]:
+        """
+        Obtain all junctable NEMids in the strand, only.
+
+        Utilizes self.NEMids() to obtain the NEMids, and then filters them by their
+            junctability.
+
+        Yields:
+            NEMids that are junctable.
+        """
+        return filter(lambda item: item.junctable, self.NEMids())
+
+    def wraps(self) -> list[Wrap]:
+        """
+        Obtain a list of all points that wrap across the screen, going in both directions.
+        """
+        wraps = []
+        for index, point in enumerate(self):
+            with suppress(IndexError):
+                if isinstance(point, NEMid) and point.junction:
+                    delta = self[index + 1].x_coord - point.x_coord
+                    if delta < -1:
+                        wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, point))
+                        wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, self[index+1]))
+                    elif delta > 1:
+                        wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, point))
+                        wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, self[index+1]))
+        return wraps
 
     def has_linkage(self) -> bool:
         """Determine whether the strand has any linkages."""

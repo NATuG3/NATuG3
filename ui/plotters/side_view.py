@@ -648,90 +648,30 @@ class SideViewPlotter(Plotter):
                     x_coords_subarrays = (x_coords,)
                     z_coords_subarrays = (z_coords,)
 
-                def subarray_yielder() -> tuple[bool, np.ndarray, np.ndarray]:
-                    """
-                    A generator to yield the x and z coord subarrays one at a time.
-
-                    For subarrays that begin on the very left or right side of the screen,
-                    an additional subarray will be spit out that indicates that visually.
-                    We use a function to yield the subarrays one by one and insert the
-                    extra ones where needed because the subarrays are stored in a larger
-                    fixed size array and it would be very computationally inefficient to
-                    insert items into.
-
-                    Yields:
-                        tuple: Whether to smooth the array, x coord subarray, z coord
-                            subarray
-                    """
-                    # Determine the midpoint of the entire plot, and then we will shift
-                    # to the left/right of the midpoint in order to place the extra line.
-                    midpoint = self.width / 2
-                    delta = self.width / 2 + settings.cross_screen_line_length
-
-                    # We will be crawling along the entire split array (which includes
-                    # False boolean values for every single index of all the coords in
-                    # the x and z subarrays and True boolean values in between them). The
-                    # "cumulative_point_index" lets us keep track of the current index to
-                    # look at of the split array as we traverse the coord subarrays.
-                    cumulative_point_index = 0
-
-                    def make_extension(location: int):
-                        """
-                        Obtain the actual plottable coordinate set for an
-                        extension line to the left/right side of the screen.
-                        """
-                        if round(x_coords_subarray[location]) == 0:
-                            shift_toward = -1
-                        elif round(x_coords_subarray[location]) == self.width:
-                            shift_toward = 1
-                        else:
-                            raise ValueError("Must shift either left/right.")
-
-                        return (
-                            False,
-                            (
-                                x_coords_subarray[location],
-                                midpoint + shift_toward * delta,
-                            ),
-                            (
-                                z_coords_subarray[location],
-                                z_coords_subarray[location],
-                            ),
-                        )
-
-                    for x_coords_subarray, z_coords_subarray in zip(
-                        x_coords_subarrays, z_coords_subarrays
-                    ):
-                        if strand.cross_screen:
-                            if round(x_coords_subarray[0]) in (0, self.domains.count):
-                                yield make_extension(0)
-                            if round(x_coords_subarray[-1]) in (0, self.domains.count):
-                                yield make_extension(-1)
-                        yield interdomain, x_coords_subarray, z_coords_subarray
-
-                for smooth, x_coords_subarray, z_coords_subarray in subarray_yielder():
+                def plot_stroke(
+                    x_coords: Iterable[float], z_coords: Iterable[float], smooth: bool
+                ):
+                    """Plot a single stroke segement."""
                     if smooth:
                         # Round the subarrays' edges using Chaikin's corner
                         # cutting algorithm.
                         rounded_coords = chaikins_corner_cutting(
-                            np.column_stack((x_coords_subarray, z_coords_subarray)),
+                            np.column_stack((x_coords, z_coords)),
                             refinements=3,
                             offset=0.3,
                         )
-                        x_coords_subarray = rounded_coords[:, 0]
-                        z_coords_subarray = rounded_coords[:, 1]
+                        x_coords = rounded_coords[:, 0]
+                        z_coords = rounded_coords[:, 1]
 
                     stroke_pen = pg.mkPen(
                         color=strand.styles.color.value,
-                        width=(
-                            strand.styles.thickness.value * self.modifiers.stroke_mod
-                        ),
+                        width=(strand.styles.thickness.value * self.modifiers.stroke_mod),
                     )
 
                     # Create the actual plot data item for the stroke segment.
                     plotted_stroke = pg.PlotDataItem(
-                        x_coords_subarray,
-                        z_coords_subarray,
+                        x_coords,
+                        z_coords,
                         pen=stroke_pen,
                         name=f"Strand#{strand_index} Stroke#"
                         f"{stroke_segment_index}/{len(stroke_segment)}",
@@ -747,47 +687,54 @@ class SideViewPlotter(Plotter):
                     # Store the stroke plotter object, which will be used later.
                     self.plot_data.plotted_strokes.append(plotted_stroke)
 
-                    # Now that we've plotted the stroke, we need to plot the
-                    # linkages. We will sort out all the linkages in the strand,
-                    # and then plot them one by one.
-                    for linkage_index, linkage in enumerate(
-                        strand.items.by_type(Linkage)
-                    ):
-                        # Linkages have a .plot_points attribute that contains three
-                        # points: the first point, the midpoint, and the last point.
-                        coords = linkage.plot_points
-                        # Round out the coordinates using Chaikin's Corner Cutting to
-                        # give the appearance of a smooth curve.
-                        coords = chaikins_corner_cutting(coords, refinements=3)
-                        # Split the coordinates into x and z coordinate arrays for
-                        # plotting with pyqtgraph.
-                        x_coords = [coord[0] for coord in coords]
-                        z_coords = [coord[1] for coord in coords]
+                for x_coords_subarray, z_coords_subarray in zip(
+                    x_coords_subarrays, z_coords_subarrays
+                ):
+                    plot_stroke(x_coords_subarray, z_coords_subarray, True)
 
-                        # Create the plot data item for the linkage.
-                        plotted_linkage = pg.PlotDataItem(
-                            x_coords,
-                            z_coords,
-                            pen=pg.mkPen(  # Create a pen for the linkage
-                                color=linkage.styles.color,
-                                width=linkage.styles.thickness
-                                * self.modifiers.stroke_mod,
-                            ),
-                            name=f"Strand#{strand_index} Linkage#{linkage_index}",
+                if strand.cross_screen:
+                    for wrap in strand.wraps():
+                        x_coords, z_coords = cross_screen_extension_coord(
+                            wrap.point, wrap.direction
                         )
-                        # Make it so that the linkage itself can be clicked.
-                        plotted_linkage.setCurveClickable(True)
-                        # When the linkage is clicked, emit the linkage_clicked signal.
-                        # This will lead to the creation of a LinkageConfig dialog when
-                        # invoked.
-                        plotted_linkage.sigClicked.connect(
-                            lambda *args, to_emit=linkage: self.linkage_clicked.emit(
-                                to_emit
-                            )
-                        )
-                        # Store the linkage plotter object, which will be used for
-                        # actually plotting the linkage later.
-                        self.plot_data.plotted_linkages.append(plotted_linkage)
+                        plot_stroke(x_coords, z_coords, False)
+
+                # Now that we've plotted the stroke, we need to plot the
+                # linkages. We will sort out all the linkages in the strand,
+                # and then plot them one by one.
+                for linkage_index, linkage in enumerate(strand.items.by_type(Linkage)):
+                    # Linkages have a .plot_points attribute that contains three
+                    # points: the first point, the midpoint, and the last point.
+                    coords = linkage.plot_points
+                    # Round out the coordinates using Chaikin's Corner Cutting to
+                    # give the appearance of a smooth curve.
+                    coords = chaikins_corner_cutting(coords, refinements=3)
+                    # Split the coordinates into x and z coordinate arrays for
+                    # plotting with pyqtgraph.
+                    x_coords = [coord[0] for coord in coords]
+                    z_coords = [coord[1] for coord in coords]
+
+                    # Create the plot data item for the linkage.
+                    plotted_linkage = pg.PlotDataItem(
+                        x_coords,
+                        z_coords,
+                        pen=pg.mkPen(  # Create a pen for the linkage
+                            color=linkage.styles.color,
+                            width=linkage.styles.thickness * self.modifiers.stroke_mod,
+                        ),
+                        name=f"Strand#{strand_index} Linkage#{linkage_index}",
+                    )
+                    # Make it so that the linkage itself can be clicked.
+                    plotted_linkage.setCurveClickable(True)
+                    # When the linkage is clicked, emit the linkage_clicked signal.
+                    # This will lead to the creation of a LinkageConfig dialog when
+                    # invoked.
+                    plotted_linkage.sigClicked.connect(
+                        lambda *args, to_emit=linkage: self.linkage_clicked.emit(to_emit)
+                    )
+                    # Store the linkage plotter object, which will be used for
+                    # actually plotting the linkage later.
+                    self.plot_data.plotted_linkages.append(plotted_linkage)
 
         for stroke in self.plot_data.plotted_strokes:
             self.addItem(stroke)
