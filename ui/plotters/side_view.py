@@ -612,17 +612,16 @@ class SideViewPlotter(Plotter):
                     # stroke segments separately instead of using pyqtgraph's
                     # "connect" feature, because we will later round the edges of
                     # strokes.
-
                     for index, point in enumerate(stroke_segment[:-1]):
                         # We will be looking ahead to the next point to determine
                         # whether we have crossed the screen, so we will skip the last
                         # point and worry about it later.
-                        if (
+                        splitter[index + 1] = (
                             abs(point.domain - stroke_segment[index + 1].domain)
                             == self.domains.count - 1
-                        ):
-                            splitter[index + 1] = True
-                            strand.cross_screen = True
+                        )
+
+                    strand.cross_screen = splitter.any()
 
                     # If the strand is closed then connect the last point to the
                     # first point by creating a pseudo-point at the first point's
