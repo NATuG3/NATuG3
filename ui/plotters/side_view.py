@@ -2,7 +2,7 @@ import logging
 from contextlib import suppress
 from dataclasses import dataclass, field
 from math import ceil
-from typing import List, Tuple, Dict, Type
+from typing import List, Tuple, Dict, Type, Iterable
 
 import numpy as np
 import pyqtgraph as pg
@@ -10,6 +10,7 @@ from PyQt6.QtCore import pyqtSignal, QTimer
 from PyQt6.QtGui import QPen, QBrush, QPainterPath, QFont
 
 import settings
+from constants.directions import WRAPS_LEFT_TO_RIGHT, WRAPS_RIGHT_TO_LEFT
 from structures.points import NEMid, Nucleoside
 from structures.points.point import Point, PointStyles
 from structures.profiles import NucleicAcidProfile
