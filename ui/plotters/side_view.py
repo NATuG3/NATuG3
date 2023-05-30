@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 def cross_screen_extension_coord(
-    point: Point, direction: WRAPS_LEFT_TO_RIGHT | WRAPS_RIGHT_TO_LEFT
+    point: Point, direction: WRAPS_LEFT_TO_RIGHT | WRAPS_RIGHT_TO_LEFT, domain_count: int
 ):
     """
     Obtain the coordinates of a cross screen extension.
@@ -30,11 +30,16 @@ def cross_screen_extension_coord(
         point: The origin point of the cross-screen extension.
         direction: The direction to create the extension in. Either WRAPS_LEFT_TO_RIGHT or
             WRAPS_RIGHT_TO_LEFT
+        domain_count: The number of total domains.
     """
+    if direction == WRAPS_RIGHT_TO_LEFT:
+        end_at = domain_count + settings.cross_screen_line_length
+    else:
+        end_at = -settings.cross_screen_line_length
     return (
         (
             point.x_coord,
-            point.x_coord + settings.cross_screen_line_length * direction,
+            end_at,
         ),
         (point.z_coord, point.z_coord),
     )
@@ -618,7 +623,10 @@ class SideViewPlotter(Plotter):
                         # whether we have crossed the screen, so we will skip the last
                         # point and worry about it later.
                         splitter[index + 1] = (
-                            abs(point.domain - stroke_segment[index + 1].domain)
+                            abs(
+                                point.domain.index
+                                - stroke_segment[index + 1].domain.index
+                            )
                             == self.domains.count - 1
                         )
 
@@ -694,9 +702,9 @@ class SideViewPlotter(Plotter):
                     plot_stroke(x_coords_subarray, z_coords_subarray, True)
 
                 if strand.cross_screen:
-                    for wrap in strand.wraps():
+                    for wrap in strand.wraps(self.domains.count):
                         x_coords, z_coords = cross_screen_extension_coord(
-                            wrap.point, wrap.direction
+                            wrap.point, wrap.direction, self.domains.count
                         )
                         plot_stroke(x_coords, z_coords, False)
 

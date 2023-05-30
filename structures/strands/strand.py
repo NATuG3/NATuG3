@@ -20,10 +20,12 @@ from utils import rgb_to_hex
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass(frozen=True, slots=True)
 class Wrap:
     direction: WRAPS_LEFT_TO_RIGHT | WRAPS_RIGHT_TO_LEFT
     point: Point
+
 
 @dataclass
 class StrandStyle:
@@ -276,9 +278,7 @@ class Strand:
         self.helix = helix
         self.styles = styles or StrandStyles(self)
         self.nucleic_acid_profile = (
-            NucleicAcidProfile()
-            if nucleic_acid_profile is None
-            else nucleic_acid_profile
+            NucleicAcidProfile() if nucleic_acid_profile is None else nucleic_acid_profile
         )
         self.direction = direction
         self.strands = strands
@@ -495,21 +495,29 @@ class Strand:
         """
         return filter(lambda item: item.junctable, self.NEMids())
 
-    def wraps(self) -> list[Wrap]:
+    def wraps(self, domain_count) -> list[Wrap]:
         """
         Obtain a list of all points that wrap across the screen, going in both directions.
         """
         wraps = []
-        for index, point in enumerate(self):
-            with suppress(IndexError):
-                if isinstance(point, NEMid) and point.junction:
-                    delta = self[index + 1].x_coord - point.x_coord
-                    if delta < -1:
-                        wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, point))
-                        wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, self[index+1]))
-                    elif delta > 1:
-                        wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, point))
-                        wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, self[index+1]))
+        for index in range(0, len(self.items) - 1):
+            point = self[index % len(self)]
+            next_point = self[(index + 1) % len(self)]
+
+            if point.x_coord > domain_count - 1 and next_point.x_coord < 1:
+                wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, point))
+                wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, next_point))
+            elif point.x_coord < 1 and next_point.x_coord > domain_count-1:
+                wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, point))
+                wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, next_point))
+
+        if self.closed:
+            if self[0].x_coord < 1 and self[-1].x_coord > domain_count - 1:
+                wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, self[0]))
+                wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, self[-1]))
+            elif self[0].x_coord > domain_count - 1 and self[-1].x_coord < 1:
+                wraps.append(Wrap(WRAPS_RIGHT_TO_LEFT, self[0]))
+                wraps.append(Wrap(WRAPS_LEFT_TO_RIGHT, self[-1]))
         return wraps
 
     def has_linkage(self) -> bool:
