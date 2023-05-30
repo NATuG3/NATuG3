@@ -19,6 +19,26 @@ from ui.plotters.utils import custom_symbol, chaikins_corner_cutting
 logger = logging.getLogger(__name__)
 
 
+def cross_screen_extension_coord(
+    point: Point, direction: WRAPS_LEFT_TO_RIGHT | WRAPS_RIGHT_TO_LEFT
+):
+    """
+    Obtain the coordinates of a cross screen extension.
+
+    Args:
+        point: The origin point of the cross-screen extension.
+        direction: The direction to create the extension in. Either WRAPS_LEFT_TO_RIGHT or
+            WRAPS_RIGHT_TO_LEFT
+    """
+    return (
+        (
+            point.x_coord,
+            point.x_coord + settings.cross_screen_line_length * direction,
+        ),
+        (point.z_coord, point.z_coord),
+    )
+
+
 @dataclass(slots=True)
 class PlotModifiers:
     """
