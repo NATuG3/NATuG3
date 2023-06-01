@@ -380,7 +380,6 @@ class Domains:
             self.antiparallel
             and self.subunit[0].left_helix_joint == self.subunit[-1].right_helix_joint
         )
-        auto_antiparallel_flag = False
 
         output = []
         for cycle in range(self.symmetry):
@@ -389,9 +388,8 @@ class Domains:
                 output.append(self.subunit)
             else:
                 copied = self.subunit.copy()
-                if auto_antiparallel and auto_antiparallel_flag:
+                if auto_antiparallel and cycle % 2:
                     copied = copied.inverted()
-                    auto_antiparallel_flag = inverse(auto_antiparallel_flag)
                 copied.template = False
                 output.append(copied)
 
