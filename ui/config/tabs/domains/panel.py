@@ -175,21 +175,22 @@ class DomainsPanel(QWidget):
             new_domains = self.fetch_domains(
                 self.runner.managers.nucleic_acid_profile.current
             )
+            print(new_domains)
             if (
                 new_domains.antiparallel
                 and (
                     new_domains.subunit[0].left_helix_joint
                     == new_domains.subunit[-1].right_helix_joint
                 )
-                and (new_domains.count % 2)
+                and (new_domains.symmetry % 2)
             ):
                 utils.warning(
-                    self,
+                    self.runner.window,
                     "Anti-parallelity Error",
                     "Because the first domain in the template subunit's direction matches"
                     " that of the last domain in the template subunit's direction, and "
                     "there is an odd number of subunits, then the first and last helices"
-                    "cannot be anti-parallel. Please change the direction of the first"
+                    "cannot be anti-parallel. Please change the direction of the first "
                     "domain's left helix joint direction."
                 )
             self.runner.managers.domains.current.update(new_domains)

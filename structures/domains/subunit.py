@@ -109,7 +109,12 @@ class Subunit:
         Returns:
             A brand-new subunit object with brand-new domain objects.
         """
-        return [domain.inverted() for domain in self.domains]
+        return Subunit(
+            self.nucleic_acid_profile,
+            [domain.inverted() for domain in self.domains],
+            False,
+            self.domains,
+        )
 
     @property
     def count(self) -> int:
