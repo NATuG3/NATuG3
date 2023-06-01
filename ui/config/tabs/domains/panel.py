@@ -175,7 +175,6 @@ class DomainsPanel(QWidget):
             new_domains = self.fetch_domains(
                 self.runner.managers.nucleic_acid_profile.current
             )
-            print(new_domains)
             if (
                 new_domains.antiparallel
                 and (
@@ -194,7 +193,7 @@ class DomainsPanel(QWidget):
                     "domain's left helix joint direction."
                 )
             self.runner.managers.domains.current.update(new_domains)
-            self.dump_domains(self.runner.managers.domains.current)
+            self.dump_domains(new_domains)
             self.updated.emit()
             logger.debug("Updated domains.")
         # They rather not update the domains, so revert to the old domains.
