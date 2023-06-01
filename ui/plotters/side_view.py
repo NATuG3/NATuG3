@@ -609,7 +609,7 @@ class SideViewPlotter(Plotter):
                 # the coordinates into separate strokes.
                 splitter = np.full(splitter_length, False, dtype=bool)
 
-                if interdomain := strand.interdomain():
+                if (interdomain := strand.interdomain()):
                     # If the strand is interdomain, it may also be cross-screen (
                     # that is, it breaks off on one side of the screen and
                     # continues on the other). For this reason, we will create an
@@ -618,17 +618,18 @@ class SideViewPlotter(Plotter):
                     # stroke segments separately instead of using pyqtgraph's
                     # "connect" feature, because we will later round the edges of
                     # strokes.
-                    for index, point in enumerate(stroke_segment[:-1]):
-                        # We will be looking ahead to the next point to determine
-                        # whether we have crossed the screen, so we will skip the last
-                        # point and worry about it later.
-                        splitter[index + 1] = (
-                            abs(
-                                point.domain.index
-                                - stroke_segment[index + 1].domain.index
+                    if len(self.domains) > 2:
+                        for index, point in enumerate(stroke_segment[:-1]):
+                            # We will be looking ahead to the next point to determine
+                            # whether we have crossed the screen, so we will skip the last
+                            # point and worry about it later.
+                            splitter[index + 1] = (
+                                abs(
+                                    point.domain.index
+                                    - stroke_segment[index + 1].domain.index
+                                )
+                                == self.domains.count - 1
                             )
-                            == self.domains.count - 1
-                        )
 
                     strand.cross_screen = splitter.any()
 
@@ -699,7 +700,7 @@ class SideViewPlotter(Plotter):
                 for x_coords_subarray, z_coords_subarray in zip(
                     x_coords_subarrays, z_coords_subarrays
                 ):
-                    plot_stroke(x_coords_subarray, z_coords_subarray, True)
+                    plot_stroke(x_coords_subarray, z_coords_subarray, interdomain)
 
                 if strand.cross_screen:
                     for wrap in strand.wraps(self.domains.count):
