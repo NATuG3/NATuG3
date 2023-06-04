@@ -639,8 +639,6 @@ class SideViewPlotter(Plotter):
                         splitter[-1] = add_connected_pseudo_point
                         x_coords[-1] = x_coords[0]
                         z_coords[-1] = z_coords[0]
-                    else:
-                        splitter[-1] = 0
 
                     # Find the indices of the split array that are nonzero.
                     split_indexes = np.nonzero(splitter)[0]
