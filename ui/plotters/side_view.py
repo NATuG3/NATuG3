@@ -699,7 +699,7 @@ class SideViewPlotter(Plotter):
                 for x_coords_subarray, z_coords_subarray in zip(
                     x_coords_subarrays, z_coords_subarrays
                 ):
-                    plot_stroke(x_coords_subarray, z_coords_subarray, True)
+                    plot_stroke(x_coords_subarray, z_coords_subarray, interdomain)
 
                 if strand.cross_screen:
                     for wrap in strand.wraps(self.domains.count):
