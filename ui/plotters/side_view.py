@@ -213,6 +213,7 @@ class SideViewPlotter(Plotter):
     def strands(self, strands):
         """Change the current strands to plot. Automatically updates plot dimensions."""
         self._strands = strands
+        logger.debug("Updating strand dimensions")
         self._set_dimensions()
 
     @property
@@ -246,10 +247,10 @@ class SideViewPlotter(Plotter):
         return self.x_max - self.x_min
 
     def _set_dimensions(self):
-        self._x_min = self.plot_data.strands.x_min()
-        self._x_max = self.plot_data.strands.x_max()
-        self._y_min = self.plot_data.strands.y_min()
-        self._y_max = self.plot_data.strands.y_max()
+        self._x_min = self.strands.x_min()
+        self._x_max = self.strands.x_max()
+        self._y_min = self.strands.y_min()
+        self._y_max = self.strands.y_max()
 
     def refresh(self):
         """Replot plot data."""
