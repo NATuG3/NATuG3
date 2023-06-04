@@ -163,7 +163,7 @@ class DomainsPanel(QWidget):
 
     def _push_updates(self):
         """
-        Warn the user if they are about to overwrite strand data, and if they are
+        Warn the user if they are about to overwrite domain data, and if they are
         okay with that, then update the domains. Otherwise, revert to the old domains.
         """
         if self._pushing_updates:
@@ -172,10 +172,28 @@ class DomainsPanel(QWidget):
         # Warn the user if they are about to overwrite strand data, and give them the
         # opportunity to save the current state and then update the domains.
         if RefreshConfirmer.run(self.runner):
-            self.runner.managers.domains.current.update(
-                self.fetch_domains(self.runner.managers.nucleic_acid_profile.current)
+            new_domains = self.fetch_domains(
+                self.runner.managers.nucleic_acid_profile.current
             )
-            self.dump_domains(self.runner.managers.domains.current)
+            if (
+                new_domains.antiparallel
+                and (
+                    new_domains.subunit[0].left_helix_joint
+                    == new_domains.subunit[-1].right_helix_joint
+                )
+                and (new_domains.symmetry % 2)
+            ):
+                utils.warning(
+                    self.runner.window,
+                    "Anti-parallelity Error",
+                    "Because the first domain in the template subunit's direction matches"
+                    " that of the last domain in the template subunit's direction, and "
+                    "there is an odd number of subunits, then the first and last helices"
+                    "cannot be anti-parallel. Please change the direction of the first "
+                    "domain's left helix joint direction."
+                )
+            self.runner.managers.domains.current.update(new_domains)
+            self.dump_domains(new_domains)
             self.updated.emit()
             logger.debug("Updated domains.")
         # They rather not update the domains, so revert to the old domains.

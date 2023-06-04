@@ -78,7 +78,6 @@ class Domains:
         )
         for domain in self.subunit.domains:
             domain.parent = self.subunit
-            assert domain.strands is self.subunit
 
     def __len__(self):
         return self.count
@@ -299,7 +298,7 @@ class Domains:
 
         coords[0] = (
             -diameter * math.cos(math.radians(180 + domains[0].theta_i)),
-            -diameter * math.sin(math.radians(180 + domains[0].theta_i))
+            -diameter * math.sin(math.radians(180 + domains[0].theta_i)),
         )
         # coords[1] = (0, 0) (this is the default)
         coords[2] = (diameter, 0)
@@ -373,19 +372,27 @@ class Domains:
         Returns:
             List[Subunit]: Copies of the template subunit for all subunits except the first one.
             The first subunit in the returned list is a direct reference to the template subunit.
-
-        Notes:
-            This is a cached method. The cache is cleared when self.subunit is changed.
         """
+        # Sometimes the user will set up the domains such that alternating subunits need
+        # to be inverted to allow for a closed tube. In this case auto_antiparallel will
+        # be True. (both requested (first condition) and needed (second condition))
+        auto_antiparallel = (
+            self.antiparallel
+            and self.subunit[0].left_helix_joint == self.subunit[-1].right_helix_joint
+        )
+
         output = []
         for cycle in range(self.symmetry):
-            # for all subunits after the first one make deep copies of the subunit.
+            # For all subunits after the first one make deep copies of the subunit.
             if cycle == 0:
                 output.append(self.subunit)
             else:
                 copied = self.subunit.copy()
+                if auto_antiparallel and cycle % 2:
+                    copied = copied.inverted()
                 copied.template = False
                 output.append(copied)
+
         return output
 
     def domains(self) -> List["Domain"]:
@@ -398,21 +405,12 @@ class Domains:
         Notes:
             This is a cached method. The cache is cleared when the subunit is changed.
         """
+        # Get all the domains from all the subunits
         output = []
         for subunit in self.subunits():
-            output.extend(subunit.domains)
+            output.extend(subunit.domains.copy())
 
-        # if the domains instance is set to antiparallel then make the directions
-        # of the domains alternate.
-        if self.antiparallel:
-            # begin with UP
-            direction = UP
-            for domain in output:
-                domain.left_helix_joint = direction
-                domain.right_helix_joint = direction
-                direction = inverse(direction)
-
-        # set the proper indexes for all the domains
+        # Set the proper indexes for all the domains
         for index, domain in enumerate(output):
             output[index].index = index
 

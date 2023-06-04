@@ -1,3 +1,4 @@
+from copy import copy
 from typing import Tuple
 from uuid import uuid1
 
@@ -5,6 +6,7 @@ from constants.directions import *
 from structures.points.point import x_coord_from_angle
 from structures.profiles import NucleicAcidProfile
 from structures.strands import Strand
+from utils import inverse
 
 
 class GenerationCount:
@@ -145,6 +147,10 @@ class Domain:
         down_helix_count (GenerationCount): The number of nucleosides to initially
             generate for the up helix of the domain.
         uuid: The unique identifier for the domain. This is automatically generated.
+
+    Methods:
+        inverted: A domain with helix joint directions that are the inverse of what they
+            were normally.
     """
 
     def __init__(
@@ -252,6 +258,13 @@ class Domain:
             True if the domains are equal, False otherwise.
         """
         return isinstance(other, Domain) and self.index == other.index
+
+    def inverted(self):
+        """A domain with inverted helix joint directions."""
+        output = copy(self)
+        output.left_helix_joint = inverse(self.left_helix_joint)
+        output.right_helix_joint = inverse(self.right_helix_joint)
+        return output
 
     def angles(self, start=0):
         """

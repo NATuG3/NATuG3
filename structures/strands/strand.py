@@ -690,19 +690,19 @@ class Strand:
 
     def y_min(self) -> float:
         """The minimum y-coordinate of the strand."""
-        return min([item.z_coord for item in self.items])
+        return min([item.z_coord for item in self.items if isinstance(item, Point)])
 
     def y_max(self) -> float:
         """The maximum y-coordinate of the strand."""
-        return max([item.z_coord for item in self.items])
+        return max([item.z_coord for item in self.items if isinstance(item, Point)])
 
     def x_min(self) -> float:
         """The minimum x-coordinate of the strand."""
-        return min([item.x_coord for item in self.items])
+        return min([item.x_coord for item in self.items if isinstance(item, Point)])
 
     def x_max(self) -> float:
         """Obtain the maximum x-coordinate of the strand."""
-        return max([item.x_coord for item in self.items])
+        return max([item.x_coord for item in self.items if isinstance(item, Point)])
 
     def height(self) -> float:
         """The height of the strand in nanometers."""

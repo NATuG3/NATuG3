@@ -26,6 +26,7 @@ class Subunit:
     Methods:
         append()
         remove()
+        inverted()
     """
 
     def __init__(
@@ -53,7 +54,7 @@ class Subunit:
 
         # assign the strands of all the domains to us
         for domain in self.domains:
-            domain.strands = self
+            domain.parent = self
 
         assert isinstance(domains, Iterable)
 
@@ -68,7 +69,7 @@ class Subunit:
             The domain will have its strands set to this subunit.
         """
         self.domains.append(domain)
-        domain.strands = self
+        domain.parent = self
 
     def remove(self, domain: "Domain") -> None:
         """
@@ -81,7 +82,7 @@ class Subunit:
             The domain will have its strands reset to None.
         """
         self.domains.remove(domain)
-        domain.strands = None
+        domain.parent = None
 
     def copy(self) -> "Subunit":
         """
@@ -96,6 +97,23 @@ class Subunit:
             [copy(domain) for domain in self.domains],
             template=self.template,
             parent=self.parent,
+        )
+
+    def inverted(self) -> "Subunit":
+        """
+        Obtain an inverted copy of the subunit.
+
+        An inverted subunit is a subunit with all of its domains helix joint directions
+        inverted.
+
+        Returns:
+            A brand-new subunit object with brand-new domain objects.
+        """
+        return Subunit(
+            self.nucleic_acid_profile,
+            [domain.inverted() for domain in self.domains],
+            False,
+            self.domains,
         )
 
     @property
@@ -150,6 +168,18 @@ class Subunit:
                     )
                 )
                 i += 1
+
+    def __getitem__(self, item):
+        """
+        Obtain a domain from the subunit.
+
+        Args:
+            item: The index of the domain to obtain.
+
+        Returns:
+            The domain at the given index.
+        """
+        return self.domains[item]
 
     def __repr__(self) -> str:
         """
