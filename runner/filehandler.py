@@ -340,7 +340,7 @@ class FileHandler:
                         # If the item is a NEMid, we need to set its juncmate if it
                         # has one
                         if isinstance(item, structures.points.NEMid):
-                            with suppress(KeyError):
+                            with suppress(KeyError, AttributeError):
                                 item.juncmate = items_by_uuid[item.juncmate.uuid]
 
             # Load the helices and double helices
