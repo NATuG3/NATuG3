@@ -1,4 +1,5 @@
 import logging
+from contextlib import suppress
 from functools import partial
 from typing import Callable
 
@@ -11,6 +12,7 @@ from structures.points.nick import Nick
 from structures.points.point import Point
 from structures.profiles.action_repeater_profile import ActionRepeaterProfile
 from structures.strands import Strands
+from structures.strands.linkage import Linkage
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +51,7 @@ def juncter(
                     "NEMid Juncmate not found",
                     "The NEMid that was clicked did not have a juncmate and thus a"
                     "junction could not be created. This is likely because the juncmate"
-                    "is currently nicked out."
+                    "is currently nicked out.",
                 )
                 return
             strands.conjunct(point, point.juncmate)
@@ -208,6 +210,12 @@ def nicker(
                     "site.",
                 )
                 return
+            with suppress(IndexError):
+                if isinstance(
+                    potential_linkage := point.surf_strand(2), Linkage
+                ) or isinstance(potential_linkage := point.surf_strand(-2), Linkage):
+                    strands.unlink(potential_linkage)
+
             strands.nick(point)
 
     runner.snapshot()

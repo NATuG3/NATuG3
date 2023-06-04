@@ -341,7 +341,7 @@ class FileHandler:
             for strand in strands:
                 for item in strand:
                     item.strand = strand
-                strand.strands = strand
+                strand.strands = strands
 
             # Load the helices and double helices
             with package.open("helices/helices.csv") as file:
