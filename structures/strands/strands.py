@@ -540,13 +540,9 @@ class Strands:
                     strand.styles.color.value = next(strand_colors)
                 else:
                     if strand.up_strand():
-                        strand.styles.color.value = settings.colors["strands"]["greys"][
-                            1
-                        ]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][1]
                     else:
-                        strand.styles.color.value = settings.colors["strands"]["greys"][
-                            0
-                        ]
+                        strand.styles.color.value = settings.colors["strands"]["greys"][0]
 
             # Set the styles of each point based off new strand styles
             for item in strand.items.by_type(Point):
@@ -662,9 +658,7 @@ class Strands:
         Returns:
             The two new strands that were created.
         """
-        assert (
-            linkage.strand.strands is self
-        ), "Linkage is not in this Strands container."
+        assert linkage.strand.strands is self, "Linkage is not in this Strands container."
 
         logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
         logger.debug(f"Linkage is at index {linkage.strand.index(linkage)}.")
@@ -753,8 +747,8 @@ class Strands:
             assert isinstance(NEMid1, NEMid)
             assert isinstance(NEMid2, NEMid)
 
-        # ensure that NEMid1 is the lefter NEMid
-        if NEMid1.x_coord > NEMid2.x_coord:
+        # ensure that NEMid1 is the lefter domain NEMid
+        if NEMid1.domain.index > NEMid2.domain.index:
             NEMid1, NEMid2 = NEMid2, NEMid1
 
         NEMid1_index = NEMid1.index
@@ -843,9 +837,7 @@ class Strands:
                     closed_strand_NEMid: NEMid = NEMid2
                     open_strand_NEMid: NEMid = NEMid1
                 else:
-                    raise ValueError(
-                        "One of the strands should be closed for this case."
-                    )
+                    raise ValueError("One of the strands should be closed for this case.")
 
                 # crawl from beginning of the open strand to the junction site NEMid
                 # of the open strand
@@ -892,34 +884,19 @@ class Strands:
 
             # if both of the NEMids are open (and thus are both not closed)
             elif not any((NEMid1.strand.closed, NEMid2.strand.closed)):
-                if NEMid1.strand.interdomain() or NEMid2.strand.interdomain():
-                    # crawl from the beginning of NEMid1's strand up until and
-                    # including the junction site
-                    new_strands[0].items.extend(NEMid1.strand[: NEMid1_index + 1])
-                    # crawl from one NEMid after the junction site on NEMid2's
-                    # strand to the end of the strand
-                    new_strands[0].items.extend(NEMid2.strand[NEMid2_index + 1 :])
+                # crawl from the beginning of NEMid#1's strand to the junction site,
+                # including the junction site
+                new_strands[0].items.extend(NEMid1.strand[:NEMid1_index])
+                # crawl from one NEMid after the junction site on NEMid#2's strand
+                # to the end of the strand
+                new_strands[0].items.extend(NEMid2.strand[NEMid2_index:])
 
-                    # Crawl from the start of NEMid#2's strand up to and including
-                    # the junction site
-                    new_strands[1].items.extend(NEMid2.strand[: NEMid2_index + 1])
-                    # crawl from one NEMid after the junction site on NEMid#1's
-                    # strand to the end of the strand
-                    new_strands[1].items.extend(NEMid1.strand[NEMid1_index + 1 :])
-                else:
-                    # crawl from the beginning of NEMid#1's strand to the junction site,
-                    # including the junction site
-                    new_strands[0].items.extend(NEMid1.strand[: NEMid1_index + 1])
-                    # crawl from one NEMid after the junction site on NEMid#2's strand
-                    # to the end of the strand
-                    new_strands[0].items.extend(NEMid2.strand[NEMid2_index + 1 :])
-
-                    # crawl from the beginning of NEMid#2's strand to the junction site,
-                    # including the junction site
-                    new_strands[1].items.extend(NEMid2.strand[: NEMid2_index + 1])
-                    # crawl from one NEMid after the junction site on NEMid#1's strand
-                    # to the end of the strand
-                    new_strands[1].items.extend(NEMid1.strand[NEMid1_index + 1 :])
+                # crawl from the beginning of NEMid#2's strand to the junction site,
+                # including the junction site
+                new_strands[1].items.extend(NEMid2.strand[:NEMid2_index])
+                # crawl from one NEMid after the junction site on NEMid#1's strand
+                # to the end of the strand
+                new_strands[1].items.extend(NEMid1.strand[NEMid1_index:])
 
                 new_strands[0].closed = False
                 new_strands[1].closed = False
