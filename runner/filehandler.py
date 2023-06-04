@@ -229,8 +229,9 @@ class FileHandler:
                 # First create all the NEMids without their juncmates, since we may
                 # not be able to fetch certain juncmates (since we're creating NEMids
                 # as we go)
+                NEMids = np.empty(len(df), dtype=object)
                 for index, row in df.iterrows():
-                    juncmate = row["NEMid:juncmate"] if row["NEMid:juncmate"] else None
+                    juncmate = row.get("NEMid:juncmate")
 
                     # Create the NEMid object from the dataframe row
                     NEMid_ = structures.points.nemid.NEMid(
@@ -245,7 +246,13 @@ class FileHandler:
                         junctable=row["NEMid:junctable"],
                         styles=row_to_point_styles(row),
                     )
+                    NEMids[index] = NEMid_
                     items_by_uuid[NEMid_.uuid] = NEMid_
+
+                # Now change the juncmate uuids to actual NEMid objects
+                for NEMid_ in NEMids:
+                    if NEMid_.juncmate is not None:
+                        NEMid_.juncmate = items_by_uuid[NEMid_.juncmate]
 
             # Load nick objects
             with package.open("points/nicks.csv") as file:
@@ -328,20 +335,13 @@ class FileHandler:
                     nucleic_acid_profile=nucleic_acid_profile,
                     strands=[items_by_uuid[uuid] for uuid in loaded["data:strands"]],
                 )
-                for strand in strands:
-                    strand.strands = strands
                 strands.nicks = nicks
 
             # Build the strand by using the items in the main hash table
             for strand in strands:
                 for item in strand:
-                    if isinstance(item, structures.points.point.Point):
-                        item.strand = strand
-                        # If the item is a NEMid, we need to set its juncmate if it
-                        # has one
-                        if isinstance(item, structures.points.NEMid):
-                            with suppress(KeyError, AttributeError):
-                                item.juncmate = items_by_uuid[item.juncmate.uuid]
+                    item.strand = strand
+                strand.strands = strand
 
             # Load the helices and double helices
             with package.open("helices/helices.csv") as file:
