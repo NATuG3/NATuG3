@@ -145,10 +145,10 @@ class Domains:
         symmetry = [self.symmetry, *[None for _ in range(len(domains) - 1)]]
         antiparallel = [self.antiparallel, *[None for _ in range(len(domains) - 1)]]
         up_helix_counts = [
-            "-".join(map(str, domain.up_helix_count)) for domain in domains
+            "&".join(map(str, domain.up_helix_count)) for domain in domains
         ]
         down_helix_counts = [
-            "-".join(map(str, domain.down_helix_count)) for domain in domains
+            "&".join(map(str, domain.down_helix_count)) for domain in domains
         ]
 
         # Create a dictionary with the columns above, and the UUIds only if requested
@@ -197,11 +197,11 @@ class Domains:
         ]
         m = [int(m) for m in df["data:m"].to_list()]
         up_helix_counts = [
-            tuple(map(int, count.split("-")))
+            tuple(map(int, count.split("&")))
             for count in df["data:up_helix_counts"].to_list()
         ]
         down_helix_counts = [
-            tuple(map(int, count.split("-")))
+            tuple(map(int, count.split("&")))
             for count in df["data:down_helix_counts"].to_list()
         ]
         symmetry = int(df["data:symmetry"].to_list()[0])
