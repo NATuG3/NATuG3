@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 from math import cos, radians, sin
 from typing import List
 
+import numpy as np
 import pyqtgraph as pg
 from PyQt6.QtCore import pyqtSignal
 
