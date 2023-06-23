@@ -163,6 +163,12 @@ class NucleicAcidPanel(QWidget):
         # that the current strand graph uses.
         self.profile_manager.profile_loaded.connect(self._push_updates)
 
+        def profiles_dict_update():
+            self.runner.managers.nucleic_acid_profile.profiles = self.profile_manager.profiles
+
+        self.profile_manager.profile_saved.connect(profiles_dict_update)
+        self.profile_manager.profile_deleted.connect(profiles_dict_update)
+
         # Add the profile manager to the top of the layout by inserting it at index 0.
         self.layout().insertWidget(0, self.profile_manager)
 
