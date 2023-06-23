@@ -81,12 +81,14 @@ class TopViewPlotter(Plotter):
     """
 
     domain_clicked = pyqtSignal(int)
+    button_clicked = pyqtSignal(object)
     point_clicked = pyqtSignal(tuple)
 
     def __init__(
         self,
         domains: "Domains",
         circle_radius: int,
+        plot_buttons: bool = True,
         rotation: float = 0,
         numbers: bool = True,
         stroke: int = 5,
@@ -99,6 +101,7 @@ class TopViewPlotter(Plotter):
         Args:
             domains: Domains to plot.
             circle_radius: Radius of a given domain.
+            plot_buttons: Whether to plot the buttons. Defaults to True.
             rotation: Rotation of the plot. In degrees. Defaults to 0.
             numbers: Whether to plot the domain numbers. Defaults to True.
             stroke: Stroke width of the plotted stroke. Defaults to 5.
@@ -109,6 +112,7 @@ class TopViewPlotter(Plotter):
         super().__init__()
 
         self.circle_radius = circle_radius
+        self.plot_buttons = plot_buttons
         self.rotation = rotation
         self.domains = domains
         self.title = title
