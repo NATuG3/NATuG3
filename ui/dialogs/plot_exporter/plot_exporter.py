@@ -113,6 +113,7 @@ class PlotExporter(QDialog):
         self.top_view_export_plot = TopViewPlotter(
             domains=self.runner.managers.domains.current,
             circle_radius=self.runner.managers.nucleic_acid_profile.current.D,
+            plot_buttons=False,
             numbers=self.top_view_numbers.isChecked(),
             rotation=self.top_view_rotation.value(),
             padding=self.top_view_padding.value(),
