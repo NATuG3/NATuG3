@@ -21,11 +21,13 @@ class PlotData:
     Currently plotted data.
 
     Attributes:
-        plotted_numbers: The plotted number symbols.
-        u_coords: u coords of plotted data.
-        v_coords: v coords of plotted data.
-        domains: The currently plotted domain circles.
-        rotation: The rotation of the plot.
+        u_coords: X coords of the plotted data.
+        v_coords: Y coords of the plotted data.
+        rotation: Rotation of the plot. In degrees.
+        plotted_domains: The plotted domains.
+        plotted_stroke: The plotted stroke.
+        plotted_numbers: The plotted numbers.
+        plotted_buttons: The plotted buttons.
     """
 
     u_coords: List[float] = field(default_factory=list)
@@ -33,7 +35,8 @@ class PlotData:
     rotation: pg.PlotDataItem = 0
     plotted_domains: pg.PlotDataItem = None
     plotted_stroke: pg.PlotDataItem = None
-    plotted_numbers: List[pg.PlotDataItem] = None
+    plotted_numbers: List[pg.PlotDataItem] = field(default_factory=list)
+    plotted_buttons: List[pg.PlotDataItem] = field(default_factory=list)
 
     def coords(self, round_to=None):
         """
