@@ -401,10 +401,11 @@ class Domains:
 
         Returns:
             A list of all domains from all subunits.
-
-        Notes:
-            This is a cached method. The cache is cleared when the subunit is changed.
         """
+        # If the structure is nonsymmetrical then self.subunit.domains := self.domains()
+        if self.symmetry == 1:
+            return self.subunit.domains
+
         # Get all the domains from all the subunits
         output = []
         for subunit in self.subunits():
