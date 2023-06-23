@@ -30,6 +30,9 @@ class Runner:
         filehandler (logging.FileHandler): The file handler for the logger. This
             is used to save and load the program state at the request of the user.
         booted (bool): Whether the program has been booted.
+
+    Methods:
+        recompute: Recompute the top and side view, and then refresh the plots.
     """
 
     def __init__(self):
@@ -187,3 +190,10 @@ class Runner:
         action.setShortcut(QKeySequence("Ctrl+Shift+Z"))
         action.triggered.connect(self.managers.snapshots.current.switch_to_next)
         self.window.addAction(action)
+
+    def recompute(self):
+        """Script to recompute top and side view data, and reload the plots."""
+        self.window.config.panel.domains.dump_domains(self.managers.domains.current)
+        self.managers.strands.recompute()
+        self.window.top_view.refresh()
+        self.window.side_view.refresh()
