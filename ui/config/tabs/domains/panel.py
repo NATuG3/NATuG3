@@ -68,8 +68,11 @@ class DomainsPanel(QWidget):
         Returns:
             The domains object.
         """
+        domains = self.tables.fetch_domains()
+        for index, domain in enumerate(domains):
+            domain.index = index
         return Domains(
-            domains=self.tables.fetch_domains(),
+            domains=domains,
             symmetry=self.symmetry.value(),
             nucleic_acid_profile=nucleic_acid_profile,
             antiparallel=self.auto_antiparallel.isChecked(),
