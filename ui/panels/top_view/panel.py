@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtWidgets import (
     QSlider,
     QVBoxLayout,
@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 )
 
 import ui.plotters
+from structures.domains import Domain
 
 
 class TopViewPanel(QGroupBox):
@@ -49,6 +50,7 @@ class TopViewPanel(QGroupBox):
             rotation=0,
         )
         self.plot.domain_clicked.connect(self._domain_clicked)
+        self.plot.button_clicked.connect(self._button_clicked)
         self.layout().addWidget(self.plot)
 
         # set up rotation slider
@@ -67,6 +69,7 @@ class TopViewPanel(QGroupBox):
         self.plot.refresh()
         self.plot.autoRange()
 
+    @pyqtSlot(int)
     def _domain_clicked(self, domain: int):
         """
         Slot for when a point in the plot is clicked.
@@ -89,3 +92,12 @@ class TopViewPanel(QGroupBox):
             # that the user has clicked on the button a second time and wants
             # to revert to the auto range of the side view plot
             self.runner.window.side_view.plot.auto_range()
+
+    def _button_clicked(self, domains: tuple[Domain]):
+        """
+        Slot for when a button in the plot is clicked.
+
+        Inverts the two domains clicked.
+        """
+        self.runner.managers.domains.current.invert(*domains)
+        self.runner.recompute()

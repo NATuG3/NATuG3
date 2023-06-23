@@ -5,7 +5,7 @@ from typing import List
 
 import numpy as np
 import pyqtgraph as pg
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import pyqtSignal, QTimer, pyqtSlot
 
 import settings
 import utils
@@ -147,6 +147,8 @@ class TopViewPlotter(Plotter):
         self.removeItem(plot_data.plotted_stroke)
         for number in plot_data.plotted_numbers:
             self.removeItem(number)
+        for button in plot_data.plotted_buttons:
+            self.removeItem(button)
 
     def _prettify(self):
         self.setTitle(self.title) if self.title else None
@@ -161,6 +163,37 @@ class TopViewPlotter(Plotter):
 
         # prevent user from interacting with the graph in certain ways
         self.getViewBox().setAspectLocked(lock=True, ratio=1)
+
+    def _plot_buttons(self, u_coords: List[float], v_coords: List[float]) -> None:
+        """
+        Plot the buttons.
+
+        This plots the buttons and stores them in self.plot_data.
+
+        Args:
+            u_coords: X coords of the buttons.
+            v_coords: Y coords of the buttons.
+        """
+        self.plot_data.plotted_buttons.clear()
+        domains = self.domains.domains()
+
+        for index, (u_coord, v_coord) in enumerate(zip(u_coords, v_coords)):
+            next_coord_index = (index + 1) % len(u_coords)
+            button_u_coord = (u_coord + u_coords[next_coord_index]) / 2
+            button_v_coord = (v_coord + v_coords[next_coord_index]) / 2
+            current_domains = [domains[index], domains[next_coord_index]]
+            button = self.plot(
+                (button_u_coord,),
+                (button_v_coord,),
+                symbol="s",
+                symbolSize=0.15 * self.circle_radius,
+                symbolBrush=pg.mkBrush(settings.colors["domains"]["buttons"]),
+                pxMode=False,
+            )
+            button.sigClicked.connect(
+                lambda *args, domains=current_domains: self.button_clicked.emit(domains)
+            )
+            self.plot_data.plotted_buttons.append(button)
 
     def _plot_domains(self, u_coords: List[float], v_coords: List[float]) -> None:
         """
@@ -206,7 +239,7 @@ class TopViewPlotter(Plotter):
         This plots the labels, sets up signals for when the user clicks them,
         and updates the plot data.
         """
-        self.plot_data.plotted_numbers = []
+        self.plot_data.plotted_numbers.clear()
         # We label domain#0 with the domain-count even though it's domain#0 in memory to
         # make it more human-friendly (so it doesn't start at #0)
         for counter, position in enumerate(tuple(zip(u_coords, v_coords)), start=1):
@@ -269,6 +302,8 @@ class TopViewPlotter(Plotter):
         if self.numbers:
             self._plot_numbers(u_coords[1:-1], v_coords[1:-1])
         self._plot_stroke(u_coords, v_coords)
+        if self.plot_buttons:
+            self._plot_buttons(u_coords[1:-1], v_coords[1:-1])
 
         # Store current plot data
         self.plot_data.u_coords = u_coords
