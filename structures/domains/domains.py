@@ -1,6 +1,7 @@
 import logging
 import math
 from contextlib import suppress
+from copy import copy
 from typing import List, Iterable, Type
 
 import numpy as np
@@ -40,6 +41,8 @@ class Domains:
         strands: Returns a Strands object containing all the strands in the domains.
         top_view: Obtain a set of coords for the centers of all the double helices.
         domains: Returns a list of all domains.
+        destroy_symmetry: Destroy the symmetry of the domains.
+        invert: Invert two domains deeper into the nanotube.
         subunits: Returns a list of subunits.
         closed: Whether the tube is closed or not.
         update: Update the domains object in place.
@@ -416,6 +419,63 @@ class Domains:
             output[index].index = index
 
         return output
+
+    def destroy_symmetry(self) -> None:
+        """
+        Make the Domains non-symmetrical by setting symmetry to 1 and applying the angles
+        that are a result of the current symmetry setting.
+        """
+        if self.symmetry != 1:
+            self.subunit = Subunit(
+                self.nucleic_acid_profile,
+                self.domains(),
+                template=True,
+                parent=self,
+            )
+            for index, domain in enumerate(self.subunit):
+                domain.index = index
+            self.symmetry = 1
+
+    def invert(self, domain1: Domain, domain2: Domain) -> None:
+        """
+        Invert two domains deeper into the nanotube.
+
+        Args:
+            domain1: The first domain of the two that are to be inverted into the tube.
+            domain2: The second domain of the two that are to be inverted into the tube.
+
+        Notes:
+            Symmetry of the tube is destroyed first. Current symmetrical settings are
+            applied to the tube and the symmetry factor is changed to 1-fold-symmetry.
+        """
+        # Apply the domain inversion formula:
+        #   A -> A - [21 - (B + C)] = A + B + C - 21
+        #   B -> 21 - C
+        #   C -> 21 - B
+        #   D -> D - [21 - (B + C)] = D + B + C - 21
+        # Where the letters refer to the interior angle multiples of domain A, B, C, D.
+        self.destroy_symmetry()
+
+        # Since there's only one subunit, self.domains() := self.subunit.domains
+        domain_A: Domain = copy(self.subunit[domain1.index - 1])
+        domain_B: Domain = copy(domain1)
+        domain_C: Domain = copy(domain2)
+        domain_D: Domain = copy(self.subunit[domain2.index + 1])
+
+        self.subunit[domain1.index - 1].theta_m_multiple = (
+            domain_A.theta_m_multiple
+            + domain_B.theta_m_multiple
+            + domain_C.theta_m_multiple
+            - 21
+        )
+        self.subunit[domain1.index].theta_m_multiple = 21 - domain_C.theta_m_multiple
+        self.subunit[domain2.index].theta_m_multiple = 21 - domain_B.theta_m_multiple
+        self.subunit[domain2.index + 1].theta_m_multiple = (
+            domain_D.theta_m_multiple
+            + domain_B.theta_m_multiple
+            + domain_C.theta_m_multiple
+            - 21
+        )
 
     def __repr__(self) -> str:
         """
