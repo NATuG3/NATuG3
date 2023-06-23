@@ -352,8 +352,8 @@ class Domains:
         """
         logger.info(f"Replacing the template subunit.")
         self._subunit = new_subunit
-        for domain in self._subunit.domains:
-            domain.strands = self._subunit
+        for domain in self._subunit:
+            domain.parent = self._subunit
 
     @property
     def count(self) -> int:
