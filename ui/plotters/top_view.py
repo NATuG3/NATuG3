@@ -127,6 +127,7 @@ class TopViewPlotter(Plotter):
         self._plot()
         self._prettify()
 
+    @pyqtSlot()
     def _point_clicked(self, event, points: List[pg.ScatterPlotItem]):
         """Slot for when points are clicked."""
         point = points[0].pos()
@@ -135,7 +136,7 @@ class TopViewPlotter(Plotter):
     def refresh(self):
         """Refresh the plot."""
         self._reset()
-        self._plot()
+        QTimer.singleShot(0, self._plot)
         logger.info("Refreshed top view.")
 
     def _reset(self, plot_data=None):
