@@ -6,6 +6,7 @@ from PyQt6.QtWidgets import (
 )
 
 import ui.plotters
+import utils
 from structures.domains import Domain
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 
@@ -84,8 +85,8 @@ class TopViewPanel(QGroupBox):
             domain -= 1
         if not self.runner.window.side_view.plot.auto_ranged():
             self.runner.window.side_view.plot.setRange(
-                xRange=(domain - .5, domain + 1.5),
-                yRange=(-.5, self.runner.window.side_view.plot.height + .5),
+                xRange=(domain - 0.5, domain + 1.5),
+                yRange=(-0.5, self.runner.window.side_view.plot.height + 0.5),
             )
         else:
             # if the new range is the same as the old range then this means
@@ -99,6 +100,15 @@ class TopViewPanel(QGroupBox):
 
         Inverts the two domains clicked.
         """
+        if self.runner.managers.nucleic_acid_profile.B <= 3:
+            utils.warning(
+                self,
+                "Failure to invert",
+                "Domains can only be inverted when the nucleic acid profile's B value is "
+                "greater than 3. Please navigate to the nucleic acid tab of the config "
+                "panel and update the value of B to allow for inversions.",
+            )
+            return
         if RefreshConfirmer.run(self.runner):
             self.runner.managers.domains.current.invert(*domains)
             self.runner.recompute()
