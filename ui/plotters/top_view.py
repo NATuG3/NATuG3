@@ -126,6 +126,7 @@ class TopViewPlotter(Plotter):
 
         self._plot()
         self._prettify()
+        self.autoRange()
 
     @pyqtSlot()
     def _point_clicked(self, event, points: List[pg.ScatterPlotItem]):
@@ -135,12 +136,12 @@ class TopViewPlotter(Plotter):
 
     def refresh(self):
         """Refresh the plot."""
-        self._reset()
+        QTimer.singleShot(0, self._reset)
         QTimer.singleShot(0, self._plot)
         logger.info("Refreshed top view.")
 
     def _reset(self, plot_data=None):
-        """Clear plot_data from plot. Plot_data defaults to self.plot_data."""
+        """Clear all plotted artifacts."""
         if plot_data is None:
             plot_data = self.plot_data
         self.removeItem(plot_data.plotted_domains)
@@ -155,7 +156,6 @@ class TopViewPlotter(Plotter):
 
         # set correct range
         self.getViewBox().setDefaultPadding(self.padding)
-        self.autoRange()
 
         # set axis labels
         self.setLabel("bottom", units="Nanometers")

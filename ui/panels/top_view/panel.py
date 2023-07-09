@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
 
 import ui.plotters
 from structures.domains import Domain
+from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 
 
 class TopViewPanel(QGroupBox):
@@ -67,7 +68,6 @@ class TopViewPanel(QGroupBox):
         """
         self.plot.rotation = (self.rotation_slider.value() * 360) / 99
         self.plot.refresh()
-        self.plot.autoRange()
 
     @pyqtSlot(int)
     def _domain_clicked(self, domain: int):
@@ -99,5 +99,7 @@ class TopViewPanel(QGroupBox):
 
         Inverts the two domains clicked.
         """
-        self.runner.managers.domains.current.invert(*domains)
-        self.runner.recompute()
+        if RefreshConfirmer.run(self.runner):
+            self.runner.managers.domains.current.invert(*domains)
+            self.runner.recompute()
+            self.runner.snapshot()

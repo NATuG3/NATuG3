@@ -449,10 +449,11 @@ class Domains:
             applied to the tube and the symmetry factor is changed to 1-fold-symmetry.
         """
         # Apply the domain inversion formula:
-        #   A -> A - [21 - (B + C)] = A + B + C - 21
+        # let b be the number of bases per t turns for the nucleic acid
+        #   A -> A - [b - (B + C)] = A + B + C - b
         #   B -> 21 - C
         #   C -> 21 - B
-        #   D -> D - [21 - (B + C)] = D + B + C - 21
+        #   D -> D - [b - (B + C)] = D + B + C - b
         # Where the letters refer to the interior angle multiples of domain A, B, C, D.
         self.destroy_symmetry()
 
@@ -466,15 +467,15 @@ class Domains:
             domain_A.theta_m_multiple
             + domain_B.theta_m_multiple
             + domain_C.theta_m_multiple
-            - 21
+            - self.nucleic_acid_profile.B
         )
-        self.subunit[domain1.index].theta_m_multiple = 21 - domain_C.theta_m_multiple
-        self.subunit[domain2.index].theta_m_multiple = 21 - domain_B.theta_m_multiple
+        self.subunit[domain1.index].theta_m_multiple = self.nucleic_acid_profile.B - domain_C.theta_m_multiple
+        self.subunit[domain2.index].theta_m_multiple = self.nucleic_acid_profile.B - domain_B.theta_m_multiple
         self.subunit[domain2.index + 1].theta_m_multiple = (
             domain_D.theta_m_multiple
             + domain_B.theta_m_multiple
             + domain_C.theta_m_multiple
-            - 21
+            - self.nucleic_acid_profile.B
         )
 
     def __repr__(self) -> str:
