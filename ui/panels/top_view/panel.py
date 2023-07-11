@@ -5,6 +5,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
 )
 
+import runner.managers.nucleic_acid_profile
 import ui.plotters
 import utils
 from structures.domains import Domain
@@ -100,7 +101,8 @@ class TopViewPanel(QGroupBox):
 
         Inverts the two domains clicked.
         """
-        if self.runner.managers.nucleic_acid_profile.B <= 3:
+
+        if runner.managers.nucleic_acid_profile.NucleicAcidProfile.B <= 3:
             utils.warning(
                 self,
                 "Failure to invert",
