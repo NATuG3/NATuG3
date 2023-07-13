@@ -458,12 +458,12 @@ class Domains:
         self.destroy_symmetry()
 
         # Since there's only one subunit, self.domains() := self.subunit.domains
-        domain_A: Domain = copy(self.subunit[(domain1.index - 1)%len(self.domains)])
+        domain_A: Domain = copy(self.subunit[(domain1.index - 1)%len(self.domains())])
         domain_B: Domain = copy(domain1)
         domain_C: Domain = copy(domain2)
-        domain_D: Domain = copy(self.subunit[(domain2.index + 1)%len(self.domains)])
+        domain_D: Domain = copy(self.subunit[(domain2.index + 1)%len(self.domains())])
 
-        self.subunit[domain1.index - 1].theta_m_multiple = (
+        self.subunit[(domain1.index - 1)%len(self.domains())].theta_m_multiple = (
             domain_A.theta_m_multiple
             + domain_B.theta_m_multiple
             + domain_C.theta_m_multiple
@@ -471,7 +471,7 @@ class Domains:
         )
         self.subunit[domain1.index].theta_m_multiple = self.nucleic_acid_profile.B - domain_C.theta_m_multiple
         self.subunit[domain2.index].theta_m_multiple = self.nucleic_acid_profile.B - domain_B.theta_m_multiple
-        self.subunit[domain2.index + 1].theta_m_multiple = (
+        self.subunit[(domain2.index + 1)%len(self.domains())].theta_m_multiple = (
             domain_D.theta_m_multiple
             + domain_B.theta_m_multiple
             + domain_C.theta_m_multiple
