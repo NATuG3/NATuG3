@@ -184,8 +184,8 @@ class DomainsTablesArea(QTabWidget):
             row.theta_m_multiple = TableIntegerBox(
                 domain.theta_m_multiple,
                 show_buttons=True,
-                minimum=1,
-                maximum=30,
+                minimum=0,
+                maximum=self.nucleic_acid_profile.B,
             )
             row.theta_m_multiple.editingFinished.connect(self.cell_widget_updated.emit)
             self.angles_table.setCellWidget(index, 3, row.theta_m_multiple)

@@ -102,7 +102,7 @@ class TopViewPanel(QGroupBox):
         Inverts the two domains clicked.
         """
 
-        if runner.managers.nucleic_acid_profile.NucleicAcidProfile.B <= 3:
+        if runner.managers.nucleic_acid_profile.NucleicAcidProfile.B < 3:
             utils.warning(
                 self,
                 "Failure to invert",
