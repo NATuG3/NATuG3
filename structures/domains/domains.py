@@ -458,10 +458,10 @@ class Domains:
         self.destroy_symmetry()
 
         # Since there's only one subunit, self.domains() := self.subunit.domains
-        domain_A: Domain = copy(self.subunit[domain1.index - 1] % len(self))
+        domain_A: Domain = copy(self.subunit[domain1.index - 1 % len(self)])
         domain_B: Domain = copy(domain1)
         domain_C: Domain = copy(domain2)
-        domain_D: Domain = copy(self.subunit[domain2.index + 1])
+        domain_D: Domain = copy(self.subunit[(domain2.index + 1) % len(self)])
 
         self.subunit[domain1.index - 1].theta_m_multiple = (
             domain_A.theta_m_multiple
