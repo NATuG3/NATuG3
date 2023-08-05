@@ -2,7 +2,7 @@ import logging
 import math
 from contextlib import suppress
 from copy import copy
-from typing import List, Iterable, Type
+from typing import List, Iterable
 
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ from constants.directions import DOWN, UP
 from structures.domains import Domain
 from structures.domains.subunit import Subunit
 from structures.profiles import NucleicAcidProfile
-from utils import inverse, timer
+from utils import timer
 
 logger = logging.getLogger(__name__)
 

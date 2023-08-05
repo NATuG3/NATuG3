@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from typing import Type, Iterable
+from typing import Iterable
 
 import pandas as pd
 
 from structures.points.point import Point
+
 
 @dataclass
 class NEMid(Point):

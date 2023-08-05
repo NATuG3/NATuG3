@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from dataclasses import field, asdict
 from typing import Iterable
-from typing import Type, List
+from typing import List
 from uuid import uuid1
 
 import pandas as pd

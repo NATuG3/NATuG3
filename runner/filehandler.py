@@ -1,6 +1,5 @@
 import json
 import logging
-from contextlib import suppress
 from typing import Dict
 from zipfile import ZipFile
 

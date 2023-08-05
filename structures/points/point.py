@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field
-from typing import Tuple, Type, Iterable
+from typing import Tuple, Iterable
 from uuid import uuid1
 
 import pandas as pd
