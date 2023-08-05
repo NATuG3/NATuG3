@@ -171,6 +171,16 @@ class Domains:
         return pd.DataFrame(data)
 
     @classmethod
+    def dummy(cls, nucleic_acid_profile: NucleicAcidProfile):
+        """An arbitrary minimal Domains object."""
+        fake_domains = []
+        for i in range(2):
+            fake_domains.append(
+                Domain(nucleic_acid_profile, 4, 0, 0, (1, 1, 1), (1, 1, 1), index=i)
+            )
+        return cls(nucleic_acid_profile, fake_domains, 1, False)
+
+    @classmethod
     def from_df(
         cls,
         df: pd.DataFrame,
