@@ -82,11 +82,10 @@ class TopViewPanel(QGroupBox):
         Args:
             domain: The index of the domain that was clicked.
         """
-        if domain == self.runner.managers.domains.current.count:
-            domain -= 1
+
         if not self.runner.window.side_view.plot.auto_ranged():
             self.runner.window.side_view.plot.setRange(
-                xRange=(domain - 0.5, domain + 1.5),
+                xRange=(domain - 1.5, domain + 0.5),
                 yRange=(-0.5, self.runner.window.side_view.plot.height + 0.5),
             )
         else:
