@@ -429,9 +429,13 @@ class FileHandler:
 
             # Update the currently displayed nucleic acid profile and the possible
             # nucleic acid profiles to those found in the file
-            self.runner.managers.nucleic_acid_profile.current.update(
-                nucleic_acid_profile
-            )
+            try:
+                self.runner.managers.nucleic_acid_profile.current.update(
+                    nucleic_acid_profile
+                )
+            except AttributeError:
+                self.runner.managers.nucleic_acid_profile.current = nucleic_acid_profile
+
             profile_manager = (
                 self.runner.window.config.panel.nucleic_acid.profile_manager
             )
@@ -446,7 +450,10 @@ class FileHandler:
 
             # Update the program's current domains and strands to those found in the
             # file
-            self.runner.managers.domains.current.update(domains)
+            try:
+                self.runner.managers.domains.current.update(domains)
+            except AttributeError:
+                self.runner.managers.domains.current = domains
             self.runner.managers.strands.current = strands
             self.runner.managers.double_helices.current = double_helices
             self.runner.window.config.panel.domains.dump_domains(domains)
@@ -454,3 +461,5 @@ class FileHandler:
             # Refresh the side view plot and the top view plot
             self.runner.window.side_view.refresh()
             self.runner.window.top_view.refresh()
+
+            return lambda callbacks: [callback() for callback in callbacks]
