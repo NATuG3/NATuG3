@@ -172,12 +172,19 @@ class DomainsPanel(QWidget):
         if self._pushing_updates:
             return
         self._pushing_updates = True
+
         # Warn the user if they are about to overwrite strand data, and give them the
         # opportunity to save the current state and then update the domains.
         if RefreshConfirmer.run(self.runner):
             new_domains = self.fetch_domains(
                 self.runner.managers.nucleic_acid_profile.current
             )
+            for domain in new_domains.subunit:
+                domain.theta_m_multiple = (
+                    domain.theta_m_multiple
+                    % self.runner.managers.nucleic_acid_profile.current.B
+                )
+
             if (
                 new_domains.antiparallel
                 and (
@@ -193,7 +200,7 @@ class DomainsPanel(QWidget):
                     " that of the last domain in the template subunit's direction, and "
                     "there is an odd number of subunits, then the first and last helices"
                     "cannot be anti-parallel. Please change the direction of the first "
-                    "domain's left helix joint direction."
+                    "domain's left helix joint direction.",
                 )
             self.runner.managers.domains.current.update(new_domains)
             self.dump_domains(new_domains)

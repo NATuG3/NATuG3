@@ -184,8 +184,8 @@ class DomainsTablesArea(QTabWidget):
             row.theta_m_multiple = TableIntegerBox(
                 domain.theta_m_multiple,
                 show_buttons=True,
-                minimum=0,
-                maximum=self.nucleic_acid_profile.B,
+                minimum=-999999,
+                maximum=999999,
             )
             row.theta_m_multiple.editingFinished.connect(self.cell_widget_updated.emit)
             self.angles_table.setCellWidget(index, 3, row.theta_m_multiple)
@@ -229,7 +229,13 @@ class DomainsTablesArea(QTabWidget):
             self.rows, self.cell_widget_updated.emit
         )
 
+        def modulo_theta_m_upon_change(widget):
+            widget.setValue(widget.value() % self.nucleic_acid_profile.B)
+
         for index, row in enumerate(self.rows):
+            row.theta_m_multiple.editingFinished.connect(
+                lambda widget=row.theta_m_multiple: modulo_theta_m_upon_change(widget)
+            )
             row.theta_m_multiple.down_button_clicked.connect(
                 lambda i=index: smooth_interior_updating.down(i)
             )
