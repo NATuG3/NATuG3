@@ -110,7 +110,7 @@ class SideViewPanel(QGroupBox):
         dialog.show()
         self.refresh()
 
-        logger.info(f"Strand #{strand.strands.index(strand)} was clicked.")
+        logger.info(f"Strand #%s was clicked.", strand.strands.index(strand))
 
     @pyqtSlot(object)
     def _on_points_clicked(self, points) -> None:

@@ -56,8 +56,8 @@ def hex_to_rgb(hex_code):
 
 def show_in_file_explorer(filepath):
     """Open the filepath in the file explorer."""
-    logger.info(f'Opening "{filepath}" in file explorer.')
-    subprocess.Popen(f'explorer /select, "{filepath}"')
+    logger.info(f'Opening "%s" in file explorer.', filepath)
+    subprocess.Popen(f'explorer /select, "%s"', filepath)
 
 
 def bases_only(blended: str):

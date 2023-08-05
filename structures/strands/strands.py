@@ -459,9 +459,9 @@ class Strands:
 
             if open_in_file_explorer:
                 QTimer.singleShot(500, partial(show_in_file_explorer, filepath))
-                logger.info(f"Opened export @ {filepath} in file explorer.")
+                logger.info(f"Opened export @ %s in file explorer.", filepath)
         else:
-            raise ValueError(f"Unknown mode: {mode}")
+            raise ValueError(f"Unknown mode: %s", mode)
 
     def randomize_sequences(self, overwrite: bool = False):
         """
@@ -660,8 +660,8 @@ class Strands:
         """
         assert linkage.strand.strands is self, "Linkage is not in this Strands container."
 
-        logger.debug(f"Unlinking {linkage} in Strands object {self.name}.")
-        logger.debug(f"Linkage is at index {linkage.strand.index(linkage)}.")
+        logger.debug(f"Unlinking %s in Strands object %s.", linkage, self.name)
+        logger.debug(f"Linkage is at index %s.", linkage.strand.index(linkage))
 
         if linkage.strand.closed:
             linkage_index = linkage.strand.index(linkage)
@@ -765,12 +765,14 @@ class Strands:
             f"NEMid1.strand {str(NEMid1.strand is NEMid2.strand).replace('True', 'is').replace('False', 'is not')}"
             f" NEMid2.strand"
         )
-        logger.debug(f"NEMid1_index={NEMid1_index}; NEMid2_index={NEMid2_index}")
+        logger.debug(f"NEMid1_index=%s; NEMid2_index=%s", NEMid1_index, NEMid2_index)
         logger.debug(
-            f"NEMid1.closed={NEMid1.strand.closed}; NEMid2.closed={NEMid2.strand.closed}"
+            f"NEMid1.closed=%s; NEMid2.closed=%s", NEMid1.strand.closed,
+            NEMid2.strand.closed
         )
         logger.debug(
-            f"NEMid1-strand-length={len(NEMid1.strand)}; NEMid2-strand-length={len(NEMid2.strand)}"
+            f"NEMid1-strand-length=%s; NEMid2-strand-length=%s",
+            len(NEMid1.strand), len(NEMid2.strand)
         )
 
         if NEMid1.strand is NEMid2.strand:

@@ -37,4 +37,4 @@ class Plotter(pg.PlotWidget):
         if show_after_export:
             show_in_file_explorer(abspath(filepath))
 
-        logger.info(f"Exported plot to {filepath}.")
+        logger.info(f"Exported plot to %s.", filepath)

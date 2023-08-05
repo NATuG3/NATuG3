@@ -181,7 +181,7 @@ class ProfileManager(QGroupBox):
         # emit signal
         self.profile_saved.emit(name, self.profiles[name])
 
-        logger.info(f'Saved new profile "{name}"')
+        logger.info(f'Saved new profile "%s"', name)
 
     def delete(self, name: str, override=False) -> None:
         if not self.approve() and not override:
@@ -208,7 +208,7 @@ class ProfileManager(QGroupBox):
         self.profile_deleted.emit(name)
 
         # log that the profiles was deleted
-        logger.info(f'Deleted profiles named "{name}"')
+        logger.info(f'Deleted profiles named "%s"', name)
 
     def load(self, name: str, override=False) -> None:
         if not self.approve() and not override:
@@ -226,8 +226,8 @@ class ProfileManager(QGroupBox):
         self.profile_loaded.emit(name, self.profiles[name])
 
         # log that the profiles was loaded
-        logger.debug(f"Settings that were loaded: {self.profiles[name]}")
-        logger.info(f'Loaded profiles named "{name}"')
+        logger.debug(f"Settings that were loaded: %s", self.profiles[name])
+        logger.info(f'Loaded profiles named "%s"', name)
 
     def update(self) -> None:
         """Update the profile manager's buttons based on new inputs."""

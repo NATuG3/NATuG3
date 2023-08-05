@@ -145,7 +145,7 @@ class SnapshotsPanel(QWidget):
             return
 
         filename = filename or generate_snapshot_name(self.root_path)
-        logger.debug(f"Taking snapshot: {self.root_path}/{filename}")
+        logger.debug(f"Taking snapshot: %s/%s", self.root_path, filename)
         if self.capacity.value() == len(self.snapshots):
             self.remove_snapshot(self.snapshots[0].filename)
 

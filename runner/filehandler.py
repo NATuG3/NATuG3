@@ -31,7 +31,7 @@ class FileHandler:
         """
         Save the current state of the program.
         """
-        logger.debug(f"Saving program state to {filename}...")
+        logger.debug(f"Saving program state to %s...", {filename})
 
         with ZipFile(filename, "w") as package:
             # Save the domains

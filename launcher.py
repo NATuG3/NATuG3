@@ -47,7 +47,7 @@ def main():
         with suppress(FileExistsError):
             os.mkdir(directory)
 
-    logger.debug(f"Booting @ {time()}")
+    logger.debug(f"Booting @ %s", {time()})
 
     if sys.platform.startswith("win"):
         # to get icon to work properly on Windows this code must be run

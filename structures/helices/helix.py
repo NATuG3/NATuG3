@@ -64,7 +64,7 @@ class HelixData:
         Notes:
             This method flushes the data of the helix. Use with caution.
         """
-        logger.debug(f"Resizing helix data to {size} points.")
+        logger.debug(f"Resizing helix data to %s points.", size)
         self.x_coords = np.zeros(size)
         self.z_coords = np.zeros(size)
         self.angles = np.zeros(size)
