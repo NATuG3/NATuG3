@@ -5,7 +5,6 @@ import pandas as pd
 
 from structures.points.point import Point
 
-
 @dataclass
 class NEMid(Point):
     """
