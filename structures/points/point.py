@@ -12,7 +12,7 @@ from utils import rgb_to_hex
 logger = logging.getLogger(__name__)
 
 
-def x_coord_from_angle(angle: float, domain: Type["Domain"]) -> float:
+def x_coord_from_angle(angle: float, domain: "Domain") -> float:
     """
     Compute a new x coord based on the angle and domain of this Point.
 
@@ -206,11 +206,11 @@ class Point:
 
     # nucleic acid attributes
     direction: int = None
-    strand: Type["Strand"] = field(default=None, repr=False)
-    helix: Type["Helix"] = field(default=None, repr=False)
+    strand: "Strand" = field(default=None, repr=False)
+    helix: "Helix" = field(default=None, repr=False)
     helical_index: int = field(default=None, repr=False)
-    linkage: Type["Linkage"] = None
-    domain: Type["Domain"] = None
+    linkage: "Linkage" = None
+    domain: "Domain" = None
 
     # plotting attributes
     styles: PointStyles = field(default=None, repr=False)
@@ -248,7 +248,7 @@ class Point:
 
         self.styles.reset()
 
-    def overlaps(self, point: Type["Point"], width=None) -> bool:
+    def overlaps(self, point: "Point", width=None) -> bool:
         """
         Return whether the point overlaps with another point.
 
@@ -297,7 +297,7 @@ class Point:
         """
         return (self.x_coord + point.x_coord) / 2, (self.z_coord + point.z_coord) / 2
 
-    def surf_strand(self, dist: int) -> Type["Point"] | None:
+    def surf_strand(self, dist: int):
         """
         Obtain the point on the point's strand that is dist away from this point.
 

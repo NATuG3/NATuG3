@@ -74,7 +74,7 @@ class NucleicAcidProfile:
         else:
             return self.g % -self.theta_c
 
-    def update(self, profile: Type["NucleicAcidProfile"]) -> None:
+    def update(self, profile: "NucleicAcidProfile") -> None:
         """
         Update our nucleic_acid_profile with theirs.
 

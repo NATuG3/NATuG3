@@ -85,7 +85,7 @@ class Domains:
     def __len__(self):
         return self.count
 
-    def update(self, domains: Type["Domains"]) -> None:
+    def update(self, domains: "Domains") -> None:
         """
         Update the domains object in place.
 

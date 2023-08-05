@@ -18,7 +18,7 @@ class NEMid(Point):
         junction: Whether this NEMid is a member of an active junction.
     """
 
-    juncmate: Type["NEMid"] | None = None
+    juncmate: None = None
     junctable: bool = False
     junction: bool = False
 
