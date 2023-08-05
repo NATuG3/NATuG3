@@ -330,7 +330,7 @@ class Domains:
         first and last domain's top view coord.
         """
         coords = self.top_view()
-        return math.dist(coords[0], coords[-1]) < settings.closed_threshold
+        return math.dist(coords[0], coords[-2]) < settings.closed_threshold
 
     @property
     def subunit(self) -> Subunit:
