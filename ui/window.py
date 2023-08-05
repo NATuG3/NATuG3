@@ -29,31 +29,30 @@ class Window(QMainWindow):
 
     def __init__(self, runner: "runner.Runner"):
         self.runner = runner
+        self._setup = False
 
         # this is an inherited class of QMainWindow,
         # so we must initialize the strands qt widget
         super().__init__()
-
-    def setup(self):
-        # create plot panels
-        self._plots()
-
-        # utilize inherited methods to set up the refs window
         self.setWindowTitle(settings.name)
 
-        # add all widgets
-        self._config()
+    def setup(self):
+        """
+        Set up the main program window.
 
-        # initialize status bar
-        self._status_bar()
+        Notes:
+            * Cannot be called more than once.
+        """
+        if self._setup:
+            raise RuntimeError("Cannot set up the main window multiple times.")
+        self._setup_plots()
+        self._setup_config()
+        self._setup_status_bar()
+        self._setup_menu_bar()
+        self._setup_toolbar()
+        self._setup = True
 
-        # initialize menu bar
-        self._menu_bar()
-
-        # initialize toolbar
-        self._toolbar()
-
-    def _toolbar(self):
+    def _setup_toolbar(self):
         """Setup toolbar."""
 
         # import the needed panel
@@ -62,7 +61,7 @@ class Window(QMainWindow):
         self.toolbar = Toolbar(self, self.runner)
         self.addToolBar(Qt.ToolBarArea.TopToolBarArea, self.toolbar)
 
-    def _config(self):
+    def _setup_config(self):
         """Setup config panel."""
 
         # import the needed panel
@@ -88,7 +87,7 @@ class Window(QMainWindow):
         # dock the new dockable config widget
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.config)
 
-    def _plots(self):
+    def _setup_plots(self):
         """
         Setup the central area of the main window.
 
@@ -113,14 +112,14 @@ class Window(QMainWindow):
 
         self.setCentralWidget(central_widget)
 
-    def _status_bar(self):
+    def _setup_status_bar(self):
         """Setup status bar."""
         status_bar = self.status_bar = QStatusBar(self)
         self.setStatusBar(status_bar)
         self.statusBar().setStyleSheet("background-color: rgb(210, 210, 210)")
         logger.info("Created status bar.")
 
-    def _menu_bar(self):
+    def _setup_menu_bar(self):
         """Setup menu bar."""
         from .menubar import Menubar
 
