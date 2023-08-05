@@ -536,7 +536,7 @@ class Strand:
 
     @sequence.setter
     def sequence(self, new_sequence: List[str]):
-        logger.debug(f"Setting sequence of {self.name} to {new_sequence}")
+        logger.debug(f"Setting sequence of %s to %s", self.name, new_sequence)
         nucleosides = self.items.unpacked().by_type(Nucleoside)
 
         if len(new_sequence) == len(self.sequence):
@@ -545,10 +545,8 @@ class Strand:
                 our_nucleoside.base = base
 
                 matching_nucleoside = our_nucleoside.matching
-                print(matching_nucleoside)
                 if matching_nucleoside:
                     matching_nucleoside.base = our_nucleoside.complement
-                print(matching_nucleoside)
         else:
             raise ValueError(
                 f"Length of the new sequence ({len(new_sequence)}) must"

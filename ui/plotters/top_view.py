@@ -191,7 +191,6 @@ class TopViewPlotter(Plotter):
         self.plot_data.plotted_buttons.clear()
         domains = self.domains.domains()
         domains_closed = self.domains.closed()
-        print(domains_closed)
 
         for index, (u_coord, v_coord) in enumerate(zip(u_coords, v_coords)):
             if (not domains_closed) and (index == len(u_coords) - 1):
