@@ -2,6 +2,7 @@ import atexit
 import logging
 import os
 import sys
+from contextlib import suppress
 
 import pyqtgraph as pg
 from PyQt6.QtGui import QKeySequence, QAction
@@ -112,7 +113,8 @@ class Runner:
             self.managers.nucleic_acid_profile.restore()
             self.managers.double_helices.restore()
             self.managers.strands.recompute()
-            self.window.setup()
+            with suppress(RuntimeError):
+                self.window.setup()
 
         # We couldn't load the toolbar when we loaded the other managers because the
         # toolbar requires the main window to be created first.

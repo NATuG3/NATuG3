@@ -51,4 +51,7 @@ class SnapshotsManager(Manager):
             if len(snapshot_files) > 12
             else settings.default_snapshot_max_capacity
         )
-        self.current.current_snapshot = self.current.snapshots[-1]
+        try:
+            self.current.current_snapshot = self.current.snapshots[-1]
+        except IndexError:
+            self.current.current_snapshot = None
