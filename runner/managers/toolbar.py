@@ -1,9 +1,10 @@
 from PyQt6.QtWidgets import QButtonGroup
 
 from constants.toolbar import *
+from runner.managers.manager import Manager
 
 
-class ToolbarManager:
+class ToolbarManager(Manager):
     """
     Manager for the toolbar.
 
@@ -11,10 +12,11 @@ class ToolbarManager:
         actions (QButtonGroup): The toolbar's actions.
 
     Notes:
-        - self.actions.buttons[constant-for-an-action] returns the action's button widget.
+        * self.actions.buttons[constant-for-an-action] returns the action's button
+            widget.
     """
 
-    def __init__(self, runner: "runner.Runner"):
+    def __init__(self, runner: "Runner"):
         self.runner = runner
         self.actions = None
 

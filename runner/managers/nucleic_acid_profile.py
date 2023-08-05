@@ -2,60 +2,68 @@ import atexit
 import logging
 import os
 
+import settings
+from runner.managers.manager import Manager
 from structures.profiles import NucleicAcidProfile
 
 logger = logging.getLogger(__name__)
 
 
-class NucleicAcidProfileManager:
+class NucleicAcidProfileManager(Manager):
     """
-    Manager for nucleic acid settings.
+    Manager for the program's current NucleicAcidProfile instance.
 
     Attributes:
+        current: The current NucleicAcidProfile instance.
+        runner: NATuG's program runner.
         profiles_filepath: The path to the directory where profiles are stored.
         restored_filepath: The path to the file where the restored state is stored.
         default_profile_name: The name of the default profile.
 
     Methods:
-        load: Load the nucleic acid profiles from files.
-        dump: Dump the nucleic acid profiles into files.
+        load_profiles: Load the nucleic acid profiles from files.
+        dump_profiles: Dump the nucleic acid profiles into files.
+        restore: Load default NucleicAcidProfile
     """
 
     profiles_filepath = f"saves/nucleic_acid"
-    restored_filepath = f"saves/nucleic_acid/Restored.json"
-    default_profile_name = "MFD B-DNA"
+    default_filepath = f"saves/nucleic_acid/{settings.default_nucleic_acid_profile}.json"
 
-    def __init__(self):
-        """Initialize the nucleic acid module."""
-        # create a dictionary to store the profiles
-        self.profiles = {}
-
-        # load profiles from files
-        self.current = None
-
-    def setup(self):
-        # load the profiles
-        self.load()
-
-        # dump profiles to files on exit
+    def __init__(self, runner: object, current: object = None, profiles=None):
+        super().__init__(runner, current)
+        if profiles:
+            self.profiles = profiles
+        else:
+            self.profiles = {}
+            self.load_profiles()
         atexit.register(self.dump)
 
-    def load(self) -> None:
+    def restore(self):
+        """Load the default nucleic acid profile as the current one."""
+        self.current = self.profiles[settings.default_nucleic_acid_profile]
+        logger.debug(
+            f"Loaded current nucleic acid profile {settings.default_nucleic_acid_profile}"
+        )
+
+    def load_profiles(self) -> None:
         """
         Load saved profiles and restored state from files.
 
         Each profile is loaded from a separate file in the profiles directory. The
         names of the files are the names of the profiles where underscores are
         replaced with spaces (dumping is the reverse of this).
+
+        No specific current profile is set because when the program loads an entire
+        program state is reloaded which includes the current nucleic acid profile.
         """
         profile_files = filter(
             lambda filename: filename.endswith(".json"),
             os.listdir(self.profiles_filepath),
         )
 
-        # load all profiles from individual files in the profiles directory
+        # Load all profiles from individual files in the profiles directory
         for name in profile_files:
-            # load the profile from the file (we make sure to replace underscores
+            # Load the profile from the file (we make sure to replace underscores
             # with spaces and ".json" with "")
             self.profiles[
                 name.replace("_", " ").replace(".json", "")
@@ -64,17 +72,7 @@ class NucleicAcidProfileManager:
                 f'Loaded "%s" from "%s"', name, f"{self.profiles_filepath}/{name}.json"
             )
 
-        # attempt to load the restored state from the restored file
-        try:
-            self.current = NucleicAcidProfile.from_file(self.restored_filepath)
-        # if unable to locate nucleic acid settings file then make no changes and
-        # announce that the default settings will be used
-        except FileNotFoundError:
-            logger.warning("Restored profile file not found. Defaults restored.")
-            # by default choose B type DNA as the profile
-            self.current: NucleicAcidProfile = self.profiles["MFD B-DNA"]
-
-        # log that profiles were loaded
+        # Log that profiles were loaded
         logger.debug("Loaded profiles. Profiles: %s", self.profiles)
 
     def dump(self) -> None:
@@ -85,15 +83,14 @@ class NucleicAcidProfileManager:
         names of the files are the names of the profiles where spaces are replaced
         with underscores (loading is the reverse of this).
         """
-        # dump all profiles into individual files
+        # Dump all profiles into individual files
+        for filename in os.listdir(self.profiles_filepath):
+            filepath = f"{self.profiles_filepath}/{filename}"
+            os.remove(filepath)
+            logger.debug(f"Deleted nucleic acid profile file \"%s\"", filepath)
         for name, profile in self.profiles.items():
             name = name.replace(" ", "_")
             profile.to_file(f"{self.profiles_filepath}/{name}.json")
             logger.info(
                 f'Dumped "%s" into "%s"', name, f"{self.profiles_filepath}/{name}.json"
             )
-
-        # dump current settings into a separate "restored" file
-        with open(self.restored_filepath, "wb") as settings_file:
-            self.current.to_file(settings_file.name)
-            logger.info(f'Dumped current nucleic_acid settings into "{settings_file}"')

@@ -1,32 +1,22 @@
 import logging
 
+from runner.managers.manager import Manager
 from structures.strands.strands import Strands
 
 logger = logging.getLogger(__name__)
 
 
-class StrandsManager:
+class StrandsManager(Manager):
     """
     Manager for the application's strands.
 
     Attributes:
+        runner: NATuG's current runner.
         current: The current strands.
 
     Methods:
-        load: Load the strands from a file.
-        dump: Dump the strands into a file.
-        recompute: Recompute the strands.
+        recompute: Recompute the strands from the current doule helices.
     """
-
-    restored_filepath = "saves/strands/restored.nano"
-
-    def __init__(self, runner: "runner.Runner"):
-        """Initialize the strands module."""
-        self.runner = runner
-        self.current = None
-
-    def setup(self):
-        self.recompute()
 
     def recompute(self) -> Strands:
         """
@@ -38,8 +28,12 @@ class StrandsManager:
         Notes:
             This is a very expensive operation.
         """
+        # Clear all currently selected points since all the points are about to change.
         self.runner.managers.misc.currently_selected.clear()
+        # Recompute the double helices based off of the current domains.
         self.runner.managers.double_helices.recompute()
+        # Generate new strands using the strands() method of double helices.
         self.current = self.runner.managers.double_helices.current.strands()
+        # Log that the strands have been recomputed and return the new strands.
         logger.info("Recomputed strands.")
         return self.current

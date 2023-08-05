@@ -1,7 +1,8 @@
+from runner.managers.manager import Manager
 from structures.points import NEMid
 
 
-class MiscManager:
+class MiscManager(Manager):
     """
     Container for miscellaneous settings.
 

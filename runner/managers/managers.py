@@ -8,11 +8,21 @@ from runner.managers.toolbar import ToolbarManager
 
 
 class Managers:
+    """
+    A container for all of NATuG's managers.
+    """
+
     def __init__(self, runner: "Runner"):
+        """
+        Initialize a container for all of NATuG's managers.
+
+        Args:
+            runner: NATuG's current runner.
+        """
         self.runner = runner
 
         # Load in the various individual properties
-        self.nucleic_acid_profile = NucleicAcidProfileManager()
+        self.nucleic_acid_profile = NucleicAcidProfileManager(self.runner)
         self.domains = DomainsManager(self.runner)
         self.double_helices = DoubleHelicesManager(self.runner)
         self.strands = StrandsManager(self.runner)
@@ -22,16 +32,17 @@ class Managers:
         self.toolbar = ToolbarManager(self.runner)
         self.misc = MiscManager()
 
-    def setup(self):
-        """
-        Calls the setup methods of the various managers.
+    def fill_with_dummies(self):
+        """Fill current manager instances with dummy instances of various datatypes."""
+        # First load blank data structures
+        from structures.profiles import NucleicAcidProfile
+        from structures.helices import DoubleHelices
+        from structures.domains import Domains
 
-        The order in which managers are set up is very important, since some rely on
-        others being already set up (for example, we can't load the strands manager
-        until the nucleic acid profile manager has been loaded).
-        """
-        self.nucleic_acid_profile.setup()
-        self.domains.setup()
-        self.strands.setup()
-        self.toolbar.setup()
-        self.snapshots.setup()
+        # fmt: off
+        self.nucleic_acid_profile.current = nucleic_acid_profile = NucleicAcidProfile()
+        self.domains.current = domains = Domains.dummy(nucleic_acid_profile)
+        self.double_helices.current = double_helices = DoubleHelices.from_domains(
+            domains, nucleic_acid_profile)
+        self.strands.current = double_helices.strands()
+        # fmt: on

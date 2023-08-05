@@ -2,13 +2,14 @@ import logging
 import os
 
 import settings
+from runner.managers.manager import Manager
 from ui.config.tabs.snapshots import SnapshotsPanel
 from ui.config.tabs.snapshots.snapshot import Snapshot
 
 logger = logging.getLogger(__name__)
 
 
-class SnapshotsManager:
+class SnapshotsManager(Manager):
     """
     Manager for program snapshots.
 
@@ -19,23 +20,19 @@ class SnapshotsManager:
 
     filepath = "saves/snapshots"
 
-    def __init__(self, runner: "Runner"):
-        """
-        Initialize the snapshots manager.
-
-        Args:
-            runner: NATuG's runner.
-        """
-        self.current = None
-        self.runner = runner
-
     @property
     def snapshots(self) -> list[Snapshot]:
-        """Return a list of all the snapshots."""
+        """
+        Obtain a list of all the snapshots.
+
+        Returns:
+            A list of all the current `Snapshot`s. This is a wrapper on
+                self.current.snapshots.
+        """
         return self.current.snapshots
 
     def setup(self):
-        """Set up the snapshots module."""
+        """Load all the snapshots into the snapshots tab."""
         self.current = SnapshotsPanel(
             None,
             self.runner.load,
@@ -54,5 +51,4 @@ class SnapshotsManager:
             if len(snapshot_files) > 12
             else settings.default_snapshot_max_capacity
         )
-        self.current.take_snapshot()
         self.current.current_snapshot = self.current.snapshots[-1]
