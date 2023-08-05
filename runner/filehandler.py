@@ -134,9 +134,14 @@ class FileHandler:
 
             logger.info("Saved program state to %s.", filename)
 
-    def load(self, filename: str):
+    def load(self, filename: str, clear_nucleic_acid_profiles: bool):
         """
         Load the current state of the program.
+
+        Args:
+            filename: The file to load a program state from.
+            clear_nucleic_acid_profiles: Whether to clear the nucleic acid profiles from
+                 the respective panel.
         """
         items_by_uuid = {}
         nucleic_acid_profiles: Dict[str, structures.NucleicAcidProfile] = {}
@@ -430,8 +435,9 @@ class FileHandler:
             profile_manager = (
                 self.runner.window.config.panel.nucleic_acid.profile_manager
             )
-            for name, profile in tuple(profile_manager.profiles.items()):
-                profile_manager.delete(name, override=True)
+            if clear_nucleic_acid_profiles:
+                for name, profile in tuple(profile_manager.profiles.items()):
+                    profile_manager.delete(name, override=True)
             for name, profile in tuple(nucleic_acid_profiles.items()):
                 profile_manager.save(name, override=True)
             profile_manager.dumper(nucleic_acid_profile)
