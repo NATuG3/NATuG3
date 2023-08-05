@@ -6,6 +6,7 @@ from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
 from PyQt6.QtWidgets import QWidget
 
+import settings
 from structures.profiles import NucleicAcidProfile
 from ui.dialogs.refresh_confirmer.refresh_confirmer import RefreshConfirmer
 from ui.widgets.profile_manager import ProfileManager
@@ -155,7 +156,7 @@ class NucleicAcidPanel(QWidget):
             self.fetch_nucleic_acid_profile,
             self.dump_nucleic_acid_profile,
             profiles=copy(self.runner.managers.nucleic_acid_profile.profiles),
-            defaults=self.runner.managers.nucleic_acid_profile.default_profile_name,
+            defaults=[settings.default_nucleic_acid_profile],
         )
 
         # When a profile is loaded, update the domains. That's because it is possible

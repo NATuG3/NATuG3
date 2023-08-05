@@ -1,4 +1,6 @@
+import atexit
 import logging
+import os
 import sys
 
 import pyqtgraph as pg
@@ -35,6 +37,8 @@ class Runner:
         recompute: Recompute the top and side view, and then refresh the plots.
     """
 
+    restored_filepath = f"saves/restored.{settings.extension}"
+
     def __init__(self):
         from runner.application import Application
 
@@ -43,6 +47,15 @@ class Runner:
         self.managers = None
         self.filehandler = None
         self.booted = False
+
+        atexit.register(self.exit)
+
+    def exit(self):
+        """
+        Dump the program state at exit.
+        """
+        self.save(Runner.restored_filepath)
+        logger.info("Dumped program state to %s", Runner.restored_filepath)
 
     def setup(self):
         """
@@ -79,16 +92,28 @@ class Runner:
         # are set up is very important, since some rely on others being already set
         # up (for example, we can't load the strands manager until the nucleic acid
         # profile manager has been loaded).
-        self.managers.nucleic_acid_profile.setup()
-        self.managers.domains.setup()
-        self.managers.double_helices.setup()
-        self.managers.strands.setup()
         self.managers.snapshots.setup()
         logger.debug("Managers loaded.")
 
-        # Create a main window instance
+        # Create a Window instance but don't set it up yet
         self.window = ui.Window(self)
-        self.window.setup()
+
+        # Load the most recent program state
+        try:
+            if not os.path.isfile(Runner.restored_filepath):
+                raise FileNotFoundError
+            # Fill the current manager with dummy instances since the Window requires
+            # SOME instance of SOME sort in order to load (even if it's an empty list of
+            # domains).
+            self.managers.fill_with_dummies()
+            self.window.setup()
+            self.load(Runner.restored_filepath, clear_nucleic_acid_profiles=False)
+        except (KeyError, FileNotFoundError):
+            self.managers.nucleic_acid_profile.restore()
+            self.managers.double_helices.restore()
+            self.managers.strands.recompute()
+            self.window.setup()
+
         # We couldn't load the toolbar when we loaded the other managers because the
         # toolbar requires the main window to be created first.
         self.managers.toolbar.setup()
@@ -100,6 +125,11 @@ class Runner:
         # Set up the keyboard shortcuts
         self._setup_shortcuts()
 
+        # Resize the plots
+        self.window.side_view.plot.auto_range()
+        self.window.top_view.plot.auto_range()
+
+        # Set the booted flag to True
         self.booted = True
 
     def save(self, filepath: str | None = None):
@@ -127,13 +157,14 @@ class Runner:
         else:
             return False
 
-    def load(self, filepath: str | None = None):
+    def load(self, filepath: str | None = None, *args, **kwargs):
         """
         Load a program state from a .natug file.
 
         Args:
             filepath (str): The path to the file to load. If None, a file dialog
                 will be opened to select the file to load.
+            *args, **kwargs: Arguments to be funneled to the file loader.
 
         Returns:
             False: If the user cancelled the file dialog.
@@ -150,7 +181,7 @@ class Runner:
                 f"NATuG Package (*.{settings.extension})",
             )[0]
         if filepath:
-            self.filehandler.load(filepath)
+            self.filehandler.load(filepath, *args, **kwargs)
             return True
         else:
             return False
