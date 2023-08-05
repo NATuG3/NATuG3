@@ -122,11 +122,25 @@ class TopViewPlotter(Plotter):
         self.plot_data = PlotData()
 
         self.getViewBox().setDefaultPadding(0.18)
-        self.disableAutoRange()
 
         self._plot()
         self._prettify()
-        self.autoRange()
+        self.auto_range()
+
+    def auto_range(self):
+        # padding = self.circle_radius - .2
+        # view_box = self.getViewBox()
+        # view_box.setRange(
+        #     xRange=(
+        #         min(self.plot_data.u_coords) - padding,
+        #         max(self.plot_data.u_coords) + padding,
+        #     ),
+        #     yRange=(
+        #         min(self.plot_data.v_coords) - padding,
+        #         max(self.plot_data.v_coords) + padding,
+        #     ),
+        # )
+        QTimer.singleShot(0, self.getViewBox().autoRange)
 
     @pyqtSlot()
     def _point_clicked(self, event, points: List[pg.ScatterPlotItem]):
