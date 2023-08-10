@@ -289,6 +289,8 @@ class ProfileManager(QGroupBox):
                 )
 
             # no matter what, do not let the user alter default profiles
+            print(self.defaults)
+            print("potato")
             if chosen_profile_name in self.defaults:
                 logger.debug(
                     "Current profiles is a default profile. "

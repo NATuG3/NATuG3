@@ -34,7 +34,7 @@ class NucleicAcidProfile:
         write_worksheet: Write the NucleicAcidProfile to a tab in an Excel document.
     """
 
-    name: str = "MDF B-DNA"
+    name: str = "MFD B-DNA"
 
     D: float = 2.2
     H: float = 3.549

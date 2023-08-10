@@ -4,7 +4,7 @@ from typing import Dict
 
 from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal, pyqtSlot
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QPlainTextEdit
 
 import settings
 from structures.profiles import NucleicAcidProfile
@@ -54,30 +54,48 @@ class NucleicAcidPanel(QWidget):
         self._profile_manager()
 
         # load defaults
-        self.dump_nucleic_acid_profile(
-            self.runner.managers.nucleic_acid_profile.current
-        )
+        self.dump_nucleic_acid_profile(self.runner.managers.nucleic_acid_profile.current)
 
         # setup signals
         self._hook_signals()
 
         logger.debug("Loaded nucleic acid settings tab of config panel.")
 
+    def _inputs(self):
+        """Obtain a list of all the input widgets."""
+        return (
+            self.D,
+            self.H,
+            self.T,
+            self.g,
+            self.B,
+            self.Z_b,
+            self.Z_c,
+            self.Z_mate,
+            self.notes_area,
+        )
+
     def dump_nucleic_acid_profile(self, profile: NucleicAcidProfile) -> None:
         """Saves current settings to profiles with name in text edit input box."""
-        if profile != self.fetch_nucleic_acid_profile():
-            self.D.setValue(profile.D)
-            self.H.setValue(profile.H)
-            self.g.setValue(profile.g)
-            self.T.setValue(profile.T)
-            self.B.setValue(profile.B)
-            self.Z_c.setValue(profile.Z_c)
-            self.Z_b.setValue(profile.Z_b)
-            self.Z_mate.setValue(profile.Z_mate)
-            self.theta_b.setValue(profile.theta_b)
-            self.theta_c.setValue(profile.theta_c)
-            self.notes_area.setPlainText(profile.notes)
-            self.runner.snapshot()
+        try:
+            for input in self._inputs():
+                input.blockSignals(True)
+            if profile != self.fetch_nucleic_acid_profile():
+                self.D.setValue(profile.D)
+                self.H.setValue(profile.H)
+                self.g.setValue(profile.g)
+                self.T.setValue(profile.T)
+                self.B.setValue(profile.B)
+                self.Z_c.setValue(profile.Z_c)
+                self.Z_b.setValue(profile.Z_b)
+                self.Z_mate.setValue(profile.Z_mate)
+                self.theta_b.setValue(profile.theta_b)
+                self.theta_c.setValue(profile.theta_c)
+                self.notes_area.setPlainText(profile.notes)
+                self.runner.snapshot()
+        finally:
+            for input in self._inputs():
+                input.blockSignals(False)
 
     def fetch_nucleic_acid_profile(self) -> NucleicAcidProfile:
         """Fetch a profiles object with all current nucleic acid settings from
@@ -90,7 +108,7 @@ class NucleicAcidPanel(QWidget):
             B=self.B.value(),
             Z_c=self.Z_c.value(),
             Z_mate=self.Z_mate.value(),
-            notes=self.notes_area.toPlainText()
+            notes=self.notes_area.toPlainText(),
         )
         logger.debug("Fetched nucleic acid settings from inputs. (%s)", profile)
         return profile
@@ -139,11 +157,15 @@ class NucleicAcidPanel(QWidget):
             self.B,
             self.Z_b,
             self.Z_c,
-            self.Z_mate
+            self.Z_mate,
         ):
             input_.editingFinished.connect(self._on_input_updated)
 
-        self.notes_area.textChanged.connect(self._on_input_updated)
+        def notes_area_altered_focus_out_event(*args, **kwargs):
+            super(QPlainTextEdit, self.notes_area).focusOutEvent(*args, **kwargs)
+            self._on_input_updated()
+
+        self.notes_area.focusOutEvent = notes_area_altered_focus_out_event
 
     def _profile_manager(self):
         """
@@ -160,7 +182,7 @@ class NucleicAcidPanel(QWidget):
             self.fetch_nucleic_acid_profile,
             self.dump_nucleic_acid_profile,
             profiles=copy(self.runner.managers.nucleic_acid_profile.profiles),
-            defaults=[settings.default_nucleic_acid_profiles],
+            defaults=settings.default_nucleic_acid_profiles,
         )
 
         # When a profile is loaded, update the domains. That's because it is possible
@@ -169,7 +191,9 @@ class NucleicAcidPanel(QWidget):
         self.profile_manager.profile_loaded.connect(self._push_updates)
 
         def profiles_dict_update():
-            self.runner.managers.nucleic_acid_profile.profiles = self.profile_manager.profiles
+            self.runner.managers.nucleic_acid_profile.profiles = (
+                self.profile_manager.profiles
+            )
 
         self.profile_manager.profile_saved.connect(profiles_dict_update)
         self.profile_manager.profile_deleted.connect(profiles_dict_update)
