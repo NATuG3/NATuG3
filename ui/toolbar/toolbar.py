@@ -29,6 +29,7 @@ class Toolbar(QToolBar):
         repeat: The checkbox that holds the "repeat" checkbox and indicates whether
             to repeat the action across many nucleosides.
         program_label: The label that holds the program name.
+        save_button: A button alias to allow the user to save the current program state.
         spacer: The spacer that holds the space between the toolbar cations and the
             program label.
         runner: NATuG's runner.
@@ -72,6 +73,10 @@ class Toolbar(QToolBar):
             QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding
         )
         self.addWidget(self.spacer)
+
+        self.save_button = QPushButton("Save All")
+        self.save_button.clicked.connect(self.runner.save)
+        self.addWidget(self.save_button)
 
         self.program_label = QLineEdit(f"{settings.name} {settings.version}")
         self.program_label.setEnabled(False)
