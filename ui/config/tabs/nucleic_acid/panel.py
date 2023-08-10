@@ -76,6 +76,7 @@ class NucleicAcidPanel(QWidget):
             self.Z_mate.setValue(profile.Z_mate)
             self.theta_b.setValue(profile.theta_b)
             self.theta_c.setValue(profile.theta_c)
+            self.notes_area.setPlainText(profile.notes)
             self.runner.snapshot()
 
     def fetch_nucleic_acid_profile(self) -> NucleicAcidProfile:
@@ -89,6 +90,7 @@ class NucleicAcidPanel(QWidget):
             B=self.B.value(),
             Z_c=self.Z_c.value(),
             Z_mate=self.Z_mate.value(),
+            notes=self.notes_area.toPlainText()
         )
         logger.debug("Fetched nucleic acid settings from inputs. (%s)", profile)
         return profile
@@ -137,9 +139,11 @@ class NucleicAcidPanel(QWidget):
             self.B,
             self.Z_b,
             self.Z_c,
-            self.Z_mate,
+            self.Z_mate
         ):
             input_.editingFinished.connect(self._on_input_updated)
+
+        self.notes_area.textChanged.connect(self._on_input_updated)
 
     def _profile_manager(self):
         """

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>449</width>
-    <height>393</height>
+    <height>381</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,6 +26,19 @@
    <property name="bottomMargin">
     <number>2</number>
    </property>
+   <item>
+    <widget class="QPlainTextEdit" name="notes_area">
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>55</height>
+      </size>
+     </property>
+     <property name="placeholderText">
+      <string>Notes about the current nucleic acid profile can go here</string>
+     </property>
+    </widget>
+   </item>
    <item>
     <widget class="QGroupBox" name="nucleic_acid_settings">
      <property name="title">
@@ -50,7 +63,7 @@
       <property name="verticalSpacing">
        <number>6</number>
       </property>
-      <item row="8" column="0" colspan="2">
+      <item row="9" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout_3">
         <property name="horizontalSpacing">
          <number>20</number>
@@ -200,14 +213,21 @@
         </item>
        </layout>
       </item>
-      <item row="6" column="0" colspan="2">
+      <item row="7" column="0" colspan="2">
        <widget class="Line" name="line">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>
-      <item row="0" column="0" colspan="2">
+      <item row="2" column="0" colspan="2">
+       <widget class="Line" name="nucleic_acid_settings_splitter">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout_2">
         <property name="horizontalSpacing">
          <number>16</number>
@@ -507,14 +527,7 @@
         </item>
        </layout>
       </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="Line" name="nucleic_acid_settings_splitter">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout_7">
         <property name="horizontalSpacing">
          <number>20</number>

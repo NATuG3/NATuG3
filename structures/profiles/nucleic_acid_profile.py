@@ -25,6 +25,7 @@ class NucleicAcidProfile:
         Z_c: Characteristic height.
         Z_mate: Nucleoside-Mate Vertical Distance.
         theta_s: Switch angle.
+        notes: Notes about the nucleic acid profile.
         uuid: The uuid of the nucleic acid profile. This is automatically generated.
 
     Methods:
@@ -41,8 +42,8 @@ class NucleicAcidProfile:
     T: int = 2
     B: int = 21
     Z_c: float = 0.17
+    notes: str = ""
     Z_mate: float = 0.094
-    # theta_s: float = 2.343 - Commented out Bill 2/12/23
 
     uuid: str = field(default_factory=lambda: str(uuid1()))
 

@@ -13,7 +13,7 @@ cross_screen_line_length = 0.3
 domain_line_point_shift = 0.04
 default_domain_preset = "hexagon"
 default_nucleic_acid_profile = "MFD B-DNA"
-default_nucleic_acid_profile = ["MFD B-DNA"]
+default_nucleic_acid_profiles = ["MFD B-DNA"]
 
 colors = {
     "grid_lines": {
