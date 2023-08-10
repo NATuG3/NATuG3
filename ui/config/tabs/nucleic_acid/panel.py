@@ -156,7 +156,7 @@ class NucleicAcidPanel(QWidget):
             self.fetch_nucleic_acid_profile,
             self.dump_nucleic_acid_profile,
             profiles=copy(self.runner.managers.nucleic_acid_profile.profiles),
-            defaults=[settings.default_nucleic_acid_profile],
+            defaults=[settings.default_nucleic_acid_profiles],
         )
 
         # When a profile is loaded, update the domains. That's because it is possible
