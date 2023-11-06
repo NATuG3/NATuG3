@@ -19,6 +19,9 @@ It is advised that you [create a virtual environment](https://docs.python.org/3/
 <hr>
 
 ## Poster on NATuG
+
+![image](https://github.com/NATuG3/NATuG3/assets/108041238/e4786e19-9ac6-450e-ba80-2c12580d6b44)
+
 [NATuG_poster.pdf](https://github.com/NATuG3/NATuG3/files/13273515/NATuG_poster.pdf)
 
 ## Program screenshots
