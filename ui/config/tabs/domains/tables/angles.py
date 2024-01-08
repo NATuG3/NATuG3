@@ -18,9 +18,3 @@ class DomainsAnglesTable(DomainsBaseTable):
         )
         # Store the nucleic acid nucleic_acid_profile
         self.nucleic_acid_profile = nucleic_acid_profile
-
-    def _prettify(self):
-        super()._prettify()
-
-        # Use ResizeToContents for the header size policy
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)

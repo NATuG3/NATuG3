@@ -15,12 +15,3 @@ class DomainsCountsTable(DomainsBaseTable):
             parent,
             ["Up Helix Counts", "Down Helix Counts"],
         )
-
-    def _prettify(self):
-        super()._prettify()
-
-        # All columns are stretch sized
-        for index, column in enumerate(range(self.columnCount())):
-            self.horizontalHeader().setSectionResizeMode(
-                index, QHeaderView.ResizeMode.Stretch
-            )

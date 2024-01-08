@@ -2,7 +2,7 @@ from typing import List
 
 from PyQt6.QtCore import QEvent, Qt
 from PyQt6.QtGui import QKeyEvent
-from PyQt6.QtWidgets import QTableWidget, QAbstractItemView, QApplication
+from PyQt6.QtWidgets import QTableWidget, QAbstractItemView, QApplication, QHeaderView
 
 
 class DomainsBaseTable(QTableWidget):
@@ -87,3 +87,6 @@ class DomainsBaseTable(QTableWidget):
 
         # Enable smooth scrolling
         self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+
+        # Change the size of the table headers
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
