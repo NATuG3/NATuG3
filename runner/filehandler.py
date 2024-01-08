@@ -133,7 +133,7 @@ class FileHandler:
 
             logger.info("Saved program state to %s.", filename)
 
-    def load(self, filename: str, clear_nucleic_acid_profiles: bool):
+    def load(self, filename: str, clear_nucleic_acid_profiles: bool = True):
         """
         Load the current state of the program.
 
