@@ -1,6 +1,7 @@
 from copy import copy
 from typing import Iterable, List
 
+import structures
 from structures.profiles import NucleicAcidProfile
 from utils import inverse
 
@@ -32,7 +33,7 @@ class Subunit:
     def __init__(
         self,
         nucleic_acid_profile: NucleicAcidProfile,
-        domains: List["Domain"],
+        domains: List["structures.domains.Domain"],
         template: bool = False,
         parent: "Domains" = None,
     ) -> None:

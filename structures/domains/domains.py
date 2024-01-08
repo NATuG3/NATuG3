@@ -171,14 +171,30 @@ class Domains:
         return pd.DataFrame(data)
 
     @classmethod
-    def dummy(cls, nucleic_acid_profile: NucleicAcidProfile):
+    def dummy(
+        cls,
+        symmetry=1,
+        nucleic_acid_profile: NucleicAcidProfile = None,
+        antiparallel=False,
+        theta_m_multiples: List[int] = None,
+    ):
         """An arbitrary minimal Domains object."""
+        nucleic_acid_profile = nucleic_acid_profile or NucleicAcidProfile()
+        theta_m_multiples = theta_m_multiples or [4, 4]
         fake_domains = []
-        for i in range(2):
+        for i, theta_m_multiples in enumerate(theta_m_multiples):
             fake_domains.append(
-                Domain(nucleic_acid_profile, 4, 0, 0, (1, 1, 1), (1, 1, 1), index=i)
+                Domain(
+                    nucleic_acid_profile,
+                    theta_m_multiples,
+                    0,
+                    0,
+                    (1, 1, 1),
+                    (1, 1, 1),
+                    index=i,
+                )
             )
-        return cls(nucleic_acid_profile, fake_domains, 1, False)
+        return cls(nucleic_acid_profile, fake_domains, symmetry, antiparallel)
 
     @classmethod
     def from_df(
@@ -319,8 +335,10 @@ class Domains:
 
         for index in range(3, self.count + 2):
             coords[index] = (
-                coords[index - 1][0] + diameter * math.cos(math.radians(absolute_angle)),
-                coords[index - 1][1] + diameter * math.sin(math.radians(absolute_angle)),
+                coords[index - 1][0]
+                + diameter * math.cos(math.radians(absolute_angle)),
+                coords[index - 1][1]
+                + diameter * math.sin(math.radians(absolute_angle)),
             )
             with suppress(IndexError):
                 absolute_angle += 180 - domains[index - 1].theta_i
