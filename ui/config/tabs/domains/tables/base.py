@@ -73,13 +73,14 @@ class DomainsBaseTable(QTableWidget):
         """Configure top headers of widget"""
         # Create a column for each header
         self.setColumnCount(len(self.top_headers))
+
         # Apply the headers
         self.setHorizontalHeaderLabels(self.top_headers)
 
     def _prettify(self):
         """Style the domain panel."""
         # Set the style worksheet of the panel
-        self.setStyleSheet("QTableView::item{padding: 3.25px; text-align: center}")
+        self.setStyleSheet("QTableView::item{ padding: 3.25px; text-align: center }")
 
         # Show table grid
         self.setShowGrid(True)

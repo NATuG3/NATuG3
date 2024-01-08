@@ -107,7 +107,6 @@ class TopViewPlotter(Plotter):
             padding: Padding of the plot to use when auto-ranging. Defaults to 0.15.
             title: Title of the plot. No title is shown if None. Defaults to None.
         """
-
         super().__init__()
 
         self.circle_radius = circle_radius
@@ -142,10 +141,11 @@ class TopViewPlotter(Plotter):
         QTimer.singleShot(0, self.getViewBox().autoRange)
 
     @pyqtSlot()
-    def _point_clicked(self, event, points: List[pg.ScatterPlotItem]):
+    def _point_clicked(self, event=None, points: List[pg.ScatterPlotItem]=None):
         """Slot for when points are clicked."""
-        point = points[0].pos()
-        self.point_clicked.emit(tuple(point))
+        if points:
+            point = points[0].pos()
+            self.point_clicked.emit(tuple(point))
 
     def refresh(self):
         """Refresh the plot."""

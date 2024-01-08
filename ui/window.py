@@ -6,7 +6,9 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QMenuBar,
     QWidget,
-    QTabWidget, QHBoxLayout, QSplitter,
+    QTabWidget,
+    QHBoxLayout,
+    QSplitter,
 )
 
 import settings
@@ -45,6 +47,7 @@ class Window(QMainWindow):
         """
         if self._setup:
             raise RuntimeError("Cannot set up the main window multiple times.")
+
         self._setup_plots()
         self._setup_config()
         self._setup_status_bar()
@@ -102,13 +105,16 @@ class Window(QMainWindow):
         plot_container = QSplitter()
         plot_container.setHandleWidth(5)
         central_widget.layout().addWidget(plot_container)
+        logger.debug("Created plot container.")
 
         self.top_view = TopViewPanel(self, self.runner)
         self.side_view = SideViewPanel(self, self.runner)
+        logger.debug("Created plots.")
 
         plot_container.addWidget(self.top_view)
         plot_container.addWidget(self.side_view)
         plot_container.setSizes([250, 520])
+        logger.debug("Added plots to plot container.")
 
         self.setCentralWidget(central_widget)
 

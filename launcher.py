@@ -57,12 +57,14 @@ def main():
 
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(__name__)
 
+    # create the splash screen
     splash_screen = SplashScreen()
     splash_screen.show()
 
     # set up the runner
     runner.setup()
 
+    # close the splash screen and run the program
     splash_screen.finish(runner.window)
 
     # close the splash screen and run the program

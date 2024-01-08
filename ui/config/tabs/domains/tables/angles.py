@@ -22,14 +22,5 @@ class DomainsAnglesTable(DomainsBaseTable):
     def _prettify(self):
         super()._prettify()
 
-        self.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)
-        self.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)
-        self.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Fixed)
-        self.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeMode.Fixed)
-        self.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)
-
-        self.setColumnWidth(0, 40)
-        self.setColumnWidth(1, 40)
-        self.setColumnWidth(2, 45)
-        self.setColumnWidth(3, 45)
-        # self.setColumnWidth(4, 60)
+        # Use ResizeToContents for the header size policy
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)

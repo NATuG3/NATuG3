@@ -2,7 +2,7 @@ PyQt6==6.4.0
 PyQt6-Qt6==6.4.0
 pyqtgraph==0.13.1
 PyOpenGL
-numpy==1.23.5
+numpy
 show-in-file-manager==1.1.4
 pandas==1.5.2
 xlwt==1.3.0

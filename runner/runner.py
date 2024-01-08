@@ -83,11 +83,13 @@ class Runner:
         from runner.filehandler import FileHandler
 
         self.filehandler = FileHandler(self)
+        logger.debug("Filehandler created")
 
         # Load in all the managers
         from runner.managers import Managers
 
         self.managers = Managers(self)
+        logger.debug("Managers created.")
 
         # Call the setup methods of the various managers. The order in which managers
         # are set up is very important, since some rely on others being already set
@@ -98,6 +100,7 @@ class Runner:
 
         # Create a Window instance but don't set it up yet
         self.window = ui.Window(self)
+        logger.debug("Main window created.")
 
         # Load the most recent program state
         try:
@@ -109,12 +112,17 @@ class Runner:
             self.managers.fill_with_dummies()
             self.window.setup()
             self.load(Runner.restored_filepath, clear_nucleic_acid_profiles=False)
+            logger.info("Restored program state from %s", Runner.restored_filepath)
         except (KeyError, FileNotFoundError):
+            logger.warning("No program state to restore.")
+
             self.managers.nucleic_acid_profile.restore()
             self.managers.double_helices.restore()
             self.managers.strands.recompute()
-            with suppress(RuntimeError):
-                self.window.setup()
+            logger.debug("Restored default program state.")
+
+            self.window.setup()
+            logger.debug("Main window set up.")
 
         # We couldn't load the toolbar when we loaded the other managers because the
         # toolbar requires the main window to be created first.
@@ -123,13 +131,16 @@ class Runner:
 
         # Set up the application
         self.application.setup()
+        logger.debug("Application set up.")
 
         # Set up the keyboard shortcuts
         self._setup_shortcuts()
+        logger.debug("Keyboard shortcuts set up.")
 
         # Resize the plots
         self.window.side_view.plot.auto_range()
         self.window.top_view.plot.auto_range()
+        logger.debug("Plots resized.")
 
         # Set the booted flag to True
         self.booted = True
