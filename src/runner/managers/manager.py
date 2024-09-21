@@ -12,7 +12,7 @@ class Manager:
         current: The current instance of what is being managed.
     """
 
-    def __init__(self, runner: "Runner", managee: object = None):
+    def __init__(self, runner: "Runner", manager: object = None):
         """
         Create an instance of a manager.
 
@@ -20,8 +20,8 @@ class Manager:
             managee: The current instance of the thing being managed.
         """
         self._current = None
-        self._managee_type = None
-        self.current = managee
+        self._manager_type = None
+        self.current = manager
         self.runner = runner
 
     @property
@@ -38,11 +38,11 @@ class Manager:
             value: The new managee instance. Must be of the same type of the manage
                 that was set at init.
         """
-        if self._managee_type is None and value is not None:
-            self._managee_type = type(value)
-        if self._managee_type is not None and not isinstance(value, self._managee_type):
+        if self._manager_type is None and value is not None:
+            self._manager_type = type(value)
+        if self._manager_type is not None and not isinstance(value, self._manager_type):
             raise TypeError(
                 f"Cannot set {self.__class__}.current to type other than "
-                f"{self._managee_type}. Got {type(value)}."
+                f"{self._manager_type}. Got {type(value)}."
             )
         self._current = value
