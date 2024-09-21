@@ -1,5 +1,6 @@
 import logging
 import os
+import platform
 import tempfile
 from functools import cache
 
@@ -29,4 +30,6 @@ def fetch_icon(name: str, folder="generic_icons") -> QIcon:
     if not os.path.exists(icon_path):
         logger.warning(f"Icon not found: {icon_path}")
         return QIcon()
-    return QIcon(convert_svg_to_png(icon_path))
+    if platform.system() == "Linux":
+        icon_path = convert_svg_to_png(icon_path)
+    return QIcon()

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "natug"
-version = "3.0.3"
+version = "3.0.5"
 description = "Nucleic acid design desktop application"
 authors = ["Wolf Mermelstein <wolfmermelstein@gmail.com>"]
 readme = "README.md"
@@ -19,6 +19,7 @@ openpyxl = "^3.1.5"
 pyqt6-sip = "^13.8.0"
 matplotlib = "^3.9.2"
 xlsxwriter = "^3.2.0"
+cairosvg = "^2.7.1"
 
 [tool.poetry.scripts]
 natug = "natug:launch"

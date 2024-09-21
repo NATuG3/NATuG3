@@ -10,3 +10,4 @@ openpyxl
 PyQt6-sip
 matplotlib
 xlsxwriter
+cairosvg
