@@ -45,6 +45,7 @@ def launch():
             os.path.join(os.path.dirname(__file__), "saves"),
             "saves",
         )
+        os.mkdir("saves/snapshots")
     else:
         for directory in (
             f"saves/domains",

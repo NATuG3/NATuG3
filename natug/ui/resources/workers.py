@@ -4,7 +4,9 @@ import platform
 import tempfile
 from functools import cache
 
-from cairosvg import svg2png
+if platform.system() == "Linux":
+    from cairosvg import svg2png
+
 from PyQt6.QtGui import QIcon
 
 from natug.runner import Runner

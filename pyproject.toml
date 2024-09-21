@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "natug"
-version = "3.0.5"
+version = "3.0.6"
 description = "Nucleic acid design desktop application"
 authors = ["Wolf Mermelstein <wolfmermelstein@gmail.com>"]
 readme = "README.md"
