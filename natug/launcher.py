@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import sys
 from contextlib import suppress
 from time import time
@@ -38,14 +39,21 @@ def launch():
         for snapshot in os.listdir("saves/snapshots"):
             os.remove(f"saves/snapshots/{snapshot}")
 
-    for directory in (
-        f"saves/domains",
-        f"saves/strands",
-        f"saves/nucleic_acid",
-        f"saves/snapshots",
-    ):
-        with suppress(FileExistsError):
-            os.mkdir(directory)
+    if not os.path.exists("saves"):
+        # Copy over the saves folder from __file__/saves to ./saves
+        shutil.copytree(
+            os.path.join(os.path.dirname(__file__), "saves"),
+            "saves",
+        )
+    else:
+        for directory in (
+            f"saves/domains",
+            f"saves/strands",
+            f"saves/nucleic_acid",
+            f"saves/snapshots",
+        ):
+            with suppress(FileExistsError):
+                os.mkdir(directory)
 
     logger.debug(f"Booting @ %s", {time()})
 
