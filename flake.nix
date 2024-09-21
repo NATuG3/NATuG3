@@ -46,8 +46,10 @@
           default = pkgs.mkShell {
             packages = [
               python
-              pkgs.pyright
+              pkgs.poetry
+              pkgs.isort
               pkgs.black
+              pkgs.pyright
             ];
           };
         };

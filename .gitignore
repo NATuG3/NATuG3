@@ -1,6 +1,8 @@
 # Nix Stuff
 *.natug
 saves/snapshots
+dist
+build
 .direnv
 result
 
