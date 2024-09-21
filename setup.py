@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 
 setup(
-    name="NATuG",
+    name="natug",
     version="3.0.1",
     packages=find_packages(),
     include_package_data=True,
@@ -9,6 +9,7 @@ setup(
         "PyQt6",
         "pyqtgraph",
         "PyOpenGL",
+        "cairosvg",
         "numpy",
         "show-in-file-manager",
         "pandas",
@@ -20,8 +21,11 @@ setup(
     ],
     entry_points={
         "console_scripts": [
-            "NATuG=natug:launch",
+            "natug=natug:launch",
         ],
+    },
+    package_data={
+        "natug": ["**/*.ui", "**/*.png", "**/*.svg"],
     },
     author="Wolf Mermelstein",
     author_email="wolfmermelstein@gmail.com",

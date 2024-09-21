@@ -2,7 +2,9 @@ import atexit
 import logging
 import os
 import sys
+from pathlib import Path
 
+import PyQt6.uic
 import pyqtgraph as pg
 from PyQt6.QtGui import QAction, QKeySequence
 from PyQt6.QtWidgets import QFileDialog
@@ -10,6 +12,39 @@ from PyQt6.QtWidgets import QFileDialog
 from natug import settings, ui
 
 logger = logging.getLogger(__name__)
+
+
+# All of the PyQt .ui files are stored in the natug directory, and load in at
+# run time relative to the current working directory. However, the current
+# working directory can change depending on how the program is run. To ensure
+# that the .ui files are always loaded in correctly, we need to set the path to
+# the natug directory as the path that this file exists at, up a level.
+
+# To do this we simply monkey patch loadUi so that all of the calls to loadUi
+# are relative to the correct path.
+
+natug_path = (
+    Path(__file__)
+    .resolve()
+    .parents[[p.name for p in Path(__file__).parents].index("natug")]
+)
+
+original_loadUi = PyQt6.uic.loadUi
+
+
+def loadUi(*args, **kwargs):
+    if (pyqt_loadui_root := os.getenv("PYQT_LOADUI_ROOT")) is not None:
+        return original_loadUi(*(Path(pyqt_loadui_root) / args[0],), **kwargs)
+    return original_loadUi(
+        *(
+            natug_path / args[0],
+            *args[1:],
+        ),
+        **kwargs,
+    )
+
+
+PyQt6.uic.loadUi = loadUi
 
 
 class Runner:
@@ -47,6 +82,10 @@ class Runner:
         self.booted = False
 
         atexit.register(self.exit)
+
+    @staticmethod
+    def root() -> Path:
+        return natug_path
 
     def exit(self):
         """
