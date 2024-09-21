@@ -1,5 +1,10 @@
-{python3Packages, ...}:
-python3Packages.buildPythonApplication {
+{
+  python3Packages,
+  stdenv,
+  rsync,
+  ...
+}:
+python3Packages.buildPythonApplication rec {
   name = "natug";
   version = "3.0.1";
   buildInputs = [python3Packages.setuptools];
@@ -17,6 +22,14 @@ python3Packages.buildPythonApplication {
     qtpy
     cairosvg
   ];
-  src = ./.;
+  src = stdenv.mkDerivation {
+    inherit name version;
+    src = ./.;
+    dontUnpack = true;
+    nativeBuildInputs = [rsync];
+    installPhase = ''
+      rsync -av --exclude 'pyproject.toml' "$src/" "$out/"
+    '';
+  };
   pyproject = true;
 }
