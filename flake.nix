@@ -1,5 +1,5 @@
 {
-  description = "";
+  description = "Nucleic Acid Nanotube Plotting Software";
 
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
@@ -28,6 +28,10 @@
           pyPkgs.xlsxwriter
         ]);
       in {
+        packages = rec {
+          default = natug;
+          natug = pkgs.callPackage ./package.nix {};
+        };
         devShells = {
           default = pkgs.mkShell {
             packages = [

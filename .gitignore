@@ -1,4 +1,5 @@
 # Nix Stuff
+*.natug
 saves/snapshots
 .direnv
 result
