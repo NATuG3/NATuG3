@@ -1,0 +1,5 @@
+data:m,data:left_helix_joints,data:right_helix_joints,data:up_helix_counts,data:down_helix_counts,data:symmetry,data:antiparallel
+10,UP,UP,0&60&0,0&60&0,3.0,True
+5,DOWN,DOWN,0&60&0,0&60&0,,
+11,UP,UP,0&60&0,0&60&0,,
+9,DOWN,DOWN,0&60&0,0&60&0,,

@@ -1,0 +1,3 @@
+data:m,data:left_helix_joints,data:right_helix_joints,data:up_helix_counts,data:down_helix_counts,data:symmetry,data:antiparallel
+4,UP,UP,1&1&1,1&1&1,1.0,False
+4,UP,UP,1&1&1,1&1&1,,

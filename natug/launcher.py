@@ -3,6 +3,7 @@ import os
 import shutil
 import sys
 from contextlib import suppress
+from pathlib import Path
 from time import time
 
 from natug.runner import Runner
@@ -18,6 +19,17 @@ logging.getLogger("PyQt6").setLevel(logging.WARNING)
 
 # create the main program runner
 runner = Runner()
+
+
+def copy_files(src, dst):
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            os.makedirs(d, exist_ok=True)
+            copy_files(s, d)
+        else:
+            shutil.copyfile(s, d)
 
 
 def launch():
@@ -41,11 +53,8 @@ def launch():
 
     if not os.path.exists("saves"):
         # Copy over the saves folder from __file__/saves to ./saves
-        shutil.copytree(
-            os.path.join(os.path.dirname(__file__), "saves"),
-            "saves",
-        )
-        os.mkdir("saves/snapshots")
+        copy_files(Path(__file__).parent / "saves", "saves")
+        os.mkdir(Path.cwd() / "saves/snapshots")
     else:
         for directory in (
             f"saves/domains",
@@ -54,7 +63,7 @@ def launch():
             f"saves/snapshots",
         ):
             with suppress(FileExistsError):
-                os.mkdir(directory)
+                os.mkdir(Path.cwd() / directory)
 
     logger.debug(f"Booting @ %s", {time()})
 

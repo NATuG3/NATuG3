@@ -25,7 +25,7 @@ setup(
         ],
     },
     package_data={
-        "natug": ["**/*.ui", "**/*.png", "**/*.svg", "saves"],
+        "natug": ["**/*.ui", "**/*.png", "**/*.svg", "**/saves/**/*"],
     },
     author="Wolf Mermelstein",
     author_email="wolfmermelstein@gmail.com",
