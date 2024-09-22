@@ -1,8 +1,7 @@
 from PyQt6.QtCore import Qt, pyqtSlot
 from PyQt6.QtWidgets import QGroupBox, QSlider, QVBoxLayout
 
-import natug.runner.managers.nucleic_acid_profile
-from natug import utils
+from natug import runner, utils
 from natug.structures.domains import Domain
 from natug.ui import plotters
 from natug.ui.dialogs.refresh_confirmer.refresh_confirmer import \
@@ -98,7 +97,7 @@ class TopViewPanel(QGroupBox):
         Inverts the two domains clicked.
         """
 
-        if runner.managers.nucleic_acid_profile.NucleicAcidProfile.B < 3:
+        if self.runner.managers.nucleic_acid_profile.current.B < 3:
             utils.warning(
                 self,
                 "Failure to invert",

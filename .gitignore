@@ -367,3 +367,5 @@ poetry.toml
 .ruff_cache/
 
 # End of https://www.toptal.com/developers/gitignore/api/pycharm,jetbrains,python
+saves/nucleic_acid/MFD_B-DNA.json
+saves/nucleic_acid/Restored.json
