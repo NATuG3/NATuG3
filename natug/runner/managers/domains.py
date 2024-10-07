@@ -30,3 +30,6 @@ class DomainsManager(Manager):
             self.runner.managers.nucleic_acid_profile.current,
         )
         logger.info("Restored previous domain editor state.")
+
+
+
