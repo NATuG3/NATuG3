@@ -12,6 +12,8 @@ from natug.utils import Timer
 logger = logging.getLogger(__name__)
 
 
+vectorized_x_coords_from_angles = np.vectorize(x_coord_from_angle)
+
 def x_coords_from_angles(angles: np.ndarray, domain: "Domain") -> np.ndarray:
     """
     Compute the x coords from the angles.
@@ -22,7 +24,7 @@ def x_coords_from_angles(angles: np.ndarray, domain: "Domain") -> np.ndarray:
     Returns:
         The x coords.
     """
-    return np.array([x_coord_from_angle(angle, domain) for angle in angles])
+    return vectorized_x_coords_from_angles(angles, domain)
 
 
 class DoubleHelices:

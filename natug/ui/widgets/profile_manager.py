@@ -2,9 +2,9 @@ import logging
 from copy import copy
 from typing import Callable, Dict, Iterable
 
+from PyQt6 import uic
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import QGroupBox
-from PyQt6 import uic
 
 from natug import utils
 from natug.ui.resources import fetch_icon
