@@ -10,17 +10,19 @@
     };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    ...
-  } @ inputs:
+  outputs =
+    {
+      self,
+      nixpkgs,
+      flake-utils,
+      ...
+    }@inputs:
     flake-utils.lib.eachDefaultSystem (
-      system: let
-        pkgs = import nixpkgs {inherit system;};
-        python = pkgs.python3.withPackages (pyPkgs:
-          with pyPkgs; [
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        python = pkgs.python3.withPackages (
+          pyPkgs: with pyPkgs; [
             pyqtgraph
             pyopengl
             numpy
@@ -33,11 +35,13 @@
             pyqt6
             qtpy
             cairosvg
-          ]);
-      in {
+          ]
+        );
+      in
+      {
         packages = rec {
           default = natug;
-          natug = pkgs.callPackage ./package.nix {};
+          natug = pkgs.callPackage ./package.nix { };
           natug-appimage = inputs.nix-bundle.lib.${system}.mkAppImage {
             program = "${natug}/bin/natug";
           };
@@ -49,7 +53,7 @@
               pkgs.poetry
               pkgs.isort
               pkgs.black
-              pkgs.pyright
+              pkgs.pyrefly
             ];
           };
         };
