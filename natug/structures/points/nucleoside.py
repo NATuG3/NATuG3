@@ -28,7 +28,7 @@ class Nucleoside(Point):
         try:
             other_helix = self.helix.other_helix()
             return other_helix.data.points[len(other_helix) - 1 - self.helical_index]
-        except IndexError:
+        except (IndexError, AttributeError):
             return None
 
     @matching.setter
