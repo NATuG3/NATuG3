@@ -75,6 +75,13 @@ class SideViewPanel(QGroupBox):
         self.plot.point_types = self.runner.managers.misc.plot_types
         self.plot.refresh()
 
+    def _clear_linker_selection(self) -> None:
+        """Reset any in-progress linker selection."""
+        currently_selected = self.runner.managers.misc.currently_selected
+        for point in currently_selected:
+            point.styles.change_state("default")
+        currently_selected.clear()
+
     @pyqtSlot(object)
     def _on_linkage_clicked(self, linkage: Linkage) -> None:
         """
@@ -85,6 +92,10 @@ class SideViewPanel(QGroupBox):
         Args:
             linkage: The linkage that was clicked.
         """
+        if self.runner.managers.toolbar.current == LINKER:
+            self._clear_linker_selection()
+            return
+
         dialog = LinkageConfig(self.parent(), linkage)
         dialog.updated.connect(self.refresh)
         dialog.finished.connect(self.runner.snapshot)
@@ -103,6 +114,10 @@ class SideViewPanel(QGroupBox):
         Args:
             strand: The strand that was clicked.
         """
+        if self.runner.managers.toolbar.current == LINKER:
+            self._clear_linker_selection()
+            return
+
         dialog = StrandConfig(self.parent(), strand=strand)
         dialog.updated.connect(self.refresh)
         dialog.finished.connect(self.runner.snapshot)
