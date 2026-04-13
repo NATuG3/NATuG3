@@ -139,6 +139,7 @@ class Runner:
         logger.debug("Main window created.")
 
         # Load the most recent program state
+        window_ready = False
         try:
             if not os.path.isfile(Runner.restored_filepath):
                 raise FileNotFoundError
@@ -147,11 +148,16 @@ class Runner:
             # domains).
             self.managers.fill_with_dummies()
             self.window.setup()
+            window_ready = True
             self.load(Runner.restored_filepath, clear_nucleic_acid_profiles=False)
             logger.info("Restored program state from %s", Runner.restored_filepath)
-        except (KeyError, FileNotFoundError):
+        except FileNotFoundError:
             logger.warning("No program state to restore.")
+        except KeyError as e:
+            logger.warning("Save file corrupt or incompatible (%s), resetting.", e)
+            self.managers.fill_with_dummies()
 
+        if not window_ready:
             self.managers.nucleic_acid_profile.restore()
             self.managers.double_helices.restore()
             self.managers.strands.recompute()

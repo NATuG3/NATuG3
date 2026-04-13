@@ -248,7 +248,7 @@ class FileHandler:
 
                 # Now change the juncmate uuids to actual NEMid objects
                 for NEMid_ in NEMids:
-                    if NEMid_.juncmate is not None:
+                    if NEMid_.juncmate is not None and not pd.isna(NEMid_.juncmate):
                         NEMid_.juncmate = items_by_uuid[NEMid_.juncmate]
 
             # Load nick objects
